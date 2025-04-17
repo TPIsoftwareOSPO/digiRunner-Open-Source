@@ -24,10 +24,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0223Service {
 
-	@Autowired
 	private DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0223Service(DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao) {
+		super();
+		this.dgrAcIdpInfoCusDao = dgrAcIdpInfoCusDao;
+	}
 
 	@Transactional
 	public DPB0223Resp updateIdPInfo_cus(TsmpAuthorization authorization, DPB0223Req req) {

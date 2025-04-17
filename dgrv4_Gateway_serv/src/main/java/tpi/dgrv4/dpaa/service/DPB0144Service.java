@@ -47,29 +47,29 @@ public class DPB0144Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
+	private DgrAuditLogMDao dgrAuditLogMDao;
+	private DgrNodeLostContactDao dgrNodeLostContactDao;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private DgrAuditLogMDao dgrAuditLogMDao;
-	
-	@Autowired
-	private DgrNodeLostContactDao dgrNodeLostContactDao;
-	
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public DPB0144Service(TsmpUserDao tsmpUserDao, TsmpRoleDao tsmpRoleDao, TsmpClientDao tsmpClientDao,
+			TsmpGroupDao tsmpGroupDao, TsmpApiDao tsmpApiDao, DgrAuditLogMDao dgrAuditLogMDao,
+			DgrNodeLostContactDao dgrNodeLostContactDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.dgrAuditLogMDao = dgrAuditLogMDao;
+		this.dgrNodeLostContactDao = dgrNodeLostContactDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public DPB0144Resp queryMonitor(TsmpAuthorization auth, DPB0144Req req) {
 

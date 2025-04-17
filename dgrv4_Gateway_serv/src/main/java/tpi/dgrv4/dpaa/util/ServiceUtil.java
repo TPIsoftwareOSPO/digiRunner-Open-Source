@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.SHA256Util;
-import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -31,7 +30,6 @@ import tpi.dgrv4.dpaa.constant.RegexpConstant;
 import tpi.dgrv4.dpaa.vo.ConvertTimeUnitRst;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpRtnCodeCacheProxy;
-import tpi.dgrv4.entity.entity.DgrAcIdpUser;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
 import tpi.dgrv4.entity.entity.TsmpRtnCode;
 import tpi.dgrv4.gateway.keeper.TPILogger;

@@ -25,9 +25,13 @@ import tpi.dgrv4.gateway.vo.GtwIdPVgroupResp;
 @RestController
 public class GtwIdPVgroupController {
 	
-	@Autowired
 	private GtwIdPVgroupService service;
 
+	@Autowired
+	public GtwIdPVgroupController(GtwIdPVgroupService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/getVgroupList")
 	public ResponseEntity<?> getVgroupList(@RequestHeader HttpHeaders headers, 

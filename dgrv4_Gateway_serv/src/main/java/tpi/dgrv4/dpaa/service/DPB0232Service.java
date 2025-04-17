@@ -26,14 +26,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0232Service {
 
-	@Autowired
 	private DgrBotDetectionDao dgrBotDetectionDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+	private TsmpSettingDao tsmpSettingDao;
 
 	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
+	public DPB0232Service(DgrBotDetectionDao dgrBotDetectionDao, TsmpSettingService tsmpSettingService,
+			TsmpSettingDao tsmpSettingDao) {
+		super();
+		this.dgrBotDetectionDao = dgrBotDetectionDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpSettingDao = tsmpSettingDao;
+	}
 
 	public DPB0232Resp queryBotDetectionList(TsmpAuthorization authorization, DPB0232Req req) {
 

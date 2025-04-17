@@ -24,12 +24,14 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiExtDao;
 import tpi.dgrv4.entity.repository.TsmpDpApiThemeDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2dDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
@@ -37,35 +39,32 @@ public class ApiOnJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-	
-	@Autowired
 	private TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao;
-
-	@Autowired
 	private TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-	
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private SeqStoreService seqStoreService;
 
-	public ApiOnJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public ApiOnJob(TsmpDpApptJob tsmpDpApptJob, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao, TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao, TsmpApiDao tsmpApiDao,
+			TsmpApiExtDao tsmpApiExtDao, FileHelper fileHelper, TsmpDpApiThemeDao tsmpDpApiThemeDao,
+			TsmpDpFileDao tsmpDpFileDao, SeqStoreService seqStoreService, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd2dDao = tsmpDpReqOrderd2dDao;
+		this.tsmpDpReqOrderd2Dao = tsmpDpReqOrderd2Dao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.fileHelper = fileHelper;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.seqStoreService = seqStoreService;
 	}
 
 	@Override

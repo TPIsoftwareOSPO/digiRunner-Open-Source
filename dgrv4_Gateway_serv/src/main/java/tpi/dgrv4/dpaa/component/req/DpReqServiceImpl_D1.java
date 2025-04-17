@@ -16,6 +16,13 @@ import tpi.dgrv4.common.constant.TsmpDpApplyStatus;
 import tpi.dgrv4.common.constant.TsmpDpRegStatus;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
+import tpi.dgrv4.dpaa.service.SendAPIApplicationMailService;
+import tpi.dgrv4.dpaa.service.SendClientRegMailService;
+import tpi.dgrv4.dpaa.service.SendReviewMailService;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
+import tpi.dgrv4.entity.daoService.BcryptParamHelper;
+import tpi.dgrv4.entity.daoService.SeqStoreService;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpDpClientext;
@@ -25,11 +32,23 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpApiAuth2;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd1;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrders;
+import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiExtDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpDpApiAuth2Dao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLayerDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLogDao;
 import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
+import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd1Dao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.gateway.component.FileHelper;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -44,20 +63,33 @@ public class DpReqServiceImpl_D1 extends DpReqServiceAbstract implements DpReqSe
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-
-	@Autowired
 	private TsmpDpReqOrderd1Dao tsmpDpReqOrderd1Dao;
+	private TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao;
 
 	@Autowired
-	private TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao;
+	public DpReqServiceImpl_D1(ApptJobDispatcher apptJobDispatcher, TsmpClientDao tsmpClientDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpUserDao tsmpUserDao,
+			SeqStoreService seqStoreService, TsmpDpReqOrdersDao tsmpDpReqOrdersDao, FileHelper fileHelper,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpDpChkLogDao tsmpDpChkLogDao,
+			BcryptParamHelper bcryptParamHelper, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, SendReviewMailService mailService,
+			SendClientRegMailService sendClientRegMailService,
+			SendAPIApplicationMailService sendAPIApplicationMailService, DgrAuditLogService dgrAuditLogService,
+			DgrAcIdpUserDao dgrAcIdpUserDao, TsmpApiDao tsmpApiDao, TsmpDpClientextDao tsmpDpClientextDao,
+			TsmpApiExtDao tsmpApiExtDao, TsmpDpReqOrderd1Dao tsmpDpReqOrderd1Dao, TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao) {
+		super(apptJobDispatcher, tsmpClientDao, tsmpDpItemsCacheProxy, tsmpDpReqOrdermDao, tsmpUserDao, seqStoreService,
+				tsmpDpReqOrdersDao, fileHelper, tsmpDpFileDao, tsmpDpChkLayerDao, tsmpDpChkLogDao, bcryptParamHelper,
+				tsmpOrganizationDao, tsmpDpApptJobDao, mailService, sendClientRegMailService,
+				sendAPIApplicationMailService, dgrAuditLogService, dgrAcIdpUserDao);
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.tsmpDpReqOrderd1Dao = tsmpDpReqOrderd1Dao;
+		this.tsmpDpApiAuth2Dao = tsmpDpApiAuth2Dao;
+	}
 
 	@Override
 	protected <Q extends DpReqServiceSaveDraftReq> void checkDetailReq(Q q, String locale) throws TsmpDpAaException {

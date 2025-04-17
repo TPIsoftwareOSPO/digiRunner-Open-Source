@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0076Controller {
 	
-	@Autowired
 	private DPB0076Service service;
 	
+	@Autowired
+	public DPB0076Controller(DPB0076Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 主題分類 Lov
 	 * 系統中所有需要選取並代ThemeId 的開窗功能, 作成下拉複選, 回傳的內容需分頁

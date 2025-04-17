@@ -29,11 +29,15 @@ import tpi.dgrv4.gateway.service.GtwIdPAuthService;
 @RestController
 public class GtwIdPAuthController {
 
-	@Autowired
 	private GtwIdPAuthService service;
+	private GtwCusIdPLoginService gtwCusIdPLoginService;
 
 	@Autowired
-	private GtwCusIdPLoginService gtwCusIdPLoginService;
+	public GtwIdPAuthController(GtwIdPAuthService service, GtwCusIdPLoginService gtwCusIdPLoginService) {
+		super();
+		this.service = service;
+		this.gtwCusIdPLoginService = gtwCusIdPLoginService;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/authorization", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> gtwIdPAuth(@RequestHeader HttpHeaders httpHeaders, HttpServletRequest httpReq,

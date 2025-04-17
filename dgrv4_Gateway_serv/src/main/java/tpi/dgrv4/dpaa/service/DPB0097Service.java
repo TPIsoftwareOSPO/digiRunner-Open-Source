@@ -25,13 +25,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0097Service {
 
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0097Service(TsmpRtnCodeDao tsmpRtnCodeDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	/**
 	 * 可依關鍵字(不分大小寫)模糊搜尋出API回覆代碼清單。				

@@ -34,16 +34,20 @@ public class DPB0047Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0047Service(TsmpDpItemsDao tsmpDpItemsDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0047Resp querySubItemsByItemNo(TsmpAuthorization tsmpAuthorization, DPB0047Req req, ReqHeader reqHeader) {
 		DPB0047Resp resp = new DPB0047Resp();

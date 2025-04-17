@@ -44,63 +44,60 @@ public class AA0224Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpSecurityLevelCacheProxy tsmpSecurityLevelCacheProxy;
-	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-	
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupAPiDao;
-	
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-	
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy;
-
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-	
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	
-	@Autowired
 	private SeqStoreService seqStoreService;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
 	
+	@Autowired
+	public AA0224Service(TsmpUserDao tsmpUserDao, TsmpApiDao tsmpApiDao,
+			TsmpSecurityLevelCacheProxy tsmpSecurityLevelCacheProxy, TsmpGroupDao tsmpGroupDao,
+			TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao, TsmpGroupApiDao tsmpGroupAPiDao,
+			TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao, TsmpVgroupDao tsmpVgroupDao,
+			TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy, TsmpRtnCodeDao tsmpRtnCodeDao,
+			TsmpVgroupGroupDao tsmpVgroupGroupDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpClientVgroupDao tsmpClientVgroupDao, TsmpClientGroupDao tsmpClientGroupDao,
+			OauthClientDetailsDao oauthClientDetailsDao, SeqStoreService seqStoreService,
+			BcryptParamHelper bcryptParamHelper, DgrAuditLogService dgrAuditLogService,
+			DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpSecurityLevelCacheProxy = tsmpSecurityLevelCacheProxy;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpGroupAPiDao = tsmpGroupAPiDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpGroupAuthoritiesCacheProxy = tsmpGroupAuthoritiesCacheProxy;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.seqStoreService = seqStoreService;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
+
+
 	@Transactional
 	public AA0224Resp updateVGroup(TsmpAuthorization auth, AA0224Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		//寫入 Audit Log M, D在OAuthUtil.updateScope裡

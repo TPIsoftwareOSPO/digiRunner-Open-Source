@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.service.DGRCServicePatch;
 @RestController
 public class DGRCControllerPatch {
 	
-	@Autowired
 	private DGRCServicePatch service;
+
+	@Autowired
+	public DGRCControllerPatch(DGRCServicePatch service) {
+		super();
+		this.service = service;
+	}
 
 	@PatchMapping(value = "/dgrc/**", 
 			produces = MediaType.ALL_VALUE)

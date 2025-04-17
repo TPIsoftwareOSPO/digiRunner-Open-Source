@@ -62,48 +62,46 @@ public class AA0221Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpSecurityLevelCacheProxy securityLevelCacheProxy;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupAPiDao;
-	
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-	
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy;
-
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private SeqStoreService seqStoreService;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
 	
+	@Autowired
+	public AA0221Service(TsmpUserDao tsmpUserDao, TsmpApiDao tsmpApiDao,
+			TsmpSecurityLevelCacheProxy securityLevelCacheProxy, TsmpGroupApiDao tsmpGroupAPiDao,
+			TsmpVgroupGroupDao tsmpVgroupGroupDao, TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			TsmpVgroupDao tsmpVgroupDao, TsmpGroupDao tsmpGroupDao,
+			TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao,
+			TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy, TsmpRtnCodeDao tsmpRtnCodeDao,
+			SeqStoreService seqStoreService, BcryptParamHelper bcryptParamHelper, DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.securityLevelCacheProxy = securityLevelCacheProxy;
+		this.tsmpGroupAPiDao = tsmpGroupAPiDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesCacheProxy = tsmpGroupAuthoritiesCacheProxy;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.seqStoreService = seqStoreService;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
+
 	@Transactional
 	public AA0221Resp createVGroup(TsmpAuthorization auth, AA0221Req req, ReqHeader reqHeader) {
 		AA0221Resp resp = new AA0221Resp();

@@ -40,16 +40,19 @@ public class AA0237Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0237Service(TsmpGroupApiDao tsmpGroupApiDao, TsmpApiDao tsmpApiDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0237Resp queryVgroupApiList(AA0237Req req) {
 		AA0237Resp resp = new AA0237Resp();

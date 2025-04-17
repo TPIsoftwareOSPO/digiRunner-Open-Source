@@ -35,21 +35,27 @@ import tpi.dgrv4.gateway.service.CApiKeyService;
 @Service
 public class DPB0189Service {
     
-    @Autowired
     private DgrRdbConnectionDao dgrRdbConnectionDao;
-    @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    @Autowired
 	private ConfigurableApplicationContext configurableApplicationContext;
+    private CApiKeyService capiKeyService;
 
     private Map<String, DataSourceInfoVo> dataSourceMap = new HashMap<>();
 
     @Autowired
-    private CApiKeyService capiKeyService;
+    public DPB0189Service(DgrRdbConnectionDao dgrRdbConnectionDao, ObjectMapper objectMapper,
+			TsmpSettingService tsmpSettingService, ConfigurableApplicationContext configurableApplicationContext,
+			CApiKeyService capiKeyService) {
+		super();
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.configurableApplicationContext = configurableApplicationContext;
+		this.capiKeyService = capiKeyService;
+	}
 
-    public DPB0189Resp executeSql(DPB0189Req req, HttpHeaders headers) {
+	public DPB0189Resp executeSql(DPB0189Req req, HttpHeaders headers) {
         return executeSql(req, headers, true, true);
     }
 

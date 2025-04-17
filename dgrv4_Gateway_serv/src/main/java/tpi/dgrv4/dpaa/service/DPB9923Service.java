@@ -33,8 +33,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9923Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+
+	@Autowired
+	public DPB9923Service(TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	public void exportTsmpDpItems(TsmpAuthorization tsmpAuthorization, DPB9923Req req, HttpServletResponse response) {
 

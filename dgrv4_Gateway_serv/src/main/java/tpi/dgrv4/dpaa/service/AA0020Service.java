@@ -31,19 +31,22 @@ public class AA0020Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private TsmpRoleFuncDao tsmpRoleFuncDao;
-
-	@Autowired
 	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0020Service(TsmpRoleDao tsmpRoleDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0020Resp queryTRoleList(TsmpAuthorization authorization, AA0020Req req) {
 		

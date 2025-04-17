@@ -38,21 +38,25 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+	private MockApiTestService mockApiTestService;
+	
+	private Map<String, String> maskInfo;
 
 	@Autowired
-	private MockApiTestService mockApiTestService;
-	private Map<String, String> maskInfo;
+	public TSMPCServicePostFormUrlEncoded(ObjectMapper objectMapper,
+			ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy, CommForwardProcService commForwardProcService,
+			TsmpSettingService tsmpSettingService, MockApiTestService mockApiTestService) {
+		super();
+		this.objectMapper = objectMapper;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.commForwardProcService = commForwardProcService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.mockApiTestService = mockApiTestService;
+	}
 
 	public ResponseEntity<?> forwardToPostFormUrlEncoded(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, MultiValueMap<String, String> values) throws Exception {
@@ -100,7 +104,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 			// JWT 資料驗證有錯誤
 			if (verifyResp != null) {
 				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n"
-						+ getCommForwardProcService().getLogResp(verifyResp, maskInfo).toString());
+						+ getCommForwardProcService().getLogResp(verifyResp, maskInfo, httpReq).toString());
 				// 第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(verifyResp.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, tsmpcUrlEncodedDgrReqVo, respMbody);
@@ -242,7 +246,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 		}
 
 		// print
-		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo);
+		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo, httpReq);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
 
 		// 第一組ES RESP

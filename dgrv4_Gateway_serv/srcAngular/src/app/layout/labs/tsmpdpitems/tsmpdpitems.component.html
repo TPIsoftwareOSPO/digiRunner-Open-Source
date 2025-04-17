@@ -6,15 +6,9 @@
       <div class="form-group row">
         <div class="col-6 col-xl-6 col-lg-6">
           <label class="control-label">{{'keyword_search'|translate}}</label>
-          <!-- <input type="text" class="form-control" formControlName="keyword" (keyup.enter)="queryTsmpDpItemsList()"
-            placeholder="{{'cate_no'|translate}}、{{'cate_name'|translate}}、{{'subitem_seqno'|translate}}、{{'subitem_name'|translate}}、{{'param_name'|translate}}"> -->
-
-          <span class="p-input-icon-right" style="width: 100%;">
-            <i class="pi pi-search tpi-i-search" (click)="queryTsmpDpItemsList();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'cate_no'|translate}}、{{'cate_name'|translate}}、{{'subitem_seqno'|translate}}、{{'subitem_name'|translate}}、{{'param_name'|translate}}"
-              (keyup.enter)="queryTsmpDpItemsList()">
-          </span>
+          <app-search-input placeholder="{{'cate_no'|translate}}、{{'cate_name'|translate}}、{{'subitem_seqno'|translate}}、{{'subitem_name'|translate}}、{{'param_name'|translate}}"
+           [control]="form.get('keyword')"
+          [searchFn]="queryTsmpDpItemsList.bind(this)" class="col-9 col-lg-6 col-sm-6"></app-search-input>
         </div>
 
         <div class="col-3 col-xl-3 col-lg-3">

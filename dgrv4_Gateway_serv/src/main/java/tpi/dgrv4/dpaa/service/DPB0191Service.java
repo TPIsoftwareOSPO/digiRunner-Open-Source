@@ -17,8 +17,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0191Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
 	private DgrRdbConnectionDao dgrRdbConnectionDao;
+
+	@Autowired
+	public DPB0191Service(DgrRdbConnectionDao dgrRdbConnectionDao) {
+		super();
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+	}
 
 	public DPB0191Resp queryRdbConnectionInfoDetail(TsmpAuthorization authorization, DPB0191Req req) {
 		DPB0191Resp resp = new DPB0191Resp();

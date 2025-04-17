@@ -27,15 +27,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA1116Service {
 
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public AA1116Service(TsmpSecurityLevelDao tsmpSecurityLevelDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA1116Resp querySecurityLevelList(TsmpAuthorization auth, AA1116Req req, ReqHeader reqHeader) {
 		AA1116Resp resp = new AA1116Resp();

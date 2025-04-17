@@ -13,6 +13,7 @@ import tpi.dgrv4.dpaa.service.ApiItemService;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.TsmpApiItem;
 import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpMailTplt;
@@ -20,8 +21,14 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd5;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd5d;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5dDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.escape.MailHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -39,23 +46,29 @@ public class DpReqQueryImpl_D5 extends DpReqQueryAbstract<DpReqQueryResp_D5> //
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrderd5Dao tsmpDpReqOrderd5Dao;
-
-	@Autowired
 	private TsmpDpReqOrderd5dDao tsmpDpReqOrderd5dDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
-
-	@Autowired
 	private ApiItemService apiItemService;
-
-	@Autowired
 	private MailHelper mailHelper;
+	
+	@Autowired
+	public DpReqQueryImpl_D5(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
+			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrderd5Dao tsmpDpReqOrderd5Dao,
+			TsmpDpReqOrderd5dDao tsmpDpReqOrderd5dDao, TsmpApiDao tsmpApiDao,
+			TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy, ApiItemService apiItemService, MailHelper mailHelper) {
+		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
+				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
+		this.tsmpDpReqOrderd5Dao = tsmpDpReqOrderd5Dao;
+		this.tsmpDpReqOrderd5dDao = tsmpDpReqOrderd5dDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpDpMailTpltCacheProxy = tsmpDpMailTpltCacheProxy;
+		this.apiItemService = apiItemService;
+		this.mailHelper = mailHelper;
+	}
 
 	@Override
 	public List<DpReqQueryResp_D5> doQueryDetail(Long reqOrdermId, String locale) {

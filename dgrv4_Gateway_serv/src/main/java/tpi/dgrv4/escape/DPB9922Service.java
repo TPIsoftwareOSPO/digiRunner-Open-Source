@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
@@ -16,6 +15,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,17 +37,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9922Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private DPB0118Service dpb0118Service;
-
-	@Autowired
+	private TsmpSettingDao tsmpSettingDao;
 	private ComposerWebSocketClientConn composerWebSocketClientConn;
-
-	@Autowired
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
+	
+	@Autowired
+	public DPB9922Service(ApplicationContext applicationContext, TsmpSettingDao tsmpSettingDao,
+			ComposerWebSocketClientConn composerWebSocketClientConn,
+			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties) {
+		super();
+		if(applicationContext != null) {
+			this.dpb0118Service = applicationContext.getBean(DPB0118Service.class); // non-Singleton
+		}
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.composerWebSocketClientConn = composerWebSocketClientConn;
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+	}
 
 	@Transactional
 	public DPB9922Resp importTsmpSetting(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {

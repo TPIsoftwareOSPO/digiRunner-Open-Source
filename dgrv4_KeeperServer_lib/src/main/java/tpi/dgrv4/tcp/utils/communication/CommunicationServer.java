@@ -31,9 +31,11 @@ public class CommunicationServer implements Runnable {
 	public ConcurrentHashMap<String, Packet_i> ExternalDgrInfoMap;
 	public ConcurrentHashMap<String, Packet_i> ExternalUndertowMetricsInfoMap;
 	public ConcurrentHashMap<String, Packet_i> ExternalUrlStatusInfoMap;
+	public ConcurrentHashMap<String, Packet_i> ExternalRealtimeDashboardInfoMap;
 	public ConcurrentHashMap<String, Packet_i> httpNodeInfo;
 	public UndertowMetricsInfoMap undertowMetricsInfos = new UndertowMetricsInfoMap();
 	public UrlStatusInfoMap urlStatusInfos = new UrlStatusInfoMap();
+	public RealtimeDashboardInfoMap realtimeDashboardInfos = new RealtimeDashboardInfoMap();
 
 	public CommunicationServer(int port) {
 		this(port, null);

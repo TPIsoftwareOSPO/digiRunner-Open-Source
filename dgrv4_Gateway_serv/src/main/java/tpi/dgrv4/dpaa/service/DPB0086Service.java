@@ -30,15 +30,19 @@ public class DPB0086Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao;
-	
-	@Autowired
 	private BcryptParamHelper helper;
 	
+	@Autowired
+	public DPB0086Service(TsmpClientCertDao tsmpClientCertDao, TsmpClientCert2Dao tsmpClientCert2Dao,
+			BcryptParamHelper helper) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.helper = helper;
+	}
+
 	@Transactional
 	public DPB0086Resp deleteClientCA(TsmpAuthorization authorization, DPB0086Req req, ReqHeader reqHeader) {
 		try {

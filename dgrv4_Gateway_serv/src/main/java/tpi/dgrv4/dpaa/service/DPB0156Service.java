@@ -25,19 +25,22 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Service
 public class DPB0156Service {
 
-	@Autowired
 	private DgrWebsiteDao dgrWebsiteDao;
-
-	@Autowired
 	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
-
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0156Service(DgrWebsiteDao dgrWebsiteDao, DgrWebsiteDetailDao dgrWebsiteDetailDao,
+			TsmpSettingDao tsmpSettingDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.dgrWebsiteDao = dgrWebsiteDao;
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@Transactional
 	public DPB0156Resp deleteWebsite(TsmpAuthorization auth, DPB0156Req req, ReqHeader header) {

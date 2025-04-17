@@ -29,10 +29,16 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0181Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private DgrAcIdpInfoMLdapDDao dgrAcIdpInfoMLdapDDao;
-	@Autowired
 	private DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
+
+	@Autowired
+	public DPB0181Service(DgrAcIdpInfoMLdapDDao dgrAcIdpInfoMLdapDDao, DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao) {
+		super();
+		this.dgrAcIdpInfoMLdapDDao = dgrAcIdpInfoMLdapDDao;
+		this.dgrAcIdpInfoMLdapMDao = dgrAcIdpInfoMLdapMDao;
+	}
 
 	public DPB0181Resp createIdPInfo_mldap(TsmpAuthorization authorization, DPB0181Req req) {
 		DPB0181Resp resp = new DPB0181Resp();

@@ -72,6 +72,7 @@ import { ApiStatusComponent } from '../layout/ac03/ac0301/api-status/api-status.
 import { CustomAlertComponent } from './custom-alert/custom-alert.component';
 import { ClientCAComponent } from './../layout/np02/np0202/client-ca/client-ca.component';
 import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-detail.component';
+import { SearchInputComponent } from '../layout/components/search-input/search-input.component';
 
 
 @NgModule({
@@ -141,7 +142,8 @@ import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-deta
     ApiStatusModifyComponent,
     CustomAlertComponent,
     ClientCAComponent,
-    UserDetailComponent
+    UserDetailComponent,
+    SearchInputComponent,
   ],
   declarations: [
     ContainerComponent,
@@ -195,7 +197,8 @@ import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-deta
     ApiStatusModifyComponent,
     CustomAlertComponent,
     ClientCAComponent,
-    UserDetailComponent
+    UserDetailComponent,
+    SearchInputComponent
   ],
   providers: [ApiBaseService, MessageService],
 })

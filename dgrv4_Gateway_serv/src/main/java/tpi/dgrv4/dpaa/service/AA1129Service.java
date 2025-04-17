@@ -97,64 +97,81 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA1129Service {
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	@Autowired
 	private DgrXApiKeyDao dgrXApiKeyDao;
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	@Autowired
 	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	@Autowired
 	private DpAppDao dpAppDao;
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	@Autowired
 	private TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao;
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-	@Autowired
 	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
-	@Autowired
 	private DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao;
-	@Autowired
 	private DgrGtwIdpInfoADao dgrGtwIdpInfoADao;
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	@Autowired
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;
-	@Autowired
 	private DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao;
-	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
 	private SeqStoreService seqStoreService;
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	@Autowired
 	private DgrRdbConnectionDao dgrRdbConnectionDao;
+
+	@Autowired
+	public AA1129Service(TsmpClientDao tsmpClientDao, TsmpClientHostDao tsmpClientHostDao,
+			TsmpDpClientextDao tsmpDpClientextDao, OauthClientDetailsDao oauthClientDetailsDao,
+			TsmpClientVgroupDao tsmpClientVgroupDao, TsmpGroupDao tsmpGroupDao, TsmpClientGroupDao tsmpClientGroupDao,
+			TsmpVgroupGroupDao tsmpVgroupGroupDao, TsmpGroupApiDao tsmpGroupApiDao, DgrXApiKeyDao dgrXApiKeyDao,
+			TsmpVgroupDao tsmpVgroupDao, DgrXApiKeyMapDao dgrXApiKeyMapDao,
+			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			TsmpSecurityLevelDao tsmpSecurityLevelDao, DpAppDao dpAppDao, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao, TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao,
+			DgrGtwIdpInfoODao dgrGtwIdpInfoODao, DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao,
+			DgrGtwIdpInfoADao dgrGtwIdpInfoADao, TsmpApiDao tsmpApiDao, DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao,
+			DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao, ObjectMapper objectMapper,
+			SeqStoreService seqStoreService, TsmpApiCacheProxy tsmpApiCacheProxy,
+			DgrRdbConnectionDao dgrRdbConnectionDao) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpClientHostDao = tsmpClientHostDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.dgrXApiKeyDao = dgrXApiKeyDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.dpAppDao = dpAppDao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpOpenApiKeyMapDao = tsmpOpenApiKeyMapDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
+		this.dgrGtwIdpInfoLDao = dgrGtwIdpInfoLDao;
+		this.dgrGtwIdpInfoADao = dgrGtwIdpInfoADao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
+		this.dgrImportClientRelatedTempDao = dgrImportClientRelatedTempDao;
+		this.objectMapper = objectMapper;
+		this.seqStoreService = seqStoreService;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+	}
 
 	@Transactional
 	public AA1129Resp importClientRelatedConfirm(TsmpAuthorization auth, AA1129Req req) {

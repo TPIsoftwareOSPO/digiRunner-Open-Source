@@ -23,12 +23,16 @@ import tpi.dgrv4.gateway.service.OAuthTokenService;
 @RestController
 public class OAuthTokenController {
 	
-	@Autowired
 	private OAuthTokenService oauthTokenService;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
  
+	@Autowired
+	public OAuthTokenController(OAuthTokenService oauthTokenService, CommForwardProcService commForwardProcService) {
+		super();
+		this.oauthTokenService = oauthTokenService;
+		this.commForwardProcService = commForwardProcService;
+	}
+
 	@PostMapping(value = "/oauth/token",
 			consumes = MediaType.MULTIPART_FORM_DATA_VALUE,//使用 Form Data 格式
 			produces = MediaType.APPLICATION_JSON_VALUE)

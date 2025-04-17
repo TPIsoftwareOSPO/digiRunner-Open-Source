@@ -29,15 +29,19 @@ public class DPB0089Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-	
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao;
-	
-	@Autowired
 	private BcryptParamHelper helper;
 	
+	@Autowired
+	public DPB0089Service(TsmpClientCertDao tsmpClientCertDao, TsmpClientCert2Dao tsmpClientCert2Dao,
+			BcryptParamHelper helper) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.helper = helper;
+	}
+
 	public DPB0089Resp returnTextFIle(TsmpAuthorization tsmpAuthorization, DPB0089Req req, ReqHeader reqHeader) {
 		DPB0089Resp resp = new DPB0089Resp();
 		try {

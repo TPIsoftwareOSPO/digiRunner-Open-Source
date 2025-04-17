@@ -1,6 +1,5 @@
 package tpi.dgrv4.gateway.controller;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,8 +17,14 @@ import tpi.dgrv4.gateway.service.DGRCServicePostRaw;
 @RestController
 public class DGRCControllerPostRaw {
 	
-	@Autowired
 	private DGRCServicePostRaw service;
+	
+	@Autowired
+	public DGRCControllerPostRaw(DGRCServicePostRaw service) {
+		super();
+		this.service = service;
+	}
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = "/dgrc/**", 
 			produces = MediaType.ALL_VALUE)

@@ -4,21 +4,11 @@
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
       <div class="form-group row">
-        <div class="col-6">
-          <!-- <label class="control-label">{{'keyword_search'|translate}}</label> -->
-          <!-- <input type="text" class="form-control" formControlName="keyword" (keyup.enter)="queryCusSettingList()"
-            placeholder="{{'cate_name'|translate}}、{{'subitem_name'|translate}}"> -->
+        <div class="col-12 d-flex">
 
-            <span class="p-input-icon-right" style="width: 100%;">
-              <i class="pi pi-search tpi-i-search" (click)="queryCusSettingList();"></i>
-              <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                placeholder="{{'cate_name'|translate}}、{{'subitem_name'|translate}}"
-                (keyup.enter)="queryCusSettingList()">
-            </span>
-
-        </div>
-        <div class="col-6">
-          <button type="button" class="btn tpi-btn tpi-second float-end"
+            <app-search-input placeholder="{{'cate_name'|translate}}、{{'subitem_name'|translate}}" [control]="form.get('keyword')"
+            [searchFn]="queryCusSettingList.bind(this)" class="col-9 col-lg-6 col-sm-6"></app-search-input>
+            <button type="button" class="btn tpi-btn tpi-second ms-auto"
           (click)="changePage('create');">{{'button.create'|translate}}</button>
         </div>
 

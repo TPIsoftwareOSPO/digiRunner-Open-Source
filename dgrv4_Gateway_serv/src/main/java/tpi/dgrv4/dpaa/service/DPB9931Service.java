@@ -32,8 +32,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9931Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrWebSocketMappingDao dgrWebSocketMappingDao;
+
+	@Autowired
+	public DPB9931Service(DgrWebSocketMappingDao dgrWebSocketMappingDao) {
+		super();
+		this.dgrWebSocketMappingDao = dgrWebSocketMappingDao;
+	}
 
 	public void exportWebsocketProxy(TsmpAuthorization tsmpAuthorization, DPB9931Req req, HttpServletResponse response) {
 

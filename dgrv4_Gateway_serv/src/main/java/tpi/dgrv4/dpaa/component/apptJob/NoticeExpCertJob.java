@@ -1,6 +1,7 @@
 package tpi.dgrv4.dpaa.component.apptJob;
 
 import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.CollectionUtils;
@@ -22,6 +23,7 @@ import tpi.dgrv4.entity.entity.jpql.*;
 import tpi.dgrv4.entity.repository.*;
 import tpi.dgrv4.escape.MailHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.time.ZoneId;
@@ -42,40 +44,33 @@ public class NoticeExpCertJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao;
-
-	@Autowired
 	private TsmpNoticeLogDao tsmpNoticeLogDao;
-
-	@Autowired
 	private TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
-
-	@Autowired
 	private PrepareMailService prepareMailService;
-
-	@Autowired
 	private MailHelper mailHelper;
 
 	private ZonedDateTime jobStartTime;
 
-	public NoticeExpCertJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public NoticeExpCertJob(TsmpDpApptJob tsmpDpApptJob, TsmpClientDao tsmpClientDao,
+			TsmpDpClientextDao tsmpDpClientextDao, TsmpClientCertDao tsmpClientCertDao,
+			TsmpClientCert2Dao tsmpClientCert2Dao, TsmpNoticeLogDao tsmpNoticeLogDao,
+			TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy, PrepareMailService prepareMailService,
+			MailHelper mailHelper, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
 		this.jobStartTime = ZonedDateTime.now();
-	}
-
-	public NoticeExpCertJob(TsmpDpApptJob tsmpDpApptJob, ZonedDateTime jobStartTime) {
-		super(tsmpDpApptJob, TPILogger.tl);
-		this.jobStartTime = jobStartTime;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.tsmpNoticeLogDao = tsmpNoticeLogDao;
+		this.tsmpDpMailTpltCacheProxy = tsmpDpMailTpltCacheProxy;
+		this.prepareMailService = prepareMailService;
+		this.mailHelper = mailHelper;
 	}
 
 	@Override

@@ -13,8 +13,13 @@ import tpi.dgrv4.dpaa.service.DPB0081Service;
 */
 public class DPB0081Controller {
 
-	@Autowired
 	private DPB0081Service dpf0081Service;
+
+	@Autowired
+	public DPB0081Controller(DPB0081Service dpf0081Service) {
+		super();
+		this.dpf0081Service = dpf0081Service;
+	}
 
 	/**
 	 * 刪除檔案:<br/>

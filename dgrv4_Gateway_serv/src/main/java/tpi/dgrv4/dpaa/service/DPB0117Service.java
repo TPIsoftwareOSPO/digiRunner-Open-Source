@@ -18,11 +18,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0117Service {
 
-	@Autowired
 	private TsmpDpMailLogDao tsmpDpMailLogDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+
+	@Autowired
+	public DPB0117Service(TsmpDpMailLogDao tsmpDpMailLogDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpMailLogDao = tsmpDpMailLogDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0117Resp queryMailLogDetail(TsmpAuthorization auth, DPB0117Req req, ReqHeader reqHeader) {
 		// 檢查參數

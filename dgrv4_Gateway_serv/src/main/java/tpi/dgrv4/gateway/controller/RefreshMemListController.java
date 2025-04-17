@@ -18,9 +18,13 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @RestController
 public class RefreshMemListController {
 
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
 
+	@Autowired
+	public RefreshMemListController(ApptJobDispatcher apptJobDispatcher) {
+		super();
+		this.apptJobDispatcher = apptJobDispatcher;
+	}
 
 	@PostMapping(value = "/dgrv4/v3/refreshMemList", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //

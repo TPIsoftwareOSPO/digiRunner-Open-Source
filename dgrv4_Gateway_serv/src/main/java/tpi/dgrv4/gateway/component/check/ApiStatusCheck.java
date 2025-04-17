@@ -18,18 +18,21 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Component
 public class ApiStatusCheck implements ICheck{
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	
-	@Autowired
 	private TsmpRtnCodeService tsmpRtnCodeService;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
 		
+	@Autowired
+	public ApiStatusCheck(TsmpSettingService tsmpSettingService, TsmpApiCacheProxy tsmpApiCacheProxy,
+			TsmpRtnCodeService tsmpRtnCodeService, CommForwardProcService commForwardProcService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+		this.commForwardProcService = commForwardProcService;
+	}
+
 	public boolean check(String apiKey, String moduleName) {
 		boolean isEnabled = getTsmpSettingService().getVal_CHECK_API_STATUS_ENABLE();
 		if(isEnabled) {

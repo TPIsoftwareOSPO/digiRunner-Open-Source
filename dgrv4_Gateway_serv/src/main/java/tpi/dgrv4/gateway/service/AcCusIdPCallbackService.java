@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.entity.entity.DgrAcIdpInfoCus;
 import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.constant.DgrCusAcIdpLogin;
@@ -29,14 +30,19 @@ import java.util.*;
 @Service
 public class AcCusIdPCallbackService extends CusIdPService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private AcIdPHelper acIdPHelper;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public AcCusIdPCallbackService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
+			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper, AcIdPHelper acIdPHelper2,
+			TsmpSettingService tsmpSettingService2) {
+		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+		this.objectMapper = objectMapper;
+		acIdPHelper = acIdPHelper2;
+		tsmpSettingService = tsmpSettingService2;
+	}
 
 	/**
 	 * 處理 CUS 帳戶登入流程

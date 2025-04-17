@@ -24,15 +24,20 @@ import java.util.*;
 
 @Service
 public class DPB9939Service {
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    @Autowired
     private KibanaService2 kibanaService2;
 
     private static final String BASIC = "basic";
     private static final String SESSION = "session";
 
-    public DPB9939Resp testKibanaConnection(DPB9939Req req) {
+    @Autowired
+    public DPB9939Service(TsmpSettingService tsmpSettingService, KibanaService2 kibanaService2) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.kibanaService2 = kibanaService2;
+	}
+
+	public DPB9939Resp testKibanaConnection(DPB9939Req req) {
         DPB9939Resp resp = new DPB9939Resp();
         try {
             String protocol = checkSetting(TsmpSettingDao.Key.KIBANA_TRANSFER_PROTOCOL);
@@ -60,6 +65,8 @@ public class DPB9939Service {
 
             if (respData.statusCode > 0 && respData.statusCode < 400) {
                 isConnection = true;
+            }else {
+                TPILogger.tl.error(respData.getLogStr());
             }
             resp.setAuth(auth);
             resp.setStatusApiUrl(url);
@@ -112,7 +119,8 @@ protected HttpUtil.HttpRespData checkConnection(String url, String auth, String 
                         // req 的時候要改成Cookie
                         header.put(HttpHeaders.COOKIE, list);
                     } else {
-                        header.put(key, valList);
+                        if (!key.startsWith(":"))
+                            header.put(key, valList);
                     }
                 }
             }));

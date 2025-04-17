@@ -1,13 +1,10 @@
 package tpi.dgrv4.dpaa.controller;
 
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,7 +15,6 @@ import tpi.dgrv4.dpaa.service.AA0314Service;
 import tpi.dgrv4.dpaa.util.ControllerUtil;
 import tpi.dgrv4.dpaa.vo.AA0314Req;
 import tpi.dgrv4.dpaa.vo.AA0314Resp;
-import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
@@ -33,10 +29,14 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @RestController
 public class AA0314Controller {
 
-	@Autowired
 	private AA0314Service service;
 
-	private TPILogger logger = TPILogger.tl;
+	@Autowired
+	public AA0314Controller(AA0314Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 確認佈署API 暫存組合 API 後，待 Composer 組合流程完成部署時回呼，用來確認此 API 已組合完成
 	 * (TSMP_API_REG.reg_status = '1')。

@@ -119,25 +119,12 @@
   </div>
   <!-- 搜尋 > 角色選擇 -->
   <div [hidden]="pageNum != 2">
-    <form [formGroup]="roleForm" (ngSubmit)="queryRoleMappingList()">
+    <form [formGroup]="roleForm">
       <div class="form-group row col-12">
-        <!-- <div class="col-4">
-                    <label class="control-label">{{'keyword_search'|translate}}</label>
-                    <input type="text" formControlName="keyword" class="form-control"
-                        placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}">
-                </div> -->
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryRoleMappingList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}"
+          [control]="roleForm.get('keyword')" [searchFn]="queryRoleMappingList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
-      <!-- <div class="form-group row">
-                <div class="col-12">
-                    <button type="button" class="btn btn-warning float-start me-3"
-                        (click)="queryRoleMappingList();">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
     </form>
     <hr>
     <p-table *ngIf="roleInfoListCols" [columns]="roleInfoListCols" [value]="roleInfoList"
@@ -449,23 +436,10 @@
   <div [hidden]="pageNum != 4">
     <form [formGroup]="roleForm" (ngSubmit)="queryRoleMappingList()">
       <div class="form-group row col-12">
-        <!-- <div class="col-4">
-                    <label class="control-label">{{'keyword_search'|translate}}</label>
-                    <input type="text" formControlName="keyword" class="form-control"
-                        placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}">
-                </div> -->
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryRoleMappingList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'role_id'|translate}}、{{'role.name'|translate}}、{{'role.alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}"
+          [control]="roleForm.get('keyword')" [searchFn]="queryRoleMappingList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
-      <!-- <div class="form-group row">
-                <div class="col-12">
-                    <button type="button" class="btn btn-warning float-start me-3"
-                        (click)="queryRoleMappingList();">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
     </form>
     <hr>
     <p-table *ngIf="roleInfoListCols" [columns]="roleInfoListCols" [value]="roleInfoList"

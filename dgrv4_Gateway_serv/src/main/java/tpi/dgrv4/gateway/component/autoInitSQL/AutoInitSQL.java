@@ -5,6 +5,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -40,115 +41,151 @@ import java.util.stream.Collectors;
 
 @Component
 public class AutoInitSQL {
-
-	@Autowired
-	private TsmpUserDao tsmpUserDao;
-	@Autowired
-	private UsersDao usersDao;
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	@Autowired
-	private TsmpRoleDao tsmpRoleDao;
-	@Autowired
-	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	@Autowired
-	private AutoInitSQLTsmpRoleRoleMappingDao autoInitSQLTsmpRoleRoleMappingDao;
-	@Autowired
-	private AuthoritiesDao authoritiesDao;
-	@Autowired
-	private TsmpDpItemsDao tsmpDpItemsDao;
-	@Autowired
-	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
-	@Autowired
-	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-	@Autowired
-	private AutoInitSQLTsmpDpApptRjobDDao autoInitSQLTsmpDpApptRjobDDao;
-	@Autowired
-	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-	@Autowired
-	private TsmpFuncDao tsmpFuncDao;
-	@Autowired
-	private TsmpRoleFuncDao tsmpRoleFuncDao;
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-	@Autowired
-	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
-	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	@Autowired
-	private TsmpReportUrlDao tsmpReportUrlDao;
-	@Autowired
-	private AutoInitSQLTsmpDpMailTpltDao autoInitSQLTsmpDpMailTpltDao;
-	@Autowired
-	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
-	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
-	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
-	@Autowired
-	private TsmpAlertDao tsmpAlertDao;
-	@Autowired
-	private TsmpRoleAlertDao tsmpRoleAlertDao;
-	@Autowired
-	private DgrRdbConnectionDao dgrRdbConnectionDao;
-
-	@Autowired
-	private SeqStoreService seqStoreService;
-	@Autowired
-	private DPB0101Service dpb0101Service;
-	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
-	@Autowired(required = false)
+	
+//	@Autowired(required = false)
 	private ITsmpFirstInstallHelper tsmpFirstInstallHelper;
-	@Autowired
-	private TsmpDpClientextDao tsmpDpClientextDao;
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
 
-	@Autowired
+	private TsmpUserDao tsmpUserDao;
+	private UsersDao usersDao;
+	private TsmpOrganizationDao tsmpOrganizationDao;
+	private TsmpRoleDao tsmpRoleDao;
+	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
+	private AutoInitSQLTsmpRoleRoleMappingDao autoInitSQLTsmpRoleRoleMappingDao;
+	private AuthoritiesDao authoritiesDao;
+	private TsmpDpItemsDao tsmpDpItemsDao;
+	private TsmpRtnCodeDao tsmpRtnCodeDao;
+	private TsmpSettingDao tsmpSettingDao;
+	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
+	private AutoInitSQLTsmpDpApptRjobDDao autoInitSQLTsmpDpApptRjobDDao;
+	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
+	private TsmpFuncDao tsmpFuncDao;
+	private TsmpRoleFuncDao tsmpRoleFuncDao;
+	private TsmpClientDao tsmpClientDao;
+	private OauthClientDetailsDao oauthClientDetailsDao;
+	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
+	private TsmpReportUrlDao tsmpReportUrlDao;
+	private AutoInitSQLTsmpDpMailTpltDao autoInitSQLTsmpDpMailTpltDao;
+	private TsmpGroupDao tsmpGroupDao;
+	private TsmpClientGroupDao tsmpClientGroupDao;
+	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
+	private TsmpAlertDao tsmpAlertDao;
+	private TsmpRoleAlertDao tsmpRoleAlertDao;
+	private DgrRdbConnectionDao dgrRdbConnectionDao;
+	private SeqStoreService seqStoreService;
+	private DPB0101Service dpb0101Service;
+	private BcryptParamHelper bcryptParamHelper;
+	private TsmpDpClientextDao tsmpDpClientextDao;
+	private DgrAuditLogService dgrAuditLogService;
 	protected TsmpUserTableInitializr tsmpUserTableInitializr;
-	@Autowired
 	private UserTableInitializer userTableInitializr;
-	@Autowired
 	private TsmpOrganizationTableInitializer tsmpOrganizationTableInitializr;
-	@Autowired
 	private TsmpRoleTableInitializer tsmpRoleTableInitializr;
-	@Autowired
 	private TsmpRoleRoleMappingTableInitializer tsmpRoleRoleMappingTableInitializr;
-	@Autowired
 	private AuthoritiesTableInitializer authoritiesTableInitializr;
-	@Autowired
 	private TsmpDpItemsTableInitializer tsmpDpItemsTableInitializr;
-	@Autowired
 	private TsmpRtnCodeTableInitializer tsmpRtnCodeTableInitializr;
-	@Autowired
 	private TsmpSettingTableInitializer tsmpSettingTableInitializr;
-	@Autowired
 	private TsmpClientTableInitializer tsmpClientTableInitializr;
-	@Autowired
 	private OauthClientDetailsTableInitializer oauthClientDetailsTableInitializr;
-	@Autowired
 	private TsmpSecurityLevelInitializer tsmpSecurityLevelTableInitializr;
-	@Autowired
 	private TsmpReportUrlTableInitializer tsmpReportUrlTableInitializr;
-	@Autowired
 	private TsmpGroupTableInitializer tsmpGroupTableInitializr;
-	@Autowired
 	private TsmpClientGroupTableInitializer tsmpClientGroupTableInitializr;
-	@Autowired
 	private TsmpFuncTableInitializer tsmpFuncTableInitializr;
-	@Autowired
 	private TsmpDpMailTpltTableInitializer tsmpDpMailTpltTableInitializr;
-	@Autowired
 	private TsmpAlertTableInitializer tsmpAlertTableInitializer;
-	@Autowired
 	private TsmpRoleAlertTableInitializer tsmpRoleAlertTableInitializer;
-	@Autowired
 	private DgrRdbConnectionTableInitializer dgrRdbConnectionTableInitializer;
-	@Autowired
 	private LicenseUtilBase licenseUtil;
+	
+	@Autowired
+	public AutoInitSQL(@Nullable ITsmpFirstInstallHelper tsmpFirstInstallHelper, TsmpUserDao tsmpUserDao, UsersDao usersDao,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpRoleDao tsmpRoleDao,
+			TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao,
+			AutoInitSQLTsmpRoleRoleMappingDao autoInitSQLTsmpRoleRoleMappingDao, AuthoritiesDao authoritiesDao,
+			TsmpDpItemsDao tsmpDpItemsDao, TsmpRtnCodeDao tsmpRtnCodeDao, TsmpSettingDao tsmpSettingDao,
+			TsmpDpApptRjobDao tsmpDpApptRjobDao, AutoInitSQLTsmpDpApptRjobDDao autoInitSQLTsmpDpApptRjobDDao,
+			TsmpDpApptRjobDDao tsmpDpApptRjobDDao, TsmpFuncDao tsmpFuncDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao,
+			TsmpSecurityLevelDao tsmpSecurityLevelDao, TsmpReportUrlDao tsmpReportUrlDao,
+			AutoInitSQLTsmpDpMailTpltDao autoInitSQLTsmpDpMailTpltDao, TsmpGroupDao tsmpGroupDao,
+			TsmpClientGroupDao tsmpClientGroupDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpAlertDao tsmpAlertDao,
+			TsmpRoleAlertDao tsmpRoleAlertDao, DgrRdbConnectionDao dgrRdbConnectionDao, SeqStoreService seqStoreService,
+			DPB0101Service dpb0101Service, BcryptParamHelper bcryptParamHelper, TsmpDpClientextDao tsmpDpClientextDao,
+			DgrAuditLogService dgrAuditLogService, TsmpUserTableInitializr tsmpUserTableInitializr,
+			UserTableInitializer userTableInitializr, TsmpOrganizationTableInitializer tsmpOrganizationTableInitializr,
+			TsmpRoleTableInitializer tsmpRoleTableInitializr,
+			TsmpRoleRoleMappingTableInitializer tsmpRoleRoleMappingTableInitializr,
+			AuthoritiesTableInitializer authoritiesTableInitializr,
+			TsmpDpItemsTableInitializer tsmpDpItemsTableInitializr,
+			TsmpRtnCodeTableInitializer tsmpRtnCodeTableInitializr,
+			TsmpSettingTableInitializer tsmpSettingTableInitializr,
+			TsmpClientTableInitializer tsmpClientTableInitializr,
+			OauthClientDetailsTableInitializer oauthClientDetailsTableInitializr,
+			TsmpSecurityLevelInitializer tsmpSecurityLevelTableInitializr,
+			TsmpReportUrlTableInitializer tsmpReportUrlTableInitializr,
+			TsmpGroupTableInitializer tsmpGroupTableInitializr,
+			TsmpClientGroupTableInitializer tsmpClientGroupTableInitializr,
+			TsmpFuncTableInitializer tsmpFuncTableInitializr,
+			TsmpDpMailTpltTableInitializer tsmpDpMailTpltTableInitializr,
+			TsmpAlertTableInitializer tsmpAlertTableInitializer,
+			TsmpRoleAlertTableInitializer tsmpRoleAlertTableInitializer,
+			DgrRdbConnectionTableInitializer dgrRdbConnectionTableInitializer, LicenseUtilBase licenseUtil) {
+		super();
+		this.tsmpFirstInstallHelper = tsmpFirstInstallHelper;
+		this.tsmpUserDao = tsmpUserDao;
+		this.usersDao = usersDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+		this.autoInitSQLTsmpRoleRoleMappingDao = autoInitSQLTsmpRoleRoleMappingDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.autoInitSQLTsmpDpApptRjobDDao = autoInitSQLTsmpDpApptRjobDDao;
+		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+		this.autoInitSQLTsmpDpMailTpltDao = autoInitSQLTsmpDpMailTpltDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
+		this.tsmpAlertDao = tsmpAlertDao;
+		this.tsmpRoleAlertDao = tsmpRoleAlertDao;
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		this.seqStoreService = seqStoreService;
+		this.dpb0101Service = dpb0101Service;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpUserTableInitializr = tsmpUserTableInitializr;
+		this.userTableInitializr = userTableInitializr;
+		this.tsmpOrganizationTableInitializr = tsmpOrganizationTableInitializr;
+		this.tsmpRoleTableInitializr = tsmpRoleTableInitializr;
+		this.tsmpRoleRoleMappingTableInitializr = tsmpRoleRoleMappingTableInitializr;
+		this.authoritiesTableInitializr = authoritiesTableInitializr;
+		this.tsmpDpItemsTableInitializr = tsmpDpItemsTableInitializr;
+		this.tsmpRtnCodeTableInitializr = tsmpRtnCodeTableInitializr;
+		this.tsmpSettingTableInitializr = tsmpSettingTableInitializr;
+		this.tsmpClientTableInitializr = tsmpClientTableInitializr;
+		this.oauthClientDetailsTableInitializr = oauthClientDetailsTableInitializr;
+		this.tsmpSecurityLevelTableInitializr = tsmpSecurityLevelTableInitializr;
+		this.tsmpReportUrlTableInitializr = tsmpReportUrlTableInitializr;
+		this.tsmpGroupTableInitializr = tsmpGroupTableInitializr;
+		this.tsmpClientGroupTableInitializr = tsmpClientGroupTableInitializr;
+		this.tsmpFuncTableInitializr = tsmpFuncTableInitializr;
+		this.tsmpDpMailTpltTableInitializr = tsmpDpMailTpltTableInitializr;
+		this.tsmpAlertTableInitializer = tsmpAlertTableInitializer;
+		this.tsmpRoleAlertTableInitializer = tsmpRoleAlertTableInitializer;
+		this.dgrRdbConnectionTableInitializer = dgrRdbConnectionTableInitializer;
+		this.licenseUtil = licenseUtil;
+	}
 
 	@Value("${service.mail.installation}")
 	private String mailLocalelInstallation;

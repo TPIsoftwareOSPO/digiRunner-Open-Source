@@ -25,9 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0002Controller {
 
-	@Autowired
 	private DPB0002Service dpb0002Service;
 
+	@Autowired
+	public DPB0002Controller(DPB0002Service dpb0002Service) {
+		super();
+		this.dpb0002Service = dpb0002Service;
+	}
+ 
 	/**
 	 * API放行/退回: 有權限之TsmpUser才能執行<br/>
 	 * 按下"通過"及"不通過", 帶參數呼叫, 成功執行後, 前端刷新畫面, 檢查TSMP_DP_REVIEW是否要發送mail
@@ -53,5 +58,4 @@ public class DPB0002Controller {
 
 		return ControllerUtil.tsmpResponseBaseObj(req.getReqHeader(), resp);
 	}
-
 }

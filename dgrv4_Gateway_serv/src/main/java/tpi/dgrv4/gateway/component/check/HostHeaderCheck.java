@@ -21,11 +21,15 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Component
 public class HostHeaderCheck implements ICheck {
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+	private TsmpRtnCodeService tsmpRtnCodeService;
 
 	@Autowired
-	private TsmpRtnCodeService tsmpRtnCodeService;
+	public HostHeaderCheck(TsmpSettingService tsmpSettingService, TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+	}
 
 	/**
 	 * 若 Host Header 不符合安全檢查就 true, 否則 false

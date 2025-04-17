@@ -34,19 +34,21 @@ public class AA0013Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private TsmpRoleFuncDao tsmpRoleFuncDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0013Service(TsmpFuncDao tsmpFuncDao, TsmpRoleDao tsmpRoleDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0013Resp updateTRoleFunc (TsmpAuthorization auth, AA0013Req req, InnerInvokeParam iip) {
 		

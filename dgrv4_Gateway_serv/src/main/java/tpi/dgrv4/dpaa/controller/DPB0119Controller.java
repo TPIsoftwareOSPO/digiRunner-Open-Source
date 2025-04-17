@@ -30,8 +30,13 @@ import java.util.Optional;
 @RestController
 public class DPB0119Controller {
 
-	@Autowired
 	private DPB0119Service service;
+
+	@Autowired
+	public DPB0119Controller(DPB0119Service service) {
+		super();
+		this.service = service;
+	}
 
 	/**
 	 * 

@@ -35,17 +35,20 @@ public class DPB0146Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
+	private TsmpRoleDao tsmpRoleDao;
 
 	@Autowired
-	private TsmpRoleDao tsmpRoleDao;
+	public DPB0146Service(DgrAcIdpUserDao dgrAcIdpUserDao, TsmpOrganizationDao tsmpOrganizationDao,
+			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao) {
+		super();
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+	}
 
 	public DPB0146Resp queryIdPUserDetail(TsmpAuthorization auth, DPB0146Req req) {
 		DPB0146Resp resp = new DPB0146Resp();

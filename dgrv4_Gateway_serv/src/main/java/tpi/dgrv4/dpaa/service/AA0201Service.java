@@ -47,39 +47,49 @@ public class AA0201Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private SeqStoreService seqStoreService;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	@Autowired
 	private ApplicationContext ctx;
-	@Autowired
 	private JobHelper jobHelper;
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private ServiceConfig serviceConfig;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+	
 	private String sendTime;
 	 
+	@Autowired
+	public AA0201Service(TsmpClientDao tsmpClientDao, TsmpClientHostDao tsmpClientHostDao,
+			TsmpDpClientextDao tsmpDpClientextDao, OauthClientDetailsDao oauthClientDetailsDao,
+			TsmpGroupDao tsmpGroupDao, SeqStoreService seqStoreService, BcryptParamHelper bcryptParamHelper,
+			TsmpSettingDao tsmpSettingDao, ApplicationContext ctx, JobHelper jobHelper,
+			TsmpClientGroupDao tsmpClientGroupDao, ServiceConfig serviceConfig, DgrAuditLogService dgrAuditLogService,
+			TsmpDpMailTpltDao tsmpDpMailTpltDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpClientHostDao = tsmpClientHostDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.seqStoreService = seqStoreService;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.serviceConfig = serviceConfig;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@PostConstruct
 	public void init() {
 	}

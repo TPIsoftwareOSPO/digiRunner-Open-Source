@@ -45,22 +45,24 @@ public class DPB0088Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-	
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao; 
-	
-	@Autowired
 	private BcryptParamHelper helper;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0088Service(TsmpClientCertDao tsmpClientCertDao, TsmpClientCert2Dao tsmpClientCert2Dao,
+			BcryptParamHelper helper, TsmpClientDao tsmpClientDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.helper = helper;
+		this.tsmpClientDao = tsmpClientDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0088Resp queryCaListByDate(TsmpAuthorization auth, DPB0088Req req, ReqHeader reqHeader) {
 		

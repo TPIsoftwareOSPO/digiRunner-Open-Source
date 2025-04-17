@@ -28,14 +28,20 @@ public class AA0703Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpAlertDao tsmpAlertDao;
-	@Autowired
 	private TsmpRoleAlertDao tsmpRoleAlertDao;
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+
+	@Autowired
+	public AA0703Service(TsmpAlertDao tsmpAlertDao, TsmpRoleAlertDao tsmpRoleAlertDao, TsmpRoleDao tsmpRoleDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpAlertDao = tsmpAlertDao;
+		this.tsmpRoleAlertDao = tsmpRoleAlertDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public AA0703Resp queryAlertSettingDetail(TsmpAuthorization authorization, AA0703Req req, ReqHeader reqHeader) {
 		AA0703Resp resp = new AA0703Resp();

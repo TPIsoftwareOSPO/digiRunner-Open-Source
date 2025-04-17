@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.component.cache.core.CacheValueAdapter;
 import tpi.dgrv4.gateway.component.cache.core.GenericCache;
@@ -34,10 +32,8 @@ public class RefreshCacheJob extends DeferrableJob {
 	
 	public long putIn2ndTime = -1L;
 
-	@Autowired
 	private TPILogger logger;
 
-	@Autowired
 	private GenericCache cache;
 
 	private String key;
@@ -46,13 +42,15 @@ public class RefreshCacheJob extends DeferrableJob {
 
 	private CacheValueAdapter adapter;
 
-	public RefreshCacheJob(String key, Supplier<?> supplier, CacheValueAdapter adapter, TPILogger logger) {
-		// 啟用 API 自適用 cache , RefreshCacheJob 搭配 DummyJob 
+	public RefreshCacheJob(String key, Supplier<?> supplier, CacheValueAdapter adapter, TPILogger logger,
+			GenericCache cache) {
+		// 啟用 API 自適用 cache , RefreshCacheJob 搭配 DummyJob
 		super(GROUP_ID.concat("-").concat(key));  // "refreshCacheJob-RDB_PK"
 		this.key = key;
 		this.supplier = supplier;
 		this.adapter = adapter;
 		this.logger = logger;
+		this.cache = cache;
 	}
 
 	// 追蹤排程器是否運行中

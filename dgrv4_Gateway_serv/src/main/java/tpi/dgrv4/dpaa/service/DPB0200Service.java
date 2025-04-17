@@ -22,17 +22,21 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0200Service {
 	
-	@Autowired
 	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private ConfigurableApplicationContext configurableApplicationContext;
 	
 	private final static String SUCCESS = "Connect success";
 	private final static String FAIL = "Connect fail";
+
+	@Autowired
+	public DPB0200Service(TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy,
+			TsmpSettingService tsmpSettingService, ConfigurableApplicationContext configurableApplicationContext) {
+		super();
+		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.configurableApplicationContext = configurableApplicationContext;
+	}
 
 	public DPB0200Resp testRdbConnection(TsmpAuthorization authorization, DPB0200Req req) {
 		DPB0200Resp resp = new DPB0200Resp();

@@ -30,11 +30,15 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @RestController
 public class AA0326Controller {
 
-	@Autowired
 	private AA0326Service service;
+	private CApiKeyService capiKeyService;
 
 	@Autowired
-	private CApiKeyService capiKeyService;
+	public AA0326Controller(AA0326Service service, CApiKeyService capiKeyService) {
+		super();
+		this.service = service;
+		this.capiKeyService = capiKeyService;
+	}
 
 
 	@PostMapping(value = "/dgrv4/11/AA0326", //

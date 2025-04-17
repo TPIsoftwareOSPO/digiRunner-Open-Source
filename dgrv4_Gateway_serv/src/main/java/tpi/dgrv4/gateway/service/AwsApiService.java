@@ -9,6 +9,7 @@ package tpi.dgrv4.gateway.service;
 
 //import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 //import org.springframework.util.StringUtils;
 
@@ -37,15 +38,21 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 public class AwsApiService {
 	
 	// IOC 注入
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private IdgRaws dgrAWSComponent;
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
 	
+	@Autowired
+	public AwsApiService(@Nullable IdgRaws dgrAWSComponent, TsmpSettingService tsmpSettingService,
+			TsmpSettingDao tsmpSettingDao) {
+		super();
+		this.dgrAWSComponent = dgrAWSComponent;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpSettingDao = tsmpSettingDao;
+	}
+
 	public Boolean awsApi(String productCode, Integer publicKeyVersion, String nonce) throws Exception {
 		// 從DB取PublicKey
 		String keyStr = getPublicKeyStr();

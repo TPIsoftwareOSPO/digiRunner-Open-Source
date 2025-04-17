@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0104Controller {
 
-	@Autowired
 	private DPB0104Service dpb0104Service;
 	
+	@Autowired
+	public DPB0104Controller(DPB0104Service dpb0104Service) {
+		super();
+		this.dpb0104Service = dpb0104Service;
+	}
+
 	/**
 	 * 依照週期排程UID查出所有工作項目執行的歷程
 	 *

@@ -27,14 +27,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class AA0107Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpReportUrlDao tsmpReportUrlDao;
+	private TsmpRoleFuncDao tsmpRoleFuncDao;
 
 	@Autowired
-	private TsmpRoleFuncDao tsmpRoleFuncDao;
+	public AA0107Service(TsmpFuncDao tsmpFuncDao, TsmpReportUrlDao tsmpReportUrlDao, TsmpRoleFuncDao tsmpRoleFuncDao) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+	}
 
 	@Transactional
 	public AA0107Resp deleteReport(TsmpAuthorization auth, AA0107Req req) {

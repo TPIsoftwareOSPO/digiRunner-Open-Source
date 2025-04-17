@@ -62,41 +62,39 @@ public class DPB0068Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1;
-
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2;
-
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3;
-	
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrdersDao tsmpDpReqOrdersDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
+	private BcryptParamHelper bcryptParamHelper;
+	private TsmpDpChkLogDao tsmpDpChkLogDao;
+	private DPB0067Service dpb0067Service;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
-	private TsmpDpChkLogDao tsmpDpChkLogDao;
-	
-	@Autowired
-	private DPB0067Service dpb0067Service;
+	public DPB0068Service(DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1, DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2,
+			DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3, DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5,
+			TsmpUserDao tsmpUserDao, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpDpChkLayerDao tsmpDpChkLayerDao,
+			BcryptParamHelper bcryptParamHelper, TsmpDpChkLogDao tsmpDpChkLogDao, DPB0067Service dpb0067Service) {
+		super();
+		this.dpReqQueryD1 = dpReqQueryD1;
+		this.dpReqQueryD2 = dpReqQueryD2;
+		this.dpReqQueryD3 = dpReqQueryD3;
+		this.dpReqQueryD5 = dpReqQueryD5;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrdersDao = tsmpDpReqOrdersDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpDpChkLogDao = tsmpDpChkLogDao;
+		this.dpb0067Service = dpb0067Service;
+	}
 
 	public DPB0068Resp queryReqByPk(TsmpAuthorization auth, DPB0068Req req, ReqHeader reqHeader) {
 		String local = ServiceUtil.getLocale(reqHeader.getLocale());

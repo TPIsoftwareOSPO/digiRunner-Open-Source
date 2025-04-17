@@ -14,7 +14,6 @@ import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.TableAct;
 import tpi.dgrv4.common.utils.DateTimeUtil;
-import tpi.dgrv4.common.utils.LicenseEditionType;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.dpaa.util.OAuthUtil;
@@ -27,13 +26,14 @@ import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.TsmpSetting;
 import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
 import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpFuncDao;
 import tpi.dgrv4.entity.repository.TsmpRoleFuncDao;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
 import tpi.dgrv4.gateway.component.autoInitSQL.AutoInitSQL;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
-import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
@@ -61,37 +61,29 @@ public class SyncTsmpdpapiToDpClientJob extends ApptJob {
 		}
 	}
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpRoleFuncDao tsmpRoleFuncDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private AutoInitSQL autoInitSQL;
-
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
 	
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	private LicenseEditionType currentLicense;
-	
-	public SyncTsmpdpapiToDpClientJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	public SyncTsmpdpapiToDpClientJob(TsmpDpApptJob tsmpDpApptJob, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpFuncDao tsmpFuncDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao, TsmpSettingDao tsmpSettingDao,
+			AutoInitSQL autoInitSQL, DgrAuditLogService dgrAuditLogService, TsmpTAEASKHelper tsmpTAEASKHelper) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.autoInitSQL = autoInitSQL;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
 	}
 
 	@Override

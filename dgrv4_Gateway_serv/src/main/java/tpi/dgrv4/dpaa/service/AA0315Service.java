@@ -32,16 +32,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service						
 public class AA0315Service {						
 						
-	@Autowired					
-	private TsmpDpFileDao tsmpDpFileDao;					
-						
-	@Autowired
-	private FileHelper fileHelper; 
-	
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
+	private TsmpDpFileDao tsmpDpFileDao;					
+	private FileHelper fileHelper; 
 	private TsmpSettingService tsmpSettingService;
+	
+	@Autowired
+	public AA0315Service(TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper, TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	/*
 	 * 利用 FileHelper.download(TsmpDpFile) 方法將 blob_data 取出轉換成 byte[]

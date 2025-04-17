@@ -1,10 +1,18 @@
 package tpi.dgrv4.dpaa.service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpModule;
@@ -31,44 +39,41 @@ import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
-import java.util.*;
-
 @Service
 @Scope("prototype")
 public class SendOpenApiKeyExpiringMailService {
 	
-	@Autowired
 	private LicenseUtilBase licenseUtil;
-
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao;
-	
-	@Autowired
 	private MailHelper mailHelper;
-	
-	@Autowired
 	private ApplicationContext ctx;
-	
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
 	
 	private String sendTime;
 	
+	@Autowired
+	public SendOpenApiKeyExpiringMailService(LicenseUtilBase licenseUtil, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao, MailHelper mailHelper, ApplicationContext ctx,
+			JobHelper jobHelper, TsmpApiDao tsmpApiDao, TsmpClientDao tsmpClientDao,
+			TsmpSettingService tsmpSettingService, TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy) {
+		super();
+		this.licenseUtil = licenseUtil;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpOpenApiKeyMapDao = tsmpOpenApiKeyMapDao;
+		this.mailHelper = mailHelper;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpDpMailTpltCacheProxy = tsmpDpMailTpltCacheProxy;
+	}
+
 	/**
 	 * 以 email 發給 client, 效期快到的 Open API Key & Secret Key及可使用的 API
 	 * 

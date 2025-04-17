@@ -125,19 +125,17 @@
     </div>
     <!-- 群組維護 > 授權核身加入 -->
     <div [hidden]="pageNum != 2">
-        <form [formGroup]="form_page2" (ngSubmit)="queryauthorities()">
-            <div class="form-group ">
+        <form [formGroup]="form_page2">
+            <div class="form-group col-12 d-flex">
                 <!-- <div class="col-3 col-xl-3 col-lg-3">
                     <label for="authoritieskeyword">{{'keyword_search'|translate}}</label>
                     <input type="text" class="form-control" id="authoritieskeyword" formControlName="authoritieskeyword"
                         placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
                 </div> -->
+                <app-search-input placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}"
+                [control]="form_page2.get('authoritieskeyword')" [searchFn]="queryauthorities.bind(this)"
+                class="col-9 col-lg-6 col-sm-6"></app-search-input>
 
-                <span class="p-input-icon-right" style="width:40vw">
-                  <i class="pi pi-search tpi-i-search" (click)="queryauthorities();"></i>
-                  <input type="search" class="form-control tpi-i-input" id="authoritieskeyword" formControlName="authoritieskeyword"
-                         placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </span>
             </div>
             <!-- <div class="form-group row">
                 <div class="col-12 col-xl-12 col-lg-12">

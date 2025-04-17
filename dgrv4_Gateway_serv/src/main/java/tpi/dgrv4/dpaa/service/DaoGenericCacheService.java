@@ -9,16 +9,21 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Service
 public class DaoGenericCacheService {
-	@Autowired
 	private DaoGenericCache daoGenericCache;
 	
+	@Autowired
+	public DaoGenericCacheService(DaoGenericCache daoGenericCache) {
+		super();
+		this.daoGenericCache = daoGenericCache;
+	}
+
 	public void clearAndNotify() {
 		if (getDaoGenericCache().getCacheMap() != null) {
 			getDaoGenericCache().clear();
 			if (TPILogger.lc == null) {
 				return;
 			}
-			TPILogger.tl.debug("Client [" + TPILogger.lc.userName + "] IDaoGenericCache is totally cleared.");
+			TPILogger.tl.info("Client [" + TPILogger.lc.userName + "] IDaoGenericCache is totally cleared.");
 			// Notify
 			synchronized (TPILogger.lc) {
 				try {

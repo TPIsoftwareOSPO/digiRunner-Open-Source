@@ -30,15 +30,18 @@ import tpi.dgrv4.gateway.vo.GtwIdPVgroupResp;
 @RestController
 public class GtwIdPMockJSConsentUiController {
 	
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-	
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private GtwIdPVgroupService gtwIdPVgroupService;
 
+	@Autowired
+	public GtwIdPMockJSConsentUiController(TsmpClientVgroupDao tsmpClientVgroupDao, TsmpVgroupDao tsmpVgroupDao,
+			GtwIdPVgroupService gtwIdPVgroupService) {
+		super();
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.gtwIdPVgroupService = gtwIdPVgroupService;
+	}
 
 	@GetMapping(value = "/dgrv4/mockac/gtwidp/{idPType}/consentui")
 	public ResponseEntity<?> getGtwConsent(@RequestHeader HttpHeaders httpHeaders, 

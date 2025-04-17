@@ -16,8 +16,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0031Service {
 
-	@Autowired
 	private TsmpDpAboutDao tsmpDpAboutDao;
+
+	@Autowired
+	public DPB0031Service(TsmpDpAboutDao tsmpDpAboutDao) {
+		super();
+		this.tsmpDpAboutDao = tsmpDpAboutDao;
+	}
 
 	public DPB0031Resp saveAbout(TsmpAuthorization authorization, DPB0031Req req) {
 		String userName = authorization.getUserName();

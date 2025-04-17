@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,7 +28,6 @@ import tpi.dgrv4.dpaa.vo.AA0511Req;
 import tpi.dgrv4.dpaa.vo.AA0511Resp;
 import tpi.dgrv4.dpaa.vo.TsmpAuthCodeInfo;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
-import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpAuthCode;
@@ -44,37 +44,38 @@ public class AA0511Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private ApplicationContext ctx;
-
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
-
-	@Autowired
+	
+	private ApplicationContext ctx;
+	private TsmpSettingService tsmpSettingService;
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpAuthCodeDao tsmpAuthCodeDao;
-
-	@Autowired
 	private ObjectMapper objectMapper;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	private Long expTime;
-
 	private Long expDay;
 	
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
+	public AA0511Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, ApplicationContext ctx,
+			TsmpSettingService tsmpSettingService, JobHelper jobHelper, ServiceConfig serviceConfig,
+			TsmpApiDao tsmpApiDao, TsmpAuthCodeDao tsmpAuthCodeDao, ObjectMapper objectMapper,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
+		this.ctx = ctx;
+		this.tsmpSettingService = tsmpSettingService;
+		this.jobHelper = jobHelper;
+		this.serviceConfig = serviceConfig;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpAuthCodeDao = tsmpAuthCodeDao;
+		this.objectMapper = objectMapper;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	public AA0511Resp getAuthCode(TsmpAuthorization auth, AA0511Req req) {
 		AA0511Resp resp = null;
 		try {

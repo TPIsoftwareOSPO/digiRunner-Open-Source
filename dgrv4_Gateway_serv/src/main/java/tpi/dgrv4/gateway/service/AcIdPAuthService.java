@@ -27,21 +27,23 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class AcIdPAuthService {
 
-    @Autowired
     private DgrAcIdpInfoDao dgrAcIdpInfoDao;
- 
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    
-    @Autowired
     private IdPWellKnownHelper idPWellKnownHelper;
- 
-    @Autowired
     private AcIdPHelper acIdPHelper;
-    
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
     
+	@Autowired
+	public AcIdPAuthService(DgrAcIdpInfoDao dgrAcIdpInfoDao, TsmpSettingService tsmpSettingService,
+			IdPWellKnownHelper idPWellKnownHelper, AcIdPHelper acIdPHelper, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.dgrAcIdpInfoDao = dgrAcIdpInfoDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.idPWellKnownHelper = idPWellKnownHelper;
+		this.acIdPHelper = acIdPHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	public void acIdPAuth(HttpHeaders httpHeaders, String idPType, HttpServletRequest httpReq, HttpServletResponse httpResp)
 			throws Exception {
 		String acIdPMsgUrl = null;
@@ -189,7 +191,7 @@ public class AcIdPAuthService {
 		// 4.打 IdP(GOOGLE / MS) 的 auth API, 會重新導向到 OAuth 同意畫面
 		// codeVerifier 寫入 cookie
 		long maxAge = 60L * 5L;// 以秒為單位, 設定5分鐘
-		String codeVerifierForOauth2 = UUID.randomUUID().toString();// for GOOGLE / MS
+		String codeVerifierForOauth2 = UUID.randomUUID().toString() + UUID.randomUUID().toString();// for GOOGLE / MS
 		ResponseCookie codeVerifierCookie = TokenHelper.createCookie(GtwIdPHelper.COOKIE_CODE_VERIFIER,
 				codeVerifierForOauth2, maxAge);
 		httpResp.addHeader(HttpHeaders.SET_COOKIE, codeVerifierCookie.toString());

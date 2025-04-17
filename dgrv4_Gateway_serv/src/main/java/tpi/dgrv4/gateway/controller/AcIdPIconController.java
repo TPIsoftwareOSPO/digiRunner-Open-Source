@@ -11,9 +11,13 @@ import tpi.dgrv4.gateway.service.AcIdPIconService;
 
 @RestController
 public class AcIdPIconController {
-	@Autowired
 	private AcIdPIconService service;
 
+	@Autowired
+	public AcIdPIconController(AcIdPIconService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/acidp/{idPType}/getIcon")
 	public ResponseEntity<String> getIcon(@PathVariable(value = "idPType", required = true) String idPType) {

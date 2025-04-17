@@ -42,6 +42,7 @@ import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
 import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
 import tpi.dgrv4.gateway.TCP.Packet.ExternalDgrInfoPacket;
+import tpi.dgrv4.gateway.TCP.Packet.ExternalRealtimeDashboardPacket;
 import tpi.dgrv4.gateway.TCP.Packet.ExternalUndertowMetricsInfosPacket;
 import tpi.dgrv4.gateway.TCP.Packet.ExternalUrlStatusPacket;
 import tpi.dgrv4.gateway.TCP.Packet.NodeInfoPacket;
@@ -50,42 +51,44 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.ClientKeeper;
 import tpi.dgrv4.gateway.vo.RefreshGTWReq;
 import tpi.dgrv4.gateway.vo.RefreshGTWResp;
+import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 import tpi.dgrv4.tcp.utils.packets.UndertowMetricsPacket;
 import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 
 @Service
 public class RefreshGTWService {
-	private final static String USERNAME = "manager";
-	@Autowired
 	private AA1120Service aA1120Service;
-
-	@Autowired
 	private CApiKeyService capiKeyService;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private AA0317Service aA0317Service;
-
-	@Autowired
 	private DPB9921Service dpb9921Service;
-	
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
 
+	private final static String USERNAME = "manager";
+	
 	// 預編譯的正則表達式，用於匹配協定+主機名和可選的端口
 	private final Pattern urlPattern = Pattern.compile("^(https?)://([^:/]+)(?::(\\d+))?");
 	
 	// 利用 TPILogger 把 msgLog 輸出到 Online Console, 效能問題可以利用 ThreadLocal<StringBuilder> 實作
 	// StringBuffer 的高併發替代品 StringBuilder(非同步) + ThreadLocal(多執行緒安全性)
 	private static final ThreadLocal<StringBuilder> sbBuilderHolder = ThreadLocal.withInitial(() -> new StringBuilder());
+
+	@Autowired
+	public RefreshGTWService(AA1120Service aA1120Service, CApiKeyService capiKeyService,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao, AA0317Service aA0317Service,
+			DPB9921Service dpb9921Service, TsmpTokenHistoryDao tsmpTokenHistoryDao, TsmpClientDao tsmpClientDao) {
+		super();
+		this.aA1120Service = aA1120Service;
+		this.capiKeyService = capiKeyService;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.aA0317Service = aA0317Service;
+		this.dpb9921Service = dpb9921Service;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.tsmpClientDao = tsmpClientDao;
+	}
 
 	public RefreshGTWResp updateGTWInfo(RefreshGTWReq refreshGTWReq, HttpServletRequest request, HttpHeaders headers) {
 		RefreshGTWResp resp = new RefreshGTWResp();
@@ -348,6 +351,7 @@ public class RefreshGTWService {
 		NodeInfoPacket nodeInfoPacket = refreshGTWReq.getNodeInfoPacket();
 		UndertowMetricsPacket undertowMetricsPacket = refreshGTWReq.getUndertowMetricsPacket();
 		UrlStatusPacket urlStatusPacket = refreshGTWReq.getUrlStatusPacket();
+		RealtimeDashboardPacket realtimeDashboardPacket = refreshGTWReq.getRealtimeDashboardPacket();
 		// 從請求物件中獲取 dgr 的 ID
 		String gtwID = refreshGTWReq.getGtwID();
 		// 從請求物件中獲取 dgr 的名稱，名稱格式為 "gateway-xxxx"
@@ -372,6 +376,7 @@ public class RefreshGTWService {
 			TPILogger.lc.send(new ExternalDgrInfoPacket(clientKeeper));
 			TPILogger.lc.send(new ExternalUndertowMetricsInfosPacket(undertowMetricsPacket));
 			TPILogger.lc.send(new ExternalUrlStatusPacket(urlStatusPacket));
+			TPILogger.lc.send(new ExternalRealtimeDashboardPacket(realtimeDashboardPacket));
 		} else {
 			// 若日誌記錄器的 lc 屬性為空，則記錄錯誤信息，表示無法將外部 dgr 資料發送到 Keeper 伺服器
 			TPILogger.tl.warn("The program lc is null and cannot send external dgr data to the Keeper server\n");

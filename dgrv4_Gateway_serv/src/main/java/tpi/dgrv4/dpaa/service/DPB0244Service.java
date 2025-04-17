@@ -22,8 +22,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0244Service {
 
-	@Autowired
 	private DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao;
+
+	@Autowired
+	public DPB0244Service(DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao) {
+		super();
+		this.dgrGtwIdpInfoCusDao = dgrGtwIdpInfoCusDao;
+	}
 
 	@Transactional
 	public DPB0244Resp deleteGtwIdPInfo(TsmpAuthorization authorization, DPB0244Req req) {

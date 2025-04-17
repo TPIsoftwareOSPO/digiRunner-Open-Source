@@ -1,81 +1,69 @@
 <app-container [title]="title">
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-        <div class="form-group">
-
-          <span class="p-input-icon-right" style="width:40vw">
-            <i class="pi pi-search tpi-i-search" (click)="submitForm();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'apply_desc'|translate}}、{{'review_com'|translate}}、{{'client_id'|translate}}、{{'reviewer'|translate}}{{'member_file'|translate}}">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <app-search-input
+        placeholder="{{'apply_desc'|translate}}、{{'review_com'|translate}}、{{'client_id'|translate}}、{{'reviewer'|translate}}{{'member_file'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="submitForm.bind(this)"
+        class="col-9 col-lg-6 col-sm-6"></app-search-input>
+    </div>
+  </form>
+  <hr>
+  <p-table *ngIf="cols" [columns]="cols" [value]="clientList" selectionMode="single" styleClass="p-datatable-striped"
+    [style]="{'word-break':'break-word'}">
+    <ng-template pTemplate="colgroup" let-columns>
+      <colgroup>
+        <col *ngFor="let col of columns" [style.width]="col.width">
+      </colgroup>
+      <colgroup style="width:80px;">{{'action'|translate}}</colgroup>
+    </ng-template>
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th *ngFor="let col of columns" scope="col">
+          {{col.header}}
+        </th>
+        <th style="width:80px;" scope="col">{{'action'|translate}}
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+      <!-- [pSelectableRow]="rowData" 控制高亮 -->
+      <tr>
+        <td *ngFor="let col of columns" [style.width]="col.width">
+          <span *ngIf="col.field != 'checkPointName'">
+            {{ rowData[col.field] }}
           </span>
-            <!-- <div class="col-4 col-xl-4 col-lg-4">
-                <label for="keyword">{{'keyword_search'|translate}}</label>
-                <input type="text" class="form-control" id="keyword" formControlName="keyword"
-                    placeholder="{{'apply_desc'|translate}}、{{'review_com'|translate}}、{{'client_id'|translate}}、{{'reviewer'|translate}}{{'member_file'|translate}}">
-            </div> -->
-        </div>
-        <!-- <div class="form-group row">
-            <div class="col-3 col-xl-3 col-lg-3">
-                <button type="submit" class="btn btn-warning float-start">{{'button.search'|translate}}</button>
-            </div>
-        </div> -->
-    </form>
-    <hr>
-    <p-table *ngIf="cols" [columns]="cols" [value]="clientList" selectionMode="single" styleClass="p-datatable-striped"
-        [style]="{'word-break':'break-word'}">
-        <ng-template pTemplate="colgroup" let-columns>
-            <colgroup>
-                <col *ngFor="let col of columns" [style.width]="col.width">
-            </colgroup>
-            <colgroup style="width:80px;">{{'action'|translate}}</colgroup>
-        </ng-template>
-        <ng-template pTemplate="header" let-columns>
-            <tr>
-                <th *ngFor="let col of columns" scope="col">
-                    {{col.header}}
-                </th>
-                <th style="width:80px;" scope="col">{{'action'|translate}}
-                </th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-rowData let-columns="columns">
-            <!-- [pSelectableRow]="rowData" 控制高亮 -->
-            <tr>
-                <td *ngFor="let col of columns" [style.width]="col.width">
-                    <span *ngIf="col.field != 'checkPointName'">
-                        {{ rowData[col.field] }}
-                    </span>
-                    <div *ngIf="col.field == 'checkPointName'">
-                        <span *ngIf="rowData['checkPointName'] != ''">
-                            {{rowData['checkPointName']}} - {{rowData['chkStatusName']}}
-                        </span>
-                    </div>
-                </td>
-                <td style="text-align:center;width: 80px">
-                    <button pButton pRipple type="button" icon="fa fa-search"
-                            class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData)"
-                            [pTooltip]="'button.chs_api' | translate" tooltipPosition="top"></button>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="footer" let-columns>
-            <tr *ngIf="rowcount">
-                <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
-                    <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                        <!-- 查詢更多 -->
-                        <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
-                        <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
-                        </button>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage" let-columns>
-            <tr>
-                <td [attr.colspan]="columns.length+1">
-                    {{'no_rec' | translate}}
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+          <div *ngIf="col.field == 'checkPointName'">
+            <span *ngIf="rowData['checkPointName'] != ''">
+              {{rowData['checkPointName']}} - {{rowData['chkStatusName']}}
+            </span>
+          </div>
+        </td>
+        <td style="text-align:center;width: 80px">
+          <button pButton pRipple type="button" icon="fa fa-search"
+            class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData)"
+            [pTooltip]="'button.chs_api' | translate" tooltipPosition="top"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer" let-columns>
+      <tr *ngIf="rowcount">
+        <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+          <span>{{'row_count' | translate}}: {{rowcount}}</span>
+          <!-- 查詢更多 -->
+          <button type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
+            <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage" let-columns>
+      <tr>
+        <td [attr.colspan]="columns.length+1">
+          {{'no_rec' | translate}}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
 </app-container>
 <app-dialog [title]="dialogTitle" #dialog></app-dialog>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

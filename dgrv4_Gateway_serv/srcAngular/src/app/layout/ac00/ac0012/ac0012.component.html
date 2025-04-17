@@ -1,11 +1,11 @@
 <app-container [title]="title" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
+    <form [formGroup]="form" >
 
 
       <div class="form-group row">
 
-        <div class="col-12 ">
+        <div class="col-12 d-flex align-items-center">
 
           <!-- <label for="keyword">{{'keyword_search'|translate}}</label> -->
           <!-- <input type="text" class="form-control" id="keyword" formControlName="keyword"
@@ -17,14 +17,11 @@
               (click)="submitForm();"></button>
           </div> -->
 
+          <app-search-input placeholder="{{'role_name'|translate}}、{{'role_desc'|translate}}"
+          [control]="form.get('keyword')" [searchFn]="submitForm.bind(this)"
+          class="col-9 col-lg-4 col-sm-6"></app-search-input>
 
-          <span class="p-input-icon-right" style="width:40vw">
-            <i class="pi pi-search tpi-i-search" (click)="submitForm();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'role_name'|translate}}、{{'role_desc'|translate}}">
-          </span>
-
-          <button type="button" class="btn tpi-btn tpi-second float-end"
+          <button type="button" class="btn tpi-btn tpi-second ms-auto"
             (click)="create();">{{'button.create'|translate}}</button>
         </div>
       </div>

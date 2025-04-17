@@ -23,11 +23,15 @@ public class AA0324Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-	
-	@Autowired
 	private CApiKeyService capiKeyService;
+
+	@Autowired
+	public AA0324Service(TsmpSettingCacheProxy tsmpSettingCacheProxy, CApiKeyService capiKeyService) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.capiKeyService = capiKeyService;
+	}
 
 	public AA0324Resp getESLogDisable(AA0324Req req, ReqHeader reqHeader,
 			HttpHeaders headers) {

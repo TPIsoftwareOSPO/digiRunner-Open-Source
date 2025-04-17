@@ -33,12 +33,16 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class UdpLoginService {
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private UdpLdapService udpLdapService;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
+	@Autowired
+	public UdpLoginService(UdpLdapService udpLdapService, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.udpLdapService = udpLdapService;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	public UdpLoginResp udpLogin(HttpHeaders headers, HttpServletRequest httpReq, HttpServletResponse httpRes, ReqHeader reqHeader) throws Exception {
 		UdpLoginResp resp = null;
 		

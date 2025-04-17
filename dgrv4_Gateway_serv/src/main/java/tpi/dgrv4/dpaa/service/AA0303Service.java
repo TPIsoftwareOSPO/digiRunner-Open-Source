@@ -78,77 +78,68 @@ public class AA0303Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private TsmpApiDetailDao tsmpApiDetailDao;
-
-	@Autowired
 	private TsmpnApiDetailDao tsmpnApiDetailDao;
-
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private TsmpDpReqOrdersDao tsmpDpReqOrdersDao;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private DgrComposerFlowDao dgrComposerFlowDao;
-
-	@Autowired
 	private DaoGenericCacheService daoGenericCacheService;
-
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private EnableDisableProcessingFlow enableDisableProcessingFlow;
+	private List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers;
 
 	@Autowired
-	private List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers;
+	public AA0303Service(TsmpUserDao tsmpUserDao, TsmpApiDao tsmpApiDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpApiRegDao tsmpApiRegDao, TsmpApiDetailDao tsmpApiDetailDao, TsmpnApiDetailDao tsmpnApiDetailDao,
+			TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy, TsmpApiExtDao tsmpApiExtDao, ApplicationContext ctx,
+			JobHelper jobHelper, TsmpDpReqOrdersDao tsmpDpReqOrdersDao, TsmpRegModuleDao tsmpRegModuleDao,
+			TsmpGroupDao tsmpGroupDao, TsmpGroupApiDao tsmpGroupApiDao, TsmpVgroupGroupDao tsmpVgroupGroupDao,
+			TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao, TsmpClientGroupDao tsmpClientGroupDao,
+			DgrAuditLogService dgrAuditLogService, DgrComposerFlowDao dgrComposerFlowDao,
+			DaoGenericCacheService daoGenericCacheService, DgrAcIdpUserDao dgrAcIdpUserDao,
+			TsmpRtnCodeDao tsmpRtnCodeDao, EnableDisableProcessingFlow enableDisableProcessingFlow,
+			List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpApiDetailDao = tsmpApiDetailDao;
+		this.tsmpnApiDetailDao = tsmpnApiDetailDao;
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpDpReqOrdersDao = tsmpDpReqOrdersDao;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.dgrComposerFlowDao = dgrComposerFlowDao;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.enableDisableProcessingFlow = enableDisableProcessingFlow;
+		this.apiPublicFlagHandlers = apiPublicFlagHandlers;
+	}
 
 	@Transactional
 	public AA0303Resp updateAPIStatus_1(TsmpAuthorization auth, AA0303Req req, ReqHeader reqHeader,

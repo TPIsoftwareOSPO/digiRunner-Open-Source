@@ -28,11 +28,15 @@ public class AA0312Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ComposerService composerService;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	public AA0312Service(ComposerService composerService, ObjectMapper objectMapper) {
+		super();
+		this.composerService = composerService;
+		this.objectMapper = objectMapper;
+	}
 
 	public AA0312Resp testAPI(TsmpAuthorization auth, AA0312Req req) {
 		AA0312Resp resp = null;

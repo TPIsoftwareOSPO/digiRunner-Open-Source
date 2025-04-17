@@ -25,11 +25,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
 public class DPB0169Service {
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
+	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
 
 	@Autowired
-	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
+	public DPB0169Service(TsmpClientDao tsmpClientDao, DgrGtwIdpInfoODao dgrGtwIdpInfoODao) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
+	}
 
 	public DPB0169Resp queryGtwIdPInfoByClientId_oauth2(TsmpAuthorization authorization, DPB0169Req req,
 			ReqHeader reqHeader) {

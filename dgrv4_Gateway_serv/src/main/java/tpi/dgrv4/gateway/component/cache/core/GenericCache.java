@@ -19,8 +19,7 @@ public class GenericCache implements IGenericCache<String, Object> {
 
 	private static final Long DEFAULT_CACHE_TIMEOUT = 120000L;	// 120sec
 
-	@Autowired
-	private TPILogger logger;
+	private TPILogger logger = TPILogger.tl;
 
 	protected Map<String, CacheValue> cacheMap;
 
@@ -45,16 +44,13 @@ public class GenericCache implements IGenericCache<String, Object> {
 		};
 	}
 
+	@Autowired
 	public GenericCache() {
-		this(DEFAULT_CACHE_TIMEOUT, null);
+		this(DEFAULT_CACHE_TIMEOUT);
 	}
 
-	public GenericCache(Long cacheTimeout, TPILogger logger) {
+	public GenericCache(Long cacheTimeout) {
 		this.cacheTimeout = cacheTimeout;
-		if(logger != null) {
-			//junit用到
-			this.logger = logger;
-		}
 		this.clear();
 	}
 

@@ -31,8 +31,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0071Controller {
 
-	@Autowired
 	private DPB0071Service dpb0071Service;
+
+	@Autowired
+	public DPB0071Controller(DPB0071Service dpb0071Service) {
+		super();
+		this.dpb0071Service = dpb0071Service;
+	}
 
 	/**
 	 * query個人申請單/審核工作單ByPk

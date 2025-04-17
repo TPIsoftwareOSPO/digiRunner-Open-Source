@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0244Controller {
 
-	@Autowired
 	private DPB0244Service service;
+
+	@Autowired
+	public DPB0244Controller(DPB0244Service service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/11/DPB0244", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public TsmpBaseResp<DPB0244Resp> deleteGtwIdPInfo(@RequestHeader HttpHeaders headers,

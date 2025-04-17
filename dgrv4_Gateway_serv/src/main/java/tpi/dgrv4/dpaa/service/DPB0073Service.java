@@ -36,18 +36,21 @@ public class DPB0073Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private BcryptParamHelper helper;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public DPB0073Service(TsmpApiDao tsmpApiDao, TsmpOrganizationDao tsmpOrganizationDao, BcryptParamHelper helper,
+			DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.helper = helper;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public DPB0073Resp setApiPublicFlag(TsmpAuthorization authorization, DPB0073Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		DPB0073Resp resp = new DPB0073Resp();

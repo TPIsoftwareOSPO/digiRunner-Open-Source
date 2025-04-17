@@ -19,9 +19,13 @@ import tpi.dgrv4.gateway.service.GtwIdPVerifyService;
 @RestController
 public class GtwIdPVerifyController {
 
-	@Autowired
 	GtwIdPVerifyService gtwIdPVerifyService;
 	
+	@Autowired
+	public GtwIdPVerifyController(GtwIdPVerifyService gtwIdPVerifyService) {
+		super();
+		this.gtwIdPVerifyService = gtwIdPVerifyService;
+	}
 
 	@PostMapping(value = "/dgrv4/ssotoken/gtwidp/verify", 
 		consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, // 使用 Form Urlencoded 格式

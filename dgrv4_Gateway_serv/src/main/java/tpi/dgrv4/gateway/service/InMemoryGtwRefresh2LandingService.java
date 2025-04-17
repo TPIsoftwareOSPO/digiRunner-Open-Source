@@ -50,30 +50,21 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
+import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 import tpi.dgrv4.tcp.utils.packets.UndertowMetricsPacket;
 import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 
 @Service
 public class InMemoryGtwRefresh2LandingService {
-	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
 	private AA0318Service aa0318Service;
-	@Autowired
 	private AA0319Service aa0319Service;
-	@Autowired
 	private AA1121Service aa1121Service;
-	@Autowired
 	private AA1128Service aa1128Service;
-	@Autowired
 	private AA1129Service aa1129Service;
-	@Autowired
 	private DPB9922Service dpb9922Service;
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-	@Autowired
 	private SeqStoreService seqStoreService;
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	@Value("${digiRunner.gtw.deploy.role}")
@@ -88,25 +79,43 @@ public class InMemoryGtwRefresh2LandingService {
 	@Value("${digiRunner.gtw.deploy.landing.scheme:https}")
 	private String landingScheme;
 
-	public void landingGtw(NodeInfoPacket nodeInfoPacket, UndertowMetricsPacket undertowMetricsPacket, UrlStatusPacket urlStatusPacket) {
+	@Autowired
+	public InMemoryGtwRefresh2LandingService(ObjectMapper objectMapper, AA0318Service aa0318Service,
+			AA0319Service aa0319Service, AA1121Service aa1121Service, AA1128Service aa1128Service,
+			AA1129Service aa1129Service, DPB9922Service dpb9922Service, TsmpTokenHistoryDao tsmpTokenHistoryDao,
+			SeqStoreService seqStoreService, TsmpSettingService tsmpSettingService) {
+		super();
+		this.objectMapper = objectMapper;
+		this.aa0318Service = aa0318Service;
+		this.aa0319Service = aa0319Service;
+		this.aa1121Service = aa1121Service;
+		this.aa1128Service = aa1128Service;
+		this.aa1129Service = aa1129Service;
+		this.dpb9922Service = dpb9922Service;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.seqStoreService = seqStoreService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
+public void landingGtw(NodeInfoPacket nodeInfoPacket, UndertowMetricsPacket undertowMetricsPacket, UrlStatusPacket urlStatusPacket, RealtimeDashboardPacket realtimeDashboardPacket) {
 		if (DgrDeployRole.MEMORY.value().equalsIgnoreCase(getDeployRole())) {
-			doMemoryRoleWork(nodeInfoPacket, undertowMetricsPacket, urlStatusPacket);
+			doMemoryRoleWork(nodeInfoPacket, undertowMetricsPacket, urlStatusPacket, realtimeDashboardPacket);
 		} else {
 			TPILogger.tl.info("My role is [" + getDeployRole() + "]");
 		}
 	}
 
 	private void doMemoryRoleWork(NodeInfoPacket nodeInfoPacket, UndertowMetricsPacket undertowMetricsPacket,
-			UrlStatusPacket urlStatusPacket) {
+			UrlStatusPacket urlStatusPacket, RealtimeDashboardPacket realtimeDashboardPacket) {
 		if (StringUtils.hasText(getIpPort())) {
-			doMemoryRoleHasIpPortWork(nodeInfoPacket, undertowMetricsPacket, urlStatusPacket);
+			doMemoryRoleHasIpPortWork(nodeInfoPacket, undertowMetricsPacket, urlStatusPacket, realtimeDashboardPacket);
 		} else {
 			TPILogger.tl.info("Missing properties [ip] & [port] ");
 		}
 	}
 
 	private void doMemoryRoleHasIpPortWork(NodeInfoPacket nodeInfoPacket, UndertowMetricsPacket undertowMetricsPacket,
-			UrlStatusPacket urlStatusPacket) {
+			UrlStatusPacket urlStatusPacket, RealtimeDashboardPacket realtimeDashboardPacket) {
 		// 取得要調用 Landing 的 IP:port,若有多組會用逗號 "," 分隔
 		String[] arrIpPort = getIpPort().split(",");
 		int dataSize = arrIpPort.length;
@@ -115,7 +124,7 @@ public class InMemoryGtwRefresh2LandingService {
 		int dataIndex = 1;// 為第 N 個 Landing URL
 		for (String strIpPort : arrIpPort) {
 			boolean hasBreak = doIpPortLoopWorks(strIpPort, nodeInfoPacket, dataIndex, dataSize, undertowMetricsPacket,
-					urlStatusPacket);
+					urlStatusPacket, realtimeDashboardPacket);
 			if (hasBreak) {
 				break;
 			}
@@ -125,7 +134,7 @@ public class InMemoryGtwRefresh2LandingService {
 	}
 
 	private boolean doIpPortLoopWorks(String strIpPort, NodeInfoPacket nodeInfoPacket, int dataIndex, int dataSize,
-			UndertowMetricsPacket undertowMetricsPacket, UrlStatusPacket urlStatusPacket) {
+			UndertowMetricsPacket undertowMetricsPacket, UrlStatusPacket urlStatusPacket, RealtimeDashboardPacket realtimeDashboardPacket) {
 		String reqJson = null;
 		String reqUrl = null;
 		String schema = getLandingScheme();
@@ -141,7 +150,7 @@ public class InMemoryGtwRefresh2LandingService {
 //			TPIFileLoggerQueue.inMemLogQueue;
 			
 			// req body
-			reqJson = makeImGTWRefreshGTWBody(keeperApi, nodeInfoPacket, undertowMetricsPacket, urlStatusPacket);
+			reqJson = makeImGTWRefreshGTWBody(keeperApi, nodeInfoPacket, undertowMetricsPacket, urlStatusPacket, realtimeDashboardPacket);
 
 			// send to API
 			HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl, "POST", reqJson, header, false);
@@ -398,7 +407,7 @@ public class InMemoryGtwRefresh2LandingService {
 	}
 
 	private String makeImGTWRefreshGTWBody(String keeperApi, NodeInfoPacket nodeInfoPacket,
-			UndertowMetricsPacket undertowMetricsPacket, UrlStatusPacket urlStatusPacket) {
+			UndertowMetricsPacket undertowMetricsPacket, UrlStatusPacket urlStatusPacket, RealtimeDashboardPacket realtimeDashboardPacket) {
 		String reqJson = null;
 		RefreshGTWReq req = new RefreshGTWReq();
 		req.setKeeperApi(keeperApi);
@@ -412,6 +421,7 @@ public class InMemoryGtwRefresh2LandingService {
 		req.setNodeInfoPacket(nodeInfoPacket);
 		req.setUndertowMetricsPacket(undertowMetricsPacket);
 		req.setUrlStatusPacket(urlStatusPacket);
+		req.setRealtimeDashboardPacket(realtimeDashboardPacket);
 		req.setTokenUsedMap(TPILogger.tokenUsedMap);
 		req.setApiUsedMap(TPILogger.apiUsedMap);
 		

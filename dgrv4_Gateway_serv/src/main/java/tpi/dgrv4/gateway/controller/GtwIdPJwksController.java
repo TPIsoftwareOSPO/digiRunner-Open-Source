@@ -22,8 +22,13 @@ import tpi.dgrv4.gateway.service.GtwIdPJwksService;
 @RestController
 public class GtwIdPJwksController {
 
-	@Autowired
 	private GtwIdPJwksService service;
+
+	@Autowired
+	public GtwIdPJwksController(GtwIdPJwksService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/oauth2/certs", 
 			produces = MediaType.APPLICATION_JSON_VALUE)

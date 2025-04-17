@@ -19,12 +19,16 @@ public class DPB0122Service {
 				 				
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private SsoAuthResultDao ssoAuthResultDao;
 						
+	@Autowired
+	public DPB0122Service(TsmpSettingService tsmpSettingService, SsoAuthResultDao ssoAuthResultDao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.ssoAuthResultDao = ssoAuthResultDao;
+	}
+
 	public DPB0122Resp loginSuccNoticeAC(TsmpAuthorization auth, DPB0122Req req) {					
 		DPB0122Resp resp = new DPB0122Resp();	
 		try {				

@@ -25,9 +25,13 @@ public class AA1002Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
 
+	@Autowired
+	public AA1002Service(TsmpOrganizationDao tsmpOrganizationDao) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+	}
 
 	public AA1002Resp queryTOrgList(TsmpAuthorization auth, AA1002Req req) {
 		AA1002Resp resp = new AA1002Resp();

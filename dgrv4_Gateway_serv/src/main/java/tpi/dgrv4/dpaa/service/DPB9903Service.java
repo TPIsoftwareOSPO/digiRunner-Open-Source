@@ -3,6 +3,7 @@ package tpi.dgrv4.dpaa.service;
 import static tpi.dgrv4.dpaa.util.ServiceUtil.isValueTooLargeException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +14,7 @@ import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.ifs.TsmpCoreTokenBase;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.config.UrlMappingRefresher;
+import tpi.dgrv4.dpaa.es.ESLogBuffer;
 import tpi.dgrv4.dpaa.vo.DPB9903Req;
 import tpi.dgrv4.dpaa.vo.DPB9903Resp;
 import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
@@ -20,10 +22,10 @@ import tpi.dgrv4.entity.entity.TsmpSetting;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
 import tpi.dgrv4.gateway.TCP.Packet.BotDetectionUpdatePacket;
 import tpi.dgrv4.gateway.TCP.Packet.UpdateComposerTSPacket;
-import tpi.dgrv4.gateway.component.BotDetectionRuleValidator;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.ComposerWebSocketClientConn;
+import tpi.dgrv4.gateway.service.DgrApiLog2ESQueue;
 import tpi.dgrv4.gateway.service.KibanaService2;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -36,29 +38,30 @@ public class DPB9903Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
-
-	@Autowired
+	
+	private TsmpSettingDao tsmpSettingDao;
+	private DgrAuditLogService dgrAuditLogService;
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-
-	@Autowired
 	private DaoGenericCacheService daoGenericCacheService;
-
-	@Autowired
 	private ComposerWebSocketClientConn composerWebSocketClientConn;
-
-	@Autowired
 	private UrlMappingRefresher urlMappingRefresher;
 
 	@Autowired
-	private BotDetectionRuleValidator botDetectionRuleValidator;
+	public DPB9903Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, TsmpSettingDao tsmpSettingDao,
+			DgrAuditLogService dgrAuditLogService, TsmpTAEASKHelper tsmpTAEASKHelper,
+			DaoGenericCacheService daoGenericCacheService, ComposerWebSocketClientConn composerWebSocketClientConn,
+			UrlMappingRefresher urlMappingRefresher) {
+		super();
+		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.composerWebSocketClientConn = composerWebSocketClientConn;
+		this.urlMappingRefresher = urlMappingRefresher;
+	}
 
 	public DPB9903Resp updateTsmpSetting(TsmpAuthorization auth, DPB9903Req req, InnerInvokeParam iip) {
 
@@ -107,7 +110,10 @@ public class DPB9903Service {
 			if (KibanaService2.cacheMap != null)
 				KibanaService2.cacheMap.clear();
 
-			this.logger.info("Clear Kibana cache");
+
+			//When updating, it should also be logged as info.
+			logSomeInfo(id);
+
 			return new DPB9903Resp();
 		} catch (TsmpDpAaException e) {
 			throw e;
@@ -118,6 +124,28 @@ public class DPB9903Service {
 			}
 			throw TsmpDpAaRtnCode._1286.throwing();
 		}
+	}
+
+	private void logSomeInfo(String id) {
+		this.logger.info("Clear Kibana cache");
+
+		// Bulk 寫入 Elastic fail 時 retry 3 次, 與寫入 Bulk file 前做 url detection 異動時印出  
+		if (id.equals(TsmpSettingDao.Key.ES_CHECK_CONNECTION) || id.equals(TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY)) {
+			DgrApiLog2ESQueue.esUrlCheckConnection = getTsmpSettingDao().findById(TsmpSettingDao.Key.ES_CHECK_CONNECTION)
+					.map(TsmpSetting::getValue)
+					.map(Boolean::parseBoolean)  // String 轉換為 boolean
+					.orElse(false);  // 如果沒有找到值，默認為 false
+			
+			ESLogBuffer.enableRetry = getTsmpSettingDao().findById(TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY)
+					.map(TsmpSetting::getValue)
+					.map(Boolean::parseBoolean)  // String 轉換為 boolean
+					.orElse(false);  // 如果沒有找到值，默認為 false
+			
+			TPILogger.tl.info(String.format("\n...ES_CHECK_CONNECTION=[%b] ,ES_LOGFILE_FAIL_RETRY=[%b]", 
+					DgrApiLog2ESQueue.esUrlCheckConnection, 
+					ESLogBuffer.enableRetry ));
+		}
+
 	}
 
 	private void freshBotDetectionRuleValidator(TsmpSetting newSetting) {

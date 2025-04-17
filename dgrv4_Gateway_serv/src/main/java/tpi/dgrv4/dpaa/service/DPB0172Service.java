@@ -22,13 +22,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0172Service {
 
-	@Autowired
 	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0172Service(DgrGtwIdpInfoODao dgrGtwIdpInfoODao, TsmpClientDao tsmpClientDao) {
+		super();
+		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
+		this.tsmpClientDao = tsmpClientDao;
+	}
 
 	public DPB0172Resp updateGtwIdPInfo_oauth2(TsmpAuthorization authorization, DPB0172Req req) {
 		DPB0172Resp resp = new DPB0172Resp();

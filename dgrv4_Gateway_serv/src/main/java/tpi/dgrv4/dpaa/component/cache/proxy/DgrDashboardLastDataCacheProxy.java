@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.jpql.DgrDashboardLastData;
 import tpi.dgrv4.entity.repository.DgrDashboardLastDataDao;
@@ -15,9 +18,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Component
 public class DgrDashboardLastDataCacheProxy extends DaoCacheProxy {
-	@Lazy
-	@Autowired
 	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
+
+	@Autowired
+	public DgrDashboardLastDataCacheProxy(@Lazy DgrDashboardLastDataDao dgrDashboardLastDataDao,
+			ObjectMapper objectMapper, DaoGenericCache cache) {
+		super(objectMapper, cache);
+		this.dgrDashboardLastDataDao = dgrDashboardLastDataDao;
+	}
 
 	public List<DgrDashboardLastData> findAll() {
 		Supplier<List<DgrDashboardLastData>> supplier = () -> {

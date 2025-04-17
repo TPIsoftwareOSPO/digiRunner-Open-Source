@@ -45,20 +45,23 @@ public class AA1205Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpReportDataDao tsmpReportDataDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	public AA1205Service(TsmpApiDao tsmpApiDao, BcryptParamHelper bcryptParamHelper,
+			TsmpReportDataDao tsmpReportDataDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpReportDataDao = tsmpReportDataDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public AA1205Resp queryBadattemptConnection(TsmpAuthorization authorization, AA1205Req req, ReqHeader reqHeader) {
 		AA1205Resp resp = null;

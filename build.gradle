@@ -35,7 +35,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-rc-v4.4.18.1-1-g5c5e4d8ac'
+	version = 'release-rc-v4.5.2.2-18-ga99c4313a'
 	apply plugin:  'io.spring.dependency-management'
 
 	repositories {
@@ -62,8 +62,8 @@ subprojects {
 
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.4.18.1-1-g5c5e4d8ac-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.4.18.1-1-g5c5e4d8ac-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.2.2-18-ga99c4313a-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.2.2-18-ga99c4313a-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 			exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -173,11 +173,11 @@ project(':dgrv4_Gateway_serv'){
 		implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
 		implementation 'org.yaml:snakeyaml:2.2'
 
-		implementation ('org.apache.poi:poi-ooxml:5.3.0'){
+		implementation ('org.apache.poi:poi-ooxml:5.4.0'){
 			// 'Avoid CVE-2024-26308'
-			exclude group: 'org.apache.commons', module: 'commons-compress'
+			// exclude group: 'org.apache.commons', module: 'commons-compress'
 		}
-		implementation 'org.apache.commons:commons-compress:1.27.0'
+		// implementation 'org.apache.commons:commons-compress:1.27.0'
 
 		// Kryo Serialization
 		implementation 'com.esotericsoftware:kryo:5.4.0'

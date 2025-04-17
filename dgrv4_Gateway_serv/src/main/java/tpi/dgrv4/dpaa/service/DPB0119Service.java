@@ -21,11 +21,15 @@ public class DPB0119Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
+	private ServiceConfig serviceConfig;
 
 	@Autowired
-	private ServiceConfig serviceConfig;
+	public DPB0119Service(TsmpSettingDao tsmpSettingDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0119Resp queryCusUrl(HttpServletRequest httpReq, TsmpAuthorization authorization) {
 		DPB0119Resp resp = new DPB0119Resp();

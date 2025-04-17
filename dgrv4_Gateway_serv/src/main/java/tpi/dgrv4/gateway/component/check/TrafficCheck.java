@@ -22,23 +22,21 @@ import tpi.dgrv4.gateway.vo.TpsVo;
 public class TrafficCheck implements ICheck{
 	public Map<String, TpsVo> map = new HashMap<>();
 
-	@Autowired
-	private TPILogger logger;
-	@Autowired
+	private TPILogger logger = TPILogger.tl;
+	
 	private TsmpSettingService tsmpSettingService;
-	@Autowired
 	private TsmpClientCacheProxy tsmpClientCacheProxy;
-	
-	@Autowired
 	private TsmpRtnCodeService tsmpRtnCodeService;
-	
-	public TrafficCheck() {
+
+	@Autowired
+	public TrafficCheck(TsmpSettingService tsmpSettingService, TsmpClientCacheProxy tsmpClientCacheProxy,
+			TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpClientCacheProxy = tsmpClientCacheProxy;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
 	}
-	
-	public TrafficCheck(TPILogger logger) {
-		this.logger = logger;
-	}
-	
+
 	public boolean check(String clientId) {
 		boolean isEnabled = getTsmpSettingService().getVal_CHECK_TRAFFIC_ENABLE();
 		if(isEnabled) {

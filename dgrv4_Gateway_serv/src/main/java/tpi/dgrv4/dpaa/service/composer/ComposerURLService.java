@@ -35,8 +35,13 @@ public class ComposerURLService {
 	
 	private final String PATH_SAVE_COLLECTIONS_V4 = "/editor/admin/import";
 	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public ComposerURLService(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public List<String> getRestartPaths(String apiUid) {
 		return resolvePath(this.PATH_RESTART, apiUid);

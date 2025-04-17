@@ -27,15 +27,18 @@ public class AA0804Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpRegHostDao tsmpRegHostDao;
-	
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
 	
+	@Autowired
+	public AA0804Service(AuthoritiesDao authoritiesDao, TsmpRegHostDao tsmpRegHostDao, TsmpApiRegDao tsmpApiRegDao) {
+		super();
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRegHostDao = tsmpRegHostDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+	}
+
 	@Transactional
 	public AA0804Resp deleteRegHost(AA0804Req req) {
 		AA0804Resp resp = new AA0804Resp();

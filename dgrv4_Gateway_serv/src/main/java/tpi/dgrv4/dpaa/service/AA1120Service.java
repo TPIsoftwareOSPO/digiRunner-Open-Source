@@ -26,59 +26,73 @@ import java.util.Optional;
 @Service
 public class AA1120Service {
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	@Autowired
 	private DgrXApiKeyDao dgrXApiKeyDao;
-	@Autowired
 	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	@Autowired
 	private DpAppDao dpAppDao;
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	@Autowired
 	private TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao;
-	@Autowired
 	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
-	@Autowired
 	private DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao;
-	@Autowired
 	private DgrGtwIdpInfoADao dgrGtwIdpInfoADao;
-	@Autowired
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	@Autowired
 	private DgrRdbConnectionDao dgrRdbConnectionDao; 
-	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	public AA1120Service(TsmpClientDao tsmpClientDao, TsmpClientHostDao tsmpClientHostDao,
+			OauthClientDetailsDao oauthClientDetailsDao, TsmpDpClientextDao tsmpDpClientextDao,
+			TsmpGroupDao tsmpGroupDao, TsmpClientGroupDao tsmpClientGroupDao, TsmpVgroupDao tsmpVgroupDao,
+			TsmpClientVgroupDao tsmpClientVgroupDao, TsmpVgroupGroupDao tsmpVgroupGroupDao,
+			TsmpGroupApiDao tsmpGroupApiDao, DgrXApiKeyDao dgrXApiKeyDao, DgrXApiKeyMapDao dgrXApiKeyMapDao,
+			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao, TsmpSecurityLevelDao tsmpSecurityLevelDao,
+			DpAppDao dpAppDao, TsmpOpenApiKeyDao tsmpOpenApiKeyDao, TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao,
+			DgrGtwIdpInfoODao dgrGtwIdpInfoODao, DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao,
+			DgrGtwIdpInfoADao dgrGtwIdpInfoADao, DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao, TsmpApiDao tsmpApiDao,
+			DgrRdbConnectionDao dgrRdbConnectionDao, ObjectMapper objectMapper) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpClientHostDao = tsmpClientHostDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.dgrXApiKeyDao = dgrXApiKeyDao;
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.dpAppDao = dpAppDao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpOpenApiKeyMapDao = tsmpOpenApiKeyMapDao;
+		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
+		this.dgrGtwIdpInfoLDao = dgrGtwIdpInfoLDao;
+		this.dgrGtwIdpInfoADao = dgrGtwIdpInfoADao;
+		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		this.objectMapper = objectMapper;
+	}
 
 	public AA1120Resp exportClientRelated(TsmpAuthorization auth, AA1120Req req) {
 		AA1120Resp resp = new AA1120Resp();

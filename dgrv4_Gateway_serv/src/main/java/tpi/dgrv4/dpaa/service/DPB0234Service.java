@@ -18,24 +18,32 @@ import java.util.*;
 public class DPB0234Service {
     private TPILogger logger = TPILogger.tl;
 
-    @Autowired
     private DgrXApiKeyDao dgrXApiKeyDao;
-    @Autowired
     private DgrXApiKeyMapDao dgrXApiKeyMapDao;
-    @Autowired
     private TsmpClientDao tsmpClientDao;
-    @Autowired
     private TsmpClientGroupDao tsmpClientGroupDao;
-    @Autowired
     private TsmpGroupDao tsmpGroupDao;
-    @Autowired
     private TsmpGroupApiDao tsmpGroupApiDao;
-    @Autowired
     private TsmpApiDao tsmpApiDao;
+    
     private static final String FLAG_KEYWORDS = "keyWords";
     private static final String FLAG_X_API_KEY = "xApiKey";
 
-    public static List<String> safelyConvertToStringList(Object obj) {
+    @Autowired
+    public DPB0234Service(DgrXApiKeyDao dgrXApiKeyDao, DgrXApiKeyMapDao dgrXApiKeyMapDao, TsmpClientDao tsmpClientDao,
+			TsmpClientGroupDao tsmpClientGroupDao, TsmpGroupDao tsmpGroupDao, TsmpGroupApiDao tsmpGroupApiDao,
+			TsmpApiDao tsmpApiDao) {
+		super();
+		this.dgrXApiKeyDao = dgrXApiKeyDao;
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpApiDao = tsmpApiDao;
+	}
+
+	public static List<String> safelyConvertToStringList(Object obj) {
         if (!(obj instanceof List<?>)) {
             throw new IllegalArgumentException("傳入的物件不是 List 類型");
         }

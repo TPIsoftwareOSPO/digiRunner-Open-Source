@@ -35,16 +35,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB9918Service {
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private FileHelper fileHelper;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB9918Service(TsmpDpFileDao tsmpDpFileDao, BcryptParamHelper bcryptParamHelper, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.fileHelper = fileHelper;
+	}
 
 	@Transactional
 	public DPB9918Resp updateTsmpDpFile(TsmpAuthorization tsmpAuthorization, DPB9918Req req, ReqHeader reqHeader) {

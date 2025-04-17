@@ -33,28 +33,27 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @ControllerAdvice(basePackages = {"tpi.dgrv4.gateway.controller","tpi.dgrv4.dpaa.controller"})
 public class ControllerExceptionHandler {
 
-	@Autowired
-	private TPILogger logger;
-
 	private final String RTN_CODE = "RTN_CODE";
-
 	private final String RTN_MSG = "RTN_MSG";
 
-	@Autowired
+	private TPILogger logger;
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
+	private TsmpRtnCodeDao tsmpRtnCodeDao;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-	
-	public ControllerExceptionHandler(TPILogger logger) {
+	public ControllerExceptionHandler(TPILogger logger, ServiceConfig serviceConfig,
+			TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy, TsmpRtnCodeDao tsmpRtnCodeDao,
+			TsmpSettingService tsmpSettingService) {
+		super();
 		this.logger = logger;
+		this.serviceConfig = serviceConfig;
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.tsmpSettingService = tsmpSettingService;
 	}
+
 
 	@ExceptionHandler(DgrException.class)
 	public ModelAndView handleDgrException(DgrException ex) {

@@ -30,15 +30,18 @@ import tpi.dgrv4.gateway.util.JsonNodeUtil;
 
 @Service
 public class GtwIdPUserInfoV2Service {
-
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	private GtwIdPVerifyService gtwIdPVerifyService;
 
 	@Autowired
-	private GtwIdPVerifyService gtwIdPVerifyService;
+	public GtwIdPUserInfoV2Service(TokenHelper tokenHelper, TsmpTokenHistoryDao tsmpTokenHistoryDao,
+			GtwIdPVerifyService gtwIdPVerifyService) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.gtwIdPVerifyService = gtwIdPVerifyService;
+	}
 
 	public ResponseEntity<?> getUserInfoV2(HttpServletRequest httpReq, HttpServletResponse httResp,
 			HttpHeaders httpHeaders) {

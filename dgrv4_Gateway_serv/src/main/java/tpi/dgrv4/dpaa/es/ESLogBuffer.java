@@ -20,12 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,14 +91,14 @@ public class ESLogBuffer {
             if (!isProcessing) {
                 processLogFiles();
             }
-        }, 0, 5, TimeUnit.SECONDS);
+        }, 60*2, 5, TimeUnit.SECONDS);
     }
     
     // Add this to the constructor (ESLogBuffer method), after startFileProcessor()
     private void startCleanupProcessor() {
         cleanupExecutor.scheduleWithFixedDelay(() -> {
             cleanupExpiredFiles();
-        }, 0, 5, TimeUnit.SECONDS);
+        }, 60*2, 30, TimeUnit.SECONDS);
     }
     
     // Add this as a constant in the class
@@ -125,9 +124,8 @@ public class ESLogBuffer {
         return false;
     }
 
-    private static final BlockingQueue<String> processingQueue = new LinkedBlockingQueue<>(1000);
     private static final AtomicInteger retryCount = new AtomicInteger(0);
-    private static final int MAX_RETRIES = 3;
+    private static final int MAX_RETRIES = 2;
     private volatile boolean isProcessing = false;
 
     // Add sysout proxy methods
@@ -139,8 +137,27 @@ public class ESLogBuffer {
 //    	System.out.println("[ESLogBuffer] " + message);
     }
     
+    // 設定日誌輸出間隔（3 分鐘，單位毫秒）
+    private static final long LOG_INTERVAL = 1 * 60 * 1000;
+
+    // 儲存上次日誌輸出的時間
+    private static final AtomicLong lastLogTime = new AtomicLong(0);
+    
     private static void sysout(String message) {
     	System.out.println("[ESLogBuffer] " + message);
+    }
+    
+    private static void sysoutRateLimited(String message) {
+    	System.out.println("[ESLogBuffer] " + message);
+    	
+    	// 取得當前時間
+    	long currentTime = System.currentTimeMillis();
+    	// 取得上次日誌輸出的時間
+    	long previousLogTime = lastLogTime.get();
+    	// 如果距離上次日誌已經過了指定時間，則輸出日誌
+    	if (currentTime - previousLogTime > LOG_INTERVAL && lastLogTime.compareAndSet(previousLogTime, currentTime)) {
+    		TPILogger.tl.info("[ESLogBuffer] " + message); //超過 3 分鐘才會執行
+    	}
     }
 
     private static void syserr(String message) {
@@ -155,6 +172,7 @@ public class ESLogBuffer {
     private Float diskFreeThreshHold = 0.2f;
     private int deletePercent = 80;
     private boolean allowWriteElastic = false;
+	public static boolean enableRetry = false; //預設不做 retry 3 次
     private ESLogBuffer(CloseableHttpClient httpClient, Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic) {
         this.httpClient = httpClient;
         this.diskFreeThreshHold = diskFreeThreshHold;
@@ -173,7 +191,7 @@ public class ESLogBuffer {
         }
     	
         try {
-            sysoutdebug("開始檢查過期的成功和失敗檔案...");
+            TPILogger.tl.info("開始清理每天過期、佔用高磁碟容量、已完成的檔案...");
             
             retainRecentLogs(1); //保留 n 天
             cleanFilesOnLowDiskSpace(diskFreeThreshHold, deletePercent); // disk free 剩 0.05 就刪 30%
@@ -195,19 +213,20 @@ public class ESLogBuffer {
     private void cleanCompleteFile() throws IOException {
         LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(EXPIRED_FILE_MINUTES);
         int removedFiles = 0;
+        Map<String, List<Path>> fileGroups = new HashMap<>();
         
         Path logDir = Paths.get(LOG_DIR);
         if (!Files.exists(logDir)) {
             return;
         }
-    	try (Stream<Path> files = Files.list(logDir)) {
-        	
-        	// 第一層過濾（文件類型）：文件名以 .logok（成功處理的文件）或 .logfailed（處理失敗的文件）
-        	// 第二層過濾（文件時間）：保留那些成功從文件名中提取出日期時間（不為null）且日期早於過期時間（expirationTime）的文件路徑。這些是需要刪除的過期文件。
-        	List<Path> filesToDelete = files
+        
+        try (Stream<Path> files = Files.list(logDir)) {
+            // 先識別符合條件的 SUCCESS_SUFFIX 和 FAILED_SUFFIX 檔案
+            List<Path> targetFiles = files
                     .filter(path -> {
                         String fileName = path.getFileName().toString();
-                        return fileName.endsWith(SUCCESS_SUFFIX) || fileName.endsWith(FAILED_SUFFIX);
+                        return fileName.endsWith(SUCCESS_SUFFIX) 
+                              || fileName.endsWith(FAILED_SUFFIX);
                     })
                     .filter(path -> {
                         LocalDateTime fileDate = extractDateFromFileName(path.getFileName().toString());
@@ -215,27 +234,61 @@ public class ESLogBuffer {
                     })
                     .collect(Collectors.toList());
             
-            if (!filesToDelete.isEmpty()) {
-                sysout("找到 " + filesToDelete.size() + " 個過期檔案需要刪除");
+            if (targetFiles.isEmpty()) {
+                systrace("沒有找到過期的成功或失敗檔案");
+                return;
+            }
+            
+            sysout("找到 " + targetFiles.size() + " 個過期檔案需要刪除");
+            
+            // 對於每個找到的檔案，識別它們的基本檔名
+            for (Path targetFile : targetFiles) {
+                String fileName = targetFile.getFileName().toString();
+                String baseName = fileName;
                 
-                for (Path file : filesToDelete) {
+                // 取得沒有後綴的基本檔名
+                if (fileName.endsWith(SUCCESS_SUFFIX)) {
+                    baseName = fileName.substring(0, fileName.length() - SUCCESS_SUFFIX.length());
+                } else if (fileName.endsWith(FAILED_SUFFIX)) {
+                    baseName = fileName.substring(0, fileName.length() - FAILED_SUFFIX.length());
+                }
+                
+                // 將檔案按基本檔名分組
+                fileGroups.computeIfAbsent(baseName, k -> new ArrayList<>()).add(targetFile);
+                
+                // 檢查並加入相關的 COMPLETE_SUFFIX 和 CONFIG_SUFFIX 檔案
+                Path completePath = logDir.resolve(baseName + COMPLETE_SUFFIX);
+                Path configPath = logDir.resolve(baseName + CONFIG_SUFFIX);
+                
+                if (Files.exists(completePath)) {
+                    fileGroups.get(baseName).add(completePath);
+                }
+                
+                if (Files.exists(configPath)) {
+                    fileGroups.get(baseName).add(configPath);
+                }
+            }
+            
+            // 刪除所有識別出的檔案
+            Path lastFile = null;
+            for (List<Path> group : fileGroups.values()) {
+                for (Path file : group) {
                     try {
                         Files.delete(file);
                         removedFiles++;
+                        lastFile = file;
                         systrace("已刪除過期檔案: " + file);
                     } catch (NoSuchFileException e) {
-                    	systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
+                        systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
                     } catch (IOException e) {
                         syserr("刪除檔案時發生錯誤: " + file, e);
                     }
                 }
-                
-                TPILogger.tl.info("[過期的成功或失敗檔案] 清理完成，共刪除 " + removedFiles + " 個檔案");
-            } else {
-                systrace("沒有找到過期的成功或失敗檔案");
             }
+            
+            TPILogger.tl.info("[過期的檔案清理] 完成，共刪除 " + removedFiles + " 個檔案, 本次最後一個刪掉的檔名:" + lastFile);
         }
-	}
+    }
 
 	private void createLogDirectoryIfNeeded() {
         try {
@@ -304,7 +357,7 @@ public class ESLogBuffer {
                     config.store(out, "Log configuration");
                 }
                 systrace("配置檔案寫入完成: " + configFileName);
-                sysout("Bulk size:" + bulkBody.getBytes().length + ", 寫入任務完成\n");
+                sysoutRateLimited("Bulk size:" + bulkBody.getBytes().length + ", 寫入任務完成\n");
                 
                 //最後寫入標記檔案，表示所有檔案都已完成寫入
                 try {
@@ -371,7 +424,8 @@ public class ESLogBuffer {
             	sysoutdebug("找到 " + pendingFiles.size() + " 個待處理檔案");
                 
                                 
-                // [外層迴圈：控制批次進度]
+                Path lastFile = null;
+				// [外層迴圈：控制批次進度]
                 for (int i = 0; i < pendingFiles.size();) {  // 注意這裡沒有 i++，因為在內部控制進度
                 	// 根據系統負載動態調整批次大小
                 	int currentBatchSize = isSystemBusy() ? MIN_BATCH_SIZE : MAX_BATCH_SIZE;
@@ -384,6 +438,7 @@ public class ESLogBuffer {
                         try {
                         	sysoutdebug("處理檔案: " + file);
                             processLogFile(file);
+                            lastFile  = file;
                         } catch (Exception e) {
                             syserr("處理檔案失敗: " + file, e);
                             continue;
@@ -413,14 +468,15 @@ public class ESLogBuffer {
                         }
                     }
                 }
-                sysout("處理程序完成，共處理 " + pendingFiles.size() + " 個檔案");
+                TPILogger.tl.info("處理程序完成，共處理 " + pendingFiles.size() + " 個檔案, 本次最後一個檔案: " + lastFile);
             }
         } catch (NoSuchFileException e) {
-        	systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
+        	syserr("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
         } catch (IOException e) {
             syserr("處理日誌檔案時發生錯誤: " + e.getMessage(), e);
         } catch (Exception e) {
             syserr("處理過程發生未預期的錯誤", e);
+            Thread.currentThread().interrupt();
         } finally {
             isProcessing = false;
         }
@@ -458,7 +514,7 @@ public class ESLogBuffer {
             validateBulkContent(content);  // 新增的驗證方法
             
             // 發送到 Elastic
-            sysout("[處理檔案] 開始發送到 Elastic: " + esUrl);
+            //sysout("[處理檔案] 開始發送到 Elastic: " + esUrl);
             HttpPost post = new HttpPost(esUrl);
             headers.forEach(post::addHeader);
             post.setEntity(new StringEntity(content, "UTF-8"));  // 明確指定編碼
@@ -472,7 +528,7 @@ public class ESLogBuffer {
             // 執行請求並獲取完整回應
             String responseBody = httpClient.execute(post, response -> {
                 int statusCode = response.getStatusLine().getStatusCode();
-                sysout("[處理檔案] Elastic http code: " + statusCode);
+                sysoutRateLimited("[處理檔案] 開始發送到 Elastic: " + esUrl + ", \nHTTP code: " + statusCode);
                 String responseContent = EntityUtils.toString(response.getEntity());
                 sysoutdebug("[處理檔案] Elastic 回應內容: " + responseContent.substring(0,50) + "..." + responseContent.substring(responseContent.length()-20, responseContent.length()));
                 return responseContent;
@@ -493,7 +549,7 @@ public class ESLogBuffer {
         } catch (NoSuchFileException e) {
         	systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
         } catch (IOException e) {
-            syserr("[處理檔案] 錯誤: " + e.getMessage(), e);
+            syserr("[處理檔案] 錯誤: " + e.getMessage() + ", File:" + filePath.toString(), e);
             handleProcessingError(filePath, e);
         }
     }
@@ -524,19 +580,68 @@ public class ESLogBuffer {
     private void handleProcessingError(String fileName, Exception e) {
         sysout("開始錯誤處理流程，目前重試次數: " + retryCount.get());
         
-        if (retryCount.incrementAndGet() <= MAX_RETRIES) {
-            sysout("將進行重試，加入處理佇列: " + fileName);
-            processingQueue.offer(fileName);
+        if (enableRetry && retryCount.incrementAndGet() <= MAX_RETRIES) {
+            sysout("將進行重試，嘗試次數: " + retryCount.get() + "/" + MAX_RETRIES);
+            
+            // === 新增的重試邏輯開始 ===
+            try {
+                // 短暫延遲後再重試 (指數退避策略)
+                int delayMs = 1000 * (int)Math.pow(2, retryCount.get() - 1); // 1秒, 2秒, 4秒
+                sysout("等待 " + delayMs + " 毫秒後重試...");
+                Thread.sleep(delayMs);
+                
+                // 直接重試處理文件
+                sysout("開始第 " + retryCount.get() + " 次重試處理: " + fileName);
+                 
+                // '.loghttp' 還原 '.logappd'
+                String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+                Path failedPath = Paths.get(baseName + APPEND_SUFFIX);
+                Path httpPath = Paths.get(baseName + HTTP_SUFFIX);
+                Files.move(httpPath, failedPath, StandardCopyOption.REPLACE_EXISTING);
+        
+                
+                // 檢查文件是否仍然存在
+                Path filePath = Paths.get(fileName);
+                if (Files.exists(filePath)) {
+                    processLogFile(filePath);
+                    //TPILogger.tl.info("[ESLogBuffer] 重試已執行! ::" + fileName);
+                    retryCount.set(0); // 重試成功後重置計數器
+                } else {
+                    throw new NoSuchFileException("重試時文件不存在: " + fileName);
+                }
+                return; // 重試成功，退出方法
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                syserr("重試等待被中斷", ie);
+            } catch (NoSuchFileException nsfe) {
+                syserr("重試失敗: " + nsfe.getMessage(), nsfe);
+            } catch (Exception retryError) {
+                syserr("進入失敗重試流程: " + fileName + ", enableRetry::" + enableRetry, retryError);
+                // 重試失敗，會繼續嘗試下一次重試 (如果還有剩餘次數)
+                handleProcessingError(fileName, retryError); // 遞迴調用以嘗試下一次重試
+                return; // 防止執行到移動文件的代碼
+            }
+            // === 新增的重試邏輯結束 ===
+            
+            // 刪除這行，因為我們現在直接重試而不是加入隊列
+            // processingQueue.offer(fileName);
             return;
         }
-
+        
+        if (!enableRetry) {
+        	TPILogger.tl.info("重試功能已停用，直接移動到失敗狀態, filename::" + fileName);
+        } else {
+        	TPILogger.tl.info("超過重試次數，移動到失敗狀態, filename::" + fileName);
+        }
+        
         try {
             Path source = Paths.get(fileName);
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+            Path httpPath = Paths.get(baseName + HTTP_SUFFIX);
             Path failedPath = Paths.get(baseName + FAILED_SUFFIX);
             
             sysout("超過重試次數，移動到失敗狀態: " + failedPath);
-            Files.move(source, failedPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(httpPath, failedPath, StandardCopyOption.REPLACE_EXISTING);
             
             // 如果存在對應的配置檔案，也移動到失敗狀態
             Path configPath = Paths.get(baseName + CONFIG_SUFFIX);
@@ -585,7 +690,7 @@ public class ESLogBuffer {
                     try {
                         Files.delete(file);
                         removedFiles++;
-                        sysout("已刪除過期檔案: " + file);
+                        sysoutRateLimited("已刪除過期(" + days + "天)檔案: " + file);
                     } catch (NoSuchFileException e) {
                     	systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
                     } catch (IOException e) {
@@ -725,7 +830,7 @@ public class ESLogBuffer {
                 try {
                     Files.delete(file);
                     successCount++;
-                    sysout("已刪除舊文件: " + file.getFileName());
+                    sysoutRateLimited("disk空間不足, 已刪除舊文件: " + file.getFileName());
                 } catch (NoSuchFileException e) {
                 	systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
                 } catch (IOException e) {

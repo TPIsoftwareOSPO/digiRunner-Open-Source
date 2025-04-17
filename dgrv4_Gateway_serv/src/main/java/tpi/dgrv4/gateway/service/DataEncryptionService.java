@@ -12,8 +12,13 @@ import tpi.dgrv4.gateway.vo.DataEncryptionResp;
 
 @Service
 public class DataEncryptionService {
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
+
+	@Autowired
+	public DataEncryptionService(TsmpTAEASKHelper tsmpTAEASKHelper) {
+		super();
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+	}
 
 	public DataEncryptionResp dataEncryption(DataEncryptionReq req) {
 		DataEncryptionResp resp = new DataEncryptionResp();

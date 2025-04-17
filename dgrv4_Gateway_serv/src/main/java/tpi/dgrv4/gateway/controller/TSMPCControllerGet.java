@@ -18,9 +18,14 @@ import tpi.dgrv4.gateway.service.TSMPCServiceGet;
 @RestController
 public class TSMPCControllerGet {
 
-	@Autowired
 	private TSMPCServiceGet service;
 	
+	@Autowired
+	public TSMPCControllerGet(TSMPCServiceGet service) {
+		super();
+		this.service = service;
+	}
+
 	@GetMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"})
 	public Callable dispatch(@RequestHeader HttpHeaders httpHeaders, 
 			HttpServletRequest httpReq, 

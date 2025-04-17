@@ -17,8 +17,13 @@ import tpi.dgrv4.dpaa.service.DPB0079Service;
 @RestController
 public class DPB0079Controller {
 
-	@Autowired
 	private DPB0079Service service;
+
+	@Autowired
+	public DPB0079Controller(DPB0079Service service) {
+		super();
+		this.service = service;
+	}
 
 	/**
 	 * 取出ImgBinaryData:<br/>

@@ -18,7 +18,7 @@ public class DiskSpaceMonitor {
 	private static final Path LOG_DIR = Paths.get("apilogs");
 	private static final long DEFAULT_MAX_DIR_SIZE_BYTES = 10_000_000_000L; // 10GB 默認值
 	private static final int DEFAULT_MAX_FILES = 10000; // 默認最大文件數
-	private static final long CHECK_INTERVAL_MS = 60000; // 每分鐘檢查一次
+	private static final long CHECK_INTERVAL_MS = 30000; // 每分鐘檢查一次
 
 	private long maxDirSizeBytes;
 	private int maxFiles;
@@ -38,7 +38,12 @@ public class DiskSpaceMonitor {
 	private DiskSpaceMonitor(long maxDirSizeBytes, int maxFiles) {
 		this.maxDirSizeBytes = maxDirSizeBytes;
 		this.maxFiles = maxFiles;
-		scheduler = Executors.newSingleThreadScheduledExecutor();
+
+		scheduler = Executors.newScheduledThreadPool(1, runnable -> {
+		    Thread thread = new Thread(runnable, "DiskSpaceMonitor-Thread");
+		    thread.setDaemon(true);  // 可選，設置為守護線程
+		    return thread;
+		});
 	}
 
 	// 獲取單例實例的方法（使用默認值）
@@ -77,10 +82,21 @@ public class DiskSpaceMonitor {
 					Files.createDirectories(LOG_DIR);
 				}
 
-				scheduler.scheduleAtFixedRate(this::checkDiskSpace, 0, CHECK_INTERVAL_MS, TimeUnit.MILLISECONDS);
+				// 創建具有自定義線程名稱的排程器
+				scheduler = Executors.newScheduledThreadPool(1, runnable -> {
+				    Thread thread = new Thread(runnable, "DiskSpaceMonitor-Thread");
+				    thread.setDaemon(true);  // 可選，設置為守護線程
+				    return thread;
+				});
+
+				// 排程執行檢查任務
+				scheduler.scheduleWithFixedDelay(this::checkDiskSpace, 0, CHECK_INTERVAL_MS, TimeUnit.MILLISECONDS);
 				isRunning = true;
 				TPILogger.tl.info("DiskSpaceMonitor started, monitoring: " + LOG_DIR.toAbsolutePath() + ", maxSize="
 						+ formatSize(maxDirSizeBytes) + ", maxFiles=" + maxFiles);
+				
+				// 啟動時, 先檢查一次
+				checkDiskSpace();
 			} catch (IOException e) {
 				TPILogger.tl.error("Failed to create log directory: " + StackTraceUtil.logTpiShortStackTrace(e));
 			}
@@ -119,11 +135,15 @@ public class DiskSpaceMonitor {
 				// 新增緩衝區，避免頻繁切換狀態
 				pauseWriting = false;
 			}
+			
+			TPILogger.tl.info(
+				    String.format("...oldPauseWriting=%b, pauseWriting=%b, currentSize=%d, fileCount=%d", oldStatus,
+				    pauseWriting, currentSize, fileCount));
 
 			// 只有狀態變化時才通知
 			if (oldStatus != pauseWriting) {
 				notifyApplications();
-				TPILogger.tl.warn("API-Log to ES Writing status changed to: " + (pauseWriting ? "paused" : "active") + " (Size: "
+				TPILogger.tl.warn("API-Log to BulkFile Writing status changed to: " + (pauseWriting ? "paused" : "active") + " (Size: "
 						+ formatSize(currentSize) + "/" + formatSize(maxDirSizeBytes) + ", Files: " + fileCount + "/"
 						+ maxFiles + ")");
 			}
@@ -165,9 +185,13 @@ public class DiskSpaceMonitor {
 		// 實現通知機制，將狀態文件寫入日誌目錄
 		try {
 			Path statusFile = LOG_DIR.resolve(".write_status");
-			Files.write(statusFile, (pauseWriting ? "PAUSE" : "ACTIVE").getBytes(StandardCharsets.UTF_8));
+			if (pauseWriting) {
+			    Files.write(statusFile, "PAUSE".getBytes(StandardCharsets.UTF_8));
+			} else {
+			    Files.deleteIfExists(statusFile);
+			}
 		} catch (IOException e) {
-			TPILogger.tl.error("Failed to update status file: " + StackTraceUtil.logTpiShortStackTrace(e));
+			TPILogger.tl.error("Failed to update status file[.write_status]: " + StackTraceUtil.logTpiShortStackTrace(e));
 		}
 	}
 

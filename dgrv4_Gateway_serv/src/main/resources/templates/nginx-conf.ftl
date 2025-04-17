@@ -12,6 +12,8 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_pass <#if sslEnabled==true>https<#else>http</#if>://localhost:${serverPort?c};
 
+        proxy_buffering off;
+
         # WebSocket support
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;

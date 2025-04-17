@@ -39,10 +39,7 @@ public class CommunicationServerConfig {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private DgrNodeLostContactDao dgrNodeLostContactDao;
 
 	// Connected Notifier
@@ -54,22 +51,29 @@ public class CommunicationServerConfig {
 	// 提供給刪除資料使用
 //	ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
+	@Autowired
+	public CommunicationServerConfig(TsmpSettingService tsmpSettingService,
+			DgrNodeLostContactDao dgrNodeLostContactDao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrNodeLostContactDao = dgrNodeLostContactDao;
+	}
+	
 	@PostConstruct
 	public void init() {
 		// keeper server go live with [Notifier]
 		notify = new Notifier() {
 			@Override
 			public void runConnection(LinkerServer conn) {
-				new Thread() {
-					public void run() {
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							Thread.currentThread().interrupt();
-						}
-						printoutAllClient();
-					}
-				}.start();
+				Thread.ofVirtual().start(() -> {
+				    try {
+				        Thread.sleep(500);
+				    } catch (InterruptedException e) {
+				        Thread.currentThread().interrupt();
+				    }
+				    printoutAllClient();
+				});
+				
 			}
 
 			@Override
@@ -156,7 +160,7 @@ public class CommunicationServerConfig {
 
 		logger.info("......Keeper Server bind port END.....");
 	}
-	
+
 	public boolean telenetPort(String ip, int port) {
 		try (Socket server = new Socket()){
 			InetSocketAddress address = new InetSocketAddress(ip, port);

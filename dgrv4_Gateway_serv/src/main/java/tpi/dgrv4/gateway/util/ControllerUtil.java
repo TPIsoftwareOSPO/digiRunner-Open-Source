@@ -10,7 +10,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tpi.dgrv4.common.component.validator.ReqValidator;
-import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.common.vo.BeforeControllerReq;
 import tpi.dgrv4.common.vo.BeforeControllerResp;
@@ -230,7 +229,7 @@ public class ControllerUtil {
 	public static String getLocale(String locale) {
 		try {
 			//若傳入值為空,則取得系統的 locale
-			if(StringUtils.isEmpty(locale)) {
+			if(!StringUtils.hasLength(locale)) {
 				// 不使用 Locale.getDefault(), 因為 pipelines 測試主機取出來的語系不一定存在TsmpRtnCode
 				//Locale currentLocale = Locale.getDefault();
 				Locale currentLocale = Locale.TRADITIONAL_CHINESE;
@@ -238,20 +237,20 @@ public class ControllerUtil {
 			};
  
 			//修改成符合DB中的資料格式, ex.zh-TW
-			if(!StringUtils.isEmpty(locale)) {
+			if(StringUtils.hasLength(locale)) {
 				locale = locale.replace("_", "-"); 
+				
+				String[] cu_arr = locale.split("-");
+				if(StringUtils.hasLength(cu_arr[0])) { //language
+					cu_arr[0] = cu_arr[0].toLowerCase(); 
+				}
+				
+				if(StringUtils.hasLength(cu_arr[1])) { //country
+					cu_arr[1] = cu_arr[1].toUpperCase();
+				}
+				
+				locale = cu_arr[0].concat("-").concat(cu_arr[1]);
 			}
-			
-			String[] cu_arr = locale.split("-");
-			if(!StringUtils.isEmpty(cu_arr[0])) { //language
-				cu_arr[0] = cu_arr[0].toLowerCase();
-			}
-			
-			if(!StringUtils.isEmpty(cu_arr[1])) { //country
-				cu_arr[1] = cu_arr[1].toUpperCase();
-			}
-			
-			locale = cu_arr[0].concat("-").concat(cu_arr[1]);
 			
 			//tom, 20240411, 因為之後會越來越多語系,所以不再限制語系,以免每次都要修正,但目前似乎沒有人呼叫這個method
 			// 若不是EN_US或ZH_TW，預設為EN_US

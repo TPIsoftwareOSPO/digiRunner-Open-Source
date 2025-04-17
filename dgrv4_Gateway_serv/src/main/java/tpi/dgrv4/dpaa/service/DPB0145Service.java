@@ -42,15 +42,21 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0145Service {
 
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private DPB0146Service dPB0146Service;
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	private ObjectMapper objectMapper;
+	private TsmpOrganizationDao tsmpOrganizationDao;
 
 	@Autowired
-	private ObjectMapper objectMapper;
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
+	public DPB0145Service(DPB0146Service dPB0146Service, DgrAcIdpUserDao dgrAcIdpUserDao, ObjectMapper objectMapper,
+			TsmpOrganizationDao tsmpOrganizationDao) {
+		super();
+		this.dPB0146Service = dPB0146Service;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.objectMapper = objectMapper;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+	}
 
 	public DPB0145Resp queryIdPUserList(TsmpAuthorization auth, DPB0145Req req) {
 		DPB0145Resp resp = new DPB0145Resp();

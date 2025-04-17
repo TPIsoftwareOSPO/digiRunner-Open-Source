@@ -19,11 +19,15 @@ public class DPB0081Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0081Service(TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+	}
 
 	@SuppressWarnings("unused")
 	public DPB0081Resp deleteFile(DPB0081Req req) {

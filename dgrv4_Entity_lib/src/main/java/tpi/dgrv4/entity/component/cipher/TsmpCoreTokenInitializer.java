@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -244,7 +246,19 @@ public class TsmpCoreTokenInitializer {
 
 				// 在AWS上同時啟動 8 台dgR，會出現ObjectOptimisticLocking問題。
 				try {
-					tsmpDpFile = getTsmpDpFileDao().save(tsmpDpFile);
+					tsmpDpFile = getTsmpDpFileDao().save(tsmpDpFile);  // Database ReadOnly
+				} catch (JpaSystemException e) {
+					String msg = StackTraceUtil.logTpiShortStackTrace(e);
+					if (msg.indexOf("The database is read only") == -1 ||
+							msg.indexOf("read-only") == -1
+							) {
+						throw e;
+					}
+				} catch (InvalidDataAccessResourceUsageException e) {
+					String msg = StackTraceUtil.logTpiShortStackTrace(e);
+					if (msg.indexOf("permission denied") == -1) {
+						throw e;
+					}
 				} catch (ObjectOptimisticLockingFailureException e) {
 					this.logger.warn("KeyPair is updated: Optimistic locking occurs");
 				}

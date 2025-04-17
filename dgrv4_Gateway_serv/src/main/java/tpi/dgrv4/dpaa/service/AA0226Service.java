@@ -39,21 +39,28 @@ public class AA0226Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0226Service(TsmpClientGroupDao tsmpClientGroupDao, TsmpGroupDao tsmpGroupDao,
+			TsmpClientVgroupDao tsmpClientVgroupDao, TsmpVgroupGroupDao tsmpVgroupGroupDao, TsmpClientDao tsmpClientDao,
+			OauthClientDetailsDao oauthClientDetailsDao, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0226Resp addClientVGroupByClientId(TsmpAuthorization authorization, AA0226Req req, InnerInvokeParam iip) {
 		//寫入 Audit Log M

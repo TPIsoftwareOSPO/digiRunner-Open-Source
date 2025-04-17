@@ -28,11 +28,18 @@ public class DPB9937Service {
 
 	@Value(value = "${cus.api.notifyActionChange}")
 	private String notifyActionChange;
-	@Autowired
+	
 	private CustomDataSourceConfig customDataSourceConfig;
-	@Autowired
 	private CApiKeyService cApiKeyService;
+	
 	private String cusIpPort;
+
+	@Autowired
+	public DPB9937Service(CustomDataSourceConfig customDataSourceConfig, CApiKeyService cApiKeyService) {
+		super();
+		this.customDataSourceConfig = customDataSourceConfig;
+		this.cApiKeyService = cApiKeyService;
+	}
 
 	public void getDbInfo(TsmpAuthorization auth, HttpHeaders headers, DPB9937Req req) {
 		try {

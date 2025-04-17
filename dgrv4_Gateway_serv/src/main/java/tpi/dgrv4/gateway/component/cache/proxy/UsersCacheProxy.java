@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.Users;
 import tpi.dgrv4.entity.repository.UsersDao;
@@ -17,8 +19,13 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class UsersCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private UsersDao usersDao;
+
+	@Autowired
+	public UsersCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache, UsersDao usersDao) {
+		super(objectMapper, cache);
+		this.usersDao = usersDao;
+	}
 
 	public Optional<Users> findById(String id) {
 		Supplier<Users> supplier = () -> {

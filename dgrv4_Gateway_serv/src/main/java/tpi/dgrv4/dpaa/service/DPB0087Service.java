@@ -36,14 +36,18 @@ public class DPB0087Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-	
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao;
-	
-	@Autowired
 	private BcryptParamHelper helper;
+
+	@Autowired
+	public DPB0087Service(TsmpClientCertDao tsmpClientCertDao, TsmpClientCert2Dao tsmpClientCert2Dao,
+			BcryptParamHelper helper) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.helper = helper;
+	}
 
 	public ResponseEntity<byte[]> downLoadPEMFile(TsmpAuthorization auth, DPB0087Req req, ReqHeader reqHeader){
 		try {

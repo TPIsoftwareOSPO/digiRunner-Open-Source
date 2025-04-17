@@ -26,11 +26,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0432Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+
+
 	private TsmpApiDao tsmpApiDao;
+	private TsmpApiRegDao tsmpApiRegDao;
 
 	@Autowired
-	private TsmpApiRegDao tsmpApiRegDao;
+	public AA0432Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+	}
 
 	public AA0432Resp batchFailHandlePolicy(TsmpAuthorization authorization, AA0432Req req) {
 		AA0432Resp resp = new AA0432Resp();

@@ -9,8 +9,13 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Component
 public class IgnoreApiPathCheck {
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public IgnoreApiPathCheck(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public boolean check(String str) {
 		boolean isEnabled = getTsmpSettingService().getVal_CHECK_IGNORE_API_PATH_ENABLE();

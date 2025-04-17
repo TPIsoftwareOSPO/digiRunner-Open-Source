@@ -22,9 +22,13 @@ import tpi.dgrv4.gateway.service.GtwIdPTitleService;
 @RestController
 public class GtwIdPTitleController {
 
-	@Autowired
 	private GtwIdPTitleService service;
 
+	@Autowired
+	public GtwIdPTitleController(GtwIdPTitleService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/getTitle")
 	public ResponseEntity<String> getTitle(@RequestHeader HttpHeaders headers, HttpServletRequest req,

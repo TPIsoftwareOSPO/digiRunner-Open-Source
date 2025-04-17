@@ -59,27 +59,35 @@ public class AA0204Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
 	private SeqStoreService seqStoreService;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0204Service(TsmpClientDao tsmpClientDao, TsmpClientGroupDao tsmpClientGroupDao, TsmpGroupDao tsmpGroupDao,
+			TsmpSettingDao tsmpSettingDao, TsmpDpClientextDao tsmpDpClientextDao, TsmpClientHostDao tsmpClientHostDao,
+			OauthClientDetailsDao oauthClientDetailsDao, BcryptParamHelper bcryptParamHelper,
+			SeqStoreService seqStoreService, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpClientHostDao = tsmpClientHostDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.seqStoreService = seqStoreService;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0204Resp updateClient(TsmpAuthorization authorization, AA0204Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		

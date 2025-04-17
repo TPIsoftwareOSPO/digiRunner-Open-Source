@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -36,26 +34,27 @@ public class SendAPIApplicationMailService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 
 	private String sendTime;
 	
+	@Autowired
+	public SendAPIApplicationMailService(ApplicationContext ctx, JobHelper jobHelper, ServiceConfig serviceConfig,
+			TsmpDpMailTpltDao tsmpDpMailTpltDao, TsmpApiDao tsmpApiDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.serviceConfig = serviceConfig;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	private TsmpMailEvent getTsmpMailEvent(TsmpClient client, List<TsmpDpApiAuth2> authList //
 			, TsmpAuthorization authorization, String applyStatus) {
 		if (client == null) {
@@ -120,10 +119,9 @@ public class SendAPIApplicationMailService {
 		return job;
 	}
 	
-	protected DPB0071MailJob getDPB0071MailJob(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime, Long reqOrdermId) {
-		DPB0071MailJob job = (DPB0071MailJob) getCtx().getBean("dpb0071MailJob", auth, mailEvents,
-				sendTime, reqOrdermId);
-		return job;
+	protected DPB0071MailJob getDPB0071MailJob(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime,
+			Long reqOrdermId) {
+		return (DPB0071MailJob) getCtx().getBean("dpb0071MailJob", auth, mailEvents, sendTime, reqOrdermId);
 	}
 	
 	

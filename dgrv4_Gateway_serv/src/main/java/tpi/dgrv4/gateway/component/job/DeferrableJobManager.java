@@ -7,22 +7,21 @@ import tpi.dgrv4.gateway.component.job.appt.ApptJob;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class DeferrableJobManager extends JobManager {
-
-	public DeferrableJobManager(TPILogger logger) {
-		super(logger);
-	}
-
-	@Autowired
+	
 	private ServiceConfig serviceConfig;
+	
+	@Autowired
+	public DeferrableJobManager(ServiceConfig serviceConfig, JobHelperImpl jobHelper) {
+		super(jobHelper);
+		this.serviceConfig = serviceConfig;
+	}
 
 	private Integer poolSize;
 
@@ -58,7 +57,7 @@ public class DeferrableJobManager extends JobManager {
 //		    return thread;
 //		});
 		
-		super.logger.debugDelay2sec("JobManager(" +this.getClass().getCanonicalName() + ") is initialized with thread-pool-size (" + this.poolSize + ")");
+		TPILogger.tl.debugDelay2sec("JobManager(" +this.getClass().getCanonicalName() + ") is initialized with thread-pool-size (" + this.poolSize + ")");
 	}
 
 	@Override
@@ -67,7 +66,7 @@ public class DeferrableJobManager extends JobManager {
 		while (true) {
 			i = takeDeferrableJob();
 			if (i == 0) {
-				this.logger.error("DeferrableJobManager is terminated unexpectedly!");
+				TPILogger.tl.error("DeferrableJobManager is terminated unexpectedly!");
 				break;
 			}
 		}
@@ -82,7 +81,7 @@ public class DeferrableJobManager extends JobManager {
 			if (job instanceof ApptJob apptJob) {
 				traceMsg += ", appt_id: " + apptJob.getTsmpDpApptJob().getApptJobId();
 			}
-			this.logger.trace(traceMsg);
+			TPILogger.tl.trace(traceMsg);
 			
 			job.runAfter(getJobHelper(), this);
 			job.setIsDeferrableJobDone();
@@ -93,14 +92,14 @@ public class DeferrableJobManager extends JobManager {
 				traceMsg += ", appt_id: " + apptJob.getTsmpDpApptJob().getApptJobId();
 			}
 			traceMsg += ", cost: " + (System.currentTimeMillis() - start) + "ms";
-			this.logger.trace(traceMsg);
+			TPILogger.tl.trace(traceMsg);
 		} catch (InterruptedException e) {
 			// 重新設置中斷狀態
 			Thread.currentThread().interrupt();
-			this.logger.warn("takeDeferrableJob was interrupted: " + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.warn("takeDeferrableJob was interrupted: " + StackTraceUtil.logStackTrace(e));
 			return 0;
 		} catch (Exception e) {
-			this.logger.error("takeDeferrableJob error: " + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("takeDeferrableJob error: " + StackTraceUtil.logStackTrace(e));
 		}
 		return 1;
 	}
@@ -237,7 +236,7 @@ public class DeferrableJobManager extends JobManager {
 		try {
 			return func.apply(strVal);
 		} catch (Exception e) {
-			this.logger.debug("Error value of " + strVal + ", set to default " + defaultVal);
+			TPILogger.tl.debug("Error value of " + strVal + ", set to default " + defaultVal);
 		}
 		return defaultVal;
 	}

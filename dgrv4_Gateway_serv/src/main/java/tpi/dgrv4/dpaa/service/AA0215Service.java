@@ -32,19 +32,26 @@ public class AA0215Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
+	@Autowired
+	public AA0215Service(TsmpGroupDao tsmpGroupDao, TsmpClientGroupDao tsmpClientGroupDao,
+			TsmpGroupApiDao tsmpGroupApiDao, TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			DgrAuditLogService dgrAuditLogService, TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@Transactional
 	public AA0215Resp deleteGroup(TsmpAuthorization authorization, AA0215Req req, InnerInvokeParam iip) {
 		

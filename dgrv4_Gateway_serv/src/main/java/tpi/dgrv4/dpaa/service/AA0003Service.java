@@ -44,26 +44,27 @@ public class AA0003Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private UsersDao usersDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	
+	@Autowired
+	public AA0003Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpUserDao tsmpUserDao, UsersDao usersDao,
+			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.usersDao = usersDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	@Transactional
 	public AA0003Resp queryTUserDetail(TsmpAuthorization auth, AA0003Req req, ReqHeader reqHeader) {

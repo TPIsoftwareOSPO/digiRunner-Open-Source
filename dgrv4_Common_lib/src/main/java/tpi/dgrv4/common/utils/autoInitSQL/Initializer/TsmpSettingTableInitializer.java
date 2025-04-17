@@ -28,10 +28,10 @@ public class TsmpSettingTableInitializer {
 	 */
 	public static String[][][] updateTsmpSettingArray = {
 		    {
-		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Alpha.name(), "true", "是否寫入API Log 到RDB"},
+		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Alpha.name(), "false", "是否寫入API Log 到RDB"},
 		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Enterprise.name(), "false", "是否寫入API Log 到RDB"},
-		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Enterprise_Lite.name(), "true","是否寫入API Log 到RDB"},
-		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Express.name(), "true", "是否寫入API Log 到RDB"}
+		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Enterprise_Lite.name(), "false","是否寫入API Log 到RDB"},
+		        {"TSMP_APILOG_FORCE_WRITE_RDB", LicenseEditionTypeVo.Express.name(), "false", "是否寫入API Log 到RDB"}
 		    }
 		};
 	
@@ -296,6 +296,12 @@ public class TsmpSettingTableInitializer {
 
 //			-- 2025/02/03 kibana  status API
 			createTsmpSetting((id = "KIBANA_STATUS_URL"), (value = "/kibana/api/status"), (memo = " Kibana status API. defult: /kibana/api/status"));
+
+//			-- 2025/03/25 ES log file status, Zoe Lee
+			createTsmpSetting((id = "ES_LOGFILE_FAIL_RETRY"), (value = "false"), (memo = "When the file status is .fail (failed to write to ES after retrying 3 times)"));
+
+//			-- 2025/03/25 ES log file write disk, Zoe Lee
+			createTsmpSetting((id = "ES_CHECK_CONNECTION"), (value = "false"), (memo = "Whether to detect the ES connection when deciding whether to write the file to the disk."));
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

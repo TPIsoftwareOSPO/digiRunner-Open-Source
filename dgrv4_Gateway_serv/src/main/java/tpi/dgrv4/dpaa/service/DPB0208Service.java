@@ -47,26 +47,27 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0208Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrXApiKeyDao dgrXApiKeyDao;
-
-	@Autowired
 	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private PrepareMailService prepareMailService;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private MailHelper mailHelper;
+	private TsmpGroupDao tsmpGroupDao;
 
 	@Autowired
-	private TsmpGroupDao tsmpGroupDao;
+	public DPB0208Service(DgrXApiKeyDao dgrXApiKeyDao, DgrXApiKeyMapDao dgrXApiKeyMapDao, TsmpClientDao tsmpClientDao,
+			PrepareMailService prepareMailService, TsmpSettingService tsmpSettingService, MailHelper mailHelper,
+			TsmpGroupDao tsmpGroupDao) {
+		super();
+		this.dgrXApiKeyDao = dgrXApiKeyDao;
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.prepareMailService = prepareMailService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.mailHelper = mailHelper;
+		this.tsmpGroupDao = tsmpGroupDao;
+	}
 
 	public DPB0208Resp createXApiKey(TsmpAuthorization authorization, DPB0208Req httpReq) {
 		DPB0208Resp resp = new DPB0208Resp();

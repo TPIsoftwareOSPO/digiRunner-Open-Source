@@ -38,20 +38,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0233Service {
 
-	@Autowired
 	private DgrBotDetectionDao dgrBotDetectionDao;
-
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private BotDetectionRuleValidator validator;
+	private DaoGenericCacheService daoGenericCacheService;
 
 	@Autowired
-	private DaoGenericCacheService daoGenericCacheService;
+	public DPB0233Service(DgrBotDetectionDao dgrBotDetectionDao, TsmpSettingDao tsmpSettingDao,
+			TsmpSettingService tsmpSettingService, BotDetectionRuleValidator validator,
+			DaoGenericCacheService daoGenericCacheService) {
+		super();
+		this.dgrBotDetectionDao = dgrBotDetectionDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.validator = validator;
+		this.daoGenericCacheService = daoGenericCacheService;
+	}
 
 	@Transactional
 	public DPB0233Resp createAndUpdateBotDetectionList(TsmpAuthorization authorization, DPB0233Req req) {

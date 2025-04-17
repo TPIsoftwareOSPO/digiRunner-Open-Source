@@ -34,23 +34,24 @@ public class AA0314Service {
 	
 	private TPILogger logger = TPILogger.tl; 
 	
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
+	private ApplicationContext ctx;
+	private DgrAuditLogService dgrAuditLogService;
+	private CApiKeyService capiKeyService;
 
 	@Autowired
-	private ApplicationContext ctx;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
-	private CApiKeyService capiKeyService;
+	public AA0314Service(JobHelper jobHelper, TsmpApiRegDao tsmpApiRegDao, TsmpApiDao tsmpApiDao,
+			ApplicationContext ctx, DgrAuditLogService dgrAuditLogService, CApiKeyService capiKeyService) {
+		super();
+		this.jobHelper = jobHelper;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.ctx = ctx;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.capiKeyService = capiKeyService;
+	}
 
 	public AA0314Resp confirmAPI(AA0314Req req, ReqHeader reqHeader, InnerInvokeParam iip, HttpHeaders headers) {
 		

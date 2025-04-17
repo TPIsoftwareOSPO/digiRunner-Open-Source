@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.DgrXApiKeyMap;
 import tpi.dgrv4.entity.repository.DgrXApiKeyMapDao;
@@ -17,8 +19,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class DgrXApiKeyMapCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
+
+	@Autowired
+	public DgrXApiKeyMapCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			DgrXApiKeyMapDao dgrXApiKeyMapDao) {
+		super(objectMapper, cache);
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+	}
 
 	public List<DgrXApiKeyMap> findByRefApiKeyId(Long refApiKeyId) {
 		Supplier<List<DgrXApiKeyMap>> supplier = () -> {

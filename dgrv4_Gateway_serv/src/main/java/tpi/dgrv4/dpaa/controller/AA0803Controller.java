@@ -30,9 +30,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0803Controller {
 	
-	@Autowired	
 	private AA0803Service service;
 	
+	@Autowired	
+	public AA0803Controller(AA0803Service service) {
+		super();
+		this.service = service;
+	}
+
 
 	@PostMapping(value = "/dgrv4/11/AA0803", params = {"before"}, //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //

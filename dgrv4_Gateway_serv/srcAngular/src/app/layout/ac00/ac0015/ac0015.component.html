@@ -1,15 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="changePage('query')">
     <div [hidden]="pageNum != 1">
-        <form [formGroup]="form" (ngSubmit)="submitForm()">
+        <form [formGroup]="form">
           <div class="form-group row">
-            <div class="col-12 ">
-              <span class="p-input-icon-right" style="width:40vw">
-                <i class="pi pi-search tpi-i-search" (click)="submitForm();"></i>
-                <input type="text" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                  placeholder="{{'login_role'|translate}}">
-              </span>
-
-              <button type="button" class="btn tpi-btn tpi-second float-end"
+            <div class="col-12 d-flex align-items-center">
+              <app-search-input placeholder="{{'login_role'|translate}}"
+              [control]="keyword" [searchFn]="submitForm.bind(this)"
+              class="col-9 col-lg-4 col-sm-6"></app-search-input>
+              <button type="button" class="btn tpi-btn tpi-second ms-auto "
                 (click)="changePage('create');">{{'button.create'|translate}}</button>
             </div>
           </div>

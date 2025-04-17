@@ -1,0 +1,444 @@
+<div class="dashboard-card-wrapper">
+  <ng-container *ngFor="let item of dataList; let i = index">
+    <ng-container *ngIf="item.nodeName === 'All Node'">
+      <div class="first-col">
+        <ng-container *ngTemplateOutlet="dashboardCard; context: { $implicit: item }"></ng-container>
+        <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="item.nodeName !== 'All Node'">
+      <ng-container *ngTemplateOutlet="dashboardCard; context: { $implicit: item }"></ng-container>
+    </ng-container>
+  </ng-container>
+
+  <div *ngIf="dataList.length==0">
+    <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
+  </div>
+</div>
+<ng-template #lastLoginLogCard>
+  <!-- 歷史登入紀錄 -->
+  <div class="dashboard-card fixed-card">
+    <div class="dashboard-card-title">
+      <h5>{{ "last_login_log" | translate }}</h5>
+    </div>
+    <div style="width: 100%">
+      <p-table [value]="lastLoginLogList" [style]="{ 'word-break': 'break-word', width: '100%' }"
+        styleClass="p-datatable-striped" responsiveLayout="scroll">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th style="width: 45%">
+              {{ "last_logon_date" | translate }}
+            </th>
+            <th style="width: 40%">{{ "login_ip" | translate }}</th>
+            <th style="width: 15%">{{ "status" | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+          <tr>
+            <td>{{ rowData.loginDate }}</td>
+            <td>{{ rowData.loginIp }}</td>
+            <td>
+              <!-- {{rowData.loginStatus}} -->
+              <div class="flex text-center" [pTooltip]="rowData.loginStatus">
+                <i style="color: #6fcaa0" class="fas fa-check" *ngIf="rowData.loginStatus === 'SUCCESS'"></i>
+                <i style="color: #da7a53" class="fas fa-times" *ngIf="rowData.loginStatus === 'FAILED'"></i>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</ng-template>
+<ng-template #dashboardCard let-item>
+  <div class="dashboard-card" [ngClass]="{
+      'all-node': item.nodeName === 'All Node',
+      'keep-server': item.nodeName !== 'All Node' && item.keeperServer === 'Y',
+      'not-keep-server':
+        item.nodeName !== 'All Node' && item.keeperServer === 'N',
+      'first-card': i === 0
+    }">
+    <div class="dashboard-card-title sticky-title">
+      <h5 >{{ item.nodeName }}</h5>
+      <div class="card-title-info">
+        <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;">
+          <label class="dashboard-label">IP Address</label>
+          <span>{{ item.ip || "---" }}</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;">
+          <label class="dashboard-label">Update Time</label>
+          <span>{{ item.updateTime || "---" }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-card-body-row" style="--columns: 1">
+      <ng-container *ngTemplateOutlet="apiRequest; context: { $implicit: item }"></ng-container>
+    </div>
+    <div class="dashboard-card-body-row" style="--columns: 2;grid-template-columns: 1.5fr 1fr;">
+      <ng-container *ngTemplateOutlet="badAttempt; context: { $implicit: item }"></ng-container>
+      <ng-container *ngTemplateOutlet="averageTime; context: { $implicit: item }"></ng-container>
+    </div>
+    <ng-container *ngIf="item.nodeName !== 'All Node'">
+      <div class="dashboard-card-body-row" style="--columns: 1" *ngIf="item.db != null">
+        <ng-container *ngTemplateOutlet="DBConnection; context: { $implicit: item }"></ng-container>
+      </div>
+      <div class="dashboard-card-body-row" style="--columns: 2">
+        <ng-container *ngIf="item.cache != null">
+          <ng-container *ngTemplateOutlet="Cache; context: { $implicit: item }"></ng-container>
+        </ng-container>
+        <ng-container *ngIf="item.queue != null">
+          <ng-container *ngTemplateOutlet="Queue; context: { $implicit: item }"></ng-container>
+        </ng-container>
+      </div>
+      <div class="dashboard-card-body-row" style="--columns: 2">
+        <ng-container *ngIf="item.nodeInfo != null">
+          <ng-container *ngTemplateOutlet="NodeInfo; context: { $implicit: item }"></ng-container>
+        </ng-container>
+        <ng-container *ngIf="item.apiThreadStatus != null">
+          <ng-container *ngTemplateOutlet="APIThreadStatus; context: { $implicit: item }"></ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+    <div class="dashboard-card-body-row" style="--columns: 1">
+      <ng-container *ngTemplateOutlet="top5FastList; context: { $implicit: item }"></ng-container>
+    </div>
+    <div class="dashboard-card-body-row" style="--columns: 1">
+      <ng-container *ngTemplateOutlet="top5SlowList; context: { $implicit: item }"></ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #apiRequest let-item>
+  <div class="api-request">
+    <div class="info-row">
+      <label class="dashboard-label">Total Request</label>
+      <div class="info-row-value">
+        <span>{{ item?.totalRequest }}</span>
+      </div>
+    </div>
+    <div class="info-row" style="color: #14b8a6" *ngIf="item?.success">
+      <div class="info-row-label">
+        <i class="fas fa-check"></i>
+        <label>Success</label>
+      </div>
+      <div class="info-row-value">
+        <span>{{ item?.success?.success }}</span>
+        <span>/{{ item?.success?.percentage }}</span>
+      </div>
+    </div>
+    <div class="info-row" style="color: #ff8780" *ngIf="item?.fail">
+      <div class="info-row-label">
+        <i class="fas fa-times"></i>
+        <label>Fail</label>
+      </div>
+      <div class="info-row-value">
+        <span>{{ item?.fail?.fail }}</span>
+        <span>/{{ item?.fail?.percentage }}</span>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #badAttempt let-item>
+  <div class="bad-attempt">
+    <label class="dashboard-label">Bad Attempt (400 Above)
+      <i *ngIf="item.badAttemptList && item.badAttemptList.length > 0" class="far fa-list-alt badAttemptIcon"
+        (click)="showBadAttemptList(item.badAttemptList)"></i></label>
+    <!-- <div style="width: 50%;height: 100%" [id]="'badAttemptReport_'+item.nodeName"></div> -->
+    <div class="info-row">
+      <!-- <div class="http-code-row"> -->
+      <div class="info-row-label">
+        <i class="fas fa-circle" style="color: #14b8a6"></i>
+        <span>401</span>
+      </div>
+      <div class="info-row-value">
+        <span>{{ item?.badAttempt?.code401 }}</span>
+      </div>
+      <!-- </div> -->
+    </div>
+    <div class="info-row">
+      <!-- <div class="http-code-row"> -->
+      <div class="info-row-label">
+        <i class="fas fa-circle" style="color: #3b82f6"></i>
+        <span>403</span>
+      </div>
+      <div class="info-row-value">
+        <span>{{ item?.badAttempt?.code403 }}</span>
+      </div>
+      <!-- </div> -->
+    </div>
+    <div class="info-row">
+      <!-- <div class="http-code-row"> -->
+      <div class="info-row-label">
+        <i class="fas fa-circle" style="color: #ffbe77"></i>
+        <span>other</span>
+      </div>
+      <div class="info-row-value">
+        <span>{{ item?.badAttempt?.others }}</span>
+      </div>
+      <!-- </div> -->
+    </div>
+  </div>
+</ng-template>
+<ng-template #averageTime let-item>
+  <div class="average-time">
+    <label class="dashboard-label">TPS</label>
+    <div class="info-row">
+      <label label="info-row-label">req</label>
+      <div class="info-row-value">
+        <span>{{ item?.reqTps }}</span>
+        <!-- <span>/s</span> -->
+      </div>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">resp</label>
+      <div class="info-row-value">
+        <span>{{ item?.respTps }}</span>
+        <!-- <span>/s</span> -->
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #top5FastList let-item>
+  <div class="top5-list">
+    <div class="card-title">
+      <label class="dashboard-label d-flex">Top5 Fast Ranking</label>
+      <!-- <div class="include-fail-btn">
+        <span class="ex">Ex</span>
+        <span class="sub">clude Fail</span>
+      </div> -->
+      <!-- <button class="include-fail-btn" (click)="this.includeFail = !this.includeFail">
+        <span class="in" *ngIf="this.includeFail">In</span>
+        <span class="ex" *ngIf="!this.includeFail">Ex</span>
+        <span>clude Fail</span>
+      </button> -->
+    </div>
+    <div class="info-row">
+      <div class="include-fail-btn">
+        <!-- <span class="ex">Ex</span> -->
+        <span class="sub">Exclude Fail</span>
+      </div>
+      <div class="list-row" *ngFor="let row of item.exclundeFailFastList">
+        <span class="code-text" [ngClass]="{
+            red: row?.statusCode?.toString().charAt(0) === '4',
+            green: row?.statusCode?.toString().charAt(0) === '2'
+          }">{{ row.statusCode }}</span>
+        <span class="url" (click)="copyToClipboard(row.uri)">{{ row.uri }}</span>
+        <span class="elapsedTime">{{ row.elapsedTime }}ms</span>
+      </div>
+      <div *ngIf="
+          !item.exclundeFailFastList || item.exclundeFailFastList?.length === 0
+        ">
+        <div class="empty-area">
+          <img src="assets/images/folder-empty.png" alt="">
+          <!-- <i class="fas fa-folder-open"></i> -->
+          <p>No Data</p>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="card-title pt-2">
+      <div class="ms-auto include-fail-btn">
+        <span class="in">In</span>
+        <span class="sub">clude Fail</span>
+      </div>
+    </div> -->
+    <div class="info-row">
+      <div class="include-fail-btn">
+        <!-- <span class="in">In</span> -->
+        <span class="sub">Include Fail</span>
+      </div>
+      <div class="list-row" *ngFor="let row of item.inclundeFailFastList">
+        <span class="code-text" [ngClass]="{
+           red: row?.statusCode?.toString().charAt(0) === '4',
+           green: row?.statusCode?.toString().charAt(0) === '2'
+          }">{{ row.statusCode }}</span>
+        <span class="url" (click)="copyToClipboard(row.uri)">{{ row.uri }}</span>
+        <span class="elapsedTime">{{ row.elapsedTime }}ms</span>
+      </div>
+      <div *ngIf="
+          !item.inclundeFailFastList || item.inclundeFailFastList?.length === 0
+        ">
+        <div class="empty-area">
+          <img src="assets/images/folder-empty.png" alt="">
+          <!-- <i class="fas fa-folder-open"></i> -->
+          <p>No Data</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #top5SlowList let-item>
+  <div class="top5-list">
+    <div class="card-title">
+      <label class="dashboard-label">Top5 Slow Ranking</label>
+      <!-- <div class="include-fail-btn">
+        <span class="ex">Ex</span>
+        <span class="sub">clude Fail</span>
+      </div> -->
+      <!-- <button class="include-fail-btn" (click)="this.includeFail = !this.includeFail">
+        <span class="in" *ngIf="this.includeFail">In</span>
+        <span class="ex" *ngIf="!this.includeFail">Ex</span>
+        <span>clude Fail</span>
+      </button> -->
+    </div>
+    <div class="info-row">
+      <div class="include-fail-btn">
+        <!-- <span class="ex">Ex</span> -->
+        <span class="sub">Exclude Fail</span>
+      </div>
+      <div class="list-row" *ngFor="let row of item.exclundeFailSlowList">
+        <span class="code-text" [ngClass]="{
+            red: row?.statusCode?.toString().charAt(0) === '4',
+            green: row?.statusCode?.toString().charAt(0) === '2'
+          }">{{ row.statusCode }}</span>
+        <span class="url" (click)="copyToClipboard(row.uri)">{{ row.uri }}</span>
+        <span class="elapsedTime">{{ row.elapsedTime }}ms</span>
+      </div>
+      <div *ngIf="
+          !item.exclundeFailSlowList || item.exclundeFailSlowList?.length === 0
+        ">
+        <div class="empty-area">
+          <img src="assets/images/folder-empty.png" alt="">
+          <!-- <i class="fas fa-folder-open"></i> -->
+          <p>No Data</p>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="card-title pt-2">
+      <div class="ms-auto include-fail-btn">
+        <span class="in">In</span>
+        <span class="sub">clude Fail</span>
+      </div>
+    </div> -->
+    <div class="info-row">
+        <div class="include-fail-btn">
+          <!-- <span class="in">In</span> -->
+          <span class="sub">Include Fail</span>
+        </div>
+      <div class="list-row" *ngFor="let row of item.inclundeFailSlowList">
+        <span class="code-text" [ngClass]="{
+            red: row?.statusCode?.toString().charAt(0) === '4',
+            green: row?.statusCode?.toString().charAt(0) === '2'
+          }">{{ row.statusCode }}</span>
+        <span class="url" (click)="copyToClipboard(row.uri)">{{ row.uri }}</span>
+        <span class="elapsedTime">{{ row.elapsedTime }}ms</span>
+      </div>
+      <div *ngIf="
+          !item.inclundeFailSlowList || item.inclundeFailSlowList?.length === 0
+        ">
+        <div class="empty-area">
+          <img src="assets/images/folder-empty.png" alt="">
+          <!-- <i class="fas fa-folder-open"></i> -->
+          <p>No Data</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #DBConnection let-item>
+  <div class="average-time">
+    <label class="dashboard-label">DB Connection</label>
+    <div class="info-row">
+      <label label="info-row-label">Total</label>
+      <span class="info-row-value">{{ item?.db.total }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Active</label>
+      <span class="info-row-value">{{ item?.db.active }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Idle</label>
+      <span class="info-row-value">{{ item?.db.idle }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Waiting</label>
+      <span class="info-row-value">{{ item?.db.waiting }}</span>
+    </div>
+  </div>
+</ng-template>
+<ng-template #Cache let-item>
+  <div class="average-time">
+    <label class="dashboard-label">Cache</label>
+    <div class="info-row">
+      <label label="info-row-label">Rcd</label>
+      <span class="info-row-value">{{ item?.cache.rcd }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Dao</label>
+      <span class="info-row-value">{{ item?.cache.dao }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Fixed</label>
+      <span class="info-row-value">{{ item?.cache.fixed }}</span>
+    </div>
+  </div>
+</ng-template>
+<ng-template #Queue let-item>
+  <div class="average-time">
+    <label class="dashboard-label">Queue</label>
+    <div class="info-row">
+      <label label="info-row-label">ES</label>
+      <span class="info-row-value">{{ item?.queue.es }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">RDB</label>
+      <span class="info-row-value">{{ item?.queue.rdb }}</span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #NodeInfo let-item>
+  <div class="average-time">
+    <label class="dashboard-label">Node Info</label>
+    <label class="panel-label">CPU {{ item?.nodeInfo.cpuCore }} core</label>
+    <div class="info-row">
+      <label label="info-row-label">Usage Rate</label>
+      <span class="info-row-value">{{ item?.nodeInfo.cpuUsage }}</span>
+    </div>
+    <label class="panel-label">Memory</label>
+    <div class="info-row">
+      <label label="info-row-label">Free</label>
+      <span class="info-row-value">{{ item?.nodeInfo.memFree }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Total</label>
+      <span class="info-row-value">{{ item?.nodeInfo.memTotal }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Max</label>
+      <span class="info-row-value">{{ item?.nodeInfo.memMax }}</span>
+    </div>
+  </div>
+</ng-template>
+<ng-template #APIThreadStatus let-item>
+  <div class="average-time">
+    <label class="dashboard-label">API Thread Status</label>
+    <label class="panel-label">Country road</label>
+    <div class="info-row">
+      <label label="info-row-label">Active Count</label>
+      <span class="info-row-value">{{
+        item?.apiThreadStatus.countryRoadActvieCount
+        }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Pool Size</label>
+      <span class="info-row-value">{{
+        item?.apiThreadStatus.countryRoadPoolSize
+        }}</span>
+    </div>
+    <label class="panel-label">Highway</label>
+    <div class="info-row">
+      <label label="info-row-label">Active Count</label>
+      <span class="info-row-value">{{
+        item?.apiThreadStatus.highwayActvieCount
+        }}</span>
+    </div>
+    <div class="info-row">
+      <label label="info-row-label">Pool Size</label>
+      <span class="info-row-value">{{
+        item?.apiThreadStatus.highwayPoolSize
+        }}</span>
+    </div>
+  </div>
+</ng-template>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

@@ -1,0 +1,5 @@
+<span class="p-input-icon-right w-100" >
+  <i class="pi pi-search tpi-i-search" (click)="onSearch()"></i>
+  <input type="search" class="form-control tpi-i-input" [placeholder]="placeholder"
+    [formControl]="control" (keydown.enter)="onKeydown($event)">
+</span>

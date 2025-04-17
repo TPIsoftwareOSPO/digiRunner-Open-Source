@@ -22,11 +22,15 @@ public class DPB9912Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private CusSettingDao cusSettingDao;
-	
-	@Autowired
 	private SeqStoreService seqStoreService;
+
+	@Autowired
+	public DPB9912Service(CusSettingDao cusSettingDao, SeqStoreService seqStoreService) {
+		super();
+		this.cusSettingDao = cusSettingDao;
+		this.seqStoreService = seqStoreService;
+	}
 
 	public DPB9912Resp addCusSetting(TsmpAuthorization auth, DPB9912Req req) {
 		try {

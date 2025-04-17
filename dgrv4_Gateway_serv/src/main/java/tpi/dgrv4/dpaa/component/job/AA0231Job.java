@@ -18,7 +18,6 @@ public class AA0231Job extends Job {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private PrepareMailService prepareMailService;
 	
 	private final TsmpAuthorization aa0231_auth;
@@ -27,10 +26,13 @@ public class AA0231Job extends Job {
 
 	private final String aa0231_sendTime;
 	
-	public AA0231Job(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime) {
+	@Autowired
+	public AA0231Job(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime,
+			PrepareMailService prepareMailService) {
 		this.aa0231_auth = auth;
 		this.aa0231_mailEvents = mailEvents;
 		this.aa0231_sendTime = sendTime;
+		this.prepareMailService = prepareMailService;
 	}
 
 	@Override

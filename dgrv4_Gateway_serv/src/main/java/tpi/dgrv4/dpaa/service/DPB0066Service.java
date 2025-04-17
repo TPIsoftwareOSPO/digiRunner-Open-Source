@@ -65,32 +65,32 @@ public class DPB0066Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao;
-	
-	@Autowired
 	private TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao;
-	
-	@Autowired
 	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	
-	@Autowired
 	private DpReqServiceFactory dpReqServiceFactory;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
+	private BcryptParamHelper bcryptParamHelper;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public DPB0066Service(TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao, TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao,
+			TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao, TsmpDpClientextDao tsmpDpClientextDao, TsmpDpFileDao tsmpDpFileDao,
+			DpReqServiceFactory dpReqServiceFactory, JobHelper jobHelper, ApplicationContext ctx,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpDpReqOrderd2Dao = tsmpDpReqOrderd2Dao;
+		this.tsmpDpReqOrderd2dDao = tsmpDpReqOrderd2dDao;
+		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.dpReqServiceFactory = dpReqServiceFactory;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	@Transactional
 	public DPB0066Resp resendReq(TsmpAuthorization authorization, DPB0066Req req, ReqHeader reqHeader, InnerInvokeParam iip) {

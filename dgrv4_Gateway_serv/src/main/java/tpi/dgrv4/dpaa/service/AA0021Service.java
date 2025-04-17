@@ -25,12 +25,15 @@ public class AA0021Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
+	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
 
 	@Autowired
-	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	
+	public AA0021Service(TsmpRoleDao tsmpRoleDao, TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+	}
 
 	public AA0021Resp queryTRoleRoleMapDetail(TsmpAuthorization authorization, AA0021Req req) {
 		AA0021Resp resp = new AA0021Resp();

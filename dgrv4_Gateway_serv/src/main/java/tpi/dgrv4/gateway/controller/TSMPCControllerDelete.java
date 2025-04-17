@@ -19,9 +19,14 @@ import tpi.dgrv4.gateway.service.TSMPCServiceDelete;
 @RestController
 public class TSMPCControllerDelete {
 	
-	@Autowired
 	private TSMPCServiceDelete service;
 	
+	@Autowired
+	public TSMPCControllerDelete(TSMPCServiceDelete service) {
+		super();
+		this.service = service;
+	}
+
 	@DeleteMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"})
 	public Callable dispatch(HttpServletRequest httpReq, 
 			HttpServletResponse httpRes,

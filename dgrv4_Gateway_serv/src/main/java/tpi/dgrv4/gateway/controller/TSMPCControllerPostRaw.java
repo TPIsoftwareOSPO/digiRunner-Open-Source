@@ -17,8 +17,15 @@ import tpi.dgrv4.gateway.service.TSMPCServicePostRaw;
 @RestController
 public class TSMPCControllerPostRaw {
 	
-	@Autowired
 	private TSMPCServicePostRaw service;
+	
+	@Autowired
+	public TSMPCControllerPostRaw(TSMPCServicePostRaw service) {
+		super();
+		this.service = service;
+	}
+
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"}, 
 			produces = MediaType.ALL_VALUE)

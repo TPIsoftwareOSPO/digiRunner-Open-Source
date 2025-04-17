@@ -2,30 +2,15 @@
     <!-- 查詢 -->
     <div [hidden]="pageNum != 1">
         <form [formGroup]="form" (ngSubmit)="queryScopeAuthoritiesList()">
+          <div class="col-12 d-flex align-items-center">
+            <app-search-input
+              placeholder="{{'auth_id'|translate}}、{{'auth_name'|translate}}、{{'group_auth_desc'|translate}}、{{'auth_level'|translate}}"
+              [control]="form.get('keyword')" [searchFn]="queryScopeAuthoritiesList.bind(this)"
+              class="col-9 col-lg-6 col-sm-6"></app-search-input>
 
-          <span class="p-input-icon-right" style="width:40vw">
-            <i class="pi pi-search tpi-i-search" (click)="queryScopeAuthoritiesList();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'auth_id'|translate}}、{{'auth_name'|translate}}、{{'group_auth_desc'|translate}}、{{'auth_level'|translate}}">
-          </span>
-
-          <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
-          [disabled]="canCreate == false">{{'button.create'|translate}}</button>
-            <!-- <div class="form-group row">
-                <div class="col-4 col-xl-4 col-lg-4">
-                    <label id="keyword_label" class="control-label" for="keyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="keyword" formControlName="keyword"
-                        placeholder="{{'auth_id'|translate}}、{{'auth_name'|translate}}、{{'group_auth_desc'|translate}}、{{'auth_level'|translate}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
-                        (click)="queryScopeAuthoritiesList();">{{'button.search' | translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
-                        [disabled]="canCreate == false">{{'button.create'|translate}}</button>
-                </div>
-            </div> -->
+            <button type="button" class="btn tpi-btn tpi-second ms-auto" (click)="changePage('create');"
+              [disabled]="canCreate == false">{{'button.create'|translate}}</button>
+          </div>
         </form>
         <hr>
         <p-table *ngIf="cols" [columns]="cols" [value]="groupAuthoritiesList" selectionMode="single"

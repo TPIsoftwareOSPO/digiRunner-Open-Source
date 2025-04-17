@@ -32,14 +32,18 @@ public class DPB0113Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRoleCacheProxy tsmpRoleCacheProxy;
-
-	@Autowired
 	private TsmpRoleTxidMapDao tsmpRoleTxidMapDao;
+	private BcryptParamHelper bcryptParamHelper;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public DPB0113Service(TsmpRoleCacheProxy tsmpRoleCacheProxy, TsmpRoleTxidMapDao tsmpRoleTxidMapDao,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRoleCacheProxy = tsmpRoleCacheProxy;
+		this.tsmpRoleTxidMapDao = tsmpRoleTxidMapDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0113Resp updateRTMap(TsmpAuthorization auth, DPB0113Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

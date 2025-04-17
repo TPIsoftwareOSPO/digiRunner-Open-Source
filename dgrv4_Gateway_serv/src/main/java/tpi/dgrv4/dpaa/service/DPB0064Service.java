@@ -32,14 +32,18 @@ public class DPB0064Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
-	
-	@Autowired 
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired 
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+
+	@Autowired 
+	public DPB0064Service(TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpRoleDao tsmpRoleDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0064Resp queryAllLayer(TsmpAuthorization authorization, DPB0064Req req, ReqHeader reqHeader) {
 		DPB0064Resp resp = new DPB0064Resp();

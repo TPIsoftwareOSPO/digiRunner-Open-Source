@@ -22,13 +22,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0098Service {
 
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0098Service(TsmpRtnCodeDao tsmpRtnCodeDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.serviceConfig = serviceConfig;
+	}
+
+
 
 	/**
 	 * 依照回覆代碼、語言地區查詢API回覆代碼明細，以帶出更新視窗所需的資料。				

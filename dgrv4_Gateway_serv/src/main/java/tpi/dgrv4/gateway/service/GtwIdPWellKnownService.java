@@ -25,14 +25,18 @@ import tpi.dgrv4.gateway.vo.GtwIdPWellKnownResp;
 @Service
 public class GtwIdPWellKnownService {
 	
-	@Autowired
 	ObjectMapper objectMapper;
-	
-	@Autowired
 	TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	TokenHelper tokenHelper;
+
+	@Autowired
+	public GtwIdPWellKnownService(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService,
+			TokenHelper tokenHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tokenHelper = tokenHelper;
+	}
 
 	public ResponseEntity<?> getGtwIdPWellKnown(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {

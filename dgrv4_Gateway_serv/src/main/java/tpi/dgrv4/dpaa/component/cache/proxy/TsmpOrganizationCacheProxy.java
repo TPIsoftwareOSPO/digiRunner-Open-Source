@@ -8,18 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpOrganization;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
-import tpi.dgrv4.entity.repository.TsmpSettingDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Component
 public class TsmpOrganizationCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
+
+	@Autowired
+	public TsmpOrganizationCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			TsmpOrganizationDao tsmpOrganizationDao) {
+		super(objectMapper, cache);
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+	}
 
 	public TsmpOrganization findById(String id) {
 		Supplier<TsmpOrganization> supplier = () -> {

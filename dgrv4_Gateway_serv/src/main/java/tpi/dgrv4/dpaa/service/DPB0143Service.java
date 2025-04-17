@@ -25,11 +25,15 @@ public class DPB0143Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	public DPB0143Service(TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, ObjectMapper objectMapper) {
+		super();
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+		this.objectMapper = objectMapper;
+	}
 
 	public DPB0143Resp checkACEntryTicket(DPB0143Req req) {
 		String reqJwe = req.getAuthCode();

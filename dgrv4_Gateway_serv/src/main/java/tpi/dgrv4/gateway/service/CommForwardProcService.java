@@ -20,8 +20,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +59,7 @@ import tpi.dgrv4.codec.utils.JWScodec;
 import tpi.dgrv4.codec.utils.MaskUtil;
 import tpi.dgrv4.codec.utils.PEMUtil;
 import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
+import tpi.dgrv4.codec.utils.RandomUtil;
 import tpi.dgrv4.codec.utils.SHA256Util;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -107,6 +106,7 @@ import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 import tpi.dgrv4.gateway.vo.TsmpApiLogResp;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
+import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
 
 @Slf4j
 @Service
@@ -541,13 +541,11 @@ public class CommForwardProcService {
 		int jobQueueSizeThreshold = 300;
 		// 0:high / 5:default / 9:low
 		// 在 JobQueueSize > 300 的時候，中優先度與低優先度的請求皆停止100毫秒。
-		if (jobHelper.getJobQueueSize(1) > jobQueueSizeThreshold && priority > 4 ) {
+		if (jobHelper.getJobQueueSize(1) > jobQueueSizeThreshold && priority > 4 && RandomUtil.getIntRandom(100) < 20) {
 			// 取代原有的 ProbabilityAlgUtils.getProbabilityAns(probMap5050);
 			// 隨機數判斷 - 產生 0-99 的數字,小於 20 代表 20% 的機率,
 			// 要改成 30% 的機率,就改成 nextInt(100) < 30
-	        if (ThreadLocalRandom.current().nextInt(100) < 20) {
-	            Thread.sleep(100);
-	        }
+			Thread.sleep(100);
 		}
 
 		// 在 JobQueueSize > 300 的時候，低優先度的請求皆停止100毫秒。
@@ -901,7 +899,7 @@ public class CommForwardProcService {
 
 	/**
 	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br> 
-	 * 註: 僅 DGRC 呼叫
+	 * 註: 僅 DGRC, TSMPC 呼叫
 	 */
 	public StringBuffer getLogResp(ResponseEntity<?> respEntity, Map<String, String> maskInfo,
 			HttpServletRequest httpReq) {
@@ -913,6 +911,7 @@ public class CommForwardProcService {
 
 	/**
 	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br> 
+	 * 註: 僅 TSMPC 呼叫, 20250407 tsmpc no call
 	 */
 	public StringBuffer getLogResp(ResponseEntity<?> respEntity, Map<String, String> maskInfo) {
 		StringBuffer log = new StringBuffer();
@@ -953,7 +952,7 @@ public class CommForwardProcService {
 	}
 
 	/**
-	 * 註: 僅 TSMPC 由此直接呼叫
+	 * 註: 僅 TSMPC 由此直接呼叫,20250407 tsmpc no call
 	 */
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int content_Length,
 			Map<String, String> maskInfo) throws IOException {
@@ -961,23 +960,38 @@ public class CommForwardProcService {
 	}
 	
 	/**
-	 * 註: 僅 DGRC, Mock API Test 由此直接呼叫
+	 * 註: 僅 DGRC, TSMPC, Mock API Test 由此直接呼叫
 	 */
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
 			Map<String, String> maskInfo, HttpServletRequest httpReq) throws IOException {
 		int httpCode = -1;
 		if (httpRes != null) {
-			// DGRC用, 記錄 response 的時間 & http status code
+			//記錄 response 的時間 & http status code
 			httpCode = httpRes.getStatus();
 			doFetchUriHistoryAfter(httpReq, httpCode);
 		}
 
 		return getLogResp(httpRes, httpRespStr, contentLength, null, maskInfo);
 	}
-
 	/**
 	 * 取得調用目標URL 的 response log
 	 * 註: 僅 TSMPCServicePostForm 由此直接呼叫
+	 */
+	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
+			StringBuffer cfp_log, Map<String, String> maskInfo, HttpServletRequest httpReq) throws IOException {
+		int httpCode = -1;
+		if (httpRes != null) {
+			//記錄 response 的時間 & http status code
+			httpCode = httpRes.getStatus();
+			doFetchUriHistoryAfter(httpReq, httpCode);
+		}
+
+		return getLogResp(httpRes, httpRespStr, contentLength, cfp_log, maskInfo);
+		
+	}
+	/**
+	 * 取得調用目標URL 的 response log
+	 * 註: 僅 TSMPCServicePostForm 由此直接呼叫, 20250407 TSMPCServicePostForm no call
 	 */
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
 			StringBuffer cfp_log, Map<String, String> maskInfo) throws IOException {

@@ -46,31 +46,32 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class DGRCServiceGet implements IApiCacheService{
 	
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-	
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-	
-	@Autowired
 	private DgrcRoutingHelper dgrcRoutingHelper;
-	
-	@Autowired
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
 	
 	private static Map<String, String> maskInfo ;
+
+	@Autowired
+	public DGRCServiceGet(TsmpApiCacheProxy tsmpApiCacheProxy, ObjectMapper objectMapper,
+			CommForwardProcService commForwardProcService, ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy,
+			DgrcRoutingHelper dgrcRoutingHelper, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
+			TsmpSettingService tsmpSettingService, MockApiTestService mockApiTestService) {
+		super();
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.objectMapper = objectMapper;
+		this.commForwardProcService = commForwardProcService;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.mockApiTestService = mockApiTestService;
+	}
 
 	@Async("async-workers-highway")
 	public CompletableFuture<ResponseEntity<?>> forwardToGetAsyncFast(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes) throws Exception {
@@ -148,6 +149,7 @@ public class DGRCServiceGet implements IApiCacheService{
 				return verifyResp;
 			}
 			
+			// 計算依來源IP取得轉發的目地的
 			List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
 
 			// 沒有目標URL,則回覆錯誤訊息
@@ -181,7 +183,13 @@ public class DGRCServiceGet implements IApiCacheService{
 			// 調用目標URL
 			Map<String, Object> convertResponseBodyMap = forwardToByPolicy(httpHeaders, httpReq, httpRes, apiReg, uuid,
 					tokenPayload, cApiKeySwitch, dgrcGetDgrReqVo, dgrcGetDgrReqVo_rdb, srcUrlList);
-
+			
+			if (convertResponseBodyMap == null) {
+				// Response alread commited HTTP code : 503 --> null
+				// 不寫 ES , 不輸出 online console
+				return null;
+			}
+			
 			byte[] httpArray = null;
 			String httpRespStr = null;
 			if (convertResponseBodyMap != null) {
@@ -271,7 +279,7 @@ public class DGRCServiceGet implements IApiCacheService{
 					dgrcGetDgrReqVo, dgrcGetDgrReqVo_rdb, cApiKeySwitch, null);
 		}
 
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 
 	protected Map<String, Object> forwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
@@ -279,8 +287,8 @@ public class DGRCServiceGet implements IApiCacheService{
 			TsmpApiLogReq dgrcGetDgrReqVo, TsmpApiLogReq dgrcGetDgrReqVo_rdb, Boolean cApiKeySwitch, String tryNumWord)
 			throws Exception {
 
-		// 2. tsmpc req header / body
-		// 3. tsmpc resp header / body / code
+		// 2. dgrc req header / body
+		// 3. dgrc resp header / body / code
 
 		// http header
 		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders, tokenPayload,cApiKeySwitch, uuid, srcUrl);
@@ -354,7 +362,7 @@ public class DGRCServiceGet implements IApiCacheService{
 		Map<String, Object> convertResponseBodyMap = getCommForwardProcService().convertResponseBody(httpRes, httpReq,
 				dgrcGet_respObj.httpRespArray, dgrcGet_respObj.respStr);
  
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 	
 	public HttpRespData callback(AutoCacheParamVo vo) {

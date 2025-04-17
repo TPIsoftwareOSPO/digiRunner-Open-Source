@@ -24,9 +24,13 @@ public class DPB0100Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
 	
+	@Autowired
+	public DPB0100Service(TsmpRtnCodeDao tsmpRtnCodeDao) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+	}
 	public DPB0100Resp deleteApiRtnCode(TsmpAuthorization tsmpAuthorization, DPB0100Req req) {
 		DPB0100Resp resp = new DPB0100Resp();
 		try {

@@ -24,14 +24,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0112Service {
 
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpRoleTxidMapDao tsmpRoleTxidMapDao;
+	private BcryptParamHelper bcryptParamHelper;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public DPB0112Service(TsmpRoleDao tsmpRoleDao, TsmpRoleTxidMapDao tsmpRoleTxidMapDao,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleTxidMapDao = tsmpRoleTxidMapDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0112Resp queryRTMapByPk(TsmpAuthorization auth, DPB0112Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

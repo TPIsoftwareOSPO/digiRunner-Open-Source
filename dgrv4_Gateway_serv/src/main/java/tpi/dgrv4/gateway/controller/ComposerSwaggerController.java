@@ -16,9 +16,14 @@ import tpi.dgrv4.gateway.service.ComposerSwaggerService;
 @RestController
 public class ComposerSwaggerController {
 	
-	@Autowired
 	private ComposerSwaggerService service;
 	
+	@Autowired
+	public ComposerSwaggerController(ComposerSwaggerService service) {
+		super();
+		this.service = service;
+	}
+
 	@GetMapping(value = "/composer/swagger3.0/**")
 	public  Callable dispatch(@RequestHeader HttpHeaders httpHeaders, 
 			HttpServletRequest httpReq, 

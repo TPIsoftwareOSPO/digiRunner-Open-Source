@@ -40,48 +40,44 @@ public class AA0316Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpRegHostDao tsmpRegHostDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private ApplicationContext ctx;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
 
 	private enum Act {
 		CREATE,	// 新增
 		UPDATE;	// 更新
+	}
+
+	@Autowired
+	public AA0316Service(BcryptParamHelper bcryptParamHelper, FileHelper fileHelper, JobHelper jobHelper,
+			TsmpUserDao tsmpUserDao, TsmpDpFileDao tsmpDpFileDao, TsmpRegHostDao tsmpRegHostDao, TsmpApiDao tsmpApiDao,
+			TsmpRegModuleDao tsmpRegModuleDao, TsmpApiRegDao tsmpApiRegDao, ObjectMapper objectMapper,
+			ApplicationContext ctx, DgrAuditLogService dgrAuditLogService, DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.fileHelper = fileHelper;
+		this.jobHelper = jobHelper;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpRegHostDao = tsmpRegHostDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.objectMapper = objectMapper;
+		this.ctx = ctx;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
 	}
 
 	@Transactional

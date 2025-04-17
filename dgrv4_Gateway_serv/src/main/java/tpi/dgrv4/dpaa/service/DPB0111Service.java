@@ -37,22 +37,24 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0111Service {
 
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpRoleCacheProxy tsmpRoleCacheProxy;
-
-	@Autowired
 	private TsmpRoleTxidMapDao tsmpRoleTxidMapDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0111Service(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpRoleCacheProxy tsmpRoleCacheProxy,
+			TsmpRoleTxidMapDao tsmpRoleTxidMapDao, BcryptParamHelper bcryptParamHelper, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpRoleCacheProxy = tsmpRoleCacheProxy;
+		this.tsmpRoleTxidMapDao = tsmpRoleTxidMapDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0111Resp queryRTMapList(TsmpAuthorization auth, DPB0111Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

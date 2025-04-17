@@ -15,11 +15,15 @@ public abstract class DpaaAlertNotifierAbstract implements DpaaAlertNotifier {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	public DpaaAlertNotifierAbstract(ApptJobDispatcher apptJobDispatcher, ObjectMapper objectMapper) {
+		super();
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.objectMapper = objectMapper;
+	}
 
 	/**
 	 * 為了讓告警留下紀錄, 故利用 ApptJob 執行告警通知

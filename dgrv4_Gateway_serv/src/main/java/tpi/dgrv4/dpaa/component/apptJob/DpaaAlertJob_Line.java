@@ -31,7 +31,9 @@ import tpi.dgrv4.dpaa.service.TsmpSettingService;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
 import tpi.dgrv4.entity.repository.TsmpAlertDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
@@ -40,17 +42,18 @@ public class DpaaAlertJob_Line extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpAlertDao tsmpAlertDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private ObjectMapper objectMapper;
 
-	public DpaaAlertJob_Line(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public DpaaAlertJob_Line(TsmpDpApptJob tsmpDpApptJob, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpAlertDao tsmpAlertDao, TsmpSettingService tsmpSettingService,
+			ObjectMapper objectMapper) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpAlertDao = tsmpAlertDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.objectMapper = objectMapper;
 	}
 
 	@Override

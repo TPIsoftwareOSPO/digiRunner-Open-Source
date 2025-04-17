@@ -2,6 +2,7 @@ package tpi.dgrv4.gateway.component.job.appt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -14,6 +15,7 @@ import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.TsmpSettingService;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpCoreTokenHelperCacheProxy;
 import tpi.dgrv4.gateway.component.job.appt.HttpUtilJob.InParams.InArgs;
@@ -46,24 +48,24 @@ public class HttpUtilJob extends ApptJob {
 
 	private final static String RESP_FILE_NAME = "HttpCall.txt";
 
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
-
-	public HttpUtilJob(TsmpDpApptJob tsmpDpApptJob, String type) {
-	    super(tsmpDpApptJob, TPILogger.tl);
-	    this.type = type;
-	}
-
+	private TsmpSettingService tsmpSettingService;
+	
 	private String type;
 	
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public HttpUtilJob(TsmpDpApptJob tsmpDpApptJob, String type, FileHelper fileHelper, ObjectMapper objectMapper,
+			TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy, TsmpSettingService tsmpSettingService,
+			ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.type = type;
+		this.fileHelper = fileHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@Override
 	public String runApptJob() throws Exception {

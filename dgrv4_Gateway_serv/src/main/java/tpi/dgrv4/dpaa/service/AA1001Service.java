@@ -28,17 +28,20 @@ public class AA1001Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private SeqStoreService seqStoreService;
-	
-	@Autowired
 	private TsmpSequenceDao tsmpSequenceDao;
+	private SeqStoreDao seqStoreDao;
 
 	@Autowired
-	private SeqStoreDao seqStoreDao;
+	public AA1001Service(TsmpOrganizationDao tsmpOrganizationDao, SeqStoreService seqStoreService,
+			TsmpSequenceDao tsmpSequenceDao, SeqStoreDao seqStoreDao) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.seqStoreService = seqStoreService;
+		this.tsmpSequenceDao = tsmpSequenceDao;
+		this.seqStoreDao = seqStoreDao;
+	}
 
 
 	public AA1001Resp addTOrg(TsmpAuthorization auth, AA1001Req req) {

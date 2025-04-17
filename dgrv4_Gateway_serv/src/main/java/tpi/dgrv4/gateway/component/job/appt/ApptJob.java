@@ -9,6 +9,7 @@ import java.util.concurrent.CancellationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
@@ -35,23 +36,22 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 
 	public final static Integer MAX_STACK_TRACE_LENGTH = 1000;
 
-	@Autowired
 	private TPILogger logger;
 
 	private TsmpDpApptJob tsmpDpApptJob;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
 
 	// 此處的 TsmpDpApptJob, 是  deep clone 而來的
-	public ApptJob(TsmpDpApptJob tsmpDpApptJob, TPILogger logger) {
+	@Autowired
+	public ApptJob(TsmpDpApptJob tsmpDpApptJob, TPILogger logger, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
 		// 以 apptJobId 作為 groupId, 會使得重複的工作被丟棄
 		super(String.valueOf(tsmpDpApptJob.getApptJobId()));
 		this.tsmpDpApptJob = tsmpDpApptJob;
 		this.logger = logger;
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
 	}
 
 	@Override
@@ -164,10 +164,17 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 	 * 工作執行失敗時需Update status = Error， 並發出告警，最後Refresh MemList
 	 * @param e
 	 */
-	private void jobError(Exception e) {
-		final String stackTrace = ServiceUtil.truncateExceptionMessage(e, MAX_STACK_TRACE_LENGTH);
+	private void jobError(Exception exception) {
+		final String stackTrace = ServiceUtil.truncateExceptionMessage(exception, MAX_STACK_TRACE_LENGTH);
 		this.tsmpDpApptJob.setStackTrace(stackTrace);
-		updateStatus(TsmpDpApptJobStatus.ERROR);
+		try {
+			updateStatus(TsmpDpApptJobStatus.ERROR); // database read only
+		} catch (JpaSystemException e) {
+			String msg = StackTraceUtil.logTpiShortStackTrace(e);
+			if (msg.indexOf("The database is read only") == -1) {
+				throw e;
+			}
+		}
 	}
 
 	private void jobCancel() {

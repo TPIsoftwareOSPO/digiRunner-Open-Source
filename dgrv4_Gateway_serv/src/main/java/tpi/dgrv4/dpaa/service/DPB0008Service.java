@@ -25,16 +25,20 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0008Service {
 
-	@Autowired
 	private TsmpDpAppCategoryDao tsmpDpAppCategoryDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0008Service(TsmpDpAppCategoryDao tsmpDpAppCategoryDao, TsmpOrganizationDao tsmpOrganizationDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpAppCategoryDao = tsmpDpAppCategoryDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0008Resp queryAppCateLikeList(TsmpAuthorization authorization, DPB0008Req req) {
 		String userName = authorization.getUserName();

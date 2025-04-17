@@ -31,14 +31,18 @@ public class DPB0062Service implements TsmpDpApptJobSetter {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
+	private TsmpDpApptJobDao tsmpDpApptJobDao;
 
 	@Autowired
-	private TsmpDpApptJobDao tsmpDpApptJobDao;
+	public DPB0062Service(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super();
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+	}
 
 	@Override
 	public TsmpDpApptJob set(TsmpDpApptJob job) {

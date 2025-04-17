@@ -55,46 +55,43 @@ public class DPB0067Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1;
-	
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2;
-	
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3;
-	
-	@Autowired
 	private DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
 	private ApplicationContext ctx;
-	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0067Service(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpUserDao tsmpUserDao, AuthoritiesDao authoritiesDao, BcryptParamHelper bcryptParamHelper,
+			DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1, DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2,
+			DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3, DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5,
+			ServiceConfig serviceConfig, JobHelper jobHelper, ApplicationContext ctx, DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.authoritiesDao = authoritiesDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dpReqQueryD1 = dpReqQueryD1;
+		this.dpReqQueryD2 = dpReqQueryD2;
+		this.dpReqQueryD3 = dpReqQueryD3;
+		this.dpReqQueryD5 = dpReqQueryD5;
+		this.serviceConfig = serviceConfig;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	public DPB0067Resp queryReqLikeList(TsmpAuthorization authorization, DPB0067Req req, ReqHeader reqHeader) {
 		String local = ServiceUtil.getLocale(reqHeader.getLocale());
@@ -104,8 +101,8 @@ public class DPB0067Service {
 		//刪除過期的草稿
 		if (req.getReqOrdermId()==null) {
 			try {
-				DPB0067Job job = (DPB0067Job) getCtx().getBean("dpb0067Job",reqHeader.getLocale());
-				getJobHelper().add(job);	
+				DPB0067Job job = (DPB0067Job) getCtx().getBean("dpb0067Job", reqHeader.getLocale());
+				getJobHelper().add(job);
 			} catch (Exception e) {
 				logger.debug("草稿申請單刪除失敗: {}" + e.getMessage());
 			}			

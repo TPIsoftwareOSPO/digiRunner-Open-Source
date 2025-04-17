@@ -30,14 +30,18 @@ public class KibanaService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
 	private CApiKeyService capiKeyService;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public KibanaService(TsmpSettingCacheProxy tsmpSettingCacheProxy, CApiKeyService capiKeyService,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.capiKeyService = capiKeyService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public void login(HttpHeaders httpHeaders, String reportURL, HttpServletRequest request,
 			HttpServletResponse response) {

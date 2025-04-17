@@ -24,15 +24,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0417Service {
 
-	@Autowired
 	private TsmpNodeDao tsmpNodeDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
 
 	private TPILogger logger = TPILogger.tl; 
+
+	@Autowired
+	public AA0417Service(TsmpNodeDao tsmpNodeDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpNodeDao = tsmpNodeDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0417Resp queryGreenTsmpNodeList(TsmpAuthorization authorization, AA0417Req req) {
 		AA0417Resp resp = new AA0417Resp();

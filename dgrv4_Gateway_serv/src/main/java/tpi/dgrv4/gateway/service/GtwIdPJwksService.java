@@ -20,14 +20,18 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class GtwIdPJwksService {
 
-	@Autowired
 	ObjectMapper objectMapper;
-
-	@Autowired
 	TsmpSettingService tsmpSettingService;
+	TokenHelper tokenHelper;
 
 	@Autowired
-	TokenHelper tokenHelper;
+	public GtwIdPJwksService(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService,
+			TokenHelper tokenHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tokenHelper = tokenHelper;
+	}
 
 	public ResponseEntity<?> getGtwIdPJwks(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp) throws Exception {

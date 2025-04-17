@@ -20,8 +20,14 @@ public class AA1108Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
+
+	@Autowired
+	public AA1108Service(TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao) {
+		super();
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+	}
+
 
 	public AA1108Resp updateTGroupAuthority(TsmpAuthorization authorization, AA1108Req req) {
 		AA1108Resp resp = new AA1108Resp();

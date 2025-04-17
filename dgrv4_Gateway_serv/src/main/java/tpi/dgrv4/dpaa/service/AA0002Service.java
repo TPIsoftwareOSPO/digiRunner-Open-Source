@@ -22,11 +22,15 @@ public class AA0002Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
+
+	@Autowired
+	public AA0002Service(TsmpUserDao tsmpUserDao, DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	public AA0002Resp queryUserDataByLoginUser(TsmpAuthorization auth, AA0002Req req) {
 		AA0002Resp resp = new AA0002Resp();

@@ -23,10 +23,15 @@ import tpi.dgrv4.gateway.vo.OnlineConsole;
 @Service
 public class OnlineConsole2Service {
 	
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
+
+	@Autowired
+	public OnlineConsole2Service(TsmpSettingDao tsmpSettingDao, TsmpSettingCacheProxy tsmpSettingCacheProxy) {
+		super();
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+	}
 
 	public List<OnlineConsole> outputlog(CurrentLogReq req) {
 

@@ -8,11 +8,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ScrollPanelModule} from 'primeng/scrollpanel';
+import { BadAttemptListComponent } from './bad-attempt-list/bad-attempt-list.component';
 
 
 
 @NgModule({
-  declarations: [DashboardComponent],
+  declarations: [DashboardComponent,BadAttemptListComponent],
   imports: [
     CommonModule,
     DashboardRoutingModule,

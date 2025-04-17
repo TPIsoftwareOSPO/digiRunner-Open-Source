@@ -30,20 +30,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0154Service {
 	
-	@Autowired
 	private DgrWebsiteDao dgrWebsiteDao;
-	
-	@Autowired
 	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
 	private TPILogger logger = TPILogger.tl;
 	
+	@Autowired
+	public DPB0154Service(DgrWebsiteDao dgrWebsiteDao, DgrWebsiteDetailDao dgrWebsiteDetailDao,
+			BcryptParamHelper bcryptParamHelper, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.dgrWebsiteDao = dgrWebsiteDao;
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	public DPB0154Resp createWebsite(TsmpAuthorization auth, DPB0154Req req , ReqHeader header) {
 		
 		DPB0154Resp resp = new DPB0154Resp();

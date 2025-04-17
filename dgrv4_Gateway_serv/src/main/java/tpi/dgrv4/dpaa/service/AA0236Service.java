@@ -32,16 +32,19 @@ public class AA0236Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0236Service(TsmpGroupApiDao tsmpGroupApiDao, TsmpApiDao tsmpApiDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0236Resp queryAPIByTsmpGroupApiIdAndKeyword(TsmpAuthorization authorization, AA0236Req req) {
 

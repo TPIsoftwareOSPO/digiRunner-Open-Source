@@ -25,8 +25,13 @@ import java.util.Date;
 @RestController
 public class DPB9927Controller {
 
-	@Autowired
 	private DPB9927Service service;
+
+	@Autowired
+	public DPB9927Controller(DPB9927Service service) {
+		super();
+		this.service = service;
+	}
 
 
 	@PostMapping(value = "/dgrv4/17/DPB9927", params = { "before" }, //

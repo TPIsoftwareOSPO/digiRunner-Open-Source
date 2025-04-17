@@ -27,8 +27,13 @@ public class DPB9907Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+
+	@Autowired
+	public DPB9907Service(TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	public DPB9907Resp queryItemNameList(TsmpAuthorization auth, DPB9907Req req) {
 		String itemNo = req.getItemNo();

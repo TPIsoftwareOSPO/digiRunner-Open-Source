@@ -20,8 +20,14 @@ import tpi.dgrv4.gateway.service.TSMPCServicePostForm;
 @RestController
 public class TSMPCControllerPostForm {
 	
-	@Autowired
 	private TSMPCServicePostForm service;
+	
+	@Autowired
+	public TSMPCControllerPostForm(TSMPCServicePostForm service) {
+		super();
+		this.service = service;
+	}
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"}, 
 			consumes = MediaType.MULTIPART_FORM_DATA_VALUE, // 使用 Form Data 格式

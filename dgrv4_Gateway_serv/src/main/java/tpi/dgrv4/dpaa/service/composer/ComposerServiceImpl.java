@@ -29,11 +29,15 @@ public class ComposerServiceImpl implements ComposerService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ComposerURLService composerURLService;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	public ComposerServiceImpl(ComposerURLService composerURLService, ObjectMapper objectMapper) {
+		super();
+		this.composerURLService = composerURLService;
+		this.objectMapper = objectMapper;
+	}
 
 	@Override
 	public void confirmAllNodes(String apiUUID) {

@@ -27,12 +27,18 @@ public class AA1104Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
+
+	@Autowired
+	public AA1104Service(TsmpSecurityLevelDao tsmpSecurityLevelDao, TsmpGroupDao tsmpGroupDao,
+			TsmpClientDao tsmpClientDao) {
+		super();
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientDao = tsmpClientDao;
+	}
 
 	public AA1104Resp deleteSecurityLevel(TsmpAuthorization authorization, AA1104Req req) {
 		AA1104Resp resp = new AA1104Resp();

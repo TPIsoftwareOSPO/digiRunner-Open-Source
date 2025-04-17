@@ -40,17 +40,20 @@ public class DpaaAlertDispatcherJobHelper {
 
 	private final TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public DpaaAlertDispatcherJobHelper(FileHelper fileHelper, TsmpDpApptJobDao tsmpDpApptJobDao,
+			TsmpDpFileDao tsmpDpFileDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.fileHelper = fileHelper;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public String buildRelationFileName(Long alertId) {
 		String fileName = RELATION_FILE_NAME_TPLT;

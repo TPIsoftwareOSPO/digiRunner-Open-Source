@@ -129,25 +129,14 @@
     </div>
     <!-- 虛擬群組維護 > 授權核身加入 -->
     <div [hidden]="pageNum != 2">
-        <form [formGroup]="form_page2" (ngSubmit)="queryauthorities()">
-            <div class="form-group d-flex col-auto">
-                <!-- <div class="col-3 col-xl-3 col-lg-3">
-                    <label for="authoritieskeyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="authoritieskeyword" formControlName="authoritieskeyword"
-                        placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </div> -->
+        <form [formGroup]="form_page2">
+          <div class="form-group d-flex col-auto">
+            <app-search-input
+              placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}"
+              [control]="form_page2.get('authoritieskeyword')" [searchFn]="queryauthorities.bind(this)"
+              class="col-9 col-lg-6 col-sm-6"></app-search-input>
+          </div>
 
-                <span class="p-input-icon-right" style="width:40vw">
-                  <i class="pi pi-search tpi-i-search" (click)="queryauthorities();"></i>
-                  <input type="search" class="form-control tpi-i-input" id="authoritieskeyword" formControlName="authoritieskeyword"
-                         placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </span>
-            </div>
-            <!-- <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
         </form>
         <hr>
         <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities" selectionMode="single" styleClass="p-datatable-striped"
@@ -504,24 +493,12 @@
     </div>
     <!-- 虛擬群組維護 > 動作 > 更新 > 授權核身加入 -->
     <div [hidden]="pageNum != 5">
-        <form [formGroup]="form_page5" (ngSubmit)="queryauthorities_page4()">
+        <form [formGroup]="form_page5">
             <div class="form-group d-flex col-auto">
-                <!-- <div class="col-3 col-xl-3 col-lg-3">
-                    <label for="authoritieskeyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="authoritieskeyword" formControlName="authoritieskeyword"
-                        placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </div> -->
-                <span class="p-input-icon-right" style="width:40vw">
-                  <i class="pi pi-search tpi-i-search" (click)="queryauthorities_page4();"></i>
-                  <input type="search" class="form-control tpi-i-input" id="authoritieskeyword" formControlName="authoritieskeyword"
-                  placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </span>
+                <app-search-input placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}"
+                 [control]="form_page5.get('authoritieskeyword')" [searchFn]="queryauthorities_page4.bind(this)"
+                class="col-9 col-lg-6 col-sm-6"></app-search-input>
             </div>
-            <!-- <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
         </form>
         <hr>
         <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities_page4" styleClass="p-datatable-striped"
@@ -1117,24 +1094,13 @@
     </div>
     <!-- 虛擬群組維護 >  新建虛擬群組 > 授權核身加入 -->
     <div [hidden]="pageNum != 10">
-        <form [formGroup]="form_page10" (ngSubmit)="queryauthorities_page9()">
-            <!-- <div class="form-group row">
-                <div class="col-3 col-xl-3 col-lg-3">
-                    <label for="authoritieskeyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="authoritieskeyword" formControlName="authoritieskeyword"
-                        placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
-            <span class="p-input-icon-right" style="width:40vw">
-              <i class="pi pi-search tpi-i-search" (click)="queryauthorities_page9();"></i>
-              <input type="search" class="form-control tpi-i-input" id="authoritieskeyword" formControlName="authoritieskeyword"
-                      placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-            </span>
+        <form [formGroup]="form_page10">
+          <div class="col-12 d-flex align-items-center">
+            <app-search-input
+              placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}"
+              [control]="form_page10.get('authoritieskeyword')" [searchFn]="queryauthorities_page9.bind(this)"
+              class="col-9 col-lg-6 col-sm-6"></app-search-input>
+          </div>
         </form>
         <hr>
         <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities_page9" styleClass="p-datatable-striped"

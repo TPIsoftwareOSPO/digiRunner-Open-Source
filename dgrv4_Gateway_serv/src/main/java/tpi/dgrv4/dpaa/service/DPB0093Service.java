@@ -30,16 +30,19 @@ public class DPB0093Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private ApiItemService apiItemService;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0093Service(TsmpApiDao tsmpApiDao, ApiItemService apiItemService, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.apiItemService = apiItemService;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0093Resp queryApiLikeList(TsmpAuthorization tsmpAuthorization, DPB0093Req req, ReqHeader reqHeader) {
 		DPB0093Resp resp = new DPB0093Resp();

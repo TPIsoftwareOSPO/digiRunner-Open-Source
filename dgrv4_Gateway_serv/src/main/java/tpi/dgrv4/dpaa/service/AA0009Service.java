@@ -33,21 +33,23 @@ public class AA0009Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private LogoutNotifier logoutNotifier;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
 	
+	@Autowired
+	public AA0009Service(LogoutNotifier logoutNotifier, TsmpUserDao tsmpUserDao, DgrAuditLogService dgrAuditLogService,
+			TsmpSettingService tsmpSettingService, TsmpTokenHistoryDao tsmpTokenHistoryDao) {
+		super();
+		this.logoutNotifier = logoutNotifier;
+		this.tsmpUserDao = tsmpUserDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+	}
+
 	public AA0009Resp logoutTUser (TsmpAuthorization auth, AA0009Req req, InnerInvokeParam iip) {
 		String userNameForQuery = auth.getUserNameForQuery();
 		String idPType = auth.getIdpType();

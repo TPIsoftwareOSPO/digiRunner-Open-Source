@@ -9,14 +9,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import jakarta.el.MethodNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.el.MethodNotFoundException;
 import tpi.dgrv4.common.component.cache.core.CacheValueAdapter;
 import tpi.dgrv4.common.component.cache.core.CacheValueKryoAdapter;
 import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
@@ -30,16 +29,17 @@ public abstract class DaoCacheProxy {
 
 	protected abstract Consumer<String> getTraceLogger();
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	protected DaoGenericCache cache;
+	private final ObjectMapper objectMapper;
+	protected final DaoGenericCache cache;
 
 	private final CacheValueAdapter adapter;
-
-	public DaoCacheProxy() {
+	
+	@Autowired
+	public DaoCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache) {
+		super();
 		this.adapter = new CacheValueKryoAdapter(getClass().getName(), this::kryoRegistration);
+		this.objectMapper = objectMapper;
+		this.cache = cache;
 	}
 
 	protected <R> Optional<R> getOne(String methodName, Supplier<R> supplier, Class<R> returnType, Object... params) {

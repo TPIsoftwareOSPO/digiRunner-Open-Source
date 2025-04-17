@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +24,7 @@ import tpi.dgrv4.gateway.service.ISysInfoService;
 @RestController
 
 public class HealthCheckingController {
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private ISysInfoService sysInfoService;
 	
 	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
@@ -34,6 +35,11 @@ public class HealthCheckingController {
 	@Setter(onMethod_ = @Autowired)
 	private HealthCheckService healthCheckService;
 
+	@Autowired
+	public HealthCheckingController(@Nullable ISysInfoService sysInfoService) {
+		super();
+		this.sysInfoService = sysInfoService;
+	}
 	
 	@GetMapping(path = "/dgrv4/liveness")
 	public CompletableFuture<ResponseEntity<?>> liveness(HttpServletRequest httpReq,

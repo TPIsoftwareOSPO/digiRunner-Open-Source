@@ -36,26 +36,27 @@ public class AA0428Service {
 	private TPILogger logger = TPILogger.tl;
 	private Integer pageSize;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private AA0301Service aa0301Service;
 
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
-	private AA0301Service aa0301Service;
+	public AA0428Service(TsmpApiDao tsmpApiDao, ServiceConfig serviceConfig, BcryptParamHelper bcryptParamHelper,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, AA0301Service aa0301Service) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.serviceConfig = serviceConfig;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpOrganizationCacheProxy = tsmpOrganizationCacheProxy;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.aa0301Service = aa0301Service;
+	}
 
 	public AA0428Resp queryAPIListByLabel(TsmpAuthorization authorization, AA0428Req req, ReqHeader reqHeader) {
 		AA0428Resp resp = new AA0428Resp();

@@ -41,26 +41,27 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
 public class DPB0044Service {
+	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpNewsDao tsmpDpNewsDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
+	private BcryptParamHelper helper;
 
 	private Integer pageSize;
 	
 	@Autowired
-	private BcryptParamHelper helper;
+	public DPB0044Service(TsmpDpNewsDao tsmpDpNewsDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			TsmpOrganizationDao tsmpOrganizationDao, ServiceConfig serviceConfig, BcryptParamHelper helper) {
+		super();
+		this.tsmpDpNewsDao = tsmpDpNewsDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+		this.helper = helper;
+	}
 	
-	private TPILogger logger = TPILogger.tl;
-
 	public DPB0044Resp queryNewsLike_v3_4(TsmpAuthorization tsmpAuthorization, DPB0044Req req, ReqHeader reqHeader) {
 		DPB0044Resp resp = new DPB0044Resp();
 

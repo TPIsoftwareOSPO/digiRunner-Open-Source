@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0047Controller {
 	
-	@Autowired
 	private DPB0047Service service;
 	
+	@Autowired
+	public DPB0047Controller(DPB0047Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * query XX類型 Lov List
 	 * 代入 TSMP_DP_ITEMS.itemNo, 取出此類型下的子類型

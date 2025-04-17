@@ -16,8 +16,13 @@ import tpi.dgrv4.gateway.vo.*;
 @RestController
 public class NotifyLandingController {
 
-	@Autowired
 	private NotifyLandingService service;
+
+	@Autowired
+	public NotifyLandingController(NotifyLandingService service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/ImGTW/notifyLanding", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public TsmpBaseResp<NotifyLandingResp> notifyLanding(//

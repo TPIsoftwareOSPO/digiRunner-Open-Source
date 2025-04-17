@@ -22,10 +22,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
 public class DPB0201Service {
-	@Autowired
 	private ObjectMapper objectMapper;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0201Service(ObjectMapper objectMapper) {
+		super();
+		this.objectMapper = objectMapper;
+	}
 
 	public DPB0201Resp queryTargetThroughput(TsmpAuthorization auth, DPB0201Req req) {
 

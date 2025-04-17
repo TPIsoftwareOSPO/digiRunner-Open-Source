@@ -44,25 +44,27 @@ public class AA0806Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpRegHostDao tsmpRegHostDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
 
 	private Integer pageSize;
+	
+	@Autowired
+	public AA0806Service(TsmpRoleDao tsmpRoleDao, AuthoritiesDao authoritiesDao, TsmpRegHostDao tsmpRegHostDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ServiceConfig serviceConfig,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRegHostDao = tsmpRegHostDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public AA0806Resp queryRegHostList_1(TsmpAuthorization authorization, AA0806Req req, ReqHeader reqHeader) {
 		AA0806Resp resp = new AA0806Resp();

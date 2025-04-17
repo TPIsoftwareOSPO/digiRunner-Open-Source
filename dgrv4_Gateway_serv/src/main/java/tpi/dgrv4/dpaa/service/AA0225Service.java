@@ -38,30 +38,31 @@ public class AA0225Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupAPiDao;
-	
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
 	
+	@Autowired
+	public AA0225Service(TsmpGroupDao tsmpGroupDao, TsmpGroupApiDao tsmpGroupAPiDao,
+			TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao, TsmpVgroupDao tsmpVgroupDao,
+			TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao, TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao,
+			TsmpVgroupGroupDao tsmpVgroupGroupDao, TsmpClientVgroupDao tsmpClientVgroupDao) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupAPiDao = tsmpGroupAPiDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+	}
+
 	@Transactional
 	public AA0225Resp deleteVGroup(AA0225Req req) {
 		AA0225Resp resp = new AA0225Resp();

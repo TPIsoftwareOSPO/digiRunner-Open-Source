@@ -20,10 +20,15 @@ import java.util.Map;
 
 @Service
 public class DPB9938Service {
-    @Autowired
     private TsmpSettingService tsmpSettingService;
 
-    public DPB9938Resp testEsConnection(DPB9938Req req) {
+    @Autowired
+    public DPB9938Service(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
+	public DPB9938Resp testEsConnection(DPB9938Req req) {
         DPB9938Resp resp = new DPB9938Resp();
         try {
             String esUrl = getTsmpSettingService().getVal_ES_URL();

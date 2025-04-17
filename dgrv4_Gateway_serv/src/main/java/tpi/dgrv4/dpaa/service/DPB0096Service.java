@@ -28,12 +28,16 @@ public class DPB0096Service {
 	
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
 	
+	@Autowired
+	public DPB0096Service(TsmpRtnCodeDao tsmpRtnCodeDao, BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
+
 	public DPB0096Resp createApiRtnCode(TsmpAuthorization tsmpAuthorization, DPB0096Req req, ReqHeader reqHeader) {
 		DPB0096Resp resp = new DPB0096Resp();
 	

@@ -1,13 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <!-- 用戶列表 -->
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="formIndex" (ngSubmit)="queryClientList()">
-      <div class="form-group row col-12">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-        </span>
+    <form [formGroup]="formIndex">
+      <div class="form-group row col-12 ">
+        <app-search-input
+          placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+          [control]="formIndex.get('keyword')" [searchFn]="queryClientList.bind(this)"
+          class="col-9 col-lg0-6 col-sm-6"></app-search-input>
       </div>
     </form>
     <hr>
@@ -426,10 +425,10 @@
 
       <div class="form-group row mt-3">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="form.invalid"
-            (click)="create()">{{'button.create'|translate}}</button>
-          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
-            (click)="update()">{{'button.update'|translate}}</button>
+          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-start me-3"
+            [disabled]="form.invalid" (click)="create()">{{'button.create'|translate}}</button>
+          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
+            [disabled]="form.invalid" (click)="update()">{{'button.update'|translate}}</button>
           <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="changePage('ClientIDList')">{{'button.return_to_list'|translate}}</button>
         </div>

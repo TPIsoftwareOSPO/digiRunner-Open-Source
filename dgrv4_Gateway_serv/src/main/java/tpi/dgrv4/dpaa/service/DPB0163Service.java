@@ -28,14 +28,21 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0163Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private AuthoritiesDao authoritiesDao;
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
+
+	@Autowired
+	public DPB0163Service(AuthoritiesDao authoritiesDao, DgrAcIdpUserDao dgrAcIdpUserDao,
+			DgrAuditLogService dgrAuditLogService, TsmpUserDao tsmpUserDao) {
+		super();
+		this.authoritiesDao = authoritiesDao;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpUserDao = tsmpUserDao;
+	}
 
 	@Transactional
 	public DPB0163Resp createIdPUser(TsmpAuthorization authorization, DPB0163Req req, InnerInvokeParam iip) {

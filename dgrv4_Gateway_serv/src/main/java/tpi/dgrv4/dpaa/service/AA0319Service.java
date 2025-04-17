@@ -70,56 +70,51 @@ public class AA0319Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private TsmpApiImpDao tsmpApiImpDao;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
-
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private ComposerService composerService;
-
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private DgrAuditLogMDao dgrAuditLogMDao;
-
-	@Autowired
 	private DgrAuditLogDDao dgrAuditLogDDao;
-
-	@Autowired
 	private DaoGenericCacheService daoGenericCacheService;
-
-	@Autowired
 	private DgrComposerFlowDao dgrComposerFlowDao;
-
-	@Autowired
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
+	
+	@Autowired
+	public AA0319Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao, TsmpApiImpDao tsmpApiImpDao,
+			TsmpRegModuleDao tsmpRegModuleDao, TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ApplicationContext ctx, JobHelper jobHelper, ObjectMapper objectMapper, ComposerService composerService,
+			DgrAuditLogService dgrAuditLogService, DgrAuditLogMDao dgrAuditLogMDao, DgrAuditLogDDao dgrAuditLogDDao,
+			DaoGenericCacheService daoGenericCacheService, DgrComposerFlowDao dgrComposerFlowDao,
+			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpApiImpDao = tsmpApiImpDao;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.objectMapper = objectMapper;
+		this.composerService = composerService;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.dgrAuditLogMDao = dgrAuditLogMDao;
+		this.dgrAuditLogDDao = dgrAuditLogDDao;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.dgrComposerFlowDao = dgrComposerFlowDao;
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+	}
 
 	@Transactional
 	public AA0319Resp importRegCompAPIs(TsmpAuthorization auth, AA0319Req req, String locale, InnerInvokeParam iip) {

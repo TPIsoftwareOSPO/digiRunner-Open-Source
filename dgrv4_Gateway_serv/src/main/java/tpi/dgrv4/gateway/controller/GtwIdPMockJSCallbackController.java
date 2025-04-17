@@ -37,15 +37,18 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @RestController
 public class GtwIdPMockJSCallbackController {
 	
-	@Autowired
-	ObjectMapper objectMapper;
-	
-	@Autowired
-	TsmpSettingService tsmpSettingService;
-	
-	@Autowired
+	private ObjectMapper objectMapper;
+	private TsmpSettingService tsmpSettingService;
 	private OAuthTokenService oAuthTokenService;
 	
+	@Autowired
+	public GtwIdPMockJSCallbackController(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService,
+			OAuthTokenService oAuthTokenService) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.oAuthTokenService = oAuthTokenService;
+	}
 
 	@GetMapping(value = "/dgrv4/mocktenancy/gtwcallback",
 			produces = MediaType.APPLICATION_JSON_VALUE)

@@ -21,14 +21,18 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 public class AcIdPTitleService {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao;
-
-	@Autowired
 	private DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
+	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
 
 	@Autowired
-	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
+	public AcIdPTitleService(DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao, DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao,
+			DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao) {
+		super();
+		this.dgrAcIdpInfoLdapDao = dgrAcIdpInfoLdapDao;
+		this.dgrAcIdpInfoMLdapMDao = dgrAcIdpInfoMLdapMDao;
+		this.dgrAcIdpInfoApiDao = dgrAcIdpInfoApiDao;
+	}
 
 	public String getTitle(String idPType) {
 		String pageTitle = IdPHelper.DEFULT_PAGE_TITLE;

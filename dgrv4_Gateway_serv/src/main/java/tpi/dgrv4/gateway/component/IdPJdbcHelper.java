@@ -34,18 +34,21 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
  */
 @Component
 public class IdPJdbcHelper {
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private DPB0189Service dpb0189Service;
-
-	@Autowired
 	private ObjectMapper objectMapper;
 	
 	public static String The_user_was_not_found = "The user was not found. username: ";
 	public static String This_user_cannot_find_the_password_data = "This user cannot find the password data.";
 	public static String User_account_or_password_is_incorrect = "User account or password is incorrect.";
+
+	@Autowired
+	public IdPJdbcHelper(TokenHelper tokenHelper, DPB0189Service dpb0189Service, ObjectMapper objectMapper) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.dpb0189Service = dpb0189Service;
+		this.objectMapper = objectMapper;
+	}
 
 	public UserInfoData checkUserAuth(String connName, String sqlPtmt, String sqlParams, String reqUserName,
 			String reqUserMima, String userMimaAlg, String userMimaColName, String idtSubColName, String idtNameColName,

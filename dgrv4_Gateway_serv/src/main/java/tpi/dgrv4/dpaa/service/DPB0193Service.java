@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,11 +27,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0193Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
-	private DgrRdbConnectionDao dgrRdbConnectionDao;
 	
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
+	
+	private DgrRdbConnectionDao dgrRdbConnectionDao;
+
+	@Autowired
+	public DPB0193Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, DgrRdbConnectionDao dgrRdbConnectionDao) {
+		super();
+		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+	}
 
 	@Transactional
 	public DPB0193Resp updateRdbConnectionInfo(TsmpAuthorization authorization, DPB0193Req req) {

@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.entity.entity.TsmpRtnCode;
@@ -18,8 +20,13 @@ import tpi.dgrv4.entity.repository.TsmpRtnCodeDao;
 @Component
 public class TsmpRtnCodeCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
+
+	@Autowired
+	public TsmpRtnCodeCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache, TsmpRtnCodeDao tsmpRtnCodeDao) {
+		super(objectMapper, cache);
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+	}
 
 	public Optional<TsmpRtnCode> findById(String rtnCode, String locale) {
 		Supplier<TsmpRtnCode> supplier = () -> {

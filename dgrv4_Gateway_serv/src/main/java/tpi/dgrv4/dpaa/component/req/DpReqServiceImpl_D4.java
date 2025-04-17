@@ -11,9 +11,28 @@ import org.springframework.util.StringUtils;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
+import tpi.dgrv4.dpaa.service.SendAPIApplicationMailService;
+import tpi.dgrv4.dpaa.service.SendClientRegMailService;
+import tpi.dgrv4.dpaa.service.SendReviewMailService;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
+import tpi.dgrv4.entity.daoService.BcryptParamHelper;
+import tpi.dgrv4.entity.daoService.SeqStoreService;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd4;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
+import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLayerDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLogDao;
+import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd4Dao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.gateway.component.FileHelper;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 
 /**
@@ -24,8 +43,24 @@ import tpi.dgrv4.gateway.util.InnerInvokeParam;
 @Service(value = "dpReqServiceImpl_D4")
 public class DpReqServiceImpl_D4 extends DpReqServiceAbstract implements DpReqServiceIfs {
 
-	@Autowired
 	private TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao;
+	
+	@Autowired
+	public DpReqServiceImpl_D4(ApptJobDispatcher apptJobDispatcher, TsmpClientDao tsmpClientDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpUserDao tsmpUserDao,
+			SeqStoreService seqStoreService, TsmpDpReqOrdersDao tsmpDpReqOrdersDao, FileHelper fileHelper,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpDpChkLogDao tsmpDpChkLogDao,
+			BcryptParamHelper bcryptParamHelper, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, SendReviewMailService mailService,
+			SendClientRegMailService sendClientRegMailService,
+			SendAPIApplicationMailService sendAPIApplicationMailService, DgrAuditLogService dgrAuditLogService,
+			DgrAcIdpUserDao dgrAcIdpUserDao, TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao) {
+		super(apptJobDispatcher, tsmpClientDao, tsmpDpItemsCacheProxy, tsmpDpReqOrdermDao, tsmpUserDao, seqStoreService,
+				tsmpDpReqOrdersDao, fileHelper, tsmpDpFileDao, tsmpDpChkLayerDao, tsmpDpChkLogDao, bcryptParamHelper,
+				tsmpOrganizationDao, tsmpDpApptJobDao, mailService, sendClientRegMailService,
+				sendAPIApplicationMailService, dgrAuditLogService, dgrAcIdpUserDao);
+		this.tsmpDpReqOrderd4Dao = tsmpDpReqOrderd4Dao;
+	}
 
 	@Override
 	protected <Q extends DpReqServiceSaveDraftReq> void checkDetailReq(Q q, String locale) throws TsmpDpAaException {

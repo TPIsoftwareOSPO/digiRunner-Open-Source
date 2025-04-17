@@ -1,15 +1,16 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryRtnCodeList()">
+    <form [formGroup]="form">
       <div class="form-group">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryRtnCodeList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'rtn_code'|translate}}、{{'fun_locale'|translate}}、{{'rtn_msg'|translate}}、{{'rtn_desc'|translate}}">
-        </span>
+        <div class="col-12 d-flex align-items-center">
+          <app-search-input
+            placeholder="{{'rtn_code'|translate}}、{{'fun_locale'|translate}}、{{'rtn_msg'|translate}}、{{'rtn_desc'|translate}}"
+            [control]="form.get('keyword')" [searchFn]="queryRtnCodeList.bind(this)"
+            class="col-9 col-lg-4 col-sm-6"></app-search-input>
 
-        <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
-          [disabled]="canCreate == false">{{'button.create'|translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-second ms-auto" (click)="changePage('create');"
+            [disabled]="canCreate == false">{{'button.create'|translate}}</button>
+        </div>
       </div>
     </form>
     <div class="col-12 px-0" style="display: flex;justify-content: space-between;">

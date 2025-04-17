@@ -24,13 +24,15 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Service
 public class HandleReportDataByHourService {
-
-
-	@Autowired
 	private TsmpReportDataDao tsmpReportDataDao;
-	
-	@Autowired
     private TsmpDpApptJobDao tsmpDpApptJobDao;
+
+    @Autowired
+	public HandleReportDataByHourService(TsmpReportDataDao tsmpReportDataDao, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super();
+		this.tsmpReportDataDao = tsmpReportDataDao;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+	}
 
 	@Transactional
 	public void exec(Date execDate, String userName, Long jobId) {

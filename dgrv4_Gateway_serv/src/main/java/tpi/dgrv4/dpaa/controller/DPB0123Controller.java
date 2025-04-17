@@ -22,9 +22,14 @@ public class DPB0123Controller {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private DPB0123ApiService service;
 	
+	@Autowired
+	public DPB0123Controller(DPB0123ApiService service) {
+		super();
+		this.service = service;
+	}
+
 
 	@GetMapping(value = "/dgrv4/ssotoken/DPB0123", //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //

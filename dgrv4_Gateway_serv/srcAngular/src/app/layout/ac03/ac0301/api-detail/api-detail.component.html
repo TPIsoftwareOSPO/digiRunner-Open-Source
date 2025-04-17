@@ -449,16 +449,13 @@
       <p-table *ngIf="detailCols" [columns]="detailCols" [value]="apiGroupList" selectionMode="single"
         styleClass="p-datatable-striped" [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
-          <form [formGroup]="detailForm" (ngSubmit)="queryApiGroupList()">
+          <form [formGroup]="detailForm">
 
             <div class="row col-12">
-              <span class="p-input-icon-right" style="width: 100%">
-                <i class="pi pi-search tpi-i-search" (click)="queryApiGroupList()"></i>
-                <input type="text" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                  placeholder="{{ 'group_name' | translate }}、{{
-                    'group_alias' | translate
-                  }}、{{ 'group_desc' | translate }}" />
-              </span>
+              <app-search-input placeholder="{{ 'group_name' | translate }}、{{
+                              'group_alias' | translate
+                            }}、{{ 'group_desc' | translate }}" [control]="detailForm.get('keyword')"
+                [searchFn]="queryApiGroupList.bind(this)" class="col-12"></app-search-input>
             </div>
           </form>
         </ng-template>

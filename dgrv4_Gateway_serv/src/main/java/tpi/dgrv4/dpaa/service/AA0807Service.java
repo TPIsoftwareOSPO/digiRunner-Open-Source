@@ -28,14 +28,17 @@ public class AA0807Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpRegHostDao tsmpRegHostDao;
+
+	@Autowired
+	public AA0807Service(TsmpRoleDao tsmpRoleDao, AuthoritiesDao authoritiesDao, TsmpRegHostDao tsmpRegHostDao) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRegHostDao = tsmpRegHostDao;
+	}
 
 	public AA0807Resp queryRegHostByRegHostID(TsmpAuthorization authorization, AA0807Req req) {
 		AA0807Resp resp = new AA0807Resp();

@@ -5,37 +5,41 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
-import tpi.dgrv4.dpaa.service.TsmpSettingService;
+import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.dpaa.service.TsmpSettingService;
 
 /**
  * 映射 application.properties 檔案內容為物件
  * @author Kim
  */
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Configuration
 @ConfigurationProperties(ignoreUnknownFields = true)
 public class ServiceConfig {
 
 	public final static String KEY_PAGE_SIZE = ".page.size";
 		
-	@Autowired
-	private TPILogger logger;
+	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	private final TsmpSettingService tsmpSettingService;
 
 	private Map<String, String> service = new HashMap<String, String>();
+	
 
-	public ServiceConfig(TPILogger logger) {
-		this.logger = logger;
-	}
+//	public ServiceConfig(TsmpSettingService tsmpSettingService, Map<String, String> service) {
+//		super();
+//		this.tsmpSettingService = tsmpSettingService;
+//		this.service = service;
+//	}
 	
 	@PostConstruct
 	public void init() {
@@ -94,9 +98,4 @@ public class ServiceConfig {
 	public void setService(Map<String, String> service) {
 		this.service = service;
 	}
-	
-	public void setTsmpSettingService(TsmpSettingService tsmpSettingService) {
-		this.tsmpSettingService = tsmpSettingService;
-	}
-
 }

@@ -35,12 +35,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9932Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrWebSocketMappingDao dgrWebSocketMappingDao;
-	
-	@Autowired
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
 	
+	@Autowired
+	public DPB9932Service(DgrWebSocketMappingDao dgrWebSocketMappingDao,
+			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties) {
+		super();
+		this.dgrWebSocketMappingDao = dgrWebSocketMappingDao;
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+	}
+
 	@Transactional
 	public DPB9932Resp importWebsocketProxy(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {
 

@@ -4,13 +4,8 @@
 
       <div class="form-group row">
         <div class="col-6">
-          <!-- <label id="status_label" class="control-label">{{ "keyword_search" | translate }}</label> -->
-          <span class="p-input-icon-right" style="width: 100%;">
-            <i class="pi pi-search tpi-i-search" (click)="queryData();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'website_name'|translate}}、URL、Context Path、{{'remark'| translate}}"
-              (keyup.enter)="queryData()">
-          </span>
+          <app-search-input placeholder="{{'website_name'|translate}}、URL、Context Path、{{'remark'| translate}}" [control]="form.get('keyword')" [searchFn]="queryData.bind(this)"
+            class="col-9 col-lg-4 col-sm-6"></app-search-input>
         </div>
         <div class="col-4">
           <!-- <label id="status_label" class="control-label">{{ "status" | translate }}</label> -->

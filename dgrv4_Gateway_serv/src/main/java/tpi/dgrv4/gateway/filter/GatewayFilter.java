@@ -1,13 +1,14 @@
 package tpi.dgrv4.gateway.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.Setter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.service.RealtimeDashboardService;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -31,7 +43,19 @@ import tpi.dgrv4.entity.exceptions.ICheck;
 import tpi.dgrv4.gateway.component.DgrcRoutingHelper;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiRegCacheProxy;
-import tpi.dgrv4.gateway.component.check.*;
+import tpi.dgrv4.gateway.component.check.ApiNotFoundCheck;
+import tpi.dgrv4.gateway.component.check.ApiStatusCheck;
+import tpi.dgrv4.gateway.component.check.BotDetectionCheck;
+import tpi.dgrv4.gateway.component.check.CusTokenCheck;
+import tpi.dgrv4.gateway.component.check.DgrJtiCheck;
+import tpi.dgrv4.gateway.component.check.HostHeaderCheck;
+import tpi.dgrv4.gateway.component.check.IgnoreApiPathCheck;
+import tpi.dgrv4.gateway.component.check.ModeCheck;
+import tpi.dgrv4.gateway.component.check.SqlInjectionCheck;
+import tpi.dgrv4.gateway.component.check.TokenCheck;
+import tpi.dgrv4.gateway.component.check.TrafficCheck;
+import tpi.dgrv4.gateway.component.check.XssCheck;
+import tpi.dgrv4.gateway.component.check.XxeCheck;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.CommForwardProcService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
@@ -42,10 +66,6 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.ResHeader;
 import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class GatewayFilter extends OncePerRequestFilter {
@@ -116,64 +136,57 @@ public class GatewayFilter extends OncePerRequestFilter {
 	public static final double PEAK_USAGE_VALUE = 0.8; // 尖峰使用量的值 // Peak usage value
 	public static final long ELAPSED_TOO_LONG_VALUE = 30000L; // 耗時過久的值 // Value that took too long
 
-	@Autowired
 	private TPILogger logger;
-
-	@Autowired
 	private ApiStatusCheck apiStatusCheck;
-
-	@Autowired
 	private IgnoreApiPathCheck ignoreApiPathCheck;
-
-	@Autowired
 	private SqlInjectionCheck sqlInjectionCheck;
-
-	@Autowired
 	private TrafficCheck trafficCheck;
-
-	@Autowired
 	private XssCheck xssCheck;
-
-	@Autowired
 	private XxeCheck xxeCheck;
-
-	@Autowired
 	private TokenCheck tokenCheck;
-
-	@Autowired
 	private ApiNotFoundCheck apiNotFoundCheck;
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-
-	@Autowired
 	private DgrcRoutingHelper dgrcRoutingHelper;
-
-	@Autowired
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-
-	@Autowired
 	private WebsiteService websiteService;
-
-	@Autowired
 	private HostHeaderCheck hostHeaderCheck;
-
-	@Autowired
 	private DgrJtiCheck dgrJtiCheck;
-
-	@Autowired
 	private ModeCheck modeCheck;
-
-	@Autowired
 	private CusTokenCheck cusTokenCheck;
+	private BotDetectionCheck dotBotDetectionCheck;
 
 	@Autowired
-	private BotDetectionCheck dotBotDetectionCheck;
+	public GatewayFilter(TPILogger logger, ApiStatusCheck apiStatusCheck, IgnoreApiPathCheck ignoreApiPathCheck,
+			SqlInjectionCheck sqlInjectionCheck, TrafficCheck trafficCheck, XssCheck xssCheck, XxeCheck xxeCheck,
+			TokenCheck tokenCheck, ApiNotFoundCheck apiNotFoundCheck, TsmpApiCacheProxy tsmpApiCacheProxy,
+			DgrcRoutingHelper dgrcRoutingHelper, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
+			TsmpSettingService tsmpSettingService, CommForwardProcService commForwardProcService,
+			WebsiteService websiteService, HostHeaderCheck hostHeaderCheck, DgrJtiCheck dgrJtiCheck,
+			ModeCheck modeCheck, CusTokenCheck cusTokenCheck, BotDetectionCheck dotBotDetectionCheck) {
+		super();
+		this.logger = logger;
+		this.apiStatusCheck = apiStatusCheck;
+		this.ignoreApiPathCheck = ignoreApiPathCheck;
+		this.sqlInjectionCheck = sqlInjectionCheck;
+		this.trafficCheck = trafficCheck;
+		this.xssCheck = xssCheck;
+		this.xxeCheck = xxeCheck;
+		this.tokenCheck = tokenCheck;
+		this.apiNotFoundCheck = apiNotFoundCheck;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.commForwardProcService = commForwardProcService;
+		this.websiteService = websiteService;
+		this.hostHeaderCheck = hostHeaderCheck;
+		this.dgrJtiCheck = dgrJtiCheck;
+		this.modeCheck = modeCheck;
+		this.cusTokenCheck = cusTokenCheck;
+		this.dotBotDetectionCheck = dotBotDetectionCheck;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -576,7 +589,14 @@ public class GatewayFilter extends OncePerRequestFilter {
 		
 		String method01 = request.getMethod();
 		String afterUri = request.getRequestURI(); // 這裡被轉換過 '/dgrc' 了
-		String srcUri = afterUri.substring(afterUri.indexOf("/", 1)); // 去除第一個 path (/dgrc)
+		String srcUri = null;
+		if(afterUri.toLowerCase().indexOf("/dgrc") == 0) {
+			srcUri = afterUri.substring(afterUri.indexOf("/", 1)); // 去除第一個 path (/dgrc)
+		}else {
+			//tsmpc, tsmpg
+			srcUri = afterUri;//It has not been converted so the original value is taken.
+		}
+		
 		
 		// 計算 '耗時'
 		long elapsed = endTime - startTime;
@@ -586,6 +606,25 @@ public class GatewayFilter extends OncePerRequestFilter {
 		Map<String, Long> innerMap = apiRespTimeMap.computeIfAbsent(keyUri, k -> new ConcurrentHashMap<>());
 		innerMap.put(GatewayFilter.ELAPSED_TIME, elapsed);
 		innerMap.put(GatewayFilter.HTTP_CODE, Long.valueOf(httpCode));
+		
+		//realtime dashboard
+		if(httpCode >= 400 || httpCode <= 0) {
+			Long fail = RealtimeDashboardService.realtimeDashobardApiMap.computeIfAbsent(RealtimeDashboardService.FAIL, k -> 0L);
+			RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.FAIL, ++fail);
+			if(httpCode == 401) {
+				Long badAttempt401 = RealtimeDashboardService.realtimeDashobardApiMap.computeIfAbsent(RealtimeDashboardService.BAD_ATTEMPT_401, k -> 0L);
+				RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.BAD_ATTEMPT_401, ++badAttempt401);
+			}else if(httpCode == 403) {
+				Long badAttempt403 = RealtimeDashboardService.realtimeDashobardApiMap.computeIfAbsent(RealtimeDashboardService.BAD_ATTEMPT_403, k -> 0L);
+				RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.BAD_ATTEMPT_403, ++badAttempt403);
+			}else {
+				Long badAttemptOthers = RealtimeDashboardService.realtimeDashobardApiMap.computeIfAbsent(RealtimeDashboardService.BAD_ATTEMPT_OTHERS, k -> 0L);
+				RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.BAD_ATTEMPT_OTHERS, ++badAttemptOthers);
+			}
+		}else {
+			Long success = RealtimeDashboardService.realtimeDashobardApiMap.computeIfAbsent(RealtimeDashboardService.SUCCESS, k -> 0L);
+			RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.SUCCESS, ++success);
+		}
 		
 		// print
 		// fetchUriHistoryList(); //不需要輸出以免影響 CPU 使用率
@@ -597,8 +636,8 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * High concurrent network traffic fast clearance dispatching device (output unit) <br>
 	 */
 	public static String fetchUriHistoryList() {
-		StringBuilder sb = sbBuilderHolder.get();
-		sb.append(String.format("%60s", "").replace(' ', '-')+"\n");
+		StringBuilder sb = getFetchUriHistoryListInitValue();
+		
 		apiRespTimeMap.forEach((key, value) -> {
 			if(key.length() > 40) {
 				for (int i = 0; i < key.length(); i += 40) {
@@ -620,12 +659,19 @@ public class GatewayFilter extends OncePerRequestFilter {
 			} else {
 				httpCodeVal = httpCode + "";
 			}
-			sb.append(" " + httpCodeVal + ",  " + elapsedTime + "ms\n");			
+			sb.append(", " + httpCodeVal + ",  " + elapsedTime + "ms\n");			
 		});
 		String result = sb.toString();
 		sb.setLength(0); // 清空
 
 		return result;
+	}
+	
+	public static StringBuilder getFetchUriHistoryListInitValue() {
+		StringBuilder sb = sbBuilderHolder.get();
+		sb.append(String.format("%60s", "").replace(' ', '-')+"\n");
+		
+		return sb;
 	}
 	
 	public void unload() {

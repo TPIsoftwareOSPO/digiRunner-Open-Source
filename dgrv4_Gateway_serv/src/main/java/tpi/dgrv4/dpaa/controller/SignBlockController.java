@@ -28,9 +28,14 @@ public class SignBlockController {
 
 	public static String identify = "getSignBlock";
 	
-	@Autowired
 	private SignBlockService service;
 	
+	@Autowired
+	public SignBlockController(SignBlockService service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 依cliendId,取得SignBlock
 	 */

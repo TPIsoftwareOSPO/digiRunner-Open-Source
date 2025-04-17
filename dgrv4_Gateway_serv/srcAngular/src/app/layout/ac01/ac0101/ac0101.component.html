@@ -1,15 +1,17 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryFuncList()">
+    <form [formGroup]="form">
       <div class="form-group">
-        <span class="p-input-icon-right" style="width: 40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryFuncList()"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder="{{ 'fun_code' | translate }}、{{
-            'fun_name' | translate
-          }}、{{ 'fun_desc' | translate }}、{{ 'role_name' | translate }}、{{
-            'role_alias' | translate
-          }}" />
-        </span>
+        <div class="col-12 d-flex align-items-center">
+          <app-search-input placeholder="{{ 'fun_code' | translate }}、{{
+                'fun_name' | translate
+              }}、{{ 'fun_desc' | translate }}、{{ 'role_name' | translate }}、{{
+                'role_alias' | translate
+              }}" [control]="keyword" [searchFn]="queryFuncList.bind(this)"
+            class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
+        </div>
+
       </div>
     </form>
     <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
@@ -137,7 +139,7 @@
       </div>
     </div>
     <hr />
-    <form [formGroup]="detailForm" (ngSubmit)="queryRoleList()">
+    <form [formGroup]="detailForm">
       <div class="form-group row">
         <div class="col-4 col-xl-4 col-lg-4">
           <label id="keyword_label" class="control-label">{{
@@ -151,12 +153,12 @@
               'role_desc' | translate
             }}"
           /> -->
-          <span class="p-input-icon-right" style="width: 40vw">
-            <i class="pi pi-search tpi-i-search" (click)="queryRoleList()"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder="{{ 'role_name' | translate }}、{{
-                'role_desc' | translate
-              }}" />
-          </span>
+          <app-search-input placeholder="{{ 'role_name' | translate }}、{{
+            'role_desc' | translate
+          }}"
+          [control]="detailForm.get('keyword')" [searchFn]="queryRoleList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
         </div>
       </div>
       <!-- <div class="form-group row">

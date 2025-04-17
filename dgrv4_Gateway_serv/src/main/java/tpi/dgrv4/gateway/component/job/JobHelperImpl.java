@@ -79,19 +79,16 @@ public class JobHelperImpl implements JobHelper {
 		if (types != null && types.length > 0) {
 			for (int type : types) {
 				if (type == 1) {
-					sum += mainJobManager.size();
+					sum += getMainJobManager().size();
 				} else if (type == 2) {
 //					sum += getDeferrableJobManager().size();
-					//int queueSize = ((ThreadPoolExecutor) getDeferrableJobManager().executor2nd).getQueue().size();//UT時會發生NullPointException
-					sum += deferrableJobManager.size() + deferrableJobManager.buff1st.size() + 
-							deferrableJobManager.buff2nd.size();
+					sum += getDeferrableJobManager().size() + getDeferrableJobManager().buff1st.size() + 
+							getDeferrableJobManager().buff2nd.size();
 				} else if (type == 3) {
 //					sum += getRefreshCacheJobManager().size();
-					//int queueSize = ((ThreadPoolExecutor) getRefreshCacheJobManager().executor2nd).getQueue().size();//UT時會發生NullPointException
-//					int queueSize = getDeferrableJobManager().getExecutor2ndQueueSize();
-					sum += deferrableJobManager.buff1st.size() + 
-							deferrableJobManager.buff2nd.size() + 
-							deferrableJobManager.size();
+					sum += getDeferrableJobManager().buff1st.size() + 
+							getDeferrableJobManager().buff2nd.size() + 
+							getDeferrableJobManager().size();
 				}
 			}
 		}

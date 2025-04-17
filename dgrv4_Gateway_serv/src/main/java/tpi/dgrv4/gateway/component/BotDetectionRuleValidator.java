@@ -32,13 +32,8 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class BotDetectionRuleValidator implements ApplicationListener<ContextRefreshedEvent> {
 
-    @Autowired
     private DgrBotDetectionDao dgrBotDetectionDao;
-
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    
-    @Autowired
     private BotDetectionCache botDetectionCache;
 
     private final AtomicReferenceArray<Boolean> isPrintingLog = new AtomicReferenceArray<>(
@@ -47,19 +42,25 @@ public class BotDetectionRuleValidator implements ApplicationListener<ContextRef
     private final AtomicReference<ConfigHolder> configHolder = new AtomicReference<>(
             new ConfigHolder(new ArrayList<>(), false));
 
-    private final ExecutorService reloadExecutor;
+    private final ExecutorService executorService;
     private final AtomicReference<ReloadConfig> pendingConfig;
 
     private static final List<String> IGNORE_APIS = Arrays.asList(
             "/dgrv4/", "/website/composer/", "/kibana/", "/http-api/", "/composer/swagger3.0/");
 
-    public BotDetectionRuleValidator() {
-        this.reloadExecutor = Executors.newSingleThreadExecutor(r -> {
+    @Autowired
+	public BotDetectionRuleValidator(DgrBotDetectionDao dgrBotDetectionDao, TsmpSettingService tsmpSettingService,
+			BotDetectionCache botDetectionCache) {
+        this.executorService = Executors.newSingleThreadExecutor(r -> {
             Thread thread = new Thread(r);
             thread.setName("bot-detection-reload-Thread");
             return thread;
         });
         this.pendingConfig = new AtomicReference<>(null);
+
+		this.dgrBotDetectionDao = dgrBotDetectionDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.botDetectionCache = botDetectionCache;
     }
 
     public BotDetectionRuleValidateResult validate(HttpServletRequest request) {
@@ -211,7 +212,7 @@ public class BotDetectionRuleValidator implements ApplicationListener<ContextRef
                 updateConfig(config);
                 logConfigurationUpdate(type);
             }
-        }, reloadExecutor);
+        }, executorService);
     }
 
     private void logConfigurationUpdate(BotDetectionUpdateType type) {
@@ -299,10 +300,10 @@ public class BotDetectionRuleValidator implements ApplicationListener<ContextRef
 
     @PreDestroy
     public void destroy() {
-        reloadExecutor.shutdown();
+        executorService.shutdown();
         try {
-            if (!reloadExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-                reloadExecutor.shutdownNow();
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
@@ -422,7 +423,7 @@ public class BotDetectionRuleValidator implements ApplicationListener<ContextRef
             for (int i = 0; i < 3; i++) {
                 isPrintingLog.set(i, i < boolList.size() ? boolList.get(i) : false);
             }
-        }, reloadExecutor);
+        }, executorService);
     }
 
     public enum BotDetectionUpdateType {

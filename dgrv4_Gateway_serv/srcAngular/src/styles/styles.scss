@@ -171,6 +171,13 @@ body {
   box-shadow: none;
 } */
 
+.btn:focus-visible {
+  color: white;
+  background-color: var(--tpi-primary);
+  border-color: var(--tpi-primary);
+  outline: 0;
+  box-shadow: 0 0 3px 3px #b0600078;
+}
 
 .list-group-item.active {
   background-color: #d98600 !important;

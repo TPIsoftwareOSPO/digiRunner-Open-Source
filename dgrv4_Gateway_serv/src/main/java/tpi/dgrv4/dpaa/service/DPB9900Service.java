@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -29,17 +30,23 @@ public class DPB9900Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
+//	@Autowired(required = false)
+	private IAllPropertiesService allPropertiesService;
+	
 	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
-
-	@Autowired(required = false)
-	private IAllPropertiesService allPropertiesService;
  
+	@Autowired
+	public DPB9900Service(@Nullable IAllPropertiesService allPropertiesService, TsmpSettingDao tsmpSettingDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.allPropertiesService = allPropertiesService;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB9900Resp queryTsmpSettingList(TsmpAuthorization auth, DPB9900Req req) {
 		String lastId = checkLastId(req.getId());
 		String[] keywords = getKeywords(req.getKeyword(), " ");

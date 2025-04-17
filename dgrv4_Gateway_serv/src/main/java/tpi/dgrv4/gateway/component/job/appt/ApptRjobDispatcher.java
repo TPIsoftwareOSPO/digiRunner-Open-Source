@@ -1,13 +1,29 @@
 package tpi.dgrv4.gateway.component.job.appt;
 
-import jakarta.annotation.PostConstruct;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import jakarta.annotation.PostConstruct;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpApptJobStatus;
@@ -15,7 +31,11 @@ import tpi.dgrv4.common.constant.TsmpDpRjobStatus;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
-import tpi.dgrv4.entity.entity.*;
+import tpi.dgrv4.entity.entity.TsmpDpApptJob;
+import tpi.dgrv4.entity.entity.TsmpDpApptRjob;
+import tpi.dgrv4.entity.entity.TsmpDpApptRjobD;
+import tpi.dgrv4.entity.entity.TsmpDpItems;
+import tpi.dgrv4.entity.entity.TsmpDpItemsId;
 import tpi.dgrv4.entity.exceptions.DgrException;
 import tpi.dgrv4.entity.exceptions.DgrRtnCode;
 import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
@@ -25,44 +45,16 @@ import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
 @Component
 public class ApptRjobDispatcher implements Runnable {
 
-	@Autowired
-	private TPILogger logger;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
 	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
 
 	// 是否啟用週期排程器
@@ -78,8 +70,34 @@ public class ApptRjobDispatcher implements Runnable {
 
 	private Object syncLock;
 	
-	public ApptRjobDispatcher(TPILogger logger) {
-		this.logger = logger;
+	// 查無週期排程UID
+	// Check for periodic schedule UID
+	private final static String CHECK_FOR_PERIODIC_SCHEDULE_UID = "Check for periodic schedule UID: ";
+	
+	// 工作已被異動
+	// Job has been moved
+	private final static String JOB_HAS_BEEN_MOVED = "Job has been moved: ";
+	
+	@Autowired
+	public ApptRjobDispatcher(TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpApptRjobDao tsmpDpApptRjobDao,
+			TsmpDpApptRjobDDao tsmpDpApptRjobDDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ServiceConfig serviceConfig, JobHelper jobHelper, ApplicationContext ctx) {
+		super();
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+	}
+	
+	/*
+	 * Because using constructor injection will cause a circular dependency, use method injection instead
+	 */
+	@Autowired
+	public void setApptJobDispatcher(ApptJobDispatcher apptJobDispatcher) {
+		this.apptJobDispatcher = apptJobDispatcher;
 	}
 
 	@PostConstruct
@@ -101,18 +119,18 @@ public class ApptRjobDispatcher implements Runnable {
 
 	public void resetSyncExecutor() {
 		if (!this.isSchedulerEnabled) {
-			this.logger.info("未啟用週期排程器, 請設定 service.scheduler.appt-rjob.enable=true");
+			TPILogger.tl.info("未啟用週期排程器, 請設定 service.scheduler.appt-rjob.enable=true");
 			return;
 		}
 
 		synchronized (this.syncLock) {
 			try {
-				this.logger.trace("正在重啟同步排程...");
+				TPILogger.tl.trace("正在重啟同步排程...");
 				if (getSyncFuture() != null) {
 					getSyncFuture().cancel(false);
 				}
 				this.syncFuture = getSyncExecutor().scheduleAtFixedRate(this, 0L, this.period, TimeUnit.MILLISECONDS);
-				this.logger.trace("重啟完成");
+				TPILogger.tl.trace("重啟完成");
 			} finally {
 				this.syncLock.notifyAll();
 			}
@@ -124,13 +142,13 @@ public class ApptRjobDispatcher implements Runnable {
 		synchronized (this.syncLock) {
 			try {
 				List<TsmpDpApptRjob> rjobList = getTsmpDpApptRjobDao().findAll();
-				this.logger.trace("同步中，共 " + rjobList.size() + " 筆週期設定");
+				TPILogger.tl.trace("同步中，共 " + rjobList.size() + " 筆週期設定");
 				if (rjobList != null && !rjobList.isEmpty()) {
 					for (TsmpDpApptRjob rjob : rjobList) {
 						dispatch(rjob);
 					}
 				}
-				this.logger.trace("同步完成");
+				TPILogger.tl.trace("同步完成");
 			} finally {
 				this.syncLock.notifyAll();
 			}
@@ -148,25 +166,25 @@ public class ApptRjobDispatcher implements Runnable {
 		switch(status) {
 			// 停用
 			case "0":
-				this.logger.trace(apptRjobId + " 已停用, 取消預定在 " + toDtStr(nextDateTime) + " 執行的工作");//1
+				TPILogger.tl.trace(apptRjobId + " 已停用, 取消預定在 " + toDtStr(nextDateTime) + " 執行的工作");//1
 				cancelApptJobs(rjob.getApptRjobId(), rjob.getNextDateTime());
 				break;
 			// 啟動
 			case "1":
-				this.logger.trace(apptRjobId + " 已啟動, 準備排入工作");//1
+				TPILogger.tl.trace(apptRjobId + " 已啟動, 準備排入工作");//1
 				dispatch_active(rjob);
 				break;
 			// 暫停
 			case "2":
-				this.logger.trace(apptRjobId + " 已暫停, 取消預定在 " + toDtStr(nextDateTime) + " 執行的工作");
+				TPILogger.tl.trace(apptRjobId + " 已暫停, 取消預定在 " + toDtStr(nextDateTime) + " 執行的工作");
 				cancelApptJobs(rjob.getApptRjobId(), rjob.getNextDateTime());
 				break;
 			// 執行中
 			case "3":
-				this.logger.trace(apptRjobId + " 正在執行中");
+				TPILogger.tl.trace(apptRjobId + " 正在執行中");
 				break;
 			default:
-				this.logger.trace(apptRjobId + " 無法同步, 未知的狀態代碼: " + status);
+				TPILogger.tl.trace(apptRjobId + " 無法同步, 未知的狀態代碼: " + status);
 				break;
 		}
 	}
@@ -182,17 +200,17 @@ public class ApptRjobDispatcher implements Runnable {
 		String apptRjobId = rjob.getApptRjobId();
 		TsmpDpApptRjobD rjobD = getTsmpDpApptRjobDDao().queryNextRjobD(apptRjobId, null);
 		if (rjobD == null) {
-			this.logger.info(apptRjobId + " 無法同步, 未設定週期排程內容");
+			TPILogger.tl.info(apptRjobId + " 無法同步, 未設定週期排程內容");
 			return;
 		}
 
 		Date nextDateTime = new Date(rjob.getNextDateTime());
 		Date nextExecutionTime = getAdjustedExecutionTime(nextDateTime, DateTimeUtil.now(), rjob.getCronExpression(), -1);
 		if (nextExecutionTime == null) {
-			this.logger.debug(apptRjobId + " 無法同步, 計算下次執行時間失敗: nextDateTime=" + rjob.getNextDateTime() + ", cronExpression=" + rjob.getCronExpression());
+			TPILogger.tl.debug(apptRjobId + " 無法同步, 計算下次執行時間失敗: nextDateTime=" + rjob.getNextDateTime() + ", cronExpression=" + rjob.getCronExpression());
 			return;
 		}
-		this.logger.trace(apptRjobId + " 調整下次執行時間: " + toDtStr(rjob.getNextDateTime()) + " -> " + toDtStr(nextExecutionTime));
+		TPILogger.tl.trace(apptRjobId + " 調整下次執行時間: " + toDtStr(rjob.getNextDateTime()) + " -> " + toDtStr(nextExecutionTime));
 		rjob.setLastDateTime(rjob.getNextDateTime());
 		rjob.setNextDateTime(nextExecutionTime.getTime());
 		rjob.setUpdateDateTime(DateTimeUtil.now());
@@ -212,7 +230,7 @@ public class ApptRjobDispatcher implements Runnable {
 		String periodNexttimeStr = toDtStr(periodNexttime);
 		List<TsmpDpApptJob> apptJobList = getTsmpDpApptJobDao().findByPeriodUidAndPeriodNexttime(periodUid, periodNexttime);
 		if (apptJobList == null || apptJobList.isEmpty()) {
-			this.logger.trace("在 " + periodNexttimeStr + " 沒有預訂的工作(UID=" + periodUid + ")");
+			TPILogger.tl.trace("在 " + periodNexttimeStr + " 沒有預訂的工作(UID=" + periodUid + ")");
 			return Collections.emptyList();
 		}
 		// 把所有下次週期要做的工作都押上取消
@@ -225,7 +243,7 @@ public class ApptRjobDispatcher implements Runnable {
 			cancelList.add(apptJob.getApptJobId());
 		}
 		cancelList = getApptJobDispatcher().removeCacheJobsImmediately(cancelList);
-		this.logger.trace("已取消預訂於 " + periodNexttimeStr + " 執行的工作(UID=" + periodUid +"): " + cancelList);
+		TPILogger.tl.trace("已取消預訂於 " + periodNexttimeStr + " 執行的工作(UID=" + periodUid +"): " + cancelList);
 		return cancelList;
 	}
 
@@ -251,10 +269,10 @@ public class ApptRjobDispatcher implements Runnable {
 			job = getApptJobDispatcher().getPeriodJob(periodUid, periodItemsId, periodNexttime);
 			if (job != null) {
 				if (!forceInsert) {
-					this.logger.trace("發現相同的工作項目: " + job.getApptJobId());
+					TPILogger.tl.trace("發現相同的工作項目: " + job.getApptJobId());
 					return job;
 				} else {
-					this.logger.trace("發現相同的工作項目" + job.getApptJobId() + ", 遞增時間: " + periodNexttime + " -> " + (periodNexttime + 1));
+					TPILogger.tl.trace("發現相同的工作項目" + job.getApptJobId() + ", 遞增時間: " + periodNexttime + " -> " + (periodNexttime + 1));
 					periodNexttime++;
 				}
 			} else {
@@ -273,14 +291,14 @@ public class ApptRjobDispatcher implements Runnable {
 		job.setPeriodNexttime(periodNexttime);
 		job.setCreateDateTime(DateTimeUtil.now());
 		job.setCreateUser("SYS");
-		this.logger.trace("準備寫入週期排程項目: rjobId= " + job.getPeriodUid() +", rjobDId=" + job.getPeriodItemsId() + ", nextDt="
+		TPILogger.tl.trace("準備寫入週期排程項目: rjobId= " + job.getPeriodUid() +", rjobDId=" + job.getPeriodItemsId() + ", nextDt="
 				+ DateTimeUtil.dateTimeToString(new Date(job.getPeriodNexttime()), DateTimeFormatEnum.西元年月日時分秒_2).orElse(String.valueOf(TsmpDpAaRtnCode._1295))
 			    + ", inParams=" + job.getInParams());
 		job = getApptJobDispatcher().addAndRefresh(job);
 		if (job != null) {
-			this.logger.debug("排程工作已建立: " + job.getApptJobId());
+			TPILogger.tl.debug("排程工作已建立: " + job.getApptJobId());
 		} else {
-			this.logger.debug("無法寫入排程工作");
+			TPILogger.tl.debug("無法寫入排程工作");
 		}
 		return job;
 	}
@@ -294,12 +312,12 @@ public class ApptRjobDispatcher implements Runnable {
 	 */
 	public TsmpDpApptRjob pause(String apptRjobId, String updateUser) throws DgrException {
 		if (!StringUtils.hasText(apptRjobId)) {
-			this.logger.error("暫停週期排程失敗, 未傳入週期排程UID");
+			TPILogger.tl.error("暫停週期排程失敗, 未傳入週期排程UID");
 			throw DgrRtnCode._1296.throwing();
 		}
 		Optional<TsmpDpApptRjob> opt = getTsmpDpApptRjobDao().findById(apptRjobId);
 		if (!opt.isPresent()) {
-			this.logger.error("查無週期排程UID: " + apptRjobId);
+			TPILogger.tl.error(CHECK_FOR_PERIODIC_SCHEDULE_UID + apptRjobId);
 			throw DgrRtnCode._1298.throwing();
 		}
 		TsmpDpApptRjob ardPause_rjob = opt.get();
@@ -309,7 +327,7 @@ public class ApptRjobDispatcher implements Runnable {
 			TsmpDpRjobStatus.IN_PROGRESS.value().equals(status) ||
 			TsmpDpRjobStatus.PAUSE.value().equals(status)
 		) {
-			this.logger.error("當前排程狀態不允許暫停: " + status);
+			TPILogger.tl.error("當前排程狀態不允許暫停: " + status);
 			throw DgrRtnCode._1251.throwing();
 		}
 		ardPause_rjob.setStatus(TsmpDpRjobStatus.PAUSE.value());
@@ -322,10 +340,10 @@ public class ApptRjobDispatcher implements Runnable {
 			cancelApptJobs(apptRjobId, ardPause_rjob.getNextDateTime());
 			return ardPause_rjob;
 		} catch (ObjectOptimisticLockingFailureException ardPause_e) {
-			this.logger.info("工作已被異動: " + apptRjobId);
+			TPILogger.tl.info(JOB_HAS_BEEN_MOVED + apptRjobId);
 			throw DgrRtnCode._1191.throwing();
 		} catch (Exception ardPause_e) {
-			this.logger.error("暫停週期排程失敗\n" + StackTraceUtil.logStackTrace(ardPause_e));
+			TPILogger.tl.error("暫停週期排程失敗\n" + StackTraceUtil.logStackTrace(ardPause_e));
 			throw DgrRtnCode._1297.throwing();
 		}
 	}
@@ -339,17 +357,17 @@ public class ApptRjobDispatcher implements Runnable {
 	 */
 	public TsmpDpApptRjob activate(String apptRjobId, String updateUser) throws DgrException {
 		if (!StringUtils.hasText(apptRjobId)) {
-			this.logger.error("啟動週期排程失敗, 未傳入週期排程UID");
+			TPILogger.tl.error("啟動週期排程失敗, 未傳入週期排程UID");
 			throw DgrRtnCode._1296.throwing();
 		}
 		Optional<TsmpDpApptRjob> ardActivate_opt = getTsmpDpApptRjobDao().findById(apptRjobId);
 		if (!ardActivate_opt.isPresent()) {
-			this.logger.error("查無週期排程UID: " + apptRjobId);
+			TPILogger.tl.error(CHECK_FOR_PERIODIC_SCHEDULE_UID + apptRjobId);
 			throw DgrRtnCode._1298.throwing();
 		}
 		TsmpDpApptRjobD ardActivate_rjobD = getTsmpDpApptRjobDDao().queryNextRjobD(apptRjobId, null);
 		if (ardActivate_rjobD == null) {
-			this.logger.info("啟動週期排程失敗, 未設定週期排程內容: " + apptRjobId);
+			TPILogger.tl.info("啟動週期排程失敗, 未設定週期排程內容: " + apptRjobId);
 			throw DgrRtnCode._1296.throwing();
 		}
 		TsmpDpApptRjob rjob = ardActivate_opt.get();
@@ -358,7 +376,7 @@ public class ApptRjobDispatcher implements Runnable {
 			TsmpDpRjobStatus.DISABLED.value().equals(ardActivate_status) ||
 			TsmpDpRjobStatus.IN_PROGRESS.value().equals(ardActivate_status)
 		) {
-			this.logger.error("當前排程狀態不允許啟動: " + ardActivate_status);
+			TPILogger.tl.error("當前排程狀態不允許啟動: " + ardActivate_status);
 			throw DgrRtnCode._1251.throwing();
 		}
 
@@ -382,10 +400,10 @@ public class ApptRjobDispatcher implements Runnable {
 			rjob = getTsmpDpApptRjobDao().saveAndFlush(rjob);
 			return rjob;
 		} catch (ObjectOptimisticLockingFailureException ardActive_e) {
-			this.logger.info("工作已被異動: " + apptRjobId);
+			TPILogger.tl.info(JOB_HAS_BEEN_MOVED + apptRjobId);
 			throw DgrRtnCode._1191.throwing();
 		} catch (Exception ardActive_e) {
-			this.logger.error("啟動週期排程失敗\n" + StackTraceUtil.logStackTrace(ardActive_e));
+			TPILogger.tl.error("啟動週期排程失敗\n" + StackTraceUtil.logStackTrace(ardActive_e));
 			throw DgrRtnCode._1297.throwing();
 		}
 	}
@@ -399,17 +417,17 @@ public class ApptRjobDispatcher implements Runnable {
 	 */
 	public TsmpDpApptRjob ignore(String apptRjobId, String updateUser) throws DgrException {
 		if (!StringUtils.hasText(apptRjobId)) {
-			this.logger.error("略過週期排程失敗, 未傳入週期排程UID");
+			TPILogger.tl.error("略過週期排程失敗, 未傳入週期排程UID");
 			throw DgrRtnCode._1296.throwing();
 		}
 		Optional<TsmpDpApptRjob> ardIgnore_opt = getTsmpDpApptRjobDao().findById(apptRjobId);
 		if (!ardIgnore_opt.isPresent()) {
-			this.logger.error("查無週期排程UID: " + apptRjobId);
+			TPILogger.tl.error(CHECK_FOR_PERIODIC_SCHEDULE_UID + apptRjobId);
 			throw DgrRtnCode._1298.throwing();
 		}
 		TsmpDpApptRjobD ardIgnore_rjobD = getTsmpDpApptRjobDDao().queryNextRjobD(apptRjobId, null);
 		if (ardIgnore_rjobD == null) {
-			this.logger.info("略過週期排程失敗, 未設定週期排程內容: " + apptRjobId);
+			TPILogger.tl.info("略過週期排程失敗, 未設定週期排程內容: " + apptRjobId);
 			throw DgrRtnCode._1296.throwing();
 		}
 		TsmpDpApptRjob rjob = ardIgnore_opt.get();
@@ -419,7 +437,7 @@ public class ApptRjobDispatcher implements Runnable {
 			TsmpDpRjobStatus.IN_PROGRESS.value().equals(status) ||
 			TsmpDpRjobStatus.PAUSE.value().equals(status)
 		) {
-			this.logger.error("當前排程狀態不允許略過: " + status);
+			TPILogger.tl.error("當前排程狀態不允許略過: " + status);
 			throw DgrRtnCode._1251.throwing();
 		}
 
@@ -441,10 +459,10 @@ public class ApptRjobDispatcher implements Runnable {
 			}
 			return rjob;
 		} catch (ObjectOptimisticLockingFailureException e) {
-			this.logger.info("工作已被異動: " + apptRjobId);
+			TPILogger.tl.info(JOB_HAS_BEEN_MOVED + apptRjobId);
 			throw DgrRtnCode._1191.throwing();
 		} catch (Exception e) {
-			this.logger.error("略過週期排程失敗\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("略過週期排程失敗\n" + StackTraceUtil.logStackTrace(e));
 			throw DgrRtnCode._1297.throwing();
 		}
 	}
@@ -458,12 +476,12 @@ public class ApptRjobDispatcher implements Runnable {
 	 */
 	public TsmpDpApptRjob suspend(String apptRjobId, String updateUser) throws DgrException {
 		if (!StringUtils.hasText(apptRjobId)) {
-			this.logger.error("作廢週期排程失敗, 未傳入週期排程UID");
+			TPILogger.tl.error("作廢週期排程失敗, 未傳入週期排程UID");
 			throw DgrRtnCode._1296.throwing();
 		}
 		Optional<TsmpDpApptRjob> opt = getTsmpDpApptRjobDao().findById(apptRjobId);
 		if (!opt.isPresent()) {
-			this.logger.error("查無週期排程UID: " + apptRjobId);
+			TPILogger.tl.error(CHECK_FOR_PERIODIC_SCHEDULE_UID + apptRjobId);
 			throw DgrRtnCode._1298.throwing();
 		}
 		TsmpDpApptRjob ardSuspend_rjob = opt.get();
@@ -472,7 +490,7 @@ public class ApptRjobDispatcher implements Runnable {
 			TsmpDpRjobStatus.DISABLED.value().equals(status) ||
 			TsmpDpRjobStatus.IN_PROGRESS.value().equals(status)
 		) {
-			this.logger.error("當前排程狀態不允許作廢: " + status);
+			TPILogger.tl.error("當前排程狀態不允許作廢: " + status);
 			throw DgrRtnCode._1251.throwing();
 		}
 		ardSuspend_rjob.setStatus(TsmpDpRjobStatus.DISABLED.value());
@@ -485,10 +503,10 @@ public class ApptRjobDispatcher implements Runnable {
 			cancelApptJobs(apptRjobId, ardSuspend_rjob.getNextDateTime());
 			return ardSuspend_rjob;
 		} catch (ObjectOptimisticLockingFailureException ardSuspend_e) {
-			this.logger.info("工作已被異動: " + apptRjobId);
+			TPILogger.tl.info(JOB_HAS_BEEN_MOVED + apptRjobId);
 			throw DgrRtnCode._1191.throwing();
 		} catch (Exception ardSuspend_e) {
-			this.logger.error("作廢週期排程失敗\n" + StackTraceUtil.logStackTrace(ardSuspend_e));
+			TPILogger.tl.error("作廢週期排程失敗\n" + StackTraceUtil.logStackTrace(ardSuspend_e));
 			throw DgrRtnCode._1297.throwing();
 		}
 	}
@@ -507,13 +525,13 @@ public class ApptRjobDispatcher implements Runnable {
 			TsmpDpRjobStatus.DISABLED.value().equals(status) ||
 			TsmpDpRjobStatus.IN_PROGRESS.value().equals(status)
 		) {
-			this.logger.error("當前排程狀態不允許更新: " + status);
+			TPILogger.tl.error("當前排程狀態不允許更新: " + status);
 			throw DgrRtnCode._1251.throwing();
 		}
 		String apptRjobId = existingRjob.getApptRjobId();
 		TsmpDpApptRjobD rjobD = getTsmpDpApptRjobDDao().queryNextRjobD(apptRjobId, null);
 		if (rjobD == null) {
-			this.logger.info("更新週期排程失敗, 未設定週期排程內容: " + apptRjobId);
+			TPILogger.tl.info("更新週期排程失敗, 未設定週期排程內容: " + apptRjobId);
 			throw DgrRtnCode._1296.throwing();
 		}
 		try {
@@ -537,10 +555,10 @@ public class ApptRjobDispatcher implements Runnable {
 			rjob = getTsmpDpApptRjobDao().saveAndFlush(rjob);
 			return rjob;
 		} catch (ObjectOptimisticLockingFailureException ardUpdate_e) {
-			this.logger.info("工作已被異動: " + apptRjobId);
+			TPILogger.tl.info(JOB_HAS_BEEN_MOVED + apptRjobId);
 			throw DgrRtnCode._1191.throwing();
 		} catch (Exception ardUpdate_e) {
-			this.logger.error("更新週期排程失敗\n" + StackTraceUtil.logStackTrace(ardUpdate_e));
+			TPILogger.tl.error("更新週期排程失敗\n" + StackTraceUtil.logStackTrace(ardUpdate_e));
 			throw DgrRtnCode._1297.throwing();
 		}
 	}
@@ -551,23 +569,23 @@ public class ApptRjobDispatcher implements Runnable {
 	 */
 	public TsmpDpApptJob step(String apptRjobId, String updateUser, boolean isSetToInProgress) {
 		if (!StringUtils.hasText(apptRjobId)) {
-			this.logger.error("推移週期排程失敗, 未傳入週期排程UID");
+			TPILogger.tl.error("推移週期排程失敗, 未傳入週期排程UID");
 			throw DgrRtnCode._1296.throwing();
 		}
 		Optional<TsmpDpApptRjob> ardStep_opt = getTsmpDpApptRjobDao().findById(apptRjobId);
 		if (!ardStep_opt.isPresent()) {
-			this.logger.error("查無週期排程UID: " + apptRjobId);
+			TPILogger.tl.error(CHECK_FOR_PERIODIC_SCHEDULE_UID + apptRjobId);
 			throw DgrRtnCode._1298.throwing();
 		}
 		TsmpDpApptRjobD ardStep_rjobD = getTsmpDpApptRjobDDao().queryNextRjobD(apptRjobId, null);
 		if (ardStep_rjobD == null) {
-			this.logger.info("推移週期排程失敗, 未設定週期排程內容: " + apptRjobId);
+			TPILogger.tl.info("推移週期排程失敗, 未設定週期排程內容: " + apptRjobId);
 			throw DgrRtnCode._1296.throwing();
 		}
 		TsmpDpApptRjob rjob = ardStep_opt.get();
 		String status = rjob.getStatus();
 		if (!TsmpDpRjobStatus.ACTIVE.value().equals(status)) {
-			this.logger.error("當前排程狀態不允許推移: " + status);
+			TPILogger.tl.error("當前排程狀態不允許推移: " + status);
 			throw DgrRtnCode._1251.throwing();
 		}
 		
@@ -575,7 +593,16 @@ public class ApptRjobDispatcher implements Runnable {
 			// 先改週期排程狀態, 避免此節點還在推移時, 其他節點也同時在推移
 			if (isSetToInProgress) {
 				rjob.setStatus(TsmpDpRjobStatus.IN_PROGRESS.value());
-				rjob = getTsmpDpApptRjobDao().saveAndFlush(rjob);
+				try {
+					rjob = getTsmpDpApptRjobDao().saveAndFlush(rjob);  // JpaSystemException: could not execute statement [The database is read only
+				} catch (JpaSystemException e) {
+					String err = e.getMessage();
+					if (err != null && err.indexOf("The database is read only") != -1) {
+						TPILogger.tl.debugDelay2sec("The database is read only");
+					}else {
+						TPILogger.tl.error("getTsmpDpApptRjobDao().saveAndFlush(rjob)::\n" + StackTraceUtil.logStackTrace(e));
+					}
+				}
 			}
 
 			Date updateDateTime = DateTimeUtil.now();
@@ -591,32 +618,39 @@ public class ApptRjobDispatcher implements Runnable {
 				Date duplicatedNextDateTime = newNextDateTime;
 				newNextDateTime = getAdjustedExecutionTime(// 
 					oldNextDateTime, updateDateTime, rjob.getCronExpression(), 1);
-				this.logger.trace("過早執行推移, 自動重算下次執行時間: " + apptRjobId + "::" + toDtStr(duplicatedNextDateTime) + "->" + toDtStr(newNextDateTime));
+				TPILogger.tl.trace("過早執行推移, 自動重算下次執行時間: " + apptRjobId + "::" + toDtStr(duplicatedNextDateTime) + "->" + toDtStr(newNextDateTime));
 			}
 			
-			getTsmpDpApptRjobDao().update_apptRjobDispatcher_01(
-				newNextDateTime.getTime(), 
-				rjob.getNextDateTime(), 
-				updateDateTime, 
-				updateUser, 
-				apptRjobId, 
-				rjob.getNextDateTime()
-			);
+			try {
+				getTsmpDpApptRjobDao().update_apptRjobDispatcher_01(
+						newNextDateTime.getTime(), 
+						rjob.getNextDateTime(), 
+						updateDateTime, 
+						updateUser, 
+						apptRjobId, 
+						rjob.getNextDateTime()
+						);  //JpaSystemException: JDBC exception executing SQL
+			} catch (JpaSystemException e) {
+				String msg = StackTraceUtil.logTpiShortStackTrace(e);
+				if (msg.indexOf("The database is read only") == -1) {
+					throw e;
+				}
+			}
 			rjob = getTsmpDpApptRjobDao().findById(apptRjobId).orElse(null);
 			assert rjob != null;
 
 			// 如果推移後的執行時間, 週期排程將會失效, 就不寫入 apptJob
 			if (isRjobValid(rjob, newNextDateTime.getTime())) {
-				this.logger.trace("產生下次週期工作: " + apptRjobId + "::" + ardStep_rjobD.getApptRjobDId() + "::" + toDtStr(newNextDateTime));
+				TPILogger.tl.trace("產生下次週期工作: " + apptRjobId + "::" + ardStep_rjobD.getApptRjobDId() + "::" + toDtStr(newNextDateTime));
 				return insertApptJob(ardStep_rjobD, newNextDateTime);
 			}
 
 			return null;
 		} catch (ObjectOptimisticLockingFailureException e) {
-			this.logger.warn("\nMaybe other worker has done \n " + apptRjobId);
+			TPILogger.tl.warn("\nMaybe other worker has done \n " + apptRjobId);
 			throw DgrRtnCode._1191.throwing();
 		} catch (Exception e) {
-			this.logger.error("推移週期排程失敗\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("推移週期排程失敗\n" + StackTraceUtil.logStackTrace(e));
 			throw DgrRtnCode._1297.throwing();
 		}
 	}
@@ -628,49 +662,49 @@ public class ApptRjobDispatcher implements Runnable {
 	 */
 	protected TsmpDpApptRjob validateRjob(TsmpDpApptRjob rjob, String locale) {
 		if (!StringUtils.hasText(rjob.getApptRjobId())) {
-			this.logger.debug("缺少週期排程UID");
+			TPILogger.tl.debug("缺少週期排程UID");
 			throw DgrRtnCode._1296.throwing();
 		}
 		if (!StringUtils.hasText(rjob.getRjobName())) {
-			this.logger.debug("缺少週期排程名稱");
+			TPILogger.tl.debug("缺少週期排程名稱");
 			throw DgrRtnCode._1296.throwing();
 		}
 		if (!StringUtils.hasText(rjob.getCronExpression())) {
-			this.logger.debug("缺少週期排程表達式");
+			TPILogger.tl.debug("缺少週期排程表達式");
 			throw DgrRtnCode._1296.throwing();
 		}
 		try {
 			CronExpression.parse(rjob.getCronExpression());
 		} catch (IllegalArgumentException e) {
-			this.logger.debug("週期排程表達式錯誤");
+			TPILogger.tl.debug("週期排程表達式錯誤");
 			throw DgrRtnCode._1290.throwing();
 		}
 		if (!StringUtils.hasText(rjob.getCronJson())) {
-			this.logger.debug("缺少週期排程表達式表單");
+			TPILogger.tl.debug("缺少週期排程表達式表單");
 			throw DgrRtnCode._1296.throwing();
 		}
 		if (rjob.getNextDateTime() == null) {
-			this.logger.debug("缺少下次執行時間");
+			TPILogger.tl.debug("缺少下次執行時間");
 			throw DgrRtnCode._1296.throwing();
 		}
 		if (!StringUtils.hasText(rjob.getStatus())) {
-			this.logger.debug("缺少週期排程狀態");
+			TPILogger.tl.debug("缺少週期排程狀態");
 			throw DgrRtnCode._1261.throwing();
 		}
 		Date effDateTime = checkPastDate(rjob.getEffDateTime(), "起始時間");
 		Date invDateTime = checkPastDate(rjob.getInvDateTime(), "結束時間");
 		if (effDateTime != null && invDateTime != null && invDateTime.compareTo(effDateTime) < 0) {
-			this.logger.debug("結束時間不得小於起始時間");
+			TPILogger.tl.debug("結束時間不得小於起始時間");
 			throw DgrRtnCode._1295.throwing();
 		}
 		TsmpDpItems items = getItemsById("RJOB_STATUS", rjob.getStatus(), false, locale);
 		if (items == null) {
-			this.logger.debug("週期排程狀態代碼不存在: " + rjob.getStatus());
+			TPILogger.tl.debug("週期排程狀態代碼不存在: " + rjob.getStatus());
 			throw DgrRtnCode._1290.throwing();
 		}
 		Optional<TsmpDpApptRjob> opt_rjob = getTsmpDpApptRjobDao().findById(rjob.getApptRjobId());
 		if (!opt_rjob.isPresent()) {
-			this.logger.error("查無週期排程UID: " + rjob.getApptRjobId());
+			TPILogger.tl.error(CHECK_FOR_PERIODIC_SCHEDULE_UID + rjob.getApptRjobId());
 			throw DgrRtnCode._1298.throwing();
 		}
 		return opt_rjob.get();
@@ -681,7 +715,7 @@ public class ApptRjobDispatcher implements Runnable {
 		try {
 			return func.apply(strVal);
 		} catch (Exception e) {
-			this.logger.debug("Error value of " + strVal + ", set to default " + defaultVal);
+			TPILogger.tl.debug("Error value of " + strVal + ", set to default " + defaultVal);
 		}
 		return defaultVal;
 	}
@@ -690,7 +724,7 @@ public class ApptRjobDispatcher implements Runnable {
 		if (dt == null) return null;
 		Date datetime = new Date(dt);
 		if (datetime.compareTo(DateTimeUtil.now()) < 0) {
-			this.logger.debug(fieldName + "不得小於現在");
+			TPILogger.tl.debug(fieldName + "不得小於現在");
 			throw DgrRtnCode._1227.throwing();
 		}
 		return datetime;
@@ -758,7 +792,7 @@ public class ApptRjobDispatcher implements Runnable {
 			isStart = (base >= effDateTime);
 		}
 		if (isStart) {
-			this.logger.trace("週期排程已生效: " + apptRjobId);
+			TPILogger.tl.trace("週期排程已生效: " + apptRjobId);
 		}
 
 		boolean isEnd = isOverInvDateTime(rjob, new Date(base));
@@ -776,7 +810,7 @@ public class ApptRjobDispatcher implements Runnable {
 		Date invDt = new Date(invDateTime);
 		boolean isOver = base.compareTo(invDt) > 0;
 		if (isOver) {
-			this.logger.trace("週期排程已失效: " + rjob.getApptRjobId());
+			TPILogger.tl.trace("週期排程已失效: " + rjob.getApptRjobId());
 		}
 		return base.compareTo(invDt) > 0;
 	}

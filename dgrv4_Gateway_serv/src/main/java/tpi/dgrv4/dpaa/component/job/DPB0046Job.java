@@ -31,12 +31,16 @@ public class DPB0046Job extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpNewsDao tsmpDpNewsDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
+	@Autowired
+	public DPB0046Job(TsmpDpNewsDao tsmpDpNewsDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpNewsDao = tsmpDpNewsDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	@Override
 	public void runJob(JobHelperImpl jobHelper, JobManager jobManager) {
 		try {

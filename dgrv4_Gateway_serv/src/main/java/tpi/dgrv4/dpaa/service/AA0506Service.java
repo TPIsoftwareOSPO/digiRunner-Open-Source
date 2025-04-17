@@ -25,12 +25,15 @@ public class AA0506Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpReportUrlDao tsmpReportUrlDao;
-
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
 
+	@Autowired
+	public AA0506Service(TsmpReportUrlDao tsmpReportUrlDao, TsmpSettingDao tsmpSettingDao) {
+		super();
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+	}
 
 	public AA0506Resp queryReportUrls(AA0506Req req) {
 		AA0506Resp resp = new AA0506Resp();

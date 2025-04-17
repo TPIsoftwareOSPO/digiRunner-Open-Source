@@ -2,7 +2,7 @@ package tpi.dgrv4.dpaa.component.job;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.constant.TsmpDpMailType;
@@ -18,22 +18,22 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @SuppressWarnings("serial")
 public class SendOpenApiKeyExpiringMailJob extends Job {
 
-//	private TPILogger logger = TPILogger.tl;
-
-	@Autowired
 	private SendOpenApiKeyExpiringMailService sendOpenApiKeyExpiringMailService;
-	
-	@Autowired
 	private PrepareMailService prepareMailService;
 
 	private final TsmpAuthorization auth;
 	private final String sendTime;
 	private final Long openApiKeyId;
 
-	public SendOpenApiKeyExpiringMailJob(TsmpAuthorization auth, String sendTime, Long openApiKeyId) {
+	public SendOpenApiKeyExpiringMailJob(TsmpAuthorization auth, String sendTime, Long openApiKeyId,
+			ApplicationContext applicationContext, PrepareMailService prepareMailService) {
+		if (applicationContext != null) {
+			this.sendOpenApiKeyExpiringMailService = applicationContext.getBean(SendOpenApiKeyExpiringMailService.class); // non-Singleton
+		}
 		this.auth = auth;
 		this.sendTime = sendTime;
 		this.openApiKeyId = openApiKeyId;
+		this.prepareMailService = prepareMailService;
 	}
 
 	@Override
@@ -41,10 +41,12 @@ public class SendOpenApiKeyExpiringMailJob extends Job {
 		try {
 			TPILogger.tl.debug("--- Begin SendOpenApiKeyExpiringMailJob ---");
 			if (this.auth == null) {
-				throw new Exception("未傳入授權資訊, 無法寄出通知信");
+				// 未傳入授權資訊, 無法寄出通知信
+				throw new Exception("Authorization information was not passed in, so the notification email cannot be sent."); 
 			}
 			if (this.openApiKeyId == null) {
-				throw new Exception("未指定Open Api Key ID, 無法寄出通知信");
+				// 未指定Open Api Key ID, 無法寄出通知信
+				throw new Exception("Open Api Key ID not specified, unable to send notification email");
 			}
 			
 			//identif 可寫入識別資料，ex: userName=mini 或 userName=mini,　reqOrdermId=17002	若有多個資料則以逗號和全型空白分隔

@@ -32,9 +32,14 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9926Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
 	
+	@Autowired
+	public DPB9926Service(TsmpDpMailTpltDao tsmpDpMailTpltDao) {
+		super();
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+	}
+
 	@Transactional
 	public DPB9926Resp importTsmpDpMailTplt(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {
 

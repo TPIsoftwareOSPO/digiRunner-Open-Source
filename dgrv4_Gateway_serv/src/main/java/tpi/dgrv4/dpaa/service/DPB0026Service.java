@@ -29,17 +29,20 @@ public class DPB0026Service {
 
     private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpFaqAnswerDao tsmpDpFaqAnswerDao;
-	
-	@Autowired
 	private TsmpDpFaqQuestionDao tsmpDpFaqQuestionDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0026Service(TsmpDpFaqAnswerDao tsmpDpFaqAnswerDao, TsmpDpFaqQuestionDao tsmpDpFaqQuestionDao,
+			TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFaqAnswerDao = tsmpDpFaqAnswerDao;
+		this.tsmpDpFaqQuestionDao = tsmpDpFaqQuestionDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+	}
 
 	@Transactional
 	public DPB0026Resp addFaq(TsmpAuthorization authorization, DPB0026Req req) {

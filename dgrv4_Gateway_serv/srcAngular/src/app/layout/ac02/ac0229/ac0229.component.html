@@ -1,13 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
 
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryClientList()">
+    <form [formGroup]="form">
       <div class="form-group row col-12">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-        </span>
+        <app-search-input
+        placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryClientList.bind(this)"
+        class="col-9 col-lg0-6 col-sm-6"></app-search-input>
       </div>
     </form>
     <hr>

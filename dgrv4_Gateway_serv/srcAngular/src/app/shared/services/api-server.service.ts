@@ -520,6 +520,7 @@ import { DPB0232Req, ReqDPB0232, RespDPB0232 } from 'src/app/models/api/ServerSe
 import { DPB0233Req, DPB0233RespBefore, ReqDPB0233, RespDPB0233 } from 'src/app/models/api/ServerService/dpb0233.interface';
 import { ReqDPB9938, RespDPB9938 } from 'src/app/models/api/ServerService/dpb9938.interface';
 import { ReqDPB9939, RespDPB9939 } from 'src/app/models/api/ServerService/dpb9939.interface';
+import { AA1212Req, ReqAA1212, ResAA1212 } from 'src/app/models/api/ReportService/aa1212.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -2048,6 +2049,15 @@ export class ServerService {
     } as ReqDPB9939;
     const path = `${this.basePath}/DPB9939`;
     return this.api.npPost<RespDPB9939>(path, body);
+  }
+
+  queryRealtimeDashboardData(ReqBody: AA1212Req): Observable<ResAA1212> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.getDashboardData),
+      ReqBody: ReqBody,
+    } as ReqAA1212;
+    const path = `${this.indexPath}/AA1212`;
+    return this.api.excuteNpPost_ignoreAll<ResAA1212>(path, body);
   }
 
 }

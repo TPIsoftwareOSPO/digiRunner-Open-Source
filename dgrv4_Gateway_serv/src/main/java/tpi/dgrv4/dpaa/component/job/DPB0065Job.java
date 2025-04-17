@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
@@ -30,16 +29,15 @@ public class DPB0065Job extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private SeqStoreDao seqStoreDao;
 	
 	private String locale;
 
-	public DPB0065Job(String locale) {
+	public DPB0065Job(String locale, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, SeqStoreDao seqStoreDao) {
 		this.locale = locale;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.seqStoreDao = seqStoreDao;
 	}
 
 	@Override

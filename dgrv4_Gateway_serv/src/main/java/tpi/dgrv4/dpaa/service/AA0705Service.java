@@ -22,12 +22,18 @@ public class AA0705Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpAlertDao tsmpAlertDao;
-	@Autowired
 	private TsmpRoleAlertDao tsmpRoleAlertDao;
-	@Autowired
     private DpaaAlertDispatcherIfs dpaaAlertDispatcher;
+
+    @Autowired
+	public AA0705Service(TsmpAlertDao tsmpAlertDao, TsmpRoleAlertDao tsmpRoleAlertDao,
+			DpaaAlertDispatcherIfs dpaaAlertDispatcher) {
+		super();
+		this.tsmpAlertDao = tsmpAlertDao;
+		this.tsmpRoleAlertDao = tsmpRoleAlertDao;
+		this.dpaaAlertDispatcher = dpaaAlertDispatcher;
+	}
 
 	@Transactional
 	public AA0705Resp deleteAlertSetting(TsmpAuthorization authorization, AA0705Req req) {

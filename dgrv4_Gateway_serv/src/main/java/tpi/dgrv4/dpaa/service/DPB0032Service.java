@@ -15,8 +15,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0032Service {
 
-	@Autowired
 	private TsmpDpAboutDao tsmpDpAboutDao;
+
+	@Autowired
+	public DPB0032Service(TsmpDpAboutDao tsmpDpAboutDao) {
+		super();
+		this.tsmpDpAboutDao = tsmpDpAboutDao;
+	}
 
 	public DPB0032Resp queryAbout_0(TsmpAuthorization authorization, DPB0032Req req) {
 		TsmpDpAbout about = getAbout();

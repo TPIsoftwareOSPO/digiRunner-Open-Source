@@ -22,8 +22,13 @@ public class AA0422Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDcDao tsmpDcDao;
+
+	@Autowired
+	public AA0422Service(TsmpDcDao tsmpDcDao) {
+		super();
+		this.tsmpDcDao = tsmpDcDao;
+	}
 
 	public AA0422Resp queryDCList_2(TsmpAuthorization authorization, AA0422Req req) {
 		AA0422Resp resp = new AA0422Resp();

@@ -27,16 +27,20 @@ public class AA1115Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public AA1115Service(TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, BcryptParamHelper bcryptParamHelper,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA1115Resp queryScopeAuthorities(TsmpAuthorization authorization, AA1115Req req) {
 		AA1115Resp resp = new AA1115Resp();

@@ -20,12 +20,16 @@ import tpi.dgrv4.gateway.util.JsonNodeUtil;
 @Component
 public class TokenCheck {
 	
-	@Autowired
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
  
+	@Autowired
+	public TokenCheck(TokenHelper tokenHelper, TsmpOpenApiKeyDao tsmpOpenApiKeyDao) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+	}
+
 	/**
 	 * 取得 cid, 依表頭 Authorization 的各種格式 <br>
 	 * cid 為 v3 底層的名稱, 即 client ID <br>

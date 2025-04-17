@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,21 +42,21 @@ public class PrepareMailService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private ApplicationContext ctx;
+//	@Autowired(required=false)
+	private ApptJobDispatcher apptJobDispatcher;
 	
-	@Autowired
-	private JobHelper jobHelper;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
 	
-	@Autowired(required=false)
-	private ApptJobDispatcher apptJobDispatcher;
- 
+	@Autowired
+	public PrepareMailService(@Nullable ApptJobDispatcher apptJobDispatcher, FileHelper fileHelper,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super();
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.fileHelper = fileHelper;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+	}
+
 	public void createMailSchedule(List<TsmpMailEvent> mailEvents, String identif,
 			String mailType, String sendTime) throws Exception{
 		
@@ -257,14 +258,6 @@ public class PrepareMailService {
 			, job.getRefItemNo().concat("_").concat(refSubitemNo) //
 			, job.getInParams() //
 			, DateTimeUtil.dateTimeToString(job.getStartDateTime(), DateTimeFormatEnum.西元年月日時分秒_2).orElseThrow(TsmpDpAaRtnCode._1295::throwing)));
-	}
-	
-	protected ApplicationContext getCtx() {
-		return this.ctx;
-	}
-
-	protected JobHelper getJobHelper() {
-		return this.jobHelper;
 	}
 
 	protected TsmpDpApptJobDao getTsmpDpApptJobDao() {

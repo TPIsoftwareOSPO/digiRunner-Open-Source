@@ -27,11 +27,15 @@ public abstract class TsmpNodeTaskNotifier<EventType> extends NodeTaskNotifiers<
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpEventsService tsmpEventsService;
+	private TsmpNodeTaskDao tsmpNodeTaskDao;
 
 	@Autowired
-	private TsmpNodeTaskDao tsmpNodeTaskDao;
+	protected TsmpNodeTaskNotifier(TsmpEventsService tsmpEventsService, TsmpNodeTaskDao tsmpNodeTaskDao) {
+		super();
+		this.tsmpEventsService = tsmpEventsService;
+		this.tsmpNodeTaskDao = tsmpNodeTaskDao;
+	}
 
 	@Override
 	public String noticePublicEvent(EventType event) {

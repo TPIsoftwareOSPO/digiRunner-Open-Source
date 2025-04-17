@@ -28,11 +28,15 @@ public class AA0102Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
+	private TsmpReportUrlDao tsmpReportUrlDao;
 
 	@Autowired
-	private TsmpReportUrlDao tsmpReportUrlDao;
+	public AA0102Service(TsmpFuncDao tsmpFuncDao, TsmpReportUrlDao tsmpReportUrlDao) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+	}
 
 	public AA0102Resp updateTFunc(TsmpAuthorization auth, AA0102Req req) {
 

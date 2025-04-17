@@ -40,17 +40,21 @@ public class DPB0085Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-	
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao; 
-	
-	@Autowired
 	private BcryptParamHelper helper;
 	
 	Sort sort = Sort.by(Sort.Direction.DESC, "expiredAt");//依憑證到期日,由新到舊排序
-	
+
+	@Autowired
+	public DPB0085Service(TsmpClientCertDao tsmpClientCertDao, TsmpClientCert2Dao tsmpClientCert2Dao,
+			BcryptParamHelper helper) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.helper = helper;
+	}
+
 	public DPB0085Resp uploadClientCA(TsmpAuthorization authorization, DPB0085Req req, ReqHeader reqHeader) {
 		DPB0085Resp resp = new DPB0085Resp();
 		try {

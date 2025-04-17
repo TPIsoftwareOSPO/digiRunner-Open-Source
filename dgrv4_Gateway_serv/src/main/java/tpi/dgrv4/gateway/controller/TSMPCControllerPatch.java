@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.service.TSMPCServicePatch;
 @RestController
 public class TSMPCControllerPatch {
 
-	@Autowired
 	private TSMPCServicePatch service;
+
+	@Autowired
+	public TSMPCControllerPatch(TSMPCServicePatch service) {
+		super();
+		this.service = service;
+	}
 
 	@PatchMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"}, 
 			produces = MediaType.ALL_VALUE)

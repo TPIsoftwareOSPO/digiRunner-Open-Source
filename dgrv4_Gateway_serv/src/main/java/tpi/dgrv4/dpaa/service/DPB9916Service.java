@@ -24,12 +24,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9916Service {
 
 	private final String File_Format = "mail log txt json";
-	@Autowired
+	
 	private TsmpDpFileDao tsmpDpFileDao;
-	@Autowired
 	private FileHelper fileHelper;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB9916Service(TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+	}
+
 
 	public DPB9916Resp queryTsmpDpFileDetail(TsmpAuthorization tsmpAuthorization, DPB9916Req req) {
 		

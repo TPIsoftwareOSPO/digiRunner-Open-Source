@@ -12,11 +12,12 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Service
 public class ChangeDbConnInfoService {
-	@Autowired
 	private ConfigurableApplicationContext applicationContext;
 
-	public ChangeDbConnInfoService() {
+	@Autowired
+	public ChangeDbConnInfoService(ConfigurableApplicationContext applicationContext) {
 		super();
+		this.applicationContext = applicationContext;
 	}
 
 	/**

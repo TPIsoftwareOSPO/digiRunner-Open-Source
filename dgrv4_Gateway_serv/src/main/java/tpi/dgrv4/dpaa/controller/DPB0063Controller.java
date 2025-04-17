@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0063Controller {
 
-	@Autowired
 	private DPB0063Service service;
 	
+	@Autowired
+	public DPB0063Controller(DPB0063Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * save關卡與角色,優先使用status取代create/delete/clear操作
 	 * 若沒有相同的 PK 值, 則新增.

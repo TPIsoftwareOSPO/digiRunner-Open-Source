@@ -27,8 +27,13 @@ public class DigiRunnerTokenService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private OAuthTokenService oAuthTokenService;
+	
+	@Autowired
+	public DigiRunnerTokenService(OAuthTokenService oAuthTokenService) {
+		super();
+		this.oAuthTokenService = oAuthTokenService;
+	}
 
 	/*
 	private final static ObjectMapper om;
@@ -61,7 +66,7 @@ public class DigiRunnerTokenService {
 		this.logger.debug(String.format("%s is initialized: %s", getClass().getName(), this.URL));
 	}
 	*/
- 
+
 	/**
 	 * 參數皆傳入明碼
 	 * @param clientId	用戶端帳號

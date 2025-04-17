@@ -1,11 +1,25 @@
 package tpi.dgrv4.gateway.component.job.appt;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.ApptJobEnum;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -25,18 +39,12 @@ import tpi.dgrv4.gateway.component.job.RunLoopJob;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 
-import java.util.*;
-import java.util.function.Function;
-
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class ApptJobDispatcher implements Runnable {
 
-	
-
 	private final static String APPT_JOB_PREFIX = "apptJob";
-
-	@Autowired
-	private TPILogger logger;
 
 	private Map<Long, TsmpDpApptJob> jobCache;
 
@@ -50,46 +58,32 @@ public class ApptJobDispatcher implements Runnable {
 	private ScheduledExecutorService taskScheduler;
 	*/
 
-	@Autowired
-	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
-	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
-	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-
-	@Autowired
-	private JobHelper jobHelper;
-
-	@Autowired
-	private ApplicationContext ctx;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
-
-	@Autowired
-	private ApptRjobDispatcher apptRjobDispatcher;
-
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
-	private FileHelper fileHelper;
+	private final TsmpDpApptJobDao tsmpDpApptJobDao;
+	private final TsmpDpApptRjobDao tsmpDpApptRjobDao;
+	private final TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
+	private final JobHelper jobHelper;
+	private final ApplicationContext ctx;
+	private final ServiceConfig serviceConfig;
+	private final ApptRjobDispatcher apptRjobDispatcher;
+	private final TsmpSettingService tsmpSettingService;
+	private final FileHelper fileHelper;
 
 	// 是否啟用排程器
 	private Boolean isSchedulerEnabled;
-
-	public ApptJobDispatcher(TPILogger logger) {
-		this.logger = logger;
-	}
+	
+	// 未啟用排程器, 請設定 service.scheduler.appt-job.enable=true
+	// Scheduler is not enabled, please set service.scheduler.appt-job.enable=true
+	private final static String SCHEDULER_IS_NOT_ENABLED_PLEASE_SET = "Scheduler is not enabled, please set service.scheduler.appt-job.enable=true";
+	
+	// 排程儲存失敗 // Schedule save failed
+	private final static String SCHEDULE_SAVE_FAILED = "Schedule save failed\n";
 	
 	@PostConstruct
 	public void init() {
 		initAttributes();
 		
 		if (!this.isSchedulerEnabled) {
-			this.logger.info("未啟用排程器, 請設定 service.scheduler.appt-job.enable=true");
+			TPILogger.tl.info(SCHEDULER_IS_NOT_ENABLED_PLEASE_SET);
 			return;
 		}
 
@@ -101,7 +95,7 @@ public class ApptJobDispatcher implements Runnable {
 		// 啟動Timer每N分同步一次DB至 MemList，N大於30分鐘，每次取最近欲執行的5筆資料(狀態wait) 
 		resetRefreshSchedule();
 
-		this.logger.debugDelay2sec("ApptJobDispatcher is initialized");
+		TPILogger.tl.debugDelay2sec("ApptJobDispatcher is initialized");
 	}
 
 	public void initAttributes() {
@@ -121,11 +115,11 @@ public class ApptJobDispatcher implements Runnable {
 	@Override
 	public void run() {
 		synchronized (this.jobCache) {
-			this.logger.trace("[#JOB#]檢查 cache 中...");
+			TPILogger.tl.trace("[#JOB#]檢查 cache 中...");
 
 			dispatchCacheJobs();
 
-			this.logger.trace("[#JOB#]檢查 cache 結束");
+			TPILogger.tl.trace("[#JOB#]檢查 cache 結束");
 		}
 	}
 
@@ -140,19 +134,27 @@ public class ApptJobDispatcher implements Runnable {
 		}
 
 		try {
-			job = getTsmpDpApptJobDao().saveAndFlush(job);
+			job = getTsmpDpApptJobDao().saveAndFlush(job); //JpaSystemException: error performing isolated work [The database is read only
+		} catch (JpaSystemException e) {
+			String err = e.getMessage();
+			if (err != null && err.indexOf("The database is read only") != -1) {
+				TPILogger.tl.debugDelay2sec("The database is read only");
+			}else {
+				TPILogger.tl.error(SCHEDULE_SAVE_FAILED + StackTraceUtil.logStackTrace(e));
+			}
+			return null;
 		} catch (DataIntegrityViolationException e) {
 			// 週期性排程的設計, 需要容許寫入 ApptJob 時出現 UK Constraint 例外
 			if (StringUtils.hasText(job.getPeriodUid()) && job.getPeriodItemsId() != null) {
-				this.logger.debugDelay2sec("已寫入相同的週期排程工作: " + //
+				TPILogger.tl.debugDelay2sec("已寫入相同的週期排程工作: " + //
 					job.getPeriodUid() + "::" + job.getPeriodItemsId() + "::" + 
 					DateTimeUtil.dateTimeToString(new Date(job.getPeriodNexttime()), DateTimeFormatEnum.西元年月日時分秒_2).orElse(String.valueOf(TsmpDpAaRtnCode._1295)));
 			} else {
-				this.logger.error("排程儲存失敗\n" + StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.error(SCHEDULE_SAVE_FAILED + StackTraceUtil.logStackTrace(e));
 			}
 			return null;
 		} catch (Exception e) {
-			this.logger.error("排程儲存失敗\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(SCHEDULE_SAVE_FAILED + StackTraceUtil.logStackTrace(e));
 			return null;
 		}
 
@@ -162,10 +164,10 @@ public class ApptJobDispatcher implements Runnable {
 				synchronized (this.jobCache) {
 					TsmpDpApptJob copyJob = ServiceUtil.deepCopy(job, TsmpDpApptJob.class);
 					this.jobCache.put(job.getApptJobId(), copyJob);
-					this.logger.trace("插入排程: " + job.getApptJobId());
+					TPILogger.tl.trace("插入排程: " + job.getApptJobId());
 				}
 			} else {
-				this.logger.info("未啟用排程器, 請設定 service.scheduler.appt-job.enable=true");
+				TPILogger.tl.info(SCHEDULER_IS_NOT_ENABLED_PLEASE_SET);
 			}
 
 			// 同步資料庫
@@ -175,7 +177,7 @@ public class ApptJobDispatcher implements Runnable {
 
 			return job;
 		} catch (Exception e) {
-			this.logger.error("插入排程失敗\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("插入排程失敗\n" + StackTraceUtil.logStackTrace(e));
 			return null;
 		}
 	}
@@ -203,15 +205,15 @@ public class ApptJobDispatcher implements Runnable {
 		} catch (DataIntegrityViolationException e) {
 			// 週期性排程的設計, 需要容許寫入 ApptJob 時出現 UK Constraint 例外
 			if (StringUtils.hasText(job.getPeriodUid()) && job.getPeriodItemsId() != null) {
-				this.logger.debugDelay2sec("已寫入相同的週期排程工作: " +
+				TPILogger.tl.debugDelay2sec("已寫入相同的週期排程工作: " +
 					job.getPeriodUid() + "::" + job.getPeriodItemsId() + "::" + 
 					DateTimeUtil.dateTimeToString(new Date(job.getPeriodNexttime()), DateTimeFormatEnum.西元年月日時分秒_2).orElse(String.valueOf(TsmpDpAaRtnCode._1295)));
 			} else {
-				this.logger.error("排程儲存失敗\n" + StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.error(SCHEDULE_SAVE_FAILED + StackTraceUtil.logStackTrace(e));
 			}
 			return null;
 		} catch (Exception e) {
-			this.logger.error("排程儲存失敗\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(SCHEDULE_SAVE_FAILED + StackTraceUtil.logStackTrace(e));
 			return Collections.emptyList();
 		}
 
@@ -221,11 +223,11 @@ public class ApptJobDispatcher implements Runnable {
 				synchronized (this.jobCache) {
 					for(TsmpDpApptJob copiedJob : copiedJobs) {
 						this.jobCache.put(copiedJob.getApptJobId(), copiedJob);
-						this.logger.trace("插入排程: " + copiedJob.getApptJobId());
+						TPILogger.tl.trace("插入排程: " + copiedJob.getApptJobId());
 					}
 				}
 			} else {
-				this.logger.info("未啟用排程器, 請設定 service.scheduler.appt-job.enable=true");
+				TPILogger.tl.info(SCHEDULER_IS_NOT_ENABLED_PLEASE_SET);
 			}
 
 			// 同步資料庫
@@ -235,7 +237,7 @@ public class ApptJobDispatcher implements Runnable {
 
 			return copiedJobs;
 		} catch (Exception e) {
-			this.logger.error("插入排程失敗\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("插入排程失敗\n" + StackTraceUtil.logStackTrace(e));
 			return Collections.emptyList();
 		}
 	}
@@ -245,7 +247,7 @@ public class ApptJobDispatcher implements Runnable {
 	 */
 	public void resetRefreshSchedule() {
 		if (!this.isSchedulerEnabled) {
-			this.logger.info("未啟用排程器, 請設定 service.scheduler.appt-job.enable=true");
+			TPILogger.tl.info(SCHEDULER_IS_NOT_ENABLED_PLEASE_SET);
 			return;
 		}
 		
@@ -298,18 +300,18 @@ public class ApptJobDispatcher implements Runnable {
 					if (apptJob.isPeriodJob()) {
 						SerialApptJob serialApptJob = getSerialApptJob(apptJob);
 						getJobHelper().add(serialApptJob);
-						this.logger.trace("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]SerialApptJob排入Queue");
+						TPILogger.tl.trace("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]SerialApptJob排入Queue");
 					} else if (ApptJobEnum.RUNLOOP_ITEM_NO.equals(tsmpDpApptJob.getRefItemNo())) {
 						RunLoopJob runLoopJob = getRunLoopJob(apptJob);
 						getJobHelper().add(runLoopJob);
-						this.logger.trace("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]RunLoopJob排入Queue");
+						TPILogger.tl.trace("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]RunLoopJob排入Queue");
 					} else {
 						getJobHelper().add(apptJob);
-						this.logger.trace("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]ApptJob排入Queue");
+						TPILogger.tl.trace("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]ApptJob排入Queue");
 					}
 					deletableIds.add(tsmpDpApptJob.getApptJobId());
 				} catch (Exception e) {
-					this.logger.error("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]無法建立名為 \"" + beanName + "\" 的排程工作\n" + StackTraceUtil.logStackTrace(e));
+					TPILogger.tl.error("[#JOB#][" + apptJob.getTsmpDpApptJob().getApptJobId() + "]無法建立名為 \"" + beanName + "\" 的排程工作\n" + StackTraceUtil.logStackTrace(e));
 					// 更新DB
 					String eMsg = ServiceUtil.truncateExceptionMessage(e, ApptJob.MAX_STACK_TRACE_LENGTH);
 					tsmpDpApptJob.setStackTrace(eMsg);
@@ -320,7 +322,7 @@ public class ApptJobDispatcher implements Runnable {
 					deletableIds.add(tsmpDpApptJob.getApptJobId());
 				}
 			} else {
-				this.logger.trace("[#JOB#][" + tsmpDpApptJob.getApptJobId()
+				TPILogger.tl.trace("[#JOB#][" + tsmpDpApptJob.getApptJobId()
 					+ "]現在("
 					+ DateTimeUtil.dateTimeToString(new Date(), DateTimeFormatEnum.西元年月日時分秒_2).orElse(String.valueOf(TsmpDpAaRtnCode._1295))
 					+ ")未到開始執行時間: "
@@ -332,7 +334,7 @@ public class ApptJobDispatcher implements Runnable {
 		deletableIds.forEach((deletableId) -> {
 			this.jobCache.remove(deletableId);
 		});
-		this.logger.trace("[#JOB#]已排入" + deletableIds.size() + "個排程到Queue中: " + deletableIds);
+		TPILogger.tl.trace("[#JOB#]已排入" + deletableIds.size() + "個排程到Queue中: " + deletableIds);
 	}
 
 	public String getBeanName(TsmpDpApptJob job) {
@@ -352,7 +354,7 @@ public class ApptJobDispatcher implements Runnable {
 
 	public void refreshJobCache() {
 		synchronized (this.jobCache) {
-			this.logger.trace("[#JOB#]同步工作清單中...");
+			TPILogger.tl.trace("[#JOB#]同步工作清單中...");
 
 			// 移除非等待中的Job
 			retainWaitingJobs();
@@ -360,7 +362,7 @@ public class ApptJobDispatcher implements Runnable {
 			// 新增job
 			addExecutableJobs();
 			
-			this.logger.trace("[#JOB#]同步結束, 剩餘" +  this.jobCache.size() + "個排程在Cache中");
+			TPILogger.tl.trace("[#JOB#]同步結束, 剩餘" +  this.jobCache.size() + "個排程在Cache中");
 		}
 	}
 
@@ -371,7 +373,7 @@ public class ApptJobDispatcher implements Runnable {
                 TPILogger.lc.send(new NotifyClientRefreshMemListPacket());
             }
         } catch (Exception e) {
-        	this.logger.warn(String.format("Failed to notify node to refresh job list: %s", e.getMessage()));
+        	TPILogger.tl.warn(String.format("Failed to notify node to refresh job list: %s", e.getMessage()));
         }
 	}
 
@@ -396,14 +398,14 @@ public class ApptJobDispatcher implements Runnable {
 		expiredIds.forEach(id -> {
 			this.jobCache.remove(id);
 		});
-		this.logger.trace("[#JOB#]移除" + expiredIds.size() + "個排程: " + expiredIds);
+		TPILogger.tl.trace("[#JOB#]移除" + expiredIds.size() + "個排程: " + expiredIds);
 	}
 
 	private void addExecutableJobs() {
 		List<TsmpDpApptJob> executableJobs = findExecutableJobs();
 
 		if (executableJobs == null || executableJobs.isEmpty()) {
-			this.logger.trace("[#JOB#]存入0個排程到 cache 中");
+			TPILogger.tl.trace("[#JOB#]存入0個排程到 cache 中");
 			return;
 		}
 
@@ -421,7 +423,7 @@ public class ApptJobDispatcher implements Runnable {
 				beanName = getBeanName(job);
 				getBeanByName(beanName, job);
 			} catch (Exception e) {
-				this.logger.trace("[#JOB#][" +  + apptJobId + "]ApptJob bean '" + beanName + "' is not found in this module. apptJobjId=["+ apptJobId +"]");
+				TPILogger.tl.trace("[#JOB#][" +  + apptJobId + "]ApptJob bean '" + beanName + "' is not found in this module. apptJobjId=["+ apptJobId +"]");
 				continue;
 			}
 			
@@ -431,7 +433,7 @@ public class ApptJobDispatcher implements Runnable {
 			TPILogger.tl.trace("[#JOB#][" + apptJobId + "]工作已被存入Cache");
 			addCnt++;
 		}
-		this.logger.trace("[#JOB#]存入" + addCnt + "個排程到 cache 中");
+		TPILogger.tl.trace("[#JOB#]存入" + addCnt + "個排程到 cache 中");
 	}
 		
 	/**
@@ -449,7 +451,7 @@ public class ApptJobDispatcher implements Runnable {
 		try {
 			return func.apply(strVal);
 		} catch (Exception e) {
-			this.logger.warn("Error value of " + strVal + ", set to default " + defaultVal);
+			TPILogger.tl.warn("Error value of " + strVal + ", set to default " + defaultVal);
 		}
 		return defaultVal;
 	}
@@ -457,7 +459,7 @@ public class ApptJobDispatcher implements Runnable {
 	public SerialApptJob getSerialApptJob(ApptJob apptJob) {
 		return new SerialApptJob(apptJob, //
 			getTsmpDpApptJobDao(), getTsmpDpApptRjobDao(), getTsmpDpApptRjobDDao(), this, //
-			getApptRjobDispatcher(), this.logger);
+			getApptRjobDispatcher(), TPILogger.tl);
 	}
 
 	public RunLoopJob getRunLoopJob(ApptJob apptJob) {

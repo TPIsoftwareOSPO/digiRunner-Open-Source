@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,53 +55,25 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Service
 public class GtwIdPLoginService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private IdPHelper idPHelper;
-
-	@Autowired
 	private GtwIdPCallbackService gtwIdPCallbackService;
-
-	@Autowired
 	private GtwIdPAuthService gtwIdPAuthService;
-
-	@Autowired
 	private LdapHelper ldapHelper;
-
-	@Autowired
 	private DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao;
-
-	@Autowired
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJDao;
-
-	@Autowired
 	private DgrGtwIdpInfoADao dgrGtwIdpInfoADao;
-
-	@Autowired
 	private GtwIdPHelper gtwIdPHelper;
-
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-
-	@Autowired
 	private IdPJdbcHelper idPJdbcHelper;
-
-	@Autowired
 	private IdPApiHelper idPApiHelper;
-
-	@Autowired
-	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;
-
-	@Autowired
+	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;	
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenEntityHelper;
+	
+	@Value("${digi.url.prefix:}")
+    private String urlPrefix;
 
 	public static class UserLoginData {
 		public ResponseEntity<?> errRespEntity;
@@ -109,6 +82,32 @@ public class GtwIdPLoginService {
 		public String userMima;
 	}
 	
+	@Autowired
+	public GtwIdPLoginService(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService, TokenHelper tokenHelper,
+			IdPHelper idPHelper, GtwIdPCallbackService gtwIdPCallbackService, GtwIdPAuthService gtwIdPAuthService,
+			LdapHelper ldapHelper, DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao, DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJDao,
+			DgrGtwIdpInfoADao dgrGtwIdpInfoADao, GtwIdPHelper gtwIdPHelper, TsmpTAEASKHelper tsmpTAEASKHelper,
+			IdPJdbcHelper idPJdbcHelper, IdPApiHelper idPApiHelper, DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao,
+			TsmpCoreTokenEntityHelper tsmpCoreTokenEntityHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tokenHelper = tokenHelper;
+		this.idPHelper = idPHelper;
+		this.gtwIdPCallbackService = gtwIdPCallbackService;
+		this.gtwIdPAuthService = gtwIdPAuthService;
+		this.ldapHelper = ldapHelper;
+		this.dgrGtwIdpInfoLDao = dgrGtwIdpInfoLDao;
+		this.dgrGtwIdpInfoJDao = dgrGtwIdpInfoJDao;
+		this.dgrGtwIdpInfoADao = dgrGtwIdpInfoADao;
+		this.gtwIdPHelper = gtwIdPHelper;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.idPJdbcHelper = idPJdbcHelper;
+		this.idPApiHelper = idPApiHelper;
+		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
+		this.tsmpCoreTokenEntityHelper = tsmpCoreTokenEntityHelper;
+	}
+
 	public ResponseEntity<?> gtwIdPLogin(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
 		
@@ -733,6 +732,10 @@ public class GtwIdPLoginService {
 
 		URL urlObj = new URL(dgrConsentUiUrl);
 		dgrConsentUiUrl = urlObj.getPath();// 使用相對路徑
+		
+		 if(StringUtils.hasText(urlPrefix)) {
+			 dgrConsentUiUrl = urlPrefix + dgrConsentUiUrl;
+		 }
 
 		String redirectUrl = String.format(
 				"%s" + "?response_type=%s" + "&client_id=%s" + "&scope=%s" + "&redirect_uri=%s" + "&state=%s"

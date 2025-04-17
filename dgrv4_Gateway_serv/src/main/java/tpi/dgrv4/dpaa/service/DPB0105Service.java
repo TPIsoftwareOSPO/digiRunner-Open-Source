@@ -51,23 +51,25 @@ public class DPB0105Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DPB0101Service dpb0101Service;
-
-	@Autowired
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
 	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
+	private ApptRjobDispatcher apptRjobDispatcher;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	@Autowired
-	private ApptRjobDispatcher apptRjobDispatcher;
-	
-	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	public DPB0105Service(DPB0101Service dpb0101Service, TsmpDpApptRjobDao tsmpDpApptRjobDao,
+			TsmpDpApptRjobDDao tsmpDpApptRjobDDao, BcryptParamHelper bcryptParamHelper,
+			ApptRjobDispatcher apptRjobDispatcher, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.dpb0101Service = dpb0101Service;
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.apptRjobDispatcher = apptRjobDispatcher;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0105Resp updateRjob(TsmpAuthorization auth, DPB0105Req req, ReqHeader reqHeader) {
 		checkParams(auth, req);

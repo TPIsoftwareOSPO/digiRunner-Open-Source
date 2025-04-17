@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.HexStringUtils;
 import tpi.dgrv4.codec.utils.JWEcodec;
@@ -85,73 +87,36 @@ import tpi.dgrv4.gateway.util.JsonNodeUtil;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class TokenHelper {
 	
 	private static volatile TokenHelper instance;
 	
+	private final TsmpClientDao tsmpClientDao;
+	private final TsmpClientCacheProxy tsmpClientCacheProxy;
+	private final TsmpClientHostCacheProxy tsmpClientHostCacheProxy;
+	private final OauthClientDetailsCacheProxy oauthClientDetailsCacheProxy;
+	private final TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private final TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	private final TsmpTokenHistoryCacheProxy tsmpTokenHistoryCacheProxy;
+	private final SeqStoreService seqStoreService;
+	private final TsmpUserCacheProxy tsmpUserCacheProxy;
+	private final UsersCacheProxy usersCacheProxy;
+	private final TsmpGroupApiCacheProxy tsmpGroupApiCacheProxy;
+	private final TsmpClientGroupCacheProxy tsmpClientGroupCacheProxy;
+	private final TsmpGroupCacheProxy tsmpGroupCacheProxy;
+	private final TsmpOpenApiKeyMapCacheProxy tsmpOpenApiKeyMapCacheProxy;
+	private final TsmpApiCacheProxy tsmpApiCacheProxy;
+	private final TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final DgrXApiKeyCacheProxy dgrXApiKeyCacheProxy;
+	private final DgrXApiKeyMapCacheProxy dgrXApiKeyMapCacheProxy;
+	private final ServiceConfig serviceConfig;
+	
 	@Value("${digi.cookie.samesite.value:Lax}")
 	public String samesiteValue;
-
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
-	private TsmpClientCacheProxy tsmpClientCacheProxy;
-
-	@Autowired
-	private TsmpClientHostCacheProxy tsmpClientHostCacheProxy;
-
-	@Autowired
-	private OauthClientDetailsCacheProxy oauthClientDetailsCacheProxy;
-
-	@Autowired
-	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-
-	@Autowired
-	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-
-	@Autowired
-	private TsmpTokenHistoryCacheProxy tsmpTokenHistoryCacheProxy;
-
-	@Autowired
-	private SeqStoreService seqStoreService;
-
-	@Autowired
-	private TsmpUserCacheProxy tsmpUserCacheProxy;
-
-	@Autowired
-	private UsersCacheProxy usersCacheProxy;
-
-	@Autowired
-	private TsmpGroupApiCacheProxy tsmpGroupApiCacheProxy;
-
-	@Autowired
-	private TsmpClientGroupCacheProxy tsmpClientGroupCacheProxy;
-
-	@Autowired
-	private TsmpGroupCacheProxy tsmpGroupCacheProxy;
-
-	@Autowired
-	private TsmpOpenApiKeyMapCacheProxy tsmpOpenApiKeyMapCacheProxy;
-
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-
-	@Autowired
-	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-
-	@Autowired
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
-	private DgrXApiKeyCacheProxy dgrXApiKeyCacheProxy;
-
-	@Autowired
-	private DgrXApiKeyMapCacheProxy dgrXApiKeyMapCacheProxy;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
 
 	@Value("${digiRunner.gtw.deploy.role}")
 	private String deployRole;
@@ -192,12 +157,21 @@ public class TokenHelper {
 	// 缺少必需的參數
 	public static final String MISSING_REQUIRED_PARAMETER = "Missing required parameter: ";
 	
+	/**
+	 * 這是一個假的 getInstance(),
+	 * 實際上不會有機會建立一個空的 TokenHelper(),
+	 * 因為在啟動 Spring boot 時, 早就被 @Component 載入,
+	 * 寫這段是為了配合 init() 將物件指向一個 volatile instance,
+	 * 方便在其它的 class 中直接使用此 sigaletone object
+	 * @return
+	 */
     public static TokenHelper getInstance() {
         if (instance == null) {
             synchronized (TokenHelper.class) {
-                if (instance == null) {
-                    instance = new TokenHelper();
-                }
+				if (instance == null) {
+					instance = new TokenHelper(null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null);
+				}
             }
         }
         return instance;
@@ -2593,89 +2567,5 @@ public class TokenHelper {
 		MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
 		header.put("Content-Type", Arrays.asList(MediaType.APPLICATION_JSON.toString()));
 		return header;
-	}
-
-	protected String getDeployRole() {
-		return deployRole;
-	}
-
-	protected OauthClientDetailsCacheProxy getOauthClientDetailsCacheProxy() {
-		return oauthClientDetailsCacheProxy;
-	}
-
-	protected TsmpClientDao getTsmpClientDao() {
-		return tsmpClientDao;
-	}
-
-	protected TsmpClientCacheProxy getTsmpClientCacheProxy() {
-		return tsmpClientCacheProxy;
-	}
-
-	protected TsmpCoreTokenEntityHelper getTsmpCoreTokenHelper() {
-		return tsmpCoreTokenHelper;
-	}
-
-	protected TsmpTokenHistoryDao getTsmpTokenHistoryDao() {
-		return tsmpTokenHistoryDao;
-	}
-
-	protected TsmpTokenHistoryCacheProxy getTsmpTokenHistoryCacheProxy() {
-		return tsmpTokenHistoryCacheProxy;
-	}
-
-	protected SeqStoreService getSeqStoreService() {
-		return this.seqStoreService;
-	}
-
-	protected TsmpUserCacheProxy getTsmpUserCacheProxy() {
-		return tsmpUserCacheProxy;
-	}
-
-	protected UsersCacheProxy getUsersCacheProxy() {
-		return usersCacheProxy;
-	}
-
-	protected TsmpGroupApiCacheProxy getTsmpGroupApiCacheProxy() {
-		return tsmpGroupApiCacheProxy;
-	}
-
-	protected TsmpClientGroupCacheProxy getTsmpClientGroupCacheProxy() {
-		return tsmpClientGroupCacheProxy;
-	}
-
-	protected TsmpGroupCacheProxy getTsmpGroupCacheProxy() {
-		return tsmpGroupCacheProxy;
-	}
-
-	protected TsmpOpenApiKeyMapCacheProxy getTsmpOpenApiKeyMapCacheProxy() {
-		return tsmpOpenApiKeyMapCacheProxy;
-	}
-
-	protected TsmpApiCacheProxy getTsmpApiCacheProxy() {
-		return tsmpApiCacheProxy;
-	}
-
-	protected TsmpOpenApiKeyDao getTsmpOpenApiKeyDao() {
-		return tsmpOpenApiKeyDao;
-	}
-
-	protected ServiceConfig getServiceConfig() {
-		return serviceConfig;
-	}
-
-	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
-		return dgrAcIdpUserDao;
-	}
-
-	protected TsmpClientHostCacheProxy getTsmpClientHostCacheProxy() {
-		return tsmpClientHostCacheProxy;
-	}
-
-	protected DgrXApiKeyCacheProxy getDgrXApiKeyCacheProxy() {
-		return dgrXApiKeyCacheProxy;
-	}
-
-	protected DgrXApiKeyMapCacheProxy getDgrXApiKeyMapCacheProxy() {
-		return dgrXApiKeyMapCacheProxy;
 	}
 }

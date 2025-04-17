@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.DgrWebsiteDetail;
 import tpi.dgrv4.entity.repository.DgrWebsiteDetailDao;
@@ -17,8 +19,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class DgrWebsiteDetailCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
+
+	@Autowired
+	public DgrWebsiteDetailCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			DgrWebsiteDetailDao dgrWebsiteDetailDao) {
+		super(objectMapper, cache);
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+	}
 
 	public List<DgrWebsiteDetail> findByDgrWebsiteId(Long dgrWebsiteId) {
 		Supplier<List<DgrWebsiteDetail>> supplier = () -> {

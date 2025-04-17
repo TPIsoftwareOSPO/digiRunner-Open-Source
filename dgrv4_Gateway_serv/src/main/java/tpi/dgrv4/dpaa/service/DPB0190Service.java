@@ -22,10 +22,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0190Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private DgrRdbConnectionDao dgrRdbConnectionDao;
-	@Autowired
     private TsmpSettingService tsmpSettingService;
+
+    @Autowired
+	public DPB0190Service(DgrRdbConnectionDao dgrRdbConnectionDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 
 	public DPB0190Resp queryRdbConnectionInfoList(TsmpAuthorization authorization, DPB0190Req req) {
 		DPB0190Resp resp = new DPB0190Resp();

@@ -23,14 +23,18 @@ public class DPB9904Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
+	private DaoGenericCacheService daoGenericCacheService;
 
 	@Autowired
-	private DaoGenericCacheService daoGenericCacheService;
+	public DPB9904Service(TsmpSettingDao tsmpSettingDao, DgrAuditLogService dgrAuditLogService,
+			DaoGenericCacheService daoGenericCacheService) {
+		super();
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.daoGenericCacheService = daoGenericCacheService;
+	}
 
 	public DPB9904Resp deleteTsmpSetting(TsmpAuthorization auth, DPB9904Req req, InnerInvokeParam iip) {
 		

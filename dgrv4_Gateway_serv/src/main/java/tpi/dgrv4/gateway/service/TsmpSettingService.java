@@ -37,17 +37,21 @@ public class TsmpSettingService {
 	@Value("${digiRunner.gtw.deploy.role}")
 	private String deployRole;
 	
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
+	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
 
 	@Autowired
-	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
+	public TsmpSettingService(TsmpSettingCacheProxy tsmpSettingCacheProxy,
+			TsmpTAEASKHelper tsmpTAEASKHelper, ObjectMapper objectMapper,
+			TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
+	}
 
 	// =========================================================
 	// ==================== COMMON METHODS =====================
@@ -1434,4 +1438,23 @@ public class TsmpSettingService {
 		String key = getKey_HIGHWAY_THRESHOLD();
     	return getIntegerVal(key, 1000);
 	}
+
+	public String getKey_ES_LOGFILE_FAIL_RETRY() {
+		return TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY;
+	}
+
+	public boolean getVal_ES_LOGFILE_FAIL_RETRY() {
+		String key = getKey_ES_LOGFILE_FAIL_RETRY();
+		return getBooleanVal(key, false);
+	}
+	public String getKey_ES_CHECK_CONNECTION() {
+		return TsmpSettingDao.Key.ES_CHECK_CONNECTION;
+	}
+
+	public boolean getVal_ES_CHECK_CONNECTION() {
+		String key = getKey_ES_CHECK_CONNECTION();
+		return getBooleanVal(key, false);
+	}
+
+
 }

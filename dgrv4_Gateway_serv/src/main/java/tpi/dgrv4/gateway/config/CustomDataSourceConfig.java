@@ -48,11 +48,6 @@ public class CustomDataSourceConfig {
 	@Value(value = "${dbConnectInit}")
 	private String dbConnectInit;
 
-	@Autowired
-	private DataSourceProperties dataSourceProperties;
-	@Autowired
-	private ObjectMapper om;
-
 	@Value("${spring.datasource.hikari.maximum-pool-size:10}")
 	private int hikariMaximumPoolSize;
 	@Value("${spring.datasource.hikari.connection-timeout:30000}")
@@ -62,6 +57,16 @@ public class CustomDataSourceConfig {
 	@Value("${spring.datasource.hikari.max-lifetime:1800000}")
 	private long hikariMaxLifeTime;
 	private static String tpiSalt = "TPIdigiRunner";
+	
+	private DataSourceProperties dataSourceProperties;
+	private ObjectMapper om;
+	
+	@Autowired
+	public CustomDataSourceConfig(DataSourceProperties dataSourceProperties, ObjectMapper om) {
+		super();
+		this.dataSourceProperties = dataSourceProperties;
+		this.om = om;
+	}
 
 	@Bean
 	public DataSource getDataSource() {
@@ -88,7 +93,7 @@ public class CustomDataSourceConfig {
 				JsonNode dbInfoRespJson = (JsonNode) info.get(TPILogger.DBINFO);
 				String username = JsonNodeUtil.getNodeAsText(dbInfoRespJson, "dbUsername1");
 				String password = JsonNodeUtil.getNodeAsText(dbInfoRespJson, "dbMima1");
-				String username2 = JsonNodeUtil.getNodeAsText(dbInfoRespJson, "dbUsername1");
+				String username2 = JsonNodeUtil.getNodeAsText(dbInfoRespJson, "dbUsername2");
 				String password2 = JsonNodeUtil.getNodeAsText(dbInfoRespJson, "dbMima2");
 				// 回應的訊息必須包含 username1, password1, username2, password2
 				if (!StringUtils.hasLength(username) || !StringUtils.hasLength(password)

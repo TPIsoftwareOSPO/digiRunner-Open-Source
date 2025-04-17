@@ -12,8 +12,13 @@ public class SignBlockService {
 	
 	public static final String SIGNBLOCK_FIXED_VALUE = "DzANBgNVBAgTBnRhaXdhbjEPMA0GA1UEBxMGdGFpcGVpMRMwEQYDVQQKEwp0aGlu";
 	
-	@Autowired
 	private ServiceConfig serviceConfig;
+
+	@Autowired
+	public SignBlockService(ServiceConfig serviceConfig) {
+		super();
+		this.serviceConfig = serviceConfig;
+	}
 
 	public SignBlockResp getSignBlock(TsmpAuthorization tsmpAuthorization) throws Exception {
 		String signBlock = SIGNBLOCK_FIXED_VALUE;

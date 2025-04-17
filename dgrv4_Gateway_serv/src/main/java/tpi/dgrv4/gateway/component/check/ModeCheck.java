@@ -12,13 +12,19 @@ import tpi.dgrv4.gateway.service.TsmpRtnCodeService;
 
 @Component
 public class ModeCheck implements ICheck {
-	@Autowired
-	private TPILogger logger;
-	@Autowired
+	private TPILogger logger = TPILogger.tl;
+	
 	private Environment env;
-	@Autowired
 	private TsmpRtnCodeService tsmpRtnCodeService;
+	
 	private static final String MODE = "digiRunner.gtw.mode";
+
+	@Autowired
+	public ModeCheck(Environment env, TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.env = env;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+	}
 
 	public Boolean check(String uri) {
 		String mode = getMode();

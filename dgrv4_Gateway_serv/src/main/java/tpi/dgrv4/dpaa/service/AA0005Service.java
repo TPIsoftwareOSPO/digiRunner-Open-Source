@@ -34,30 +34,30 @@ public class AA0005Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private UsersDao usersDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private AuthoritiesCacheProxy authoritiesCacheProxy;
 	
+	@Autowired
+	public AA0005Service(AuthoritiesDao authoritiesDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpRoleDao tsmpRoleDao, UsersDao usersDao, DgrAuditLogService dgrAuditLogService, TsmpUserDao tsmpUserDao,
+			TsmpSettingService tsmpSettingService, AuthoritiesCacheProxy authoritiesCacheProxy) {
+		super();
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.usersDao = usersDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.authoritiesCacheProxy = authoritiesCacheProxy;
+	}
+
 	@Transactional
 	public AA0005Resp deleteTUser(TsmpAuthorization auth, AA0005Req req, InnerInvokeParam iip) {
 		

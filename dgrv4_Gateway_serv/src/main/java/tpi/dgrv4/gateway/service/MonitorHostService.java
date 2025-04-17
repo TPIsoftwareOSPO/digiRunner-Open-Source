@@ -34,7 +34,6 @@ import tpi.dgrv4.dpaa.component.DpaaSystemInfoHelper;
 import tpi.dgrv4.dpaa.es.ESLogBuffer;
 import tpi.dgrv4.dpaa.vo.DpaaSystemInfo;
 import tpi.dgrv4.entity.exceptions.DgrException;
-import tpi.dgrv4.gateway.component.job.DeferrableJobManager;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpMonitorLog;
@@ -43,22 +42,14 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
 @Service
 public class MonitorHostService {
-
-	private final static String ES_URL = "ES_URL";
-
-	private final static  String ES_HEADER = "ES_HEADER";
 	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private JobHelper jobHelper;
+	private ConfigurableApplicationContext applicationContext;
+	
+	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
 	
 	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers"))
 	ThreadPoolTaskExecutor asyncWorkerPool;
@@ -67,14 +58,21 @@ public class MonitorHostService {
 	@Qualifier("async-workers-highway")
 	ThreadPoolTaskExecutor asyncWorkerHighwayPool;
 	
-	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
-	
+	private final static String ES_URL = "ES_URL";
+	private final static  String ES_HEADER = "ES_HEADER";
 	private long times = 0;
-	
 	private StringBuilder sb = new StringBuilder();
 	
 	@Autowired
-	private ConfigurableApplicationContext applicationContext;
+	public MonitorHostService(TsmpSettingService tsmpSettingService, CommForwardProcService commForwardProcService,
+			ObjectMapper objectMapper, JobHelper jobHelper, ConfigurableApplicationContext applicationContext) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.commForwardProcService = commForwardProcService;
+		this.objectMapper = objectMapper;
+		this.jobHelper = jobHelper;
+		this.applicationContext = applicationContext;
+	}
 	
 	public void execMonitor() {
 		try {
@@ -359,7 +357,4 @@ public class MonitorHostService {
 	public ObjectMapper getObjectMapper() {
 		return objectMapper;
 	}
-	
-	
-
 }

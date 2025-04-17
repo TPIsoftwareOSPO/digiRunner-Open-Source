@@ -20,10 +20,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB9920Service {
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB9920Service(TsmpDpFileDao tsmpDpFileDao) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+	}
 
 	@Transactional
 	public DPB9920Resp eliminateTsmpDpFile(TsmpAuthorization tsmpAuthorization, DPB9920Req req) {

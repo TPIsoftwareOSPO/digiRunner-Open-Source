@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientCert;
 import tpi.dgrv4.entity.repository.TsmpClientCertDao;
@@ -16,8 +18,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Component
 public class TsmpClientCertCacheProxy extends DaoCacheProxy {
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
+
+	@Autowired
+	public TsmpClientCertCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			TsmpClientCertDao tsmpClientCertDao) {
+		super(objectMapper, cache);
+		this.tsmpClientCertDao = tsmpClientCertDao;
+	}
 
 	public List<TsmpClientCert> findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, long nowLong) {
 		Supplier<List<TsmpClientCert>> supplier = () -> {

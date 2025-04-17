@@ -1,17 +1,14 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
-      <div class="form-group row">
-        <div class="col-6">
-          <span class="p-input-icon-right" style="width: 100%;">
-            <i class="pi pi-search tpi-i-search" (click)="queryWsList();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'site_name'|translate}}、{{'target_ws'|translate}}" (keyup.enter)="queryWsList()">
-          </span>
-        </div>
-        <div class="col-6">
-          <button type="button" class="btn tpi-btn tpi-second float-end"
+      <div class="form-group">
+        <div class="col-12 d-flex">
+          <app-search-input placeholder="{{'site_name'|translate}}、{{'target_ws'|translate}}" [control]="form.get('keyword')"
+            [searchFn]="queryWsList.bind(this)" class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
+          <button type="button" class="btn tpi-btn tpi-second ms-auto"
             (click)="changePage('create');">{{'button.create'|translate}}</button>
+
         </div>
       </div>
 

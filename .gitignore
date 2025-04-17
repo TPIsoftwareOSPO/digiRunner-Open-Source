@@ -12,6 +12,8 @@ build/
 logs/
 **/logs/**
 
+**/bin/**
+
 # User-specific stuff
 .idea
 .idea/**/workspace.xml

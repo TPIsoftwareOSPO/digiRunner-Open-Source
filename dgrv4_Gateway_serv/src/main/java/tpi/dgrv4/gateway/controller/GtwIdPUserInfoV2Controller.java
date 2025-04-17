@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.service.GtwIdPUserInfoV2Service;
 @RestController
 public class GtwIdPUserInfoV2Controller {
 
-	@Autowired
 	private GtwIdPUserInfoV2Service gtwIdPUserInfoV2Service;
+
+	@Autowired
+	public GtwIdPUserInfoV2Controller(GtwIdPUserInfoV2Service gtwIdPUserInfoV2Service) {
+		super();
+		this.gtwIdPUserInfoV2Service = gtwIdPUserInfoV2Service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/v2/userInfo", 
 			produces = MediaType.APPLICATION_JSON_VALUE)

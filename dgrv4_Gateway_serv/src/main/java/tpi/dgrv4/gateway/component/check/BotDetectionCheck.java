@@ -1,27 +1,27 @@
 package tpi.dgrv4.gateway.component.check;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import tpi.dgrv4.entity.entity.TsmpRtnCode;
 import tpi.dgrv4.entity.exceptions.DgrRtnCode;
 import tpi.dgrv4.entity.exceptions.ICheck;
-import tpi.dgrv4.gateway.component.BotDetectionRuleValidator;
 import tpi.dgrv4.gateway.component.BotDetectionCache;
+import tpi.dgrv4.gateway.component.BotDetectionRuleValidator;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.TsmpRtnCodeService;
-import org.springframework.util.StringUtils;
 
+@AllArgsConstructor
 @Component
+@Getter(AccessLevel.PROTECTED)
 public class BotDetectionCheck implements ICheck {
 
-    @Autowired
     private TsmpRtnCodeService tsmpRtnCodeService;
-
-    @Autowired
     private BotDetectionRuleValidator botDetectionRuleValidator;
-    
-    @Autowired
     private BotDetectionCache botDetectionCache;
 
     public boolean check(HttpServletRequest request) {
@@ -81,13 +81,5 @@ public class BotDetectionCheck implements ICheck {
         return tsmpRtnCode != null 
             ? tsmpRtnCode.getTsmpRtnMsg() + " (User-Agent is not allowed.)"
             : getRtnCode().getDefaultMessage() + " (User-Agent is not allowed.)";
-    }
-
-    protected TsmpRtnCodeService getTsmpRtnCodeService() {
-        return tsmpRtnCodeService;
-    }
-
-    protected BotDetectionRuleValidator getBotDetectionRuleValidator() {
-        return botDetectionRuleValidator;
     }
 }

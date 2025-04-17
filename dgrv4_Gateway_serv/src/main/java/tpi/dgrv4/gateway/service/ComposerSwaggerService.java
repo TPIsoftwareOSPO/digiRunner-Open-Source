@@ -23,11 +23,14 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
 @Service
 public class ComposerSwaggerService {
-
-	private TPILogger logger = TPILogger.tl;
+	
+	private ComposerURLService composerURLService;
 
 	@Autowired
-	private ComposerURLService composerURLService;
+	public ComposerSwaggerService(ComposerURLService composerURLService) {
+		super();
+		this.composerURLService = composerURLService;
+	}
 
 	public ResponseEntity<?> forwardToGet(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes) {

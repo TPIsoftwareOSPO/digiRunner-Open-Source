@@ -30,13 +30,19 @@ public class AA0227Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0227Service(TsmpClientGroupDao tsmpClientGroupDao, OauthClientDetailsDao oauthClientDetailsDao,
+			DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0227Resp deleteClientGroupByClientId(TsmpAuthorization authorization, AA0227Req req, InnerInvokeParam iip) {
 				

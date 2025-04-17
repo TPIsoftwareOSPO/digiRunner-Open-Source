@@ -32,15 +32,21 @@ public class AA0218Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0218Service(TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao,
+			BcryptParamHelper bcryptParamHelper, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	public AA0218Resp updateTokenSettingByClient(TsmpAuthorization authorization, AA0218Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		
 		//寫入 Audit Log M

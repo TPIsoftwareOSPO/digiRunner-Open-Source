@@ -23,11 +23,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0194Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
-	private DgrRdbConnectionDao dgrRdbConnectionDao;
 	
-	@Autowired
+	private DgrRdbConnectionDao dgrRdbConnectionDao;
 	private DPB0189Service DPB0189Service;
+
+	@Autowired
+	public DPB0194Service(DgrRdbConnectionDao dgrRdbConnectionDao,
+			tpi.dgrv4.dpaa.service.DPB0189Service dPB0189Service) {
+		super();
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		DPB0189Service = dPB0189Service;
+	}
 
 	@Transactional
 	public DPB0194Resp deleteRdbConnectionInfo(TsmpAuthorization authorization, DPB0194Req req) {

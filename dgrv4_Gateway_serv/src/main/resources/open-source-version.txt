@@ -1,1 +1,1 @@
-release-rc-v4.4.18.1-1-g5c5e4d8ac
+release-rc-v4.5.2.2-18-ga99c4313a

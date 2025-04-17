@@ -1,6 +1,5 @@
 package tpi.dgrv4.gateway.controller;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,8 +18,14 @@ import tpi.dgrv4.gateway.service.DGRCServicePostFormUrlEncoded;
 @RestController
 public class DGRCControllerPostFormUrlEncode {
 	
-	@Autowired
 	private DGRCServicePostFormUrlEncoded service;
+	
+	@Autowired
+	public DGRCControllerPostFormUrlEncode(DGRCServicePostFormUrlEncoded service) {
+		super();
+		this.service = service;
+	}
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = "/dgrc/**", 
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, // 使用 application/x-www-form-urlencoded 格式

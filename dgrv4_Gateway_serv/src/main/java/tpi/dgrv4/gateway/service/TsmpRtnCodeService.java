@@ -17,18 +17,20 @@ import tpi.dgrv4.gateway.util.CacheUtil;
 @Service
 public class TsmpRtnCodeService {
 	
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private DaoCacheService daoCacheService;
 	
+	@Autowired
+	public TsmpRtnCodeService(TsmpRtnCodeDao tsmpRtnCodeDao, JobHelper jobHelper, ApplicationContext ctx,
+			DaoCacheService daoCacheService) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.daoCacheService = daoCacheService;
+	}
 
 	/**
 	 * 由 TsmpRtnCodeId(rtnCode,locale) ,使用快取取得TsmpRtnCode

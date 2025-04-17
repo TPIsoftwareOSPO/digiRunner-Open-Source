@@ -21,8 +21,13 @@ public class DPB0033Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpSiteMapDao tsmpDpSiteMapDao;
+
+	@Autowired
+	public DPB0033Service(TsmpDpSiteMapDao tsmpDpSiteMapDao) {
+		super();
+		this.tsmpDpSiteMapDao = tsmpDpSiteMapDao;
+	}
 
 	public DPB0033Resp addNode(TsmpAuthorization authorization, DPB0033Req req) {
 		String userName = authorization.getUserName();

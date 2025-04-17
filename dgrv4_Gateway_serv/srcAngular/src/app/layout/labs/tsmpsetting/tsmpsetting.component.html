@@ -3,19 +3,12 @@
   <!-- 查詢 -->
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
-      <div class="form-group col-12 px-0">
-
-
-        <span class="p-input-icon-right" style="width: 40vw;">
-          <i class="pi pi-search tpi-i-search" (click)="queryTsmpSettingList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'key'|translate}}、{{'value'|translate}}、{{'memo'|translate}}"
-            (keyup.enter)="queryTsmpSettingList()">
-        </span>
-        <button type="button" class="btn tpi-btn tpi-second float-end"
+      <div class="form-group col-12 px-0 d-flex align-items-center">
+        <app-search-input placeholder="{{'key'|translate}}、{{'value'|translate}}、{{'memo'|translate}}"
+          [control]="keyword" [searchFn]="queryTsmpSettingList.bind(this)"
+          class="col-9 col-lg-4 col-sm-6"></app-search-input>
+        <button type="button" class="btn tpi-btn tpi-second ms-auto"
           (click)="changePage('create');">{{'button.create'|translate}}</button>
-
-        <!-- </div> -->
       </div>
       <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
         <!-- 匯出 tsmp setting -->

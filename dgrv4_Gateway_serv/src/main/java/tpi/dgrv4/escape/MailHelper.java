@@ -10,6 +10,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -25,7 +29,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.cache.proxy.TsmpDpMailTpltCacheProxy;
@@ -37,19 +40,16 @@ import tpi.dgrv4.entity.repository.TsmpDpMailLogDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 //checkmarx, Unchecked Input for Loop Condition
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class MailHelper {
 
 	private List<Pair<String, String>> identifiers = new ArrayList<Pair<String, String>>();
 
-	@Autowired
-	private TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
-
-	@Autowired
-	private TsmpDpMailLogDao tsmpDpMailLogDao;
-
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	private final TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
+	private final TsmpDpMailLogDao tsmpDpMailLogDao;
+	private final TsmpSettingService tsmpSettingService;
 
 	@PostConstruct
 	public void init() throws NumberFormatException {

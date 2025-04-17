@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import jakarta.transaction.Transactional;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpDataStatus;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
@@ -34,21 +33,23 @@ public class DPB0046Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpDpNewsDao tsmpDpNewsDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
 	private ApplicationContext ctx;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
+	@Autowired
+	public DPB0046Service(TsmpDpNewsDao tsmpDpNewsDao, TsmpOrganizationDao tsmpOrganizationDao, JobHelper jobHelper,
+			ApplicationContext ctx, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpNewsDao = tsmpDpNewsDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB0046Resp deleteNews_v3_4(TsmpAuthorization tsmpAuthorization, DPB0046Req req) {
 		Map<String, Object> map = deleteNews(tsmpAuthorization, req);
 		return (DPB0046Resp) map.get("Resp");
@@ -149,8 +150,7 @@ public class DPB0046Service {
 	}
 	
 	protected DPB0046Job getDPB0046Job() {
-		DPB0046Job job = (DPB0046Job) getCtx().getBean("dpb0046Job");
-		return job;
+		return (DPB0046Job) getCtx().getBean("dpb0046Job");
 	}
 
 	protected JobHelper getJobHelper() {

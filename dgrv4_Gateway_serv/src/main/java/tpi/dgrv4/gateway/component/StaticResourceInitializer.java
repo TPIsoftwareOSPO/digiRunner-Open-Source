@@ -32,30 +32,31 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Component
 public class StaticResourceInitializer {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private DPB0115Service dpb0115Service;
-
-	@Autowired
 	private Environment env;
-
-	@Autowired
 	private TsmpOpenApiKeyCacheProxy tsmpOpenApiKeyCacheProxy;
-
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private DgrWebSocketMappingCacheProxy dgrWebSocketMappingCacheProxy;
-	
-	@Autowired
 	private TPILogger logger;
 	
+	@Autowired
+	public StaticResourceInitializer(ObjectMapper objectMapper, DPB0115Service dpb0115Service, Environment env,
+			TsmpOpenApiKeyCacheProxy tsmpOpenApiKeyCacheProxy, TsmpRtnCodeDao tsmpRtnCodeDao,
+			TsmpSettingService tsmpSettingService, DgrWebSocketMappingCacheProxy dgrWebSocketMappingCacheProxy,
+			TPILogger logger) {
+		super();
+		this.objectMapper = objectMapper;
+		this.dpb0115Service = dpb0115Service;
+		this.env = env;
+		this.tsmpOpenApiKeyCacheProxy = tsmpOpenApiKeyCacheProxy;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrWebSocketMappingCacheProxy = dgrWebSocketMappingCacheProxy;
+		this.logger = logger;
+	}
+
 	@PostConstruct
 	public void init() {
 		ControllerUtil.setObjectMapper(getObjectMapper());

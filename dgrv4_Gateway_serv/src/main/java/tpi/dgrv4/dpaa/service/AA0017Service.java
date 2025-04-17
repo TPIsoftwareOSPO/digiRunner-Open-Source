@@ -21,15 +21,19 @@ public class AA0017Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;	
 	
+	@Autowired
+	public AA0017Service(TsmpRoleDao tsmpRoleDao, TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@Transactional
 	public AA0017Resp deleteTRoleRoleMap(TsmpAuthorization authorization, AA0017Req req) {
 		AA0017Resp resp = new AA0017Resp();

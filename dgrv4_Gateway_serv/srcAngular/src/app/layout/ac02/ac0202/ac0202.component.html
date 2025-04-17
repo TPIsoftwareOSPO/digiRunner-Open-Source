@@ -129,19 +129,16 @@
     </p-table>
   </div>
   <div [hidden]="pageNum != 9">
-    <form [formGroup]=form (ngSubmit)="queryGroupListData()">
+    <form [formGroup]="form">
       <div class="form-group row col-12">
         <!-- <div class="col-6 col-xl-6 col-lg-6">
           <label class="control-label">{{'keyword_search'|translate}}</label>
           <input type="text" class="form-control" formControlName="keyword"
             placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}">
         </div> -->
-
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryGroupListData();"></i>
-          <input type="search" class="form-control tpi-i-input" formControlName="keyword"
-            placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryGroupListData.bind(this)"
+        class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
       <!-- <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
@@ -1551,25 +1548,13 @@
   </div>
   <!-- 群組列表 -->
   <div *ngIf="pageNum == 7">
-    <form [formGroup]="form" (ngSubmit)="queryGroupList()">
-      <div class="form-group">
-        <!-- <div class="col-4 col-xl-4 col-lg-4">
-          <label for="keyword">{{'keyword_search'|translate}}</label>
-          <input type="text" class="form-control" formControlName="keyword"
-            placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}">
-        </div> -->
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryGroupList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}">
-        </span>
+    <form [formGroup]="form">
+      <div class="form-group col-12 d-flex">
+        <app-search-input placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryGroupList.bind(this)"
+        class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
-      <!-- <div class="form-group row">
-        <div class="col-3 col-xl-3 col-lg-3">
-          <button type="button" class="btn tpi-btn tpi-primary pull-right me-3"
-            (click)="queryGroupList();">{{'button.search'|translate}}</button>
-        </div>
-      </div> -->
+
     </form>
     <hr>
     <p-table *ngIf="groupInfoListCols" [columns]="groupInfoListCols" [value]="groupInfoList" selectionMode="single"
@@ -1636,25 +1621,15 @@
   </div>
   <!-- 虛擬群組列表 -->
   <div *ngIf="pageNum == 8">
-    <form [formGroup]="form" (ngSubmit)="searchVGroupList()">
-      <div class="form-group ">
-        <!-- <div class="col-4 col-xl-4 col-lg-4">
-          <label for="keyword">{{'keyword_search'|translate}}</label>
-          <input type="text" class="form-control" formControlName="keyword"
-            placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}">
-        </div> -->
-        <span class="p-input-icon-right" style="width:50vw">
-          <i class="pi pi-search tpi-i-search" (click)="searchVGroupList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}">
-        </span>
-      </div>
-      <!-- <div class="form-group row">
-        <div class="col-3 col-xl-3 col-lg-3">
-          <button type="button" class="btn tpi-btn tpi-primary pull-right me-3"
-            (click)="searchVGroupList();">{{'button.search'|translate}}</button>
+    <form [formGroup]="form">
+      <div class="form-group col-12 d-flex">
+        <div class="col-12 d-flex align-items-center">
+          <app-search-input placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}"
+          [control]="form.get('keyword')" [searchFn]="searchVGroupList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
         </div>
-      </div> -->
+      </div>
+
     </form>
     <hr>
     <p-table *ngIf="vgroupInfoListCols" [columns]="vgroupInfoListCols" [value]="vgroupInfoList" selectionMode="single"

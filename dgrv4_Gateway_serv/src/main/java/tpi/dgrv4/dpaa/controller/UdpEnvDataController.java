@@ -29,9 +29,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class UdpEnvDataController {
 	
-	@Autowired
 	private UdpEnvDataService service;
 	
+	@Autowired
+	public UdpEnvDataController(UdpEnvDataService service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * @param headers
 	 * @param req

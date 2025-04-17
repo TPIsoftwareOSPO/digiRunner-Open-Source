@@ -32,17 +32,20 @@ public class DPB0054Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
+	private TsmpOrganizationDao tsmpOrganizationDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
-	private FileHelper fileHelper;
+	public DPB0054Service(TsmpDpFileDao tsmpDpFileDao, TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao,
+			TsmpOrganizationDao tsmpOrganizationDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.fileHelper = fileHelper;
+	}
 
 	@Transactional
 	public DPB0054Resp updateTheme(TsmpAuthorization authorization, DPB0054Req req) {

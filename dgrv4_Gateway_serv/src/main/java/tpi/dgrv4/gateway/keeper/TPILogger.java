@@ -51,8 +51,10 @@ import tpi.dgrv4.dpaa.es.DiskSpaceMonitor;
 import tpi.dgrv4.dpaa.es.ESLogBuffer;
 import tpi.dgrv4.dpaa.es.EsHttpClient;
 import tpi.dgrv4.dpaa.service.ChangeDbConnInfoService;
+import tpi.dgrv4.dpaa.service.RealtimeDashboardService;
 import tpi.dgrv4.dpaa.vo.DpaaSystemInfo;
 import tpi.dgrv4.entity.entity.TsmpSetting;
+import tpi.dgrv4.entity.ifs.IEntityTPILogger;
 import tpi.dgrv4.entity.repository.DgrDashboardEsLogDao;
 import tpi.dgrv4.entity.repository.DgrNodeLostContactDao;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
@@ -65,24 +67,33 @@ import tpi.dgrv4.gateway.component.ServerConfigProperties;
 import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.cache.core.GenericCache;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpSettingCacheProxy;
-import tpi.dgrv4.gateway.component.job.DeferrableJobManager;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.constant.DgrDeployRole;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.server.CommunicationServerConfig;
-import tpi.dgrv4.gateway.service.*;
+import tpi.dgrv4.gateway.service.AwsApiService;
+import tpi.dgrv4.gateway.service.CommForwardProcService;
+import tpi.dgrv4.gateway.service.DPB0059Service;
+import tpi.dgrv4.gateway.service.DgrApiLog2ESQueue;
+import tpi.dgrv4.gateway.service.DgrApiLog2RdbQueue;
+import tpi.dgrv4.gateway.service.IUndertowMetricsService;
+import tpi.dgrv4.gateway.service.InMemoryGtwRefresh2LandingService;
+import tpi.dgrv4.gateway.service.MonitorHostService;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
+import tpi.dgrv4.gateway.service.WebsiteService;
 import tpi.dgrv4.gateway.vo.ClientKeeper;
 import tpi.dgrv4.tcp.utils.communication.ClinetNotifier;
 import tpi.dgrv4.tcp.utils.communication.LinkerClient;
 import tpi.dgrv4.tcp.utils.communication.Role;
 import tpi.dgrv4.tcp.utils.packets.DoSetUserName;
+import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 import tpi.dgrv4.tcp.utils.packets.UndertowMetricsPacket;
 import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 
 @Component
-public class TPILogger extends ITPILogger {
+public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	// ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
 	public static boolean trace_flag = false; // 可由 LoggerFlagController 啟用/停用
 	public static boolean debug_flag = false; // 可由 LoggerFlagController 啟用/停用
@@ -119,6 +130,9 @@ public class TPILogger extends ITPILogger {
 	
 	@Autowired
 	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
+	
+	@Autowired
+	private RealtimeDashboardService realtimeDashboardService;
 
 	@Autowired(required = false)
 	private LicenseUtilBase util;
@@ -162,6 +176,7 @@ public class TPILogger extends ITPILogger {
 
 	@Autowired
 	private ServiceConfig serviceConfig;
+	
 	private Thread scheduler_t_refresh = null;
 	private Thread scheduler_t_check = null;
 
@@ -290,6 +305,7 @@ public class TPILogger extends ITPILogger {
 	static {
 		tl = new TPILogger();
 		ITPILogger.tl = tl;
+		IEntityTPILogger.Holder.setInstance(tl);
 		TPIFileLoggerQueue.startThread();
 	}
 
@@ -297,6 +313,7 @@ public class TPILogger extends ITPILogger {
 	public void init() {
 		tl = this;
 		ITPILogger.tl = tl;
+		IEntityTPILogger.Holder.setInstance(tl);
 		initKeeper();
 
 		// init logger LEVEL
@@ -332,24 +349,6 @@ public class TPILogger extends ITPILogger {
 			return tsmpSetting.getValue();
 		}
 		return "";
-	}
-
-	private void testRun() {
-		new Thread() {
-			public void run() {
-				while (true) {
-					for (int i = 0; i < 500; i++) {
-						TPILogger.tl.trace(i + " = # .............................................. #");
-					}
-					try {
-						Thread.sleep(500);
-					} catch (Exception e) {
-						error(StackTraceUtil.logStackTrace(e));
-						Thread.currentThread().interrupt();
-					}
-				}
-			}
-		}.start();
 	}
 
 	public void initKeeper() {
@@ -767,6 +766,27 @@ public class TPILogger extends ITPILogger {
 			int maxFiles = getConfiguredMaxFiles(); // 例如 50,000
 			DiskSpaceMonitor.getInstance(maxDirSize, maxFiles).start();
 		}
+
+		updateESLogFlag();
+	}
+	
+	public void updateESLogFlag() {
+		try {
+			DgrApiLog2ESQueue.esUrlCheckConnection = getTsmpSettingService().getVal_ES_CHECK_CONNECTION();
+		} catch (Exception e) {
+			TPILogger.tl.error(StackTraceUtil.logTpiShortStackTrace(e));
+		}
+		
+		try {
+			ESLogBuffer.enableRetry = getTsmpSettingService().getVal_ES_LOGFILE_FAIL_RETRY();
+		} catch (Exception e) {
+			TPILogger.tl.error(StackTraceUtil.logTpiShortStackTrace(e));
+		}
+		
+		
+		TPILogger.tl.info(String.format("\n...ES_CHECK_CONNECTION=[%b] ,ES_LOGFILE_FAIL_RETRY=[%b]", 
+				DgrApiLog2ESQueue.esUrlCheckConnection, 
+				ESLogBuffer.enableRetry ));
 	}
 
 	private void createLinkerClient() throws UnknownHostException, IOException {
@@ -866,7 +886,9 @@ public class TPILogger extends ITPILogger {
 						String uriStatus = GatewayFilter.fetchUriHistoryList();
 						UrlStatusPacket urlStatusPacket = new UrlStatusPacket(lc.userName, uriStatus);
 						
-						inMemoryGtwRefresh2LandingService.landingGtw(nodeInfoPacket, undertowMetricsPacket, urlStatusPacket);
+						RealtimeDashboardPacket realtimeDashboardPacket = realtimeDashboardService.getPacket(lc.userName);
+						
+						inMemoryGtwRefresh2LandingService.landingGtw(nodeInfoPacket, undertowMetricsPacket, urlStatusPacket, realtimeDashboardPacket);
 					} catch (InterruptedException e) {
 						TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 						Thread.currentThread().interrupt();
@@ -1300,6 +1322,10 @@ public class TPILogger extends ITPILogger {
 						// online console 'URI Status' data
 						String uriStatus = GatewayFilter.fetchUriHistoryList();
 						lc.send(new UrlStatusPacket(lc.userName, uriStatus));
+						RealtimeDashboardPacket realtimeDashboardPacket = realtimeDashboardService.getPacket(lc.userName);
+						if(realtimeDashboardPacket != null) {
+							lc.send(realtimeDashboardPacket);
+						}
 					} catch (InterruptedException e) {
 						TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 						// Restore interrupted state...

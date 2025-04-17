@@ -37,11 +37,11 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Component
 public class IdPApiHelper {
 
-	@Autowired
 	private TokenHelper tokenHelper;
+	
 	private static String AC_IdP_API_login_API_failed = "AC IdP(API) login API failed";
 	private static String GTW_IdP_API_login_API_failed = "GTW API(API) IdP login API failed";
-	
+
 	public static class ApiUserInfoData {
 		public String errMsg;
 		public String apiResp;
@@ -51,6 +51,12 @@ public class IdPApiHelper {
 		public String userPicture;
 		public String idtLightId ;
 		public String idtRoleName;
+	}
+
+	@Autowired
+	public IdPApiHelper(TokenHelper tokenHelper) {
+		super();
+		this.tokenHelper = tokenHelper;
 	}
 
 	/**

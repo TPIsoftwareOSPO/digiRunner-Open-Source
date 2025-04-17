@@ -32,22 +32,23 @@ public class AA1004Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-	
-	@Autowired
 	private TsmpnApiModuleDao tsmpnApiModuleDao;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
 	
-	
+	@Autowired
+	public AA1004Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao,
+			TsmpApiModuleDao tsmpApiModuleDao, TsmpnApiModuleDao tsmpnApiModuleDao, TsmpUserDao tsmpUserDao) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpnApiModuleDao = tsmpnApiModuleDao;
+		this.tsmpUserDao = tsmpUserDao;
+	}
+
 	@Transactional
 	public AA1004Resp deleteTOrgByOrgId (TsmpAuthorization auth, AA1004Req req) {
 		AA1004Resp resp = new AA1004Resp();

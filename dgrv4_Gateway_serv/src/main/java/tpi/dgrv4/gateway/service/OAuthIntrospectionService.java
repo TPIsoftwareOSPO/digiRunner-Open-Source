@@ -36,23 +36,25 @@ import java.util.Map;
 @Service
 public class OAuthIntrospectionService {
 
-	@Autowired
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
+	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
 
 	@Autowired
-	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	public OAuthIntrospectionService(TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, TokenHelper tokenHelper,
+			TsmpSettingService tsmpSettingService, DgrAcIdpUserDao dgrAcIdpUserDao, TsmpUserDao tsmpUserDao,
+			TsmpTokenHistoryDao tsmpTokenHistoryDao) {
+		super();
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+		this.tokenHelper = tokenHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+	}
 
 	public ResponseEntity<?> introspection(HttpServletRequest httpReq, HttpServletResponse httpRes) {
 		String reqUri = httpReq.getRequestURI();

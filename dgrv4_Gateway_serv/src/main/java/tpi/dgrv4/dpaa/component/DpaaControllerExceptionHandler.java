@@ -43,18 +43,21 @@ public class DpaaControllerExceptionHandler {
 	private final String RTN_CODE = "RTN_CODE";
 	private final String RTN_MSG = "RTN_MSG";
 
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
+	@Autowired
+	public DpaaControllerExceptionHandler(ServiceConfig serviceConfig, TsmpRtnCodeDao tsmpRtnCodeDao,
+			TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy, TsmpSettingService tsmpSettingService) {
+		super();
+		this.serviceConfig = serviceConfig;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@ExceptionHandler(TsmpDpAaException.class)
 	public ModelAndView handleDpAaException(TsmpDpAaException ex) {
 		this.logger.debug(String.format("Enter %s", getClass().getSimpleName()));

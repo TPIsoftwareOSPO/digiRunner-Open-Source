@@ -34,16 +34,20 @@ public class DPB0094Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao; 
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao; 
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0094Service(TsmpClientDao tsmpClientDao, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0094Resp queryOpenApiKeyByDateAndLike(TsmpAuthorization authorization, DPB0094Req req, ReqHeader reqHeader) {
 		DPB0094Resp resp = new DPB0094Resp();

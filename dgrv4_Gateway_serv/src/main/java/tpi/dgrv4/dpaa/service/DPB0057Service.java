@@ -31,17 +31,20 @@ public class DPB0057Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
+	private TsmpDpFileDao tsmpDpFileDao;
+	private TsmpOrganizationDao tsmpOrganizationDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
-	
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
-	private FileHelper fileHelper;
+	public DPB0057Service(TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpDpFileDao tsmpDpFileDao,
+			TsmpOrganizationDao tsmpOrganizationDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.fileHelper = fileHelper;
+	}
 
 	@Transactional
 	public DPB0057Resp deleteTheme(TsmpAuthorization authorization, DPB0057Req req) {

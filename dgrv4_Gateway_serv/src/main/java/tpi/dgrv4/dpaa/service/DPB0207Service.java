@@ -40,17 +40,20 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0207Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private DgrXApiKeyDao dgrXApiKeyDao;
-
-	@Autowired
 	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
+	private TsmpGroupDao tsmpGroupDao;
 
 	@Autowired
-	private TsmpGroupDao tsmpGroupDao;
+	public DPB0207Service(TsmpClientDao tsmpClientDao, DgrXApiKeyDao dgrXApiKeyDao, DgrXApiKeyMapDao dgrXApiKeyMapDao,
+			TsmpGroupDao tsmpGroupDao) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.dgrXApiKeyDao = dgrXApiKeyDao;
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+	}
 
 	public DPB0207Resp queryXApiKeyListByClientId(TsmpAuthorization authorization, DPB0207Req req) {
 		DPB0207Resp resp = new DPB0207Resp();

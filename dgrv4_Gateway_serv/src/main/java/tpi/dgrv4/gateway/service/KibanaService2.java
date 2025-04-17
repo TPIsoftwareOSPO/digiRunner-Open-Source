@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -45,22 +46,29 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 @Service
 public class KibanaService2 {
 
-
-    @Autowired
     private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-    @Autowired
     private CApiKeyService capiKeyService;
-
-    @Autowired
     private TsmpSettingService tsmpSettingService;
+    
+    @Value("${digi.url.prefix:}")
+    private String urlPrefix;
 
     public static HashMap<String, HttpResponse<byte[]>> cacheMap;
     private static String kibanaUser = null;
     private static String kibanaPwd = null;
     private static String auth = null;
 
-    public void login(HttpHeaders httpHeaders, String reportURL, HttpServletRequest request,
+    @Autowired
+    public KibanaService2(TsmpSettingCacheProxy tsmpSettingCacheProxy, CApiKeyService capiKeyService,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.capiKeyService = capiKeyService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
+
+	public void login(HttpHeaders httpHeaders, String reportURL, HttpServletRequest request,
                       HttpServletResponse response) {
         try {
 
@@ -91,10 +99,12 @@ public class KibanaService2 {
                 loginKbn(response);
             }
 
-
-            //checkmarx, ReDoS From Regex Injection ,所以用replaceAll會有問題,理論上取代一次就行了, 已通過中風險
             // 直接轉導 Kibana URL
-            String localUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+            String localUrl = urlPrefix;
+            if(!StringUtils.hasText(localUrl)) {
+            	//checkmarx, ReDoS From Regex Injection ,所以用replaceAll會有問題, 改用沒Regex, 已通過中風險
+            	localUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+            }
             String redirecturl = localUrl + reportURL;
             response.sendRedirect(redirecturl);
 
@@ -234,15 +244,19 @@ public class KibanaService2 {
         }
 
         try {
-            String resourceURL = getKibanaURL() + request.getRequestURI();
+            String kibanaPrefix = getTsmpSettingService().getVal_KIBANA_REPORTURL_PREFIX();
+            String path =  request.getRequestURI();
+            if (path.contains(kibanaPrefix)) {
+                path = path.replaceFirst(kibanaPrefix, "");
+            }
+            String resourceURL = getKibanaURL() + path;
+            // 去掉 /kibana2
+            URI uri = new URI(resourceURL);
+
+            resourceURL = HttpUtil.removeDefaultPort(resourceURL);
             String querString = request.getQueryString();
             if (querString != null) {
                 resourceURL = resourceURL + "?" + querString;
-            }
-            // 去掉 /kibana2
-            String kibanaPrefix = getTsmpSettingService().getVal_KIBANA_REPORTURL_PREFIX();
-            if (resourceURL.contains(kibanaPrefix)) {
-                resourceURL = resourceURL.replaceFirst(kibanaPrefix, "");
             }
             sb.append("\nrequrli:　" + resourceURL);
 
@@ -380,13 +394,15 @@ public class KibanaService2 {
                 errsb.append("AsyncRequestNotUsableException = " + StackTraceUtil.logTpiShortStackTrace(e) + "\n\n");
                 errsb.append("current byte total = " + total + "\n\n");
                 TPILogger.tl.warn(errsb.toString());
+                cacheMap.clear();
+                TPILogger.tl.info("Clear Kibana cache");
                 return;
             }
             outputStream.flush();
             sb.append("\n resp body len : " + CheckmarxUtils.sanitizeForCheckmarx(httpResponse).length);
 
             sb.append("\n ===============================================");
-            if (httpResponse.statusCode() >= 400) {
+            if (httpResponse.statusCode() >= 400 || httpResponse.statusCode() <= 0) {
                 TPILogger.tl.error(sb.toString());
                 if (cacheMap != null) {
                     cacheMap.clear();
@@ -398,6 +414,9 @@ public class KibanaService2 {
             return;
 
         } catch (Exception e) {
+            cacheMap.clear();
+            TPILogger.tl.info("Clear Kibana cache");
+            TPILogger.tl.error(sb.toString());
             TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
             Thread.currentThread().interrupt();
         }

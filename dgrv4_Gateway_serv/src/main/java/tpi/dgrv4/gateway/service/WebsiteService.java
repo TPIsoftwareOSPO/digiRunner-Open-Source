@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -69,42 +70,35 @@ public class WebsiteService {
 	public static final String TYPE_REQ = "req";
 	public static final String TYPE_RESP = "resp";
 
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private DgrWebsiteCacheProxy dgrWebsiteCacheProxy;
-
-	@Autowired
 	private DgrWebsiteDetailCacheProxy dgrWebsiteDetailCacheProxy;
-	
-	@Autowired	
 	private GtwIdPVerifyService gtwIdPVerifyService;
-	
-	@Autowired	
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private SqlInjectionCheck sqlInjectionCheck;
-
-	@Autowired
 	private XssCheck xssCheck;
-
-	@Autowired
 	private XxeCheck xxeCheck;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private GatewayFilter gatewayFilter;
 	
-
-	public WebsiteService() {
-
+	@Autowired
+	public WebsiteService(TsmpSettingCacheProxy tsmpSettingCacheProxy, TsmpSettingService tsmpSettingService,
+			DgrWebsiteCacheProxy dgrWebsiteCacheProxy, DgrWebsiteDetailCacheProxy dgrWebsiteDetailCacheProxy,
+			GtwIdPVerifyService gtwIdPVerifyService, TokenHelper tokenHelper, SqlInjectionCheck sqlInjectionCheck,
+			XssCheck xssCheck, XxeCheck xxeCheck, ObjectMapper objectMapper, @Lazy GatewayFilter gatewayFilter) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrWebsiteCacheProxy = dgrWebsiteCacheProxy;
+		this.dgrWebsiteDetailCacheProxy = dgrWebsiteDetailCacheProxy;
+		this.gtwIdPVerifyService = gtwIdPVerifyService;
+		this.tokenHelper = tokenHelper;
+		this.sqlInjectionCheck = sqlInjectionCheck;
+		this.xssCheck = xssCheck;
+		this.xxeCheck = xxeCheck;
+		this.objectMapper = objectMapper;
+		this.gatewayFilter = gatewayFilter;
 	}
 
 	public void resource(HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response,

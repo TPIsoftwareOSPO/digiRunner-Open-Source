@@ -28,14 +28,18 @@ public class TsmpInvokeCommonService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private ObjectMapper objectMapper;
+	private TsmpInvokeHelper tsmpInvokeHelper;
 
 	@Autowired
-	private TsmpInvokeHelper tsmpInvokeHelper;
+	public TsmpInvokeCommonService(FileHelper fileHelper, ObjectMapper objectMapper,
+			TsmpInvokeHelper tsmpInvokeHelper) {
+		super();
+		this.fileHelper = fileHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpInvokeHelper = tsmpInvokeHelper;
+	}
 
 	public <R extends CgRespBody, T> R callCgApi_direct(String mockId, String apiType, Map<String, String> cgReqHeader, //
 		T cgReqBody, Class<R> cgRespBodyClass, String httpMethod, String queryString) {

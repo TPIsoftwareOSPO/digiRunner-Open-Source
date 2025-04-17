@@ -51,25 +51,33 @@ public class AA0203Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	@Autowired
 	private TsmpSecurityLevelDao securityLVDao;
 	
+	@Autowired
+	public AA0203Service(TsmpClientDao tsmpClientDao, TsmpSettingDao tsmpSettingDao,
+			TsmpDpClientextDao tsmpDpClientextDao, TsmpClientHostDao tsmpClientHostDao,
+			TsmpClientGroupDao tsmpClientGroupDao, TsmpClientVgroupDao tsmpClientVgroupDao, TsmpGroupDao tsmpGroupDao,
+			TsmpVgroupDao tsmpVgroupDao, TsmpSecurityLevelDao securityLVDao) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpClientHostDao = tsmpClientHostDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.securityLVDao = securityLVDao;
+	}
+
 	/**
 	 * 1.查詢TSMP_CLIENT資料表，條件TSMP_CLIENT.CLIENT_ID = AA0203Req.clientID AND TSMP_CLIENT.CLIENT_NAME = AA0203Req.clientName ，若沒有查詢到資料則throw RTN Code 1344。
 	 * 2.將步驟1查詢到資料轉換成AA0203Resp。

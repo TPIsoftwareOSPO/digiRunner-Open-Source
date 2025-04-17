@@ -275,7 +275,7 @@ export class ToolService {
     sessionStorage.setItem('AcConf', acConf);
   }
 
-  getAcConf(): AA0510Resp {
+  getAcConf() {
     // console.log(sessionStorage.getItem("AcConf"))
     // return sessionStorage.getItem("AcConf") ? JSON.parse(sessionStorage.getItem("AcConf")!) as AA0510Resp : '';
     return sessionStorage.getItem('AcConf')

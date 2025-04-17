@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.Authorities;
 import tpi.dgrv4.entity.entity.TsmpUser;
@@ -19,11 +21,16 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class AuthoritiesCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private UsersDao usersDao;
+
+	@Autowired
+	public AuthoritiesCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache, AuthoritiesDao authoritiesDao,
+			UsersDao usersDao) {
+		super(objectMapper, cache);
+		this.authoritiesDao = authoritiesDao;
+		this.usersDao = usersDao;
+	}
 
 	public List<Authorities> findByUsername(String userName) {
 		Supplier<List<Authorities>> supplier = () -> {

@@ -21,6 +21,7 @@ import tpi.dgrv4.dpaa.component.TsmpMailEventBuilder;
 import tpi.dgrv4.dpaa.component.cache.proxy.TsmpDpMailTpltCacheProxy;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpDpFile;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
@@ -33,10 +34,15 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd2d;
 import tpi.dgrv4.entity.entity.sql.TsmpDpThemeCategory;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiExtDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2dDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
 import tpi.dgrv4.entity.repository.TsmpDpThemeCategoryDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.escape.MailHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -52,26 +58,32 @@ public class DpReqQueryImpl_D2 extends DpReqQueryAbstract<DpReqQueryResp_D2> //
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao;
-
-	@Autowired
 	private TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
+	private TsmpApiExtDao tsmpApiExtDao;
 
 	@Autowired
-	private TsmpApiExtDao tsmpApiExtDao;
+	public DpReqQueryImpl_D2(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
+			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao,
+			TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao, TsmpApiDao tsmpApiDao,
+			TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpDpFileDao tsmpDpFileDao2,
+			TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy, TsmpApiExtDao tsmpApiExtDao) {
+		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
+				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
+		this.tsmpDpReqOrderd2Dao = tsmpDpReqOrderd2Dao;
+		this.tsmpDpReqOrderd2dDao = tsmpDpReqOrderd2dDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		tsmpDpFileDao = tsmpDpFileDao2;
+		this.tsmpDpMailTpltCacheProxy = tsmpDpMailTpltCacheProxy;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+	}
 
 	@Override
 	public List<DpReqQueryResp_D2> doQueryDetail(Long reqOrdermId, String locale) {

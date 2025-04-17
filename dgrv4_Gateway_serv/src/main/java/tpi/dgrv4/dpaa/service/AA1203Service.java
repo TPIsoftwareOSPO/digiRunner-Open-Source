@@ -40,20 +40,23 @@ public class AA1203Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpReportDataDao tsmpReportDataDao;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private TsmpApiDao tsmpApiDao;
+	private TsmpOrganizationDao tsmpOrganizationDao;
 
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
-	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
+	public AA1203Service(BcryptParamHelper bcryptParamHelper, TsmpReportDataDao tsmpReportDataDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpApiDao tsmpApiDao,
+			TsmpOrganizationDao tsmpOrganizationDao) {
+		super();
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpReportDataDao = tsmpReportDataDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+	}
 
 	public AA1203Resp queryAPIAverageTime(TsmpAuthorization authorization, AA1203Req req, ReqHeader reqHeader) {
 		AA1203Resp resp = null;

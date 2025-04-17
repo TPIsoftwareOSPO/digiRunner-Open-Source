@@ -28,15 +28,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0115Service {
 
-	@Autowired
 	private TPILogger logger;
-
-	@Autowired
-	private AuthoritiesCacheProxy authoritiesCacheProxy;
 	
-	@Autowired
+	private AuthoritiesCacheProxy authoritiesCacheProxy;
 	private TsmpRoleTxidMapCacheProxy tsmpRoleTxidMapCacheProxy;
 	
+	@Autowired
+	public DPB0115Service(AuthoritiesCacheProxy authoritiesCacheProxy,
+			TsmpRoleTxidMapCacheProxy tsmpRoleTxidMapCacheProxy) {
+		super();
+		this.authoritiesCacheProxy = authoritiesCacheProxy;
+		this.tsmpRoleTxidMapCacheProxy = tsmpRoleTxidMapCacheProxy;
+	}
+
 	public DPB0115Resp queryRTMapByUk(TsmpAuthorization auth, DPB0115Req req) {
 		checkParams(auth, req);
 		

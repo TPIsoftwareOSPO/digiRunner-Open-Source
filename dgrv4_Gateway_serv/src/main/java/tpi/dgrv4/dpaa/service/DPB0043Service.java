@@ -32,17 +32,21 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0043Service {
 	
-	@Autowired
 	private TsmpDpNewsDao tsmpDpNewsDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private BcryptParamHelper helper;
 	
 	private TPILogger logger = TPILogger.tl;
 	
+	@Autowired
+	public DPB0043Service(TsmpDpNewsDao tsmpDpNewsDao, TsmpOrganizationDao tsmpOrganizationDao,
+			BcryptParamHelper helper) {
+		super();
+		this.tsmpDpNewsDao = tsmpDpNewsDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.helper = helper;
+	}
+
 	public DPB0043Resp updateNews(TsmpAuthorization authorization, DPB0043Req req, ReqHeader reqHeader) {
 		DPB0043Resp resp = new DPB0043Resp();
 		

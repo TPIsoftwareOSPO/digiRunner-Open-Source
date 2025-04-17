@@ -35,15 +35,19 @@ public class DPB0123UdpService {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private LdapAuthResultDao ldapAuthResultDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
 	
+	@Autowired
+	public DPB0123UdpService(LdapAuthResultDao ldapAuthResultDao, TsmpSettingService tsmpSettingService,
+			TsmpRtnCodeDao tsmpRtnCodeDao) {
+		super();
+		this.ldapAuthResultDao = ldapAuthResultDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+	}
+
 	public DPB0123UdpResp udpDoubleCheckLogin(HttpServletRequest req) {
 		Map<String, String> parameters = new HashMap<>();
 		req.getParameterMap().forEach((k, vs) -> {

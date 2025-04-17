@@ -18,23 +18,25 @@ public class DpReqQueryFactory {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
+	private DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1;
+	private DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2;
+	private DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3;
+	private DpReqQueryIfs<DpReqQueryResp_D4> dpReqQueryD4;
+	private DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5;
 
 	@Autowired
-	private DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1;
-	
-	@Autowired
-	private DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2;
-	
-	@Autowired
-	private DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3;
-	
-	@Autowired
-	private DpReqQueryIfs<DpReqQueryResp_D4> dpReqQueryD4;
-	
-	@Autowired
-	private DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5;
+	public DpReqQueryFactory(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, DpReqQueryIfs<DpReqQueryResp_D1> dpReqQueryD1,
+			DpReqQueryIfs<DpReqQueryResp_D2> dpReqQueryD2, DpReqQueryIfs<DpReqQueryResp_D3> dpReqQueryD3,
+			DpReqQueryIfs<DpReqQueryResp_D4> dpReqQueryD4, DpReqQueryIfs<DpReqQueryResp_D5> dpReqQueryD5) {
+		super();
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.dpReqQueryD1 = dpReqQueryD1;
+		this.dpReqQueryD2 = dpReqQueryD2;
+		this.dpReqQueryD3 = dpReqQueryD3;
+		this.dpReqQueryD4 = dpReqQueryD4;
+		this.dpReqQueryD5 = dpReqQueryD5;
+	}
 
 	/**
 	 * @param reqOrdermId

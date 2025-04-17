@@ -10,30 +10,41 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tpi.dgrv4.dpaa.component.DpaaSystemInfoHelper;
 import tpi.dgrv4.dpaa.component.alert.DpaaAlertDetectResult;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertDispatcherJobHelper;
 import tpi.dgrv4.dpaa.component.alert.DpaaAlertEvent;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierCustom;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierLine;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierRoleEmail;
 import tpi.dgrv4.dpaa.constant.DpaaAlertType;
 import tpi.dgrv4.dpaa.vo.DpaaSystemInfo;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
+import tpi.dgrv4.entity.repository.TsmpAlertDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
 public class DpaaAlertDetectorJobSystemBasic extends DpaaAlertDetectorJob<DpaaAlertDetectorJobSystemBasicParams> {
 
 	private TPILogger logger = TPILogger.tl;
-
 	
 	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
 	
-	public DpaaAlertDetectorJobSystemBasic(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper) throws Exception {
-		super(tsmpDpApptJob, objectMapper, DpaaAlertDetectorJobSystemBasicParams.class);
+	public DpaaAlertDetectorJobSystemBasic(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper,
+			ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao,
+			DpaaAlertNotifierRoleEmail dpaaAlertNotifierRoleEmail, DpaaAlertNotifierLine dpaaAlertNotifierLine,
+			DpaaAlertNotifierCustom dpaaAlertNotifierCustom, DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper,
+			TsmpAlertDao tsmpAlertDao) throws Exception {
+		super(tsmpDpApptJob, objectMapper, DpaaAlertDetectorJobSystemBasicParams.class, apptJobDispatcher,
+				tsmpDpApptJobDao, dpaaAlertNotifierRoleEmail, dpaaAlertNotifierLine, dpaaAlertNotifierCustom,
+				dpaaAlertDispatcherJobHelper, tsmpAlertDao);
 	}
 
 	@Override

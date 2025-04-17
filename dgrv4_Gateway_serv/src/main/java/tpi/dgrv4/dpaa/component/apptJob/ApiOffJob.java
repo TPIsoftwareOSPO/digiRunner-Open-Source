@@ -20,11 +20,13 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiExtDao;
 import tpi.dgrv4.entity.repository.TsmpDpApiThemeDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
@@ -32,32 +34,29 @@ public class ApiOffJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-	
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private SeqStoreService seqStoreService;
 
-	public ApiOffJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public ApiOffJob(TsmpDpApptJob tsmpDpApptJob, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao, TsmpApiDao tsmpApiDao, TsmpApiExtDao tsmpApiExtDao,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpApiThemeDao tsmpDpApiThemeDao, FileHelper fileHelper,
+			SeqStoreService seqStoreService, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd2Dao = tsmpDpReqOrderd2Dao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.fileHelper = fileHelper;
+		this.seqStoreService = seqStoreService;
 	}
 
 	@Override

@@ -39,36 +39,35 @@ import tpi.dgrv4.gateway.vo.GtwIdPVgroupResp;
 @Service
 public class GtwIdPVgroupService {
 	
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-	
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private IdPHelper idPHelper;
-	
-	@Autowired
 	private GtwIdPHelper gtwIdPHelper;
 	
+	@Autowired
+	public GtwIdPVgroupService(TsmpClientVgroupDao tsmpClientVgroupDao, TsmpVgroupDao tsmpVgroupDao,
+			TsmpVgroupGroupDao tsmpVgroupGroupDao, TsmpGroupApiDao tsmpGroupApiDao, TsmpApiDao tsmpApiDao,
+			OauthClientDetailsDao oauthClientDetailsDao, TokenHelper tokenHelper, TsmpClientDao tsmpClientDao,
+			IdPHelper idPHelper, GtwIdPHelper gtwIdPHelper) {
+		super();
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tokenHelper = tokenHelper;
+		this.tsmpClientDao = tsmpClientDao;
+		this.idPHelper = idPHelper;
+		this.gtwIdPHelper = gtwIdPHelper;
+	}
+
 	public GtwIdPVgroupResp getVgroupList(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
 		

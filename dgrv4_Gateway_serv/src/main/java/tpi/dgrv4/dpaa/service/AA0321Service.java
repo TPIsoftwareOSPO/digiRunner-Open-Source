@@ -32,20 +32,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class AA0321Service {
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private ApiItemService apiItemService;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
 	
+	@Autowired
+	public AA0321Service(TsmpApiDao tsmpApiDao, TsmpOrganizationDao tsmpOrganizationDao, ApiItemService apiItemService,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.apiItemService = apiItemService;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public AA0321Resp queryAPIListByOrg(TsmpAuthorization authorization, AA0321Req req, ReqHeader reqHeader) {
 		AA0321Resp resp = new AA0321Resp();
 		try {

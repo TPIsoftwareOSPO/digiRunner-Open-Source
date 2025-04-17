@@ -36,30 +36,30 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class GtwIdPAuthService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
-	
-	@Autowired
 	private DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao;
-	
-	@Autowired
-	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
- 
-	@Autowired
-	private GtwIdPHelper gtwIdPHelper;
- 
-	@Autowired
+	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao; 
+	private GtwIdPHelper gtwIdPHelper; 
 	private IdPWellKnownHelper idPWellKnownHelper;
 	
+	@Autowired
+	public GtwIdPAuthService(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService, TokenHelper tokenHelper,
+			DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao, DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao,
+			DgrGtwIdpInfoODao dgrGtwIdpInfoODao, GtwIdPHelper gtwIdPHelper, IdPWellKnownHelper idPWellKnownHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tokenHelper = tokenHelper;
+		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
+		this.dgrGtwIdpAuthDDao = dgrGtwIdpAuthDDao;
+		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
+		this.gtwIdPHelper = gtwIdPHelper;
+		this.idPWellKnownHelper = idPWellKnownHelper;
+	}
+
 	public ResponseEntity<?> gtwIdPAuth(HttpHeaders headers, HttpServletRequest httpReq, HttpServletResponse httpResp, 
 			String idPType) throws Exception {
 		
@@ -97,7 +97,7 @@ public class GtwIdPAuthService {
 				httpResp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
 		        
 				// codeVerifier 寫入 cookie
-				String codeVerifierForOauth2 = UUID.randomUUID().toString();// for GOOGLE / MS
+				String codeVerifierForOauth2 = UUID.randomUUID().toString() + UUID.randomUUID().toString();// for GOOGLE / MS
 				ResponseCookie codeVerifierCookie = TokenHelper.createCookie(GtwIdPHelper.COOKIE_CODE_VERIFIER,
 						codeVerifierForOauth2, maxAge);
 				httpResp.addHeader(HttpHeaders.SET_COOKIE, codeVerifierCookie.toString());

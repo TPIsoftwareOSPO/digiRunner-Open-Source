@@ -32,21 +32,24 @@ public class TsmpSettingService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-
-	@Autowired
 	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
-
-	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	public TsmpSettingService(TsmpSettingCacheProxy tsmpSettingCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper,
+			TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy, ObjectMapper objectMapper) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
+		this.objectMapper = objectMapper;
+	}
 	// =========================================================
 	// ==================== COMMON METHODS =====================
 	// =========================================================
+
 
 	/**
 	 * 判斷若值為"ENC()"括起來,則解密 <br>

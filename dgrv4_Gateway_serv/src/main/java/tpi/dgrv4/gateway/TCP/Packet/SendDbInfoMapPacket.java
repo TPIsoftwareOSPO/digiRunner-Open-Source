@@ -46,7 +46,7 @@ public class SendDbInfoMapPacket implements Packet_i {
 		data.put(TPILogger.DBINFO, dbInfoJson);
 
 		if (ls.paramObj.containsKey(CHANGEDBINFO) == false && DbActionEnum.APPLY_DB_CONNECT.name().equals(action)) {
-			ls.paramObj.put(CHANGEDBINFO, new ChangeDbConnInfoService());
+			ls.paramObj.put(CHANGEDBINFO, new ChangeDbConnInfoService(null));
 		}
 
 		CommunicationServer.cs.sendToAll(ls, this);

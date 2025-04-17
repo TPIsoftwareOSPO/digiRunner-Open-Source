@@ -20,8 +20,13 @@ public class DPB0010Service {
 
 	private TPILogger logger = TPILogger.tl;;
 
-	@Autowired
 	private TsmpDpAppCategoryDao tsmpDpAppCategoryDao;
+
+	@Autowired
+	public DPB0010Service(TsmpDpAppCategoryDao tsmpDpAppCategoryDao) {
+		super();
+		this.tsmpDpAppCategoryDao = tsmpDpAppCategoryDao;
+	}
 
 	public DPB0010Resp updateAppCateById(TsmpAuthorization authorization, DPB0010Req req) {
 		String userName = authorization.getUserName();

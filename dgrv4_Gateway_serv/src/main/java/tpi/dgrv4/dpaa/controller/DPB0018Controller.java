@@ -26,8 +26,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0018Controller {
 
-	@Autowired
 	private DPB0018Service dpb0018Service;
+
+	@Autowired
+	public DPB0018Controller(DPB0018Service dpb0018Service) {
+		super();
+		this.dpb0018Service = dpb0018Service;
+	}
 
 	/**
 	 * ApiLikeList:<br/>

@@ -28,9 +28,14 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @RestController
 public class UdpLoginController {
 	
-	@Autowired
 	private UdpLoginService service;
 	
+	@Autowired
+	public UdpLoginController(UdpLoginService service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * @param headers
 	 * @param req

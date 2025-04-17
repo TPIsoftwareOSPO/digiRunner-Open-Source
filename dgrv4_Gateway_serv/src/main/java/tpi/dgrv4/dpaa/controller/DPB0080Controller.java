@@ -33,10 +33,7 @@ public class DPB0080Controller {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DPB0080Service dpb0080Service;
-
-	@Autowired
 	private FileHelper fileHelper;
 
 	/* tsmp-v3 暫不支持 MULTIPART_FORM_DATA 類型
@@ -101,6 +98,12 @@ public class DPB0080Controller {
 	}
 	*/
 
+	@Autowired
+	public DPB0080Controller(DPB0080Service dpb0080Service, FileHelper fileHelper) {
+		super();
+		this.dpb0080Service = dpb0080Service;
+		this.fileHelper = fileHelper;
+	}
 
 	@PostMapping(value = "/dgrv4/11/DPB0080", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //

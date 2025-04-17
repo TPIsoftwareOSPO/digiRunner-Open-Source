@@ -21,10 +21,14 @@ import tpi.dgrv4.gateway.service.AcIdPAuthService;
 @RestController
 public class AcIdPAuthController {
 
-	@Autowired
 	private AcIdPAuthService service;
 
-	
+	@Autowired
+	public AcIdPAuthController(AcIdPAuthService service) {
+		super();
+		this.service = service;
+	}
+
 	@GetMapping(value = "/dgrv4/ssotoken/acidp/{idPType}/acIdPAuth")
 	public void acIdPAuth(@RequestHeader HttpHeaders headers, 
 			HttpServletRequest req, 

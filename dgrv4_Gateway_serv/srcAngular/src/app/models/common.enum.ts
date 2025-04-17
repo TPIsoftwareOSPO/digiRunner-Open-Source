@@ -418,6 +418,7 @@ export enum TxID {
   createAndUpdateBotDetectionList = 'DPB0233',
   testEsConnection = 'DPB9938',
   testKibanaConnection = 'DPB9939',
+  queryRealtimeDashboardData = 'AA1212',
 }
 
 export enum GrantType {

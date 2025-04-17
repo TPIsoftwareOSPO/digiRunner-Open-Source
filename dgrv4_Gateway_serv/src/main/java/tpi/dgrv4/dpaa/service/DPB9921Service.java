@@ -27,8 +27,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9921Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
+
+	@Autowired
+	public DPB9921Service(TsmpSettingDao tsmpSettingDao) {
+		super();
+		this.tsmpSettingDao = tsmpSettingDao;
+	}
 
 	public void exportTsmpSetting(TsmpAuthorization tsmpAuthorization, DPB9921Req req, OutputStream outputStream) {
 		exportTsmpSetting(outputStream);

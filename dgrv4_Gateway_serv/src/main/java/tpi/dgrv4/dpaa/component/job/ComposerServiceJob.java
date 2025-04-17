@@ -2,7 +2,6 @@ package tpi.dgrv4.dpaa.component.job;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -19,16 +18,16 @@ public class ComposerServiceJob extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ComposerService composerService;
 
 	private Integer act;
 
 	private List<String> apiUUIDs;
 
-	public ComposerServiceJob(Integer act, List<String> apiUUIDs) {
+	public ComposerServiceJob(Integer act, List<String> apiUUIDs, ComposerService composerService) {
 		this.act = act;
 		this.apiUUIDs = apiUUIDs;
+		this.composerService = composerService;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.Date;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,12 +31,17 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB9921Controller {
 
-	@Autowired
-	private DPB9921Service service;
+	private DPB0118Service dpb0118Service;
+	private DPB9921Service dpb9921Service;
 	
 	@Autowired
-	private DPB0118Service dpb0118Service;
-
+	public DPB9921Controller(ApplicationContext applicationContext, DPB9921Service dpb9921Service) {
+		super();
+		if (applicationContext != null) { 
+			this.dpb0118Service = applicationContext.getBean(DPB0118Service.class); // non-Singleton
+		}
+		this.dpb9921Service = dpb9921Service;
+	}
 
 	@PostMapping(value = "/dgrv4/17/DPB9921", params = { "before" }, //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //
@@ -59,7 +65,7 @@ public class DPB9921Controller {
 		try {
 			ControllerUtil.validateRequest(tsmpHttpHeader.getAuthorization(), req);
 			doExportSetting(response);
-			service.exportTsmpSetting(tsmpHttpHeader.getAuthorization(), req.getBody(), response.getOutputStream());
+			dpb9921Service.exportTsmpSetting(tsmpHttpHeader.getAuthorization(), req.getBody(), response.getOutputStream());
 		} catch (Exception e) {
 			throw new TsmpDpAaException(e, req.getReqHeader());
 		}

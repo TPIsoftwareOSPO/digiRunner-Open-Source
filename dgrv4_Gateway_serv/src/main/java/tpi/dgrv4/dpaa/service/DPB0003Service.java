@@ -33,28 +33,29 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0003Service {
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpnApiModuleDao tsmpnApiModuleDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0003Service(TsmpApiDao tsmpApiDao, TsmpApiModuleDao tsmpApiModuleDao, TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpnApiModuleDao tsmpnApiModuleDao, TsmpClientDao tsmpClientDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpDpApiAuth2Dao = tsmpDpApiAuth2Dao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpnApiModuleDao = tsmpnApiModuleDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0003Resp queryApiLikeHistory(TsmpAuthorization authorization, DPB0003Req req) {
 		String orgId = authorization.getOrgId();

@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import tpi.dgrv4.common.constant.TsmpAuthCodeStatus;
@@ -23,17 +22,17 @@ public class RefreshAuthCodeJob extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpAuthCodeDao tsmpAuthCodeDao;
 
 	private Long expDay;
 
-	public RefreshAuthCodeJob(Long expDay) {
+	public RefreshAuthCodeJob(Long expDay, TsmpAuthCodeDao tsmpAuthCodeDao) {
 		// 預設 30 天
 		if (expDay == null) {
 			expDay = 30L;
 		}
 		this.expDay = expDay;
+		this.tsmpAuthCodeDao = tsmpAuthCodeDao;
 	}
 
 	@Override

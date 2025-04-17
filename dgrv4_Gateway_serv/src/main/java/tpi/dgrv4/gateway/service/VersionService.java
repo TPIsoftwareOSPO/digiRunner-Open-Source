@@ -89,8 +89,8 @@ public class VersionService implements IVersionService{
 		String strVersion = null;		// 1.0.0-20230420_1100
 		if(version != null && StringUtils.hasText(version)) {
 			
-			version = version.replaceAll("dgrv4-gateway-", "");
-			version = version.replaceAll(".jar", "");
+			version = version.replace("dgrv4-gateway-", "");
+			version = version.replace(".jar", "");
 
 			String[] arrVer = version.split("-");
 			if (arrVer.length >= 1) {
@@ -126,8 +126,8 @@ public class VersionService implements IVersionService{
 		String version = getTxtVersion();
 		if (version != null && StringUtils.hasText(version)) {
 			v.strVersion = version; // release-rc-v4.4.18.1-1-g5c5e4d8ac
-			version = version.replaceAll("release-", "");
-			version = version.replaceAll("rc-", "");
+			version = version.replace("release-", "");
+			version = version.replace("rc-", "");
 			v.majorVersionNo = version.split("-")[0]; // v4.4.18.1
 		}
 

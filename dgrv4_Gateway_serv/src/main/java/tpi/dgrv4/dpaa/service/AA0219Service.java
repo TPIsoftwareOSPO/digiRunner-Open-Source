@@ -26,12 +26,16 @@ public class AA0219Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
 	
+	@Autowired
+	public AA0219Service(OauthClientDetailsDao oauthClientDetailsDao, TsmpClientDao tsmpClientDao) {
+		super();
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpClientDao = tsmpClientDao;
+	}
+
 	/**
 	 * 1.查詢oauth_client_details資料表，條件 client_id = AA0219Req.clientID，將查詢出來的資料放進AA0219Resp。
 	 * */

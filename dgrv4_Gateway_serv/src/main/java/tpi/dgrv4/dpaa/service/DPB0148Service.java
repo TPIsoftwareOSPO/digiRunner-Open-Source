@@ -30,21 +30,24 @@ public class DPB0148Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private AuthoritiesCacheProxy authoritiesCacheProxy;
 	
+	@Autowired
+	public DPB0148Service(DgrAcIdpUserDao dgrAcIdpUserDao, AuthoritiesDao authoritiesDao,
+			DgrAuditLogService dgrAuditLogService, TsmpSettingService tsmpSettingService,
+			AuthoritiesCacheProxy authoritiesCacheProxy) {
+		super();
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.authoritiesDao = authoritiesDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.authoritiesCacheProxy = authoritiesCacheProxy;
+	}
+
 	@Transactional
 	public DPB0148Resp deleteIdPUser(TsmpAuthorization auth, DPB0148Req req, InnerInvokeParam iip) {
 		

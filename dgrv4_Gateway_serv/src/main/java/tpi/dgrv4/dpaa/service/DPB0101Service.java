@@ -42,25 +42,27 @@ public class DPB0101Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-
-	@Autowired
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
 	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private ApptRjobDispatcher apptRjobDispatcher;
 
 	private ObjectMapper om = new ObjectMapper();
+
+	@Autowired
+	public DPB0101Service(TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy, TsmpDpApptRjobDao tsmpDpApptRjobDao,
+			TsmpDpApptRjobDDao tsmpDpApptRjobDDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			BcryptParamHelper bcryptParamHelper, ApptRjobDispatcher apptRjobDispatcher) {
+		super();
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.apptRjobDispatcher = apptRjobDispatcher;
+	}
 
 	public DPB0101Resp createRjob(TsmpAuthorization auth, DPB0101Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

@@ -30,12 +30,20 @@ public class AA0234Service {
 	private TPILogger logger = TPILogger.tl;
 
 	private Integer pageSize;
-	@Autowired
+	
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	@Autowired
 	private ServiceConfig serviceConfig;
+
+	@Autowired
+	public AA0234Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 
 	public AA0234Resp queryAPIByOrgIdAndModuleName(TsmpAuthorization authorization, AA0234Req req) {
 		AA0234Resp resp = new AA0234Resp();

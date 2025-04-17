@@ -27,11 +27,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0209Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrXApiKeyDao dgrXApiKeyDao;
+	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
 
 	@Autowired
-	private DgrXApiKeyMapDao dgrXApiKeyMapDao;
+	public DPB0209Service(DgrXApiKeyDao dgrXApiKeyDao, DgrXApiKeyMapDao dgrXApiKeyMapDao) {
+		super();
+		this.dgrXApiKeyDao = dgrXApiKeyDao;
+		this.dgrXApiKeyMapDao = dgrXApiKeyMapDao;
+	}
 
 	@Transactional
 	public DPB0209Resp deleteXApiKey(TsmpAuthorization authorization, DPB0209Req req) {

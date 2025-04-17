@@ -32,12 +32,16 @@ public class UdpLdapService {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private LdapAuthResultDao ldapAuthResultDao;
 	
+	@Autowired
+	public UdpLdapService(TsmpSettingService tsmpSettingService, LdapAuthResultDao ldapAuthResultDao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.ldapAuthResultDao = ldapAuthResultDao;
+	}
+
 	public UdpLdapResp udpCheckAccountByLdap(String userIp, HttpServletRequest httpReq, 
 			TsmpAuthorization auth, UdpLdapReq req, String localBaseUrl) {
 

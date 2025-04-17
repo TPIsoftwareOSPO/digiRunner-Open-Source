@@ -32,25 +32,27 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0020Service {
 
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0020Service(TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpApiDao tsmpApiDao,
+			TsmpApiModuleDao tsmpApiModuleDao, TsmpDpApiThemeDao tsmpDpApiThemeDao,
+			TsmpOrganizationDao tsmpOrganizationDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0020Resp queryThemeLikeList(TsmpAuthorization authorization, DPB0020Req req) {
 		String orgId = authorization.getOrgId();

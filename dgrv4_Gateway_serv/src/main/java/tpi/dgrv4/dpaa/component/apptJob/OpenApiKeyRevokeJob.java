@@ -15,10 +15,12 @@ import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.TsmpOpenApiKey;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd5;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.entity.repository.TsmpOpenApiKeyDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
@@ -32,20 +34,20 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @SuppressWarnings("serial")
 public class OpenApiKeyRevokeJob extends ApptJob {
 
-	@Autowired
 	private SendOpenApiKeyMailService sendOpenApiKeyMailService;
-	
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrderd5Dao tsmpDpReqOrderd5Dao;
-
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
 
-	public OpenApiKeyRevokeJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public OpenApiKeyRevokeJob(TsmpDpApptJob tsmpDpApptJob, SendOpenApiKeyMailService sendOpenApiKeyMailService,
+			TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrderd5Dao tsmpDpReqOrderd5Dao,
+			TsmpOpenApiKeyDao tsmpOpenApiKeyDao, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher,  tsmpDpApptJobDao);
+		this.sendOpenApiKeyMailService = sendOpenApiKeyMailService;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd5Dao = tsmpDpReqOrderd5Dao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
 	}
 
 	@Override

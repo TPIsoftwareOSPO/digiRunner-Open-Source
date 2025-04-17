@@ -1,6 +1,5 @@
 package tpi.dgrv4.gateway.controller;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +18,14 @@ import tpi.dgrv4.gateway.service.DGRCServiceGet;
 @RestController
 public class DGRCControllerGet {
 	
-	@Autowired
 	private DGRCServiceGet service;
 	
+	@Autowired
+	public DGRCControllerGet(DGRCServiceGet service) {
+		super();
+		this.service = service;
+	}
+
 	@GetMapping(value = "/dgrc/**")
 	public CompletableFuture<ResponseEntity<?>> dispatch(@RequestHeader HttpHeaders httpHeaders,
 														 HttpServletRequest httpReq,

@@ -1,33 +1,16 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
     <!-- 查詢 -->
     <div [hidden]="pageNum != 1">
-        <form [formGroup]="queryForm" (ngSubmit)="querySecurityList();">
+        <form [formGroup]="queryForm">
+          <div class="col-12 d-flex align-items-center">
+            <app-search-input
+              placeholder="{{'security_lev_id'|translate}}、{{'security_lev_name'|translate}}、{{'security_level_desc'|translate}}"
+              [control]="queryForm.get('keyword')" [searchFn]="querySecurityList.bind(this)"
+              class="col-9 col-lg-6 col-sm-6"></app-search-input>
 
-
-
-          <span class="p-input-icon-right" style="width:40vw">
-            <i class="pi pi-search tpi-i-search" (click)="querySecurityList();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'security_lev_id'|translate}}、{{'security_lev_name'|translate}}、{{'security_level_desc'|translate}}">
-          </span>
-
-          <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
-                  [disabled]="canCreate == false">{{'button.create'|translate}}</button>
-            <!-- <div class="form-group row">
-                <div class="col-4 col-xl-4 col-lg-4">
-                    <label id="keyword_label" class="control-label" for="keyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="keyword" formControlName="keyword"
-                        placeholder="{{'security_lev_id'|translate}}、{{'security_lev_name'|translate}}、{{'security_level_desc'|translate}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search' |
-                        translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
-                        [disabled]="canCreate == false">{{'button.create'|translate}}</button>
-                </div>
-            </div> -->
+            <button type="button" class="btn tpi-btn tpi-second ms-auto" (click)="changePage('create');"
+              [disabled]="canCreate == false">{{'button.create'|translate}}</button>
+          </div>
         </form>
         <hr>
         <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single"

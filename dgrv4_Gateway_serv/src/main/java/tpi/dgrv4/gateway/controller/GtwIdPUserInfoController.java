@@ -19,9 +19,13 @@ import tpi.dgrv4.gateway.service.GtwIdPUserInfoService;
 @RestController
 public class GtwIdPUserInfoController {
 
-	@Autowired
 	GtwIdPUserInfoService gtwIdPUserInfoService;
 	
+	@Autowired
+	public GtwIdPUserInfoController(GtwIdPUserInfoService gtwIdPUserInfoService) {
+		super();
+		this.gtwIdPUserInfoService = gtwIdPUserInfoService;
+	}
 
 	@PostMapping(value = "/dgrv4/ssotoken/gtwidp/userInfo", 
 		consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, // 使用 Form Urlencoded 格式

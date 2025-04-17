@@ -39,32 +39,32 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0217Service {
 
-	@Autowired
 	private TsmpSecurityLevelDao securityLVDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroup;
-	
-	@Autowired
 	private TsmpVgroupDao tsmpVgroup;
-	
-	@Autowired 
 	private TsmpClientGroupDao tsmpClientGroup;
-	
-	@Autowired
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
-
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 
 	private TPILogger logger = TPILogger.tl;
 	
+	@Autowired
+	public AA0217Service(TsmpSecurityLevelDao securityLVDao, TsmpClientDao tsmpClientDao, TsmpGroupDao tsmpGroup,
+			TsmpVgroupDao tsmpVgroup, TsmpClientGroupDao tsmpClientGroup, TsmpClientVgroupDao tsmpClientVgroupDao,
+			OauthClientDetailsDao oauthClientDetailsDao, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.securityLVDao = securityLVDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpGroup = tsmpGroup;
+		this.tsmpVgroup = tsmpVgroup;
+		this.tsmpClientGroup = tsmpClientGroup;
+		this.tsmpClientVgroupDao = tsmpClientVgroupDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0217Resp updateSecurityLVByClient(TsmpAuthorization auth, AA0217Req req, InnerInvokeParam iip) {
 		AA0217Resp resp = new AA0217Resp();

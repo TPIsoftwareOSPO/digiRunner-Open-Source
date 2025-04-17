@@ -2,8 +2,6 @@ package tpi.dgrv4.dpaa.component.job;
 
 import static tpi.dgrv4.dpaa.util.ServiceUtil.isValueTooLargeException;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpSeqStoreKey;
@@ -21,19 +19,18 @@ import tpi.dgrv4.gateway.component.job.JobManager;
 @SuppressWarnings("serial")
 public class SaveEventJob extends Job {
 
-	@Autowired
 	private TsmpEventsDao tsmpEventsDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private SeqStoreService seqStoreService;
 
 	private TsmpEvents tsmpEvents;
 
-	public SaveEventJob(TsmpEvents tsmpEvents) {
+	public SaveEventJob(TsmpEvents tsmpEvents, TsmpEventsDao tsmpEventsDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			SeqStoreService seqStoreService) {
 		this.tsmpEvents = tsmpEvents;
+		this.tsmpEventsDao = tsmpEventsDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.seqStoreService = seqStoreService;
 	}
 
 	@Override

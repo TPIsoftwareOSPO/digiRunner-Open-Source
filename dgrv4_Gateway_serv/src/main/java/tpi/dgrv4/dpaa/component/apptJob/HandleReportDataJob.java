@@ -11,13 +11,17 @@ import tpi.dgrv4.dpaa.service.*;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
+
+/**
+ * 已不使用 HandleReportDataJob 報表排程, 改用即時 dashboard
+ */
 
 /**
  * 處理報表資料JOB
@@ -31,37 +35,48 @@ import java.util.concurrent.CancellationException;
 @SuppressWarnings("serial")
 public class HandleReportDataJob extends ApptJob {
 
-	private TPILogger logger = TPILogger.tl;
-
-	@Autowired
 	private HandleReportDataByMinuteService handleReportDataByMinuteService;
-	@Autowired
 	private HandleReportDataByHourService handleReportDataByHourService;
-	@Autowired
 	private HandleReportDataByDayService handleReportDataByDayService;
-	@Autowired
 	private HandleReportDataByMonthService handleReportDataByMonthService;
-	@Autowired
 	private HandleReportDataByYearService handleReportDataByYearService;
-	@Autowired
 	private HandleDashboardLogDataService handleDashboardLogDataService;
-	@Autowired
 	private HandleDashboardDataService handleDashboardDataService;
-	@Autowired
 	private HandleDashboardDataByYearService handleDashboardDataByYearService;
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	@Autowired
 	private HandleESApiDataService handleESApiDataService;
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private HandleESExpiredDataService handleESExpiredDataService;
 	
-	public HandleReportDataJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public HandleReportDataJob(TsmpDpApptJob tsmpDpApptJob, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, HandleReportDataByMinuteService handleReportDataByMinuteService,
+			HandleReportDataByHourService handleReportDataByHourService,
+			HandleReportDataByDayService handleReportDataByDayService,
+			HandleReportDataByMonthService handleReportDataByMonthService,
+			HandleReportDataByYearService handleReportDataByYearService,
+			HandleDashboardLogDataService handleDashboardLogDataService,
+			HandleDashboardDataService handleDashboardDataService,
+			HandleDashboardDataByYearService handleDashboardDataByYearService, TsmpSettingService tsmpSettingService,
+			HandleESApiDataService handleESApiDataService,
+			HandleESExpiredDataService handleESExpiredDataService) {  
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		
+		this.handleReportDataByMinuteService = handleReportDataByMinuteService;
+		this.handleReportDataByHourService = handleReportDataByHourService;
+		this.handleReportDataByDayService = handleReportDataByDayService;
+		this.handleReportDataByMonthService = handleReportDataByMonthService;
+		this.handleReportDataByYearService = handleReportDataByYearService;
+		this.handleDashboardLogDataService = handleDashboardLogDataService;
+		this.handleDashboardDataService = handleDashboardDataService;
+		this.handleDashboardDataByYearService = handleDashboardDataByYearService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.handleESApiDataService = handleESApiDataService;
+		this.handleESExpiredDataService = handleESExpiredDataService;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
 	}
+
+
 	
 //	 1.ES_LOG_DISABLE =false,不管TSMP_APILOG_FORCE_WRITE_RDB的值(若為true會有紀錄但不做統計,直到執行RDB統計才做),就執行ES
 //	 2.ES_LOG_DISABLE=true,而TSMP_APILOG_FORCE_WRITE_RDB=true就執行RDB

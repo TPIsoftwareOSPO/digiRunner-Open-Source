@@ -18,14 +18,20 @@ import tpi.dgrv4.gateway.component.CustomEncryptablePropertyResolver;
 @ComponentScan({"tpi.dgrv4.common.utils"})	// Online Console
 public class BeanConfig {
 
-	@Autowired
 	private DefaultLazyEncryptor defaultEncryptor;
 
 	/**
 	 * 關於 jasypt 的設定值 (from application-*.properties)
 	 */
-	@Autowired
 	private Singleton<JasyptEncryptorConfigurationProperties> configPropsSingleton;
+
+	@Autowired
+	public BeanConfig(DefaultLazyEncryptor defaultEncryptor,
+			Singleton<JasyptEncryptorConfigurationProperties> configPropsSingleton) {
+		super();
+		this.defaultEncryptor = defaultEncryptor;
+		this.configPropsSingleton = configPropsSingleton;
+	}
 
 	@Bean
 	public ObjectMapper objectMapper() {

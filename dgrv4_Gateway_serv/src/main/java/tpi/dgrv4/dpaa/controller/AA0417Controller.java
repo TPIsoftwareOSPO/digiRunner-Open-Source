@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0417Controller {
 
-	@Autowired
 	private AA0417Service service;
  
+	@Autowired
+	public AA0417Controller(AA0417Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 查詢健康的TSMP節點清單
 	 * 僅查詢最近一分鐘內更新的TSMP節點清單。

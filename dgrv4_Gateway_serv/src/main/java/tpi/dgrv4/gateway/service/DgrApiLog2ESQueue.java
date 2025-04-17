@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.es.EsHttpClient;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
 
 public class DgrApiLog2ESQueue {
     // 靜態配置參數
@@ -350,28 +351,47 @@ public class DgrApiLog2ESQueue {
 	}
 	
 	public static int workIndex = -1; // -1:不可用, 0~n:為可用URL
+	public static boolean esUrlCheckConnection = false; // 預設不偵測
 	
+	/**
+	 * 回傳選定的一條 Elastic URL 
+	 * @param arrEsUrl EX: https://10.20.30.88:19200/,https://10.20.30.88:29200/
+	 * @param arrIdPwd EX: id1:pwd1,id2:pwd2
+	 * @param indexName
+	 * @param timeout
+	 * @return
+	 */
 	public static String getEsReqUrl(String[] arrEsUrl, String[] arrIdPwd, String indexName, int timeout) {
-		workIndex = -1;
-		//測試連線, 找出可用的連線(可再優化)
-		if (workIndex == -1) {
-			int index = 0;
-			boolean isConnection = false;
-			for(;index < arrEsUrl.length; index++) {
-				try {
-					isConnection = HttpsConnectionChecker.checkConnection(arrEsUrl[index]);
-				} catch (Exception e) {
-					TPILogger.tl.error("Connection failed! Url = " + arrEsUrl[index] + "\n" + StackTraceUtil.logStackTrace(e));
-				}
+	    // 檢查陣列是否有內容
+	    if (arrEsUrl == null || arrEsUrl.length == 0) {
+	        return null;
+	    }
+	    
+	    // 檢查是否需要進行連接檢測
+	    if (esUrlCheckConnection) {
+	        // 需要檢測連線，找出可用的連線
+	        workIndex = -1;
+	        int index = 0;
+	        boolean isConnection = false;
+	        for (; index < arrEsUrl.length; index++) {
+	            try {
+	                isConnection = HttpsConnectionChecker.checkConnection(arrEsUrl[index]);
+	            } catch (Exception e) {
+	                TPILogger.tl.error("Connection failed! Url = " + arrEsUrl[index] + "\n" + StackTraceUtil.logStackTrace(e));
+	            }
 
-				if(isConnection) {
-					workIndex = index;
-					break;
-				}
-			}
-		}
+	            if (isConnection) {
+	                workIndex = index;
+	                break;
+	            }
+	        }
+	    } else {
+	        // 不需要檢測連線，直接選擇一個URL
+	        // 輪流選擇下一個URL（Round Robin）
+	        workIndex = (workIndex + 1) % arrEsUrl.length;
+	    }
 		
-		// 如果算完還是 -1 表示, 沒有可用的連線
+		// 如果算完還是 -1 表示, 表示沒有可用的連線
 		if(workIndex > -1) {
 //			String esReqUrl = arrEsUrl[workIndex] + indexName + "/_doc";  // 這是單筆處理
 			String esReqUrl = arrEsUrl[workIndex] + indexName + "/_bulk"; // 改為批次處理

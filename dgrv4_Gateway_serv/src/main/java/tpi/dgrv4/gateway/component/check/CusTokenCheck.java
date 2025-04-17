@@ -39,20 +39,12 @@ import tpi.dgrv4.gateway.vo.Whitelist;
 @Component
 public class CusTokenCheck implements ICheck {
 
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private DgrRtnMsgBuilder dgrRtnMsgBuilder;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private OAuthTokenService tokenService;
+	private TsmpRtnCodeService tsmpRtnCodeService;
 
 	@Value("${server.port}")
 	private String serverPort;
@@ -62,10 +54,18 @@ public class CusTokenCheck implements ICheck {
 	
 	private Map<String, Whitelist> whitelistMap = new ConcurrentHashMap<>();
 
-//	private Map<String, String> cusTokenCache = new ConcurrentHashMap<>();
-	
 	@Autowired
-	private TsmpRtnCodeService tsmpRtnCodeService;
+	public CusTokenCheck(TokenHelper tokenHelper, TsmpSettingService tsmpSettingService,
+			DgrRtnMsgBuilder dgrRtnMsgBuilder, ObjectMapper objectMapper, OAuthTokenService tokenService,
+			TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrRtnMsgBuilder = dgrRtnMsgBuilder;
+		this.objectMapper = objectMapper;
+		this.tokenService = tokenService;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+	}
 
 	/*
 	 * 檢查來源是否為客製包 1.有CAPI-key 2.有username  符合以上2點就是來自客製包

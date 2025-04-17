@@ -31,11 +31,15 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
  */
 @RestController
 public class DPB0048Controller {
-
 	
-	@Autowired
 	private DPB0047Service service;
 	
+	@Autowired
+	public DPB0048Controller(DPB0047Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 
 	 * 1在【tsmp_dp_items】中 item_note = ENABLE_FLAG的資料是需多API共用的。

@@ -35,19 +35,22 @@ public class DPB0090Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao; 
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0090Service(TsmpClientDao tsmpClientDao, TsmpOpenApiKeyDao tsmpOpenApiKeyDao, ServiceConfig serviceConfig,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.serviceConfig = serviceConfig;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0090Resp queryOpenApiKeyByClientId(TsmpAuthorization tsmpAuthorization, DPB0090Req req, ReqHeader reqHeader) {
 		DPB0090Resp resp = new DPB0090Resp();

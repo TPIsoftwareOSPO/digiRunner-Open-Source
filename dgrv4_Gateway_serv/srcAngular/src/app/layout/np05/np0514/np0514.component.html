@@ -7,37 +7,20 @@
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form" (ngSubmit)="queryScheduleList()">
       <div class="form-group row">
-        <div class="col-12">
-          <p-dropdown
-            [showClear]="true"
-            [options]="statusOption"
-            [filter]="true"
-            placeholder="{{ 'plz_chs' | translate }}"
-            formControlName="status"
-            [style]="{ width: '10%' }"
-          >
+        <div class="col-12 d-flex">
+          <div class="col-auto">
+          <p-dropdown [showClear]="true" [options]="statusOption" [filter]="true" placeholder="{{ 'plz_chs' | translate }}"
+            formControlName="status" [style]="{ width: '100%' }">
           </p-dropdown>
-
-          <span class="p-input-icon-right ms-2" style="width: 40vw">
-            <i
-              class="pi pi-search tpi-i-search"
-              (click)="queryScheduleList()"
-            ></i>
-            <input
-              type="text"
-              class="form-control tpi-i-input"
-              id="keyword"
-              formControlName="keyword"
-              placeholder="{{ 'alias' | translate }}、{{
-                'frequency' | translate
-              }}、{{ 'memo' | translate }}"
-              (keyup.enter)="queryScheduleList()"
-            />
-          </span>
+          </div>
+          <app-search-input placeholder="{{ 'alias' | translate }}、{{
+                      'frequency' | translate
+                    }}、{{ 'memo' | translate }}" [control]="form.get('keyword')" [searchFn]="queryScheduleList.bind(this)"
+            class="col-6 col-lg-6 col-sm-6 ms-2"></app-search-input>
 
           <button
             type="button"
-            class="btn tpi-btn tpi-second float-end"
+            class="btn tpi-btn tpi-second ms-auto"
             [disabled]="canCreate == false"
             (click)="changePage('create')"
           >

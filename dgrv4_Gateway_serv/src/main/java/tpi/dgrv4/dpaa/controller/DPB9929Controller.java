@@ -1,15 +1,10 @@
 package tpi.dgrv4.dpaa.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,18 +15,20 @@ import tpi.dgrv4.dpaa.service.DPB9929Service;
 import tpi.dgrv4.dpaa.util.ControllerUtil;
 import tpi.dgrv4.dpaa.vo.DPB9929Req;
 import tpi.dgrv4.dpaa.vo.DPB9929Resp;
-import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 
 @RestController
 public class DPB9929Controller {
-	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DPB9929Service service;
 
+	@Autowired
+	public DPB9929Controller(DPB9929Service service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/17/DPB9929", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //

@@ -31,7 +31,7 @@ export class GtwidpComponent implements OnInit {
   msg: string = 'Loading...';
   btnDisabled: boolean = true;
   processShow: boolean = true;
-  isCollapsed:boolean = false;
+  isCollapsed:boolean = true;
   show:boolean = false;
 
   constructor(
@@ -164,15 +164,14 @@ export class GtwidpComponent implements OnInit {
         })
 
         this.form.get("timeUnit")?.setValue("86400");
-
-
+        
         // 增加條件: 當為dp_開頭且無子項目時自動跳轉 => Tom 提出需求 for dp
         if (this.apiNodes.length == 0 || (this.apiNodes.length == 1 &&  this.isValidStringStartWith_dp_(this.apiNodes[0].vgroupAliasShowUi) && this.apiNodes[0].apiDataList.length == 0)) {
           this.apiConfirm();
         }else{
           //當為dp_開頭預設展開
           if (this.isValidStringStartWith_dp_(this.apiNodes[0].vgroupAliasShowUi)) {
-            this.isCollapsed = true;
+            this.isCollapsed = false;
           }
 
           this.show = true;
@@ -283,23 +282,21 @@ export class GtwidpComponent implements OnInit {
     // let body = new URLSearchParams();
     // body.set('username', this.paramsObj['username']);
     // body.set('redirect_uri', this.paramsObj['redirect_uri']);
-    // body.set('state', this.paramsObj['state']);
-
+    // body.set('state', this.paramsObj['state']);    
     let scope = new Array<string>();
     Object.keys(this.formApi.controls).filter(ctl => {
       if (ctl.indexOf('_') > -1 && this.formApi.controls[ctl].value == true) {
 
 
         this.apiNodes.forEach(item => {
-          item.apiDataList.forEach(sub => {
+          item.apiDataList.forEach(sub => {            
             if (sub.key === ctl) scope.push(sub.groupId);
           });
         })
 
       }
     })
-
-
+    
     // body.set('scope', scope.join(' '));
 
     // let url = `${environment.apiUrl}/dgrv4/ssotoken/gtwidp/LDAP/approve`

@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpTokenHistory;
 import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
@@ -15,8 +17,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class TsmpTokenHistoryCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
+
+	@Autowired
+	public TsmpTokenHistoryCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			TsmpTokenHistoryDao tsmpTokenHistoryDao) {
+		super(objectMapper, cache);
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+	}
 
 	public TsmpTokenHistory findFirstByTokenJti(String jti) {
 		Supplier<TsmpTokenHistory> supplier = () -> {

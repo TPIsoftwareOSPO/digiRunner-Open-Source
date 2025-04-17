@@ -39,17 +39,20 @@ public final class MockApiTestService {
 
 	public static final String HTTP_HEADER_MOCK_TEST = "dgr-mock-test";
 
-	@Autowired
 	private CommForwardProcService commForwardProcService;
+	private VersionController versionController;
+	private TsmpApiCacheProxy tsmpApiCacheProxy;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private VersionController versionController;
-	
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	
-	@Autowired
-	private ObjectMapper objectMapper;
+	public MockApiTestService(CommForwardProcService commForwardProcService, VersionController versionController,
+			TsmpApiCacheProxy tsmpApiCacheProxy, ObjectMapper objectMapper) {
+		super();
+		this.commForwardProcService = commForwardProcService;
+		this.versionController = versionController;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.objectMapper = objectMapper;
+	}
 
 	public boolean checkIfMockTest(HttpHeaders httpHeaders) {
 		List<String> values = httpHeaders.get(HTTP_HEADER_MOCK_TEST);

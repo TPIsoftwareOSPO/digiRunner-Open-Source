@@ -19,8 +19,13 @@ public class AA1105Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao; 
+
+	@Autowired
+	public AA1105Service(TsmpSecurityLevelDao tsmpSecurityLevelDao) {
+		super();
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+	}
 
 	public AA1105Resp querySecurityLevelDetail(TsmpAuthorization authorization, AA1105Req req) {
 		AA1105Resp resp = new AA1105Resp();

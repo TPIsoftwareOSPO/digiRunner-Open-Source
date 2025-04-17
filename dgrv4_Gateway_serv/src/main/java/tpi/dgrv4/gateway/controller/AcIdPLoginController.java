@@ -28,8 +28,13 @@ import tpi.dgrv4.gateway.service.AcIdPLoginService;
 @RestController
 public class AcIdPLoginController {
 	
-	@Autowired
 	private AcIdPLoginService service;
+
+	@Autowired
+	public AcIdPLoginController(AcIdPLoginService service) {
+		super();
+		this.service = service;
+	}
 
 	// 模擬畫面測試用
 	@GetMapping(value = "/dgrv4/ssotoken/acidp/{idPType}/acIdPLogin")

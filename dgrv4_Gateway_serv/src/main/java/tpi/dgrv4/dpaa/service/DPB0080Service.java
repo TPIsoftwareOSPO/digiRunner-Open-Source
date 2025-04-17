@@ -23,14 +23,17 @@ public class DPB0080Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0080Service(TsmpDpFileDao tsmpDpFileDao, TsmpClientDao tsmpClientDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.fileHelper = fileHelper;
+	}
 
 	/* 因 tsmp-v3 暫不支援 Multipart 格式，故此方法暫不使用
 	public void uploadFile(DPB0080Req req) {

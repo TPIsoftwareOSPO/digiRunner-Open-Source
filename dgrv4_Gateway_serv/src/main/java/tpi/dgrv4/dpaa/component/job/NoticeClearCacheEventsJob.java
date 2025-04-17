@@ -2,7 +2,6 @@ package tpi.dgrv4.dpaa.component.job;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.constant.LocaleType;
@@ -22,16 +21,9 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @SuppressWarnings("serial")
 public class NoticeClearCacheEventsJob extends Job {
 	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
 	private CleanAllCacheNotifier cleanAllCacheNotifier;
-	
-	@Autowired
 	private CleanCacheByKeyNotifier cleanCacheByKeyNotifier;
-	
-	@Autowired
 	private CleanCacheByTableNameNotifier cleanCacheByTableNameNotifier;
 
 	private TPILogger logger = TPILogger.tl;
@@ -40,10 +32,18 @@ public class NoticeClearCacheEventsJob extends Job {
 	private final String cacheName;
 	private final List<String> tableNames;
 	
-	public NoticeClearCacheEventsJob(Integer action, String cacheName, List<String> tableNames) {
+	public NoticeClearCacheEventsJob(Integer action, String cacheName, List<String> tableNames,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, CleanAllCacheNotifier cleanAllCacheNotifier,
+			CleanCacheByKeyNotifier cleanCacheByKeyNotifier,
+			CleanCacheByTableNameNotifier cleanCacheByTableNameNotifier) {
 		this.action = action;
 		this.cacheName = cacheName;
 		this.tableNames = tableNames;
+
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.cleanAllCacheNotifier = cleanAllCacheNotifier;
+		this.cleanCacheByKeyNotifier = cleanCacheByKeyNotifier;
+		this.cleanCacheByTableNameNotifier = cleanCacheByTableNameNotifier;
 	}
 
 	@Override

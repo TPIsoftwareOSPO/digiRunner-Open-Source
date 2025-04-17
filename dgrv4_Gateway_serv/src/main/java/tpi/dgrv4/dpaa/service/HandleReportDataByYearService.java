@@ -5,11 +5,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.ReportDateTimeRangeTypeEnum;
 import tpi.dgrv4.common.constant.ReportTypeEnum;
@@ -21,14 +23,13 @@ import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpReportDataDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class HandleReportDataByYearService {
 
-
-	@Autowired
-	private TsmpReportDataDao tsmpReportDataDao;
-	@Autowired
-    private TsmpDpApptJobDao tsmpDpApptJobDao;
+	private final TsmpReportDataDao tsmpReportDataDao;
+    private final TsmpDpApptJobDao tsmpDpApptJobDao;
 
 	@Transactional
 	public void exec(Date execDate, String userName, Long jobId) {

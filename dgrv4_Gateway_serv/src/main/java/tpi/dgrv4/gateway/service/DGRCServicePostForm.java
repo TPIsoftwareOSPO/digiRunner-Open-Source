@@ -53,31 +53,32 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class DGRCServicePostForm implements IApiCacheService{
 	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-
-	@Autowired
 	private MultipartResolver multipartResolver;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-	
-	@Autowired
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private DgrcRoutingHelper dgrcRoutingHelper;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
 	
 	private Map<String, String> maskInfo ;
+
+	@Autowired
+	public DGRCServicePostForm(CommForwardProcService commForwardProcService, MultipartResolver multipartResolver,
+			ObjectMapper objectMapper, ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy,
+			TsmpApiRegCacheProxy tsmpApiRegCacheProxy, TsmpSettingService tsmpSettingService,
+			DgrcRoutingHelper dgrcRoutingHelper, MockApiTestService mockApiTestService) {
+		super();
+		this.commForwardProcService = commForwardProcService;
+		this.multipartResolver = multipartResolver;
+		this.objectMapper = objectMapper;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.mockApiTestService = mockApiTestService;
+	}
 
 	@Async("async-workers-highway")
 	public CompletableFuture<ResponseEntity<?>> forwardToPostFormDataAsyncFast(HttpHeaders httpHeaders, HttpServletRequest httpReq,
@@ -92,7 +93,6 @@ public class DGRCServicePostForm implements IApiCacheService{
 		var response = forwardToPostFormData(httpHeaders, httpReq, httpRes);
 		return CompletableFuture.completedFuture(response);
 	}
-
 
 	public ResponseEntity<?> forwardToPostFormData(HttpHeaders httpHeaders, HttpServletRequest httpReq, 
 			HttpServletResponse httpRes) throws Exception {
@@ -154,7 +154,7 @@ public class DGRCServicePostForm implements IApiCacheService{
 		StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start DGRC】--\n" + reqLog.toString());
 		
-		// 檢查資料
+		// 檢查授權
 		ResponseEntity<?> verifyResp = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders, apiReg);
 		
 		// 1. req header / body
@@ -164,9 +164,10 @@ public class DGRCServicePostForm implements IApiCacheService{
 		// 第一組 RDB Req
 		TsmpApiLogReq dgrcPostFormDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq, reqMbody, "dgrc", aType);
 		
-		// JWT 資料驗證有錯誤
+		// 授權錯誤,則回覆錯誤訊息
 		if(verifyResp != null) {
-			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" + getCommForwardProcService().getLogResp(verifyResp, maskInfo).toString());
+			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" 
+					+ getCommForwardProcService().getLogResp(verifyResp, maskInfo, httpReq).toString());
 			//第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(verifyResp.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, dgrcPostFormDgrReqVo, respMbody);
@@ -180,7 +181,7 @@ public class DGRCServicePostForm implements IApiCacheService{
 			ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
 
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n"
-					+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo).toString());
+					+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo, httpReq).toString());
 			// 第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(srcUrlListErrResp.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(srcUrlListErrResp, dgrcPostFormDgrReqVo, respMbody);
@@ -209,6 +210,12 @@ public class DGRCServicePostForm implements IApiCacheService{
 		Map<String, Object> convertResponseBodyMap = forwardToWithoutFileByPolicy(httpHeaders, httpReq, httpRes, apiReg,
 				uuid, tokenPayload, cApiKeySwitch, dgrcPostFormDgrReqVo, dgrcPostFormDgrReqVo_rdb, srcUrlList, reqMbody,
 				partContentTypes);
+		
+		if (convertResponseBodyMap == null) {
+			// Response alread commited HTTP code : 503 --> null
+			// 不寫 ES , 不輸出 online console
+			return null;
+		}
 		
 		byte[] httpArray = null;
 		String httpRespStr = null;
@@ -281,15 +288,15 @@ public class DGRCServicePostForm implements IApiCacheService{
 					null);
 		}
 
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 	
 	protected Map<String, Object> forwardToWithoutFile(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders, String reqMbody, String srcUrl, String uuid, int tokenPayload,
 			TsmpApiLogReq dgrcPostFormDgrReqVo, TsmpApiLogReq dgrcPostFormDgrReqVo_rdb, Boolean cApiKeySwitch,
 			Map<String, String> partContentTypes, String tryNumWord) throws Exception {
-		// 2. tsmpc req header / body
-		// 3. tsmpc resp header / body / code
+		// 2. dgrc req header / body
+		// 3. dgrc resp header / body / code
 
 		// http header
 		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders,
@@ -370,7 +377,7 @@ public class DGRCServicePostForm implements IApiCacheService{
 		Map<String, Object> convertResponseBodyMap = getCommForwardProcService().convertResponseBody(httpRes, httpReq,
 				dgrcPostForm_respObj.httpRespArray, dgrcPostForm_respObj.respStr);
 		 
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 	
 	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletRequest httpReq,
@@ -652,7 +659,7 @@ public class DGRCServicePostForm implements IApiCacheService{
 		// 印出第一道log
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start DGRC】--\n" + dgrcPostFormForward_log.toString());
 		
-		// 檢查資料
+		// 檢查授權
 		ResponseEntity<?> verifyResp = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders, apiReg);
 		
 		// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
@@ -660,13 +667,14 @@ public class DGRCServicePostForm implements IApiCacheService{
 		// 第一組 RDB Req
 		TsmpApiLogReq dgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq, reqMbody, "dgrc", aType);
 		
-		// JWT 資料驗證有錯誤
+		// 授權錯誤,則回覆錯誤訊息
 		if(verifyResp != null) {
 			//第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(verifyResp.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, dgrReqVo, respMbody);
 			getCommForwardProcService().addRdbTsmpApiLogResp1(verifyResp, dgrReqVo_rdb, respMbody);
-			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" + getCommForwardProcService().getLogResp(verifyResp,maskInfo).toString());
+			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" 
+					+ getCommForwardProcService().getLogResp(verifyResp,maskInfo, httpReq).toString());
 			return verifyResp;
 		}
 		 
@@ -676,7 +684,7 @@ public class DGRCServicePostForm implements IApiCacheService{
 			ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
 
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n"
-					+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo).toString());
+					+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo, httpReq).toString());
 			// 第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(srcUrlListErrResp.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(srcUrlListErrResp, dgrReqVo, respMbody);
@@ -700,6 +708,12 @@ public class DGRCServicePostForm implements IApiCacheService{
 		Map<String, Object> convertResponseBodyMap = forwardWithFileByPolicy(httpHeaders, httpReq, httpRes, apiReg,
 				uuid, tokenPayload, cApiKeySwitch, dgrReqVo, dgrReqVo_rdb, srcUrlList, reqMbody, boundary, formBody,
 				formBody2Hex);
+		
+		if (convertResponseBodyMap == null) {
+			// Response alread commited HTTP code : 503 --> null
+			// 不寫 ES , 不輸出 online console
+			return null;
+		}
 		
 		byte[] httpArray = null;
 		String httpRespStr = null;
@@ -769,7 +783,7 @@ public class DGRCServicePostForm implements IApiCacheService{
 					tokenPayload, dgrReqVo, dgrReqVo_rdb, cApiKeySwitch, boundary, formBody, formBody2Hex, null);
 		}
 
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 	
 	protected Map<String, Object> forwardWithFile(HttpServletRequest httpReq, HttpServletResponse httpRes,

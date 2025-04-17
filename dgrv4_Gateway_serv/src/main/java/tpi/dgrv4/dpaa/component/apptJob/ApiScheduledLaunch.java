@@ -2,30 +2,35 @@ package tpi.dgrv4.dpaa.component.apptJob;
 
 import java.util.List;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
+import jakarta.transaction.Transactional;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.dpaa.constant.TsmpDpItem;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Transactional
 public class ApiScheduledLaunch extends ApptJob {
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
 
-	public ApiScheduledLaunch(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public ApiScheduledLaunch(TsmpDpApptJob tsmpDpApptJob, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpApiDao tsmpApiDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpApiDao = tsmpApiDao;
 	}
 
-	public ApiScheduledLaunch(TsmpDpApptJob tsmpDpApptJob, TPILogger logger) {
-		super(tsmpDpApptJob, logger);
+	public ApiScheduledLaunch(TsmpDpApptJob tsmpDpApptJob, TPILogger logger, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpApiDao tsmpApiDao) {
+		super(tsmpDpApptJob, logger, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpApiDao = tsmpApiDao;
 	}
 
 	@Override

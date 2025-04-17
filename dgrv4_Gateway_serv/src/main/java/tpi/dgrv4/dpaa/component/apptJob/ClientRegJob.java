@@ -16,18 +16,19 @@ import tpi.dgrv4.common.constant.TsmpDpRegStatus;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
-import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.TsmpDpClientext;
 import tpi.dgrv4.entity.entity.TsmpDpFile;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd3;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
 import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd3Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -42,26 +43,25 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @SuppressWarnings("serial")
 public class ClientRegJob extends ApptJob {
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private FileHelper fileHelper;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 
-	public ClientRegJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public ClientRegJob(TsmpDpApptJob tsmpDpApptJob, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao, TsmpDpClientextDao tsmpDpClientextDao, TsmpDpFileDao tsmpDpFileDao,
+			FileHelper fileHelper, DgrAuditLogService dgrAuditLogService, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
 	}
 
 	@Override

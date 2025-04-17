@@ -21,28 +21,28 @@ public class DpReqServiceFactory {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
-	@Qualifier("dpReqServiceImpl_D1")
 	private DpReqServiceIfs d1ReqService;
-
-	@Autowired
-	@Qualifier("dpReqServiceImpl_D2")
 	private DpReqServiceIfs d2ReqService;
-
-	@Autowired
-	@Qualifier("dpReqServiceImpl_D3")
 	private DpReqServiceIfs d3ReqService;
-
-	@Autowired
-	@Qualifier("dpReqServiceImpl_D4")
 	private DpReqServiceIfs d4ReqService;
+	private DpReqServiceIfs d5ReqService;
 	
 	@Autowired
-	@Qualifier("dpReqServiceImpl_D5")
-	private DpReqServiceIfs d5ReqService;
+	public DpReqServiceFactory(TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			@Qualifier("dpReqServiceImpl_D1") DpReqServiceIfs d1ReqService,
+			@Qualifier("dpReqServiceImpl_D2") DpReqServiceIfs d2ReqService,
+			@Qualifier("dpReqServiceImpl_D3") DpReqServiceIfs d3ReqService,
+			@Qualifier("dpReqServiceImpl_D4") DpReqServiceIfs d4ReqService,
+			@Qualifier("dpReqServiceImpl_D5") DpReqServiceIfs d5ReqService) {
+		super();
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.d1ReqService = d1ReqService;
+		this.d2ReqService = d2ReqService;
+		this.d3ReqService = d3ReqService;
+		this.d4ReqService = d4ReqService;
+		this.d5ReqService = d5ReqService;
+	}
 
 	/**
 	 * 使用時機: 草稿(申請單)建立後

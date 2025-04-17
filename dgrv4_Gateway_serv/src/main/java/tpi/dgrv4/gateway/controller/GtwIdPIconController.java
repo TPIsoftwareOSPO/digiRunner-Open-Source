@@ -21,9 +21,13 @@ import tpi.dgrv4.gateway.service.GtwIdPIconService;
  */
 @RestController
 public class GtwIdPIconController {
-	@Autowired
 	private GtwIdPIconService service;
 
+	@Autowired
+	public GtwIdPIconController(GtwIdPIconService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/getIcon")
 	public ResponseEntity<String> getIcon(

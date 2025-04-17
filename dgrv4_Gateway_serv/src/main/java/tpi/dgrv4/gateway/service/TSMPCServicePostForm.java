@@ -46,24 +46,27 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class TSMPCServicePostForm implements IApiCacheService {
 
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-
-	@Autowired
 	private MultipartResolver multipartResolver;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
-
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
+	private TsmpSettingService tsmpSettingService;
+	
+	private Map<String, String> maskInfo;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
-	private Map<String, String> maskInfo;
+	public TSMPCServicePostForm(CommForwardProcService commForwardProcService, MultipartResolver multipartResolver,
+			ObjectMapper objectMapper, MockApiTestService mockApiTestService,
+			ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy, TsmpSettingService tsmpSettingService) {
+		super();
+		this.commForwardProcService = commForwardProcService;
+		this.multipartResolver = multipartResolver;
+		this.objectMapper = objectMapper;
+		this.mockApiTestService = mockApiTestService;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public ResponseEntity<?> forwardToPostFormData(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes) throws Exception {
@@ -133,7 +136,7 @@ public class TSMPCServicePostForm implements IApiCacheService {
 		// JWT 資料驗證有錯誤
 		if (verifyResp != null) {
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n"
-					+ getCommForwardProcService().getLogResp(verifyResp, maskInfo).toString());
+					+ getCommForwardProcService().getLogResp(verifyResp, maskInfo, httpReq).toString());
 			// 第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(verifyResp.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, tsmpcPostFormDgrReqVo, respMbody);
@@ -259,7 +262,7 @@ public class TSMPCServicePostForm implements IApiCacheService {
 
 			// print
 			StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length,
-					maskInfo);
+					maskInfo, httpReq);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
 
 			// 第一組ES RESP
@@ -546,7 +549,7 @@ public class TSMPCServicePostForm implements IApiCacheService {
 			getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, dgrReqVo, respMbody);
 			getCommForwardProcService().addRdbTsmpApiLogResp1(verifyResp, dgrReqVo_rdb, respMbody);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n"
-					+ getCommForwardProcService().getLogResp(verifyResp, maskInfo).toString());
+					+ getCommForwardProcService().getLogResp(verifyResp, maskInfo, httpReq).toString());
 			return verifyResp;
 		}
 
@@ -623,7 +626,7 @@ public class TSMPCServicePostForm implements IApiCacheService {
 			// 10.【Http status code】
 			// 11.【Resp payload / Form Data】
 //			String httpRespStr = new String(httpArray , StandardCharsets.UTF_8);
-			getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, tsmpcPostForm_log, maskInfo);
+			getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, tsmpcPostForm_log, maskInfo, httpReq);
 
 			// print
 			TPILogger.tl.debug("\n" + tsmpcPostForm_log.toString());

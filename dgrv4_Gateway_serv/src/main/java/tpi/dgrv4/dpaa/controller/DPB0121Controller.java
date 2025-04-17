@@ -22,8 +22,13 @@ public class DPB0121Controller {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DPB0121Service service;
+
+	@Autowired
+	public DPB0121Controller(DPB0121Service service) {
+		super();
+		this.service = service;
+	}
 
 
 	@GetMapping(value = "/dgrv4/11/DPB0121", //

@@ -36,26 +36,27 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service						
 public class AA0411Service {						
 						
-	@Autowired					
 	private TsmpUserDao tsmpUserDao; 	
-	
-	@Autowired					
 	private TsmpDcDao tsmpDcDao; 			
-	
-	@Autowired					
 	private TsmpNodeDao tsmpNodeDao; 	
-	
-	@Autowired					
 	private TsmpDcNodeDao tsmpDcNodeDao; 	
-	
-	@Autowired					
 	private DgrAcIdpUserDao dgrAcIdpUserDao; 	
- 
-	@Autowired					
 	private SeqStoreService seqStoreService; 			
  				
 	private TPILogger logger = TPILogger.tl; 					
-						
+	
+	@Autowired
+	public AA0411Service(TsmpUserDao tsmpUserDao, TsmpDcDao tsmpDcDao, TsmpNodeDao tsmpNodeDao,
+			TsmpDcNodeDao tsmpDcNodeDao, DgrAcIdpUserDao dgrAcIdpUserDao, SeqStoreService seqStoreService) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpDcDao = tsmpDcDao;
+		this.tsmpNodeDao = tsmpNodeDao;
+		this.tsmpDcNodeDao = tsmpDcNodeDao;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.seqStoreService = seqStoreService;
+	}
+
 	public AA0411Resp addDC(TsmpAuthorization auth, AA0411Req req) {	
 		AA0411Resp resp = new AA0411Resp();				
 		try {				

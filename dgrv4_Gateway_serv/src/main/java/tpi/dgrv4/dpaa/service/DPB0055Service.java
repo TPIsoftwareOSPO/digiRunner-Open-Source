@@ -31,22 +31,24 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0055Service {
 
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0055Service(TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0055Resp queryThemeLikeList_1(TsmpAuthorization authorization, DPB0055Req req) {
 		// 只能看到自己組織向下的主題

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import tpi.dgrv4.gateway.TCP.Packet.NodeInfoPacket;
+import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 import tpi.dgrv4.tcp.utils.packets.UndertowMetricsPacket;
 import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 
@@ -21,6 +22,7 @@ public class RefreshGTWReq {
 	private NodeInfoPacket nodeInfoPacket;
 	private UndertowMetricsPacket undertowMetricsPacket;
 	private UrlStatusPacket urlStatusPacket;
+	private RealtimeDashboardPacket realtimeDashboardPacket;
 	
 	/* GTW 的 token 使用量 */
 	private Map<String, Long> tokenUsedMap;
@@ -139,4 +141,14 @@ public class RefreshGTWReq {
 	public void setLogMsg(List<String> logMsg) {
 		this.logMsg = logMsg;
 	}
+
+	public RealtimeDashboardPacket getRealtimeDashboardPacket() {
+		return realtimeDashboardPacket;
+	}
+
+	public void setRealtimeDashboardPacket(RealtimeDashboardPacket realtimeDashboardPacket) {
+		this.realtimeDashboardPacket = realtimeDashboardPacket;
+	}
+	
+	
 }

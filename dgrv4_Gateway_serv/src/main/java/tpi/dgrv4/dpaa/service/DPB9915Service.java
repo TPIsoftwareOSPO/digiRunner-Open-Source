@@ -34,18 +34,11 @@ import java.util.regex.Pattern;
 @Service
 public class DPB9915Service  {
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
 	private FileHelper fileHelper;
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private Long expMs;
@@ -53,6 +46,19 @@ public class DPB9915Service  {
 	private Integer pageSize;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB9915Service(TsmpDpFileDao tsmpDpFileDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			BcryptParamHelper bcryptParamHelper, FileHelper fileHelper, ServiceConfig serviceConfig,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.fileHelper = fileHelper;
+		this.serviceConfig = serviceConfig;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public DPB9915Resp queryTsmpDpFileList(TsmpAuthorization tsmpAuthorization, DPB9915Req req, String locale) {
 		

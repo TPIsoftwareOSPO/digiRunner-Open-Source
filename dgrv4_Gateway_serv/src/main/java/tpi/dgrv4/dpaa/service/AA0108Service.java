@@ -18,9 +18,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 public class AA0108Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
 	
+	@Autowired
+	public AA0108Service(TsmpFuncDao tsmpFuncDao) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+	}
+
 	public AA0108Resp queryCusMasterFunc(ReqHeader reqHeader ) {
 		List<AA0108FuncInfo> list = new ArrayList<>();
 		AA0108Resp resp = new AA0108Resp();

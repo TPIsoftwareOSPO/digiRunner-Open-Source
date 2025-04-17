@@ -1,6 +1,5 @@
 package tpi.dgrv4.dpaa.component.job;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import tpi.dgrv4.dpaa.constant.TsmpDpMailType;
 import tpi.dgrv4.dpaa.service.PrepareMailService;
 import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
@@ -13,20 +12,21 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 import java.util.List;
 
 public class SendMailJob extends Job {
-    @Autowired
     private PrepareMailService prepareMailService;
+    
     private final TsmpAuthorization auth;
 
     private final List<TsmpMailEvent> mailEvents;
-
     private final String sendTime;
     private final String identif;
 
-    public SendMailJob(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime, String identif) {
+	public SendMailJob(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime, String identif,
+			PrepareMailService prepareMailService) {
         this.auth = auth;
         this.mailEvents = mailEvents;
         this.sendTime = sendTime;
         this.identif = identif;
+        this.prepareMailService = prepareMailService;
     }
 
     @Override

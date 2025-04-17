@@ -26,11 +26,13 @@ import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpClientGroupDao;
 import tpi.dgrv4.entity.repository.TsmpDpApiAuth2Dao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd1Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.entity.repository.TsmpGroupApiDao;
 import tpi.dgrv4.entity.repository.TsmpGroupDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 /**
@@ -45,35 +47,31 @@ public class ApiApplicationJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrderd1Dao tsmpDpReqOrderd1Dao;
-
-	@Autowired
 	private TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
+	private SeqStoreService seqStoreService;
 	
 	@Autowired
-	private SeqStoreService seqStoreService;
-
-	public ApiApplicationJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	public ApiApplicationJob(TsmpDpApptJob tsmpDpApptJob, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			TsmpDpReqOrderd1Dao tsmpDpReqOrderd1Dao, TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao, TsmpClientDao tsmpClientDao,
+			TsmpGroupApiDao tsmpGroupApiDao, TsmpApiDao tsmpApiDao, TsmpClientGroupDao tsmpClientGroupDao,
+			TsmpGroupDao tsmpGroupDao, SeqStoreService seqStoreService, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd1Dao = tsmpDpReqOrderd1Dao;
+		this.tsmpDpApiAuth2Dao = tsmpDpApiAuth2Dao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.seqStoreService = seqStoreService;
 	}
 
 	@Override

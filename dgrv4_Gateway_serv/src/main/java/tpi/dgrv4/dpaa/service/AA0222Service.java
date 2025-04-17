@@ -29,24 +29,25 @@ import static tpi.dgrv4.dpaa.util.ServiceUtil.nvl;
 @Service
 public class AA0222Service {
 
-//	private TPILogger logger = TPILogger.tl;
-	
 	private Integer pageSize;
 	
-	@Autowired
 	private TsmpSecurityLevelCacheProxy securityLevelCacheProxy;
-
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy;
+	private ServiceConfig serviceConfig;
 
 	@Autowired
-	private ServiceConfig serviceConfig;
+	public AA0222Service(TsmpSecurityLevelCacheProxy securityLevelCacheProxy, TsmpVgroupDao tsmpVgroupDao,
+			TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao,
+			TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy, ServiceConfig serviceConfig) {
+		super();
+		this.securityLevelCacheProxy = securityLevelCacheProxy;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesCacheProxy = tsmpGroupAuthoritiesCacheProxy;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0222Resp queryVGroupList_1(AA0222Req req) {
 		AA0222Resp resp = new AA0222Resp();

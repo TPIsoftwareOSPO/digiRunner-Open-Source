@@ -44,13 +44,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA1211Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired 
-	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
 	
-	@Autowired
+	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
 	private DgrAuditLogMDao dgrAuditLogMDao;
 	
 	private final static int GAP = 20; // 中位數的刻度，目前暫定寫死20
+
+	@Autowired
+	public AA1211Service(DgrDashboardLastDataDao dgrDashboardLastDataDao, DgrAuditLogMDao dgrAuditLogMDao) {
+		super();
+		this.dgrDashboardLastDataDao = dgrDashboardLastDataDao;
+		this.dgrAuditLogMDao = dgrAuditLogMDao;
+	}
 
 	public AA1211Resp queryDashboardData(TsmpAuthorization authorization, AA1211Req req, ReqHeader reqHeader) {
 		AA1211Resp resp = new AA1211Resp();

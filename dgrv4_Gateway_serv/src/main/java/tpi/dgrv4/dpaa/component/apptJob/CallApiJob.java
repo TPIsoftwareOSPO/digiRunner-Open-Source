@@ -1,22 +1,21 @@
 package tpi.dgrv4.dpaa.component.apptJob;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import tpi.dgrv4.dpaa.component.ApiHelperImpl;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
 public class CallApiJob extends ApptJob {
 
-	private TPILogger logger = TPILogger.tl;;
-
 	@Autowired
-	private ApiHelperImpl apiHelper;
-
-	public CallApiJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	public CallApiJob(TsmpDpApptJob tsmpDpApptJob, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
 	}
 
 	@Override

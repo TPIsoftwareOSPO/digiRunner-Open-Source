@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,7 +14,6 @@ import tpi.dgrv4.common.ifs.TsmpCoreTokenBase;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0192Req;
 import tpi.dgrv4.dpaa.vo.DPB0192Resp;
-import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.entity.DgrRdbConnection;
 import tpi.dgrv4.entity.repository.DgrRdbConnectionDao;
 import tpi.dgrv4.gateway.constant.DgrDataType;
@@ -23,11 +23,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0192Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
-	private DgrRdbConnectionDao dgrRdbConnectionDao;
 	
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
+	
+	private DgrRdbConnectionDao dgrRdbConnectionDao;
+
+	@Autowired
+	public DPB0192Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, DgrRdbConnectionDao dgrRdbConnectionDao) {
+		super();
+		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+	}
 
 	public DPB0192Resp createRdbConnectionInfo(TsmpAuthorization authorization, DPB0192Req req) {
 		DPB0192Resp resp = new DPB0192Resp();

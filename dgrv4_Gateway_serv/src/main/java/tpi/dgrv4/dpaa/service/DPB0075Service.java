@@ -33,20 +33,23 @@ public class DPB0075Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private ApiItemService apiItemService;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
 	
+	@Autowired
+	public DPB0075Service(ApiItemService apiItemService, TsmpApiDao tsmpApiDao, TsmpOrganizationDao tsmpOrganizationDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.apiItemService = apiItemService;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB0075Resp queryApiLov(TsmpAuthorization authorization, DPB0075Req req, ReqHeader header) {
 		DPB0075Resp resp = new DPB0075Resp();
 

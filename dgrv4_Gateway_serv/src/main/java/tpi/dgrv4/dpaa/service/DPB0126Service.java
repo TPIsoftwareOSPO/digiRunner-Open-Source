@@ -34,14 +34,19 @@ public class DPB0126Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	@Autowired
 	private DgrESService dgrESService;
-	@Autowired
 	private ObjectMapper objectMapper;
 	
+	@Autowired
+	public DPB0126Service(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, DgrESService dgrESService,
+			ObjectMapper objectMapper) {
+		super();
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.dgrESService = dgrESService;
+		this.objectMapper = objectMapper;
+	}
+
 	public DPB0126Resp queryAllIndex(TsmpAuthorization auth, DPB0126Req req, ReqHeader reqHeader) {
 		DPB0126Resp resp = new DPB0126Resp();
 		try {

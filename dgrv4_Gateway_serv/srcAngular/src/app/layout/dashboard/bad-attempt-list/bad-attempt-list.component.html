@@ -1,0 +1,24 @@
+<div>
+  <p-table [value]="badAttemptList" selectionMode="single" [style]="{'word-break':'break-word'}"
+    responsiveLayout="scroll" styleClass="p-datatable-striped">
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th style="width: 80%;" scope="col">URI</th>
+        <th style="width: 20%;" scope="col">HTTP Status Codes</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+      <tr>
+        <td >{{rowData.uri}}</td>
+        <td class="text-center">{{rowData.statusCode}}</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="2">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+  </p-table>
+</div>

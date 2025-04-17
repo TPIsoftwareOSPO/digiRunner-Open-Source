@@ -57,36 +57,35 @@ public class TptokenService {
 	String tokenApiUrl = "/tptoken/oauth/token";
 	String auditClientId = "";
 	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private TsmpSsoUserSecretDao tsmpSsoUserSecretDao;
-	
-	@Autowired
 	private SsotokenService ssotokenService;
-	
-	@Autowired
-	private LdapService ldapService;
-	
-	@Autowired
+	private LdapService ldapService;	
 	private OAuthTokenService oAuthTokenService;
 	
+	@Autowired
+	public TptokenService(TsmpUserDao tsmpUserDao, TsmpSettingDao tsmpSettingDao, ServiceConfig serviceConfig,
+			TsmpSettingService tsmpSettingService, TsmpTAEASKHelper tsmpTAEASKHelper,
+			DgrAuditLogService dgrAuditLogService, TsmpSsoUserSecretDao tsmpSsoUserSecretDao,
+			SsotokenService ssotokenService, LdapService ldapService, OAuthTokenService oAuthTokenService) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.serviceConfig = serviceConfig;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSsoUserSecretDao = tsmpSsoUserSecretDao;
+		this.ssotokenService = ssotokenService;
+		this.ldapService = ldapService;
+		this.oAuthTokenService = oAuthTokenService;
+	}
+
 	public void getTptoken(HttpServletRequest httpReq, HttpServletResponse httpRes, HttpHeaders httpHeaders,
 			ReqHeader reqHeader) throws Exception {
 		String scheme = httpReq.getScheme();

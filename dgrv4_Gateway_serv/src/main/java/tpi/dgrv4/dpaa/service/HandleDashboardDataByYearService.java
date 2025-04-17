@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -44,16 +45,13 @@ import tpi.dgrv4.gateway.service.ISysInfoService;
 
 @Service
 public class HandleDashboardDataByYearService {
-	@Autowired
-	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
-	@Autowired
-	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
-	@Autowired
-	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private ISysInfoService sysInfoService;
+	
+	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
+	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
+	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
+	private TsmpApiCacheProxy tsmpApiCacheProxy;
 	
 	private DateFormat yyyyMMddHHmmssSSS = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 	private DateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -61,6 +59,18 @@ public class HandleDashboardDataByYearService {
 
 	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
 	
+	@Autowired
+	public HandleDashboardDataByYearService(@Nullable ISysInfoService sysInfoService,
+			DgrDashboardLastDataDao dgrDashboardLastDataDao, TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao,
+			DgrDashboardEsLogDao dgrDashboardEsLogDao, TsmpApiCacheProxy tsmpApiCacheProxy) {
+		super();
+		this.sysInfoService = sysInfoService;
+		this.dgrDashboardLastDataDao = dgrDashboardLastDataDao;
+		this.tsmpReqResLogHistoryDao = tsmpReqResLogHistoryDao;
+		this.dgrDashboardEsLogDao = dgrDashboardEsLogDao;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+	}
+
 	@Transactional
 	public void exec(Date execDate, boolean isEs) {
 

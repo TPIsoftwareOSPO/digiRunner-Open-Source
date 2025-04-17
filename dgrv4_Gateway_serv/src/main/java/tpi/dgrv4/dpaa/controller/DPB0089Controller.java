@@ -29,9 +29,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0089Controller {
 
-	@Autowired
 	private DPB0089Service service;
 	
+	@Autowired
+	public DPB0089Controller(DPB0089Service service) {
+		super();
+		this.service = service;
+	}
+
 
 	@PostMapping(value = "/dgrv4/11/DPB0089", //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //

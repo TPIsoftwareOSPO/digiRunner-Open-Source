@@ -21,8 +21,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0221Controller {
 	
-	@Autowired
 	private DPB0221Service service;
+
+	@Autowired
+	public DPB0221Controller(DPB0221Service service) {
+		super();
+		this.service = service;
+	}
 
 
 	@PostMapping(value = "/dgrv4/11/DPB0221", //

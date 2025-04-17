@@ -37,14 +37,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9930Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrWebsiteDao dgrWebsiteDao;
-
-	@Autowired
 	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
+	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
 
 	@Autowired
-	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
+	public DPB9930Service(DgrWebsiteDao dgrWebsiteDao, DgrWebsiteDetailDao dgrWebsiteDetailDao,
+			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties) {
+		super();
+		this.dgrWebsiteDao = dgrWebsiteDao;
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+	}
 
 	@Transactional
 	public DPB9930Resp importWebsiteProxy(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {

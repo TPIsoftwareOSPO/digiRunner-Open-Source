@@ -28,10 +28,15 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0422Controller {
 		
-	@Autowired
 	private AA0422Service service;
 	
-	
+	@Autowired
+	public AA0422Controller(AA0422Service service) {
+		super();
+		this.service = service;
+	}
+
+
 	/**
 	 * 查詢某個Module Name的部署容器清單。				
 	 * 

@@ -25,9 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0090Controller {
 	
-	@Autowired
 	private DPB0090Service service;
 	
+	@Autowired
+	public DPB0090Controller(DPB0090Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 查詢Open API Key依Client ID
 	 * 查詢該 Client ID 的 Open API KEY 清單						

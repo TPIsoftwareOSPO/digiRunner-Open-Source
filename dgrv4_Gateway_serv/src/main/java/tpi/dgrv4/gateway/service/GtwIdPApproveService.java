@@ -31,30 +31,31 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Service
 public class GtwIdPApproveService {
 	
-	@Autowired
 	private GtwIdPAuthService gtwIdPAuthService;
-	
-	@Autowired
 	private DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
-	
-	@Autowired
-	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
- 
-	@Autowired
+	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao; 
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private OAuthTokenService oAuthTokenService;
-	
-	@Autowired
 	private OAuthAuthorizationService oAuthAuthorizationService;
-	
-	@Autowired
-	private DgrOauthApprovalsDao dgrOauthApprovalsDao;
- 
-	@Autowired
+	private DgrOauthApprovalsDao dgrOauthApprovalsDao; 
 	private GtwIdPHelper gtwIdPHelper;
 	
+	@Autowired
+	public GtwIdPApproveService(GtwIdPAuthService gtwIdPAuthService, DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao,
+			DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao, TokenHelper tokenHelper, OAuthTokenService oAuthTokenService,
+			OAuthAuthorizationService oAuthAuthorizationService, DgrOauthApprovalsDao dgrOauthApprovalsDao,
+			GtwIdPHelper gtwIdPHelper) {
+		super();
+		this.gtwIdPAuthService = gtwIdPAuthService;
+		this.dgrGtwIdpAuthCodeDao = dgrGtwIdpAuthCodeDao;
+		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
+		this.tokenHelper = tokenHelper;
+		this.oAuthTokenService = oAuthTokenService;
+		this.oAuthAuthorizationService = oAuthAuthorizationService;
+		this.dgrOauthApprovalsDao = dgrOauthApprovalsDao;
+		this.gtwIdPHelper = gtwIdPHelper;
+	}
+
 	public ResponseEntity<?> gtwIdPApprove(HttpHeaders headers, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
 		

@@ -33,16 +33,20 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0103Service {
 
-	@Autowired
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
 	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	private ObjectMapper om = new ObjectMapper();
+
+	@Autowired
+	public DPB0103Service(TsmpDpApptRjobDao tsmpDpApptRjobDao, TsmpDpApptRjobDDao tsmpDpApptRjobDDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0103Resp queryRjobByPk(TsmpAuthorization auth, DPB0103Req req, ReqHeader reqHeader) {
 		String apptRjobId = req.getApptRjobId();

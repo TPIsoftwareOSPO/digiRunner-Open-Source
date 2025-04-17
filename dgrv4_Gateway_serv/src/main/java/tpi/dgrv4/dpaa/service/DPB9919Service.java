@@ -28,12 +28,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB9919Service {
 
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	@Autowired
 	private FileHelper fileHelper;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB9919Service(TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+	}
 
 	@Transactional
 	public DPB9919Resp removeAndRestoreTsmpDpFile(TsmpAuthorization tsmpAuthorization, DPB9919Req req) {

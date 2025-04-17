@@ -31,19 +31,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0125Service {
 
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private DgrESService dgrESService;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 
 	private final String DT_FORMAT = "yyyyMMdd'T'HHmmssZ";
+	
+	@Autowired
+	public DPB0125Service(DgrESService dgrESService, ObjectMapper objectMapper, ServiceConfig serviceConfig,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.dgrESService = dgrESService;
+		this.objectMapper = objectMapper;
+		this.serviceConfig = serviceConfig;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public DPB0125Resp getIndex(TsmpAuthorization auth, DPB0125Req req) {
 		Map<String, Date> dates = checkDates(req);

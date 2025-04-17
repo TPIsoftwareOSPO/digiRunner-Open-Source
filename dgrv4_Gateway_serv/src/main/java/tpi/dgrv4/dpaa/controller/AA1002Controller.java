@@ -28,10 +28,15 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA1002Controller {
 		
-	@Autowired
 	private AA1002Service service;
 		
-	
+	@Autowired
+	public AA1002Controller(AA1002Service service) {
+		super();
+		this.service = service;
+	}
+
+
 	/**
 	 * 
 	 * @param headers

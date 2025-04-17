@@ -25,10 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 //@RestController 停用[事件檢視器]功能 2022/09/26
 public class DPB0107Controller {
 	
-	@Autowired
 	private DPB0107Service dpb0107Service;
 		
-	
+	@Autowired
+	public DPB0107Controller(DPB0107Service dpb0107Service) {
+		super();
+		this.dpb0107Service = dpb0107Service;
+	}
+
 	/**
 	 * 查詢事件依PK
 	 * @param jsonStr

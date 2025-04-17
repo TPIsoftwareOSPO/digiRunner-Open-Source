@@ -16,9 +16,14 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
+	@Autowired
+	public WebMvcConfig(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 //		String url = "redirect:/dgrv4/ac4/login"; // 預設頁, 它可以跳到任何登入頁 ex: /ldap , /login2

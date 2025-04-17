@@ -25,9 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA1116Controller {
 	
-	@Autowired
 	private AA1116Service service;
 	
+	@Autowired
+	public AA1116Controller(AA1116Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 查詢安全等級清單(原aa1102)
 	 * 提供關鍵字(安全等級ID、安全等級名稱、安全等級描述)搜尋安全等級清單。							

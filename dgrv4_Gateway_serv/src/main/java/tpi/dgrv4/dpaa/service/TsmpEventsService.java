@@ -29,11 +29,15 @@ public class TsmpEventsService {
 		;
 	}
 
-	@Autowired
 	private JobHelper jobHelper;
+	private ApplicationContext ctx;
 
 	@Autowired
-	private ApplicationContext ctx;
+	public TsmpEventsService(JobHelper jobHelper, ApplicationContext ctx) {
+		super();
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+	}
 
 	public Job saveEvent(EventType eventType, String eventNameId, String infoMsg, String traceId) {
 		return saveEvent(eventType, eventNameId, infoMsg, traceId, null);

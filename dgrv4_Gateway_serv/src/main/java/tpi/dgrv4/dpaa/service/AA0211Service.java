@@ -47,29 +47,30 @@ public class AA0211Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
+	private TsmpGroupApiDao tsmpGroupApiDao;
+	private SeqStoreService seqStoreService;
+	private BcryptParamHelper bcryptParamHelper;
+	private DgrAuditLogService dgrAuditLogService;
 
 	@Autowired
-	private TsmpGroupApiDao tsmpGroupApiDao;
-	
-	@Autowired
-	private SeqStoreService seqStoreService;
-	
-	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
+	public AA0211Service(TsmpGroupDao tsmpGroupDao, TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			TsmpApiDao tsmpApiDao, TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpGroupApiDao tsmpGroupApiDao,
+			SeqStoreService seqStoreService, BcryptParamHelper bcryptParamHelper,
+			DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.seqStoreService = seqStoreService;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
 
 	@Transactional
 	public AA0211Resp addGroup(TsmpAuthorization authorization, AA0211Req req, ReqHeader reqHeader, InnerInvokeParam iip) {

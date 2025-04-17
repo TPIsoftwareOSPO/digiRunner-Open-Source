@@ -38,19 +38,22 @@ public class DPB0102Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0102Service(TsmpDpApptRjobDao tsmpDpApptRjobDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			BcryptParamHelper bcryptParamHelper, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0102Resp queryRjobList(TsmpAuthorization auth, DPB0102Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

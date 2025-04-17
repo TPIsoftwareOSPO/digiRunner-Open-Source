@@ -23,8 +23,13 @@ import tpi.dgrv4.gateway.service.GtwIdPApproveService;
 @RestController
 public class GtwIdPApproveController {
 	
-	@Autowired
 	private GtwIdPApproveService service;
+
+	@Autowired
+	public GtwIdPApproveController(GtwIdPApproveService service) {
+		super();
+		this.service = service;
+	}
 
 	// 前端使用
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/approve", 

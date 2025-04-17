@@ -42,9 +42,13 @@ public class AA0506Controller {
 	@Value("${digi.cookie.samesite.value:Lax}")
 	private String samesiteValue;
 	
-	@Autowired
 	private AA0506Service service;
-	
+
+	@Autowired
+	public AA0506Controller(AA0506Service service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/11/AA0506", params = {"before"}, //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //

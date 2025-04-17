@@ -33,16 +33,19 @@ public class AA0801Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRegHostDao tsmpRegHostDao;
-	
-	@Autowired
 	private SeqStoreService seqStoreService;
+	private BcryptParamHelper bcryptParamHelper;
 	
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public AA0801Service(TsmpRegHostDao tsmpRegHostDao, SeqStoreService seqStoreService,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRegHostDao = tsmpRegHostDao;
+		this.seqStoreService = seqStoreService;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
-	
 	@Transactional
 	public AA0801Resp addRegHost(TsmpAuthorization authorization, AA0801Req req, ReqHeader reqHeader) {
 		AA0801Resp resp = new AA0801Resp();

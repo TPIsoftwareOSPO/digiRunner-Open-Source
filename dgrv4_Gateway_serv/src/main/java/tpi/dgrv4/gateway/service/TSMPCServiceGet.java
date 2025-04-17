@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import tpi.dgrv4.common.ifs.TraceCodeUtilIfs;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
 import tpi.dgrv4.gateway.component.cache.proxy.ProxyMethodServiceCacheProxy;
@@ -38,25 +37,25 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class TSMPCServiceGet implements IApiCacheService{
 	
-	@Autowired(required = false)
-	private TraceCodeUtilIfs traceCodeUtil ;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-	
-	@Autowired
 	private MockApiTestService mockApiTestService;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 
 	private HashMap<String, String> maskInfo ;
+
+	@Autowired
+	public TSMPCServiceGet(CommForwardProcService commForwardProcService, ObjectMapper objectMapper,
+			ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy, MockApiTestService mockApiTestService,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.commForwardProcService = commForwardProcService;
+		this.objectMapper = objectMapper;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.mockApiTestService = mockApiTestService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public ResponseEntity<?> forwardToGet(HttpHeaders httpHeaders, HttpServletRequest httpReq, 
 			HttpServletResponse httpRes) throws Exception {
@@ -104,7 +103,7 @@ public class TSMPCServiceGet implements IApiCacheService{
 			
 			// JWT 資料驗證有錯誤
 			if(verifyResp != null) {
-				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + getCommForwardProcService().getLogResp(verifyResp, maskInfo).toString());
+				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + getCommForwardProcService().getLogResp(verifyResp, maskInfo, httpReq).toString());
 				//第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(verifyResp.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, tsmpcGetDgrReqVo, respMbody);
@@ -241,7 +240,7 @@ public class TSMPCServiceGet implements IApiCacheService{
 		}
 
 		// print
-		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo);
+		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo, httpReq);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
 
 		//第一組ES RESP

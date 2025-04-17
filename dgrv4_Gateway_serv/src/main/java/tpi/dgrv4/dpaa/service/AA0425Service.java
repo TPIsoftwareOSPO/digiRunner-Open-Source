@@ -31,18 +31,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0425Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0425Service(ObjectMapper objectMapper, FileHelper fileHelper, TsmpDpFileDao tsmpDpFileDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.objectMapper = objectMapper;
+		this.fileHelper = fileHelper;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0425Resp previewByModifyBatch(TsmpAuthorization authorization, AA0425Req req) {
 		AA0425Resp resp = new AA0425Resp();

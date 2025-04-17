@@ -13,9 +13,6 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @SuppressWarnings("serial")
 public abstract class DeferrableJob extends Job {
 
-	@Autowired
-	private TPILogger logger;
-
 	/**
 	 * 被丟入Deferrable佇列的時間點
 	 */

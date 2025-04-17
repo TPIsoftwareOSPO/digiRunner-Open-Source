@@ -17,9 +17,11 @@ import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.dpaa.component.TsmpInvokeHelper;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.TsmpDpFile;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
@@ -28,16 +30,9 @@ public class TsmpInvokeJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private TsmpInvokeHelper tsmpInvokeHelper;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
 
 	private Long apptJobId;
@@ -46,10 +41,17 @@ public class TsmpInvokeJob extends ApptJob {
 
 	private Map<String, Object> params;
 
-	public TsmpInvokeJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public TsmpInvokeJob(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper, TsmpInvokeHelper tsmpInvokeHelper,
+			FileHelper fileHelper, TsmpDpFileDao tsmpDpFileDao, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
 		this.apptJobId = tsmpDpApptJob.getApptJobId();
 		this.userName = tsmpDpApptJob.getCreateUser();
+		this.objectMapper = objectMapper;
+		this.tsmpInvokeHelper = tsmpInvokeHelper;
+		this.fileHelper = fileHelper;
+		this.tsmpDpFileDao = tsmpDpFileDao;
 	}
 
 	@Override

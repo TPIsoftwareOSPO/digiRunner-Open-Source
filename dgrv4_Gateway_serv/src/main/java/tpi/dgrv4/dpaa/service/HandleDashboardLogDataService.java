@@ -26,13 +26,19 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class HandleDashboardLogDataService {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpReqLogDao tsmpReqLogDao;
-	@Autowired
 	private TsmpResLogDao tsmpResLogDao;
+	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
 
 	@Autowired
-	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
+	public HandleDashboardLogDataService(TsmpReqLogDao tsmpReqLogDao, TsmpResLogDao tsmpResLogDao,
+			TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao) {
+		super();
+		this.tsmpReqLogDao = tsmpReqLogDao;
+		this.tsmpResLogDao = tsmpResLogDao;
+		this.tsmpReqResLogHistoryDao = tsmpReqResLogHistoryDao;
+	}
 
 	@Transactional
 	public Map<String, Object> exec(Date execDate, String createUser) {

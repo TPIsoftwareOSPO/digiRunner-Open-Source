@@ -3,13 +3,14 @@ package tpi.dgrv4.gateway.component.cache.core;
 import com.esotericsoftware.kryo.Kryo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.el.MethodNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
+
 import tpi.dgrv4.gateway.component.job.DummyJob;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.component.job.RefreshCacheJob;
-import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,25 +25,27 @@ public abstract class AbstractCacheProxy {
 
 	private static final String NO_PARAM_KEY = "0";
 
-	@Autowired
 	protected GenericCache cache;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
-	private TPILogger logger;
 
 	private final CacheValueAdapter adapter;
 
-	public AbstractCacheProxy() {
+	@Autowired
+	protected AbstractCacheProxy(GenericCache cache, ObjectMapper objectMapper, ApplicationContext ctx) {
 		this.adapter = new CacheValueKryoAdapter(getClass().getName(), this::kryoRegistration);
+		this.cache = cache;
+		this.objectMapper = objectMapper;
+		this.ctx = ctx;
+	}
+	
+	/*
+	 * Because using constructor injection will cause a circular dependency, use method injection instead
+	 */
+	@Autowired
+	public void setJobHelper(JobHelper jobHelper) {
+		this.jobHelper = jobHelper;
 	}
 
 	protected <R> Optional<R> getOne(String methodName, Supplier<R> supplier, Class<R> returnType, Object...params) {
@@ -155,7 +158,7 @@ public abstract class AbstractCacheProxy {
 
 	private void addDummyJob(String cacheKey) {
 		String groupId = RefreshCacheJob.GROUP_ID.concat("-").concat(cacheKey);
-		DummyJob job = new DummyJob(groupId, 0, getLogger());
+		DummyJob job = new DummyJob(groupId, 0);
 		getJobHelper().add(job);
 	}
 
@@ -173,10 +176,6 @@ public abstract class AbstractCacheProxy {
 
 	protected JobHelper getJobHelper() {
 		return this.jobHelper;
-	}
-
-	protected TPILogger getLogger() {
-		return this.logger;
 	}
 
 	protected RefreshCacheJob getRefreshCacheJob(String key, Supplier<?> supplier) {

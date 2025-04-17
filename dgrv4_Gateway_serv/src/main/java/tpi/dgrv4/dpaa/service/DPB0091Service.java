@@ -42,38 +42,37 @@ public class DPB0091Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao; 
-	
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-	
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-	
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	
-	@Autowired
 	private ApiItemService apiItemService;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
 	
+	@Autowired
+	public DPB0091Service(TsmpApiDao tsmpApiDao, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpDpApiThemeDao tsmpDpApiThemeDao, TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao,
+			TsmpApiExtDao tsmpApiExtDao, TsmpOrganizationDao tsmpOrganizationDao, TsmpDpFileDao tsmpDpFileDao,
+			ApiItemService apiItemService, TsmpClientDao tsmpClientDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.apiItemService = apiItemService;
+		this.tsmpClientDao = tsmpClientDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB0091Resp queryOpenApiKeyDetailByPk(TsmpAuthorization tsmpAuthorization, DPB0091Req req, ReqHeader reqHeader) {
 		DPB0091Resp resp = new DPB0091Resp();
 

@@ -2,6 +2,7 @@ package tpi.dgrv4.dpaa.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.Setter;
 import org.checkerframework.checker.regex.qual.Regex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +18,7 @@ import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.common.vo.ReqHeader;
 import tpi.dgrv4.dpaa.component.job.NoticeClearCacheEventsJob;
 import tpi.dgrv4.dpaa.constant.TsmpApiSrc;
+import tpi.dgrv4.dpaa.service.tools.DgrProtocol;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.AA0311Func;
 import tpi.dgrv4.dpaa.vo.AA0311RedirectByIpData;
@@ -82,6 +84,9 @@ public class AA0311Service {
 	
 	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
+
+	@Setter(onMethod_ = @Autowired)
+	private DgrProtocol dgrProtocol;
 	
 	@Transactional
 	public AA0311Resp registerAPI(TsmpAuthorization auth, AA0311Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
@@ -308,7 +313,7 @@ public class AA0311Service {
 		if (srcUrlDataList.size() == 1 ) {
 
 			String[] srcUrlData = srcUrlDataList.get(0);
-			if (srcUrlData[1].startsWith("http"))
+//			if (srcUrlData[1].startsWith("http"))
 				return srcUrlData[1];// 目標URL
 		}
 
@@ -643,7 +648,9 @@ public class AA0311Service {
 				// 若srcUrl值不是"b64.", 也不是"http"開頭, 才需要加協定
 				int index = srcUrl.indexOf("b64.");
 				int index2 = srcUrl.indexOf("http");
-				if (index != 0 && index2 != 0) {// 不是"b64.", 也不是"http"開頭
+				boolean isDgrProtocol = dgrProtocol.isValidScheme(srcUrl);
+				if (index != 0 && index2 != 0 && !isDgrProtocol) {
+					// not "b64.", not "http", not dgr protocol
 					srcUrl = String.format("%s://%s", protocol,srcUrl );
 				}
 			}
@@ -701,7 +708,9 @@ public class AA0311Service {
 				// 若srcUrl值不是"b64.", 也不是"http"開頭, 才需要加協定
 				int index = srcUrl.indexOf("b64.");
 				int index2 = srcUrl.indexOf("http");
-				if (index != 0 && index2 != 0) {// 不是"b64.", 也不是"http"開頭
+				var isDgrProtocol = dgrProtocol.isValidScheme(srcUrl);
+				if (index != 0 && index2 != 0 && !isDgrProtocol) {
+					// not "b64.", not "http", not dgr protocol
 					srcUrl = String.format("%s://%s", protocol, srcUrl);
 
 				}

@@ -34,13 +34,17 @@ public class DPB9905Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB9905Service(ServiceConfig serviceConfig, TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.serviceConfig = serviceConfig;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	public DPB9905Resp queryTsmpDpItemsList(TsmpAuthorization auth, DPB9905Req req) {
 		String locale = getLocale(req.getLocale());

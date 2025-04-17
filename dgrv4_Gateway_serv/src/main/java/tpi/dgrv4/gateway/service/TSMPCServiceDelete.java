@@ -38,21 +38,25 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class TSMPCServiceDelete implements IApiCacheService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
+	private CommForwardProcService commForwardProcService;
+	
+	private HashMap<String, String> maskInfo;
 
 	@Autowired
-	private CommForwardProcService commForwardProcService;
-	private HashMap<String, String> maskInfo;
+	public TSMPCServiceDelete(ObjectMapper objectMapper, ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy,
+			TsmpSettingService tsmpSettingService, MockApiTestService mockApiTestService,
+			CommForwardProcService commForwardProcService) {
+		super();
+		this.objectMapper = objectMapper;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.mockApiTestService = mockApiTestService;
+		this.commForwardProcService = commForwardProcService;
+	}
 
 	public ResponseEntity<?> forwardToDelete(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, String payload) throws Exception {
@@ -104,7 +108,7 @@ public class TSMPCServiceDelete implements IApiCacheService {
 			// JWT 資料驗證有錯誤
 			if (errRespEntity != null) {
 				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n"
-						+ getCommForwardProcService().getLogResp(errRespEntity, maskInfo).toString());
+						+ getCommForwardProcService().getLogResp(errRespEntity, maskInfo, httpReq).toString());
 				// 第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, tsmpcDelDgrReqVo, respMbody);
@@ -118,7 +122,7 @@ public class TSMPCServiceDelete implements IApiCacheService {
 			errRespEntity = jwtPayloadData.errRespEntity;
 			if (errRespEntity != null) {// 資料有錯誤
 				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n"
-						+ getCommForwardProcService().getLogResp(errRespEntity, maskInfo).toString());
+						+ getCommForwardProcService().getLogResp(errRespEntity, maskInfo, httpReq).toString());
 				// 第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, tsmpcDelDgrReqVo, respMbody);
@@ -249,7 +253,7 @@ public class TSMPCServiceDelete implements IApiCacheService {
 		}
 
 		// print
-		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo);
+		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo, httpReq);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
 
 		// 第一組ES RESP

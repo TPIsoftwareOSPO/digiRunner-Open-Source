@@ -22,8 +22,13 @@ import tpi.dgrv4.gateway.service.GtwIdPWellKnownService;
 @RestController
 public class GtwIdPWellKnownController {
 
-	@Autowired
 	private GtwIdPWellKnownService service;
+
+	@Autowired
+	public GtwIdPWellKnownController(GtwIdPWellKnownService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/{idPType}/.well-known/openid-configuration", 
 			produces = MediaType.APPLICATION_JSON_VALUE)

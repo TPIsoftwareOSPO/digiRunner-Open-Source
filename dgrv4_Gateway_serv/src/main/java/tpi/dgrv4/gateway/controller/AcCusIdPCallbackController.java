@@ -16,8 +16,13 @@ import tpi.dgrv4.gateway.service.AcCusIdPCallbackService;
 @RestController
 public class AcCusIdPCallbackController {
 
-	@Autowired
 	private AcCusIdPCallbackService acCusIdPCallbackService;
+
+	@Autowired
+	public AcCusIdPCallbackController(AcCusIdPCallbackService acCusIdPCallbackService) {
+		super();
+		this.acCusIdPCallbackService = acCusIdPCallbackService;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/acCusIdp/callback")
 	public void processCusAcLogin(@RequestHeader HttpHeaders httpHeaders, //

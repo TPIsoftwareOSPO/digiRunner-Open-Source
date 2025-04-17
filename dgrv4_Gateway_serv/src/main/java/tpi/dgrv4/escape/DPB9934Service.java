@@ -38,13 +38,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9934Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-	@Autowired
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
+	private TsmpClientDao tsmpClientDao;
 
 	@Autowired
-	private TsmpClientDao tsmpClientDao;
+	public DPB9934Service(TsmpClientCertDao tsmpClientCertDao,
+			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties, TsmpClientDao tsmpClientDao) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+		this.tsmpClientDao = tsmpClientDao;
+	}
 
 	@Transactional
 	public DPB9934Resp importJwe(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {

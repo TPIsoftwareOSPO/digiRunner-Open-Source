@@ -17,8 +17,13 @@ import tpi.dgrv4.gateway.service.KibanaService2;
 @RestController
 public class KibanaController2 {
 
-	@Autowired
 	private KibanaService2 service;
+
+	@Autowired
+	public KibanaController2(KibanaService2 service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/kibana/login")
 	public void login2(@RequestHeader HttpHeaders httpHeaders, @RequestParam String reportURL,

@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.service.OAuthRevocationService;
 @RestController
 public class OAuthRevocationController {
 	
-	@Autowired
 	private OAuthRevocationService oauthRevocationService;
 	
+	@Autowired
+	public OAuthRevocationController(OAuthRevocationService oauthRevocationService) {
+		super();
+		this.oauthRevocationService = oauthRevocationService;
+	}
+
 	@PostMapping(value = "/oauth/revocation",
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)

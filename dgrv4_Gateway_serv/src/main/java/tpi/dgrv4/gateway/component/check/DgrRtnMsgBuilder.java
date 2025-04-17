@@ -19,8 +19,13 @@ import tpi.dgrv4.entity.exceptions.DgrRtnCode;
 @Component
 public class DgrRtnMsgBuilder {
 
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
+
+	@Autowired
+	public DgrRtnMsgBuilder(TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy) {
+		super();
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+	}
 
 	public DgrException build(DgrException e, String locale) throws RuntimeException {
 		return build(e.getError(), e.getParams(), locale, true);

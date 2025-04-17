@@ -34,18 +34,20 @@ public class AA0213Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
 
+	@Autowired
+	public AA0213Service(TsmpGroupDao tsmpGroupDao, TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpSecurityLevelDao tsmpSecurityLevelDao) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+	}
 
 	public AA0213Resp queryGroupDetail(TsmpAuthorization authorization, AA0213Req req, ReqHeader reqHeader) {
 		AA0213Resp resp = new AA0213Resp();

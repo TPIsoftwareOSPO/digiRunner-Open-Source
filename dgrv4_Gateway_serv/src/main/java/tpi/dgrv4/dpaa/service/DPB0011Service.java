@@ -29,17 +29,20 @@ public class DPB0011Service {
 
 	private TPILogger logger = TPILogger.tl;;
 
-	@Autowired
 	private TsmpDpAppCategoryDao tsmpDpAppCategoryDao;
-
-	@Autowired
 	private TsmpDpAppDao tsmpDpAppDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0011Service(TsmpDpAppCategoryDao tsmpDpAppCategoryDao, TsmpDpAppDao tsmpDpAppDao,
+			TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpAppCategoryDao = tsmpDpAppCategoryDao;
+		this.tsmpDpAppDao = tsmpDpAppDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+	}
 
 	@Transactional
 	public DPB0011Resp deleteAppCateById(TsmpAuthorization authorization, DPB0011Req req) {

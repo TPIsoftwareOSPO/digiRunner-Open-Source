@@ -39,18 +39,21 @@ public class DPB0084Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientCertDao tsmpClientCertDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private TsmpClientCert2Dao tsmpClientCert2Dao;
-	
-	@Autowired
 	private BcryptParamHelper helper;
 	
+	@Autowired
+	public DPB0084Service(TsmpClientCertDao tsmpClientCertDao, TsmpClientDao tsmpClientDao,
+			TsmpClientCert2Dao tsmpClientCert2Dao, BcryptParamHelper helper) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpClientCert2Dao = tsmpClientCert2Dao;
+		this.helper = helper;
+	}
+
 	public DPB0084Resp queryClientByCid(TsmpAuthorization tsmpAuthorization, DPB0084Req req, ReqHeader reqHeader) {
 		DPB0084Resp resp = new DPB0084Resp();
 		try {
