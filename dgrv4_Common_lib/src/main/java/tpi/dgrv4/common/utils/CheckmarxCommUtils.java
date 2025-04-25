@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -23,8 +24,35 @@ public class CheckmarxCommUtils {
 		return b;
 	}
 	
+	@Deprecated
 	public static byte[] sanitizeForCheckmarx(Path targetFilePath) throws IOException {
-		return Files.readAllBytes(targetFilePath);
+		/* 
+		✔️file.toPath().normalize() - 將檔案路徑標準化：
+			處理 . 和 .. 這樣的特殊路徑元素
+			例如：/path/to/target/../../etc/passwd 會被標準化為 /path/etc/passwd
+		✔️.startsWith(targetPath) - 檢查標準化後的路徑是否以目標路徑開頭： 
+		因為相容版本問題暫保留, 此路徑應只有 v2 "入口網使用", 故白名單如下:
+		 * */
+		final String[] targetDirectories = {"/temp", "/moduleShare"};
+		
+		// 將輸入路徑標準化以防止路徑遍歷攻擊
+	    Path normalizedPath = targetFilePath.normalize();
+	    
+	    // 檢查標準化後的路徑是否位於允許的目錄內
+	    boolean isValid = false;
+	    for (String directory : targetDirectories) {
+	        Path allowedPath = Paths.get(directory).normalize();
+	        if (normalizedPath.startsWith(allowedPath)) {
+	            isValid = true;
+	            break;
+	        }
+	    }
+	    
+	    if (!isValid) {
+	        throw new SecurityException("Access denied: File is outside of allowed directories");
+	    }
+	    
+	    return Files.readAllBytes(normalizedPath);
 	}
 	
 	public static Optional<Pattern> sanitizeForCheckmarxRegex(String regex) {
