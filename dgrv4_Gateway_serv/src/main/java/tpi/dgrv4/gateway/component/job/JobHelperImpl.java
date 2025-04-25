@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -16,14 +17,9 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Component
 public class JobHelperImpl implements JobHelper {
-
-	@Autowired
-	private TPILogger logger;
-
 	/**
 	 * 需要初始Queue的大小，故在 {@link #JobConfig} 使用 {@link Autowired} by name
 	 */
-	@Autowired
 	private JobManager mainJobManager;
 
 	/**
@@ -31,7 +27,6 @@ public class JobHelperImpl implements JobHelper {
 	 * 因為此類別有兩個 {@link DeferrableJobManager}<br>
 	 * 故在 {@link #JobConfig} 使用{@link Autowired} by name
 	 */
-	@Autowired
 	private DeferrableJobManager deferrableJobManager;
 
 	/**
@@ -39,14 +34,28 @@ public class JobHelperImpl implements JobHelper {
 	 * 因為此類別有兩個 {@link DeferrableJobManager}<br>
 	 * 故在 {@link #JobConfig} 使用{@link Autowired} by name
 	 */
-	@Autowired
 	private DeferrableJobManager refreshCacheJobManager;
-	
-	public JobHelperImpl(TPILogger logger) {
-		this.logger = logger;
+
+	public static boolean STRESS_MODE = true;
+
+	/*
+	 * Because using constructor injection will cause a circular dependency, use method injection instead
+	 */
+	@Autowired
+	public void setDeferrableJobManager(@Qualifier("deferrableJobManager") DeferrableJobManager deferrableJobManager) {
+		this.deferrableJobManager = deferrableJobManager;
 	}
 	
-	public static boolean STRESS_MODE = true;
+	@Autowired
+	public void setRefreshCacheJobManager(@Qualifier("refreshCacheJobManager") DeferrableJobManager refreshCacheJobManager) {
+		this.refreshCacheJobManager = refreshCacheJobManager;
+	}
+	
+	@Autowired
+	public void setMainJobManager(@Qualifier("mainJobManager") JobManager mainJobManager) {
+		this.mainJobManager = mainJobManager;
+	}
+
 
 	@Override
 	public void add(Job job) throws DgrException {
@@ -61,7 +70,7 @@ public class JobHelperImpl implements JobHelper {
 			//System.out.println("排入主要佇列：" + job.getId());
 			getMainJobManager().put(job);
 		} catch (InterruptedException e) {
-			logger.error("JobAdd InterruptedException:\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("JobAdd InterruptedException:\n" + StackTraceUtil.logStackTrace(e));
 			Thread.currentThread().interrupt();
 		}
 	}

@@ -65,8 +65,8 @@ public class IdPJdbcHelper {
 		// 3.設定查詢 RDB 的 request
 		DPB0189Req dpb0189Req = new DPB0189Req();
 		dpb0189Req.setConnName(connName);
-		dpb0189Req.setStrSql(sqlPtmt);
-		dpb0189Req.setParamList(paramList);
+		dpb0189Req.setStrSql(sqlPtmt);	//"SELECT * FROM users WHERE user = ? AND pass = ?";
+		dpb0189Req.setParamList(paramList); //["user", "pass"]
 
 		// 4.執行 SQL,查詢 user 資料
 		DPB0189Resp dpb0189Resp = getDPB0189Service().executeSql(dpb0189Req, null, false, false);

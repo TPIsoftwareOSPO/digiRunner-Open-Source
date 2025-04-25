@@ -23,7 +23,7 @@ public class CusIdPService {
 	@Autowired
 	public CusIdPService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
 			TsmpSettingService tsmpSettingService) {
-		super();
+
 		this.dgrAuditLogService = dgrAuditLogService;
 		this.acIdPHelper = acIdPHelper;
 		this.tsmpSettingService = tsmpSettingService;

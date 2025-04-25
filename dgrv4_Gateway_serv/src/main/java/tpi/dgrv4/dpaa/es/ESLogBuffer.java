@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,9 +38,14 @@ import org.apache.http.util.EntityUtils;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.DpaaSystemInfoHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.util.LimitLogger;
 
 public class ESLogBuffer {
+	// Double-Checked Locking mode has been implemented, but SonarQube may not fully understand the context and issue a warning, so annotate
+	// 已經實作雙重檢查鎖定(Double-Checked Locking)模式,但SonarQube可能無法完全理解上下文發出警告,故加註解
+	@SuppressWarnings("java:S3077")
     private static volatile ESLogBuffer instance;
+	
     private final CloseableHttpClient httpClient;
     
     private static final String LOG_DIR = "apilogs";
@@ -91,14 +97,14 @@ public class ESLogBuffer {
             if (!isProcessing) {
                 processLogFiles();
             }
-        }, 60*2, 5, TimeUnit.SECONDS);
+        }, 60L*2, 5, TimeUnit.SECONDS);
     }
     
     // Add this to the constructor (ESLogBuffer method), after startFileProcessor()
     private void startCleanupProcessor() {
         cleanupExecutor.scheduleWithFixedDelay(() -> {
             cleanupExpiredFiles();
-        }, 60*2, 30, TimeUnit.SECONDS);
+        }, 60L*2, 30, TimeUnit.SECONDS);
     }
     
     // Add this as a constant in the class
@@ -138,7 +144,7 @@ public class ESLogBuffer {
     }
     
     // 設定日誌輸出間隔（3 分鐘，單位毫秒）
-    private static final long LOG_INTERVAL = 1 * 60 * 1000;
+    private static final long LOG_INTERVAL = 1L * 60 * 1000;
 
     // 儲存上次日誌輸出的時間
     private static final AtomicLong lastLogTime = new AtomicLong(0);
@@ -185,13 +191,19 @@ public class ESLogBuffer {
     
     
     private void cleanupExpiredFiles() {
+    	
     	if (! allowWriteElastic) {
             systrace("不允許寫入 Elastic，跳過本次處理");
             return;
         }
     	
         try {
-            TPILogger.tl.info("開始清理每天過期、佔用高磁碟容量、已完成的檔案...");
+        	
+            // 限流 180 sec 輸出
+            LimitLogger.logWithThrottle(String.format("""
+            		...開始清理每天過期、佔用高磁碟容量、已完成的檔案...
+            		... %s ...
+            		""", StackTraceUtil.getStackTraceAsString()), "ESLogBuffer.processLogFiles()", 180);
             
             retainRecentLogs(1); //保留 n 天
             cleanFilesOnLowDiskSpace(diskFreeThreshHold, deletePercent); // disk free 剩 0.05 就刪 30%
@@ -301,6 +313,8 @@ public class ESLogBuffer {
         }
     }
     
+	// Double-Checked Locking mode
+	// 雙重檢查鎖定(Double-Checked Locking)模式
     public static ESLogBuffer getInstance(CloseableHttpClient httpClient, Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic) {
         if (instance == null) {
             synchronized (ESLogBuffer.class) {
@@ -340,37 +354,42 @@ public class ESLogBuffer {
         systrace("\n開始寫入日誌檔案: " + logFileName );
         
         // 使用虛擬線程執行 I/O 操作
-        Thread.startVirtualThread(() -> {
-            try {
-                // 寫入日誌內容
-                Path logPath = Paths.get(logFileName);
-                Files.write(logPath, bulkBody.getBytes(), 
-                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-                
-                systrace("日誌內容寫入完成: " + logFileName);
-                // 寫入配置檔案
-                Properties config = new Properties();
-                config.setProperty("esUrl", esUrl);
-                headers.forEach((key, value) -> config.setProperty("header." + key, value));
-                
-                try (OutputStream out = Files.newOutputStream(Paths.get(configFileName))) {
-                    config.store(out, "Log configuration");
-                }
-                systrace("配置檔案寫入完成: " + configFileName);
-                sysoutRateLimited("Bulk size:" + bulkBody.getBytes().length + ", 寫入任務完成\n");
-                
-                //最後寫入標記檔案，表示所有檔案都已完成寫入
-                try {
-                    Files.createFile(Paths.get(markerFileName));
-                } catch (FileAlreadyExistsException e) {
-                    // 標記檔案已存在，這意味著另一個線程已經完成了相同的操作
-                    // 這種情況不常見但不必失敗
-                    sysout("標記檔案已存在 (不常見但可接受): " + markerFileName);
-                }
-            } catch (IOException e) {
-            	syserr("寫入檔案失敗: " + e.getMessage(), e);
-            }
-        });
+        try(ExecutorService executor = Executors.newFixedThreadPool(10)) {
+        	executor.submit(() -> {
+        		try {
+        			// 寫入日誌內容
+        			Path logPath = Paths.get(logFileName);
+        			Files.write(logPath, bulkBody.getBytes(), 
+        					StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        			
+        			systrace("日誌內容寫入完成: " + logFileName);
+        			// 寫入配置檔案
+        			Properties config = new Properties();
+        			config.setProperty("esUrl", esUrl);
+        			headers.forEach((key, value) -> config.setProperty("header." + key, value));
+        			
+        			try (OutputStream out = Files.newOutputStream(Paths.get(configFileName))) {
+        				config.store(out, "Log configuration");
+        			}
+        			systrace("配置檔案寫入完成: " + configFileName);
+        			sysoutRateLimited("Bulk size:" + bulkBody.getBytes().length + ", 寫入任務完成\n");
+        			
+        			//最後寫入標記檔案，表示所有檔案都已完成寫入
+        			try {
+        				Files.createFile(Paths.get(markerFileName));
+        			} catch (FileAlreadyExistsException e) {
+        				// 標記檔案已存在，這意味著另一個線程已經完成了相同的操作
+        				// 這種情況不常見但不必失敗
+        				sysout("標記檔案已存在 (不常見但可接受): " + markerFileName);
+        			}
+        		} catch (IOException e) {
+        			syserr("寫入檔案失敗: " + e.getMessage(), e);
+        		}
+        	});
+		} catch (Exception e) {
+		    TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		    Thread.currentThread().interrupt();
+		}
 
         // 立即返回，不等待虛擬線程完成
         return 202; // Accepted
@@ -392,6 +411,12 @@ public class ESLogBuffer {
         	systrace("已有處理程序在執行中，跳過本次處理");
         	return;
         }
+        
+        // 限流 180 sec 輸出
+        LimitLogger.logWithThrottle(String.format("""
+        		...ESLogBuffer.processLogFiles()...
+        		... %s ...
+        		""", StackTraceUtil.getStackTraceAsString()), "ESLogBuffer.processLogFiles()", 180);
         
         try {
             isProcessing = true;
@@ -586,7 +611,7 @@ public class ESLogBuffer {
             // === 新增的重試邏輯開始 ===
             try {
                 // 短暫延遲後再重試 (指數退避策略)
-                int delayMs = 1000 * (int)Math.pow(2, retryCount.get() - 1); // 1秒, 2秒, 4秒
+                int delayMs = 1000 * (int)Math.pow(2, (double)retryCount.get() - 1); // 1秒, 2秒, 4秒
                 sysout("等待 " + delayMs + " 毫秒後重試...");
                 Thread.sleep(delayMs);
                 

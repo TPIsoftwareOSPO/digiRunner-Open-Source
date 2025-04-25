@@ -477,8 +477,8 @@ public class DpaaJobConfig {
 	@Bean
 	@Scope("prototype")
 	public OakChkExpiJob apptJob_OAK_CHK_EXPI(TsmpDpApptJob job) {
-		return new OakChkExpiJob(job, this.sendOpenApiKeyExpiringMailService, this.tsmpOpenApiKeyDao,
-				this.tsmpDpItemsCacheProxy, this.apptJobDispatcher, this.tsmpDpApptJobDao);
+		return new OakChkExpiJob(job, this.tsmpOpenApiKeyDao, this.tsmpDpItemsCacheProxy, this.apptJobDispatcher,
+				this.tsmpDpApptJobDao, this.applicationContext);
 	}
 
 	@Bean

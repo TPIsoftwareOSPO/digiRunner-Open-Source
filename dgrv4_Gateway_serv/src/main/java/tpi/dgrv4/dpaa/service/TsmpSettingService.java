@@ -38,14 +38,15 @@ public class TsmpSettingService {
 	private ObjectMapper objectMapper;
 
 	@Autowired
-	public TsmpSettingService(TsmpSettingCacheProxy tsmpSettingCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper,
+	public void setTsmpSettingService(TsmpSettingCacheProxy tsmpSettingCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper,
 			TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy, ObjectMapper objectMapper) {
-		super();
+		// Because using constructor injection will cause a circular dependency, use method injection instead
 		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
 		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
 		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
 		this.objectMapper = objectMapper;
 	}
+	
 	// =========================================================
 	// ==================== COMMON METHODS =====================
 	// =========================================================

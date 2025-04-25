@@ -89,14 +89,12 @@ public class DiskSpaceMonitor {
 				    return thread;
 				});
 
-				// 排程執行檢查任務
-				scheduler.scheduleWithFixedDelay(this::checkDiskSpace, 0, CHECK_INTERVAL_MS, TimeUnit.MILLISECONDS);
+				// 排程執行檢查任務 (2分後才會啟動排程)
+				scheduler.scheduleWithFixedDelay(this::checkDiskSpace, 120000, CHECK_INTERVAL_MS, TimeUnit.MILLISECONDS);
 				isRunning = true;
 				TPILogger.tl.info("DiskSpaceMonitor started, monitoring: " + LOG_DIR.toAbsolutePath() + ", maxSize="
 						+ formatSize(maxDirSizeBytes) + ", maxFiles=" + maxFiles);
 				
-				// 啟動時, 先檢查一次
-				checkDiskSpace();
 			} catch (IOException e) {
 				TPILogger.tl.error("Failed to create log directory: " + StackTraceUtil.logTpiShortStackTrace(e));
 			}
@@ -113,6 +111,7 @@ public class DiskSpaceMonitor {
 	}
 
 	private void checkDiskSpace() {
+		TPILogger.tl.info(StackTraceUtil.getStackTraceAsString());
 		try {
 			// 使用 Java NIO 計算文件數量
 			long fileCount;

@@ -89,7 +89,11 @@ public class DgrApiLog2ESQueue {
     private static void putByPoll(DgrApiLog2ESQueue logObj) {
         if (!ES_LoggerQueue.offer(logObj)) {
             ES_LoggerQueue.poll(); // 丟棄最舊的
-            ES_LoggerQueue.offer(logObj);
+            
+			if (!ES_LoggerQueue.offer(logObj)) {// 添加新元素到隊尾
+				TPILogger.tl.warn("Failed to insert job into queue");
+			}
+            
             int count = abortNum.incrementAndGet();
             if (count % 100 == 0) {
                 TPILogger.tl.warn("ES log queue is full, discarded " + count + " requests");

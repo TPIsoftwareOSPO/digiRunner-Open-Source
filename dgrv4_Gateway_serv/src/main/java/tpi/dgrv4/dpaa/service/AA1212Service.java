@@ -126,7 +126,10 @@ public class AA1212Service {
 			return;
 		}
 		for(ClientKeeper clientVo : clientList) {
-			
+			// Ignore custom packages
+			if("1".equals(clientVo.getProjectType())) {
+				continue;
+			}
 			//allClientList scope value
 			AA1212RespItem itemVo = new AA1212RespItem();
 			//nodeName, updateTime, Req/s, Resp/s

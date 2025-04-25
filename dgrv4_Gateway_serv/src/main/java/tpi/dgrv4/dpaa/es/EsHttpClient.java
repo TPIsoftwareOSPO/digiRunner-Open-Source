@@ -28,7 +28,11 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
  * int httpCode = client.bulkWrite("http://es:9200/_bulk", bulkBody, headers);
  */
 public class EsHttpClient {
+	// Double-Checked Locking mode has been implemented, but SonarQube may not fully understand the context and issue a warning, so annotate
+	// 已經實作雙重檢查鎖定(Double-Checked Locking)模式,但SonarQube可能無法完全理解上下文發出警告,故加註解
+	@SuppressWarnings("java:S3077")
     private static volatile EsHttpClient instance;
+    
     private final CloseableHttpClient httpClient;
     
     // 將構造函數改為私有
@@ -58,6 +62,8 @@ public class EsHttpClient {
             .build();
     }
     
+	// Double-Checked Locking mode
+	// 雙重檢查鎖定(Double-Checked Locking)模式
     // 獲取實例的方法
     public static EsHttpClient getInstance() {
         if (instance == null) {

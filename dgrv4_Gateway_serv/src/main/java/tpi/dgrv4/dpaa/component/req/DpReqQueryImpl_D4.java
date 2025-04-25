@@ -35,12 +35,11 @@ public class DpReqQueryImpl_D4 extends DpReqQueryAbstract<DpReqQueryResp_D4> //
 	public DpReqQueryImpl_D4(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
 			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
 			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
-			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao,
-			TsmpUserDao tsmpUserDao2) {
+			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao) {
 		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
 				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
 		this.tsmpDpReqOrderd4Dao = tsmpDpReqOrderd4Dao;
-		tsmpUserDao = tsmpUserDao2;
+		this.tsmpUserDao = tsmpUserDao;
 	}
 
 	@Override

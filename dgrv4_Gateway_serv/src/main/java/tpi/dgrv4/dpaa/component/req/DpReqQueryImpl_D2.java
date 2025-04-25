@@ -72,15 +72,15 @@ public class DpReqQueryImpl_D2 extends DpReqQueryAbstract<DpReqQueryResp_D2> //
 			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
 			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao,
 			TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao, TsmpApiDao tsmpApiDao,
-			TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpDpFileDao tsmpDpFileDao2,
-			TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy, TsmpApiExtDao tsmpApiExtDao) {
+			TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy,
+			TsmpApiExtDao tsmpApiExtDao) {
 		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
 				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
 		this.tsmpDpReqOrderd2Dao = tsmpDpReqOrderd2Dao;
 		this.tsmpDpReqOrderd2dDao = tsmpDpReqOrderd2dDao;
 		this.tsmpApiDao = tsmpApiDao;
 		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
-		tsmpDpFileDao = tsmpDpFileDao2;
+		this.tsmpDpFileDao = tsmpDpFileDao;
 		this.tsmpDpMailTpltCacheProxy = tsmpDpMailTpltCacheProxy;
 		this.tsmpApiExtDao = tsmpApiExtDao;
 	}

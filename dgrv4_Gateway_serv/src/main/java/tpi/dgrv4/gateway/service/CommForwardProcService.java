@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -48,6 +49,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import oshi.util.tuples.Pair;
 import tpi.dgrv4.codec.utils.Base64Util;
@@ -108,6 +112,8 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Slf4j
 @Service
 public class CommForwardProcService {
@@ -115,29 +121,11 @@ public class CommForwardProcService {
 	@Value("${cors.allow.headers}")
 	private String corsAllowHeaders;
 
-	@Autowired(required = false)
-	private TraceCodeUtilIfs traceCodeUtil;
-
 	public static Map<String, FixedCacheVo> fixedCacheMap = new HashMap<>();
-
-	@Autowired
-	private TokenHelper tokenHelper;
-
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-
-	@Autowired
-	private DgrcRoutingHelper dgrcRoutingHelper;
-
-	@Autowired
-	private JobHelper jobHelper;
-
 	public static final String AUTHORIZATION = "authorization";
 	public static final String TOKENPAYLOAD = "tokenpayload";
 	public static final String BACKAUTH = "backauth";
-	
 	private static final String MODULE_NAME = "moduleName";
-
 	private static final List<String> MASK_TOKEN_LIST = new ArrayList<>();
 
 	static {
@@ -146,36 +134,25 @@ public class CommForwardProcService {
 		MASK_TOKEN_LIST.add(CommForwardProcService.BACKAUTH);
 	}
 
-	@Autowired
-	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-
-	@Autowired
-	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-
-	@Autowired
-	private OAuthTokenService oAuthTokenService;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
-	private TokenCheck tokenCheck;
-
-	@Autowired
-	private TsmpReqLogDao tsmpReqLogDao;
-
-	@Autowired
-	private TsmpResLogDao tsmpResLogDao;
-
 	private ExecutorService executor;
-
-	@Autowired
+	
+//	@Autowired(required = false)
+	private TraceCodeUtilIfs traceCodeUtil;
+	
+	private DgrcRoutingHelper dgrcRoutingHelper;
+	private OAuthTokenService oAuthTokenService;
+	
+	private TokenHelper tokenHelper;
+	private TsmpApiCacheProxy tsmpApiCacheProxy;
+	private JobHelper jobHelper;
+	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
+	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private ObjectMapper objectMapper;
+	private TsmpSettingService tsmpSettingService;
+	private TokenCheck tokenCheck;
+	private TsmpReqLogDao tsmpReqLogDao;
+	private TsmpResLogDao tsmpResLogDao;
 	private TsmpClientCacheProxy tsmpClientCacheProxy;
-
-	@Autowired
 	private TsmpClientCertCacheProxy tsmpClientCertCacheProxy;
 
 	public static class ClientPublicKeyData {
@@ -194,10 +171,35 @@ public class CommForwardProcService {
 			this.clientPublicKey = clientPublicKey;
 		}
 	}
-
+ 
 	@Autowired
-	public CommForwardProcService() {
+	public void setCommForwardProcService(@Nullable TraceCodeUtilIfs traceCodeUtil, DgrcRoutingHelper dgrcRoutingHelper,
+			OAuthTokenService oAuthTokenService, TokenHelper tokenHelper, TsmpApiCacheProxy tsmpApiCacheProxy,
+			JobHelper jobHelper, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
+			TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, ObjectMapper objectMapper,
+			TsmpSettingService tsmpSettingService, TokenCheck tokenCheck, TsmpReqLogDao tsmpReqLogDao,
+			TsmpResLogDao tsmpResLogDao, TsmpClientCacheProxy tsmpClientCacheProxy,
+			TsmpClientCertCacheProxy tsmpClientCertCacheProxy) {
 		this.executor = Executors.newCachedThreadPool(new CustomizableThreadFactory("CommForwardProcService"));
+		this.traceCodeUtil = traceCodeUtil;
+
+		this.tokenHelper = tokenHelper;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.jobHelper = jobHelper;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tokenCheck = tokenCheck;
+		this.tsmpReqLogDao = tsmpReqLogDao;
+		this.tsmpResLogDao = tsmpResLogDao;
+		this.tsmpClientCacheProxy = tsmpClientCacheProxy;
+		this.tsmpClientCertCacheProxy = tsmpClientCertCacheProxy;
+
+		// Because using constructor injection will cause a circular dependency, use
+		// method injection instead
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.oAuthTokenService = oAuthTokenService;
 	}
 
 	@PreDestroy
@@ -2837,57 +2839,5 @@ public class CommForwardProcService {
 	protected String getAesKey() {
 		String key = System.getenv("TAEASK");
 		return key;
-	}
-
-	protected TsmpApiRegCacheProxy getTsmpApiRegCacheProxy() {
-		return tsmpApiRegCacheProxy;
-	}
-
-	protected TsmpCoreTokenEntityHelper getTsmpCoreTokenHelper() {
-		return tsmpCoreTokenHelper;
-	}
-
-	protected OAuthTokenService getOAuthTokenService() {
-		return oAuthTokenService;
-	}
-
-	protected ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-
-	protected TsmpSettingService getTsmpSettingService() {
-		return tsmpSettingService;
-	}
-
-	protected TokenHelper getTokenHelper() {
-		return tokenHelper;
-	}
-
-	protected TsmpApiCacheProxy getTsmpApiCacheProxy() {
-		return tsmpApiCacheProxy;
-	}
-
-	protected DgrcRoutingHelper getDgrcRoutingHelper() {
-		return dgrcRoutingHelper;
-	}
-
-	protected TokenCheck getTokenCheck() {
-		return tokenCheck;
-	}
-
-	protected TsmpReqLogDao getTsmpReqLogDao() {
-		return this.tsmpReqLogDao;
-	}
-
-	protected TsmpResLogDao getTsmpResLogDao() {
-		return this.tsmpResLogDao;
-	}
-
-	protected TsmpClientCacheProxy getTsmpClientCacheProxy() {
-		return this.tsmpClientCacheProxy;
-	}
-
-	protected TsmpClientCertCacheProxy getTsmpClientCertCacheProxy() {
-		return tsmpClientCertCacheProxy;
 	}
 }

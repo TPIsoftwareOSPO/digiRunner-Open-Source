@@ -335,61 +335,8 @@ b, strong {
 }
 
 
-/* 客製API列表查詢畫面下，JWT設定(req/resp)dropdown Style */
 
-/* .jwt-req-dropdown .ui-dropdown .ui-dropdown-label {
-  background-color: #ffa5009e !important;
-} */
-.jwt-req-dropdown .p-dropdown {
-  background-color: #FFF0D1 !important;
-  border: 1px solid #FFAC00;
-}
 
-.jwt-req-dropdown .p-dropdown .p-dropdown-label{
-  color: #FFAC00;
-}
-
-/* .jwt-req-dropdown .p-dropdown-panel .P-dropdown-items {
-  background-color: #ffa5009e !important;
-} */
-
-.jwt-req-dropdown .p-dropdown-panel .p-dropdown-items:not(.p-dropdown-virtualscroll) {
-  background-color: #FFF0D1;
-}
-
-.jwt-req-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item{
-  color: #FFAC00;
-}
-
-.jwt-req-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
-  color: #fff;
-  background-color: orange !important;
-}
-
-/* .jwt-req-dropdown .p-dropdown .p-dropdown-trigger {
-  background-color: unset !important;
-} */
-
-.jwt-resp-dropdown .p-dropdown  {
-  background-color: #D4E0F3 !important;
-  border: 1px solid #6096E7;
-}
-
-.jwt-resp-dropdown .p-dropdown .p-dropdown-label{
-  color: #6096E7;
-}
-
-.jwt-resp-dropdown .p-dropdown-panel .p-dropdown-items:not(.p-dropdown-virtualscroll) {
-  background-color: #007ad97a !important;
-}
-
-.jwt-resp-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item{
-  color: #434343;
-}
-
-/* .jwt-resp-dropdown .p-dropdown .p-dropdown-trigger {
-  background-color: unset !important;
-} */
 /* ul.dd-list{
   background: #fafafa;
 } */
@@ -1477,15 +1424,6 @@ p-inputswitch{
 
 .p-dialog .p-dialog-footer {
   text-align: center!important;
-}
-
-
-
-
-
-
-.p-dropdown{
-  border: 1px solid #ced4da;
 }
 
 .pre-code-style {

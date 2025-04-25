@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Component
 public class DgrProtocol {
 
-    private final String rex = "^dgr(\\+[-a-zA-Z]*)*://.*";
+    private final String rex = "^dgr(\\+[-a-zA-Z]*){0,10}://.*";
     private final Pattern pattern = Pattern.compile(rex);
 
     public boolean isValidScheme(String url) {

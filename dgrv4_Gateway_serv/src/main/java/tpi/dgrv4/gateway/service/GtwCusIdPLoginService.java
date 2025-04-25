@@ -48,14 +48,15 @@ public class GtwCusIdPLoginService extends CusIdPService {
 
 	@Autowired
 	public GtwCusIdPLoginService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
-			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper, AcIdPHelper acIdPHelper2,
-			TsmpSettingService tsmpSettingService2, GtwIdPCallbackService gtwIdPCallbackService,
-			GtwIdPAuthService gtwIdPAuthService, TokenHelper tokenHelper, GtwIdPHelper gtwIdPHelper,
-			DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao) {
+			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper,
+			GtwIdPCallbackService gtwIdPCallbackService, GtwIdPAuthService gtwIdPAuthService, TokenHelper tokenHelper,
+			GtwIdPHelper gtwIdPHelper, DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao) {
+
 		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
 		this.objectMapper = objectMapper;
-		acIdPHelper = acIdPHelper2;
-		tsmpSettingService = tsmpSettingService2;
+		this.acIdPHelper = acIdPHelper;
+		this.tsmpSettingService = tsmpSettingService;
 		this.gtwIdPCallbackService = gtwIdPCallbackService;
 		this.gtwIdPAuthService = gtwIdPAuthService;
 		this.tokenHelper = tokenHelper;

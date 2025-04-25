@@ -54,20 +54,12 @@ public class FileHelper implements IFileHelper{
 	private TPILogger logger;
 
 	private final String UPLOAD_PREFIX;
-
 	private final String UPLOAD_TEMP;
-
 	private final Path TSMP_DP_AA_UPLOAD_PATH;
-
 	private final Path TSMP_DP_AA_UPLOAD_TEMP;
 
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
 
 
@@ -89,6 +81,13 @@ public class FileHelper implements IFileHelper{
 		this.UPLOAD_TEMP = (uploadTemp == null ? "" : filterPath(uploadTemp, false));
 		this.TSMP_DP_AA_UPLOAD_PATH = resolveUploadPath(uploadPrefix);
 		this.TSMP_DP_AA_UPLOAD_TEMP = resolveUploadTemp(this.TSMP_DP_AA_UPLOAD_PATH, uploadTemp);
+	}
+	
+	@Autowired
+	public void setFileHelper(JobHelper jobHelper, ApplicationContext ctx, TsmpDpFileDao tsmpDpFileDao) {
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.tsmpDpFileDao = tsmpDpFileDao;
 	}
 
 	private final Path resolveUploadPath(String uploadPrefix) {

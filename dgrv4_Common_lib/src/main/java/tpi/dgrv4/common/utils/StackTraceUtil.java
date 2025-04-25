@@ -90,6 +90,25 @@ public class StackTraceUtil {
 		return errMsg;
 	}
 	
+	/**
+	 * 獲取當前執行線程的呼叫堆疊作為字串
+	 * @return
+	 */
+    public static String getStackTraceAsString() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        StringBuilder sb = new StringBuilder("=== [Current Thread: " + Thread.currentThread().getName() + "] ===\n");
+        Thread.currentThread().getName();        
+        // 從索引 2 開始，跳過 getStackTrace() 和 getStackTraceAsString() 方法
+        for (int i = 2; i < stackTraceElements.length; i++) {
+            StackTraceElement element = stackTraceElements[i];
+            sb.append("\t").append(element.getClassName()).append(".")
+              .append(element.getMethodName()).append("(")
+              .append(element.getFileName()).append(":")
+              .append(element.getLineNumber()).append(")\n");
+        }
+        sb.append("===================");
+        return sb.toString();
+    }
 	
 }
 

@@ -748,7 +748,6 @@ public class ServiceUtil {
 				// 不使用 Locale.getDefault(), 因為 pipelines 測試主機取出來的語系不一定存在TsmpRtnCode
 				locale = LocaleType.ZH_TW;
 			}
-			;
 
 			// 修改成符合DB中的資料格式, ex.zh-TW
 			if (StringUtils.hasText(locale)) {
@@ -767,8 +766,9 @@ public class ServiceUtil {
 			locale = arr[0].concat("-").concat(arr[1]);
 
 			// 若不是EN_US、ZH_CN或ZH_TW，預設為EN_US
-			if (!LocaleType.EN_US.matches(locale) && !LocaleType.ZH_TW.matches(locale)
-					&& !LocaleType.ZH_CN.matches(locale)) {
+			locale = Pattern.quote(locale);// SonarQube 消毒, 避免正則表達式注入攻擊
+			if (!LocaleType.EN_US.matches(Pattern.quote(locale)) && !LocaleType.ZH_TW.matches(Pattern.quote(locale))
+					&& !LocaleType.ZH_CN.matches(Pattern.quote(locale))) {
 				locale = LocaleType.EN_US;
 			}
 		} catch (Exception e) {

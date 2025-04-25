@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import tpi.dgrv4.codec.utils.CipherInstanceUtil;
 import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.entity.component.IFileHelper;
 import tpi.dgrv4.entity.component.IFileHelperCacheProxy;
@@ -55,7 +56,7 @@ public class TsmpCoreTokenEntityHelper {
 		PublicKey publicKey = getPublicKey();
 		if (publicKey == null) {
 			IEntityTPILogger.getInstance().debug("Public key is null");
-			throw DgrRtnCode._1433.throwing( TsmpCoreTokenInitializer.DEFAULT_ALGORITHM );
+			throw DgrRtnCode._1433.throwing( CipherInstanceUtil.getCipherInstance3());
 		}
 
 		byte[] originalByte = originalString.getBytes();
@@ -68,7 +69,7 @@ public class TsmpCoreTokenEntityHelper {
 		PrivateKey privateKey = getPrivateKey();
 		if (privateKey == null) {
 			IEntityTPILogger.getInstance().debug("Private key is null");
-			throw DgrRtnCode._1434.throwing( TsmpCoreTokenInitializer.DEFAULT_ALGORITHM );
+			throw DgrRtnCode._1434.throwing( CipherInstanceUtil.getCipherInstance3() );
 		}
 		
 		// 調整 RSA decrypt block size
@@ -88,7 +89,7 @@ public class TsmpCoreTokenEntityHelper {
 
 	private byte[] codec(byte[] data, int mode, Key key, int maxBlockLength) throws DgrException {
 		try {
-			Cipher cipher = Cipher.getInstance( TsmpCoreTokenInitializer.DEFAULT_ALGORITHM );
+			Cipher cipher = Cipher.getInstance( CipherInstanceUtil.getCipherInstance3() );
 			cipher.init(mode, key);
 
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -113,14 +114,14 @@ public class TsmpCoreTokenEntityHelper {
 
 		} catch (Throwable t) {
 			if (Cipher.ENCRYPT_MODE == mode) {
-				throw DgrRtnCode._1433.throwing( TsmpCoreTokenInitializer.DEFAULT_ALGORITHM );
+				throw DgrRtnCode._1433.throwing( CipherInstanceUtil.getCipherInstance3() );
 			} else if (Cipher.DECRYPT_MODE == mode) {
 				try {
 					IEntityTPILogger.getInstance().error(new String(data, StandardCharsets.UTF_8));
 				}catch(Exception e) {
 					
 				}
-				throw DgrRtnCode._1434.throwing( TsmpCoreTokenInitializer.DEFAULT_ALGORITHM );
+				throw DgrRtnCode._1434.throwing( CipherInstanceUtil.getCipherInstance3() );
 			} else {
 				throw DgrRtnCode._1297.throwing();
 			}

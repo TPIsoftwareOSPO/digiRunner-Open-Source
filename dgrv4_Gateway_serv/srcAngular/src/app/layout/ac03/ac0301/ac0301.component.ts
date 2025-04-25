@@ -71,6 +71,7 @@ import {
   AA0319Req,
   AA0319ReqItem,
 } from 'src/app/models/api/ApiService/aa0319.interface';
+import { JwtSettingComponent } from './jwt-setting/jwt-setting.component';
 
 @Component({
   selector: 'app-ac0301',
@@ -2605,6 +2606,29 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
   updateMenuItems(mode:number) {
     this.ModeItems.forEach((x,i) => x.styleClass =mode===i ? "active":"")
+  }
+
+  async updateJwtSetting(){
+    const code = [
+      'jwt_setting',      
+    ];
+    const dict = await this.tool.getDict(code);
+    const ref = this.dialogService.open(JwtSettingComponent, {
+      // styleClass: 'cHeader cContent cIcon',
+      header: dict['jwt_setting'],        
+      width: '400px',
+      // height: '30vh',
+      data: {
+        updateJwtSettingFlags: this.updateJwtSettingFlags
+      },
+    });
+    ref.onClose.subscribe((res) => {
+      if (res) {        
+        this.q_jweFlag!.setValue(res.jweFlag);
+        this.q_jweFlagResp!.setValue(res.jweFlagResp);
+        this.jwtSettingChange();
+      }
+    });
   }
 
   public get q_jwtSetting() {

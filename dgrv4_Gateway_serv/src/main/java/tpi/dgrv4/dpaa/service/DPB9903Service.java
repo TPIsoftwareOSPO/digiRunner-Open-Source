@@ -26,7 +26,7 @@ import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.ComposerWebSocketClientConn;
 import tpi.dgrv4.gateway.service.DgrApiLog2ESQueue;
-import tpi.dgrv4.gateway.service.KibanaService2;
+import tpi.dgrv4.gateway.service.IKibanaService2;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
@@ -40,7 +40,8 @@ public class DPB9903Service {
 
 //	@Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
-	
+
+	private IKibanaService2 kibanaService2;
 	private TsmpSettingDao tsmpSettingDao;
 	private DgrAuditLogService dgrAuditLogService;
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
@@ -52,7 +53,8 @@ public class DPB9903Service {
 	public DPB9903Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, TsmpSettingDao tsmpSettingDao,
 			DgrAuditLogService dgrAuditLogService, TsmpTAEASKHelper tsmpTAEASKHelper,
 			DaoGenericCacheService daoGenericCacheService, ComposerWebSocketClientConn composerWebSocketClientConn,
-			UrlMappingRefresher urlMappingRefresher) {
+			UrlMappingRefresher urlMappingRefresher, 
+			@Nullable IKibanaService2 kibanaService2) {
 		super();
 		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
 		this.tsmpSettingDao = tsmpSettingDao;
@@ -61,6 +63,7 @@ public class DPB9903Service {
 		this.daoGenericCacheService = daoGenericCacheService;
 		this.composerWebSocketClientConn = composerWebSocketClientConn;
 		this.urlMappingRefresher = urlMappingRefresher;
+		this.kibanaService2 = kibanaService2;
 	}
 
 	public DPB9903Resp updateTsmpSetting(TsmpAuthorization auth, DPB9903Req req, InnerInvokeParam iip) {
@@ -107,8 +110,12 @@ public class DPB9903Service {
 
 			// in-memory, 用列舉的值傳入值
 			TPILogger.updateTime4InMemory(DgrDataType.SETTING.value());
-			if (KibanaService2.cacheMap != null)
-				KibanaService2.cacheMap.clear();
+			
+			
+			if (kibanaService2 != null) {
+				kibanaService2.clearCacheMap();
+				this.logger.info("Clear Kibana cache");
+			}
 
 
 			//When updating, it should also be logged as info.
@@ -127,8 +134,6 @@ public class DPB9903Service {
 	}
 
 	private void logSomeInfo(String id) {
-		this.logger.info("Clear Kibana cache");
-
 		// Bulk 寫入 Elastic fail 時 retry 3 次, 與寫入 Bulk file 前做 url detection 異動時印出  
 		if (id.equals(TsmpSettingDao.Key.ES_CHECK_CONNECTION) || id.equals(TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY)) {
 			DgrApiLog2ESQueue.esUrlCheckConnection = getTsmpSettingDao().findById(TsmpSettingDao.Key.ES_CHECK_CONNECTION)

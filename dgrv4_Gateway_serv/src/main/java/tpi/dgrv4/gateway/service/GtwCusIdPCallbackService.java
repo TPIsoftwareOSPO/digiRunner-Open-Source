@@ -40,24 +40,20 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 public class GtwCusIdPCallbackService extends CusIdPService {
 
 	private ObjectMapper objectMapper;
-	private AcIdPHelper acIdPHelper;
-	private TsmpSettingService tsmpSettingService;
 	private GtwIdPCallbackService gtwIdPCallbackService;
 	private GtwIdPAuthService gtwIdPAuthService;
 
 	@Autowired
 	public GtwCusIdPCallbackService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
-			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper, AcIdPHelper acIdPHelper2,
-			TsmpSettingService tsmpSettingService2, GtwIdPCallbackService gtwIdPCallbackService,
-			GtwIdPAuthService gtwIdPAuthService) {
+			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper,
+			GtwIdPCallbackService gtwIdPCallbackService, GtwIdPAuthService gtwIdPAuthService) {
+
 		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
 		this.objectMapper = objectMapper;
-		acIdPHelper = acIdPHelper2;
-		tsmpSettingService = tsmpSettingService2;
 		this.gtwIdPCallbackService = gtwIdPCallbackService;
 		this.gtwIdPAuthService = gtwIdPAuthService;
 	}
-
 
 	/**
 	 * 處理 CUS 帳戶登入流程
@@ -277,16 +273,6 @@ public class GtwCusIdPCallbackService extends CusIdPService {
 
 	protected ObjectMapper getObjectMapper() {
 		return this.objectMapper;
-	}
-
-	@Override
-	protected AcIdPHelper getAcIdPHelper() {
-		return this.acIdPHelper;
-	}
-
-	@Override
-	protected TsmpSettingService getTsmpSettingService() {
-		return tsmpSettingService;
 	}
 
 	protected GtwIdPCallbackService getGtwIdPCallbackService() {

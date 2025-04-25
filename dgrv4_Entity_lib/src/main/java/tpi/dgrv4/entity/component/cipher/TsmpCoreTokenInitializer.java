@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import tpi.dgrv4.codec.utils.CipherInstanceUtil;
 import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.common.keeper.ITPILogger;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -41,7 +42,7 @@ public class TsmpCoreTokenInitializer {
 
 	public static final Long KEY_PAIR_REF_ID = 0L;
 
-	public static final String DEFAULT_ALGORITHM = "RSA";
+
 
 	public static String KEY_PAIR_FILE_NAME;
 
@@ -118,7 +119,7 @@ public class TsmpCoreTokenInitializer {
 			localKeyPair = remoteKeyPair;
 			if (remoteKeyPair == null) {
 				// 如果找不到 KeyPair 就自行產生一組
-				localKeyPair = generateKeyPair(TsmpCoreTokenInitializer.DEFAULT_ALGORITHM, 2048);
+				localKeyPair = generateKeyPair(CipherInstanceUtil.getCipherInstance3(), 2048);
 			}
 		} else if (remoteKeyPair != null) {
 			if (!isSameHashCode(localKeyPair, remoteKeyPair)) {

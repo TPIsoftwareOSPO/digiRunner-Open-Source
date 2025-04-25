@@ -72,11 +72,11 @@ public class ApptRjobDispatcher implements Runnable {
 	
 	// 查無週期排程UID
 	// Check for periodic schedule UID
-	private final static String CHECK_FOR_PERIODIC_SCHEDULE_UID = "Check for periodic schedule UID: ";
+	private static final String CHECK_FOR_PERIODIC_SCHEDULE_UID = "Check for periodic schedule UID: ";
 	
 	// 工作已被異動
 	// Job has been moved
-	private final static String JOB_HAS_BEEN_MOVED = "Job has been moved: ";
+	private static final String JOB_HAS_BEEN_MOVED = "Job has been moved: ";
 	
 	@Autowired
 	public ApptRjobDispatcher(TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpApptRjobDao tsmpDpApptRjobDao,

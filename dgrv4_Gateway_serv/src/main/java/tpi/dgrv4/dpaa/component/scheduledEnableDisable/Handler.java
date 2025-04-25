@@ -21,19 +21,19 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 public abstract class Handler {
 
-	private TPILogger logger = TPILogger.tl;
-
-	@Autowired
 	private EnableAlgorithm enableAlgorithm;
-
-	@Autowired
 	private DisableAlgorithm disableAlgorithm;
-
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+	private TsmpRtnCodeDao tsmpRtnCodeDao;
 
 	@Autowired
-	private TsmpRtnCodeDao tsmpRtnCodeDao;
+	public void setHandler(EnableAlgorithm enableAlgorithm, DisableAlgorithm disableAlgorithm,
+			TsmpDpItemsDao tsmpDpItemsDao, TsmpRtnCodeDao tsmpRtnCodeDao) {
+		this.enableAlgorithm = enableAlgorithm;
+		this.disableAlgorithm = disableAlgorithm;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+	}
 
 	protected AA0303Item getAA0303Item(TsmpApi api, String locale) {
 
@@ -77,8 +77,8 @@ public abstract class Handler {
 					LocaleType.EN_US);
 
 		if (item == null) {
-			logger.debugDelay2sec("The result of searching TsmpDpItems's " + itemEnum.getItemNo() + " is null.");
-			logger.debugDelay2sec("subitemNo is " + subitemNo + ";" + "locale is " + locale);
+			TPILogger.tl.debugDelay2sec("The result of searching TsmpDpItems's " + itemEnum.getItemNo() + " is null.");
+			TPILogger.tl.debugDelay2sec("subitemNo is " + subitemNo + ";" + "locale is " + locale);
 		}
 
 		return item;

@@ -108,7 +108,11 @@ public class DPB0065Service {
 			// 初始化回傳參數
 			resp.setClientReg(new DPB0065RespClientReg());
 			
-			doSaveD3Draft(dpReqSerivce, authorization, req, resp, local, iip);
+			/*
+			 * 2025/4/24-因 SornarQube 掃描到(Change this code to not construct the path from user-controlled data.) 
+			 * 先註解呼叫建立用戶註冊"簽核流程 D3 的 method doSaveD3Draft(), 因為是不再使用的功能
+			 */
+//			doSaveD3Draft(dpReqSerivce, authorization, req, resp, local, iip);
 		}
 		
 		// Open API Key 管理

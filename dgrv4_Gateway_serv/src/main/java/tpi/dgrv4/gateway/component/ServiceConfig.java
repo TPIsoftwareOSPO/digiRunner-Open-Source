@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
@@ -12,7 +13,6 @@ import org.springframework.util.ObjectUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.dpaa.service.TsmpSettingService;
 
@@ -20,7 +20,6 @@ import tpi.dgrv4.dpaa.service.TsmpSettingService;
  * 映射 application.properties 檔案內容為物件
  * @author Kim
  */
-@RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
 @Configuration
 @ConfigurationProperties(ignoreUnknownFields = true)
@@ -30,16 +29,15 @@ public class ServiceConfig {
 		
 	private TPILogger logger = TPILogger.tl;
 	
-	private final TsmpSettingService tsmpSettingService;
+	private TsmpSettingService tsmpSettingService;
 
 	private Map<String, String> service = new HashMap<String, String>();
-	
 
-//	public ServiceConfig(TsmpSettingService tsmpSettingService, Map<String, String> service) {
-//		super();
-//		this.tsmpSettingService = tsmpSettingService;
-//		this.service = service;
-//	}
+    @Autowired
+    public void setTsmpSettingService(TsmpSettingService tsmpSettingService) {
+    	// Because using constructor injection will cause a circular dependency, use method injection instead
+        this.tsmpSettingService = tsmpSettingService;
+    }
 	
 	@PostConstruct
 	public void init() {

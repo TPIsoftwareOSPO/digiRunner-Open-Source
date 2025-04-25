@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.StringUtils;
@@ -36,6 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
 
 import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
@@ -92,6 +96,7 @@ import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 import tpi.dgrv4.tcp.utils.packets.UndertowMetricsPacket;
 import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	// ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
@@ -118,25 +123,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	
 	public static String lcUserName;
 
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	// 用來載入 @PostConstruct init()
-	@Autowired
-	private CommunicationServerConfig communicationServerConfig;
-
-	@Autowired(required = false)
-	private IUndertowMetricsService undertowMetricsService;
-	
-	@Autowired
-	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
-	
-	@Autowired
-	private RealtimeDashboardService realtimeDashboardService;
-
-	@Autowired(required = false)
-	private LicenseUtilBase util;
-
 	private String prifixUserName = "gateway";
 
 	public static String uuid = UUID64Util.UUID64(UUID.randomUUID()).substring(0, 4);
@@ -153,30 +139,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	@Value("${es.apilog.allow.write.elastic:false}")
 	public boolean allowWriteElastic;
 
-	@Autowired
-	DPB0059Service dPB0059Service;
-	@Autowired
-	private JobHelper jobHelper;
-
-	@Autowired
-	private MonitorHostService monitorHostService;
-	@Autowired
-	private InMemoryGtwRefresh2LandingService inMemoryGtwRefresh2LandingService;
-
-	@Autowired
-	private GenericCache genericCache;
-	@Autowired
-	private DaoGenericCache daoGenericCache;
-	@Autowired
-	private ApptJobDispatcher apptJobDispatcher;
-
-	@Autowired
-	private DgrNodeLostContactDao dgrNodeLostContactDao;
 	public static final String dgrNodeLostContactDaoStr = "dgrNodeLostContactDaoStr";
-
-	@Autowired
-	private ServiceConfig serviceConfig;
-	
 	private Thread scheduler_t_refresh = null;
 	private Thread scheduler_t_check = null;
 
@@ -195,21 +158,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	private HashMap<String, String> paramBefore;
 
 	private long startTime = System.currentTimeMillis();
-
-	@Autowired
-	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
-	private WebsiteService websiteService;
-
-	@Autowired
-	private BotDetectionRuleValidator botDetectionRuleValidator;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private AwsApiService awsApiService;
+	
 	private NodeInfoPacket nodeInfoPacket;
 
 	// 儲存客戶端資料最後更新的時間戳，初始值為 -1 表示尚未更新
@@ -257,10 +206,10 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
             multiplier = 1024;
             sizeStr = sizeStr.substring(0, sizeStr.length() - 2);
         } else if (sizeStr.endsWith("MB")) {
-            multiplier = 1024 * 1024;
+            multiplier = 1024L * 1024;
             sizeStr = sizeStr.substring(0, sizeStr.length() - 2);
         } else if (sizeStr.endsWith("GB")) {
-            multiplier = 1024 * 1024 * 1024;
+            multiplier = 1024L * 1024 * 1024;
             sizeStr = sizeStr.substring(0, sizeStr.length() - 2);
         } else if (sizeStr.endsWith("TB")) {
             multiplier = 1024L * 1024L * 1024L * 1024L;
@@ -276,16 +225,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		return deployRole;
 	}
 
-	@Autowired
-	private HikariDataSource dataSource;
-
-	@Autowired
-	private ChangeDbConnInfoService changeDbConnInfoService;
-
-	@Autowired
-	private ServerConfigProperties serverConfigProperties;
-	public static boolean dbConnByApi;
-
 	public static Map<String, Object> dbInfoMap = new HashMap<>();
 	public static final String DBINFOMAP = "dbInfoMap";
 	public static final String DBINFO = "dbInfo";
@@ -298,9 +237,76 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	public static String cusIpPortForBroadcast;
 	public static List<String> maskKeysArr;
 	private static long threadCreateTiem;
-
+	public static boolean dbConnByApi;
+	
 	@Value(value = "${tomcat.Graceful}")
 	private Boolean tomcatGraceful;
+	
+	
+//	@Autowired(required = false)
+	private IUndertowMetricsService undertowMetricsService;
+//	@Autowired(required = false)
+	private LicenseUtilBase licenseUtilBase;
+	
+	private CommunicationServerConfig communicationServerConfig; // 用來載入 @PostConstruct init()
+	
+	private TsmpSettingService tsmpSettingService;
+	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
+	private RealtimeDashboardService realtimeDashboardService;
+	private DPB0059Service dPB0059Service;
+	private JobHelper jobHelper;
+	private MonitorHostService monitorHostService;
+	private InMemoryGtwRefresh2LandingService inMemoryGtwRefresh2LandingService;
+	private GenericCache genericCache;
+	private DaoGenericCache daoGenericCache;
+	private ApptJobDispatcher apptJobDispatcher;
+	private DgrNodeLostContactDao dgrNodeLostContactDao;
+	private ServiceConfig serviceConfig;
+	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
+	private WebsiteService websiteService;
+	private BotDetectionRuleValidator botDetectionRuleValidator;
+	private ObjectMapper objectMapper;
+	private AwsApiService awsApiService;
+	private HikariDataSource dataSource;
+	private ChangeDbConnInfoService changeDbConnInfoService;
+	private ServerConfigProperties serverConfigProperties;
+	
+	@Autowired
+	public void setTPILogger(@Nullable IUndertowMetricsService undertowMetricsService,
+			@Nullable LicenseUtilBase licenseUtilBase, CommunicationServerConfig communicationServerConfig,
+			TsmpSettingService tsmpSettingService, DgrDashboardEsLogDao dgrDashboardEsLogDao,
+			RealtimeDashboardService realtimeDashboardService, DPB0059Service dPB0059Service, JobHelper jobHelper,
+			MonitorHostService monitorHostService, InMemoryGtwRefresh2LandingService inMemoryGtwRefresh2LandingService,
+			GenericCache genericCache, DaoGenericCache daoGenericCache, ApptJobDispatcher apptJobDispatcher,
+			DgrNodeLostContactDao dgrNodeLostContactDao, ServiceConfig serviceConfig,
+			TsmpSettingCacheProxy tsmpSettingCacheProxy, WebsiteService websiteService,
+			BotDetectionRuleValidator botDetectionRuleValidator, ObjectMapper objectMapper, AwsApiService awsApiService,
+			HikariDataSource dataSource, ChangeDbConnInfoService changeDbConnInfoService,
+			ServerConfigProperties serverConfigProperties) {
+		this.undertowMetricsService = undertowMetricsService;
+		this.licenseUtilBase = licenseUtilBase;
+		this.communicationServerConfig = communicationServerConfig;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrDashboardEsLogDao = dgrDashboardEsLogDao;
+		this.realtimeDashboardService = realtimeDashboardService;
+		this.dPB0059Service = dPB0059Service;
+		this.jobHelper = jobHelper;
+		this.monitorHostService = monitorHostService;
+		this.inMemoryGtwRefresh2LandingService = inMemoryGtwRefresh2LandingService;
+		this.genericCache = genericCache;
+		this.daoGenericCache = daoGenericCache;
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.dgrNodeLostContactDao = dgrNodeLostContactDao;
+		this.serviceConfig = serviceConfig;
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.websiteService = websiteService;
+		this.botDetectionRuleValidator = botDetectionRuleValidator;
+		this.objectMapper = objectMapper;
+		this.awsApiService = awsApiService;
+		this.dataSource = dataSource;
+		this.changeDbConnInfoService = changeDbConnInfoService;
+		this.serverConfigProperties = serverConfigProperties;
+	}
 
 	static {
 		tl = new TPILogger();
@@ -1046,8 +1052,8 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		// 判斷LICENSE中的 env 是否AWS 是才呼叫 AWS的計量服務
 		String license = getTsmpSettingService().getVal_TSMP_LICENSE_KEY();
 		if (StringUtils.hasLength(license)) {
-			util.initLicenseUtil(license, null);
-			String env = util.getValue(license, LicenseType.env);
+			licenseUtilBase.initLicenseUtil(license, null);
+			String env = licenseUtilBase.getValue(license, LicenseType.env);
 			if (StringUtils.hasLength(env) && env.equals(LicenseEnvType.AWS.name())) {
 				msgbuf.append("\nenv : " + env);
 				try {
@@ -1719,5 +1725,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	public void setBotDetectionRuleValidator(BotDetectionRuleValidator botDetectionRuleValidator) {
 		this.botDetectionRuleValidator = botDetectionRuleValidator;
 	}
+
+
 
 }

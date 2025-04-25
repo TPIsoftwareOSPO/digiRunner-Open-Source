@@ -66,12 +66,12 @@ public class DpReqQueryImpl_D1 extends DpReqQueryAbstract<DpReqQueryResp_D1> imp
 	public DpReqQueryImpl_D1(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
 			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
 			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
-			DpReqServiceFactory dpReqServiceFactory, TsmpClientDao tsmpClientDao2, TsmpApiDao tsmpApiDao,
+			DpReqServiceFactory dpReqServiceFactory, TsmpApiDao tsmpApiDao,
 			TsmpDpReqOrderd1Dao tsmpDpReqOrderd1Dao, MailHelper mailHelper, TsmpDpApiThemeDao tsmpDpApiThemeDao,
 			TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpApiExtDao tsmpApiExtDao) {
 		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
 				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
-		tsmpClientDao = tsmpClientDao2;
+		this.tsmpClientDao = tsmpClientDao;
 		this.tsmpApiDao = tsmpApiDao;
 		this.tsmpDpReqOrderd1Dao = tsmpDpReqOrderd1Dao;
 		this.mailHelper = mailHelper;

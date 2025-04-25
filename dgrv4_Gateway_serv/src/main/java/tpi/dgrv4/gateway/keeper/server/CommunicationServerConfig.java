@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import tpi.dgrv4.entity.entity.jpql.DgrNodeLostContact;
 import tpi.dgrv4.entity.repository.DgrNodeLostContactDao;
 import tpi.dgrv4.escape.CheckmarxUtils;
 import tpi.dgrv4.gateway.keeper.TPILogInfo;
+import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.tcp.utils.communication.CommunicationServer;
 import tpi.dgrv4.tcp.utils.communication.LinkerServer;
@@ -65,15 +68,19 @@ public class CommunicationServerConfig {
 		notify = new Notifier() {
 			@Override
 			public void runConnection(LinkerServer conn) {
-				Thread.ofVirtual().start(() -> {
-				    try {
-				        Thread.sleep(500);
-				    } catch (InterruptedException e) {
-				        Thread.currentThread().interrupt();
-				    }
-				    printoutAllClient();
-				});
-				
+				try(ExecutorService executor = Executors.newFixedThreadPool(10)) {
+					executor.submit(() -> {
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
+						printoutAllClient();
+					});
+				} catch (Exception e) {
+				    TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+				    Thread.currentThread().interrupt();
+				}
 			}
 
 			@Override

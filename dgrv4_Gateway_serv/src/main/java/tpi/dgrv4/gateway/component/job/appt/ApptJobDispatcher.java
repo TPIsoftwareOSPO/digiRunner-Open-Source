@@ -73,10 +73,10 @@ public class ApptJobDispatcher implements Runnable {
 	
 	// 未啟用排程器, 請設定 service.scheduler.appt-job.enable=true
 	// Scheduler is not enabled, please set service.scheduler.appt-job.enable=true
-	private final static String SCHEDULER_IS_NOT_ENABLED_PLEASE_SET = "Scheduler is not enabled, please set service.scheduler.appt-job.enable=true";
+	private static final String SCHEDULER_IS_NOT_ENABLED_PLEASE_SET = "Scheduler is not enabled, please set service.scheduler.appt-job.enable=true";
 	
 	// 排程儲存失敗 // Schedule save failed
-	private final static String SCHEDULE_SAVE_FAILED = "Schedule save failed\n";
+	private static final String SCHEDULE_SAVE_FAILED = "Schedule save failed\n";
 	
 	@PostConstruct
 	public void init() {

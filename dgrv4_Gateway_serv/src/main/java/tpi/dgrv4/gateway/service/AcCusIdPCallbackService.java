@@ -36,12 +36,13 @@ public class AcCusIdPCallbackService extends CusIdPService {
 
 	@Autowired
 	public AcCusIdPCallbackService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
-			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper, AcIdPHelper acIdPHelper2,
-			TsmpSettingService tsmpSettingService2) {
+			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper) {
+
 		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
 		this.objectMapper = objectMapper;
-		acIdPHelper = acIdPHelper2;
-		tsmpSettingService = tsmpSettingService2;
+		this.acIdPHelper = acIdPHelper;
+		this.tsmpSettingService = tsmpSettingService;
 	}
 
 	/**

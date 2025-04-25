@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.management.ImmutableDescriptor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -39,11 +37,12 @@ public class AcCusIdPLoginService extends CusIdPService {
 
 	@Autowired
 	public AcCusIdPLoginService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
-			TsmpSettingService tsmpSettingService, DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao,
-			TsmpSettingService tsmpSettingService2) {
+			TsmpSettingService tsmpSettingService, DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao) {
+
 		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
 		this.dgrAcIdpInfoCusDao = dgrAcIdpInfoCusDao;
-		tsmpSettingService = tsmpSettingService2;
+		this.tsmpSettingService = tsmpSettingService;
 	}
 
 	/**

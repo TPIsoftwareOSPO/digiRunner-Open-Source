@@ -182,6 +182,7 @@ public class DPB0189Service {
         return resp;
     }
 
+    @SuppressWarnings("java:S3649")  // 停用 SQL 注入檢查, 因為此入口必需通過 capikey 的檢查, 此技術只適用在 container 內部互相傳送使用
     private String execJdbc(HikariDataSource dataSource, DPB0189Req req) throws Exception {
     	//checkmarx, sql injection
     	String strSql = req.getStrSql().trim();

@@ -54,11 +54,11 @@ public class DpReqQueryImpl_D3 extends DpReqQueryAbstract<DpReqQueryResp_D3> imp
 	public DpReqQueryImpl_D3(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
 			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
 			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
-			DpReqServiceFactory dpReqServiceFactory, TsmpClientDao tsmpClientDao2,
+			DpReqServiceFactory dpReqServiceFactory,
 			TsmpDpClientextDao tsmpDpClientextDao, TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao, MailHelper mailHelper) {
 		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
 				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
-		tsmpClientDao = tsmpClientDao2;
+		this.tsmpClientDao = tsmpClientDao;
 		this.tsmpDpClientextDao = tsmpDpClientextDao;
 		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
 		this.mailHelper = mailHelper;

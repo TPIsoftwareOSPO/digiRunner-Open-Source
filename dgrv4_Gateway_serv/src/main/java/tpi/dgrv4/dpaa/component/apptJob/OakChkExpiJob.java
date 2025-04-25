@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 
 /**
@@ -36,13 +37,13 @@ public class OakChkExpiJob extends ApptJob {
 	private SendOpenApiKeyExpiringMailService sendOpenApiKeyExpiringMailService;
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
- 
+
 	@Autowired
-	public OakChkExpiJob(TsmpDpApptJob tsmpDpApptJob,
-			SendOpenApiKeyExpiringMailService sendOpenApiKeyExpiringMailService, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
-			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+	public OakChkExpiJob(TsmpDpApptJob tsmpDpApptJob, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, ApplicationContext applicationContext) {
 		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
-		this.sendOpenApiKeyExpiringMailService = sendOpenApiKeyExpiringMailService;
+		this.sendOpenApiKeyExpiringMailService = applicationContext.getBean(SendOpenApiKeyExpiringMailService.class); // non-Singleton
 		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
 		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
 	}

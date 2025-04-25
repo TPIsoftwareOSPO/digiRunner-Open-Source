@@ -162,8 +162,10 @@ public class JobManager implements Runnable {
 	    if (queue.remainingCapacity() == 0) {  // 隊列已滿
 	        queue.poll();  // 移除隊首元素
 	    }
-	    queue.offer(job);  // 添加新元素到隊尾
 	    
+		if (!queue.offer(job)) {// 添加新元素到隊尾
+			TPILogger.tl.warn("Failed to insert job into queue");
+		}
 	}
 
 	public Job take() throws InterruptedException {

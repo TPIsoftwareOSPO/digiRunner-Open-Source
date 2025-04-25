@@ -25,6 +25,7 @@ import tpi.dgrv4.gateway.component.job.DeferrableJob;
 import tpi.dgrv4.gateway.component.job.JobHelperImpl;
 import tpi.dgrv4.gateway.component.job.JobManager;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.util.LimitLogger;
 
 /**
  * 因排程工作是由 DeferrableJob 實作
@@ -88,7 +89,23 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 			return ;
 		} 
 		
-		TPILogger.tl.info(" ... " + cpuLoad + "%... CPU Load" + "\n");
+		if (TPILogger.lc != null) {
+			// 限流 1 sec 輸出 ApptJob 本體類別 
+			LimitLogger.logWithThrottle(String.format("""
+				... nodeName = %s
+				... %.2f %%... CPU Load
+				... getClass().getName()=%s
+				... Stacktrace ...
+				%s
+				""", 
+				TPILogger.lc.userName, 
+				infoVo.getCpu() * 100, 
+				this.getClass().getName(), 
+				StackTraceUtil.getStackTraceAsString()), 
+					this.getClass().getName(), 
+					1);
+		}
+
 		try {
 			// 週期排程的流程中, 只要有"暫停"、"作廢"...等操作, 都會刪除 ApptJob 的資料, 所以才會需要在執行前判斷資料是否還在
 			Boolean isExists = getTsmpDpApptJobDao().existsById(this.tsmpDpApptJob.getApptJobId());

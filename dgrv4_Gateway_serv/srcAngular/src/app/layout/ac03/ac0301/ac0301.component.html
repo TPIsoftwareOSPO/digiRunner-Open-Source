@@ -183,9 +183,13 @@
               {{ "button.delete" | translate }}
             </button>
             <button type="button" *ngIf="canSetting" class="btn tpi-primary tpi-btn"
+              (click)="updateJwtSetting()" [disabled]="selected.length == 0">
+              {{ "jwt_setting" | translate }}
+            </button>            
+            <!-- <button type="button" class="btn tpi-primary tpi-btn"
               (click)="jwtSettingPanel.toggle($event)" [disabled]="selected.length == 0">
               {{ "jwt_setting" | translate }}
-            </button>
+            </button> -->
             <button type="button" *ngIf="canImport" title="{{ 'button.export_apiList_tooltip' | translate }}"
               class="btn tpi-primary tpi-btn" (click)="updateApiStatus('4')"
               [disabled]="selected.length == 0">
@@ -630,20 +634,21 @@
           </div>
         </div>
         <div class="col-sm-4">
-          <div>
-            <label class="w-100" style="
+          <label class="control-label">{{ "data_format" | translate }}</label>
+            <!-- class="w-100" style="
                 font-weight: bolder;
                 font-family: PingFangSC-Regular, sans-serif;
                 font-size: 16px;
                 color: #5a5541;
-              ">{{ "data_format" | translate }}</label>
+              " -->
+            
             <!-- <label id="reghostId_label" class="w-50" style="
                 font-weight: bolder;
                 font-family: PingFangSC-Regular, sans-serif;
                 font-size: 16px;
                 color: #5a5541;
               ">{{ "reg_host" | translate }}</label> -->
-          </div>
+          
           <div>
             <p-dropdown [showClear]="false" [options]="dataFormats" formControlName="dataFormat"
               placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }">

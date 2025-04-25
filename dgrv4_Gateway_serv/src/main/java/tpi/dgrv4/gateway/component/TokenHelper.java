@@ -92,6 +92,9 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Component
 public class TokenHelper {
 	
+	// Double-Checked Locking mode has been implemented, but SonarQube may not fully understand the context and issue a warning, so annotate
+	// 已經實作雙重檢查鎖定(Double-Checked Locking)模式,但SonarQube可能無法完全理解上下文發出警告,故加註解
+	@SuppressWarnings("java:S3077")
 	private static volatile TokenHelper instance;
 	
 	private final TsmpClientDao tsmpClientDao;
@@ -163,8 +166,9 @@ public class TokenHelper {
 	 * 因為在啟動 Spring boot 時, 早就被 @Component 載入,
 	 * 寫這段是為了配合 init() 將物件指向一個 volatile instance,
 	 * 方便在其它的 class 中直接使用此 sigaletone object
-	 * @return
 	 */
+	// Double-Checked Locking mode
+	// 雙重檢查鎖定(Double-Checked Locking)模式
     public static TokenHelper getInstance() {
         if (instance == null) {
             synchronized (TokenHelper.class) {
@@ -664,12 +668,14 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同
+	 * [ZH] 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
+	 * [EN] Check if the redirectUri passed in is the same as the one registered in the client system <br>
 	 */
 	public ResponseEntity<?> checkRedirectUri(String clientId, String redirectUri, String apiUrl) {
 		String errMsg = null;
 
 		// 沒有 redirect_uri
+		// No redirect_uri
 		if (!StringUtils.hasLength(redirectUri)) {
 			errMsg = MISSING_REQUIRED_PARAMETER + "redirect_uri";
 			TPILogger.tl.debug(errMsg);
@@ -678,16 +684,21 @@ public class TokenHelper {
 		}
 
 		// 取得 OAUTH_CLIENT_DETAILS 的 web_server_redirect_uri
+		// Get the web_server_redirect_uri of OAUTH_CLIENT_DETAILS
 		Optional<OauthClientDetails> opt_authClientDetails = getOauthClientDetailsCacheProxy().findById(clientId);
 		if (!opt_authClientDetails.isPresent()) {
 			return getFindOauthClientDetailsError(clientId, apiUrl);
 		}
 
 		OauthClientDetails authClientDetails = opt_authClientDetails.get();
+		
+		// 取得 client 在 digiRunner 設定的重新導向URI資料
+		// Get the redirect URI data set by the client in digiRunner
 		List<String> webServerRedirectUriList = getWebServerRedirectUriList(authClientDetails);
 		String webServerRedirectUriMsg = getMsgForWebServerRedirectUri(webServerRedirectUriList);
 
 		// redirect_uri 不正確
+		// The redirect_uri is incorrect
 		if (!isMatchRedirectUri(webServerRedirectUriList, redirectUri)) {
 			errMsg = String.format("The redirect_uri mismatch. \n" //
 					+ "client_id: %s, \n" //
@@ -708,12 +719,17 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
+	 * [ZH] 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
 	 * 若 redirectUri 為 https 或 https, 則網址必須完全相同才是符合 <br>
 	 * 否則, redirectUri 只要和註冊的 * 號前後相同即符合 <br>
+	 * [EN]Check if the redirectUri passed in is the same as the client registered in the system <br>
+	 * If redirectUri is https or https, the URL must be exactly the same to comply with <br>
+	 * Otherwise, redirectUri will be in compliance as long as it is the same as the registered * before and after <br>
 	 * 
-	 * @param webServerRedirectUriList client 註冊在系統中的
-	 * @param reqRedirectUri           傳入的 redirectUri
+	 * @param webServerRedirectUriList [ZH] client 註冊在 dgR 中的 [EN] The client is
+	 *                                 registered in dgR
+	 * @param reqRedirectUri           [ZH] 傳入的 redirectUri [EN] The redirectUri
+	 *                                 passed in
 	 */
 	private boolean isMatchRedirectUri(List<String> webServerRedirectUriList, String reqRedirectUri) {
 		if (isHttpsOrHttp(reqRedirectUri)) {// https or http
@@ -739,9 +755,9 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 網址是否為 "https://" 或 "http://" 開頭
-	 * 
-	 * @return true: 是; false: 不是
+	 * [ZH] 網址是否為 "https://" 或 "http://" 開頭 <br>
+	 * [EN] Whether the URL starts with "https://" or "http://" <br>
+	 * @return true: yes; false: not
 	 */
 	private boolean isHttpsOrHttp(String uri) {
 		if (uri == null) {
@@ -764,7 +780,8 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 檢查 user 狀態, 2張表 Users 和 TSMP_USER
+	 * [ZH] 檢查 user 狀態, 2張表 Users 和 TSMP_USER <br>
+	 * [EN] Check user status, 2 tables Users and TSMP_USER <br>
 	 */
 	public ResponseEntity<?> checkUserStatus(String userName, String apiUrl) {
 		if (!StringUtils.hasLength(userName)) {
