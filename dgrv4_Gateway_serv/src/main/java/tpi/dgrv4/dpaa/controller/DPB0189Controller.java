@@ -21,7 +21,7 @@ import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 
 @SuppressWarnings("java:S3649")  // 停用 SQL 注入檢查, 因為此入口必需通過 capikey 的檢查, 此技術只適用在 container 內部互相傳送使用
-@RestController
+
 public class DPB0189Controller {
 	private DPB0189Service service;
 	
