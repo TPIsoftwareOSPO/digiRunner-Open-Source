@@ -78,7 +78,7 @@ public class CheckmarxCommUtils {
             throw new SecurityException("Not a regular file");
         }
 	    
-	    return Files.readAllBytes(normalizedPath);
+	    return Files.readAllBytes(resolvedPath);
 	}
 	
 	public static Optional<Pattern> sanitizeForCheckmarxRegex(String regex) {
