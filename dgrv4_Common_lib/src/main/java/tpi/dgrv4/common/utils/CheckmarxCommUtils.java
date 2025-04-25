@@ -25,7 +25,7 @@ public class CheckmarxCommUtils {
 	}
 	
 	@Deprecated
-	public static byte[] sanitizeForCheckmarx(Path targetFilePath) throws IOException {
+	public static byte[] sanitizeForCheckmarx(Path relativePath) throws IOException {
 		/* 
 		✔️file.toPath().normalize() - 將檔案路徑標準化：
 			處理 . 和 .. 這樣的特殊路徑元素
@@ -33,24 +33,50 @@ public class CheckmarxCommUtils {
 		✔️.startsWith(targetPath) - 檢查標準化後的路徑是否以目標路徑開頭： 
 		因為相容版本問題暫保留, 此路徑應只有 v2 "入口網使用", 故白名單如下:
 		 * */
-		final String[] targetDirectories = {"/temp", "/moduleShare"};
-		
-		// 將輸入路徑標準化以防止路徑遍歷攻擊
-	    Path normalizedPath = targetFilePath.normalize();
-	    
-	    // 檢查標準化後的路徑是否位於允許的目錄內
-	    boolean isValid = false;
-	    for (String directory : targetDirectories) {
-	        Path allowedPath = Paths.get(directory).normalize();
-	        if (normalizedPath.startsWith(allowedPath)) {
-	            isValid = true;
-	            break;
-	        }
-	    }
-	    
-	    if (!isValid) {
-	        throw new SecurityException("Access denied: File is outside of allowed directories");
-	    }
+		final String[] targetDirectories = {"/temp/", "/moduleShare/"};
+        
+		// 驗證輸入不為空
+        if (relativePath == null) {
+            throw new IllegalArgumentException("Path cannot be null");
+        }
+        
+        // 將路徑標準化
+        Path normalizedPath = relativePath.normalize();
+        
+        // 重要：將路徑轉換為相對路徑
+        Path relativeNormalizedPath = normalizedPath.isAbsolute() ? 
+            normalizedPath.getRoot().relativize(normalizedPath) : 
+            normalizedPath;
+        
+        // 檢查是否包含任何路徑遍歷的嘗試
+        String pathString = relativeNormalizedPath.toString();
+        if (pathString.contains("..")) {
+            throw new SecurityException("Path traversal attempt detected");
+        }
+        
+        // 嘗試在允許的目錄中找檔案
+        Path resolvedPath = null;
+        
+        // 檢查每個允許的目錄
+        for (String directory : targetDirectories) {
+            Path rootPath = Paths.get(directory).normalize();
+            Path filePath = rootPath.resolve(relativeNormalizedPath).normalize();
+            
+            if (filePath.startsWith(rootPath) && Files.exists(filePath)) {
+                resolvedPath = filePath;
+                break;
+            }
+        }
+        
+        // 如果沒找到，拋出例外
+        if (resolvedPath == null) {
+            throw new IOException("File not found in allowed directories");
+        }
+        
+        // 確保是普通檔案
+        if (!Files.isRegularFile(resolvedPath)) {
+            throw new SecurityException("Not a regular file");
+        }
 	    
 	    return Files.readAllBytes(normalizedPath);
 	}
