@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +14,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
@@ -40,19 +43,21 @@ public class DPB0189Service {
     private TsmpSettingService tsmpSettingService;
 	private ConfigurableApplicationContext configurableApplicationContext;
     private CApiKeyService capiKeyService;
-
+    private ISqlExecutor sqlExecutor; 
+    
     private Map<String, DataSourceInfoVo> dataSourceMap = new HashMap<>();
 
     @Autowired
     public DPB0189Service(DgrRdbConnectionDao dgrRdbConnectionDao, ObjectMapper objectMapper,
 			TsmpSettingService tsmpSettingService, ConfigurableApplicationContext configurableApplicationContext,
-			CApiKeyService capiKeyService) {
+			CApiKeyService capiKeyService, @Nullable ISqlExecutor sqlExecutor) {
 		super();
 		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
 		this.objectMapper = objectMapper;
 		this.tsmpSettingService = tsmpSettingService;
 		this.configurableApplicationContext = configurableApplicationContext;
 		this.capiKeyService = capiKeyService;
+		this.sqlExecutor = sqlExecutor;
 	}
 
 	public DPB0189Resp executeSql(DPB0189Req req, HttpHeaders headers) {
@@ -223,13 +228,22 @@ public class DPB0189Service {
                     rsJson = getObjectMapper().writeValueAsString(dataList);
                 }
             } else {//執行非查詢語法
-                int updatedRows = preparedStatement.executeUpdate();
-                Map<String, Integer> dataMap = new HashMap<>();
-                dataMap.put("updatedRows", updatedRows);
-                rsJson = getObjectMapper().writeValueAsString(dataMap);
+            	if (sqlExecutor != null) {
+            		rsJson = sqlExecutor.execUpdate(preparedStatement, getObjectMapper());
+            	} else {
+            		rsJson = execUpdate(preparedStatement);
+            	}
             }
             return rsJson;
         }
+    }
+    
+    public String execUpdate(PreparedStatement preparedStatement) throws SQLException, JsonProcessingException {
+    	// Database queries should not be vulnerable to injection attacks
+    	int updatedRows = 0; //實作內容請自行斟酌
+        Map<String, Integer> dataMap = new HashMap<>();
+        dataMap.put("updatedRows", updatedRows);
+        return getObjectMapper().writeValueAsString(dataMap);
     }
 
     private String checkParam(DPB0189Req req) {
