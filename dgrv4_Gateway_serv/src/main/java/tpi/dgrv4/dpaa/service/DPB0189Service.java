@@ -214,19 +214,7 @@ public class DPB0189Service {
                 }
             }
             if (isQuery) {//執行查詢語法
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    ResultSetMetaData metadata = resultSet.getMetaData();
-                    int columnCount = metadata.getColumnCount();
-                    List<Map<String, String>> dataList = new ArrayList<>();
-                    while (resultSet.next()) {
-                        Map<String, String> dataMap = new HashMap<>();
-                        for (int i = 1; i <= columnCount; i++) {
-                            dataMap.put(metadata.getColumnName(i), resultSet.getString(i));
-                        }
-                        dataList.add(dataMap);
-                    }
-                    rsJson = getObjectMapper().writeValueAsString(dataList);
-                }
+                rsJson = execQuery(sqlExecutor, preparedStatement, getObjectMapper());
             } else {//執行非查詢語法
             	if (sqlExecutor != null) {
             		rsJson = sqlExecutor.execUpdate(preparedStatement, getObjectMapper());
@@ -238,8 +226,28 @@ public class DPB0189Service {
         }
     }
     
-    public String execUpdate(PreparedStatement preparedStatement) throws SQLException, JsonProcessingException {
-    	// Database queries should not be vulnerable to injection attacks
+	public String execQuery(ISqlExecutor sqlExecutor2, PreparedStatement preparedStatement, ObjectMapper objectMapper2) throws JsonProcessingException, SQLException {
+    	// SonarQube: Database queries should not be vulnerable to injection attacks
+		List<Map<String, String>> dataList = new ArrayList<>();
+		if (sqlExecutor2 == null) {
+			return getObjectMapper().writeValueAsString(dataList);
+		}
+    	try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            ResultSetMetaData metadata = resultSet.getMetaData();
+            int columnCount = metadata.getColumnCount();
+            while (resultSet.next()) {
+                Map<String, String> dataMap = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    dataMap.put(metadata.getColumnName(i), resultSet.getString(i));
+                }
+                dataList.add(dataMap);
+            }
+            return getObjectMapper().writeValueAsString(dataList);
+        }
+	}
+
+	public String execUpdate(PreparedStatement preparedStatement) throws SQLException, JsonProcessingException {
+    	// SonarQube: Database queries should not be vulnerable to injection attacks
     	int updatedRows = 0; //實作內容請自行斟酌
         Map<String, Integer> dataMap = new HashMap<>();
         dataMap.put("updatedRows", updatedRows);
