@@ -1,11 +1,16 @@
 package tpi.dgrv4.gateway.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -14,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -38,19 +44,25 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
  * (GOOGLE / MS / OIDC) <br>
  * (LDAP / API / JDBC) <br>
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
 @Service
 public class GtwIdPApproveService {
 	
-	private GtwIdPAuthService gtwIdPAuthService;
-	private DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
-	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao; 
-	private TokenHelper tokenHelper;
-	private OAuthTokenService oAuthTokenService;
-	private OAuthAuthorizationService oAuthAuthorizationService;
-	private DgrOauthApprovalsDao dgrOauthApprovalsDao; 
-	private GtwIdPHelper gtwIdPHelper;
+	private I302 i302;
+	private final GtwIdPAuthService gtwIdPAuthService;
+	private final DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
+	private final DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao; 
+	private final TokenHelper tokenHelper;
+	private final OAuthTokenService oAuthTokenService;
+	private final OAuthAuthorizationService oAuthAuthorizationService;
+	private final DgrOauthApprovalsDao dgrOauthApprovalsDao; 
+	private final GtwIdPHelper gtwIdPHelper;
+	
+	@Autowired
+	public void setI302(@Nullable I302 i302) {
+		this.i302 = i302;
+	}
 	
 	public ResponseEntity<?> gtwIdPApprove(HttpHeaders headers, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
@@ -150,22 +162,33 @@ public class GtwIdPApproveService {
 		);
 		
 		/*
-		 * [ZH] 6. 再次檢查 redirect_uri, 並轉導。
-		 * 雖然前面已有檢查過了, 但 SonarQube 要求這裡也要檢查, 以避免開放重定向攻擊。
-		 * [EN] 6. Check redirect_uri again and redirect.
-		 * Although this has been checked before, SonarQube requires this to be checked as well to avoid open redirection attacks.
-		 */
+		 * [ZH] 6.轉導
+		 * [EN] 6.redirect
+		 * */
 		TPILogger.tl.debug("Redirect to URL【dgR Client Redirect URL】: " + redirectUrl);
-		errRespEntity = getTokenHelper().checkRedirectUri(dgrClientId, redirectUrl.substring(0, redirectUrl.indexOf("?")), reqUri);
-		if (errRespEntity != null) {// redirectUri 驗證有錯誤
-			return errRespEntity;
-		} else {
-			httpResp.sendRedirect(redirectUrl);
-		}
+		handleSendRedirect(httpResp, redirectUrl);
 		
 		return null;
 	}
 	
+	private void handleSendRedirect(HttpServletResponse httpResp, String redirectUrl) throws IOException {
+		// SonarQube :
+		// Change this code to not perform redirects based on user-controlled data.
+		// HTTP request redirections should not be open to forging attacks
+		if (i302 != null) {
+			i302.sendRedirect(httpResp, redirectUrl); // Only for Enterprise
+		} else {
+			// Please add Your allowed list
+			List<String> allowedHosts = new ArrayList<String>();
+			allowedHosts.add("https://trusted1.example.com/");
+			allowedHosts.add("https://trusted2.example.com/");
+			
+			if (allowedHosts.contains(redirectUrl)) {
+				httpResp.sendRedirect(redirectUrl);
+			}
+		}
+	}
+
 	/**
 	 * 檢查傳入的資料
 	 */
