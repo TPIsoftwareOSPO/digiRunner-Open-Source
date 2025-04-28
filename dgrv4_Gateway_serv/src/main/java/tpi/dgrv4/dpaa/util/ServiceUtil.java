@@ -766,7 +766,7 @@ public class ServiceUtil {
 			locale = arr[0].concat("-").concat(arr[1]);
 
 			// 若不是EN_US、ZH_CN或ZH_TW，預設為EN_US
-			locale = Pattern.quote(locale);// SonarQube 消毒, 避免正則表達式注入攻擊
+			// SonarQube 消毒, 避免正則表達式注入攻擊
 			if (!LocaleType.EN_US.matches(Pattern.quote(locale)) && !LocaleType.ZH_TW.matches(Pattern.quote(locale))
 					&& !LocaleType.ZH_CN.matches(Pattern.quote(locale))) {
 				locale = LocaleType.EN_US;
