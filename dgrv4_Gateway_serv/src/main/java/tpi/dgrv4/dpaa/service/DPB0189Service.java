@@ -2,8 +2,6 @@ package tpi.dgrv4.dpaa.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -231,19 +229,9 @@ public class DPB0189Service {
 		List<Map<String, String>> dataList = new ArrayList<>();
 		if (sqlExecutor2 == null) {
 			return getObjectMapper().writeValueAsString(dataList);
+		} else {
+			return sqlExecutor2.execQuery(preparedStatement, objectMapper2);
 		}
-    	try (ResultSet resultSet = preparedStatement.executeQuery()) {
-            ResultSetMetaData metadata = resultSet.getMetaData();
-            int columnCount = metadata.getColumnCount();
-            while (resultSet.next()) {
-                Map<String, String> dataMap = new HashMap<>();
-                for (int i = 1; i <= columnCount; i++) {
-                    dataMap.put(metadata.getColumnName(i), resultSet.getString(i));
-                }
-                dataList.add(dataMap);
-            }
-            return getObjectMapper().writeValueAsString(dataList);
-        }
 	}
 
 	public String execUpdate(PreparedStatement preparedStatement) throws SQLException, JsonProcessingException {
