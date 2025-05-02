@@ -73,12 +73,16 @@ public class TsmpDpNews {
 	public String toString() {
 		Optional<String> postDateDate = DateTimeUtil.dateTimeToString(postDateTime, DateTimeFormatEnum.西元年月日時分秒_2);
 		String postDateTimeStr = null;
+		String createDateTimeStr = null;
+
 		if (postDateDate.isPresent()) {
 			postDateTimeStr = postDateDate.get();
 		}
-		
+
 		Optional<String> createDateDate = DateTimeUtil.dateTimeToString(createDateTime, DateTimeFormatEnum.西元年月日時分秒_2);
-		String createDateTimeStr = createDateDate.get();
+		if (createDateDate.isPresent()) {
+			createDateTimeStr = createDateDate.get();
+		}
 		
 		return "TsmpDpNews [newsId=" + newsId + ", newTitle=" + newTitle + ", newContent=" + newContent + ", status="
 				+ status + ", orgId=" + orgId + ", postDateTime=" + postDateTimeStr + ", refTypeSubitemNo="
