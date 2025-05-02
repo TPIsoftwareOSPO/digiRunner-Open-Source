@@ -8,11 +8,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esotericsoftware.kryo.Kryo;
 
 import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
 
 public class CommunicationServer implements Runnable {
+	private static Logger logger = LoggerFactory.getLogger(CommunicationServer.class);
+	
 	ServerSocket server = null;
 
 	public static CommunicationServer cs;
@@ -69,13 +74,18 @@ public class CommunicationServer implements Runnable {
 
 	public void run() {
 		Socket user = null;
+		boolean isExit = false;
 		while (true) {
+			if(isExit) {
+				break;
+			}
 			try {
 				user = server.accept();
 				doConnectionProc(user);
 			} catch (Exception e) {
 //				e.printStackTrace();
 				System.err.println("TCP server.accept()結束");
+				isExit = true;
 				break;
 			}
 		}
@@ -85,7 +95,7 @@ public class CommunicationServer implements Runnable {
 		try {
 			server.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package tpi.dgrv4.entity.entity.jpql;
 
 import java.util.Date;
+import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.TableGenerator;
 import jakarta.persistence.Version;
-
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.entity.component.fuzzy.FuzzyEntityListener;
@@ -71,15 +71,20 @@ public class TsmpDpNews {
 
 	@Override
 	public String toString() {
+		Optional<String> postDateDate = DateTimeUtil.dateTimeToString(postDateTime, DateTimeFormatEnum.西元年月日時分秒_2);
+		String postDateTimeStr = null;
+		if (postDateDate.isPresent()) {
+			postDateTimeStr = postDateDate.get();
+		}
 		
-		String postDateTimeStr = DateTimeUtil.dateTimeToString(postDateTime, DateTimeFormatEnum.西元年月日時分秒_2).get();
-		String createDateTimeStr = DateTimeUtil.dateTimeToString(createDateTime, DateTimeFormatEnum.西元年月日時分秒_2).get();
+		Optional<String> createDateDate = DateTimeUtil.dateTimeToString(createDateTime, DateTimeFormatEnum.西元年月日時分秒_2);
+		String createDateTimeStr = createDateDate.get();
+		
 		return "TsmpDpNews [newsId=" + newsId + ", newTitle=" + newTitle + ", newContent=" + newContent + ", status="
 				+ status + ", orgId=" + orgId + ", postDateTime=" + postDateTimeStr + ", refTypeSubitemNo="
 				+ refTypeSubitemNo + ", createDateTime=" + createDateTimeStr + ", createUser=" + createUser
 				+ ", updateDateTime=" + updateDateTime + ", updateUser=" + updateUser + ", version=" + version + "]\n";
 	}
-	
 	
 	/* getters and setters */
 

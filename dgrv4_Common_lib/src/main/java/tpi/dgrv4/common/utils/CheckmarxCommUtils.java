@@ -37,7 +37,7 @@ public class CheckmarxCommUtils {
 		 * */
 		
 		/* 
-		 * 根目錄白名單
+		 * 上層目錄白名單
 		 * temp/ : DPB0065 - 建立申請單的附件
 		 * API_ATTACHMENT/ : DPB0065 - 建立申請單 （API 上下架）D2
 		 * D2_ATTACHMENT/ : API 上下架 Job
@@ -49,12 +49,12 @@ public class CheckmarxCommUtils {
 		// 驗證輸入不為空
         if (relativePath == null) {
         	String errMsg = "Path cannot be null";
-        	ITPILogger.tl.info(errMsg);
+        	ITPILogger.tl.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
         
         /*
-         * 拿掉根目錄後的子路徑,
+         * 拿掉上層目錄後的子路徑,
          * 例如: API_ATTACHMENT\2000000000\API1.txt
          * 取得子路徑: \2000000000\API1.txt
          */
@@ -62,7 +62,7 @@ public class CheckmarxCommUtils {
 		// 驗證輸入不為空
         if (subPath == null) {
         	String errMsg = "Sub Path cannot be null. Original path: " + relativePath;
-        	ITPILogger.tl.info(errMsg);
+        	ITPILogger.tl.error(errMsg);
         	 throw new IllegalArgumentException(errMsg);
         }
         
@@ -78,14 +78,14 @@ public class CheckmarxCommUtils {
         String pathString = relativeNormalizedPath.toString();
         if (pathString.contains("..")) {
         	String errMsg = "Path traversal attempt detected";
-        	ITPILogger.tl.info(errMsg);
+        	ITPILogger.tl.error(errMsg);
             throw new SecurityException(errMsg);
         }
         
         // 嘗試在允許的目錄中找檔案
         Path resolvedPath = null;
         
-        // 檢查每個允許的目錄
+        // 檢查每個允許的上層目錄
         for (String directory : targetDirectories) {
             Path rootPath = Paths.get(directory).normalize();
             Path filePath = rootPath.resolve(relativeNormalizedPath).normalize();
@@ -98,7 +98,7 @@ public class CheckmarxCommUtils {
         
         // 如果沒找到，拋出例外
 		if (resolvedPath == null) {
-			ITPILogger.tl.info("File not found in allowed directories,\n" 
+			ITPILogger.tl.error("File not found in allowed directories,\n" 
 					+ "Original path: " + relativePath + "\n"
 					+ "Sub Path: " + subPath);
 			throw new IOException("File not found in allowed directories");
@@ -107,7 +107,7 @@ public class CheckmarxCommUtils {
         // 確保是普通檔案
         if (!Files.isRegularFile(resolvedPath)) {
         	String errMsg = "Not a regular file";
-        	ITPILogger.tl.info(errMsg);
+        	ITPILogger.tl.error(errMsg);
             throw new SecurityException(errMsg);
         }
 	    

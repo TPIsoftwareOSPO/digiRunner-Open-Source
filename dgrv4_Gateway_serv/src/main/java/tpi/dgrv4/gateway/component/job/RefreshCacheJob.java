@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.component.cache.core.CacheValueAdapter;
 import tpi.dgrv4.gateway.component.cache.core.GenericCache;
@@ -42,6 +44,7 @@ public class RefreshCacheJob extends DeferrableJob {
 
 	private CacheValueAdapter adapter;
 
+	@Autowired
 	public RefreshCacheJob(String key, Supplier<?> supplier, CacheValueAdapter adapter, TPILogger logger,
 			GenericCache cache) {
 		// 啟用 API 自適用 cache , RefreshCacheJob 搭配 DummyJob

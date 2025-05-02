@@ -3,25 +3,25 @@ package tpi.dgrv4.entity.daoService;
 import java.util.Base64;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.copy.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.component.cache.proxy.ITsmpDpItemsCacheProxy;
 import tpi.dgrv4.common.constant.BcryptFieldValueEnum;
 import tpi.dgrv4.common.exceptions.BcryptParamDecodeException;
 import tpi.dgrv4.common.keeper.ITPILogger;
 import tpi.dgrv4.entity.entity.ITsmpDpItems;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class BcryptParamHelper {
  
-	@Autowired
-	private ITsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private final ITsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
-	@Autowired
-	private ITPILogger logger; 
-
 	public String decode(final String bcryptParamString, final String itemNo, final String locale) throws BcryptParamDecodeException {
 		return decode(bcryptParamString, itemNo, BcryptFieldValueEnum.SUBITEM_NO, locale);
 	}
@@ -74,7 +74,7 @@ public class BcryptParamHelper {
 		} catch (NumberFormatException e) {
 			throw new BcryptParamDecodeException("Invalid index " + e.getLocalizedMessage(), bcryptParamString);
 		} catch (IllegalArgumentException e) {
-			logger.error("bcryptParamString: " + bcryptParamString + "\n" + "itemNo: " + itemNo + "\n"
+			ITPILogger.tl.error("bcryptParamString: " + bcryptParamString + "\n" + "itemNo: " + itemNo + "\n"
 					+ "fieldValue: " + fieldValue + "\n" + "locale: " + locale);
 			throw new BcryptParamDecodeException("Invalid parameter format, missing \",\"", bcryptParamString);
 		} catch (Exception e) {
@@ -128,9 +128,4 @@ public class BcryptParamHelper {
 	private String base64Encode(byte[] bytes) {
 		return Base64.getEncoder().encodeToString(bytes);
 	}
-
-	public void setLogger(ITPILogger logger) {
-		this.logger = logger;
-	}
-
 }

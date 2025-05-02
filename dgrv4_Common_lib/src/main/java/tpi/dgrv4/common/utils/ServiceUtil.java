@@ -100,7 +100,7 @@ public class ServiceUtil {
 //				gateway_locale = LocaleType.EN_US;
 //			}
 		} catch (Exception e) {
-			logger.debug(StackTraceUtil.logStackTrace(e));
+			logger.error(StackTraceUtil.logStackTrace(e));
 		}
 		
 		return gateway_locale;
@@ -503,7 +503,6 @@ public class ServiceUtil {
             BigInteger checkSubnet = checkBigInt.and(mask);
 
             // Compare the results
-            cidrsubnet.equals(checkSubnet);
             return cidrsubnet.equals(checkSubnet);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Invalid IP address or CIDR", e);

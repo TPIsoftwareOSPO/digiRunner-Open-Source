@@ -231,7 +231,7 @@ public class TsmpSettingTableInitializer {
 	        createTsmpSetting((id = "COMPOSER_LOG_SIZE"), (value = "100"), (memo = "單位：KB。當此 log 檔大於 {COMPOSER_LOG_SIZE} KB，則此 log 檔會被壓縮並開新的 log 檔繼續寫入 log。"));
 	        createTsmpSetting((id = "COMPOSER_LOG_SWICTH"), (value = "true"), (memo = "Composer log 的總開關。true：開，false：關。Composer log 的總開關。"));
 	        createTsmpSetting((id = "COMPOSER_LOG_MAX_FILES"), (value = "7"), (memo = "保留幾個 rotation log 文件(or壓縮檔)，只能為正整數。"));
-	        createTsmpSetting((id = "COMPOSER_REQUEST_TIMEOUT"), (value = "59000"), (memo = "請求 COMPOSER API 超時時長。單位：毫秒。"));
+	        createTsmpSetting((id = "COMPOSER_REQUEST_TIMEOUT"), (value = "240000"), (memo = "請求 COMPOSER API 超時時長。單位：毫秒。"));
 	        
 //			-- 限制不能變更及刪除自己的帳號開關 , Kevin K	        	        
 	        createTsmpSetting((id = "USER_UPDATE_BY_SELF"), (value = "false"), (memo = "限制不能變更及刪除自己的帳號(預設為false關閉功能)"));

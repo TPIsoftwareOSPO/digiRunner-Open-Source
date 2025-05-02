@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '3.4.0' apply false // 加上 apply false
+	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'com.github.jk1.dependency-license-report' version '2.9'
 
@@ -35,7 +35,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-rc-v4.5.3.1-29-g9bb987dc2'
+	version = 'release-rc-v4.5.4.1'
 	apply plugin:  'io.spring.dependency-management'
 
 	repositories {
@@ -62,8 +62,8 @@ subprojects {
 
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.3.1-29-g9bb987dc2-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.3.1-29-g9bb987dc2-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.4.1-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.4.1-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 			exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -162,7 +162,6 @@ project(':dgrv4_Gateway_serv'){
 		// https://mvnrepository.com/artifact/org.codehaus.janino/janino
 		implementation 'org.codehaus.janino:janino:3.0.7'
 
-		implementation 'org.apache.httpcomponents.client5:httpclient5'
 		implementation 'org.apache.httpcomponents:httpclient:4.5.14'
 		implementation 'org.apache.httpcomponents:httpmime:4.5.14'
 

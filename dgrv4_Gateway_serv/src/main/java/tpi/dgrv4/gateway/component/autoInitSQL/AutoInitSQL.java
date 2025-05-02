@@ -1,34 +1,139 @@
 package tpi.dgrv4.gateway.component.autoInitSQL;
 
-import jakarta.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import tpi.dgrv4.common.constant.*;
+
+import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import tpi.dgrv4.common.constant.AuditLogEvent;
+import tpi.dgrv4.common.constant.LocaleType;
+import tpi.dgrv4.common.constant.TableAct;
+import tpi.dgrv4.common.constant.TsmpDpDataStatus;
+import tpi.dgrv4.common.constant.TsmpDpReqReviewType;
+import tpi.dgrv4.common.constant.TsmpDpSeqStoreKey;
 import tpi.dgrv4.common.ifs.ITsmpFirstInstallHelper;
 import tpi.dgrv4.common.utils.LicenseEditionType;
 import tpi.dgrv4.common.utils.LicenseEditionTypeVo;
 import tpi.dgrv4.common.utils.LicenseUtilBase;
 import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.common.utils.autoInitSQL.Initializer.*;
-import tpi.dgrv4.common.utils.autoInitSQL.vo.*;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.AuthoritiesTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.DgrRdbConnectionTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.OauthClientDetailsTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpAlertTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpClientGroupTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpClientTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpDpItemsTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpDpMailTpltTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpFuncTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpGroupTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpOrganizationTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpReportUrlTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRoleAlertTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRoleRoleMappingTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRoleTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRtnCodeTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpSecurityLevelInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpSettingTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpUserTableInitializr;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.UserTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.AuthoritiesVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.AutoInitSQLTsmpDpMailTpltVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.AutoInitSQLTsmpRoleRoleMappingVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.DgrRdbConnectionVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.OauthClientDetailsVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpAlertVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpClientGroupVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpClientVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpDpItemsVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpFuncVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpGroupVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpOrganizationVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpReportUrlVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpRoleAlertVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpRoleVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpRtnCodeVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpSecurityLevelVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpSettingVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpUserVo;
+import tpi.dgrv4.common.utils.autoInitSQL.vo.UsersVo;
 import tpi.dgrv4.dpaa.component.rjob.SystemDefaultRjobInitializer;
 import tpi.dgrv4.dpaa.service.DPB0101Service;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.dpaa.vo.DPB0101Req;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.daoService.SeqStoreService;
-import tpi.dgrv4.entity.entity.*;
+import tpi.dgrv4.entity.entity.Authorities;
+import tpi.dgrv4.entity.entity.AuthoritiesId;
+import tpi.dgrv4.entity.entity.DgrRdbConnection;
+import tpi.dgrv4.entity.entity.OauthClientDetails;
+import tpi.dgrv4.entity.entity.TsmpClient;
+import tpi.dgrv4.entity.entity.TsmpClientGroup;
+import tpi.dgrv4.entity.entity.TsmpClientGroupId;
+import tpi.dgrv4.entity.entity.TsmpDpClientext;
+import tpi.dgrv4.entity.entity.TsmpDpItems;
+import tpi.dgrv4.entity.entity.TsmpDpItemsId;
+import tpi.dgrv4.entity.entity.TsmpFunc;
+import tpi.dgrv4.entity.entity.TsmpFuncId;
+import tpi.dgrv4.entity.entity.TsmpGroup;
+import tpi.dgrv4.entity.entity.TsmpOrganization;
+import tpi.dgrv4.entity.entity.TsmpRole;
+import tpi.dgrv4.entity.entity.TsmpRoleFunc;
+import tpi.dgrv4.entity.entity.TsmpRoleFuncId;
+import tpi.dgrv4.entity.entity.TsmpRtnCode;
+import tpi.dgrv4.entity.entity.TsmpRtnCodeId;
+import tpi.dgrv4.entity.entity.TsmpSetting;
+import tpi.dgrv4.entity.entity.TsmpUser;
+import tpi.dgrv4.entity.entity.Users;
 import tpi.dgrv4.entity.entity.autoInitSQL.AutoInitSQLTsmpDpMailTplt;
 import tpi.dgrv4.entity.entity.autoInitSQL.AutoInitSQLTsmpRoleRoleMapping;
-import tpi.dgrv4.entity.entity.jpql.*;
-import tpi.dgrv4.entity.repository.*;
+import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
+import tpi.dgrv4.entity.entity.jpql.TsmpDpChkLayer;
+import tpi.dgrv4.entity.entity.jpql.TsmpReportUrl;
+import tpi.dgrv4.entity.entity.jpql.TsmpReportUrlId;
+import tpi.dgrv4.entity.entity.jpql.TsmpRoleAlert;
+import tpi.dgrv4.entity.entity.jpql.TsmpRoleAlertId;
+import tpi.dgrv4.entity.entity.jpql.TsmpSecurityLevel;
+import tpi.dgrv4.entity.repository.AuthoritiesDao;
+import tpi.dgrv4.entity.repository.DgrRdbConnectionDao;
+import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
+import tpi.dgrv4.entity.repository.TsmpAlertDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpClientGroupDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptRjobDDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptRjobDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLayerDao;
+import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
+import tpi.dgrv4.entity.repository.TsmpDpItemsDao;
+import tpi.dgrv4.entity.repository.TsmpFuncDao;
+import tpi.dgrv4.entity.repository.TsmpGroupDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpReportUrlDao;
+import tpi.dgrv4.entity.repository.TsmpRoleAlertDao;
+import tpi.dgrv4.entity.repository.TsmpRoleDao;
+import tpi.dgrv4.entity.repository.TsmpRoleFuncDao;
+import tpi.dgrv4.entity.repository.TsmpRoleRoleMappingDao;
+import tpi.dgrv4.entity.repository.TsmpRtnCodeDao;
+import tpi.dgrv4.entity.repository.TsmpSecurityLevelDao;
+import tpi.dgrv4.entity.repository.TsmpSettingDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.entity.repository.UsersDao;
 import tpi.dgrv4.entity.repository.autoInitSQL.AutoInitSQLTsmpDpApptRjobDDao;
 import tpi.dgrv4.entity.repository.autoInitSQL.AutoInitSQLTsmpDpMailTpltDao;
 import tpi.dgrv4.entity.repository.autoInitSQL.AutoInitSQLTsmpRoleRoleMappingDao;
@@ -36,155 +141,75 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class AutoInitSQL {
 	
 //	@Autowired(required = false)
 	private ITsmpFirstInstallHelper tsmpFirstInstallHelper;
+	
+	private LicenseUtilBase licenseUtil; // non-Singleton
 
-	private TsmpUserDao tsmpUserDao;
-	private UsersDao usersDao;
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	private TsmpRoleDao tsmpRoleDao;
-	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	private AutoInitSQLTsmpRoleRoleMappingDao autoInitSQLTsmpRoleRoleMappingDao;
-	private AuthoritiesDao authoritiesDao;
-	private TsmpDpItemsDao tsmpDpItemsDao;
-	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	private TsmpSettingDao tsmpSettingDao;
-	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-	private AutoInitSQLTsmpDpApptRjobDDao autoInitSQLTsmpDpApptRjobDDao;
-	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-	private TsmpFuncDao tsmpFuncDao;
-	private TsmpRoleFuncDao tsmpRoleFuncDao;
-	private TsmpClientDao tsmpClientDao;
-	private OauthClientDetailsDao oauthClientDetailsDao;
-	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	private TsmpReportUrlDao tsmpReportUrlDao;
-	private AutoInitSQLTsmpDpMailTpltDao autoInitSQLTsmpDpMailTpltDao;
-	private TsmpGroupDao tsmpGroupDao;
-	private TsmpClientGroupDao tsmpClientGroupDao;
-	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
-	private TsmpAlertDao tsmpAlertDao;
-	private TsmpRoleAlertDao tsmpRoleAlertDao;
-	private DgrRdbConnectionDao dgrRdbConnectionDao;
-	private SeqStoreService seqStoreService;
-	private DPB0101Service dpb0101Service;
-	private BcryptParamHelper bcryptParamHelper;
-	private TsmpDpClientextDao tsmpDpClientextDao;
-	private DgrAuditLogService dgrAuditLogService;
-	protected TsmpUserTableInitializr tsmpUserTableInitializr;
-	private UserTableInitializer userTableInitializr;
-	private TsmpOrganizationTableInitializer tsmpOrganizationTableInitializr;
-	private TsmpRoleTableInitializer tsmpRoleTableInitializr;
-	private TsmpRoleRoleMappingTableInitializer tsmpRoleRoleMappingTableInitializr;
-	private AuthoritiesTableInitializer authoritiesTableInitializr;
-	private TsmpDpItemsTableInitializer tsmpDpItemsTableInitializr;
-	private TsmpRtnCodeTableInitializer tsmpRtnCodeTableInitializr;
-	private TsmpSettingTableInitializer tsmpSettingTableInitializr;
-	private TsmpClientTableInitializer tsmpClientTableInitializr;
-	private OauthClientDetailsTableInitializer oauthClientDetailsTableInitializr;
-	private TsmpSecurityLevelInitializer tsmpSecurityLevelTableInitializr;
-	private TsmpReportUrlTableInitializer tsmpReportUrlTableInitializr;
-	private TsmpGroupTableInitializer tsmpGroupTableInitializr;
-	private TsmpClientGroupTableInitializer tsmpClientGroupTableInitializr;
-	private TsmpFuncTableInitializer tsmpFuncTableInitializr;
-	private TsmpDpMailTpltTableInitializer tsmpDpMailTpltTableInitializr;
-	private TsmpAlertTableInitializer tsmpAlertTableInitializer;
-	private TsmpRoleAlertTableInitializer tsmpRoleAlertTableInitializer;
-	private DgrRdbConnectionTableInitializer dgrRdbConnectionTableInitializer;
-	private LicenseUtilBase licenseUtil;
+	private final TsmpUserDao tsmpUserDao;
+	private final UsersDao usersDao;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
+	private final AutoInitSQLTsmpRoleRoleMappingDao autoInitSQLTsmpRoleRoleMappingDao;
+	private final AuthoritiesDao authoritiesDao;
+	private final TsmpDpItemsDao tsmpDpItemsDao;
+	private final TsmpRtnCodeDao tsmpRtnCodeDao;
+	private final TsmpSettingDao tsmpSettingDao;
+	private final TsmpDpApptRjobDao tsmpDpApptRjobDao;
+	private final AutoInitSQLTsmpDpApptRjobDDao autoInitSQLTsmpDpApptRjobDDao;
+	private final TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
+	private final TsmpFuncDao tsmpFuncDao;
+	private final TsmpRoleFuncDao tsmpRoleFuncDao;
+	private final TsmpClientDao tsmpClientDao;
+	private final OauthClientDetailsDao oauthClientDetailsDao;
+	private final TsmpSecurityLevelDao tsmpSecurityLevelDao;
+	private final TsmpReportUrlDao tsmpReportUrlDao;
+	private final AutoInitSQLTsmpDpMailTpltDao autoInitSQLTsmpDpMailTpltDao;
+	private final TsmpGroupDao tsmpGroupDao;
+	private final TsmpClientGroupDao tsmpClientGroupDao;
+	private final TsmpDpChkLayerDao tsmpDpChkLayerDao;
+	private final TsmpAlertDao tsmpAlertDao;
+	private final TsmpRoleAlertDao tsmpRoleAlertDao;
+	private final DgrRdbConnectionDao dgrRdbConnectionDao;
+	private final SeqStoreService seqStoreService;
+	private final DPB0101Service dpb0101Service;
+	private final BcryptParamHelper bcryptParamHelper;
+	private final TsmpDpClientextDao tsmpDpClientextDao;
+	private final DgrAuditLogService dgrAuditLogService;
+	protected final TsmpUserTableInitializr tsmpUserTableInitializr;
+	private final UserTableInitializer userTableInitializr;
+	private final TsmpOrganizationTableInitializer tsmpOrganizationTableInitializr;
+	private final TsmpRoleTableInitializer tsmpRoleTableInitializr;
+	private final TsmpRoleRoleMappingTableInitializer tsmpRoleRoleMappingTableInitializr;
+	private final AuthoritiesTableInitializer authoritiesTableInitializr;
+	private final TsmpDpItemsTableInitializer tsmpDpItemsTableInitializr;
+	private final TsmpRtnCodeTableInitializer tsmpRtnCodeTableInitializr;
+	private final TsmpSettingTableInitializer tsmpSettingTableInitializr;
+	private final TsmpClientTableInitializer tsmpClientTableInitializr;
+	private final OauthClientDetailsTableInitializer oauthClientDetailsTableInitializr;
+	private final TsmpSecurityLevelInitializer tsmpSecurityLevelTableInitializr;
+	private final TsmpReportUrlTableInitializer tsmpReportUrlTableInitializr;
+	private final TsmpGroupTableInitializer tsmpGroupTableInitializr;
+	private final TsmpClientGroupTableInitializer tsmpClientGroupTableInitializr;
+	private final TsmpFuncTableInitializer tsmpFuncTableInitializr;
+	private final TsmpDpMailTpltTableInitializer tsmpDpMailTpltTableInitializr;
+	private final TsmpAlertTableInitializer tsmpAlertTableInitializer;
+	private final TsmpRoleAlertTableInitializer tsmpRoleAlertTableInitializer;
+	private final DgrRdbConnectionTableInitializer dgrRdbConnectionTableInitializer;
 	
 	@Autowired
-	public AutoInitSQL(@Nullable ITsmpFirstInstallHelper tsmpFirstInstallHelper, TsmpUserDao tsmpUserDao, UsersDao usersDao,
-			TsmpOrganizationDao tsmpOrganizationDao, TsmpRoleDao tsmpRoleDao,
-			TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao,
-			AutoInitSQLTsmpRoleRoleMappingDao autoInitSQLTsmpRoleRoleMappingDao, AuthoritiesDao authoritiesDao,
-			TsmpDpItemsDao tsmpDpItemsDao, TsmpRtnCodeDao tsmpRtnCodeDao, TsmpSettingDao tsmpSettingDao,
-			TsmpDpApptRjobDao tsmpDpApptRjobDao, AutoInitSQLTsmpDpApptRjobDDao autoInitSQLTsmpDpApptRjobDDao,
-			TsmpDpApptRjobDDao tsmpDpApptRjobDDao, TsmpFuncDao tsmpFuncDao, TsmpRoleFuncDao tsmpRoleFuncDao,
-			TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao,
-			TsmpSecurityLevelDao tsmpSecurityLevelDao, TsmpReportUrlDao tsmpReportUrlDao,
-			AutoInitSQLTsmpDpMailTpltDao autoInitSQLTsmpDpMailTpltDao, TsmpGroupDao tsmpGroupDao,
-			TsmpClientGroupDao tsmpClientGroupDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpAlertDao tsmpAlertDao,
-			TsmpRoleAlertDao tsmpRoleAlertDao, DgrRdbConnectionDao dgrRdbConnectionDao, SeqStoreService seqStoreService,
-			DPB0101Service dpb0101Service, BcryptParamHelper bcryptParamHelper, TsmpDpClientextDao tsmpDpClientextDao,
-			DgrAuditLogService dgrAuditLogService, TsmpUserTableInitializr tsmpUserTableInitializr,
-			UserTableInitializer userTableInitializr, TsmpOrganizationTableInitializer tsmpOrganizationTableInitializr,
-			TsmpRoleTableInitializer tsmpRoleTableInitializr,
-			TsmpRoleRoleMappingTableInitializer tsmpRoleRoleMappingTableInitializr,
-			AuthoritiesTableInitializer authoritiesTableInitializr,
-			TsmpDpItemsTableInitializer tsmpDpItemsTableInitializr,
-			TsmpRtnCodeTableInitializer tsmpRtnCodeTableInitializr,
-			TsmpSettingTableInitializer tsmpSettingTableInitializr,
-			TsmpClientTableInitializer tsmpClientTableInitializr,
-			OauthClientDetailsTableInitializer oauthClientDetailsTableInitializr,
-			TsmpSecurityLevelInitializer tsmpSecurityLevelTableInitializr,
-			TsmpReportUrlTableInitializer tsmpReportUrlTableInitializr,
-			TsmpGroupTableInitializer tsmpGroupTableInitializr,
-			TsmpClientGroupTableInitializer tsmpClientGroupTableInitializr,
-			TsmpFuncTableInitializer tsmpFuncTableInitializr,
-			TsmpDpMailTpltTableInitializer tsmpDpMailTpltTableInitializr,
-			TsmpAlertTableInitializer tsmpAlertTableInitializer,
-			TsmpRoleAlertTableInitializer tsmpRoleAlertTableInitializer,
-			DgrRdbConnectionTableInitializer dgrRdbConnectionTableInitializer, LicenseUtilBase licenseUtil) {
-		super();
+	public void setAutoInitSQL(@Nullable ITsmpFirstInstallHelper tsmpFirstInstallHelper,
+			ApplicationContext applicationContext) {
 		this.tsmpFirstInstallHelper = tsmpFirstInstallHelper;
-		this.tsmpUserDao = tsmpUserDao;
-		this.usersDao = usersDao;
-		this.tsmpOrganizationDao = tsmpOrganizationDao;
-		this.tsmpRoleDao = tsmpRoleDao;
-		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
-		this.autoInitSQLTsmpRoleRoleMappingDao = autoInitSQLTsmpRoleRoleMappingDao;
-		this.authoritiesDao = authoritiesDao;
-		this.tsmpDpItemsDao = tsmpDpItemsDao;
-		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
-		this.tsmpSettingDao = tsmpSettingDao;
-		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
-		this.autoInitSQLTsmpDpApptRjobDDao = autoInitSQLTsmpDpApptRjobDDao;
-		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
-		this.tsmpFuncDao = tsmpFuncDao;
-		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
-		this.tsmpClientDao = tsmpClientDao;
-		this.oauthClientDetailsDao = oauthClientDetailsDao;
-		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
-		this.tsmpReportUrlDao = tsmpReportUrlDao;
-		this.autoInitSQLTsmpDpMailTpltDao = autoInitSQLTsmpDpMailTpltDao;
-		this.tsmpGroupDao = tsmpGroupDao;
-		this.tsmpClientGroupDao = tsmpClientGroupDao;
-		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
-		this.tsmpAlertDao = tsmpAlertDao;
-		this.tsmpRoleAlertDao = tsmpRoleAlertDao;
-		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
-		this.seqStoreService = seqStoreService;
-		this.dpb0101Service = dpb0101Service;
-		this.bcryptParamHelper = bcryptParamHelper;
-		this.tsmpDpClientextDao = tsmpDpClientextDao;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.tsmpUserTableInitializr = tsmpUserTableInitializr;
-		this.userTableInitializr = userTableInitializr;
-		this.tsmpOrganizationTableInitializr = tsmpOrganizationTableInitializr;
-		this.tsmpRoleTableInitializr = tsmpRoleTableInitializr;
-		this.tsmpRoleRoleMappingTableInitializr = tsmpRoleRoleMappingTableInitializr;
-		this.authoritiesTableInitializr = authoritiesTableInitializr;
-		this.tsmpDpItemsTableInitializr = tsmpDpItemsTableInitializr;
-		this.tsmpRtnCodeTableInitializr = tsmpRtnCodeTableInitializr;
-		this.tsmpSettingTableInitializr = tsmpSettingTableInitializr;
-		this.tsmpClientTableInitializr = tsmpClientTableInitializr;
-		this.oauthClientDetailsTableInitializr = oauthClientDetailsTableInitializr;
-		this.tsmpSecurityLevelTableInitializr = tsmpSecurityLevelTableInitializr;
-		this.tsmpReportUrlTableInitializr = tsmpReportUrlTableInitializr;
-		this.tsmpGroupTableInitializr = tsmpGroupTableInitializr;
-		this.tsmpClientGroupTableInitializr = tsmpClientGroupTableInitializr;
-		this.tsmpFuncTableInitializr = tsmpFuncTableInitializr;
-		this.tsmpDpMailTpltTableInitializr = tsmpDpMailTpltTableInitializr;
-		this.tsmpAlertTableInitializer = tsmpAlertTableInitializer;
-		this.tsmpRoleAlertTableInitializer = tsmpRoleAlertTableInitializer;
-		this.dgrRdbConnectionTableInitializer = dgrRdbConnectionTableInitializer;
-		this.licenseUtil = licenseUtil;
+		if (applicationContext != null) {
+			this.licenseUtil = applicationContext.getBean(LicenseUtilBase.class); // non-Singleton
+		}
 	}
 
 	@Value("${service.mail.installation}")
@@ -963,11 +988,12 @@ public class AutoInitSQL {
 
 		TPILogger.tl.debug("Authorize 'manager' to sign Open API Key Finish ");
 	}
+	
 
 	// 寫入系統預設的週期排程
 	public void createDefaultRjobs() {
 		SystemDefaultRjobInitializer initializer = new SystemDefaultRjobInitializer( //
-				getDPB0101Service(), getTsmpDpApptRjobDao(), getBcryptParamHelper());
+				getDpb0101Service(), getTsmpDpApptRjobDao(), getBcryptParamHelper());
 		List<DPB0101Req> rjobList = initializer.getDefaultRjobList();
 		if (CollectionUtils.isEmpty(rjobList)) {
 			return;
@@ -1084,217 +1110,7 @@ public class AutoInitSQL {
 		}
 	}
 
-	protected LicenseUtilBase getLicenseUtil(){
-		return licenseUtil;
+	public static void setAuthoritieslist(List<Authorities> authoritieslist) {
+		AutoInitSQL.authoritieslist = authoritieslist;
 	}
-
-	protected TsmpFuncDao getTsmpFuncDao() {
-		return tsmpFuncDao;
-	}
-
-	protected TsmpRoleFuncDao getTsmpRoleFuncDao() {
-		return tsmpRoleFuncDao;
-	}
-
-	protected TsmpUserDao getTsmpUserDao() {
-		return tsmpUserDao;
-	}
-
-	protected UsersDao getUsersDao() {
-		return usersDao;
-	}
-
-	protected TsmpOrganizationDao getTsmpOrganizationDao() {
-		return tsmpOrganizationDao;
-	}
-
-	protected TsmpRoleDao getTsmpRoleDao() {
-		return tsmpRoleDao;
-	}
-
-	protected TsmpRoleRoleMappingDao getTsmpRoleRoleMappingDao() {
-		return tsmpRoleRoleMappingDao;
-	}
-
-	protected AutoInitSQLTsmpRoleRoleMappingDao getAutoInitSQLTsmpRoleRoleMappingDao() {
-		return autoInitSQLTsmpRoleRoleMappingDao;
-	}
-
-	protected AuthoritiesDao getAuthoritiesDao() {
-		return authoritiesDao;
-	}
-
-	protected TsmpDpItemsDao getTsmpDpItemsDao() {
-		return tsmpDpItemsDao;
-	}
-
-	protected TsmpRtnCodeDao getTsmpRtnCodeDao() {
-		return tsmpRtnCodeDao;
-	}
-
-	protected TsmpSettingDao getTsmpSettingDao() {
-		return tsmpSettingDao;
-	}
-
-	protected TsmpDpApptRjobDao getTsmpDpApptRjobDao() {
-		return tsmpDpApptRjobDao;
-	}
-
-	protected TsmpDpApptRjobDDao getTsmpDpApptRjobDDao() {
-		return tsmpDpApptRjobDDao;
-	}
-
-	protected AutoInitSQLTsmpDpApptRjobDDao getAutoInitSQLTsmpDpApptRjobDDao() {
-		return autoInitSQLTsmpDpApptRjobDDao;
-	}
-
-	protected TsmpClientDao getTsmpClientDao() {
-		return tsmpClientDao;
-	}
-
-	protected OauthClientDetailsDao getOauthClientDetailsDao() {
-		return oauthClientDetailsDao;
-	}
-
-	protected TsmpSecurityLevelDao getTsmpSecurityLevelDao() {
-		return tsmpSecurityLevelDao;
-	}
-
-	protected TsmpReportUrlDao getTsmpReportUrlDao() {
-		return tsmpReportUrlDao;
-	}
-
-	protected TsmpGroupDao getTsmpGroupDao() {
-		return tsmpGroupDao;
-	}
-
-	protected TsmpClientGroupDao getTsmpClientGroupDao() {
-		return tsmpClientGroupDao;
-	}
-
-	protected AutoInitSQLTsmpDpMailTpltDao getAutoInitSQLTsmpDpMailTpltDao() {
-		return autoInitSQLTsmpDpMailTpltDao;
-	}
-
-	protected TsmpDpChkLayerDao getTsmpDpChkLayerDao() {
-		return this.tsmpDpChkLayerDao;
-	}
-
-	protected TsmpAlertDao getTsmpAlertDao() {
-		return this.tsmpAlertDao;
-	}
-
-	protected TsmpRoleAlertDao getTsmpRoleAlertDao() {
-		return this.tsmpRoleAlertDao;
-	}
-
-	protected SeqStoreService getSeqStoreService() {
-		return this.seqStoreService;
-	}
-
-	protected DPB0101Service getDPB0101Service() {
-		return this.dpb0101Service;
-	}
-
-	protected BcryptParamHelper getBcryptParamHelper() {
-		return this.bcryptParamHelper;
-	}
-
-	protected ITsmpFirstInstallHelper getTsmpFirstInstallHelper() {
-		return this.tsmpFirstInstallHelper;
-	}
-
-	protected TsmpDpClientextDao getTsmpDpClientextDao() {
-		return this.tsmpDpClientextDao;
-	}
-
-	protected DgrAuditLogService getDgrAuditLogService() {
-		return this.dgrAuditLogService;
-	}
-
-	protected TsmpUserTableInitializr getTsmpUserTableInitializr() {
-		return this.tsmpUserTableInitializr;
-	}
-
-	protected UserTableInitializer getUserTableInitializr() {
-		return this.userTableInitializr;
-	}
-
-	protected TsmpOrganizationTableInitializer getTsmpOrganizationTableInitializr() {
-		return this.tsmpOrganizationTableInitializr;
-	}
-
-	protected TsmpRoleTableInitializer getTsmpRoleTableInitializr() {
-		return this.tsmpRoleTableInitializr;
-	}
-
-	protected TsmpRoleRoleMappingTableInitializer getTsmpRoleRoleMappingTableInitializr() {
-		return this.tsmpRoleRoleMappingTableInitializr;
-	}
-
-	protected AuthoritiesTableInitializer getAuthoritiesTableInitializr() {
-		return this.authoritiesTableInitializr;
-	}
-
-	protected TsmpDpItemsTableInitializer getTsmpDpItemsTableInitializr() {
-		return this.tsmpDpItemsTableInitializr;
-	}
-
-	protected TsmpRtnCodeTableInitializer getTsmpRtnCodeTableInitializr() {
-		return this.tsmpRtnCodeTableInitializr;
-	}
-
-	protected TsmpSettingTableInitializer getTsmpSettingTableInitializr() {
-		return this.tsmpSettingTableInitializr;
-	}
-
-	protected TsmpClientTableInitializer getTsmpClientTableInitializr() {
-		return this.tsmpClientTableInitializr;
-	}
-
-	protected OauthClientDetailsTableInitializer getOauthClientDetailsTableInitializr() {
-		return this.oauthClientDetailsTableInitializr;
-	}
-
-	protected TsmpSecurityLevelInitializer getTsmpSecurityLevelTableInitializr() {
-		return this.tsmpSecurityLevelTableInitializr;
-	}
-
-	protected TsmpReportUrlTableInitializer getTsmpReportUrlTableInitializr() {
-		return this.tsmpReportUrlTableInitializr;
-	}
-
-	protected TsmpGroupTableInitializer getTsmpGroupTableInitializr() {
-		return this.tsmpGroupTableInitializr;
-	}
-
-	protected TsmpClientGroupTableInitializer getTsmpClientGroupTableInitializr() {
-		return this.tsmpClientGroupTableInitializr;
-	}
-
-	protected TsmpFuncTableInitializer getTsmpFuncTableInitializr() {
-		return this.tsmpFuncTableInitializr;
-	}
-
-	protected TsmpDpMailTpltTableInitializer getTsmpDpMailTpltTableInitializr() {
-		return this.tsmpDpMailTpltTableInitializr;
-	}
-
-	protected TsmpAlertTableInitializer getTsmpAlertTableInitializer() {
-		return this.tsmpAlertTableInitializer;
-	}
-
-	protected TsmpRoleAlertTableInitializer getTsmpRoleAlertTableInitializer() {
-		return this.tsmpRoleAlertTableInitializer;
-	}
-
-	protected DgrRdbConnectionDao getDgrRdbConnectionDao() {
-		return dgrRdbConnectionDao;
-	}
-
-	protected DgrRdbConnectionTableInitializer getDgrRdbConnectionTableInitializer() {
-		return dgrRdbConnectionTableInitializer;
-	}
-	
-
 }

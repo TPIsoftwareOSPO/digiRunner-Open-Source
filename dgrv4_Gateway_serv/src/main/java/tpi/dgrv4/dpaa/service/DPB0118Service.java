@@ -23,7 +23,7 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
 @Service
-@Scope("prototype")
+@Scope("prototype") // non-Singleton
 public class DPB0118Service {
 
 	private TsmpSettingService tsmpSettingService;

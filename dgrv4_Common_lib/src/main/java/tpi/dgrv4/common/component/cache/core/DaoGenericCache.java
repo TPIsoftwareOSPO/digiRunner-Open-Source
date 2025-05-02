@@ -1,7 +1,5 @@
 package tpi.dgrv4.common.component.cache.core;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -9,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -67,6 +66,7 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 		};
 	}
 
+	@Autowired
 	public DaoGenericCache() {
 		this(DEFAULT_CACHE_TIMEOUT, null);
 	}
@@ -96,6 +96,7 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 						if (traceLogger != null) {
 							traceLogger.accept(StackTraceUtil.logStackTrace(e));
 						}
+						Thread.currentThread().interrupt();
 					}
 				}
 			}
@@ -168,7 +169,7 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 				// 休息1ms，避免CPU飆高
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				
+				Thread.currentThread().interrupt();
 			}
 			this.remove(key);
 			if (traceLogger != null) {

@@ -7,7 +7,6 @@ import java.time.Instant;
 import jakarta.annotation.PostConstruct;
 import javax.crypto.Cipher;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -24,9 +23,6 @@ import tpi.dgrv4.common.utils.StackTraceUtil;
 @Component
 public class TsmpTAEASKHelper {
 
-	@Autowired
-	private ITPILogger logger;
-
 	private final int keySize = 128;
 
 	private final Charset defaultCharset = StandardCharsets.UTF_8;
@@ -38,14 +34,10 @@ public class TsmpTAEASKHelper {
 	private Cipher encryptCipher;
 
 	private Cipher decryptCipher;
-
-	public TsmpTAEASKHelper(ITPILogger logger) {
-		this.logger = logger;
-	}
-
+	
 	@PostConstruct
 	public void init() throws Exception {
-		this.logger.debugDelay2sec("=== Begin TAEASK initialization ===");
+		ITPILogger.tl.debugDelay2sec("=== Begin TAEASK initialization ===");
 
 		loadKey();
 
@@ -67,7 +59,7 @@ public class TsmpTAEASKHelper {
 		 * this.decryptCipher.init(Cipher.DECRYPT_MODE, key);
 		 */
 
-		this.logger.debugDelay2sec("=== TAEASK initialize successfully! ===");
+		ITPILogger.tl.debugDelay2sec("=== TAEASK initialize successfully! ===");
 	}
 
 	private void loadKey() throws Exception {
@@ -79,25 +71,25 @@ public class TsmpTAEASKHelper {
 			if (!StringUtils.hasText(key)) {
 				String errMsg = "\n\t...Could not find TAEASK Key\n";
 				errMsg += "\t...Please add Eclipse 'Run as / Configurations... / Enviroment / Variable:TAEASK'\n";
-				this.logger.error(errMsg);
+				ITPILogger.tl.error(errMsg);
 				System.err.println("=============================================");
 				System.err.println(errMsg);
 				System.err.println("=============================================");
 			}
 		} catch (Exception e) {
-			this.logger.error("Unable to load TAEASK Key\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error("Unable to load TAEASK Key\n" + StackTraceUtil.logStackTrace(e));
 		}
 
 		// 如果找不到 secureKey 就自己產生一組
 		if (!StringUtils.hasText(key)) {
 			try {
 				key = genKey();
-				this.logger.warn("Generating TAEASK Key: " + key);
+				ITPILogger.tl.warn("Generating TAEASK Key: " + key);
 				System.err.println("=============================================");
 				System.err.println("Generating TAEASK Key: " + key);
 				System.err.println("=============================================");
 			} catch (Exception e) {
-				this.logger.error("Error generating TAEASK Key\n" + StackTraceUtil.logStackTrace(e));
+				ITPILogger.tl.error("Error generating TAEASK Key\n" + StackTraceUtil.logStackTrace(e));
 			}
 		}
 
@@ -107,7 +99,7 @@ public class TsmpTAEASKHelper {
 
 		this.secureKey = key;
 
-		this.logger.debugDelay2sec("TAEASK Key is loaded");
+		ITPILogger.tl.debugDelay2sec("TAEASK Key is loaded");
 	}
 
 	private String genKey() {
@@ -137,7 +129,7 @@ public class TsmpTAEASKHelper {
 
 			return enc;
 		} catch (Exception e) {
-			logger.debug(StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 	}

@@ -74,6 +74,7 @@ public class StaticResourceInitializer {
 		ReqValidator.setLogger(getLogger());
 		BaseDao.setLogger(getLogger());
 		ControllerUtil.setLogger(getLogger());
+		tpi.dgrv4.common.utils.ControllerUtil.setLogger(getLogger());
 		ServiceUtil.setLogger(getLogger());
 		WebSocketClientConn.setDgrWebSocketMappingCacheProxy(getDgrWebSocketMappingCacheProxy());
 		WebSocketClientConn.setTsmpSettingService(getTsmpSettingService());

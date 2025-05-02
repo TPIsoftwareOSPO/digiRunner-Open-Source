@@ -12,6 +12,10 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_pass <#if sslEnabled==true>https<#else>http</#if>://localhost:${serverPort?c};
 
+        proxy_connect_timeout 245s;
+        proxy_send_timeout 245s;
+        proxy_read_timeout 245s;
+
         proxy_buffering off;
 
         # WebSocket support
