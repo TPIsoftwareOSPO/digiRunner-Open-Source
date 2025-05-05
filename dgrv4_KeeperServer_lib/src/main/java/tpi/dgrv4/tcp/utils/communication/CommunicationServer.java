@@ -104,6 +104,7 @@ public class CommunicationServer implements Runnable {
 			try {
 				wait();
 			} catch (Exception e) {
+				Thread.currentThread().interrupt();
 			}
 		}
 
@@ -131,7 +132,7 @@ public class CommunicationServer implements Runnable {
 			for (Notifier noti : notifiers) {
 				noti.runDisconnect(conn);
 			}
-			notify();
+			notifyAll();
 		}
 	}
 

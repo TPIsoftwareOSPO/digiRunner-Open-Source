@@ -26,7 +26,7 @@ public class DoSetUserName implements Packet_i {
 	public void runOnClient(LinkerClient lc) {
 		logger.info("\n\n...runOnClient 2: SET NAME OK :" + name + "\n");
 		synchronized (DoSetUserName.waitKey) {
-			DoSetUserName.waitKey.notify();
+			DoSetUserName.waitKey.notifyAll();
 		}
 	}
 

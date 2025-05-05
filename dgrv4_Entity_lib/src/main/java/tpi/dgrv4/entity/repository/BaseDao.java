@@ -130,7 +130,7 @@ public abstract class BaseDao {
 		} else if (StringUtils.hasLength(resultSetMapping)) {
 			query = entityManager.createNativeQuery(nativeSql, resultSetMapping);
 		} else {
-			if("java.util.Map".equals(clazz.getName())) {
+			if(java.util.Map.class.isAssignableFrom(clazz)) {
 				 query = entityManager.createNativeQuery(nativeSql);
 				//注意:回傳的key一律為小寫,會有CustomTransformers是因為根據DB造成KEY大小寫不同,如postgreSQL是小寫,其他為大寫,所以將它統一為小寫
 				 try {

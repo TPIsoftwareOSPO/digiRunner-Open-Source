@@ -299,6 +299,7 @@ public class LinkerClient implements Runnable {
 		} catch (Exception e) {
 			//e.printStackTrace();
 			logger.error(LinkerServer.logTpiShortStackTrace(e));
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -310,6 +311,7 @@ public class LinkerClient implements Runnable {
 			snd.put(obj);
 		} catch (InterruptedException e) {
 			logger.error("", e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -355,6 +357,7 @@ public class LinkerClient implements Runnable {
 		} catch (Exception e) {
 			//e.printStackTrace();
 			logger.error(LinkerServer.logTpiShortStackTrace(e));
+			Thread.currentThread().interrupt();
 		}
 	}
 	
@@ -385,6 +388,7 @@ public class LinkerClient implements Runnable {
 //			}
 		} catch (Exception e) {
 			logger.error("", e);
+			Thread.currentThread().interrupt();
 		}
 	}
 

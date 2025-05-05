@@ -549,6 +549,7 @@ public class LinkerServer implements Runnable {
 			socket.close();
 		} catch (Exception e) {
 			logger.error("", e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -559,6 +560,7 @@ public class LinkerServer implements Runnable {
 			logger.error("", e);
 			doExitThread();
 			CommunicationServer.cs.doDisconnectProc(this);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -599,6 +601,7 @@ public class LinkerServer implements Runnable {
 			logger.error("", e);
 			close();
 			CommunicationServer.cs.doDisconnectProc(this);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -621,6 +624,7 @@ public class LinkerServer implements Runnable {
 			logger.error(logTpiShortStackTrace(e));
 			close();
 			CommunicationServer.cs.doDisconnectProc(this);
+			Thread.currentThread().interrupt();
 		}
 	}
 
