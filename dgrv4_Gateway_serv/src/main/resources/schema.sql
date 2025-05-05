@@ -1622,10 +1622,10 @@ ALTER TABLE TSMP_API_IMP ADD LABEL4 nvarchar(20) NULL;
 ALTER TABLE TSMP_API_IMP ADD LABEL5 nvarchar(20) NULL;
 -- 20231127, v4 入口網(DP) DP USER 移除舊有的 user name uk, 新增 user name 與 iss uk, Kevin Cheng
 ALTER TABLE dp_user ADD dp_user_name NVARCHAR(400) NOT NULL DEFAULT 'NULL';
-UPDATE dp_user SET dp_user_name = user_name;
+UPDATE dp_user SET dp_user_name = user_name WHERE user_name IS NOT NULL AND user_name != '';
 ALTER TABLE dp_user ALTER COLUMN user_name DROP NOT NULL;
 ALTER TABLE dp_app  ADD dp_user_name NVARCHAR(400);
-UPDATE dp_app SET dp_user_name = user_name;
+UPDATE dp_app SET dp_user_name = user_name WHERE user_name IS NOT NULL AND user_name != '';
 ALTER TABLE dp_app DROP COLUMN user_name;
 --20231130, SRC_URL 拿掉NOT NULL ,Zoe Lee
 ALTER TABLE TSMP_API_REG ALTER COLUMN SRC_URL DROP NOT NULL;

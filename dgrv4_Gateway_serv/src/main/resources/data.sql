@@ -1075,7 +1075,7 @@ INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_d
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000047, 'body.oak-expi2.TD', 'border: 1px solid lightgray; font-family: Microsoft JhengHei, Arial, sans-serif; padding: 0.3em', '', current_timestamp, 'SYSTEM', 1);
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000048, 'subject.cert-exp', '憑證到期通知', 'NoticeExpCertJob', current_timestamp, 'SYSTEM', 1);
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000049, 'body.cert-exp', '<p style="font-family: Microsoft JhengHei, Arial, sans-serif;">親愛的&nbsp;digiRunner&nbsp;用戶您好：</p><p style="font-family: Microsoft JhengHei, Arial, sans-serif; padding-left: 2em">提醒您，<i>{{clientId}}</i>&nbsp;之&nbsp;{{certType}}&nbsp;憑證&nbsp;-&nbsp;<i>{{certFileName}}</i>&nbsp;將於&nbsp;<i><b style="color: red">{{expiredDate}}</b></i>&nbsp;到期。</p>', 'NoticeExpCertJob', current_timestamp, 'SYSTEM', 1);
-UPDATE tsmp_dp_mail_tplt SET keyword_search = code || '|' || template_txt || '|' || remark;
+UPDATE tsmp_dp_mail_tplt SET keyword_search = code || '|' || template_txt || '|' || remark WHERE code IS NOT NULL AND code != '';
 
 INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1101', 'en-US', 'No application instance classification', '');
 INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1101', 'zh-TW', '查無應用實例分類', '');
