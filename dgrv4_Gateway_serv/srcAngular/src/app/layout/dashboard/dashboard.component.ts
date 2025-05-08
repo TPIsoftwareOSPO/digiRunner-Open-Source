@@ -1,4 +1,12 @@
-import { Component, OnInit, AfterViewInit, HostListener, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  HostListener,
+  ViewChildren,
+  QueryList,
+  ElementRef,
+} from '@angular/core';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { AlertType } from 'src/app/models/common.enum';
 import { AboutService } from 'src/app/shared/services/api-about.service';
@@ -73,7 +81,6 @@ export class DashboardComponent implements OnInit {
   isAsc: boolean = true;
   includeFail: boolean = false;
 
-
   // badattempChart: any;
   // medianChart: any;
   // hotChart: any;
@@ -101,7 +108,6 @@ export class DashboardComponent implements OnInit {
     private ngxService: NgxUiLoaderService,
     private dialogService: DialogService,
     private messageService: MessageService
-
   ) {}
 
   // resizeReport() {
@@ -868,6 +874,32 @@ export class DashboardComponent implements OnInit {
     // this.serverService.queryRealtimeDashboardData({}).subscribe((res) => {
     //   if (this.toolService.checkDpSuccess(res.ResHeader)) {
     //     this.dataList = res.RespBody?.dataList ?? [];
+    //     if (this.dataList.length > 0) {
+    //       this.dataList = this.dataList.map((item) => {
+    //         const cleanedItem = { ...item };
+    //         const urlContainingLists = [
+    //           'badAttemptList',
+    //           'inclundeFailFastList',
+    //           'inclundeFailSlowList',
+    //           'exclundeFailFastList',
+    //           'exclundeFailSlowList',
+    //         ];
+
+    //         urlContainingLists.forEach((listName) => {
+    //           if (
+    //             cleanedItem[listName] &&
+    //             Array.isArray(cleanedItem[listName])
+    //           ) {
+    //             cleanedItem[listName] = cleanedItem[listName].map((entry) => ({
+    //               ...entry,
+    //               uri: entry.uri ? entry.uri.replace(/\n/g, '') : entry.uri,
+    //             }));
+    //           }
+    //         });
+            
+    //         return cleanedItem;
+    //       });
+    //     }
     //     this.lastLoginLogList = res.RespBody.lastLoginLogList;
     //   }
     // });
@@ -889,16 +921,33 @@ export class DashboardComponent implements OnInit {
         if (res && this.toolService.checkDpSuccess(res.ResHeader)) {
           // console.log(res.RespBody)
           this.dataList = res.RespBody?.dataList ?? [];
+          if (this.dataList.length > 0) {
+            this.dataList = this.dataList.map((item) => {
+              const cleanedItem = { ...item };
+              const urlContainingLists = [
+                'badAttemptList',
+                'inclundeFailFastList',
+                'inclundeFailSlowList',
+                'exclundeFailFastList',
+                'exclundeFailSlowList',
+              ];
+  
+              urlContainingLists.forEach((listName) => {
+                if (
+                  cleanedItem[listName] &&
+                  Array.isArray(cleanedItem[listName])
+                ) {
+                  cleanedItem[listName] = cleanedItem[listName].map((entry) => ({
+                    ...entry,
+                    uri: entry.uri ? entry.uri.replace(/\n/g, '') : entry.uri,
+                  }));
+                }
+              });
+              
+              return cleanedItem;
+            });
+          }
           this.lastLoginLogList = res.RespBody.lastLoginLogList;
-          // if(this.dataList)
-          //   {
-          //     this.dataList.forEach(item=>{
-          //       if(item.badAttempt)
-          //         {
-          //           this.generateBadAttemptReport(item.nodeName,item.badAttempt)
-          //         }
-          //     })
-          //   }
         }
       });
   }
@@ -1018,18 +1067,22 @@ export class DashboardComponent implements OnInit {
 
   copyToClipboard(text: string): void {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(async () => {
-        console.log('Copied to clipboard!');
-        const code = ['copy', 'message.success'];
-        const dict = await this.toolService.getDict(code);
-        this.messageService.add({
-          severity: 'success', summary: `${dict['copy']} `,
-          detail: `${dict['copy']} ${dict['message.success']}!`
+      navigator.clipboard
+        .writeText(text)
+        .then(async () => {
+          console.log('Copied to clipboard!');
+          const code = ['copy', 'message.success'];
+          const dict = await this.toolService.getDict(code);
+          this.messageService.add({
+            severity: 'success',
+            summary: `${dict['copy']} `,
+            detail: `${dict['copy']} ${dict['message.success']}!`,
+          });
+          // 可改成顯示提示訊息或 toast
+        })
+        .catch((err) => {
+          console.error('Failed to copy:', err);
         });
-        // 可改成顯示提示訊息或 toast
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-      });
     } else {
       // 備援處理
       console.warn('This browser does not support the Clipboard API');

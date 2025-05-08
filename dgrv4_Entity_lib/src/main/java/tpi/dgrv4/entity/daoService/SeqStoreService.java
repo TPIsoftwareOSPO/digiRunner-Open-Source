@@ -1,6 +1,5 @@
 package tpi.dgrv4.entity.daoService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;

@@ -55,6 +55,16 @@ export class HeaderComponent implements OnInit {
       }
     });
     this.acConf = this.toolService.getAcConf();
+    if (this.acConf && this.acConf.edition) {
+      const editionMap: { [key: string]: string } = {
+        'Express': 'Community',
+        'Alpha': 'Alpha',
+        'Enterprise': '',
+        'Enterprise_Lite': 'Enterprise Lite'
+      };
+
+      this.acConf.edition = editionMap[this.acConf.edition] ?? this.acConf.edition;
+    }
     this.aliveSec = sessionStorage.getItem('expires_in')
       ? Number(sessionStorage.getItem('expires_in'))
       : undefined;

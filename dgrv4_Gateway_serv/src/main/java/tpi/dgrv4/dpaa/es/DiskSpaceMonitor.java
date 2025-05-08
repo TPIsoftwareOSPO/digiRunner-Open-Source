@@ -213,6 +213,8 @@ public class DiskSpaceMonitor {
 				return "PAUSE".equals(status); // 暫停寫入 log
 			}
 			return false; // 允許寫入
+		} catch (NoSuchFileException e) {
+			return false;
 		} catch (Exception e) {
 			TPILogger.tl.error("Error reading status file: " + StackTraceUtil.logTpiShortStackTrace(e));
 			return false; // 發生錯誤時默認允許寫入

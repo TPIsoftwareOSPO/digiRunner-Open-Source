@@ -49,16 +49,16 @@
         {{ "module_name" | translate }}</label>
       <label class="form-control border-line">
         [{{ apiDetail?.moduleId }}]
-         <!-- {{ apiDetail?.moduleName.v }} -->
+        <!-- {{ apiDetail?.moduleName.v }} -->
         <!-- <a *ngIf="apiDetail?.moduleName.t == true" href="javascript:void(0)" pTooltip="{{ apiDetail.moduleName.o }}"
           (click)="copyData(apiDetail.moduleName.o)">...{{ "show_more" | translate }}</a> -->
-          {{ apiDetail?.moduleName.o && !apiDetail?.moduleName.t ? apiDetail?.moduleName.o : apiDetail?.moduleName.v}}
-          <label class="moreless" *ngIf="apiDetail?.moduleName.o" (click)="switchOri(apiDetail.moduleName)">
-            {{apiDetail.moduleName.t ? ("show_more" | translate): '' }}
-            <i class="fas"
-              [ngClass]="[apiDetail.moduleName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
-            {{apiDetail.moduleName.t ? '' : ("show_less" | translate) }}
-          </label>
+        {{ apiDetail?.moduleName.o && !apiDetail?.moduleName.t ? apiDetail?.moduleName.o : apiDetail?.moduleName.v}}
+        <label class="moreless" *ngIf="apiDetail?.moduleName.o" (click)="switchOri(apiDetail.moduleName)">
+          {{apiDetail.moduleName.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.moduleName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.moduleName.t ? '' : ("show_less" | translate) }}
+        </label>
       </label>
     </div>
   </div>
@@ -366,43 +366,64 @@
   <div class="form-group row">
     <div class="col-12">
       <label class="control-label">{{ "headers" | translate }}：</label>
-      <span>{{ originString(apiDetail?.headersOfJson) }}
-        <a *ngIf="apiDetail?.headersOfJson.o" href="javascript:void(0)"
-          (click)="switchOri(apiDetail.headersOfJson)">{{
+      <label class="control-label">{{ originString(apiDetail?.headersOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.headersOfJson.o" (click)="switchOri(apiDetail.headersOfJson)">
+          {{apiDetail.headersOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.headersOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.headersOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+      </label>
+      <!-- <span>{{ originString(apiDetail?.headersOfJson) }}
+        <a *ngIf="apiDetail?.headersOfJson.o" href="javascript:void(0)" (click)="switchOri(apiDetail.headersOfJson)">{{
           apiDetail.headersOfJson.t
           ? "..." + ("show_more" | translate)
           : ("show_less" | translate)
           }}</a>
-      </span>
+      </span> -->
       <br />
       <label class="control-label" style="font-weight: bolder">{{ "params" | translate }}：</label>
-      <span>{{ originString(apiDetail?.paramsOfJson) }}
+      <label class="control-label">{{ originString(apiDetail?.paramsOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.paramsOfJson.o" (click)="switchOri(apiDetail.paramsOfJson)">
+          {{apiDetail.paramsOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.paramsOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.paramsOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+      </label>
+      <!-- <span>{{ originString(apiDetail?.paramsOfJson) }}
         <a *ngIf="apiDetail?.paramsOfJson.o" href="javascript:void(0)" (click)="switchOri(apiDetail.paramsOfJson)">{{
           apiDetail.paramsOfJson.t
           ? "..." + ("show_more" | translate)
           : ("show_less" | translate)
           }}</a>
-      </span>
+      </span> -->
       <br />
       <label class="control-label" style="font-weight: bolder">{{ "content_type" | translate }}：</label>
-      <span>{{ originString(apiDetail?.consumesOfJson) }}
-        <a *ngIf="apiDetail?.consumesOfJson.o" href="javascript:void(0)"
-          (click)="switchOri(apiDetail.consumesOfJson)">{{
-          apiDetail.consumesOfJson.t
-          ? "..." + ("show_more" | translate)
-          : ("show_less" | translate)
-          }}</a>
-      </span>
+      <label class="control-label">{{ originString(apiDetail?.consumesOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.consumesOfJson.o" (click)="switchOri(apiDetail.consumesOfJson)">
+          {{apiDetail.consumesOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.consumesOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.consumesOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+      </label>
       <br />
       <label class="control-label" style="font-weight: bolder">{{ "produces" | translate }}：</label>
-      <span>{{ originString(apiDetail?.producesOfJson) }}
-        <a *ngIf="apiDetail?.producesOfJson.o" href="javascript:void(0)"
+      <label class="control-label">{{ originString(apiDetail?.producesOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.producesOfJson.o" (click)="switchOri(apiDetail.producesOfJson)">
+          {{apiDetail.producesOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.producesOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.producesOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+        <!-- <a *ngIf="apiDetail?.producesOfJson.o" href="javascript:void(0)"
           (click)="switchOri(apiDetail.producesOfJson)">{{
           apiDetail.producesOfJson.t
           ? "..." + ("show_more" | translate)
           : ("show_less" | translate)
-          }}</a>
-      </span>
+          }}</a> -->
+      </label>
     </div>
   </div>
 
@@ -429,8 +450,8 @@
     <!-- Mock Headers-->
     <div class="col-12">
       <label class="control-label">Mock Headers</label>
-      <textarea class="form-control" rows="5" style="resize: none" [innerHtml]="apiDetail.mockHeadersOfJson"
-        readonly autoResize="autoResize"></textarea>
+      <textarea class="form-control" rows="5" style="resize: none" [innerHtml]="apiDetail.mockHeadersOfJson" readonly
+        autoResize="autoResize"></textarea>
     </div>
   </div>
 

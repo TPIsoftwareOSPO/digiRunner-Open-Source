@@ -57,9 +57,13 @@ public class BCRIStringValidator extends BCRIValidator<String> {
 	private void checkMinLength(BeforeControllerRespItem item, String fieldValue) {
 		Integer minLength = getRespValue(item.getMinLength());
 		if (minLength != null) {
+			String fieldLength = "0";
+			if (fieldValue != null) {
+				fieldLength = fieldValue.length() + "";
+			}
+			
 			if (StringUtils.isEmpty(fieldValue) || (!StringUtils.isEmpty(fieldValue)) && fieldValue.length() < minLength) {
-				throw TsmpDpAaRtnCode._1384.throwing(getWrappedFieldName(), //
-					String.valueOf(minLength), String.valueOf(fieldValue.length()));
+				throw TsmpDpAaRtnCode._1384.throwing(getWrappedFieldName(), String.valueOf(minLength), fieldLength);
 			}
 		}
 	}

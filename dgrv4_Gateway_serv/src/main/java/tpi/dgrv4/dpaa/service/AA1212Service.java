@@ -193,7 +193,7 @@ public class AA1212Service {
 					successResp.setSuccess(String.format("%,d", dashboardVo.getSuccess()));
 					successResp.setTotal(String.format("%,d", totalRequest));
 					BigDecimal bdTotal = new BigDecimal(totalRequest + "");
-					BigDecimal bdSuccess = new BigDecimal(dashboardVo.getSuccess());
+					BigDecimal bdSuccess = new BigDecimal(dashboardVo.getSuccess() + "");
 					String percentage = "0.00%";
 					if(totalRequest > 0 && dashboardVo.getSuccess() > 0) {
 						percentage = String.format("%.2f", bdSuccess.divide(bdTotal, 4, RoundingMode.HALF_UP).doubleValue() * 100) + "%";
@@ -204,7 +204,7 @@ public class AA1212Service {
 					AA1212FailResp failResp = new AA1212FailResp();
 					failResp.setFail(String.format("%,d", dashboardVo.getFail()));
 					failResp.setTotal(String.format("%,d", totalRequest));
-					BigDecimal bdFail = new BigDecimal(failResp.getFail());
+					BigDecimal bdFail = new BigDecimal(dashboardVo.getFail() + "");
 					percentage = "0.00%";
 					if(totalRequest > 0 && dashboardVo.getFail() > 0) {
 						percentage = String.format("%.2f", bdFail.divide(bdTotal, 4, RoundingMode.HALF_UP).doubleValue() * 100) + "%";

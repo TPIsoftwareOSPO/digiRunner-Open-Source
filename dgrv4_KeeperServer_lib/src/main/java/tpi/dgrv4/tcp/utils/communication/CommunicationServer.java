@@ -74,19 +74,15 @@ public class CommunicationServer implements Runnable {
 
 	public void run() {
 		Socket user = null;
-		boolean isExit = false;
-		while (true) {
-			if(isExit) {
-				break;
-			}
+		boolean isRunning = true;
+		while (isRunning) {
 			try {
 				user = server.accept();
 				doConnectionProc(user);
 			} catch (Exception e) {
 //				e.printStackTrace();
 				System.err.println("TCP server.accept()結束");
-				isExit = true;
-				break;
+				isRunning = false;
 			}
 		}
 	}

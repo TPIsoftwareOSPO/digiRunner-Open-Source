@@ -27,7 +27,7 @@ public class BCRILongValidator extends BCRIValidator<Long> {
 
 	private void checkIsRequired(BeforeControllerRespItem item, Long fieldValue) {
 		Boolean isRequired = getRespValue(item.getIsRequired());
-		if (!Objects.isNull(isRequired) && isRequired && Objects.isNull(fieldValue)) {
+		if (isRequired != null && isRequired && Objects.isNull(fieldValue)) {
 			throw TsmpDpAaRtnCode._1350.throwing(getWrappedFieldName());
 		}
 	}

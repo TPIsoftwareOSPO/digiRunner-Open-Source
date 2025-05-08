@@ -35,7 +35,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-v4.5.4'
+	version = 'release-v4.5.5.1'
 	apply plugin:  'io.spring.dependency-management'
 
 	repositories {
@@ -62,8 +62,8 @@ subprojects {
 
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.4.1-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.4.1-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.5.1-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.5.1-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 			exclude group: 'ch.qos.logback', module: 'logback-classic'

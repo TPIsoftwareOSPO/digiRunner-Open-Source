@@ -75,7 +75,7 @@
                 <div class="checkbox">
                     <div *ngIf="groups.apiDataList && groups.apiDataList.length>0">
                         <input type="checkbox" value="" (change)="menuChange($event, groups)" [formControlName]="groups.key">
-                        <a class="btn collapsed" data-bs-toggle="collapse" [attr.href]="'#mains'+groups.key" role="button" 
+                        <a class="btn collapsed" data-bs-toggle="collapse" [attr.href]="'#mains'+groups.key" role="button"
                         [attr.aria-expanded]="apiNodes.length === 1 ? 'true' : isCollapsed"
                         [attr.aria-controls]="'mains' + groups.key">
                         {{ isValidStringStartWith_dp_(groups.vgroupAliasShowUi)? ("all"|translate) : (groups.vgroupAliasShowUi + "(" +  groups.vgroupId + ")")  }}<span class="me-3"></span>
@@ -192,7 +192,7 @@
           <section class="loading-section">
               <img
               class="img-logo"
-              src="assets/images/DigiFusion_digiRunner_logo_horizontal.png"
+              src="assets/images/svg/logo.svg"
               alt=""
               title="v202102251030-v3"
             />

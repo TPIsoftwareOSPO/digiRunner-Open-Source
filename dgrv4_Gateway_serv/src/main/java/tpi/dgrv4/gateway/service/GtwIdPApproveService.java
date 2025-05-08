@@ -59,6 +59,8 @@ public class GtwIdPApproveService {
 	private final DgrOauthApprovalsDao dgrOauthApprovalsDao; 
 	private final GtwIdPHelper gtwIdPHelper;
 	
+	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
+	
 	@Autowired
 	public void setI302(@Nullable I302 i302) {
 		this.i302 = i302;
@@ -178,6 +180,7 @@ public class GtwIdPApproveService {
 		if (i302 != null) {
 			i302.sendRedirect(httpResp, redirectUrl); // Only for Enterprise
 		} else {
+			TPILogger.tl.debug(NO_ENTERPRISE_SERVICE);
 			// Please add Your allowed list
 			List<String> allowedHosts = new ArrayList<String>();
 			allowedHosts.add("https://trusted1.example.com/");
