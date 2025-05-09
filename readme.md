@@ -245,6 +245,6 @@ tasks:
 - `run-container`: run docker container
 
 
-[tpi-url]: https://tpi.dev/home
+[tpi-url]: https://tpi.dev/
 [tpi-logo]: /digiRunner.png
 
