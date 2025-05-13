@@ -447,26 +447,60 @@ public class ServiceUtil {
 	
 	
 	/**
-	 * 判斷IP是否在網段中
-	 * 例如:
-	 * "192.168.1.127", "192.168.1.64/26" 
+	 * [ZH] 判斷IP是否在網段中 <br>
+	 * 例如: <br>
+	 * "192.168.1.127", "192.168.1.64/26"  <br>
+	 * [EN] Determine whether the IP is in the network segment <br>
+	 * For example: <br>
+	 * "192.168.1.127", "192.168.1.64/26" <br>
 	 */
 	public static boolean isIpInNetwork(String ip, String gateway_cidr) {
 		try {
-			
-			// 不限網域
+			// [ZH] 1.特殊情況處理：
+			// 不限網域（接受任何 IP）
+			// [EN] 1.Special Situation Handling：
+			// Unlimited domain (accept any IP)
 			if("0.0.0.0/0".equals(gateway_cidr)) return true;
 			
+			// [ZH] 2.IP 地址轉換：
+			// 將點分十進制的 IP 地址（例如 "192.168.1.1"）分割成四個部分
+			// [EN] 2.IP address conversion：
+			// Split a dotted decimal IP address (e.g. "192.168.1.1") into four parts
 			String[] ips = ip.split("\\.");
+			// [ZH] 將這四個部分轉換為一個 32 位整數，使用位移運算（<<）進行組合
+			// [EN] CConvert these four parts into a 32-bit integer and combine them using the bit shift operation (<<)
 			int ipAddr = (Integer.parseInt(ips[0]) << 24) | (Integer.parseInt(ips[1]) << 16)
 					| (Integer.parseInt(ips[2]) << 8) | Integer.parseInt(ips[3]);
-			//這段 Regex 已被 Tom Review 過了, 故取消 hotspot 標記
-			int type = Integer.parseInt(gateway_cidr.replaceAll(".*/", ""));
+			
+			// [ZH] 3.CIDR 處理：
+			// 從 CIDR 表示法（例如 "192.168.1.0/24"）中提取掩碼位數（例如 "24"）
+			// [EN] 3.CIDR processing:
+			// Extract the number of mask bits (for example, "24") from CIDR notation (for example, "192.168.1.0/24")
+			String[] cidrParts = gateway_cidr.split("/");
+			int type = Integer.parseInt(cidrParts[1]);
+			
+			// [ZH] 計算對應的網路掩碼值（mask）
+			// [EN] Calculate the corresponding network mask value (mask)
 			int mask = 0xFFFFFFFF << (32 - type);
-			String cidrIp = gateway_cidr.replaceAll("/.*", "");
+			
+			// [ZH] 從 CIDR 表示法中提取網路地址部分
+			// [EN] Extract the network address portion from CIDR notation
+			String cidrIp = cidrParts[0];
+			
+			// [ZH] 網路地址轉換為整數值
+			// [EN] Convert network address to integer value
 			String[] cidrIps = cidrIp.split("\\.");
 			int cidrIpAddr = (Integer.parseInt(cidrIps[0]) << 24) | (Integer.parseInt(cidrIps[1]) << 16)
 					| (Integer.parseInt(cidrIps[2]) << 8) | Integer.parseInt(cidrIps[3]);
+			
+			// [ZH] 4.網段判斷：
+			// 使用位運算 &（AND）運算符將 IP 地址和網路掩碼進行運算
+			// 同樣對網路地址和網路掩碼進行運算
+			// 比較這兩個結果是否相等，相等則表示 IP 在該網段內
+			// [EN] 4.Network segment determination:
+			// Use the bitwise & (AND) operator to perform operations on the IP address and network mask
+			// Also perform operations on the network address and network mask
+			// Compare the two results to see if they are equal. If they are equal, it means the IP is in the network segment.
 			return (ipAddr & mask) == (cidrIpAddr & mask);
 			
 		} catch (Exception e) {
