@@ -69,7 +69,7 @@ public class TsmpSettingTableInitializer {
 	        createTsmpSetting("SERVICE_SECONDARY_MAIL_X_MAILER","Thinkpower","次要smtp server設定, 發送郵件的程序名稱");
 	        createTsmpSetting("TSMP_EDITION","Cn88-nNO8-xx8u-un88-nVoF-Fr48-80rc-L5rF-xN#8-e1=x-6#xo-=d4#-2!=n-!#2!-=!!!-!!!","TSMP license key");
 	        // 這段 hardcoded IP 會被 SonarQube 標記為 Security Hotspots, 故改為 DNS 名稱
-	        createTsmpSetting("LDAP_URL","ldap://ldap.example.com:389","ldap登入的URL");
+	        createTsmpSetting("LDAP_URL","ldap://ldap.example.com:389","LDAP login URL");
 	        createTsmpSetting("LDAP_DN","uid={{0}},dc=tstpi,dc=com","ldap登入的使用者DN");
 	        createTsmpSetting("LDAP_TIMEOUT","3000","ldap登入的連線timeout,單位毫秒");
 	        createTsmpSetting("LDAP_CHECK_ACCT_ENABLE","false","LDAP檢查帳號功能是否啟用 true/false");
@@ -88,15 +88,15 @@ public class TsmpSettingTableInitializer {
 //	      -- 20221118, v4, 增加 RDB 版本的 API Log
 	        createTsmpSetting("TSMP_APILOG_FORCE_WRITE_RDB","false","是否寫入API Log 到RDB");
 	        // 這段 hardcoded IP 會被 SonarQube 標記為 Security Hotspots, 故改為 DNS 名稱
-	        createTsmpSetting("DGR_LOGOUT_URL","","客製登入頁url{{scheme}}://{{ip}}:{{port}}/{{path}} ex: \"https://hostname:port/dgr-cus-scbank-ac/\"");
+	        createTsmpSetting("DGR_LOGOUT_URL","","Custom login page url, {{scheme}}://{{ip}}:{{port}}/{{path}} ex: \"https://hostname:port/dgr-cus-scbank-ac/\"");
 	        createTsmpSetting("TSMP_COMPOSER_PORT","8440","給前端頁面使用用的PORT，主要是給AC使用");
 	        createTsmpSetting("TSMP_COMPOSER_PATH","/website/composer","給前端頁面使用用的路徑，主要是給AC使用");
 	        createTsmpSetting("TSMP_PROXY_PORT","4944","目前無使用，保留，當初功能性與TSMP_REPORT_ADDRESS相同");
 	        createTsmpSetting("CUS_MODULE_EXIST","false","客製包是否存在 true/false");
 	        createTsmpSetting("CUS_FUNC_ENABLE1","false","介接功能是否啟用 true/false");
 	        createTsmpSetting("CUS_MODULE_NAME1","","客製包 Moudle 名稱");
-	        //這段 hardcoded IP 已被 Tom Review 過了, 故取消 hotspot 標記
-	        createTsmpSetting("UDPSSO_LOGIN_NETWORK","192.168.0.0/23,192.168.0.0/24,127.0.0.0/24","可登入的網段,多個CIDR用逗號分隔");
+	        // 這段 hardcoded IP 會被 SonarQube 標記為 Security Hotspots, 例如: "192.168.0.0/23,192.168.0.0/24,127.0.0.0/24", 故改為 a.b.0.0 表示
+	        createTsmpSetting("UDPSSO_LOGIN_NETWORK","a.b.0.0/23,a.b.0.0/24,a.0.0.0/24","Network segments that can be logged in, multiple CIDRs are separated by commas; CIDR notation can be found at wiki: \"https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing\"");
 	        createTsmpSetting("CLIENT_CREDENTIALS_DEFAULT_USERNAME","true","client_credentials取token預設userName是否啟用 true/false");
 	        createTsmpSetting((id = "TSMP_REPORT_ADDRESS"), (value = "15601"), (memo = "查詢Kibana報表網址PORT, v3(38451),v4(15601)"));
 	        createTsmpSetting((id = "LOGOUT_API"), (value = ""), (memo = "客製登出url{{scheme}}://{{ip}}:{{port}}/{{path}} ex: \"https://127.0.0.1:8442/dgr-cus-scbank/scb/logout\""));
@@ -124,7 +124,7 @@ public class TsmpSettingTableInitializer {
 
 //	      -- 20220606, ES的設定, tom chu
 	        // 這段 hardcoded IP 會被 SonarQube 標記為 Security Hotspots, 故改為 DNS 名稱
-	        createTsmpSetting((id = "ES_URL"), (value = "https://es.example.com:19200/"), (memo = "ES的URL,最後要有/線,多組以逗號(,)隔開,EX:https://es.example.com:19200/,https://es.example.com:29200/"));
+	        createTsmpSetting((id = "ES_URL"), (value = "https://es.example.com:19200/"), (memo = "ES URL, the last line must be /, multiple groups are separated by commas (,),EX:https://es.example.com:19200/,https://es.example.com:29200/"));
 	        createTsmpSetting((id = "ES_ID_PWD"), (value = "ENC(cGxlYXNlIHNldCB5b3VyIGVzIGlkIGFuZCBwYXNzd29yZCwgU2V0dGluZyBpcyBFU19JRF9QV0Q=)"), (memo = "ES的ID:PWD為組合並以Base64加密後, 請點選ENC按鈕進行加密,URL多組這就多組,在ENC加密前以逗號,隔開,EX:ENC(id1:pwd1,id2:pwd2)"));
 	        createTsmpSetting((id = "ES_TEST_TIMEOUT"), (value = "3000"), (memo = "ES測試連線的timeout"));
 	        createTsmpSetting((id = "ES_MBODY_MASK_FLAG"), (value = "false"), (memo = "對全部做mbody遮罩,true為遮罩,false為不遮罩"));
@@ -180,7 +180,7 @@ public class TsmpSettingTableInitializer {
 	        
 	        createTsmpSetting((id = "KIBANA_TRANSFER_PROTOCOL"), (value = "https"), (memo = "Kibana的http協定"));
 	        // 這段 hardcoded IP 會被 SonarQube 標記為 Security Hotspots, 故改為 DNS 名稱
-	        createTsmpSetting((id = "KIBANA_HOST"), (value = "kibana.example.com"), (memo = "Kibana主機的IP"));
+	        createTsmpSetting((id = "KIBANA_HOST"), (value = "kibana.example.com"), (memo = "The IP address of the Kibana host"));
 	        createTsmpSetting((id = "KIBANA_PORT"), (value = "15601"), (memo = "Kibana主機的Port"));
 	        
 //		  -- 20230104, v4 SSO IdP 的設定, Mini Lee
