@@ -1,0 +1,3912 @@
+
+openapi: 3.0.0 
+info:
+  title: API 規格文件提供
+  description: "展示六種情境"
+  version: 1.0.0
+servers:
+  - url: https://localhost:18080
+    description: API伺服器
+  - url: https://10.20.30.88:20001
+    description: API伺服器
+
+tags:
+  - name: 情境一
+    description: CI/CD 工具自動匯出有更改的註冊/組合API，也就是這次更版需要APIM新增或調整的項目
+  - name: 情境二
+    description: 如果這隻API有設定用戶檔，CI/CD工具自動也是需要匯出相關API來取得相關用戶端設
+  - name: 情境三
+    description: 透過CI/CD工具執行script，執行“搜尋/取代目標”，將url等字串取代
+  - name: 情境四
+    description: 將步驟1+3匯出與取代字串後的設定檔匯入Prod APIM(可能新增或更新)
+  - name: 情境五
+    description: 將步驟2+3匯出與取代字串後的設定檔匯入Prod APIM(可能新增或更新)
+  - name: 情境六
+    description: 驗證API
+
+
+paths:
+  /dgrv4/tptoken/oauth/token:
+    post:
+      tags:
+        - login
+      summary: 取得 AC Token
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  default: password
+                username:
+                  type: string
+                  default: manager
+                password:
+                  type: string
+                  default: bWFuYWdlcjEyMw==
+              required:
+                - grant_type
+                - username
+                - password
+      responses:
+        '200':
+          description: Successful operation
+     
+  /dgrv4/11/AA0301:
+    post:
+      summary: 查詢API清單
+      description: |-
+        查詢所有部署在 digiRunner 中的API。
+        
+      operationId: queryAPIList
+      tags:
+        - 情境一
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                      description: 組織單位ID，從 Token 取得
+                    moduleName:
+                      type: string
+                      description: 模組名稱，分頁用
+                    apiKey:
+                      type: string
+                      description: API ID，分頁用
+                    keyword:
+                      type: string
+                      description: 關鍵字，以空格分隔，模糊搜尋 API ID、模組名稱、API 名稱、API 說明
+                    apiSrc:
+                      type: array
+                      description: API 來源，不使用 bcrypt 加密，例如 ["M", "R"]
+                      items:
+                        type: string
+                    apiStatus:
+                      type: string
+                      description: API 狀態，bcrypt 加密，ITEM_NO = 'JOB_STATUS'
+                    publicFlag:
+                      type: string
+                      description: 開放權限，bcrypt 加密，ITEM_NO = 'API_AUTHORITY'
+                    jweFlag:
+                      type: string
+                      description: JWT 設定(Req)，bcrypt 加密，ITEM_NO = 'API_JWT_FLAG'
+                    jweFlagResp:
+                      type: string
+                      description: JWT 設定(Resp)，bcrypt 加密，ITEM_NO = 'API_JWT_FLAG'
+                    sortBy:
+                      type: object
+                      description: |-
+                        排源] 由大序設定，Map<欄位名稱, 排序方向>
+                        欄位名稱僅允許4種值：["apiKey","apiSrc","moduleName","apiName"]
+                        排序方向僅允許2種值：["asc", "desc"]
+                        例如：依 [API來到小排序 = {"apiSrc": "desc"}
+                        按下[搜尋]按鈕，或是恢復[預設排序]時，前端不傳入此欄位
+                      additionalProperties:
+                        type: string
+                    paging:
+                      type: string
+                      description: |-
+                        是否分頁
+                        "Y": 要分頁
+                        "N": 不用分頁
+                        NULL: 不用分頁
+                        [API列表] 功能呼叫 AA0301 時，前端固定帶入 "Y"
+                      enum:
+                        - "Y"
+                        - "N"
+                  required:
+                    - orgId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505071358131JbqBh"
+                txDate: "20250507T135813+0800"
+                txID: "AA0301"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                keyword: ""
+                apiSrc: []
+                publicFlag: ""
+                paging: "N"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      sortBy:
+                        type: object
+                        description: |-
+                          排序設定，from AA0301Req.sortBy
+                          若 Request 未傳此值 (NULL)，則回傳 {"apiKey": "asc"}
+                        additionalProperties:
+                          type: string
+                      dataList:
+                        type: array
+                        description: 資料清單
+                        items:
+                          $ref: '#/components/schemas/AA0301Item'
+                    required:
+                      - sortBy
+                      - dataList
+              example:
+                ResHeader:
+                  txSN: "1241114154827zOMy0E"
+                  txDate: "20241114T154827+0800"
+                  txID: "AA0301"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  sortBy:
+                    apiKey: "asc"
+                  dataList:
+                    - moduleName:
+                        val: "/"
+                        t: false
+                      apiKey:
+                        val: "//test/123"
+                        t: false
+                      apiStatus:
+                        n: "停用"
+                        v: "2"
+                      apiSrc:
+                        n: "註冊"
+                        v: "R"
+                      apiName:
+                        val: "test123"
+                        t: false
+                      apiDesc:
+                        val: ""
+                        t: false
+                      jweFlag:
+                        n: "不使用"
+                        v: "0"
+                      jweFlagResp:
+                        n: "不使用"
+                        v: "0"
+                      updateTime: "2024-10-23 09:43:37"
+                      org:
+                        n: "TSMPDefaultRoot"
+                        v: "100000"
+                      enableScheduledDate: 0
+                      disableScheduledDate: 0
+                      createDate: "2024-09-04 17:02:36"
+                      createUser: "manager"
+                      updateDate: "2024-10-23 09:43:37"
+                      updateUser: "chad"
+                      labelList: []
+                    - moduleName:
+                        val: "/a"
+                        t: false
+                      apiKey:
+                        val: "/a"
+                        t: false
+                      apiStatus:
+                        n: "啟用"
+                        v: "1"
+                      apiSrc:
+                        n: "註冊"
+                        v: "R"
+                      apiName:
+                        val: "dp_test01_min"
+                        t: false
+                      apiDesc:
+                        val: "Salary transfer account\n我是CXXX"
+                        t: false
+                      jweFlag:
+                        n: "不使用"
+                        v: "0"
+                      jweFlagResp:
+                        n: "不使用"
+                        v: "0"
+                      updateTime: "2024-11-13 17:53:54"
+                      org:
+                        n: "TSMPDefaultRoot"
+                        v: "100000"
+                      enableScheduledDate: 0
+                      disableScheduledDate: 0
+                      createDate: "2023-09-18 16:00:48"
+                      createUser: "min2"
+                      updateDate: "2024-11-13 17:53:54"
+                      updateUser: "manager"
+                      labelList: []
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1273'
+                          - '1290'
+                          - '1298'
+                          - '1299'
+                          - '1354'
+                        description: "錯誤代碼：1273(組織單位ID:必填參數)、1290(參數錯誤)、1298(查無資料)、1299(參數驗證錯誤)、1354([{{0}}] 不存在: {{1}})"
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                組織單位ID必填參數:
+                  value:
+                    ResHeader:
+                      txSN: "1201110112549000001"
+                      txDate: "202011315T112549+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1273"
+                      rtnMsg: "1273 - 組織單位ID:必填參數"
+                參數驗證錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1201110112851000001"
+                      txDate: "202011315T112851+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1299"
+                      rtnMsg: "1299 - 參數驗證錯誤"
+                查無資料:
+                  value:
+                    ResHeader:
+                      txSN: "1201110112945000001"
+                      txDate: "202011315T112945+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - 查無資料"
+                參數錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1201110113243000001"
+                      txDate: "202011315T113243+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1290"
+                      rtnMsg: "1290 - 參數錯誤"
+                API來源不存在:
+                  value:
+                    ResHeader:
+                      txSN: "1201110114008000001"
+                      txDate: "202011315T114008+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1354"
+                      rtnMsg: "1354 - [{{apiSrc}}] 不存在: ss"
+
+  /dgrv4/11/AA0317:
+    post:
+      summary: 匯出註冊/組合API
+      description: |-
+        匯出在 digiRunner 中註冊與組合的 API 資料。
+        
+      operationId: exportRegCompAPIs
+      tags:
+        - 情境一
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    userName:
+                      type: string
+                      description: 使用者名稱，從 Token 取得
+                    orgId:
+                      type: string
+                      description: 組織單位ID，從 Token 取得
+                    apiList:
+                      type: array
+                      description: API清單
+                      items:
+                        $ref: '#/components/schemas/AA0317ReqItem'
+                  required:
+                    - userName
+                    - orgId
+                    - apiList
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505071406334jCttp"
+                txDate: "20250507T140633+0800"
+                txID: "AA0317"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                apiList:
+                  - moduleName: "/226-8877"
+                    apiKey: "/226-8877"
+                  - moduleName: "/5555-999"
+                    apiKey: "/5555-999"
+                  - moduleName: "/999-444"
+                    apiKey: "/999-444"
+                  - moduleName: "/mock"
+                    apiKey: "/mock"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      fileName:
+                        type: string
+                        description: 檔名，格式為 "exportAPI_" + 現在時間(yyyy-MM-dd HH-mm-ss) + ".json"
+                      data:
+                        $ref: '#/components/schemas/AA0317Data'
+                        description: 匯出資料
+                    required:
+                      - fileName
+                      - data
+              example:
+                ResHeader:
+                  txSN: "1200227100631000001"
+                  txDate: "20200258T100631+0800"
+                  txID: "AA0317"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  fileName: "exportAPI_2020-12-29 15-39-33.json"
+                  data:
+                    r:
+                      - moduleName: "R_MODULE"
+                        regModule: null
+                        apiList:
+                          - apiKey: "API_KEY_R01"
+                            moduleName: "R_MODULE"
+                            apiName: "API_NAME_R01"
+                            apiDesc: ""
+                            apiOwner: ""
+                            urlRID: "0"
+                            apiSrc: "R"
+                            srcURL: "https://www.tpisoftware.com"
+                            apiUUID: ""
+                            contentType: ""
+                            enpoint: "[/R_MODULE/API_KEY_R01]"
+                            httpHeader: ""
+                            httpMethod: "[\"POST\"]"
+                            params: ""
+                            produce: ""
+                            flow: null
+                            no_oauth: "0"
+                            jweFlag: "0"
+                            jweFlagResp: "0"
+                            funFlag: 0
+                      - moduleName: "R2_MODULE"
+                        regModule:
+                          regModuleId: 1
+                          moduleName: "R2_MODULE"
+                          moduleVersion: "v1.0"
+                          moduleSrc: "3"
+                        apiList:
+                          - apiKey: "API_KEY_R01"
+                            moduleName: "R2_MODULE"
+                            apiName: "API_NAME_R01"
+                            apiDesc: ""
+                            apiOwner: ""
+                            urlRID: "0"
+                            apiSrc: "R"
+                            srcURL: "https://www.tpisoftware.com"
+                            apiUUID: ""
+                            contentType: ""
+                            enpoint: "[/R2_MODULE/API_KEY_R01]"
+                            httpHeader: ""
+                            httpMethod: "[\"POST\"]"
+                            params: ""
+                            produce: ""
+                            flow: null
+                            no_oauth: "0"
+                            jweFlag: "0"
+                            jweFlagResp: "0"
+                            funFlag: 0
+                    c: null
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1258'
+                          - '1273'
+                          - '1296'
+                          - '1297'
+                          - '1298'
+                          - '1444'
+                          - '1452'
+                        description: 錯誤代碼：1258(使用者名稱:必填參數)、1273(組織單位ID:必填參數)、1296(缺少必填參數)、1297(執行錯誤)、1298(查無資料)、1444(不可匯出 Java 或 .NET 模組的 API)、1452(無法從 Composer 取得 Flow 資料)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                使用者名稱必填參數:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1258"
+                      rtnMsg: "1258 - 使用者名稱:必填參數"
+                組織單位ID必填參數:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1273"
+                      rtnMsg: "1273 - 組織單位ID:必填參數"
+                缺少必填參數:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1296"
+                      rtnMsg: "1296 - 缺少必填參數"
+                執行錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - 執行錯誤"
+                查無資料:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - 查無資料"
+                不可匯出Java或NET模組的API:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1444"
+                      rtnMsg: "1444 - 不可匯出 Java 或 .NET 模組的 API"
+
+  /dgrv4/11/AA1120:
+    post:
+      summary: 匯出用戶端相關資料
+      description: |-
+        將系統中的用戶端相關資料以 JSON 格式匯出，包含用戶端資料、群組資料、授權範圍等多個相關資料表的資訊。
+        
+      operationId: exportClientRelated
+      tags:
+        - 情境二
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  description: 無需額外參數
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505071056450j8qlF"
+                txDate: "20250507T105645+0800"
+                txID: "AA1120"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody: {}
+      responses:
+        '200':
+          description: 成功處理請求，直接返回匯出的檔案
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: 指定檔案下載的檔名，格式為 "attachment; filename=exportClientRelated_yyyyMMddHHmmss.json"
+              example: "attachment; filename=exportClientRelated_20240122114650.json"
+            Content-Type:
+              schema:
+                type: string
+              description: 內容類型
+              example: "application/json"
+            Content-Length:
+              schema:
+                type: string
+              description: 內容長度
+              example: "5760"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  importClientRelated:
+                    type: object
+                    description: 各個資料表的資料
+                    properties:
+                      tsmpClientList:
+                        type: array
+                        description: 用戶端資料清單
+                        items:
+                          type: object
+                      tsmpClientHostList:
+                        type: array
+                        description: 主機清單
+                        items:
+                          type: object
+                      oauthClientDetailsList:
+                        type: array
+                        description: Token 設定清單
+                        items:
+                          type: object
+                      tsmpDpClientextList:
+                        type: array
+                        description: 公開狀態清單
+                        items:
+                          type: object
+                      tsmpGroupList:
+                        type: array
+                        description: 群組資料清單
+                        items:
+                          type: object
+                      tsmpClientGroupList:
+                        type: array
+                        description: 用戶使用的群組清單
+                        items:
+                          type: object
+                      tsmpVgroupList:
+                        type: array
+                        description: 授權範圍資料清單
+                        items:
+                          type: object
+                      tsmpClientVgroupList:
+                        type: array
+                        description: 用戶使用的授權範圍清單
+                        items:
+                          type: object
+                      tsmpVgroupGroupList:
+                        type: array
+                        description: 授權範圍使用的群組清單
+                        items:
+                          type: object
+                      tsmpGroupApiList:
+                        type: array
+                        description: 群組使用的 API 清單
+                        items:
+                          type: object
+                      dgrXApiKeyList:
+                        type: array
+                        description: x_api_key 資料清單
+                        items:
+                          type: object
+                      dgrXApiKeyMapList:
+                        type: array
+                        description: x_api_key 使用的群組清單
+                        items:
+                          type: object
+                      tsmpGroupAuthoritiesList:
+                        type: array
+                        description: 核身資料清單
+                        items:
+                          type: object
+                      tsmpGroupAuthoritiesMapList:
+                        type: array
+                        description: 群組使用的核身清單
+                        items:
+                          type: object
+                      tsmpVgroupAuthoritiesMapList:
+                        type: array
+                        description: 授權範圍使用的核身清單
+                        items:
+                          type: object
+                      tsmpSecurityLevelList:
+                        type: array
+                        description: 安全等級資料清單
+                        items:
+                          type: object
+                      dpAppList:
+                        type: array
+                        description: dp 資料清單
+                        items:
+                          type: object
+                      tsmpOpenApikeyList:
+                        type: array
+                        description: open api key 清單
+                        items:
+                          type: object
+                      tsmpOpenApikeyMapList:
+                        type: array
+                        description: open api key 對應的 api 清單
+                        items:
+                          type: object
+                      dgrGtwIdpInfoOList:
+                        type: array
+                        description: GTW OAuth 2.0 IdP 清單
+                        items:
+                          type: object
+                      dgrGtwIdpInfoLList:
+                        type: array
+                        description: GTW LDAP IdP 清單
+                        items:
+                          type: object
+                      dgrGtwIdpInfoAList:
+                        type: array
+                        description: GTW API IdP 清單
+                        items:
+                          type: object
+                      dgrGtwIdpInfoJdbcList:
+                        type: array
+                        description: GTW JDBC IdP 清單
+                        items:
+                          type: object
+                      dgrRdbConnectionList:
+                        type: array
+                        description: GTW JDBC IdP 設定時會用到的連線清單
+                        items:
+                          type: object
+                      dgrApikeyUseApiList:
+                        type: array
+                        description: api key 使用的清單
+                        items:
+                          $ref: '#/components/schemas/AA1120DgrApikeyUseApi'
+                  analyzeClientRelated:
+                    type: object
+                    description: 分析資料，在 AA1120 中固定為 null，僅在 AA1130 中有值
+                    nullable: true
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1297'
+                        description: 錯誤代碼：1297(執行錯誤)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              example:
+                ResHeader:
+                  txSN: "1240131153256000001"
+                  txDate: "20240131T033256+0800"
+                  txID: "AA1120Req"
+                  rtnCode: "1297"
+                  rtnMsg: "1297 - 執行錯誤"
+
+
+  /dgrv4/11/AA0423:
+    post:
+      summary: 依目標URL或標籤搜尋API清單
+      description: |-
+        依目標URL或標籤搜尋API清單，用於API批量修改功能。
+        
+      operationId: queryAPIListBySrcUrlOrLabel
+      tags:
+        - 情境三
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    labelList:
+                      type: array
+                      description: 標籤清單，可多選，與targetSite擇一代入
+                      items:
+                        type: string
+                      nullable: true
+                    targetSite:
+                      type: string
+                      description: 目標站台，單選，與labelList擇一代入
+                      nullable: true
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250507141214JxlMd6"
+                txDate: "20250507T141214+0800"
+                txID: "AA0423"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody: {}
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      dataList:
+                        type: array
+                        description: 資料清單
+                        items:
+                          $ref: '#/components/schemas/AA0423RespItem'
+                    required:
+                      - dataList
+              example:
+                ResHeader:
+                  txSN: "1231219151917000001"
+                  txDate: "20231219T031917+0800"
+                  txID: "AA0423Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  dataList:
+                    - apiKey: "api1"
+                      moduleName: "module1"
+                      apiStatus: "1"
+                      apiName: "api1"
+                      srcUrlList:
+                        - ip: ""
+                          srcUrlAndPercentageList:
+                            - percentage: "100"
+                              srcUrl: "https://10.20.30.88:8181/HelloWorld"
+                            - percentage: "0"
+                              srcUrl: "https://10.20.30.88:8181/HelloWorld2"
+                      labelList: []
+                      noOauth: false
+                    - apiKey: "api2"
+                      moduleName: "module2"
+                      apiStatus: "1"
+                      apiName: "api2"
+                      srcUrlList:
+                        - ip: ""
+                          srcUrlAndPercentageList:
+                            - percentage: "100"
+                              srcUrl: "https://10.20.30.88:8181/echo"
+                      labelList: []
+                      noOauth: false
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1297'
+                          - '1298'
+                        description: 錯誤代碼：1297(執行錯誤)、1298(查無資料)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                執行錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1231219151917000001"
+                      txDate: "20231219T031917+0800"
+                      txID: "AA0423Req"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - 執行錯誤"
+                查無資料:
+                  value:
+                    ResHeader:
+                      txSN: "1231219151917000001"
+                      txDate: "20231219T031917+0800"
+                      txID: "AA0423Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - 查無資料"
+
+  /dgrv4/11/AA0424:
+    post:
+      summary: 批次修改暫存
+      description: |-
+        批次修改API的URL設定，並將修改結果暫存為JSON檔案。
+        
+      operationId: temporaryByModifyBatch
+      tags:
+        - 情境三
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    apiList:
+                      type: array
+                      description: API清單
+                      items:
+                        $ref: '#/components/schemas/AA0424ReqAPIList'
+                    srcUrlList:
+                      type: array
+                      description: 修改目標清單
+                      items:
+                        $ref: '#/components/schemas/AA0424ReqSrcUrlList'
+                  required:
+                    - apiList
+                    - srcUrlList
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250507141753a7HgNK"
+                txDate: "20250507T141753+0800"
+                txID: "AA0424"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                apiList:
+                  - apiKey: "/226-8877"
+                    moduleName: "/226-8877"
+                  - apiKey: "/5555-999"
+                    moduleName: "/5555-999"
+                  - apiKey: "/999-444"
+                    moduleName: "/999-444"
+                  - apiKey: "/mock"
+                    moduleName: "/mock"
+                srcUrlList:
+                  - srcUrl: "10.20.30.88"
+                    isPercentage: false
+                    isReplace: true
+                    replaceString: "localhost"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      tempFileName:
+                        type: string
+                        description: 暫存檔名，格式為 "modifyBatch_YYYY-MM-DD HH-mm-ss.json"
+                      refId:
+                        type: string
+                        description: 參考ID
+                    required:
+                      - tempFileName
+                      - refId
+              example:
+                ResHeader:
+                  txSN: "1231214113516000001"
+                  txDate: "20231214T113516+0800"
+                  txID: "AA0424Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  tempFileName: "modifyBatch_2023-12-15 14-29-59.json"
+                  refId: "0"
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1297'
+                          - '1298'
+                          - '1350'
+                          - '1400'
+                          - '1481'
+                        description: 錯誤代碼：1297(執行錯誤)、1298(查無資料)、1350(必填參數缺失)、1400(TsmpApi為null)、1481(TsmpApiReg無值)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                執行錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0424Req"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - 執行錯誤"
+                查無資料:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0424Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - 查無資料"
+                必填參數缺失:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0424Req"
+                      rtnCode: "1350"
+                      rtnMsg: "1350 - [apiList] 為必填欄位"
+
+  /dgrv4/11/AA0425:
+    post:
+      summary: 批次修改預覽
+      description: |-
+        預覽批次修改的內容，顯示修改前後的 API 設定差異。
+        
+      operationId: previewByModifyBatch
+      tags:
+        - 情境三
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    tempFileName:
+                      type: string
+                      description: 暫存檔名，通過 DPB0082 上傳獲得
+                    sort:
+                      type: integer
+                      description: 排序值，用於分頁顯示，第一次不帶，後續帶入最後一筆的 sort
+                    refId:
+                      type: string
+                      description: 參考 ID
+                  required:
+                    - tempFileName
+                    - refId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250506182922CeVQr6"
+                txDate: "20250506T182922+0800"
+                txID: "AA0425"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                tempFileName: "modifyBatch_2025-05-06 18-29-25.json"
+                refId: "1"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      apiList:
+                        type: array
+                        description: API 清單
+                        items:
+                          $ref: '#/components/schemas/AA0425RespItem'
+                    required:
+                      - apiList
+              example:
+                ResHeader:
+                  txSN: "1231214113516000001"
+                  txDate: "20231214T113516+0800"
+                  txID: "AA0425Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  apiList:
+                    - sort: 0
+                      apiKey: "/module1/apikey1"
+                      moduleName: "/module1"
+                      apiName: "apiName1"
+                      apiStatus: "1"
+                      noAuth: true
+                      labelList:
+                        - "有b64"
+                        - "啟用"
+                        - "nooauth"
+                        - "無分流"
+                      oldSrcUrlList:
+                        - ip: ""
+                          srcUrlList:
+                            - percentage: 50
+                              srcUrl: "https: //10.20.30.88:8181/nowTime"
+                            - percentage: 30
+                              srcUrl: "https://10.20.30.89:8181/nowTime"
+                            - percentage: 20
+                              srcUrl: "https://10.20.30.90:8181/nowTime"
+                          isSuccess: true
+                      newSrcUrlList:
+                        - ip: ""
+                          srcUrlList:
+                            - percentage: 20
+                              srcUrl: "https: //10.20.30.88:8181/nowTime"
+                            - percentage: 80
+                              srcUrl: "https://10.20.30.89:8181/nowTime"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8181/nowTime"
+                          isSuccess: true
+                    - sort: 1
+                      apiKey: "/module2/apikey2"
+                      moduleName: "/module2"
+                      apiName: "apiName2"
+                      apiStatus: "2"
+                      noAuth: false
+                      labelList:
+                        - "有b64"
+                        - "無b64"
+                        - "停用"
+                        - "有分流"
+                      oldSrcUrlList:
+                        - ip: "10.20.30.1"
+                          srcUrlList:
+                            - percentage: 40
+                              srcUrl: "https://10.20.30.88:8282/nowTime2"
+                            - percentage: 25
+                              srcUrl: "https://10.20.30.89:8282/nowTime2"
+                            - percentage: 35
+                              srcUrl: "https://10.20.30.90:8282/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.2"
+                          srcUrlList:
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.88:8181/nowTime2"
+                            - percentage: 100
+                              srcUrl: "https://10.20.30.89:8181/nowTime2"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8181/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.3"
+                          srcUrlList:
+                            - percentage: 100
+                              srcUrl: "https://10.20.30.99:8181/nowTime2"
+                          isSuccess: true
+                      newSrcUrlList:
+                        - ip: "10.20.30.1"
+                          srcUrlList:
+                            - percentage: 20
+                              srcUrl: "https://10.20.30.88:8383/nowTime2"
+                            - percentage: 80
+                              srcUrl: "https://10.20.30.89:8383/nowTime2"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8383/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.2"
+                          srcUrlList:
+                            - percentage: 20
+                              srcUrl: "https://10.20.30.88:8181/nowTime2"
+                            - percentage: 80
+                              srcUrl: "https://10.20.30.89:8181/nowTime2"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8181/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.3"
+                          srcUrlList:
+                            - percentage: 100
+                              srcUrl: "https://10.20.30.99:8181/nowTime2"
+                          isSuccess: true
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1129'
+                          - '1233'
+                          - '1297'
+                          - '1298'
+                          - '1350'
+                        description: 錯誤代碼：1129(查無檔案)、1233(檔案不得為空檔)、1297(執行錯誤)、1298(查無資料)、1350(參數錯誤)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                查無檔案:
+                  value:
+                    ResHeader:
+                      txSN: "1250506182922CeVQr6"
+                      txDate: "20250506T182922+0800"
+                      txID: "AA0425"
+                      rtnCode: "1129"
+                      rtnMsg: "1129 - 查無檔案"
+                檔案為空檔:
+                  value:
+                    ResHeader:
+                      txSN: "1250506182922CeVQr6"
+                      txDate: "20250506T182922+0800"
+                      txID: "AA0425"
+                      rtnCode: "1233"
+                      rtnMsg: "1233 - 檔案不得為空檔"
+                執行錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1250506182922CeVQr6"
+                      txDate: "20250506T182922+0800"
+                      txID: "AA0425"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - 執行錯誤"
+
+  /dgrv4/11/AA0426:
+    post:
+      summary: 批次修改
+      description: |-
+        執行批次修改API的URL設定，根據暫存檔案中的設定進行實際的資料更新。
+        
+      operationId: batchModify
+      tags:
+        - 情境三
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    tempFileName:
+                      type: string
+                      description: 暫存檔名，從AA0424回應中獲得
+                    refId:
+                      type: string
+                      description: 參考ID，從AA0424回應中獲得
+                  required:
+                    - tempFileName
+                    - refId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250507142234BLCbL7"
+                txDate: "20250507T142234+0800"
+                txID: "AA0426"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                tempFileName: "modifyBatch_2025-05-07 14-17-58.json"
+                refId: "1"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      errList:
+                        type: array
+                        description: 錯誤API清單，若無錯誤則為null
+                        items:
+                          $ref: '#/components/schemas/AA0426RespItem'
+                        nullable: true
+                      errMsg:
+                        type: string
+                        description: 錯誤訊息，若無錯誤則為null
+                        nullable: true
+                    required:
+                      - errList
+                      - errMsg
+              example:
+                ResHeader:
+                  txSN: "1231214113516000001"
+                  txDate: "20231214T113516+0800"
+                  txID: "AA0426Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  errList: null
+                  errMsg: null
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1129'
+                          - '1297'
+                          - '1298'
+                          - '1350'
+                          - '2026'
+                        description: 錯誤代碼：1129(查無檔案)、1297(執行錯誤)、1298(查無資料)、1350(必填參數缺失)、2026(修改失敗)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                執行錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - 執行錯誤"
+                查無檔案:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "1129"
+                      rtnMsg: "1129 - 查無檔案"
+                必填參數缺失:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "1350"
+                      rtnMsg: "1350 - [tempFileName] 為必填欄位"
+                修改失敗:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "2026"
+                      rtnMsg: "2026 - 修改失敗"
+
+
+
+  /dgrv4/11/DPB0082:
+    post:
+      summary: 上傳檔案
+      description: |-
+        為了避免上傳檔案太大, 造成連線逾時, 故使用單一檔案上傳方式。
+        使用 multipart/form-data 方式上傳檔案，取得上傳的暫存檔名。
+        
+      operationId: uploadFile
+      tags:
+        - 情境四
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                txSN:
+                  type: string
+                  description: 交易序號
+                txDate:
+                  type: string
+                  description: 交易日期時間
+                txID:
+                  type: string
+                  description: 交易ID，固定為 DPB0082
+                cID:
+                  type: string
+                  description: 用戶端ID
+                file:
+                  type: string
+                  format: binary
+                  description: 上傳的檔案
+              required:
+                - txSN
+                - txDate
+                - txID
+                - cID
+                - file
+            example:
+              txSN: "1250506180531aW2ABA"
+              txDate: "20250506T180531+0800"
+              txID: "DPB0082"
+              cID: "YWRtaW5Db25zb2xl"
+              file: "(binary file content)"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      tempFileName:
+                        type: string
+                        description: 暫存檔名，格式為 timestamp.wait.原始檔名
+                    required:
+                      - tempFileName
+              example:
+                ResHeader:
+                  txSN: "1250506180531aW2ABA"
+                  txDate: "20250506T180531+0800"
+                  txID: "DPB0082"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  tempFileName: "1746525931821.wait.exportAPI_2025-05-05 14-57-19.json"
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1203'
+                          - '1133'
+                          - '1233'
+                        description: 錯誤代碼：1203(檔案寫入錯誤)、1133(未包含檔案)、1233(檔案不得為空檔)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                檔案寫入錯誤:
+                  value:
+                    ResHeader:
+                      txSN: "1250506180531aW2ABA"
+                      txDate: "20250506T180531+0800"
+                      txID: "DPB0082"
+                      rtnCode: "1203"
+                      rtnMsg: "1203 - 檔案寫入錯誤"
+                未包含檔案:
+                  value:
+                    ResHeader:
+                      txSN: "1250506180531aW2ABA"
+                      txDate: "20250506T180531+0800"
+                      txID: "DPB0082"
+                      rtnCode: "1133"
+                      rtnMsg: "1133 - 未包含檔案"
+                檔案為空檔:
+                  value:
+                    ResHeader:
+                      txSN: "1250506180531aW2ABA"
+                      txDate: "20250506T180531+0800"
+                      txID: "DPB0082"
+                      rtnCode: "1233"
+                      rtnMsg: "1233 - 檔案不得為空檔"
+          
+  /dgrv4/11/AA0318:
+    post:
+      summary: 上傳註冊/組合API
+      description: |-
+        上傳註冊/組合API的檔案，並預覽內容及檢查結果。
+
+      operationId: uploadRegCompAPIs
+      tags:
+        - 情境四
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    tempFileName:
+                      type: string
+                      description: 暫存檔名，通過DPB0082上傳獲得
+                  required:
+                    - tempFileName
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: 1250506143405h58R3U
+                txDate: 20250506T143405+0800
+                txID: AA0318
+                cID: YWRtaW5Db25zb2xl
+                locale: zh-TW
+              ReqBody:
+                tempFileName: 1746513248409.wait.exportAPI_2025-05-05 14-57-19.json
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      batchNo:
+                        type: integer
+                        description: 批號，處理過程中產生的批號
+                      apiList:
+                        type: array
+                        description: API清單
+                        items:
+                          $ref: '#/components/schemas/AA0318Item'
+                    required:
+                      - batchNo
+                      - apiList
+              example:
+                ResHeader:
+                  txSN: '1201230145402000001'
+                  txDate: 202112365T025402+0800
+                  txID: AA0318Req
+                  rtnCode: '1100'
+                  rtnMsg: null
+                RespBody:
+                  batchNo: 1000
+                  apiList:
+                    - apiKey:
+                        val: API_KEY_R_01
+                        t: false
+                      moduleName:
+                        val: R_MODULE
+                        t: false
+                      apiName:
+                        val: API_NAME_R_01
+                        t: false
+                      apiSrc:
+                        v: R
+                        'n': 註冊
+                      endpoint: '[/R_MODULE/API_KEY_R_01]'
+                      checkAct:
+                        v: C
+                        'n': 新增
+                      memo:
+                        val: ''
+                        t: false
+                      srcURL: https://example.com/api
+                      failDiscoveryPolicy: NONE
+                      failHandlePolicy: NONE
+                    - apiKey:
+                        val: API_KEY_R2_01
+                        t: false
+                      moduleName:
+                        val: R2_MODULE
+                        t: false
+                      apiName:
+                        val: API_NAME_R2_01
+                        t: false
+                      apiSrc:
+                        v: R
+                        'n': 註冊
+                      endpoint: '[/R2_MODULE/API_KEY_R2_01]'
+                      checkAct:
+                        v: U
+                        'n': 更新
+                      memo:
+                        val: ''
+                        t: false
+                      srcURL: https://example.com/api2
+                      failDiscoveryPolicy: NONE
+                      failHandlePolicy: NONE
+                    - apiKey:
+                        val: API_KEY_C_01
+                        t: false
+                      moduleName:
+                        val: C_MODULE
+                        t: false
+                      apiName:
+                        val: API_NAME_C_01
+                        t: false
+                      apiSrc:
+                        v: C
+                        'n': 組合
+                      endpoint: '[/C_MODULE/API_KEY_C_01]'
+                      checkAct:
+                        v: 'N'
+                        'n': 無法操作
+                      memo:
+                        val: Data in TSMP_API is not consistent with TSMP_API_R
+                        t: true
+                        ori: 'Data in TSMP_API is not consistent with TSMP_API_REG: api_key=API_KEY_C_01, module_name=C_MODULE'
+                      srcURL: https://example.com/api3
+                      failDiscoveryPolicy: NONE
+                      failHandlePolicy: NONE
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1129'
+                          - '1133'
+                          - '1203'
+                          - '1233'
+                          - '1258'
+                          - '1273'
+                          - '1291'
+                          - '1443'
+                          - '1445'
+                        description: 錯誤代碼：1129(查無檔案)、1133(未包含檔案)、1203(檔案寫入錯誤)、1233(檔案不得為空檔)、1258(使用者名稱:必填參數)、1273(組織單位ID:必填參數)、1291(檔案解析錯誤)、1443(不支援的檔案類型)、1445(檔案中未包含任何 API 資料)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                查無檔案:
+                  value:
+                    ResHeader:
+                      txSN: '1200227100631000001'
+                      txDate: 20200258T100631+0800
+                      txID: AA0318
+                      rtnCode: '1129'
+                      rtnMsg: 1129 - 查無檔案
+                未包含檔案:
+                  value:
+                    ResHeader:
+                      txSN: '1200227100631000001'
+                      txDate: 20200258T100631+0800
+                      txID: AA0318
+                      rtnCode: '1133'
+                      rtnMsg: 1133 - 未包含檔案
+                檔案寫入錯誤:
+                  value:
+                    ResHeader:
+                      txSN: '1201230143725000001'
+                      txDate: 202112365T023725+0800
+                      txID: AA0318Req
+                      rtnCode: '1203'
+                      rtnMsg: 1203 - 檔案寫入錯誤
+                      
+                      
+  /dgrv4/11/AA0319:
+    post:
+      summary: 匯入註冊/組合API
+      description: |-
+        指定在 digiRunner 上傳的註冊/組合API檔案中，要匯入的API資料。
+        
+      operationId: importRegCompAPIs
+      tags:
+        - 情境四
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    userName:
+                      type: string
+                      description: 使用者名稱，從 Token 取得
+                    orgId:
+                      type: string
+                      description: 組織單位ID，從 Token 取得
+                    apiList:
+                      type: array
+                      description: 要匯入的 API 清單
+                      items:
+                        $ref: '#/components/schemas/AA0319ReqItem'
+                    batchNo:
+                      type: integer
+                      description: 批號，從 AA0318 回應中獲得
+                  required:
+                    - apiList
+                    - batchNo
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505061815290DNxRk"
+                txDate: "20250506T181529+0800"
+                txID: "AA0319"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                batchNo: 1003
+                apiList:
+                  - moduleName: "/mock"
+                    apiKey: "/mock"
+                  - moduleName: "/5555-999"
+                    apiKey: "/5555-999"
+                  - moduleName: "/999-444"
+                    apiKey: "/999-444"
+                  - moduleName: "/226-8877"
+                    apiKey: "/226-8877"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      apiList:
+                        type: array
+                        description: API 匯入結果清單
+                        items:
+                          $ref: '#/components/schemas/AA0319RespItem'
+                    required:
+                      - apiList
+              example:
+                ResHeader:
+                  txSN: "12505061815290DNxRk"
+                  txDate: "20250506T181529+0800"
+                  txID: "AA0319"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  apiList:
+                    - apiKey: "/mock"
+                      moduleName: "/mock"
+                      result:
+                        v: "S"
+                        n: "成功"
+                    - apiKey: "/5555-999"
+                      moduleName: "/5555-999"
+                      result:
+                        v: "S"
+                        n: "成功"
+                    - apiKey: "/999-444"
+                      moduleName: "/999-444"
+                      result:
+                        v: "S"
+                        n: "成功"
+                    - apiKey: "/226-8877"
+                      moduleName: "/226-8877"
+                      result:
+                        v: "S"
+                        n: "成功"
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1219'
+                          - '1258'
+                          - '1273'
+                          - '1296'
+                          - '1298'
+                          - '1354'
+                          - '1426'
+                          - '2009'
+                        description: 錯誤代碼：1219(沒有權限)、1258(使用者名稱:必填參數)、1273(組織單位ID:必填參數)、1296(缺少必填參數)、1298(查無資料)、1354([batch_no] 不存在)、1426(無法使用此模組名稱)、2009(最少選擇1項)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                查無資料:
+                  value:
+                    ResHeader:
+                      txSN: "12505061815290DNxRk"
+                      txDate: "20250506T181529+0800"
+                      txID: "AA0319"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - 查無資料"
+                批號不存在:
+                  value:
+                    ResHeader:
+                      txSN: "12505061815290DNxRk"
+                      txDate: "20250506T181529+0800"
+                      txID: "AA0319"
+                      rtnCode: "1354"
+                      rtnMsg: "1354 - [batch_no] 不存在: 1003"
+                最少選擇1項:
+                  value:
+                    ResHeader:
+                      txSN: "12505061815290DNxRk"
+                      txDate: "20250506T181529+0800"
+                      txID: "AA0319"
+                      rtnCode: "2009"
+                      rtnMsg: "2009 - 最少選擇1項"
+
+                      
+                      
+  /dgrv4/11/AA1121:
+    post:
+      summary: 匯入用戶端相關資料
+      description: 匯入JSON格式的用戶端相關資料並進行分析
+      operationId: importClientRelated
+      tags:
+        - 情境五
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 匯入的JSON檔案，副檔名必須為.json
+                req:
+                  type: string
+                  description: 請求參數的JSON字串
+                  example: '{"ReqHeader":{"txSN":"1250506110358E8vTte","txDate":"20250506T110358+0800","txID":"AA1121","cID":"YWRtaW5Db25zb2xl","locale":"zh-TW"},"ReqBody":{}}'
+              required:
+                - file
+                - req
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      lackApiList:
+                        type: array
+                        description: API缺少清單
+                        items:
+                          $ref: '#/components/schemas/AA1121LackApi'
+                      clientList:
+                        type: array
+                        description: 用戶端清單
+                        items:
+                          $ref: '#/components/schemas/AA1121Client'
+                      groupList:
+                        type: array
+                        description: 群組清單
+                        items:
+                          $ref: '#/components/schemas/AA1121Group'
+                      vgroupList:
+                        type: array
+                        description: 授權範圍清單
+                        items:
+                          $ref: '#/components/schemas/AA1121Vgroup'
+                      groupAuthList:
+                        type: array
+                        description: 核身方式清單
+                        items:
+                          $ref: '#/components/schemas/AA1121GroupAuth'
+                      securityLevelList:
+                        type: array
+                        description: 安全等級清單
+                        items:
+                          $ref: '#/components/schemas/AA1121SecurityLevel'
+                      rdbConnectionList:
+                        type: array
+                        description: RDB連線
+                        items:
+                          $ref: '#/components/schemas/AA1121RdbConnection'
+                      longId:
+                        type: string
+                        description: ID，前端按動作時需傳此longId
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1443'
+                          - '1233'
+                          - '1291'
+                          - '1297'
+                        description: 錯誤代碼
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+  /dgrv4/11/AA1128:
+    post:
+      summary: 匯入用戶端相關重複全部覆蓋
+      description: |-
+        確認匯入用戶端相關資料，執行實際的資料匯入操作，並且覆蓋重複的地方
+
+      operationId: importClientRelatedAllCover
+      tags:
+        - 情境五
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    longId:
+                      type: string
+                      description: 從AA1121回應中獲取的ID
+                  required:
+                    - longId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: 1250506114435V4g73O
+                txDate: 20250506T114435+0800
+                txID: AA1128
+                cID: YWRtaW5Db25zb2xl
+                locale: zh-TW
+              ReqBody:
+                longId: '2316263106968687481'
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    description: 將分析資料異動狀態的值，R變更為C(也就是重複變覆蓋)
+              example:
+                ResHeader:
+                  txSN: '1240201165917000001'
+                  txDate: 20240201T045917+0800
+                  txID: AA1128Req
+                  rtnCode: '1100'
+                  rtnMsg: null
+                RespBody: {}
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1298'
+                          - '1297'
+                          - '1350'
+                        description: 錯誤代碼：1298(查無資料)、1297(執行錯誤)、1350([{{0}}] 為必填欄位)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              example:
+                ResHeader:
+                  txSN: '1240201170055000001'
+                  txDate: 20240201T050055+0800
+                  txID: AA1128Req
+                  rtnCode: '1298'
+                  rtnMsg: 1298 - 查無資料
+  /dgrv4/11/AA1129:
+    post:
+      summary: 匯入用戶端相關確認
+      description: 確認匯入用戶端相關資料，執行實際的資料匯入操作
+      operationId: importClientRelatedConfirm
+      tags:
+        - 情境五
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    longId:
+                      type: string
+                      description: 從AA1121回應中獲取的ID
+                  required:
+                    - longId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: 1250506113624pYfEQ9
+                txDate: 20250506T113624+0800
+                txID: AA1129
+                cID: YWRtaW5Db25zb2xl
+                locale: zh-TW
+              ReqBody:
+                longId: '2316263106968687481'
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    description: 匯入完成後無特殊回傳內容
+              example:
+                ResHeader:
+                  txSN: '1240226155703000001'
+                  txDate: 20240226T035703+0800
+                  txID: AA1129Req
+                  rtnCode: '1100'
+                  rtnMsg: null
+                RespBody: {}
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1298'
+                          - '1297'
+                          - '1350'
+                        description: 錯誤代碼：1298(查無資料)、1297(執行錯誤)、1350(參數錯誤)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              example:
+                ResHeader:
+                  txSN: '1240226155858000001'
+                  txDate: 20240226T035858+0800
+                  txID: AA1129Req
+                  rtnCode: '1298'
+                  rtnMsg: 1298 - 查無資料
+				  
+				  
+
+  /dgrv4/11/AA0302:
+    post:
+      summary: 查詢API明細
+      description: |-
+        查詢API的詳細資料。預設取得目前Active Module或是最新的API Detail資料。
+      operationId: queryAPIDetail
+      tags:
+        - 情境六
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: 交易序號
+                    txDate:
+                      type: string
+                      description: 交易日期時間
+                    txID:
+                      type: string
+                      description: 交易ID
+                    cID:
+                      type: string
+                      description: 用戶端ID
+                    locale:
+                      type: string
+                      description: 語系
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                      description: 組織單位ID，從 Token 取得
+                    moduleName:
+                      type: string
+                      description: 模組名稱
+                    apiKey:
+                      type: string
+                      description: API ID
+                  required:
+                    - moduleName
+                    - apiKey
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505081057088pPD8X"
+                txDate: "20250508T105708+0800"
+                txID: "AA0302"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                moduleName: "/226-8877"
+                apiKey: "/226-8877"
+      responses:
+        '200':
+          description: 成功處理請求
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: 交易序號
+                      txDate:
+                        type: string
+                        description: 交易日期時間
+                      txID:
+                        type: string
+                        description: 交易ID
+                      rtnCode:
+                        type: string
+                        description: 回傳代碼
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: 回傳訊息
+                  RespBody:
+                    type: object
+                    properties:
+                      apiStatus:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: API狀態
+                      moduleId:
+                        type: integer
+                        description: 模組編號，-1表示無模組編號
+                      moduleName:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: 模組名稱
+                      apiKey:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: API ID
+                      apiName:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: API名稱
+                      apiSrc:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: API來源
+                      jweFlag:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: JWT設定(Request)
+                      jweFlagResp:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: JWT設定(Response)
+                      methodOfJson:
+                        type: string
+                        description: Http Method
+                      pathOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: 端點
+                      protocol:
+                        type: string
+                        description: 目標URL的協定
+                      srcUrl:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: 目標URL
+                      urlRID:
+                        type: string
+                        description: Path Parameter，"0"=沒有，"1"=有
+                      noOAuth:
+                        type: string
+                        description: No OAuth，"0"=沒有，"1"=有
+                      funFlag:
+                        type: integer
+                        description: Token Payload，1=Token Payload
+                      dataFormat:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: 資料格式
+                      regHostId:
+                        type: string
+                        description: 註冊主機ID
+                      regHostName:
+                        type: string
+                        description: 註冊主機名稱
+                      headersOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: 表頭
+                      paramsOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: 參數值
+                      consumesOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: CONSUMES
+                      producesOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: PRODUCES
+                      apiDesc:
+                        type: string
+                        description: API說明
+                      apiUUID:
+                        type: string
+                        description: API UUID
+                      orgId:
+                        type: string
+                        description: 組織單位ID
+                      orgName:
+                        type: string
+                        description: 組織單位名稱
+                      controls:
+                        $ref: '#/components/schemas/AA0302Controls'
+                        description: 欄位控制項
+                      apiCacheFlag:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: API CACHE方式
+                      mockStatusCode:
+                        type: string
+                        description: mock 狀態碼
+                      mockHeaders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AA0302KeyVal'
+                        description: mock Headers(更新用)
+                      mockBody:
+                        type: string
+                        description: mock 表身
+                      mockHeadersOfJson:
+                        type: string
+                        description: mock Headers的json格式(明細用)
+                      labelList:
+                        type: array
+                        items:
+                          type: string
+                        description: 標籤
+                      fixedCacheTime:
+                        type: integer
+                        description: 固定快取時間
+                      type:
+                        type: string
+                        description: 模式，"0"=tsmpc，"1"=dgrc
+                      failDiscoveryPolicy:
+                        type: string
+                        description: 失敗判定策略
+                      failHandlePolicy:
+                        type: string
+                        description: 失敗處置策略
+                      notifyNameList:
+                        type: array
+                        items:
+                          type: string
+                        description: Webhook Notify Name
+                      enableScheduledDate:
+                        type: integer
+                        format: int64
+                        description: 預定啟用日期
+                      disableScheduledDate:
+                        type: integer
+                        format: int64
+                        description: 預定停用日期
+                      createDate:
+                        type: string
+                        description: 建立日期
+                      createUser:
+                        type: string
+                        description: 建立人員
+                      updateDate:
+                        type: string
+                        description: 更新日期
+                      updateUser:
+                        type: string
+                        description: 更新人員
+              example:
+                ResHeader:
+                  txSN: "1241114144626ydc0Qf"
+                  txDate: "20241114T144626+0800"
+                  txID: "AA0302"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  apiStatus:
+                    v: "1"
+                    n: "啟用"
+                  moduleId: -1
+                  moduleName:
+                    v: "/api"
+                    t: false
+                  apiKey:
+                    v: "/api/v1/item/card"
+                    t: false
+                  apiName:
+                    v: "商品資料卡查詢"
+                    t: false
+                  apiSrc:
+                    v: "R"
+                    n: "註冊"
+                  jweFlag:
+                    v: "0"
+                    n: "不使用"
+                  jweFlagResp:
+                    v: "0"
+                    n: "不使用"
+                  methodOfJson: "GET"
+                  pathOfJson:
+                    v: "[/api/v1/item/c"
+                    t: true
+                    o: "[/api/v1/item/card]"
+                  protocol: "http://"
+                  srcUrl:
+                    v: "http://bncrfr-sit-temp-api-583"
+                    t: true
+                    o: "http://bncrfr-sit-temp-api-5831e7b32ce88782.elb.ap-northeast-1.amazonaws.com:80/api/v1/item/card"
+                  urlRID: "0"
+                  noOAuth: "1"
+                  funFlag: 0
+                  dataFormat:
+                    v: "1"
+                    n: "JSON"
+                  headersOfJson:
+                    v: "[]"
+                    t: false
+                  paramsOfJson:
+                    v: "[]"
+                    t: false
+                  consumesOfJson:
+                    v: "[]"
+                    t: false
+                  producesOfJson:
+                    v: "[\"*/*\"]"
+                    t: false
+                  apiDesc: ""
+                  apiUUID: "C25E450B-05ED-4C13-8151-220243CED88D"
+                  orgId: "100000"
+                  orgName: "TSMPDefaultRoot"
+                  controls:
+                    apiName: true
+                    protocol: true
+                    srcUrl: true
+                    methodOfJson: true
+                    dataFormat: true
+                  apiCacheFlag:
+                    v: "1"
+                    n: "無"
+                  pathType: "dgrc"
+                  dgrPath: "/api/v1/item/card"
+                  mockStatusCode: null
+                  mockHeaders: null
+                  mockHeadersOfJson: null
+                  mockBody: null
+                  headerMaskKey: ""
+                  headerMaskPolicy: "0"
+                  headerMaskPolicyNum: null
+                  headerMaskPolicySymbol: ""
+                  bodyMaskKeyword: ""
+                  bodyMaskPolicy: "0"
+                  bodyMaskPolicyNum: null
+                  bodyMaskPolicySymbol: ""
+                  isRedirectByIp: false
+                  type: "1"
+                  failDiscoveryPolicy: "0"
+                  failHandlePolicy: "0"
+                  labelList: []
+                  redirectByIpDataList: []
+                  fixedCacheTime: 0
+                  enableScheduledDate: 0
+                  disableScheduledDate: 0
+                  createDate: "2024-04-19 16:56:15"
+                  createUser: "zoe"
+                  updateDate: "2024-06-26 15:11:12"
+                  updateUser: "chrisc"
+        '400':
+          description: 請求錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1108'
+                          - '1296'
+                          - '1298'
+                          - '1436'
+                        description: 錯誤代碼：1108(查無API明細資料)、1296(缺少必填參數)、1298(查無資料)、1436(找不到已啟動或最近上傳的模組)
+                      rtnMsg:
+                        type: string
+                        description: 錯誤訊息
+              examples:
+                查無API明細資料:
+                  value:
+                    ResHeader:
+                      txSN: "1201125152041000001"
+                      txDate: "202011330T032041+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1108"
+                      rtnMsg: "1108 - 查無API明細資料"
+                缺少必填參數:
+                  value:
+                    ResHeader:
+                      txSN: "1201125143050000001"
+                      txDate: "202011330T023050+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1296"
+                      rtnMsg: "1296 - 缺少必填參數"
+                查無資料:
+                  value:
+                    ResHeader:
+                      txSN: "1201125143655000001"
+                      txDate: "202011330T023655+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - 查無資料"
+                找不到已啟動或最近上傳的模組:
+                  value:
+                    ResHeader:
+                      txSN: "1201125152135000001"
+                      txDate: "202011330T032135+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1436"
+                      rtnMsg: "1436 - 找不到已啟動或最近上傳的模組"
+
+
+				  
+				  
+components:
+  schemas:
+    AA1121LackApi:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: 模組名稱
+        apiId:
+          type: string
+          description: API ID
+      required:
+        - moduleName
+        - apiId
+    AA1121Client:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: 資料異動狀態
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        clientId:
+          type: string
+          description: 用戶端帳號
+        clientName:
+          type: string
+          description: 用戶端代號
+        clientAlias:
+          type: string
+          description: 用戶端名稱
+          nullable: true
+      required:
+        - dataStatus
+        - clientId
+        - clientName
+    AA1121Group:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: 資料異動狀態
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        groupName:
+          type: string
+          description: 群組代碼
+        groupAlias:
+          type: string
+          description: 群組名稱
+      required:
+        - dataStatus
+        - groupName
+        - groupAlias
+    AA1121Vgroup:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: 資料異動狀態
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        vgroupName:
+          type: string
+          description: 授權範圍代碼
+        groupAlias:
+          type: string
+          description: 授權範圍名稱
+      required:
+        - dataStatus
+        - vgroupName
+        - groupAlias
+    AA1121GroupAuth:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: 資料異動狀態
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        groupAuthId:
+          type: string
+          description: 核身方式代碼
+        groupAuthName:
+          type: string
+          description: 核身方式名稱
+      required:
+        - dataStatus
+        - groupAuthId
+        - groupAuthName
+    AA1121SecurityLevel:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: 資料異動狀態
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        securityLevelId:
+          type: string
+          description: 安全等級代碼
+        securityLevelName:
+          type: string
+          description: 安全等級名稱
+      required:
+        - dataStatus
+        - securityLevelId
+        - securityLevelName
+    AA1121RdbConnection:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: 資料異動狀態
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        connectionName:
+          type: string
+          description: Connection Name
+      required:
+        - dataStatus
+        - connectionName
+    AA0318Item:
+      type: object
+      properties:
+        apiKey:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: API ID，TSMP_API_IMP.api_key，長度超過 20 時截斷
+        moduleName:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: 模組名稱，TSMP_API_IMP.module_name，長度超過 15 時截斷
+        apiName:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: API名稱，TSMP_API_IMP.api_name，長度超過 20 時截斷
+        apiSrc:
+          $ref: '#/components/schemas/AA0318Pair'
+          description: API來源，TSMP_API_IMP.api_src，對應文字 ITEM_NO = 'API_SRC'
+        endpoint:
+          type: string
+          description: 端點，TSMP_API_IMP.path_of_json
+        checkAct:
+          $ref: '#/components/schemas/AA0318Pair'
+          description: 檢查結果，TSMP_API_IMP.check_act，對應文字 ITEM_NO = 'API_IMP_CHECK_ACT'
+        memo:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: 描述，TSMP_API_IMP.memo，長度超過 50 時截斷
+        srcURL:
+          type: string
+          description: 目標URL，TSMP_API_IMP.SRC_URL
+        srcURLByIpRedirectMap:
+          type: object
+          additionalProperties:
+            type: string
+          description: IP分流的目標URL
+        failDiscoveryPolicy:
+          type: string
+          description: 失敗判定策略，TSMP_API_IMP.fail_discovery_policy
+        failHandlePolicy:
+          type: string
+          description: 失敗處置策略，TSMP_API_IMP.fail_handle_policy
+      required:
+        - apiKey
+        - moduleName
+        - apiName
+        - apiSrc
+        - endpoint
+        - checkAct
+        - srcURL
+        - failDiscoveryPolicy
+        - failHandlePolicy
+    AA0318Trunc:
+      type: object
+      properties:
+        val:
+          type: string
+          description: 顯示值，畫面要呈現的值(可能是被截斷後的值)。若 t = TRUE，則前端顯示時應於 v 值後方串上 "...顯示更多"。
+        t:
+          type: boolean
+          description: 原始值是否被截斷，若欄位 ori 超過長度限制而被截斷，則填入 TRUE，否則填入 FALSE。
+        ori:
+          type: string
+          description: '"顯示更多" 所呈現的值。若 t = FALSE，則後端不用回傳此欄位 (連 key 都不用傳)'
+      required:
+        - val
+        - t
+    AA0318Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: 值
+        'n':
+          type: string
+
+    AA0319ReqItem:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: 模組名稱
+        apiKey:
+          type: string
+          description: API ID
+      required:
+        - moduleName
+        - apiKey
+    AA0319RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: 模組名稱
+        result:
+          $ref: '#/components/schemas/AA0319Pair'
+          description: 匯入結果，對應文字 ITEM_NO = 'API_IMP_RESULT'
+        desc:
+          $ref: '#/components/schemas/AA0319Trunc'
+          description: 描述，長度超過 50 時截斷
+      required:
+        - apiKey
+        - moduleName
+        - result
+    AA0319Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: 值
+        n:
+          type: string
+          description: 顯示文字
+      required:
+        - v
+    AA0319Trunc:
+      type: object
+      properties:
+        val:
+          type: string
+          description: 顯示值，畫面要呈現的值(可能是被截斷後的值)
+        t:
+          type: boolean
+          description: 原始值是否被截斷，若欄位 ori 超過長度限制而被截斷，則填入 TRUE，否則填入 FALSE
+        ori:
+          type: string
+          description: '"顯示更多" 所呈現的值，若 t = FALSE，則後端不用回傳此欄位'
+      required:
+        - val
+        - t
+
+    AA0425RespItem:
+      type: object
+      properties:
+        sort:
+          type: integer
+          description: 排序值
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: 模組名稱
+        apiName:
+          type: string
+          description: API名稱
+        apiStatus:
+          type: string
+          description: API狀態，1=啟用，2=停用
+        noAuth:
+          type: boolean
+          description: 是否不需驗證
+        labelList:
+          type: array
+          description: 標籤清單
+          items:
+            type: string
+        oldSrcUrlList:
+          type: array
+          description: 原始URL清單
+          items:
+            $ref: '#/components/schemas/AA0425RespNewSrcUrlItem'
+        newSrcUrlList:
+          type: array
+          description: 新URL清單
+          items:
+            $ref: '#/components/schemas/AA0425RespNewSrcUrlItem'
+      required:
+        - sort
+        - apiKey
+        - moduleName
+        - apiName
+        - apiStatus
+        - noAuth
+        - labelList
+        - oldSrcUrlList
+        - newSrcUrlList
+    AA0425RespNewSrcUrlItem:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: IP位址，若無IP分流則為空字串
+        srcUrlList:
+          type: array
+          description: URL清單
+          items:
+            $ref: '#/components/schemas/AA0425RespPercentageAndSrcUrl'
+        isSuccess:
+          type: boolean
+          description: 是否成功，true=成功，false=失敗
+      required:
+        - ip
+        - srcUrlList
+        - isSuccess
+    AA0425RespPercentageAndSrcUrl:
+      type: object
+      properties:
+        percentage:
+          type: integer
+          description: 百分比
+        srcUrl:
+          type: string
+          description: 目標URL
+      required:
+        - percentage
+        - srcUrl
+        
+    AA1120DgrApikeyUseApi:
+      type: object
+      properties:
+        apiUid:
+          type: string
+          description: UUID
+        moudleName:
+          type: string
+          description: 模組名稱
+        apiId:
+          type: string
+          description: API ID
+      required:
+        - apiUid
+        - moudleName
+        - apiId
+
+
+    AA0301Item:
+      type: object
+      properties:
+        moduleName:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: 模組名稱，TSMP_API.module_name，長度超過 15 時截斷
+        apiKey:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: API ID，TSMP_API.api_key，長度超過 20 時截斷
+        apiStatus:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: 狀態，TSMP_API.api_status，對應文字 ITEM_NO = 'ENABLE_FLAG', PARAM1 = api_status
+        apiSrc:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: API來源，TSMP_API.api_src，對應文字 ITEM_NO = 'API_SRC'
+        apiName:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: API名稱，TSMP_API.api_name，長度超過 20 時截斷
+        apiDesc:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: API說明，TSMP_API.api_desc，長度超過 30 時截斷
+          nullable: true
+        jweFlag:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: JWT設定(Request)，TSMP_API.jwe_flag，對應文字 ITEM_NO = 'API_JWT_FLAG'，NULL時，後端轉為"0"填入
+        jweFlagResp:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: JWT設定(Response)，TSMP_API.jwe_flag_resp，對應文字 ITEM_NO = 'API_JWT_FLAG'，NULL時，後端轉為"0"填入
+        updateTime:
+          type: string
+          description: 最近異動日期，TSMP_API.create_time / update_time，yyyy-MM-dd HH:mm:ss，優先使用 update_time，若無值才取 create_time
+        org:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: 組織單位，TSMP_API.org_id，對應文字 TSMP_ORGANIZATION.org_name
+        labelList:
+          type: array
+          description: 標籤清單
+          items:
+            type: string
+        enableScheduledDate:
+          type: integer
+          format: int64
+          description: 預定啟用日期，TSMP_API.Enable_Scheduled_Date
+        disableScheduledDate:
+          type: integer
+          format: int64
+          description: 預定停用日期，TSMP_API.Disable_Scheduled_Date
+        createDate:
+          type: string
+          description: 建立日期，TSMP_API.CREATE_TIME
+        createUser:
+          type: string
+          description: 建立人員，TSMP_API.CREATE_USER
+        updateDate:
+          type: string
+          description: 更新日期，TSMP_API.UPDATE_TIME
+          nullable: true
+        updateUser:
+          type: string
+          description: 更新人員，TSMP_API.UPDATE_USER
+          nullable: true
+      required:
+        - moduleName
+        - apiKey
+        - apiStatus
+        - apiSrc
+        - apiName
+        - jweFlag
+        - jweFlagResp
+        - labelList
+        - enableScheduledDate
+        - disableScheduledDate
+        - createDate
+        - createUser
+    
+    AA0301Trunc:
+      type: object
+      properties:
+        val:
+          type: string
+          description: 顯示值，畫面要呈現的值(可能是被截斷後的值)。若 t = TRUE，則前端顯示時應於 v 值後方串上 "...顯示更多"。
+        t:
+          type: boolean
+          description: 原始值是否被截斷，若欄位 ori 超過長度限制而被截斷，則填入 TRUE，否則填入 FALSE。
+        ori:
+          type: string
+          description: '"顯示更多" 所呈現的值。若 t = FALSE，則後端不用回傳此欄位 (連 key 都不用傳)'
+      required:
+        - val
+        - t
+    
+    AA0301Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: 值
+        n:
+          type: string
+          description: 顯示文字，當值沒有對應文字時，此欄位可能回傳 NULL
+          nullable: true
+      required:
+        - v
+
+
+    AA0317ReqItem:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: 模組名稱，TSMP_API.module_name
+        apiKey:
+          type: string
+          description: API ID，TSMP_API.api_key
+      required:
+        - moduleName
+        - apiKey
+    
+    AA0317Data:
+      type: object
+      properties:
+        r:
+          type: array
+          description: 註冊API清單，當有匯出[API來源]為註冊(R)的API時，此欄位才會有值
+          items:
+            $ref: '#/components/schemas/AA0317Module'
+          nullable: true
+        c:
+          type: array
+          description: 組合API清單，當有匯出[API來源]為組合(C)的API時，此欄位才會有值
+          items:
+            $ref: '#/components/schemas/AA0317Module'
+          nullable: true
+    
+    AA0317Module:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: 模組名稱
+        regModule:
+          $ref: '#/components/schemas/AA0317RegModule'
+          description: 註冊模組資訊，[API來源]為註冊(R)，且模組存在於 TSMP_REG_MODULE 時才會有此資料
+          nullable: true
+        apiList:
+          type: array
+          description: API清單
+          items:
+            $ref: '#/components/schemas/AA0317RespItem'
+      required:
+        - moduleName
+        - apiList
+    
+    AA0317RegModule:
+      type: object
+      properties:
+        regModuleId:
+          type: integer
+          format: int64
+          description: ID(流水號)，TSMP_REG_MODULE.reg_module_id
+        moduleName:
+          type: string
+          description: 模組名稱，TSMP_REG_MODULE.module_name
+        moduleVersion:
+          type: string
+          description: 模組版本，TSMP_REG_MODULE.module_version
+        moduleSrc:
+          type: string
+          description: 建立來源，TSMP_REG_MODULE.module_src
+      required:
+        - regModuleId
+        - moduleName
+        - moduleVersion
+        - moduleSrc
+    
+    AA0317RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API Key
+        moduleName:
+          type: string
+          description: Module名稱
+        apiName:
+          type: string
+          description: API名稱
+        apiDesc:
+          type: string
+          description: API說明
+          nullable: true
+        apiOwner:
+          type: string
+          description: API擁有者
+          nullable: true
+        urlRID:
+          type: string
+          description: ResourceID in URL，Source URL中是否會有ResourceID，"0"表示沒有，"1"表示有
+        apiSrc:
+          type: string
+          description: Source，'R'表示Registered，'C'表示Composed
+        srcURL:
+          type: string
+          description: 來源URL (Registered API only)
+          nullable: true
+        apiUUID:
+          type: string
+          description: API UUID (Composered API only)
+          nullable: true
+        contentType:
+          type: string
+          description: CONSUMES
+          nullable: true
+        enpoint:
+          type: string
+          description: End Point
+        httpHeader:
+          type: string
+          description: HEADERS
+          nullable: true
+        httpMethod:
+          type: string
+          description: Http Method
+        params:
+          type: string
+          description: PARAMS
+          nullable: true
+        produce:
+          type: string
+          description: PRODUCES
+          nullable: true
+        flow:
+          type: array
+          description: Composer Flow (composer flow configuration in mongodb)
+          items:
+            type: string
+          nullable: true
+        no_oauth:
+          type: string
+          description: OAuth轉導設定，0表示tsmpg不轉導，1表示tsmpg允許轉導，預設為0
+          nullable: true
+        jweFlag:
+          type: string
+          description: 有無JWE FLAG(Request)，0表示不使用，1表示JWE，2表示JWS，null表示不使用
+          nullable: true
+        jweFlagResp:
+          type: string
+          description: 有無JWE FLAG(Response)，0表示不使用，1表示JWE，2表示JWS，null表示不使用
+          nullable: true
+        funFlag:
+          type: integer
+          description: 功能設定，1表示tokenpayload，會將token的payload往後帶
+          nullable: true
+        apiCacheFlag:
+          type: string
+          description: API CACHE方式，1表示無(預設)，2表示自適應，3表示固定
+        fixedCacheTime:
+          type: integer
+          description: 固定快取時間，apiCacheFlag=3時才會有值
+          nullable: true
+        failDiscoveryPolicy:
+          type: string
+          description: 失敗判定策略，0表示Policy 0
+        failHandlePolicy:
+          type: string
+          description: 失敗處置策略，0表示Policy 0，1表示Policy 1
+        publicFlag:
+          type: string
+          description: DP的API上下架，E表示上架(Enable)，D表示下架(Disable)
+        apiReleaseTime:
+          type: string
+          description: DP的API上架時間，非null為longTime
+      required:
+        - apiKey
+        - moduleName
+        - apiName
+        - urlRID
+        - apiSrc
+        - enpoint
+        - httpMethod
+        - apiCacheFlag
+        - failDiscoveryPolicy
+        - failHandlePolicy
+        - publicFlag
+        - apiReleaseTime
+
+    AA0423RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: 模組名稱
+        apiStatus:
+          type: string
+          description: API狀態
+        apiName:
+          type: string
+          description: API名稱
+        srcUrlList:
+          type: array
+          description: 目標URL清單
+          items:
+            $ref: '#/components/schemas/AA0423RespSrcUrlListItem'
+        noOauth:
+          type: boolean
+          description: 是否不需OAuth驗證，FALSE表示需要驗證，TRUE表示不需要驗證
+        labelList:
+          type: array
+          description: 標籤清單
+          items:
+            type: string
+          nullable: true
+      required:
+        - apiKey
+        - moduleName
+        - apiStatus
+        - apiName
+        - srcUrlList
+        - noOauth
+    
+    AA0423RespSrcUrlListItem:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: IP位址，若無IP分流則為空字串
+        srcUrlAndPercentageList:
+          type: array
+          description: URL及百分比清單
+          items:
+            $ref: '#/components/schemas/AA0423RespSrcUrlAndPercentageItem'
+      required:
+        - ip
+        - srcUrlAndPercentageList
+    
+    AA0423RespSrcUrlAndPercentageItem:
+      type: object
+      properties:
+        percentage:
+          type: string
+          description: 百分比
+        srcUrl:
+          type: string
+          description: 目標URL
+      required:
+        - percentage
+        - srcUrl
+
+    AA0424ReqAPIList:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID，TSMP_API.api_key
+        moduleName:
+          type: string
+          description: 模組名稱，TSMP_API.module_name
+      required:
+        - apiKey
+        - moduleName
+    
+    AA0424ReqSrcUrlList:
+      type: object
+      properties:
+        srcUrl:
+          type: string
+          description: 要被替換或修正的關鍵字
+        isPercentage:
+          type: boolean
+          description: 是否修正百分比
+        percentage:
+          type: integer
+          description: 百分比值，當isPercentage為true時必填
+        isReplace:
+          type: boolean
+          description: 是否要替換文字
+        replaceString:
+          type: string
+          description: 要替換的文字，當isReplace為true時必填
+      required:
+        - srcUrl
+        - isPercentage
+        - isReplace
+
+    AA0426RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: 模組名稱
+      required:
+        - apiKey
+        - moduleName
+
+
+    AA0302Trunc:
+      type: object
+      properties:
+        v:
+          type: string
+          description: 顯示值，畫面要呈現的值(可能是被截斷後的值)
+        t:
+          type: boolean
+          description: 原始值是否被截斷，若欄位 o 超過長度限制而被截斷，則填入 TRUE，否則填入 FALSE
+        o:
+          type: string
+          description: 原始值，"顯示更多" 所呈現的值，若 t = FALSE，則後端不用回傳此欄位
+      required:
+        - v
+        - t
+        
+    AA0302Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: 值 (Value)
+        n:
+          type: string
+          description: 顯示文字 (Name)，當值沒有對應文字時，此欄位可能回傳 NULL
+      required:
+        - v
+        
+    AA0302Controls:
+      type: object
+      properties:
+        apiName:
+          type: boolean
+          description: 是否可編輯API名稱，TRUE=Enabled，FALSE=Disabled
+        protocol:
+          type: boolean
+          description: 是否可編輯協定，TRUE=Enabled，FALSE=Disabled
+        srcUrl:
+          type: boolean
+          description: 是否可編輯目標URL，TRUE=Enabled，FALSE=Disabled
+        methodOfJson:
+          type: boolean
+          description: 是否可編輯Http Method，TRUE=Enabled，FALSE=Disabled
+        dataFormat:
+          type: boolean
+          description: 是否可編輯資料格式，TRUE=Enabled，FALSE=Disabled
+        regHostId:
+          type: boolean
+          description: 是否可編輯註冊主機，TRUE=Enabled，FALSE=Disabled
+      required:
+        - apiName
+        - protocol
+        - srcUrl
+        - methodOfJson
+        - dataFormat
+        - regHostId
+        
+    AA0302KeyVal:
+      type: object
+      properties:
+        key:
+          type: string
+          description: KEY
+        value:
+          type: string
+          description: VALUE
+      required:
+        - key
+        - value
+
+
+        
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
