@@ -1,13 +1,10 @@
 package tpi.dgrv4.gateway.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +12,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import tpi.dgrv4.codec.constant.I302;
 import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -58,12 +54,6 @@ public class GtwIdPApproveService {
 	private final OAuthAuthorizationService oAuthAuthorizationService;
 	private final DgrOauthApprovalsDao dgrOauthApprovalsDao; 
 	private final GtwIdPHelper gtwIdPHelper;
-	
-	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
-	
-	// OIDC redirect URL allow list for open source
-	@Value("${oss.oidc.redirect.url.allow.list}")
-	private String ossOidcRedirectUrlAllowListValue;
 	
 	@Autowired
 	public void setI302(@Nullable I302 i302) {
@@ -171,10 +161,7 @@ public class GtwIdPApproveService {
 		 * [ZH] 6.轉導
 		 * [EN] 6.redirect
 		 */
-		errRespEntity = handleSendRedirect(httpResp, redirectUrl);
-		if (errRespEntity != null) {// redirectUri 驗證有錯誤 // redirectUri verification error
-			return errRespEntity;
-		}
+		handleSendRedirect(httpResp, redirectUrl);
 		
 		return null;
 	}
@@ -183,59 +170,11 @@ public class GtwIdPApproveService {
 	 * [ZH] 轉導
 	 * [EN] redirect
 	 */
-	private ResponseEntity<?> handleSendRedirect(HttpServletResponse httpResp, String redirectUrl) throws IOException {
-		// SonarQube :
-		// Change this code to not perform redirects based on user-controlled data.
-		// HTTP request redirections should not be open to forging attacks
+	private void handleSendRedirect(HttpServletResponse httpResp, String redirectUrl) throws IOException {
 		if (i302 != null) {
 			TPILogger.tl.debug("Redirect to URL【dgR Client Redirect URL】: " + redirectUrl);
-			i302.sendRedirect(httpResp, redirectUrl); // Only for Enterprise
-			return null;
-			
-		} else {// for Open Source
-			String errMsg = null;
-			TPILogger.tl.debug("[Open Source] Redirect to URL【dgR Client Redirect URL】: " + redirectUrl);
-			TPILogger.tl.debug(NO_ENTERPRISE_SERVICE);
-			
-			// OIDC redirect URL allow list 
-			List<String> allowedHosts = new ArrayList<String>();
-			try {
-				ObjectMapper om = new ObjectMapper();
-				allowedHosts = om.readValue(ossOidcRedirectUrlAllowListValue, List.class);
-				
-			} catch (Exception e) {
-				errMsg = "[Open Source] The value of allow list is incorrect,\n"
-						+ "value:" + ossOidcRedirectUrlAllowListValue + ".\n"
-						+ "Please confirm the value of {oss.oidc.redirect.url.allow.list} in application.properties.";
-				TPILogger.tl.error(errMsg);
-				return getResponseEntity(errMsg); // 400
-			}
-			
-			int flag = redirectUrl.indexOf("?");
-			if (flag < 0) {
-				errMsg = "[Open Source] The value of redirectUrl is incorrect, value:" + redirectUrl;
-				return getResponseEntity(errMsg); // 400
-			}
-			
-			if (allowedHosts.contains(redirectUrl.substring(0, flag))) {
-				// [ZH] 若 redirect URL 在合法清單中, 則轉導
-				// [EN] If the redirect URL is in the allow list, then redirect.
-				httpResp.sendRedirect(redirectUrl);
-				return null;
-			} else {
-				errMsg = "[Open Source] The redirect URL is not in the allow list.\n"
-						+ "Please confirm the value of {oss.oidc.redirect.url.allow.list} in application.properties.\n"
-						+ "redirect URL:" + redirectUrl + "\n"
-						+ "allow list:" + allowedHosts;
-				TPILogger.tl.error(errMsg);
-				return getResponseEntity(errMsg); // 400
-			}
+			i302.sendRedirect(httpResp, redirectUrl);
 		}
-	}
-	
-	private ResponseEntity<?> getResponseEntity(String errMsg) {
-		return new ResponseEntity<OAuthTokenErrorResp2>(
-				getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg), HttpStatus.BAD_REQUEST);// 400
 	}
 
 	/**

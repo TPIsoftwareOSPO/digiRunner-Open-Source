@@ -430,6 +430,9 @@ public class GatewayFilter extends OncePerRequestFilter {
 		responseWrapper.setHeaderByForce("Referrer-Policy", "strict-origin-when-cross-origin");
 		responseWrapper.setHeaderByForce("Cache-Control", "no-cache");
 		responseWrapper.setHeaderByForce("Pragma", "no-cache");
+		if (request.getHeader("isSse") != null) {
+			responseWrapper.setHeaderByForce("Content-Type", "text/event-stream");
+		}
 
 		// [ZH]將取得的 DGR_CORS_VAL 放入 ServletContext 裡面供其他類取用,例如:AllowCorsFilterConfig
 		// [EN]Put the obtained DGR_CORS_VAL into ServletContext for other classes to use, for example: AllowCorsFilterConfig
