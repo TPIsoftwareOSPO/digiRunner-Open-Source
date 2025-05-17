@@ -1,6 +1,8 @@
 package tpi.dgrv4.gateway.service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -217,8 +219,9 @@ public class GtwIdPApproveService {
 				return getResponseEntity(errMsg); // 400
 			}
 			
-			if (allowedHosts.contains(redirectUrl.substring(0, flag))) {
-				// [ZH] 若 redirect URL 在合法清單中, 則轉導
+			boolean isValidRedirectUrl = isValidRedirectUrl(redirectUrl, allowedHosts);
+			if (isValidRedirectUrl) {
+				// [ZH] 若重定向 URL 在合法清單中, 則轉導
 				// [EN] If the redirect URL is in the allow list, then redirect.
 				httpResp.sendRedirect(redirectUrl);
 				return null;
@@ -230,6 +233,37 @@ public class GtwIdPApproveService {
 				TPILogger.tl.error(errMsg);
 				return getResponseEntity(errMsg); // 400
 			}
+		}
+	}
+	
+	/*
+	 * [ZH] 驗證重定向 URL 是否在許可清單中
+	 * [EN] Verify that the redirect URL is in the allowed list
+	 */
+	private boolean isValidRedirectUrl(String redirectUrl, List<String> allowedHosts) {
+	    if (redirectUrl == null || redirectUrl.trim().isEmpty()) {
+	        return false;
+	    }
+	    
+		try {
+			// [ZH] 使用 URL 類處理 URL
+			// [EN] Handling URLs with the URL class
+			URL url = new URL(redirectUrl);
+			String host = url.getHost();
+
+			// [ZH] 嚴格檢查完整主機名
+			// [EN] Strictly check the full host name
+			for (String allowedHost : allowedHosts) {
+				if (host.equals(allowedHost)) {
+					return true;
+				}
+			}
+
+			return false;
+		} catch (MalformedURLException e) {
+			// [ZH] 無效 URL
+			// [EN] Invalid URL
+			return false;
 		}
 	}
 	
