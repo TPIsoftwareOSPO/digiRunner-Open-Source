@@ -2,6 +2,7 @@ package tpi.dgrv4.gateway.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -373,8 +374,8 @@ public class DGRCServiceGet implements IApiCacheService{
 			
 			//第二組ES REQ
 			TsmpApiLogReq dgrcGetBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
-	
-			HttpRespData respObj = getHttpRespData(vo.getHeader(), vo.getSrcUrl());
+
+			HttpRespData respObj = getHttpRespData(vo.getHeader(), vo.getSrcUrl(), null);
 			respObj.fetchByte(maskInfo); // because Enable inputStream
 			sb.append(respObj.getLogStr());
 			TPILogger.tl.debug(sb.toString());
@@ -415,7 +416,7 @@ public class DGRCServiceGet implements IApiCacheService{
 		//第二組ES REQ
 		TsmpApiLogReq dgrcGetBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header, srcUrl,
 				"");
-		HttpRespData respObj = getHttpRespData(header, srcUrl);
+		HttpRespData respObj = getHttpRespData(header, srcUrl,httpRes.getOutputStream());
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		dgrcGet_sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(dgrcGet_sb.toString());
@@ -478,8 +479,8 @@ public class DGRCServiceGet implements IApiCacheService{
 	}
 	
 	private HttpRespData getHttpRespData(Map<String, List<String>> header, 
-			String reqUrl) throws Exception {
-		HttpRespData dgrcGet_httpRespData = HttpUtil.httpReqByGetList(reqUrl, header, true, false, maskInfo);
+			String reqUrl, OutputStream sseOutput) throws Exception {
+		HttpRespData dgrcGet_httpRespData = HttpUtil.httpReqByGetList(reqUrl, header, true, false, maskInfo, sseOutput);
 		
 		return dgrcGet_httpRespData;
 	}

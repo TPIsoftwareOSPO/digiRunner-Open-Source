@@ -1,10 +1,6 @@
 package tpi.dgrv4.gateway.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -382,8 +378,8 @@ public class DGRCServicePostRaw implements IApiCacheService{
 			
 			//第二組ES REQ
 			TsmpApiLogReq dgrcPostRawBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
-	
-			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
+
+			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody(), null);
 			respObj.fetchByte(maskInfo); // because Enable inputStream
 			//下載檔案的處理
 			if(respObj.respHeader != null && respObj.respHeader.get("Content-Disposition") != null) {
@@ -432,7 +428,10 @@ public class DGRCServicePostRaw implements IApiCacheService{
 		// 第二組ES REQ
 		TsmpApiLogReq dgrcPostRawBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header,
 				srcUrl, payload);
-		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, payload);
+		if(header.get("isSse")!=null){
+			httpRes.setHeader("Content-Type", "text/event-stream");
+		}
+		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, payload,httpRes.getOutputStream());
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		//若respObj.respStr為null帶表有檔案則寫入檔案sha256
 //		if (!StringUtils.hasLength(respObj.respStr)){
@@ -521,9 +520,9 @@ public class DGRCServicePostRaw implements IApiCacheService{
 	}
 	
 	protected HttpRespData getHttpRespData(String httpMethod, Map<String, List<String>> header,
-			String reqUrl, String payload) throws Exception {
+			String reqUrl, String payload, OutputStream sseOutput) throws Exception {
 
-		HttpRespData dgrcPostRaw_httpRespData = HttpUtil.httpReqByRawDataList(reqUrl, httpMethod, payload, header, true, false, maskInfo);
+		HttpRespData dgrcPostRaw_httpRespData = HttpUtil.httpReqByRawDataList(reqUrl, httpMethod, payload, header, true, false, maskInfo ,sseOutput);
 		//判斷是否有檔案 有檔案回傳Stream 無則回傳String
 //		if (!httpRespData.respHeader.containsKey("Content-Disposition")){
 //			httpRespData.respStr = HttpUtil.toPrettyJson(HttpUtil.read(httpRespData.respInputStreamObj));

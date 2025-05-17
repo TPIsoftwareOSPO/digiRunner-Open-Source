@@ -353,7 +353,7 @@ public class TSMPCServiceGet implements IApiCacheService{
 	
 	private HttpRespData getHttpRespData(Map<String, List<String>> header, 
 			String reqUrl) throws Exception {
-		HttpRespData httpRespData = HttpUtil.httpReqByGetList(reqUrl, header, true, false, maskInfo);
+		HttpRespData httpRespData = HttpUtil.httpReqByGetList(reqUrl, header, true, false, maskInfo, null);
 		
 		return httpRespData;
 	}
