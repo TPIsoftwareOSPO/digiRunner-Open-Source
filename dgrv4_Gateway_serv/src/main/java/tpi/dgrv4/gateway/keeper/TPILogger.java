@@ -39,7 +39,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
@@ -226,7 +225,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	}
 
 	public static Map<String, Object> dbInfoMap = new HashMap<>();
-	public static final String DBINFOMAP = "dbInfoMap";
+	public static final String DBINFOMAP_TITLE = "dbInfoMap";
 	public static final String DBINFO = "dbInfo";
 
 	public static int PORT = 0;
@@ -718,7 +717,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		lc.paramObj.put("GenericCache", genericCache);
 		lc.paramObj.put("DaoGenericCache", daoGenericCache);
 		TPILogger.lc.paramObj.put("changeDbInfo", getChangeDbConnInfoService());
-		TPILogger.lc.paramObj.put(DBINFOMAP, dbInfoMap);
+		TPILogger.lc.paramObj.put(DBINFOMAP_TITLE, dbInfoMap);
 
 		createThreadStarter();
 		

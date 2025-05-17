@@ -659,6 +659,7 @@ export class ToolService {
     return url;
   }
 
+  /** 千分位補點 */
   numberComma(num) {
     let comma = /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g;
     return num.toString().replace(comma, ',');

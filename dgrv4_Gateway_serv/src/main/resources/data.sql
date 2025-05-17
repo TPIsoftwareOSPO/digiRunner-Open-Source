@@ -977,52 +977,52 @@ CREATE TABLE IF NOT EXISTS tsmp_api (
 	PRIMARY KEY (api_key, module_name)
 );
 
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_ENABLE', 'true', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_HOST', 'smtp.gmail.com', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_PORT', '587', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_AUTH', 'true', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_STARTTLS_ENABLE', 'true', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_USERNAME', 'system@elite-erp.com.tw', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_PASSWORD', 'eliteTpower', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_FROM', 'system@elite-erp.com.tw', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_X_MAILER', 'Thinkpower', '主要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_ENABLE', 'true', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_HOST', 'smtp.gmail.com', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_PORT', '587', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_AUTH', 'true', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_STARTTLS_ENABLE', 'true', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_USERNAME', 'system@elite-erp.com.tw', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_PASSWORD', 'eliteTpower', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_FROM', 'system@elite-erp.com.tw', '次要smtp server設定');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_X_MAILER', 'Thinkpower', '次要smtp server設定');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_ENABLE', 'true', 'Main SMTP server setting : Sender authentication process enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_HOST', 'smtp.gmail.com', 'Main SMTP server setting : SMTP server domain name ( smtp.gmail.com )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_PORT', '587', 'Main SMTP server setting : SMTP server service-port');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_AUTH', 'true', 'Main SMTP server setting : Sender authentication enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_STARTTLS_ENABLE', 'true', 'Main SMTP server setting : TLS enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_USERNAME', 'system@elite-erp.com.tw', 'Main SMTP server setting : Sender display name');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_PASSWORD', 'eliteTpower', 'Main SMTP server setting : Sender email password');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_FROM', 'system@elite-erp.com.tw', 'Main SMTP server setting : Sender email address ( system@elite-erp.com.tw )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_MAIL_X_MAILER', 'Thinkpower', 'Main SMTP server setting : mail delivery process name');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_ENABLE', 'true', 'Secondary SMTP server setting : Sender authentication process enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_HOST', 'smtp.gmail.com', 'Secondary SMTP server setting : SMTP server domain name ( smtp.gmail.com )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_PORT', '587', 'Secondary SMTP server setting : SMTP server service-port');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_AUTH', 'true', 'Secondary SMTP server setting : Sender authentication enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_STARTTLS_ENABLE', 'true', 'Secondary SMTP server setting : TLS enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_USERNAME', 'system@elite-erp.com.tw', 'Secondary SMTP server setting : Sender display name');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_PASSWORD', 'eliteTpower', 'Secondary SMTP server setting : Sender email password');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_FROM', 'system@elite-erp.com.tw', 'Secondary SMTP server setting : Sender email address ( system@elite-erp.com.tw )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SERVICE_SECONDARY_MAIL_X_MAILER', 'Thinkpower', 'Secondary SMTP server setting : mail delivery process name');
 -- 由 initSQL 執行
 --INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_EDITION', 'Pn88-nq8x-x8ux-88ng-en68-x#cx-=88#-x2=x-#F=x-#F=F-#x=', 'TSMP license key');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_URL', 'ldap://10.20.30.162:389', 'ldap登入的URL');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_DN', 'uid={{0}},dc=tstpi,dc=com', 'ldap登入的使用者DN');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_TIMEOUT', '3000', 'ldap登入的連線timeout,單位毫秒');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_CHECK_ACCT_ENABLE', 'false', 'LDAP檢查帳號功能是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_FAIL_THRESHOLD', '6', '允許User密碼錯誤次數上限');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SSO_PKCE', 'true', 'PKCE等級AuthCode驗證是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SSO_DOUBLE_CHECK', 'true', 'Double check驗證是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SSO_AUTO_CREATE_USER', 'false', '自動建立User資料是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_DPAA_RUNLOOP_INTERVAL', '1', 'RUNLOOP每次循環間隔秒數(sec), 設為0則停用告警偵測');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_DELETEMODULE_ALERT', 'false', '刪除MODULE時提示要刪除相關資料');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_APILOG_FORCE_WRITE_RDB', 'false', '判斷Enterprise是否要將API Log寫入DB');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_LOGOUT_URL', '', '客製登入頁url{{scheme}}://{{ip}}:{{port}}/{{path}} ex: "https://203.69.248.109:38452/dgr-cus-scbank-ac/"');
---INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'http://tsmp-composer:1880', 'COMPOSER 廣播使用,以逗號區隔');
---INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PORT', '48080', '給前端頁面使用用的路徑，主要是給AC使用');
---INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PATH', '/editor/tsmpApi', '給前端頁面使用用的路徑，主要是給AC使用');
---COMPOSER SERVER在本機使用並使用proxy
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'https://127.0.0.1:8440', 'COMPOSER 廣播使用,以逗號區隔');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PORT', '8080', '給前端頁面使用用的路徑，主要是給AC使用');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PATH', '/website/composer', '給前端頁面使用用的路徑，主要是給AC使用');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_PROXY_PORT', '4944', '目前無使用，保留，當初功能性與TSMP_REPORT_ADDRESS相同');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_MODULE_EXIST', 'false', '客製包是否存在 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_FUNC_ENABLE1', 'false', '介接功能是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_MODULE_NAME1', '', '客製包 Moudle 名稱');
--- 每一台設定不同
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('UDPSSO_LOGIN_NETWORK', '192.168.0.0/23,192.168.0.0/24,127.0.0.0/24', '可登入的網段,多個CIDR用逗號分隔');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_CREDENTIALS_DEFAULT_USERNAME', 'true', 'client_credentials取token預設userName是否啟用 (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_URL', 'ldap://10.20.30.162:389', 'ldap login URL');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_DN', 'uid={{0}},dc=tstpi,dc=com', 'ldap login user DN');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_TIMEOUT', '3000', 'Connection timeout for ldap login, in milliseconds(ms)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('LDAP_CHECK_ACCT_ENABLE', 'false', 'LDAP check account function enablement - true/false');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_FAIL_THRESHOLD', '6', 'Allowed "User password" fail THRESHOLD');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SSO_PKCE', 'true', 'PKCE Level AuthCode verification enablement - true/false');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SSO_DOUBLE_CHECK', 'true', 'Enablement of Double-check verification - true/false');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SSO_AUTO_CREATE_USER', 'false', 'Enablement of SSO auto - user account creation - true/false');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_DPAA_RUNLOOP_INTERVAL', '1', 'The RUNLOOP sett for DPAA, if it is set to 0, the alarm detection will be disabled');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_DELETEMODULE_ALERT', 'false', 'Enable the Prompt when deleting MODULE - true/false');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_APILOG_FORCE_WRITE_RDB', 'false', 'Write API log into RDB enablement ( true/false )');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_LOGOUT_URL', '', 'Customized Login Page URL{{scheme}}://{{ip}}:{{port}}/{{path}} ex: "https://203.69.248.109:38452/dgr-cus-scbank-ac/"');
+--INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'http://tsmp-composer:1880', 'COMPOSER broadcasting, separated by commas');
+--INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PORT', '48080', 'The Composer access port used for AC');
+--INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PATH', '/editor/tsmpApi', 'The Composer path used for AC');
+--COMPOSER SERVER used locally with proxy
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'https://127.0.0.1:8440', 'COMPOSER broadcasting, separated by commas');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PORT', '8080', 'The Composer access port used for AC');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PATH', '/website/composer', 'The Composer path used for AC');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_PROXY_PORT', '4944', 'Currently inused ; Reserved as the functionality - TSMP_REPORT_ADDRESS');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_MODULE_EXIST', 'false', '"Customized Module" exist indicator (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_FUNC_ENABLE1', 'false', '"Customized Function" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_MODULE_NAME1', '', 'Customized Module name');
+-- Different settings for each server
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('UDPSSO_LOGIN_NETWORK', '192.168.0.0/23,192.168.0.0/24,127.0.0.0/24', 'Network segments that can be logged in, multiple CIDRs are separated by commas');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_CREDENTIALS_DEFAULT_USERNAME', 'true', 'client_credentials get token "default userName" enablement (true/false)');
 
 DELETE FROM tsmp_dp_mail_tplt WHERE mailtplt_id BETWEEN 10000000 AND 10000050;
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000000, 'subject.member-pass', 'API Portal - User Account Application Notification', 'DPB0005', current_timestamp, 'SYSTEM', 1);
@@ -2297,7 +2297,7 @@ INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME
 INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME, SORT_BY, LOCALE, IS_DEFAULT, PARAM1, PARAM2, PARAM3, PARAM4, PARAM5) VALUES (288, 'FUNC_TYPE', '功能類型', '1', 'Embeded function', 1871, 'en-US', NULL, NULL, NULL, NULL, NULL, NULL);
 
 --20230508 新增 DP admin, Kevin.Cheng
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DP_ADMIN', 'dpmanager', 'DP 預設 Admin ID TOKEN SUB');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DP_ADMIN', 'dpmanager', 'DP Default Admin ID TOKEN SUB');
 
 
 -- 20230919, 來源IP 增加填寫Hostname, 增加欄位長度 , Zoe Lee

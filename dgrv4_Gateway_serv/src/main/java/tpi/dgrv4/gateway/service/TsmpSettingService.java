@@ -32,8 +32,6 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class TsmpSettingService {
 
-	private TPILogger logger = TPILogger.tl;
-	
 	@Value("${digiRunner.gtw.deploy.role}")
 	private String deployRole;
 	
@@ -101,7 +99,7 @@ public class TsmpSettingService {
 				return Integer.valueOf(gateway_val);
 			} catch (Exception gateway_e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(gateway_e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(gateway_e));
 					return defaultVal;
 				}
 				throw gateway_e;
@@ -122,7 +120,7 @@ public class TsmpSettingService {
 				return Long.valueOf(gateway_val);
 			} catch (Exception gateway_e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(gateway_e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(gateway_e));
 					return defaultVal;
 				}
 				throw gateway_e;
@@ -173,7 +171,7 @@ public class TsmpSettingService {
 	private TsmpSetting findById(String id) {
 		Optional<TsmpSetting> opt = getTsmpSettingCacheProxy().findById(id);
 		if (!opt.isPresent()) {
-			logger.debug("id=" + id);
+			TPILogger.tl.debug("id=" + id);
 			throw DgrRtnCode._1202.throwing();
 
 		}
@@ -622,7 +620,7 @@ public class TsmpSettingService {
 				gateway_args = getObjectMapper().readValue(val, //
 						new TypeReference<Map<String, Object>>(){}); // converts JSON to Map
 			} catch (Exception e) {
-				this.logger.error(StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			}
 			return gateway_args;
 		});

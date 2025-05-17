@@ -30,8 +30,6 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service(value = "dpaaTsmpSettingService")
 public class TsmpSettingService {
 
-	private TPILogger logger = TPILogger.tl;
-
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
 	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
@@ -98,7 +96,7 @@ public class TsmpSettingService {
 				return Integer.valueOf(val);
 			} catch (Exception e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
 					return defaultVal;
 				}
 				throw e;
@@ -119,7 +117,7 @@ public class TsmpSettingService {
 				return Long.valueOf(val);
 			} catch (Exception e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
 					return defaultVal;
 				}
 				throw e;
@@ -179,7 +177,7 @@ public class TsmpSettingService {
 		Optional<TsmpSetting> opt = getTsmpSettingCacheProxy().findById(id);
 
 		if (opt.isEmpty()) {
-			logger.debug("id=" + id);
+			TPILogger.tl.debug("id=" + id);
 			throw TsmpDpAaRtnCode.NO_ITEMS_DATA.throwing();
 		}
 
@@ -582,7 +580,7 @@ public class TsmpSettingService {
 						new TypeReference<Map<String, Object>>() {
 						}); // converts JSON to Map
 			} catch (Exception e) {
-				this.logger.error(StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			}
 			return args;
 		});

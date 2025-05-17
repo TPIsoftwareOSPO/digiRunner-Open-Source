@@ -707,7 +707,7 @@ INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) V
 INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('9930', 'en-US', 'Invalid String', '');
 
 -- 20220303, Audit Log 增加參數, Mini Lee
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('AUDIT_LOG_ENABLE', 'true', 'Audit Log記錄功能是否啟用 (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('AUDIT_LOG_ENABLE', 'true', '"Audit Log" Recode Function enablement (true/false)');
 
 -- 20220302, Audit Log 增加參數, Mini Lee
 INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME, SORT_BY, LOCALE, IS_DEFAULT, PARAM1, PARAM2, PARAM3, PARAM4, PARAM5) VALUES (212, 'AUDIT_LOG_EVENT', '安全稽核日誌事件', 'updateUserProfile', '更新使用者個人資料', 1488, 'zh-TW', NULL, NULL, NULL, NULL, NULL, NULL);
@@ -730,14 +730,14 @@ INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME
 INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME, SORT_BY, LOCALE, IS_DEFAULT, PARAM1, PARAM2, PARAM3, PARAM4, PARAM5) VALUES (218, 'AUDIT_LOG_EVENT', '安全稽核日誌事件', 'forceLogout', 'Force Logout', 1492, 'en-US', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- 2022/04/13 DGRKEEPER設定
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('DGRKEEPER_IP','127.0.0.1','DGRKEEPER Server主機IP');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('DGRKEEPER_PORT','8085','DGRKEEPER Server主機PORT');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('DGRKEEPER_IP','127.0.0.1','DGRKEEPER Server Host IP');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('DGRKEEPER_PORT','8085','DGRKEEPER Server Host PORT');
 
--- 2022/04/13 Online Console開關設定
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('TSMP_ONLINE_CONSOLE','true','Online Console開關');
+-- 2022/04/13 Online Console Switch Setting
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('TSMP_ONLINE_CONSOLE','true','Online Console enablement - true/false');
 
 -- 2022/04/19 Logger Level設定
--- INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('LOGGER_LEVEL','INFO','Logger的log輸出等級設定');
+-- INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('LOGGER_LEVEL','INFO','Logger log output level setting');
 
 -- 20220606, 授權範圍紀錄, Mini
 CREATE TABLE IF NOT EXISTS DGR_OAUTH_APPROVALS (
@@ -757,53 +757,53 @@ CREATE TABLE IF NOT EXISTS DGR_OAUTH_APPROVALS (
 );
  
 -- 20220427, 檢查器的設定, tom
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_XSS_ENABLE', 'true', 'XSS檢查器是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_XXE_ENABLE', 'true', 'XXE檢查器是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_SQL_INJECTION_ENABLE', 'true', 'SQL Injection檢查器是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_IGNORE_API_PATH_ENABLE', 'true', '指定API路徑略過所有檢查器是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_API_STATUS_ENABLE', 'true', 'API開關是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_TRAFFIC_ENABLE', 'true', 'Traffic檢查器是否啟用 (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('IGNORE_API_PATH', '/,/tptoken/oauth/token,/ssotoken/**,/v3/**,/shutdown/**,/version/**,/onlineconsole1/**,/onlineConsole/**,/udpssotoken/**,/cus/**', '指定API路徑略過所有檢查器設定(多筆以逗號(,)隔開)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_XSS_ENABLE', 'true', '"XSS Checker" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_XXE_ENABLE', 'true', '"XXE Checker" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_SQL_INJECTION_ENABLE', 'true', '"SQL Injection Checker" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_IGNORE_API_PATH_ENABLE', 'true', '"API Path IGNORE Checker" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_API_STATUS_ENABLE', 'true', '"API Switch" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_TRAFFIC_ENABLE', 'true', '"Traffic Checker" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('IGNORE_API_PATH', '/,/tptoken/oauth/token,/ssotoken/**,/v3/**,/shutdown/**,/version/**,/onlineconsole1/**,/onlineConsole/**,/udpssotoken/**,/cus/**', 'Specify the API path to skip all checker settings (multiple items separated by commas (,))');
 
 -- 20220606, ES的設定, tom chu
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_URL','https://10.20.30.88:19200/','ES的URL,最後要有/線,多組以逗號(,)隔開');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_ID_PWD','ENC(cGxlYXNlIHNldCB5b3VyIGVzIGlkIGFuZCBwYXNzd29yZCwgU2V0dGluZyBpcyBFU19JRF9QV0Q=)','ES的ID:PWD為組合並以Base64加密後再用ENC加密,URL多組這就多組,在ENC加密前以逗號(,)隔開');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_TEST_TIMEOUT','3000','ES測試連線的timeout');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_MBODY_MASK_FLAG','false','對全部做mbody遮罩,true為遮罩,false為不遮罩');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_IGNORE_API','','ES不紀錄的API,多組以逗號(,)隔開,值為moduleName/apiId');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_MBODY_MASK_API','','對tsmpc的API做mbody遮罩,多組以逗號(,)隔開,值為moduleName/apiId');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_TOKEN_MASK_FLAG','true','對token遮罩,true為遮罩,false為不遮罩');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_MAX_SIZE_MBODY_MASK','0','超過mbody內容值byte的length自動對mbody遮罩,單位為byte,值10(含)以下為不遮罩');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_DGRC_MBODY_MASK_URI','','對dgrc的URI(值含/dgrc)做mbody遮罩,多組以逗號(,)隔開,值為/dgrc/aa/bb/cc');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_DGRC_IGNORE_URI','','對dgrc的ES不紀錄的URI(值含/dgrc),多組以逗號(,)隔開,值為/dgrc/aa/bb/cc');
-INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_LOG_DISABLE','true','是否禁止紀錄ES的LOG,true為是,false為否');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_URL','https://10.20.30.88:19200/','The URL of ES, there must be a / line at the end, multiple groups are separated by commas (,), EX: https://10.20.30.88:19200/, https://10.20.30.88:29200/');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_ID_PWD','ENC(cGxlYXNlIHNldCB5b3VyIGVzIGlkIGFuZCBwYXNzd29yZCwgU2V0dGluZyBpcyBFU19JRF9QV0Q=)','ES''s ID:PWD is combined and encrypted with Base64; you can press the button"ENC" to encrypt with ENC. If you want to set for multiple URLs - Separated by commas before ENC encryption, EX:ENC(id1:pwd1,id2:pwd2)');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_TEST_TIMEOUT','3000','ES connection timeout setting for testing');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_MBODY_MASK_FLAG','false','Mask all mbody, true is masking, false is not masking');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_IGNORE_API','','Ignore the assigned API transation recording in the ES, API list can be list and separated by commas (,), and the value is moduleName/apiId');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_MBODY_MASK_API','','Do mbody mask for the API of tsmpc, API list can be separated by commas (,), and the value is moduleName/apiId');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_TOKEN_MASK_FLAG','true','Mask token, true is masking, false is not masking');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_MAX_SIZE_MBODY_MASK','0','Auto mbody mask when the length exceeding the mbody content value byte, the unit is byte, and the value below 10 (inclusive) will not be masked');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_DGRC_MBODY_MASK_URI','','Make an mbody mask on the URI of dgrc (value contains /dgrc), URL lists are separate by commas, Value format / dgrc/aa/bb/cc');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_DGRC_IGNORE_URI','','ES does not record URIs for dgrc(Value contains /dgrc), URL lists are separate by commas (,),Value is /dgrc/aa/bb/cc');
+INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_LOG_DISABLE','true','Whether to prohibit the recording of ES LOG, true means yes, false means no');
 
 -- 20220712, token的設定, Mini Lee
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_TOKEN_JWE_ENABLE', 'false', 'token JWE加密是否啟用,預設為false(JWS) (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_TOKEN_JWE_ENABLE', 'false', '"Token JWE encryption" enablement (true/false), default:false');
 
 -- 20220718, TSMP access_token 歷史紀錄, 增加欄位, Mini Lee
 ALTER TABLE TSMP_TOKEN_HISTORY ADD RFT_REVOKED_AT DATETIME;
 ALTER TABLE TSMP_TOKEN_HISTORY ADD RFT_REVOKED_STATUS VARCHAR(10);
 
--- 20220801, token的設定, Mini Lee
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_TOKEN_WHITELIST_ENABLE', 'false', 'token 白名單是否啟用,預設為false (true/false)');
+-- 20220801, token settings, Mini Lee
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_TOKEN_WHITELIST_ENABLE', 'false', '"Token whitelist" enablement (true/false), default:false');
 
--- 20220805, API訊息設定, Mini Lee
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_TW_FAPI_ENABLE', 'false', 'API訊息使用TW Open Banking格式是否啟用,預設為false (true/false)');
+-- 20220805, API message settings, Mini Lee
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_TW_FAPI_ENABLE', 'false', '"API information follow TW Open Banking Format" enablement (true/false), default:false');
 
--- 20220810, v4 paths 相容設定, KevinC
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_PATHS_COMPATIBILITY', '2', 'url路徑相容,0:tsmpc only;1:dgrc only;2:tsmpc與dgrc相容,預設2');
+-- 20220810, v4 paths compatibility settings, KevinC
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_PATHS_COMPATIBILITY', '2', 'URL Path compatibility, 0: tsmpc only, 1 : dgrc only, 2 : tsmpc dgrc Compatible, default:2');
 
 -- 20220810,  filter rtnCode, Zoe Lee
 INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('0125', 'zh-TW', 'API不存在', '');
 INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('0125', 'en-US', 'API not found', '');
 
--- 20220815, fixedCache時間, Tom
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('FIXED_CACHE_TIME', '1', 'Fixed Cache的時間,單位為分鐘');
+-- 20220815, fixedCache time, Tom
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('FIXED_CACHE_TIME', '1', 'Static cache time, set in minutes');
 
--- 20220829, es monitor host的設定, tom
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('ES_SYS_TYPE', 'DGR_LOCAL', '用來視別資料用途');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('ES_MONITOR_DISABLE', 'true', '是否禁止紀錄監控,true為是,false為否');
+-- 20220829, es monitor host settings, tom
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('ES_SYS_TYPE', 'DGR_LOCAL', 'Used to identify data purposes');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('ES_MONITOR_DISABLE', 'true', 'Whether to prohibit record ES monitoring, true means yes, false means no');
 
 -- 20220901, TSMP用戶端基本資料表, 增加欄位, Mini Lee
 ALTER TABLE tsmp_client ADD START_DATE BIGINT;
@@ -923,18 +923,18 @@ ALTER TABLE tsmp_token_history ADD TOKEN_QUOTA INT;
 ALTER TABLE tsmp_token_history ADD TOKEN_USED INT;
 ALTER TABLE tsmp_token_history ADD RFT_QUOTA INT;
 ALTER TABLE tsmp_token_history ADD RFT_USED INT;
- 
- -- 20221018, v4 新增 DEFAULT_PAGE_SIZE, Kevin Cheng
+
+-- 20221018, v4 Added DEFAULT_PAGE_SIZE, Kevin Cheng
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DEFAULT_PAGE_SIZE', '20', 'Default Page Size');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_BODY_API_FAIL_SERVICE_MAIL', 'service@thinkpower.com.tw', 'Mail: api-fail parameters');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_BODY_API_FAIL_SERVICE_TEL', '+886-2-8751-1610', 'Mail: api-fail parameters');
- -- 20221018, v4 新增 Setting 參數, Kevin Cheng
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('ERRORLOG_KEYWORD', 'tpi.dgrv4,com.thinkpower', '只印出有包含特定文字的錯誤訊息,多組以逗號(,)隔開');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('FILE_TEMP_EXP_TIME', '3600000', '暫存檔案過期時間(ms)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('AUTH_CODE_EXP_TIME', '600000', 'Auth code 過期時間(ms)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('QUERY_DURATION', '30', 'ES查詢日期區間上限');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SHUTDOWN_ENDPOINT_ALLOWED_IPS', '127.0.0.1,0:0:0:0:0:0:0:1', '允許存取 shutdown endpoint 的 IP host 清單, 以逗號(,)隔開, 未設定則無人可以呼叫');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_SEND_TIME', '3600000', '多久後寄發Email(ms)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_BODY_API_FAIL_SERVICE_MAIL', 'service@thinkpower.com.tw', 'System email body : Service email account (service@thinkpower.com.tw)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_BODY_API_FAIL_SERVICE_TEL', '+886-2-8751-1610', 'System email body : Service number ( 02-12345678 )');
+-- 20221018, v4 Added Setting Parameters, Kevin Cheng
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('ERRORLOG_KEYWORD', 'tpi.dgrv4,com.thinkpower', 'Print error messages contains specific texts, set up multiple texts - separates by commas (,)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('FILE_TEMP_EXP_TIME', '3600000', 'Temporary file expiry time');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('AUTH_CODE_EXP_TIME', '600000', '"Auth code Expired Time" setting(ms)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('QUERY_DURATION', '30', 'ES query date interval upper limit');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SHUTDOWN_ENDPOINT_ALLOWED_IPS', '127.0.0.1,0:0:0:0:0:0:0:1', 'List of IP hosts allowed to access the shutdown endpoint, separated by commas (,), if the setting empty, no one allow to call');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_SEND_TIME', '3600000', 'How long does it take to send the mail (ms) after writing the mail into the schedule');
 
 --20221020, v4 sequence Kevin K
 create sequence  SEQ_TSMP_USER_PK increment by 1 start with 2000000000;
@@ -961,7 +961,7 @@ create sequence  SEQ_TSMP_ALERT_PK increment by 1 start with 2000000000;
 ALTER TABLE TSMP_ROLE ALTER COLUMN ROLE_ALIAS NVARCHAR(255);
  
 -- 20221129, 將 CORS, Access-Control-Allow-Origin 的值加入 Setting, Kevin Cheng
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_CORS_VAL', '*', 'default為 * ， 但可以改為網域，例如: https://dgRv4.io/');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_CORS_VAL', '*', 'CORS default setting *, can change domain,Example:https://dgRv4.io/');
 
 -- 20221201, v4, Gateway LB 加大欄位長度, Mini Lee
 ALTER TABLE TSMP_API ALTER COLUMN SRC_URL NVARCHAR(2000);
@@ -1716,7 +1716,7 @@ CREATE TABLE IF NOT EXISTS DGR_IMPORT_CLIENT_RELATED_TEMP (
 ); 
 
 -- 20240306, 為了controllerMockTest不用每次改TsmpSettingTableInitializer而建立的, Tom
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_JTI_ENABLE', 'false', '當Request包含Authorization時將會檢查此jti於DB中是否過期,若不含此HTTP Header則不檢查, default檢查功能為啟用(true),反之則為停用(false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_JTI_ENABLE', 'false', 'When the request includes Authorization, it will check if the jti is expired in the database. If this HTTP header is not included, no check will be performed. By default, the check function is enabled (true), and it will be disabled (false) otherwise.');
 
 -- 20240401, API匯出入沒有PUBLIC_FLAG和API_RELEASE_TIME, Webber Luo
 ALTER TABLE TSMP_API_IMP ADD PUBLIC_FLAG VARCHAR2(1) NULL;
@@ -2030,7 +2030,12 @@ ALTER TABLE TSMP_API ADD COLUMN SCHEDULED_LAUNCH_DATE BIGINT DEFAULT 0;
 ALTER TABLE TSMP_API ADD COLUMN SCHEDULED_REMOVAL_DATE BIGINT DEFAULT 0;
 
 -- 20240507,
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DEFAULT_DATA_CHANGE_ENABLED', 'false', '異動系統預設資料須啟用(true/false)，影響功能如下: 1.使用者維護，禁止(manager、DpUser)刪除操作。 2.角色維護，禁止(ADMIN)刪除操作。 3.角色清單設定，禁止(Administrator)刪除操作。 4.用戶端維護，禁止(adminConsole、DpClient)刪除操作。 5.群組維護，禁止(SMS(Admin Console))刪除操作。');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DEFAULT_DATA_CHANGE_ENABLED', 'false', 'System default data modification must be enabled (true/false). The following features will be affected:
+1. User maintenance: Prevent deletion for (manager, DpUser).
+2. Role maintenance: Prevent deletion for (ADMIN).
+3. Role list configuration: Prevent deletion for (Administrator).
+4. Client maintenance: Prevent deletion for (adminConsole, DpClient).
+5. Group maintenance: Prevent deletion for (SMS(Admin Console)).');
 
 -- 20240516, 添加兩個欄位用於預定DGR API啟用停用功能, Kevin Cheng
 ALTER TABLE TSMP_API ADD COLUMN ENABLE_SCHEDULED_DATE BIGINT DEFAULT 0;

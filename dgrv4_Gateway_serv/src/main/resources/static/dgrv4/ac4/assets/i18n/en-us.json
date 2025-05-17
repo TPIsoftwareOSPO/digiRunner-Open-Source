@@ -1314,5 +1314,13 @@
   "view_mode": {
     "0":"Manage View",
     "1":"Audit review"
-  }
+  },
+  "abnormal_elapsed_time": "Abnormal Elapsed Time",
+  "abnormal_elapsed_time_tip" : "HTTP status code success (less than 400) but \"Elapsed Time\" greater than \"Abnormal Elapsed Time\" is considered abnormal API. Less than 0 means ignoring this condition and only searching for HTTP status code failure (greater than or equal to 400)\nFor example, there are 4 records:\n        The first status code is 400 and the Elapsed Time is 800ms.\n        The second status code is 500 and the Elapsed Time is 1800ms.\n        The third status code is 200 and the Elapsed Time is 1200ms.\n        The fourth status code is 200 and the Elapsed Time is 31000ms.\nIf the Abnormal Elapsed Time is 30000ms, the first, second and fourth records will be searched out.\nIf the Abnormal Elapsed Time is -1ms, search for the first and second records.",
+  "status_code": "Status Code",
+  "elapsed_time": "Elapsed Time",
+  "date_duration": "Duration",
+  "date_duration_tip": "When the start time is empty, it means to start immediately. When the end time is empty, it means to never end.",
+  "date_duration_start": "When the start time is empty, it means to start immediately.",
+  "date_duration_end": "When the end time is empty, it means to never end."
 }

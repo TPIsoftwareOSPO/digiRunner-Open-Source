@@ -91,7 +91,7 @@ public class DPB9937Service {
 		dbInfoPacket.action = action;
 		// 傳送給給所有節點
 		TPILogger.lc.send(dbInfoPacket);
-		TPILogger.lc.paramObj.put(TPILogger.DBINFOMAP, map);
+		TPILogger.lc.paramObj.put(TPILogger.DBINFOMAP_TITLE, map);
 	}
 
 	protected String getCusIpPort() {

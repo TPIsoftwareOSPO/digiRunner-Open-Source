@@ -168,13 +168,11 @@ public class DPB0102Service {
 		if (invDt != null) {
 			invDateTime = DateTimeUtil.dateTimeToString(new Date(invDt), DateTimeFormatEnum.西元年月日時分秒_2).orElse(new String());
 		}
-		if (!StringUtils.isEmpty(effDateTime)) {
-			effPeriod += effDateTime;
-			if (!StringUtils.isEmpty(invDateTime)) {
-				effPeriod += " ~ " + invDateTime;
-			}
-		} else if (!StringUtils.isEmpty(invDateTime)) {
-			effPeriod += invDateTime;
+		
+		if(StringUtils.hasText(effDateTime) || StringUtils.hasText(invDateTime)) {
+			effDateTime = String.format("%19s", effDateTime);
+			invDateTime = String.format("%19s", invDateTime);
+			effPeriod = effDateTime + " ~ " + invDateTime;
 		}
 		return effPeriod;
 	}

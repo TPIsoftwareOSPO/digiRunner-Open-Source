@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import tpi.dgrv4.codec.constant.ISqlExecutor;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0189Req;
 import tpi.dgrv4.dpaa.vo.DPB0189Resp;
@@ -105,12 +106,7 @@ public class DPB0189Service {
 	                    HikariConfig config = new HikariConfig();
 	                    config.setJdbcUrl(connVo.getJdbcUrl());
 	                    config.setUsername(connVo.getUserName());
-	                    String mima = null;
-	                    if ("ENC()".equals(connVo.getMima())) {
-	                        mima = "";
-	                    } else {
-	                        mima = getTsmpSettingService().getENCPlainVal(connVo.getMima());
-	                    }
+	                    String mima = decryptMima(connVo.getMima());
 	                    config.setPassword(mima);
 	                    config.setMaximumPoolSize(connVo.getMaxPoolSize());
 	                    config.setConnectionTimeout(connVo.getConnectionTimeout());
@@ -184,6 +180,18 @@ public class DPB0189Service {
 
         return resp;
     }
+    
+    /**
+     * [ZH] 將密碼做 RSA 解密
+     * [EN] Decrypt the password using RSA
+     */
+	public String decryptMima(String mimaCiphertext) {
+		if ("ENC()".equals(mimaCiphertext)) {
+			return "";
+		} else {
+			return getTsmpSettingService().getENCPlainVal(mimaCiphertext); // RSA decryption
+		}
+	}
 
     @SuppressWarnings("java:S3649")  // 停用 SQL 注入檢查, 因為此入口必需通過 capikey 的檢查, 此技術只適用在 container 內部互相傳送使用
     private String execJdbc(HikariDataSource dataSource, DPB0189Req req) throws Exception {

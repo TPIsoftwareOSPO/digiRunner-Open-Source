@@ -59,6 +59,7 @@ const routes: Routes = [
 
       { path: 'ac05/ac0501', loadChildren: () => import('./ac05/ac0501/ac0501.module').then(m => m.Ac0501Module), data: { id: 'ac0501' } },
       { path: 'ac05/ac0502', loadChildren: () => import('./ac05/ac0502/ac0502.module').then(m => m.Ac0502Module), data: { id: 'ac0502' } },
+      { path: 'ac05/ac0503', loadChildren: () => import('./ac05/ac0503/ac0503.module').then(m => m.Ac0503Module), data: { id: 'ac0503' } },
       // { path: 'ac05/ac0504', loadChildren: () => import('./ac05/ac0504/ac0504.module').then(m => m.Ac0504Module), data: { id: 'ac0504' } },
       // { path: 'ac05/ac0507', loadChildren: () => import('./ac05/ac0507/ac0507.module').then(m => m.Ac0507Module), data: { id: 'ac0507' } },
       { path: 'ac05/ac0508', loadChildren: () => import('./ac05/ac0508/ac0508.module').then(m => m.Ac0508Module), data: { id: 'ac0508' } },

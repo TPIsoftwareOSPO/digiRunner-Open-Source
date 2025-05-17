@@ -85,7 +85,14 @@ public class GtwIdPMockJSConsentUiController {
 			);
 			
 			TPILogger.tl.debug("Redirect to URL【dgR Approve URL】: " + redirectUrl);
-			httpResp.sendRedirect(redirectUrl);
+			
+			// [ZH] 不要用 httpResp.sendRedirect (302), 以免前端會轉導2次,
+			// sendRedirect 是 HTTP 302 重定向, 會更改 URL, 是客戶端重定向 (http code 302),
+			// RequestDispatcher.forward 是服務器端轉發, URL 不變 (http code 200).
+			// [EN] Do not use httpResp.sendRedirect (302), to avoid the front end redirecting twice,
+			// sendRedirect is HTTP 302 redirect, will change the URL, is a client redirect (http code 302),
+			// RequestDispatcher.forward is server-side forwarding, the URL remains unchanged (http code 200).
+			httpReq.getRequestDispatcher(redirectUrl).forward(httpReq, httpResp); 
 			
 			return null;
 		} catch (Exception e) {

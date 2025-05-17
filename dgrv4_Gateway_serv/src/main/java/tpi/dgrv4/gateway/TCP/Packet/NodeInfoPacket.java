@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.utils.DateTimeUtil;
-import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.tcp.utils.communication.CommunicationServer;
@@ -58,11 +57,11 @@ public class NodeInfoPacket implements Packet_i {
 
 	public static final String rdbQueue = "rdbQueue";
 
-	public static final String CPU = "CPU";
-	public static final String MEM = "MEM";
-	public static final String H_USED = "H_USED";
-	public static final String H_FREE = "H_FREE";
-	public static final String H_TOTAL = "H_TOTAL";
+	public static final String CPU_TITLE = "CPU";
+	public static final String MEM_TITLE = "MEM";
+	public static final String H_USED_TITLE = "H_USED";
+	public static final String H_FREE_TITLE = "H_FREE";
+	public static final String H_TOTAL_TITLE = "H_TOTAL";
 
 	public static final String API_ReqThroughput = "API_ReqThroughput";
 	public static final String API_RespThroughput = "API_RespThroughput";
@@ -72,10 +71,10 @@ public class NodeInfoPacket implements Packet_i {
 	public static final String lastUpdateTimeSettingInfo = "lastUpdateTimeSetting";
 	public static final String lastUpdateTimeTokenInfo = "lastUpdateTimeToken";
 	
-	public static final String DBINFO = "dbInfo";
-	public static final String DBCONNECT = "dbConnect";
+	public static final String DBINFO_TITLE = "dbInfo";
+	public static final String DBCONNECT_TITLE = "dbConnect";
 
-	public static final String METASPACE = "METASPACE";
+	public static final String METASPACE_TITLE = "METASPACE";
 
 	public String main;
 
@@ -202,15 +201,15 @@ public class NodeInfoPacket implements Packet_i {
 				nodeInfoData.put(esQueue, ES_Queue);
 				nodeInfoData.put(rdbQueue, RDB_Queue);
 
-				nodeInfoData.put(CPU, cpu);
-				nodeInfoData.put(METASPACE, metaSpace);
-				nodeInfoData.put(MEM, mem);
-				nodeInfoData.put(H_USED, h_used);
-				nodeInfoData.put(H_FREE, h_free);
-				nodeInfoData.put(H_TOTAL, h_total);
-				nodeInfoData.put(DBCONNECT, dbConnect);
+				nodeInfoData.put(CPU_TITLE, cpu);
+				nodeInfoData.put(METASPACE_TITLE, metaSpace);
+				nodeInfoData.put(MEM_TITLE, mem);
+				nodeInfoData.put(H_USED_TITLE, h_used);
+				nodeInfoData.put(H_FREE_TITLE, h_free);
+				nodeInfoData.put(H_TOTAL_TITLE, h_total);
+				nodeInfoData.put(DBCONNECT_TITLE, dbConnect);
 				if (TPILogger.dbConnByApi) {
-					nodeInfoData.put(DBINFO, dbInfo);
+					nodeInfoData.put(DBINFO_TITLE, dbInfo);
 				}
 
 				// API轉發吞吐量資訊

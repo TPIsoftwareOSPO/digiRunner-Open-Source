@@ -419,6 +419,7 @@ export enum TxID {
   testEsConnection = 'DPB9938',
   testKibanaConnection = 'DPB9939',
   queryRealtimeDashboardData = 'AA1212',
+  queryApiAbnormal = 'AA1213',
 }
 
 export enum GrantType {

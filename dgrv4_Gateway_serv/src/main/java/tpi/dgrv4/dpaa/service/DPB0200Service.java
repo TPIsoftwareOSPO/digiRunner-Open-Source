@@ -3,7 +3,6 @@ package tpi.dgrv4.dpaa.service;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -11,6 +10,9 @@ import org.springframework.util.StringUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0200Req;
@@ -19,24 +21,23 @@ import tpi.dgrv4.gateway.component.cache.proxy.TsmpCoreTokenHelperCacheProxy;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+/**
+ * [ZH] 測試RDB連線資訊
+ * [EN] Test RDB connection information
+ */
+
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class DPB0200Service {
 	
-	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
-	private TsmpSettingService tsmpSettingService;
-	private ConfigurableApplicationContext configurableApplicationContext;
+	private final TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
+	private final TsmpSettingService tsmpSettingService;
+	private final ConfigurableApplicationContext configurableApplicationContext;
+	private final DPB0189Service dpb0189Service;
 	
 	private final static String SUCCESS = "Connect success";
 	private final static String FAIL = "Connect fail";
-
-	@Autowired
-	public DPB0200Service(TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy,
-			TsmpSettingService tsmpSettingService, ConfigurableApplicationContext configurableApplicationContext) {
-		super();
-		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
-		this.tsmpSettingService = tsmpSettingService;
-		this.configurableApplicationContext = configurableApplicationContext;
-	}
 
 	public DPB0200Resp testRdbConnection(TsmpAuthorization authorization, DPB0200Req req) {
 		DPB0200Resp resp = new DPB0200Resp();
@@ -46,6 +47,7 @@ public class DPB0200Service {
 		String jdbcUrl = req.getJdbcUrl();
 		String username = req.getUserName();
 		String mima = req.getMima();
+		mima = getDpb0189Service().decryptMima(mima);
 		String connName = req.getConnName();
 		boolean isDefaultDb = "APIM-default-DB".equalsIgnoreCase(connName);
 		HikariConfig config = null;

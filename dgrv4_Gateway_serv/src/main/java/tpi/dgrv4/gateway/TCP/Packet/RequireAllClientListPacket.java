@@ -114,12 +114,12 @@ public class RequireAllClientListPacket implements Packet_i {
 					c.setVersion(nodeInfoData.get(NodeInfoPacket.versionInfo));
 					c.setUpdateTime(nodeInfoData.get(NodeInfoPacket.updateTimeInfo));
 
-					c.setCpu(nodeInfoData.get(NodeInfoPacket.CPU));
-					c.setMem(nodeInfoData.get(NodeInfoPacket.MEM));
-					c.setMetaSpace(nodeInfoData.get(NodeInfoPacket.METASPACE));
-					c.setH_used(nodeInfoData.get(NodeInfoPacket.H_USED));
-					c.setH_free(nodeInfoData.get(NodeInfoPacket.H_FREE));
-					c.setH_total(nodeInfoData.get(NodeInfoPacket.H_TOTAL));
+					c.setCpu(nodeInfoData.get(NodeInfoPacket.CPU_TITLE));
+					c.setMem(nodeInfoData.get(NodeInfoPacket.MEM_TITLE));
+					c.setMetaSpace(nodeInfoData.get(NodeInfoPacket.METASPACE_TITLE));
+					c.setH_used(nodeInfoData.get(NodeInfoPacket.H_USED_TITLE));
+					c.setH_free(nodeInfoData.get(NodeInfoPacket.H_FREE_TITLE));
+					c.setH_total(nodeInfoData.get(NodeInfoPacket.H_TOTAL_TITLE));
 
 					// API轉發吞吐量資訊
 					c.setApi_ReqThroughputSize(nodeInfoData.get(NodeInfoPacket.API_ReqThroughput));
@@ -127,7 +127,7 @@ public class RequireAllClientListPacket implements Packet_i {
 					// DB連線資訊 密碼部分要隱碼
 					// 最後資訊要 base64 , ex:b64.xxx
 					if (TPILogger.dbConnByApi) {
-						String dbInfo = nodeInfoData.get(NodeInfoPacket.DBINFO);
+						String dbInfo = nodeInfoData.get(NodeInfoPacket.DBINFO_TITLE);
 						ObjectMapper oMapper = new ObjectMapper();
 						JsonNode jn = oMapper.readTree(dbInfo);
 						findAndModifyValues(jn);
@@ -140,7 +140,7 @@ public class RequireAllClientListPacket implements Packet_i {
 
 					}
 					// 目前的DB連線帳號
-					c.setDbConnect(nodeInfoData.get(NodeInfoPacket.DBCONNECT));
+					c.setDbConnect(nodeInfoData.get(NodeInfoPacket.DBCONNECT_TITLE));
 					// 如果更新時間超過 n000, 則移除
 					Optional<Date> date = DateTimeUtil.stringToDateTime(c.getUpdateTime(), DateTimeFormatEnum.西元年月日時分秒);
 					Date updateDate = date.orElse(DateTimeUtil.now());

@@ -234,7 +234,10 @@ public class GtwIdPLoginService {
 		
 		UserLoginData userLoginData = new UserLoginData();
        
-		if (StringUtils.hasLength(reqCredential)) {// 若 credential 有值
+		if(StringUtils.hasLength(reqCredential) && "none".equalsIgnoreCase(reqCredential)) { // for POST, 密碼不加密
+			decryptType = "NONE";
+			
+		}else if (StringUtils.hasLength(reqCredential)) {// 若 credential 有值
 			decryptType = "JWE";
 			
 		} else if (StringUtils.hasLength(reqUserName) //
@@ -247,7 +250,12 @@ public class GtwIdPLoginService {
 		String userName = null;
 		String userMima = null;
 		Long exp = null;
-		if ("AES".equals(decryptType)) {
+		
+		if("NONE".equals(decryptType)) { // 不做解密
+			userName = reqUserName;
+			userMima = reqUserMima;
+			
+		} else if ("AES".equals(decryptType)) {
 			// 1.將 user 密碼做 AES 解密, 取得 User 密碼明文
 			userName = reqUserName;
 			userMima = getTsmpTAEASKHelper().decrypt(reqUserMima);

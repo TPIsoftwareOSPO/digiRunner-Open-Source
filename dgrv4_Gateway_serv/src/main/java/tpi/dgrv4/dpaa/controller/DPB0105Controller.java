@@ -17,6 +17,7 @@ import tpi.dgrv4.dpaa.util.ControllerUtil;
 import tpi.dgrv4.dpaa.vo.DPB0105Req;
 import tpi.dgrv4.dpaa.vo.DPB0105Req2;
 import tpi.dgrv4.dpaa.vo.DPB0105Resp;
+import tpi.dgrv4.entity.exceptions.DgrException;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
@@ -44,6 +45,8 @@ public class DPB0105Controller {
 			, @RequestBody TsmpBaseReq<BeforeControllerReq> req) {
 		try {
 			return ControllerUtil.getReqConstraints(req, new DPB0105Req2());
+		} catch (DgrException e) {
+			throw new DgrException(e, req.getReqHeader());
 		} catch (Exception e) {
 			throw new TsmpDpAaException(e, req.getReqHeader());
 		}
@@ -67,6 +70,8 @@ public class DPB0105Controller {
 		try {
 			ControllerUtil.validateRequest(tsmpHttpHeader.getAuthorization(), req);
 			resp = dpb0105Service.updateRjob(tsmpHttpHeader.getAuthorization(), req.getBody(), req.getReqHeader());
+		} catch (DgrException e) {
+			throw new DgrException(e, req.getReqHeader());
 		} catch (Exception e) {
 			throw new TsmpDpAaException(e, req.getReqHeader());
 		}

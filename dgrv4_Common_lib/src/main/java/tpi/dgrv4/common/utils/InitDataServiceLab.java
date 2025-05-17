@@ -18,9 +18,9 @@ public class InitDataServiceLab {
 		String value;
 		String memo;
 		
-		String[][] arrData = {{id = "SERVICE_MAIL_ENABLE", value = "true", memo = "主要smtp server設定"}
-							 ,{"SERVICE_MAIL_HOST", "smtp.gmail.com", "主要smtp server設定"}
-							 ,{(id = "SERVICE_MAIL_PORT"), (value = "587"), (memo = "主要smtp server設定")}};
+		String[][] arrData = {{id = "SERVICE_MAIL_ENABLE", value = "true", memo = "Main SMTP server setting : Sender authentication process enablement ( true/false )"}
+							 ,{"SERVICE_MAIL_HOST", "smtp.gmail.com", ",Main SMTP server setting : SMTP server domain name ( smtp.gmail.com )"}
+							 ,{(id = "SERVICE_MAIL_PORT"), (value = "587"), (memo = "Main SMTP server setting : SMTP server service-port")}};
 
 		for(int i=0; i <arrData.length ;i++) {
 			 Map<String,String> dataMap = new HashMap<>();

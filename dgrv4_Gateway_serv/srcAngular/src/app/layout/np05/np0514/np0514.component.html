@@ -1,29 +1,21 @@
-<app-container
-  [title]="currentTitle"
-  [isDefault]="pageNum == 1"
-  (headerReturn)="headerReturn()"
->
+<app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <!-- 查詢週期排程 -->
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form" (ngSubmit)="queryScheduleList()">
       <div class="form-group row">
         <div class="col-12 d-flex">
           <div class="col-auto">
-          <p-dropdown [showClear]="true" [options]="statusOption" [filter]="true" placeholder="{{ 'plz_chs' | translate }}"
-            formControlName="status" [style]="{ width: '100%' }">
-          </p-dropdown>
+            <p-dropdown [showClear]="true" [options]="statusOption" [filter]="true"
+              placeholder="{{ 'plz_chs' | translate }}" formControlName="status" [style]="{ width: '100%' }">
+            </p-dropdown>
           </div>
           <app-search-input placeholder="{{ 'alias' | translate }}、{{
                       'frequency' | translate
-                    }}、{{ 'memo' | translate }}" [control]="form.get('keyword')" [searchFn]="queryScheduleList.bind(this)"
-            class="col-6 col-lg-6 col-sm-6 ms-2"></app-search-input>
+                    }}、{{ 'memo' | translate }}" [control]="form.get('keyword')"
+            [searchFn]="queryScheduleList.bind(this)" class="col-6 col-lg-6 col-sm-6 ms-2"></app-search-input>
 
-          <button
-            type="button"
-            class="btn tpi-btn tpi-second ms-auto"
-            [disabled]="canCreate == false"
-            (click)="changePage('create')"
-          >
+          <button type="button" class="btn tpi-btn tpi-second ms-auto" [disabled]="canCreate == false"
+            (click)="changePage('create')">
             {{ "button.create" | translate }}
           </button>
         </div>
@@ -52,23 +44,15 @@
             </div> -->
     </form>
     <hr />
-    <p-table
-      #body
-      *ngIf="scheduleCols"
-      [columns]="scheduleCols"
-      [value]="scheduleList"
-      selectionMode="single"
-      responsiveLayout="scroll"
-      styleClass="p-datatable-striped"
-      [style]="{ 'word-break': 'break-word' }"
-    >
+    <p-table #body *ngIf="scheduleCols" [columns]="scheduleCols" [value]="scheduleList" selectionMode="single"
+      responsiveLayout="scroll" styleClass="p-datatable-striped" [style]="{ 'word-break': 'break-word' }">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width" />
         </colgroup>
-        <colgroup style="width: 240px">
+        <colgroup style="width: 120px">
           {{
-            "action" | translate
+          "action" | translate
           }}
         </colgroup>
       </ng-template>
@@ -76,46 +60,30 @@
         <tr>
           <th *ngFor="let col of columns" scope="col">
             {{ col.header }}
+            <i class="far fa-question-circle ms-2 " pTooltip="{{'date_duration_tip'|translate}}" *ngIf="col.field == 'effPeriod'" [escape]="false"></i>
           </th>
-          <th style="width: 240px" scope="col">{{ "action" | translate }}</th>
+          <th style="width: 120px" scope="col">{{ "action" | translate }}</th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-rowData let-columns="columns">
         <tr>
           <td *ngFor="let col of columns" [style.width]="col.width">
-            {{ rowData[col.field] }}
+            <span
+              [style]="{'white-space': col.field == 'effPeriod' ? 'pre':'','font-family': col.field == 'effPeriod' || col.field == 'nextDateTime' ? 'monospace':'inherit'}">
+              {{ rowData[col.field] }}
+            </span>
           </td>
 
-          <td style="text-align: center; width: 240px">
-            <button
-              pButton
-              pRipple
-              type="button"
-              icon="pi pi-eye"
-              class="p-button-rounded p-button-text p-button-plain"
-              (click)="changePage('detail', rowData)"
-              [pTooltip]="'button.detail' | translate"
-              tooltipPosition="top"
-            ></button>
-            <button
-              pButton
-              pRipple
-              type="button"
-              icon="fa fa-edit"
-              class="p-button-rounded p-button-text p-button-plain"
-              (click)="changePage('update', rowData)"
-              [pTooltip]="'button.edit' | translate"
-              tooltipPosition="top"
-            ></button>
-            <button
-              pButton
-              pRipple
-              type="button"
-              icon="pi pi-ellipsis-v"
-              class="p-button-rounded p-button-text p-button-plain"
-              (click)="toggleBtnMenu($event, rowData)"
-            ></button>
+          <td style="text-align: center; width: 120px">
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              (click)="changePage('detail', rowData)" [pTooltip]="'button.detail' | translate"
+              tooltipPosition="top"></button>
+            <button pButton pRipple type="button" icon="fa fa-edit"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
+              [pTooltip]="'button.edit' | translate" tooltipPosition="top"></button>
+            <button pButton pRipple type="button" icon="pi pi-ellipsis-v"
+              class="p-button-rounded p-button-text p-button-plain" (click)="toggleBtnMenu($event, rowData)"></button>
 
             <!-- <button pButton pRipple type="button" icon="pi pi-ellipsis-h" class="p-button-rounded p-button-text p-button-plain"
                         (click)="toggleBtnMenu2($event,rowData)" #hihi ></button> -->
@@ -168,18 +136,12 @@
       <ng-template pTemplate="footer" let-columns>
         <tr *ngIf="scheduleListRowcount">
           <td [attr.colspan]="columns.length + 1" style="color: #b7b7b7">
-            <span style="vertical-align: middle"
-              >{{ "row_count" | translate }}: {{ scheduleListRowcount }}</span
-            >
+            <span style="vertical-align: middle">{{ "row_count" | translate }}: {{ scheduleListRowcount }}</span>
             <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreScheduleList();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
-            <button
-              type="button"
-              class="btn tpi-header-return"
-              (click)="moreScheduleList()"
-            >
+            <button type="button" class="btn tpi-header-return" (click)="moreScheduleList()">
               {{ "button.more" | translate }}
               <i class="fas fa-angle-double-right" style="margin-left: 5px"></i>
             </button>
@@ -231,73 +193,45 @@
         <div class="col-12">
           <label class="required control-label" id="cronJson_label">
             {{ "repeating_time" | translate }}
-            <i
-              class="far fa-question-circle"
-              pTooltip="{{ scheduleDetailData.cronExpression }}"
-              [escape]="false"
-              *ngIf="currentAction == 'detail'"
-            >
+            <i class="far fa-question-circle" pTooltip="{{ scheduleDetailData.cronExpression }}" [escape]="false"
+              *ngIf="currentAction == 'detail'">
             </i>
           </label>
         </div>
         <!-- 每天 -->
         <div class="col-12 field-flex-start" style="min-height: 40px;">
-          <p-radioButton
-            formControlName="frequency"
-            value="0"
-            inputId="frequency0"
-          ></p-radioButton>
+          <p-radioButton formControlName="frequency" value="0" inputId="frequency0"></p-radioButton>
           <label for="frequency0" class="mb-0">{{
             "everyday" | translate
-          }}</label>
+            }}</label>
           <ng-container *ngIf="frequency.value == '0'">
             <div *ngTemplateOutlet="time"></div>
           </ng-container>
         </div>
         <!-- 每周 -->
         <div class="col-12 field-flex-start" style="min-height: 40px;">
-          <p-radioButton
-            formControlName="frequency"
-            value="2"
-            inputId="frequency2"
-          ></p-radioButton>
+          <p-radioButton formControlName="frequency" value="2" inputId="frequency2"></p-radioButton>
           <label for="frequency2" class="mb-0">{{
             "every_week" | translate
-          }}</label>
+            }}</label>
           <ng-container *ngIf="frequency.value == '2'">
-            <app-datepicker
-              id="weekRange"
-              [dateType]="'week'"
-              formControlName="weekRange"
-            ></app-datepicker>
+            <app-datepicker id="weekRange" [dateType]="'week'" formControlName="weekRange"></app-datepicker>
             <div *ngTemplateOutlet="time"></div>
           </ng-container>
 
-          <div
-            *ngIf="frequency.invalid && (frequency.dirty || frequency.touched)"
-            class="text-danger"
-          >
+          <div *ngIf="frequency.invalid && (frequency.dirty || frequency.touched)" class="text-danger">
             <small class="form-text">{{
               frequency.errors.required | translate
-            }}</small>
+              }}</small>
           </div>
         </div>
         <!-- 每月 -->
         <div class="col-12 field-flex-start" style="min-height: 40px;">
-          <p-radioButton
-            formControlName="frequency"
-            value="1"
-            inputId="frequency1"
-          ></p-radioButton>
+          <p-radioButton formControlName="frequency" value="1" inputId="frequency1"></p-radioButton>
           <label for="frequency1" class="mb-0">
-            {{ "every_month" | translate }}</label
-          >
+            {{ "every_month" | translate }}</label>
           <ng-container *ngIf="frequency.value == '1'">
-            <app-datepicker
-              id="dayRange"
-              [dateType]="'month'"
-              formControlName="dayRange"
-            ></app-datepicker>
+            <app-datepicker id="dayRange" [dateType]="'month'" formControlName="dayRange"></app-datepicker>
             <div *ngTemplateOutlet="time"></div>
           </ng-container>
         </div>
@@ -323,130 +257,80 @@
           <p-dropdown [options]="hourOption" formControlName="hour">
           </p-dropdown>
           <label class="control-label mb-0">:</label>
-          <div
-            *ngIf="hour.invalid && (hour.dirty || hour.touched)"
-            class="text-danger"
-          >
+          <div *ngIf="hour.invalid && (hour.dirty || hour.touched)" class="text-danger">
             <small class="form-text">{{
               hour.errors.required | translate
-            }}</small>
+              }}</small>
           </div>
           <p-dropdown [options]="minuteOption" formControlName="minute">
           </p-dropdown>
           <!-- <label class="control-label mb-0">{{ "minute" | translate }}</label> -->
-          <div
-            *ngIf="minute.invalid && (minute.dirty || minute.touched)"
-            class="text-danger"
-          >
+          <div *ngIf="minute.invalid && (minute.dirty || minute.touched)" class="text-danger">
             <small class="form-text">{{
               minute.errors.required | translate
-            }}</small>
+              }}</small>
           </div>
         </ng-template>
         <div class="col-12 field-flex-start" style="min-height: 40px;">
           <!-- 每十分鐘 -->
           <!-- <div class="p-form-check-line form-group"> -->
-            <div class="p-form-check">
-              <p-radioButton
-                formControlName="frequency"
-                value="3"
-                inputId="frequency3"
-              ></p-radioButton>
-              <label for="frequency3" class="ms-2 mb-0">
-                {{ "every_ten_minutes" | translate }}</label
-              >
-            </div>
-            <!-- 每半小時 -->
-            <div class="p-form-check">
-              <p-radioButton
-                formControlName="frequency"
-                value="4"
-                inputId="frequency4"
-              ></p-radioButton>
-              <label for="frequency4" class="ms-2 mb-0">
-                {{ "every_halt_hour" | translate }}</label
-              >
-            </div>
-            <!-- 每一小時 -->
-            <div class="p-form-check">
-              <p-radioButton
-                formControlName="frequency"
-                value="5"
-                inputId="frequency5"
-              ></p-radioButton>
-              <label for="frequency5" class="ms-2 mb-0">
-                {{ "every_hour" | translate }}</label
-              >
-            </div>
-            <!-- 每二小時 -->
-            <div class="p-form-check">
-              <p-radioButton
-                formControlName="frequency"
-                value="6"
-                inputId="frequency6"
-              ></p-radioButton>
-              <label for="frequency6" class="ms-2 mb-0">
-                {{ "every_two_hours" | translate }}</label
-              >
-            </div>
-            <!-- 每六小時 -->
-            <div class="p-form-check">
-              <p-radioButton
-                formControlName="frequency"
-                value="7"
-                inputId="frequency7"
-              ></p-radioButton>
-              <label for="frequency7" class="ms-2 mb-0">
-                {{ "every_six_hours" | translate }}</label
-              >
-            </div>
-            <!-- 每十二小時 -->
-            <div class="p-form-check">
-              <p-radioButton
-                formControlName="frequency"
-                value="8"
-                inputId="frequency8"
-              ></p-radioButton>
-              <label for="frequency8" class="ms-2 mb-0">
-                {{ "every_twelve_hours" | translate }}</label
-              >
-            </div>
+          <div class="p-form-check">
+            <p-radioButton formControlName="frequency" value="3" inputId="frequency3"></p-radioButton>
+            <label for="frequency3" class="ms-2 mb-0">
+              {{ "every_ten_minutes" | translate }}</label>
+          </div>
+          <!-- 每半小時 -->
+          <div class="p-form-check">
+            <p-radioButton formControlName="frequency" value="4" inputId="frequency4"></p-radioButton>
+            <label for="frequency4" class="ms-2 mb-0">
+              {{ "every_halt_hour" | translate }}</label>
+          </div>
+          <!-- 每一小時 -->
+          <div class="p-form-check">
+            <p-radioButton formControlName="frequency" value="5" inputId="frequency5"></p-radioButton>
+            <label for="frequency5" class="ms-2 mb-0">
+              {{ "every_hour" | translate }}</label>
+          </div>
+          <!-- 每二小時 -->
+          <div class="p-form-check">
+            <p-radioButton formControlName="frequency" value="6" inputId="frequency6"></p-radioButton>
+            <label for="frequency6" class="ms-2 mb-0">
+              {{ "every_two_hours" | translate }}</label>
+          </div>
+          <!-- 每六小時 -->
+          <div class="p-form-check">
+            <p-radioButton formControlName="frequency" value="7" inputId="frequency7"></p-radioButton>
+            <label for="frequency7" class="ms-2 mb-0">
+              {{ "every_six_hours" | translate }}</label>
+          </div>
+          <!-- 每十二小時 -->
+          <div class="p-form-check">
+            <p-radioButton formControlName="frequency" value="8" inputId="frequency8"></p-radioButton>
+            <label for="frequency8" class="ms-2 mb-0">
+              {{ "every_twelve_hours" | translate }}</label>
+          </div>
           <!-- </div> -->
         </div>
         <!-- 開始時間 -->
         <div class="col-6">
           <label class="control-label" id="effDateTime_label" for="effDateTime">
             {{ "start_time" | translate }}
+            <i class="far fa-question-circle ms-2 " pTooltip="{{'date_duration_start'|translate}}" [escape]="false"></i>
           </label>
-          <p-calendar
-            [style]="{ width: '100%' }"
-            [inputStyle]="{ width: '95%' }"
-            appendTo="body"
-            formControlName="effDateTime"
-            dateFormat="yy/mm/dd"
-            [showIcon]="true"
-            showTime="true"
-            [minDate]="minDate"
-            [showButtonBar]="true"
-          >
+          <p-calendar [style]="{ width: '100%' }" [inputStyle]="{ width: '95%' }" appendTo="body"
+            formControlName="effDateTime" dateFormat="yy/mm/dd" [showIcon]="true" showTime="true" [minDate]="minDate"
+            [showButtonBar]="true">
           </p-calendar>
         </div>
         <!-- 結束時間 -->
         <div class="col-6">
           <label class="control-label" id="invDateTime_label" for="invDateTime">
             {{ "end_time" | translate }}
+            <i class="far fa-question-circle ms-2 " pTooltip="{{'date_duration_end'|translate}}" [escape]="false"></i>
           </label>
-          <p-calendar
-            [style]="{ width: '100%' }"
-            [inputStyle]="{ width: '95%' }"
-            appendTo="body"
-            formControlName="invDateTime"
-            dateFormat="yy/mm/dd"
-            [showIcon]="true"
-            showTime="true"
-            [minDate]="minDate"
-            [showButtonBar]="true"
-          >
+          <p-calendar [style]="{ width: '100%' }" [inputStyle]="{ width: '95%' }" appendTo="body"
+            formControlName="invDateTime" dateFormat="yy/mm/dd" [showIcon]="true" showTime="true" [minDate]="minDate"
+            [showButtonBar]="true">
           </p-calendar>
         </div>
       </div>
@@ -628,29 +512,17 @@
       <!-- <app-datepicker [dateType]="'month'" formControlName="dayRange"></app-datepicker>
             <app-datepicker [dateType]="'week'" formControlName="weekRange"></app-datepicker> -->
 
-      <app-schedule-content
-        formControlName="rjobItems"
-        [action]="currentAction"
-      ></app-schedule-content>
+      <app-schedule-content formControlName="rjobItems" [action]="currentAction"></app-schedule-content>
       <hr />
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button
-            *ngIf="currentAction != 'detail'"
-            type="button"
-            class="btn tpi-btn tpi-second float-start me-3"
+          <button *ngIf="currentAction != 'detail'" type="button" class="btn tpi-btn tpi-second float-start me-3"
             [disabled]="
               form.invalid || rjobItems.value.length == 0 || !isInvalid
-            "
-            (click)="saveScheduleSetting()"
-          >
+            " (click)="saveScheduleSetting()">
             {{ btnName }}
           </button>
-          <button
-            type="button"
-            class="btn tpi-btn tpi-primary float-start"
-            (click)="changePage('query')"
-          >
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
             {{ "button.return_to_list" | translate }}
           </button>
         </div>
@@ -663,33 +535,24 @@
         <div class="col-12 col-xl-12 col-lg-12">
           <label class="control-label">{{
             "cycle_schedule_uid" | translate
-          }}</label
-          >：
+            }}</label>：
           <label>{{ scheduleHistoryData.apptRjobId }}</label>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <label class="control-label">{{ "name" | translate }}</label
-          >：
+          <label class="control-label">{{ "name" | translate }}</label>：
           <label>{{ scheduleHistoryData.rjobName }}</label>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <label class="control-label">{{ "memo" | translate }}</label
-          >：
+          <label class="control-label">{{ "memo" | translate }}</label>：
           <label>{{ scheduleHistoryData.remark }}</label>
         </div>
       </div>
-      <p-table
-        *ngIf="scheduleHistoryCols"
-        [columns]="scheduleHistoryCols"
-        styleClass="p-datatable-striped"
-        [value]="scheduleHistoryData.historyList"
-        selectionMode="single"
-        [style]="{ 'word-break': 'break-word' }"
-      >
+      <p-table *ngIf="scheduleHistoryCols" [columns]="scheduleHistoryCols" styleClass="p-datatable-striped"
+        [value]="scheduleHistoryData.historyList" selectionMode="single" [style]="{ 'word-break': 'break-word' }">
         <ng-template pTemplate="colgroup" let-columns>
           <colgroup>
             <col *ngFor="let col of columns" [style.width]="col.width" />
@@ -712,24 +575,15 @@
         <ng-template pTemplate="footer" let-columns>
           <tr *ngIf="scheduleHistoryDataRowcount">
             <td [attr.colspan]="columns.length" style="color: #b7b7b7">
-              <span style="vertical-align: middle"
-                >{{ "row_count" | translate }}:
-                {{ scheduleHistoryDataRowcount }}</span
-              >
+              <span style="vertical-align: middle">{{ "row_count" | translate }}:
+                {{ scheduleHistoryDataRowcount }}</span>
               <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                                 (click)="moreScheduleHistoryData();">{{'button.more'|translate}}</button> -->
 
               <!-- 查詢更多 -->
-              <button
-                type="button"
-                class="btn tpi-header-return"
-                (click)="moreScheduleHistoryData()"
-              >
+              <button type="button" class="btn tpi-header-return" (click)="moreScheduleHistoryData()">
                 {{ "button.more" | translate }}
-                <i
-                  class="fas fa-angle-double-right"
-                  style="margin-left: 5px"
-                ></i>
+                <i class="fas fa-angle-double-right" style="margin-left: 5px"></i>
               </button>
             </td>
           </tr>
@@ -745,11 +599,7 @@
       <hr />
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button
-            type="button"
-            class="btn tpi-btn tpi-primary float-start"
-            (click)="changePage('query')"
-          >
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
             {{ "button.return_to_list" | translate }}
           </button>
         </div>
@@ -777,33 +627,15 @@
         </div>
     </ng-template>
 </p-toast> -->
-<p-confirmDialog
-  #cd
-  [style]="{ width: '50vw' }"
-  icon="pi pi-exclamation-triangle"
-  styleClass="cHeader cContent cIcon"
->
+<p-confirmDialog #cd [style]="{ width: '50vw' }" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="row" style="justify-content: center">
-      <button
-        type="button"
-        pButton
-        icon="pi pi-check"
-        [ngStyle]="{
+      <button type="button" pButton icon="pi pi-check" [ngStyle]="{
           backgroundColor: 'var(--red-300)',
           'border-color': 'var(--red-300)'
-        }"
-        label="{{ 'button.confirm' | translate }}"
-        (click)="cd.accept()"
-      ></button>
-      <button
-        type="button"
-        pButton
-        icon="pi pi-times"
-        class="p-button-secondary"
-        label="{{ 'button.cancel' | translate }}"
-        (click)="cd.reject()"
-      ></button>
+        }" label="{{ 'button.confirm' | translate }}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{ 'button.cancel' | translate }}" (click)="cd.reject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

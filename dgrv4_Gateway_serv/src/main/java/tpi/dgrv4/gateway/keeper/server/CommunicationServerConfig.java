@@ -46,7 +46,7 @@ public class CommunicationServerConfig {
 	private DgrNodeLostContactDao dgrNodeLostContactDao;
 
 	// Connected Notifier
-	public Notifier notify;
+	private Notifier notifyObj;
 
 	// 用來放最近的 n 條訊息
 	public static LinkedBlockingQueue<TPILogInfo> logPool = new LinkedBlockingQueue<>(8);
@@ -65,7 +65,7 @@ public class CommunicationServerConfig {
 	@PostConstruct
 	public void init() {
 		// keeper server go live with [Notifier]
-		notify = new Notifier() {
+		notifyObj = new Notifier() {
 			@Override
 			public void runConnection(LinkerServer conn) {
 				try(ExecutorService executor = Executors.newFixedThreadPool(10)) {
@@ -142,7 +142,7 @@ public class CommunicationServerConfig {
 		
 		boolean canConnect = telenetPort("127.0.0.1", getTsmpSettingService().getVal_DGRKEEPER_PORT());
 		if ( !canConnect ) {
-			new CommunicationServer(getTsmpSettingService().getVal_DGRKEEPER_PORT(), notify);
+			new CommunicationServer(getTsmpSettingService().getVal_DGRKEEPER_PORT(), notifyObj);
 			StringBuffer msgbuf = new StringBuffer();
 			String s = "\r\n"
 					+ " __  ___ .______          _______.____    ____  _______ .______      \r\n"
