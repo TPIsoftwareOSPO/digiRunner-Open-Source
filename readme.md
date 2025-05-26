@@ -1,5 +1,5 @@
 [![][tpi-logo]][tpi-url]
-# Your API Gateway for Microservices
+# digiRunner – Mission-Critical Open Source API Management for Real-World Developers
 [TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog)
 ## Table of contents
 - [Overview](#overview)
@@ -10,29 +10,71 @@
 - [Run digiRunner in a Local Container Registry](#run-digirunner-in-a-local-container-registry)
 
 ## Overview
-digiRunner is an application-layer API gateway that acts as a central hub for communication between clients and your backend services in a microservices architecture. It simplifies frontend development by providing a unified API endpoint, streamlining interactions with your distributed backend services.
+
+Welcome to digiRunner, the mission-critical, open-source API management platform purpose-built to help developers tame complexity, enforce security, and streamline API operations—without the bloat or barriers.
+Whether you're launching your first microservice or governing dozens of API endpoints in a production-critical environment, digiRunner makes modern API management simple, scalable, and reliable where it matters most.
+
+## What Makes digiRunner Different?:
+
+Managing APIs across services, teams, and environments can be messy—especially when uptime, performance, and security are non-negotiable. digiRunner fixes that with a streamlined control plane and tools that just make sense.
+With digiRunner, you can:
+
+•	✅ Route API requests intelligently and dynamically
+
+•	✅ Secure APIs using OAuth2, OIDC, RBAC, and token-based flows
+
+•	✅ Apply rate limits, traffic shaping, and quotas effortlessly
+
+•	✅ Monitor real-time usage, latency, and anomalies
+
+All with a clean UI, strong defaults, and smart documentation that scales with your mission-critical systems.
+
+## Solving Real API Challenges:
+
+| **Challenge**                             | **digiRunner Solution**                                                                  |
+|-------------------------------------------|------------------------------------------------------------------------------------------|
+| Inconsistent access control               | Visual RBAC, API keys, OAuth2 & OIDC support                                             |
+| Disorganized microservice endpoints       | Unified API Gateway with intelligent routing                                             |
+| High learning curve for devs & ops        | UI-driven config + AI-powered documentation                                              |
+| Siloed logs and monitoring gaps           | Built-in dashboards and real-time analytics                                              |
+| Adapting data for multiple clients        | On-the-fly transformation of response formats (JSON ↔ XML, filtering, etc.)              |
+| Limited visibility into performance       | Track API performance and catch anomalies before users do                                |
+| Lack of scalability and governance        | Build API-first apps with policy-based traffic control and enterprise-grade security     |
+
+
 
 ## Key Features:
 
-- Intelligent Routing: Routes API requests efficiently to the appropriate backend service based on request content.
-- Robust Security: Provides multi-layered authentication and authorization to protect your APIs from attacks.
-- Real-time Monitoring: Monitors API performance with detailed data for proactive issue identification and resolution.
-- Traffic Management: Ensures system stability by setting limits on API access frequency and quotas.
+- Smart Routing Engine – Route API traffic based on URL paths, headers, query parameters, and other request metadata. Supports dynamic and conditional routing logic for microservices, legacy systems, and multi-version APIs.
 
-## Benefits of digiRunner:
+- Intelligent Non-Blocking Traffic Dispatching – With simple configurations, digiRunner intelligently distributes traffic across optimal routes, even in the event of API congestion or backend latency. This ensures system stability, minimizes bottlenecks, and improves responsiveness during peak loads.
 
-- Simplified Frontend Development: Provides a single API entry point, reducing development complexity.
-- Enhanced System Stability: Ensures reliability through traffic control and error handling.
-- Improved System Security: Offers multiple security mechanisms to safeguard your system.
-- Facilitated Microservices Governance: Enables unified management and control of your microservices through API management.
+- Real-Time Monitoring Dashboard – Monitor live request metrics, error rates, and latency with a rich, visual dashboard. Interactive indicators and customizable alerts enable early issue detection and faster resolution—empowering teams to collaborate efficiently and maintain system health in real time.
 
-## Common Use Cases:
+- Role-Based Access Control (RBAC) – Set granular access policies per user, team, or role. Combine this with API key authentication or OAuth2/OIDC to ensure only the right consumers can access your APIs.
 
-- Consolidate multiple backend services into a single, easily accessible API.
-- Implement robust access control to protect your APIs from unauthorized access.
-- Gain insights into API usage patterns through detailed monitoring data.
-- Enforce rate limiting to prevent API overload and ensure system stability.
-- Transform API outputs into various formats like JSON or XML for broader client compatibility.
+- Rate Limiting & Quotas – Define limits on request rates per consumer, application, or endpoint. Enforce burst limits, sustained usage thresholds, and usage quotas to maintain reliability under high load.
+
+- Token-based Auth – Seamlessly integrate secure authentication flows using OAuth2, OpenID Connect (OIDC), and static API keys. Supports multi-tenant identity providers for enterprise use cases.
+
+- Easy Setup – Deploy digiRunner anywhere—locally for development, in Docker containers for portability, or on cloud platforms for production-scale infrastructure. Configuration is UI-driven with CLI support.
+
+## Where digiRunner Fits: Real-World Scenarios:
+
+digiRunner empowers teams across industries to implement mission-critical API management use cases with ease:
+
+•	Financial Services – Enforce security standards and control access to customer transaction APIs across digital banking and fintech ecosystems.
+
+•	Retail & E-commerce – Manage catalog, inventory, and checkout APIs with built-in rate limiting, version control, and monitoring during high-traffic seasons.
+
+•	Healthcare & Insurance – Govern sensitive API endpoints with fine-grained access policies, audit trails.
+
+•	Software & SaaS Providers – Offer a scalable and secure API layer to partners and developers with clear documentation and usage analytics.
+
+•	Government & Public Sector – Unify legacy and modern service APIs under a single gateway to simplify external integrations and ensure compliance.
+
+These use cases build on digiRunner’s core strengths in observability, scalability, and governance—giving teams a stable foundation for growth and agility.
+
 
 ## Service Structure
 
