@@ -1,0 +1,3908 @@
+openapi: 3.0.0
+info:
+  title: API Specification Document
+  description: "Demonstrates Six Scenarios"
+  version: 1.0.0
+servers:
+  - url: https://localhost:18080
+    description: API Server
+  - url: https://10.20.30.88:20001
+    description: API Server
+
+tags:
+  - name: Scenario 1.
+    description: Automatically export modified registered/combined APIs via CI/CD tools — i.e., the APIs that need to be added or updated in APIM for this release
+  - name: Scenario 2.
+    description: If an API includes client profile settings, automatically export the related APIs used to retrieve the corresponding client settings via CI/CD tools
+  - name: Scenario 3.
+    description: Automatically execute scripts via CI/CD tools to perform "search-and-replace" operations, replacing strings such as URLs
+  - name: Scenario 4.
+    description: Import the configuration files (exported and strings replaced in Scenario 1 + 3) into Prod APIM (may involve additions or updates)
+  - name: Scenario 5.
+    description: Import the configuration files (exported and strings replaced in Scenario 2 + 3) into Prod APIM (may involve additions or updates)
+  - name: Scenario 6.
+    description: Validate APIs
+
+
+paths:
+  /dgrv4/tptoken/oauth/token:
+    post:
+      tags:
+        - login
+      summary: Obtain AC Token
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  default: password
+                username:
+                  type: string
+                  default: manager
+                password:
+                  type: string
+                  default: bWFuYWdlcjEyMw==
+              required:
+                - grant_type
+                - username
+                - password
+      responses:
+        '200':
+          description: Successful operation
+     
+  /dgrv4/11/AA0301:
+    post:
+      summary: Query API List
+      description: |-
+        Queries all APIs deployed in digiRunner.
+        
+      operationId: queryAPIList
+      tags:
+        - Scenario 1.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                      description: Organization Unit ID, obtained from Token
+                    moduleName:
+                      type: string
+                      description: Module Name, for pagination
+                    apiKey:
+                      type: string
+                      description: API ID, for pagination
+                    keyword:
+                      type: string
+                      description: Keywords, separated by spaces, fuzzy search API ID, module name, API name, API description
+                    apiSrc:
+                      type: array
+                      description: API Source, not encrypted with bcrypt, e.g. ["M", "R"]
+                      items:
+                        type: string
+                    apiStatus:
+                      type: string
+                      description: API Status, bcrypt encrypted, ITEM_NO = 'JOB_STATUS'
+                    publicFlag:
+                      type: string
+                      description: Public Permission, bcrypt encrypted, ITEM_NO = 'API_AUTHORITY'
+                    jweFlag:
+                      type: string
+                      description: JWT Setting (Req), bcrypt encrypted, ITEM_NO = 'API_JWT_FLAG'
+                    jweFlagResp:
+                      type: string
+                      description: JWT Setting (Resp), bcrypt encrypted, ITEM_NO = 'API_JWT_FLAG'
+                    sortBy:
+                      type: object
+                      description: |-
+                        Sort by] descending order setting, Map<Field Name, Sort Direction>
+                        Field name only allows 4 values: ["apiKey","apiSrc","moduleName","apiName"]
+                        Sort direction only allows 2 values: ["asc", "desc"]
+                        For example: Sort by [API Source] descending = {"apiSrc": "desc"}
+                        When pressing the [Search] button or restoring [Default Sort], the frontend does not pass this field
+                      additionalProperties:
+                        type: string
+                    paging:
+                      type: string
+                      description: |-
+                        Pagination
+                        "Y": paginate
+                        "N": no pagination
+                        NULL: no pagination
+                        When the [API List] function calls AA0301, the frontend always passes "Y"
+                      enum:
+                        - "Y"
+                        - "N"
+                  required:
+                    - orgId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505071358131JbqBh"
+                txDate: "20250507T135813+0800"
+                txID: "AA0301"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                keyword: ""
+                apiSrc: []
+                publicFlag: ""
+                paging: "N"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      sortBy:
+                        type: object
+                        description: |-
+                          Sort setting, from AA0301Req.sortBy
+                          If Request does not pass this value (NULL), then {"apiKey": "asc"} is returned
+                        additionalProperties:
+                          type: string
+                      dataList:
+                        type: array
+                        description: Data list
+                        items:
+                          $ref: '#/components/schemas/AA0301Item'
+                    required:
+                      - sortBy
+                      - dataList
+              example:
+                ResHeader:
+                  txSN: "1241114154827zOMy0E"
+                  txDate: "20241114T154827+0800"
+                  txID: "AA0301"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  sortBy:
+                    apiKey: "asc"
+                  dataList:
+                    - moduleName:
+                        val: "/"
+                        t: false
+                      apiKey:
+                        val: "//test/123"
+                        t: false
+                      apiStatus:
+                        n: "Disabled"
+                        v: "2"
+                      apiSrc:
+                        n: "Registered"
+                        v: "R"
+                      apiName:
+                        val: "test123"
+                        t: false
+                      apiDesc:
+                        val: ""
+                        t: false
+                      jweFlag:
+                        n: "Not used"
+                        v: "0"
+                      jweFlagResp:
+                        n: "Not used"
+                        v: "0"
+                      updateTime: "2024-10-23 09:43:37"
+                      org:
+                        n: "TSMPDefaultRoot"
+                        v: "100000"
+                      enableScheduledDate: 0
+                      disableScheduledDate: 0
+                      createDate: "2024-09-04 17:02:36"
+                      createUser: "manager"
+                      updateDate: "2024-10-23 09:43:37"
+                      updateUser: "chad"
+                      labelList: []
+                    - moduleName:
+                        val: "/a"
+                        t: false
+                      apiKey:
+                        val: "/a"
+                        t: false
+                      apiStatus:
+                        n: "Enabled"
+                        v: "1"
+                      apiSrc:
+                        n: "Registered"
+                        v: "R"
+                      apiName:
+                        val: "dp_test01_min"
+                        t: false
+                      apiDesc:
+                        val: "Salary transfer account\nI am CXXX"
+                        t: false
+                      jweFlag:
+                        n: "Not used"
+                        v: "0"
+                      jweFlagResp:
+                        n: "Not used"
+                        v: "0"
+                      updateTime: "2024-11-13 17:53:54"
+                      org:
+                        n: "TSMPDefaultRoot"
+                        v: "100000"
+                      enableScheduledDate: 0
+                      disableScheduledDate: 0
+                      createDate: "2023-09-18 16:00:48"
+                      createUser: "min2"
+                      updateDate: "2024-11-13 17:53:54"
+                      updateUser: "manager"
+                      labelList: []
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1273'
+                          - '1290'
+                          - '1298'
+                          - '1299'
+                          - '1354'
+                        description: "Error Code: 1273(Organization Unit ID: Required parameter), 1290(Parameter error), 1298(No data found), 1299(Parameter validation error), 1354([{{0}}] does not exist: {{1}})"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                Organization Unit ID Required Parameter:
+                  value:
+                    ResHeader:
+                      txSN: "1201110112549000001"
+                      txDate: "202011315T112549+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1273"
+                      rtnMsg: "1273 - Organization Unit ID: Required parameter"
+                Parameter Validation Error:
+                  value:
+                    ResHeader:
+                      txSN: "1201110112851000001"
+                      txDate: "202011315T112851+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1299"
+                      rtnMsg: "1299 - Parameter validation error"
+                No Data Found:
+                  value:
+                    ResHeader:
+                      txSN: "1201110112945000001"
+                      txDate: "202011315T112945+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - No data found"
+                Parameter Error:
+                  value:
+                    ResHeader:
+                      txSN: "1201110113243000001"
+                      txDate: "202011315T113243+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1290"
+                      rtnMsg: "1290 - Parameter error"
+                API Source Does Not Exist:
+                  value:
+                    ResHeader:
+                      txSN: "1201110114008000001"
+                      txDate: "202011315T114008+0800"
+                      txID: "AA0301Req"
+                      rtnCode: "1354"
+                      rtnMsg: "1354 - [{{apiSrc}}] does not exist: ss"
+
+  /dgrv4/11/AA0317:
+    post:
+      summary: Export Registered/Combined APIs
+      description: |-
+        Export API data that has been registered or combined in digiRunner.
+        
+      operationId: exportRegCompAPIs
+      tags:
+        - Scenario 1.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    userName:
+                      type: string
+                      description: User name, obtained from Token
+                    orgId:
+                      type: string
+                      description: Organization Unit ID, obtained from Token
+                    apiList:
+                      type: array
+                      description: API list
+                      items:
+                        $ref: '#/components/schemas/AA0317ReqItem'
+                  required:
+                    - userName
+                    - orgId
+                    - apiList
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505071406334jCttp"
+                txDate: "20250507T140633+0800"
+                txID: "AA0317"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                apiList:
+                  - moduleName: "/226-8877"
+                    apiKey: "/226-8877"
+                  - moduleName: "/5555-999"
+                    apiKey: "/5555-999"
+                  - moduleName: "/999-444"
+                    apiKey: "/999-444"
+                  - moduleName: "/mock"
+                    apiKey: "/mock"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      fileName:
+                        type: string
+                        description: File name, format is "exportAPI_" + current time (yyyy-MM-dd HH-mm-ss) + ".json"
+                      data:
+                        $ref: '#/components/schemas/AA0317Data'
+                        description: Export data
+                    required:
+                      - fileName
+                      - data
+              example:
+                ResHeader:
+                  txSN: "1200227100631000001"
+                  txDate: "20200258T100631+0800"
+                  txID: "AA0317"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  fileName: "exportAPI_2020-12-29 15-39-33.json"
+                  data:
+                    r:
+                      - moduleName: "R_MODULE"
+                        regModule: null
+                        apiList:
+                          - apiKey: "API_KEY_R01"
+                            moduleName: "R_MODULE"
+                            apiName: "API_NAME_R01"
+                            apiDesc: ""
+                            apiOwner: ""
+                            urlRID: "0"
+                            apiSrc: "R"
+                            srcURL: "https://www.tpisoftware.com"
+                            apiUUID: ""
+                            contentType: ""
+                            enpoint: "[/R_MODULE/API_KEY_R01]"
+                            httpHeader: ""
+                            httpMethod: "[\"POST\"]"
+                            params: ""
+                            produce: ""
+                            flow: null
+                            no_oauth: "0"
+                            jweFlag: "0"
+                            jweFlagResp: "0"
+                            funFlag: 0
+                      - moduleName: "R2_MODULE"
+                        regModule:
+                          regModuleId: 1
+                          moduleName: "R2_MODULE"
+                          moduleVersion: "v1.0"
+                          moduleSrc: "3"
+                        apiList:
+                          - apiKey: "API_KEY_R01"
+                            moduleName: "R2_MODULE"
+                            apiName: "API_NAME_R01"
+                            apiDesc: ""
+                            apiOwner: ""
+                            urlRID: "0"
+                            apiSrc: "R"
+                            srcURL: "https://www.tpisoftware.com"
+                            apiUUID: ""
+                            contentType: ""
+                            enpoint: "[/R2_MODULE/API_KEY_R01]"
+                            httpHeader: ""
+                            httpMethod: "[\"POST\"]"
+                            params: ""
+                            produce: ""
+                            flow: null
+                            no_oauth: "0"
+                            jweFlag: "0"
+                            jweFlagResp: "0"
+                            funFlag: 0
+                    c: null
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1258'
+                          - '1273'
+                          - '1296'
+                          - '1297'
+                          - '1298'
+                          - '1444'
+                          - '1452'
+                        description: "Error Code: 1258(User name: Required parameter), 1273(Organization Unit ID: Required parameter), 1296(Missing required parameters), 1297(Execution error), 1298(No data found), 1444(Cannot export APIs of Java or .NET modules), 1452(Cannot get Flow data from Composer)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                User name required parameter:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1258"
+                      rtnMsg: "1258 - User name: Required parameter"
+                Organization Unit ID required parameter:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1273"
+                      rtnMsg: "1273 - Organization Unit ID: Required parameter"
+                Missing required parameters:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1296"
+                      rtnMsg: "1296 - Missing required parameters"
+                Execution error:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - Execution error"
+                No data found:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - No data found"
+                Cannot export Java or .NET module APIs:
+                  value:
+                    ResHeader:
+                      txSN: "1200227100631000001"
+                      txDate: "20200258T100631+0800"
+                      txID: "AA0317"
+                      rtnCode: "1444"
+                      rtnMsg: "1444 - Cannot export APIs of Java or .NET modules"
+
+  /dgrv4/11/AA1120:
+    post:
+      summary: Export Client-Related Data
+      description: |-
+        Exports client-related data in JSON format from the system, including client data, group data, authorization scope, and information from multiple related data tables.
+        
+      operationId: exportClientRelated
+      tags:
+        - Scenario 2.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  description: No additional parameters required
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505071056450j8qlF"
+                txDate: "20250507T105645+0800"
+                txID: "AA1120"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody: {}
+      responses:
+        '200':
+          description: Request processed successfully, exported file returned directly
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: Specifies the filename for download, format is "attachment; filename=exportClientRelated_yyyyMMddHHmmss.json"
+              example: "attachment; filename=exportClientRelated_20240122114650.json"
+            Content-Type:
+              schema:
+                type: string
+              description: Content type
+              example: "application/json"
+            Content-Length:
+              schema:
+                type: string
+              description: Content length
+              example: "5760"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  importClientRelated:
+                    type: object
+                    description: Data for each data table
+                    properties:
+                      tsmpClientList:
+                        type: array
+                        description: Client Data list
+                        items:
+                          type: object
+                      tsmpClientHostList:
+                        type: array
+                        description: Host list
+                        items:
+                          type: object
+                      oauthClientDetailsList:
+                        type: array
+                        description: Token settings list
+                        items:
+                          type: object
+                      tsmpDpClientextList:
+                        type: array
+                        description: Public status list
+                        items:
+                          type: object
+                      tsmpGroupList:
+                        type: array
+                        description: Group Data list
+                        items:
+                          type: object
+                      tsmpClientGroupList:
+                        type: array
+                        description: Groups used by client
+                        items:
+                          type: object
+                      tsmpVgroupList:
+                        type: array
+                        description: Authorization scope Data list
+                        items:
+                          type: object
+                      tsmpClientVgroupList:
+                        type: array
+                        description: Authorization scopes used by client
+                        items:
+                          type: object
+                      tsmpVgroupGroupList:
+                        type: array
+                        description: Groups used by authorization scope
+                        items:
+                          type: object
+                      tsmpGroupApiList:
+                        type: array
+                        description: API list used by group
+                        items:
+                          type: object
+                      dgrXApiKeyList:
+                        type: array
+                        description: x_api_key Data list
+                        items:
+                          type: object
+                      dgrXApiKeyMapList:
+                        type: array
+                        description: Groups used by x_api_key
+                        items:
+                          type: object
+                      tsmpGroupAuthoritiesList:
+                        type: array
+                        description: Authentication Data list
+                        items:
+                          type: object
+                      tsmpGroupAuthoritiesMapList:
+                        type: array
+                        description: Authentication list used by group
+                        items:
+                          type: object
+                      tsmpVgroupAuthoritiesMapList:
+                        type: array
+                        description: Authentication list used by authorization scope
+                        items:
+                          type: object
+                      tsmpSecurityLevelList:
+                        type: array
+                        description: Security level Data list
+                        items:
+                          type: object
+                      dpAppList:
+                        type: array
+                        description: dp Data list
+                        items:
+                          type: object
+                      tsmpOpenApikeyList:
+                        type: array
+                        description: Open API key list
+                        items:
+                          type: object
+                      tsmpOpenApikeyMapList:
+                        type: array
+                        description: APIs corresponding to open API key
+                        items:
+                          type: object
+                      dgrGtwIdpInfoOList:
+                        type: array
+                        description: GTW OAuth 2.0 IdP list
+                        items:
+                          type: object
+                      dgrGtwIdpInfoLList:
+                        type: array
+                        description: GTW LDAP IdP list
+                        items:
+                          type: object
+                      dgrGtwIdpInfoAList:
+                        type: array
+                        description: GTW API IdP list
+                        items:
+                          type: object
+                      dgrGtwIdpInfoJdbcList:
+                        type: array
+                        description: GTW JDBC IdP list
+                        items:
+                          type: object
+                      dgrRdbConnectionList:
+                        type: array
+                        description: Connection list used when setting GTW JDBC IdP
+                        items:
+                          type: object
+                      dgrApikeyUseApiList:
+                        type: array
+                        description: API key usage list
+                        items:
+                          $ref: '#/components/schemas/AA1120DgrApikeyUseApi'
+                  analyzeClientRelated:
+                    type: object
+                    description: Analysis data, always null in AA1120, only has value in AA1130
+                    nullable: true
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1297'
+                        description: 'Error code: 1297(Execution error)'
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              example:
+                ResHeader:
+                  txSN: "1240131153256000001"
+                  txDate: "20240131T033256+0800"
+                  txID: "AA1120Req"
+                  rtnCode: "1297"
+                  rtnMsg: "1297 - Execution error"
+
+
+  /dgrv4/11/AA0423:
+    post:
+      summary: Search API List by Target URL or Tag
+      description: |-
+        Searches API list by target URL or tag, used for batch API modification function.
+        
+      operationId: queryAPIListBySrcUrlOrLabel
+      tags:
+        - Scenario 3.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    labelList:
+                      type: array
+                      description: Tag list, multiple selections allowed, enter one of targetSite or labelList
+                      items:
+                        type: string
+                      nullable: true
+                    targetSite:
+                      type: string
+                      description: Target site, single selection, enter one of targetSite or labelList
+                      nullable: true
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250507141214JxlMd6"
+                txDate: "20250507T141214+0800"
+                txID: "AA0423"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody: {}
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      dataList:
+                        type: array
+                        description: Data list
+                        items:
+                          $ref: '#/components/schemas/AA0423RespItem'
+                    required:
+                      - dataList
+              example:
+                ResHeader:
+                  txSN: "1231219151917000001"
+                  txDate: "20231219T031917+0800"
+                  txID: "AA0423Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  dataList:
+                    - apiKey: "api1"
+                      moduleName: "module1"
+                      apiStatus: "1"
+                      apiName: "api1"
+                      srcUrlList:
+                        - ip: ""
+                          srcUrlAndPercentageList:
+                            - percentage: "100"
+                              srcUrl: "https://10.20.30.88:8181/HelloWorld"
+                            - percentage: "0"
+                              srcUrl: "https://10.20.30.88:8181/HelloWorld2"
+                      labelList: []
+                      noOauth: false
+                    - apiKey: "api2"
+                      moduleName: "module2"
+                      apiStatus: "1"
+                      apiName: "api2"
+                      srcUrlList:
+                        - ip: ""
+                          srcUrlAndPercentageList:
+                            - percentage: "100"
+                              srcUrl: "https://10.20.30.88:8181/echo"
+                      labelList: []
+                      noOauth: false
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1297'
+                          - '1298'
+                        description: "Error Code: 1297(Execution error), 1298(No data found)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                Execution error:
+                  value:
+                    ResHeader:
+                      txSN: "1231219151917000001"
+                      txDate: "20231219T031917+0800"
+                      txID: "AA0423Req"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - Execution error"
+                No data found:
+                  value:
+                    ResHeader:
+                      txSN: "1231219151917000001"
+                      txDate: "20231219T031917+0800"
+                      txID: "AA0423Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - No data found"
+
+  /dgrv4/11/AA0424:
+    post:
+      summary: Batch Update (Save as Draft)
+      description: |-
+        Batch update API URL settings and save the modified results as a JSON file temporarily.
+        
+      operationId: temporaryByModifyBatch
+      tags:
+        - Scenario 3.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    apiList:
+                      type: array
+                      description: API list
+                      items:
+                        $ref: '#/components/schemas/AA0424ReqAPIList'
+                    srcUrlList:
+                      type: array
+                      description: Modification target list
+                      items:
+                        $ref: '#/components/schemas/AA0424ReqSrcUrlList'
+                  required:
+                    - apiList
+                    - srcUrlList
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250507141753a7HgNK"
+                txDate: "20250507T141753+0800"
+                txID: "AA0424"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                apiList:
+                  - moduleName: "/226-8877"
+                    apiKey: "/226-8877"
+                  - moduleName: "/5555-999"
+                    apiKey: "/5555-999"
+                  - moduleName: "/999-444"
+                    apiKey: "/999-444"
+                  - moduleName: "/mock"
+                    apiKey: "/mock"
+                srcUrlList:
+                  - srcUrl: "10.20.30.88"
+                    isPercentage: false
+                    isReplace: true
+                    replaceString: "localhost"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      tempFileName:
+                        type: string
+                        description: Temporary file name, format is "modifyBatch_YYYY-MM-DD HH-mm-ss.json"
+                      refId:
+                        type: string
+                        description: Reference ID
+                    required:
+                      - tempFileName
+                      - refId
+              example:
+                ResHeader:
+                  txSN: "1231214113516000001"
+                  txDate: "20231214T113516+0800"
+                  txID: "AA0424Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  tempFileName: "modifyBatch_2023-12-15 14-29-59.json"
+                  refId: "0"
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1297'
+                          - '1298'
+                          - '1350'
+                          - '1400'
+                          - '1481'
+                        description: "Error Code: 1297(Execution error), 1298(No data found), 1350(Missing required parameters), 1400(TsmpApi is null), 1481(TsmpApiReg has no value)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                Execution error:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0424Req"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - Execution error"
+                No data found:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0424Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - No data found"
+                Missing required parameters:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0424Req"
+                      rtnCode: "1350"
+                      rtnMsg: "1350 - [apiList] is a required field"
+
+  /dgrv4/11/AA0425:
+    post:
+      summary: Batch Update (Preview)
+      description: |-
+        Previews the content of the batch modification, showing the differences in API settings before and after modification.
+        
+      operationId: previewByModifyBatch
+      tags:
+        - Scenario 3.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    tempFileName:
+                      type: string
+                      description: Temporary file name, obtained by uploading via DPB0082
+                    sort:
+                      type: integer
+                      description: Sort value, used for pagination display, not sent for the first time, subsequently carry the sort of the last record
+                    refId:
+                      type: string
+                      description: Reference ID
+                  required:
+                    - tempFileName
+                    - refId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250506182922CeVQr6"
+                txDate: "20250506T182922+0800"
+                txID: "AA0425"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                tempFileName: "modifyBatch_2025-05-06 18-29-25.json"
+                refId: "1"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      apiList:
+                        type: array
+                        description: API list
+                        items:
+                          $ref: '#/components/schemas/AA0425RespItem'
+                    required:
+                      - apiList
+              example:
+                ResHeader:
+                  txSN: "1231214113516000001"
+                  txDate: "20231214T113516+0800"
+                  txID: "AA0425Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  apiList:
+                    - sort: 0
+                      apiKey: "/module1/apikey1"
+                      moduleName: "/module1"
+                      apiName: "apiName1"
+                      apiStatus: "1"
+                      noAuth: true
+                      labelList:
+                        - "hasb64"
+                        - "Enabled"
+                        - "nooauth"
+                        - "no traffic split"
+                      oldSrcUrlList:
+                        - ip: ""
+                          srcUrlList:
+                            - percentage: 50
+                              srcUrl: "https: //10.20.30.88:8181/nowTime"
+                            - percentage: 30
+                              srcUrl: "https://10.20.30.89:8181/nowTime"
+                            - percentage: 20
+                              srcUrl: "https://10.20.30.90:8181/nowTime"
+                          isSuccess: true
+                      newSrcUrlList:
+                        - ip: ""
+                          srcUrlList:
+                            - percentage: 20
+                              srcUrl: "https: //10.20.30.88:8181/nowTime"
+                            - percentage: 80
+                              srcUrl: "https://10.20.30.89:8181/nowTime"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8181/nowTime"
+                          isSuccess: true
+                    - sort: 1
+                      apiKey: "/module2/apikey2"
+                      moduleName: "/module2"
+                      apiName: "apiName2"
+                      apiStatus: "2"
+                      noAuth: false
+                      labelList:
+                        - "hasb64"
+                        - "nob64"
+                        - "Disabled"
+                        - "has traffic split"
+                      oldSrcUrlList:
+                        - ip: "10.20.30.1"
+                          srcUrlList:
+                            - percentage: 40
+                              srcUrl: "https://10.20.30.88:8282/nowTime2"
+                            - percentage: 25
+                              srcUrl: "https://10.20.30.89:8282/nowTime2"
+                            - percentage: 35
+                              srcUrl: "https://10.20.30.90:8282/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.2"
+                          srcUrlList:
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.88:8181/nowTime2"
+                            - percentage: 100
+                              srcUrl: "https://10.20.30.89:8181/nowTime2"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8181/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.3"
+                          srcUrlList:
+                            - percentage: 100
+                              srcUrl: "https://10.20.30.99:8181/nowTime2"
+                          isSuccess: true
+                      newSrcUrlList:
+                        - ip: "10.20.30.1"
+                          srcUrlList:
+                            - percentage: 20
+                              srcUrl: "https://10.20.30.88:8383/nowTime2"
+                            - percentage: 80
+                              srcUrl: "https://10.20.30.89:8383/nowTime2"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8383/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.2"
+                          srcUrlList:
+                            - percentage: 20
+                              srcUrl: "https://10.20.30.88:8181/nowTime2"
+                            - percentage: 80
+                              srcUrl: "https://10.20.30.89:8181/nowTime2"
+                            - percentage: 0
+                              srcUrl: "https://10.20.30.90:8181/nowTime2"
+                          isSuccess: true
+                        - ip: "10.20.30.3"
+                          srcUrlList:
+                            - percentage: 100
+                              srcUrl: "https://10.20.30.99:8181/nowTime2"
+                          isSuccess: true
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1129'
+                          - '1233'
+                          - '1297'
+                          - '1298'
+                          - '1350'
+                        description: "Error Code: 1129(File not found), 1233(File cannot be empty), 1297(Execution error), 1298(No data found), 1350(Parameter error)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                File not found:
+                  value:
+                    ResHeader:
+                      txSN: "1250506182922CeVQr6"
+                      txDate: "20250506T182922+0800"
+                      txID: "AA0425"
+                      rtnCode: "1129"
+                      rtnMsg: "1129 - File not found"
+                File is empty:
+                  value:
+                    ResHeader:
+                      txSN: "1250506182922CeVQr6"
+                      txDate: "20250506T182922+0800"
+                      txID: "AA0425"
+                      rtnCode: "1233"
+                      rtnMsg: "1233 - File cannot be empty"
+                Execution error:
+                  value:
+                    ResHeader:
+                      txSN: "1250506182922CeVQr6"
+                      txDate: "20250506T182922+0800"
+                      txID: "AA0425"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - Execution error"
+
+  /dgrv4/11/AA0426:
+    post:
+      summary: Batch Update
+      description: |-
+        Executes batch update of API URL settings, performing actual data updates based on the settings in the temporary file.
+        
+      operationId: batchModify
+      tags:
+        - Scenario 3.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    tempFileName:
+                      type: string
+                      description: Temporary file name, obtained from AA0424 response
+                    refId:
+                      type: string
+                      description: Reference ID, obtained from AA0424 response
+                  required:
+                    - tempFileName
+                    - refId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "1250507142234BLCbL7"
+                txDate: "20250507T142234+0800"
+                txID: "AA0426"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                tempFileName: "modifyBatch_2025-05-07 14-17-58.json"
+                refId: "1"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      errList:
+                        type: array
+                        description: Error API list, null if no errors
+                        items:
+                          $ref: '#/components/schemas/AA0426RespItem'
+                        nullable: true
+                      errMsg:
+                        type: string
+                        description: Error message, null if no errors
+                        nullable: true
+                    required:
+                      - errList
+                      - errMsg
+              example:
+                ResHeader:
+                  txSN: "1231214113516000001"
+                  txDate: "20231214T113516+0800"
+                  txID: "AA0426Req"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  errList: null
+                  errMsg: null
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1129'
+                          - '1297'
+                          - '1298'
+                          - '1350'
+                          - '2026'
+                        description: "Error Code: 1129(File not found), 1297(Execution error), 1298(No data found), 1350(Missing required parameters), 2026(Modification failed)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                Execution error:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "1297"
+                      rtnMsg: "1297 - Execution error"
+                File not found:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "1129"
+                      rtnMsg: "1129 - File not found"
+                Missing required parameters:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "1350"
+                      rtnMsg: "1350 - [tempFileName] is a required field"
+                Modification failed:
+                  value:
+                    ResHeader:
+                      txSN: "1231214113516000001"
+                      txDate: "20231214T113516+0800"
+                      txID: "AA0426Req"
+                      rtnCode: "2026"
+                      rtnMsg: "2026 - Modification failed"
+
+
+
+  /dgrv4/11/DPB0082:
+    post:
+      summary: Upload Files
+      description: |-
+        To avoid connection timeouts caused by large files, a single file upload method is used.
+        Uploads files using multipart/form-data to get the uploaded temporary file name.
+        
+      operationId: uploadFile
+      tags:
+        - Scenario 4.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                txSN:
+                  type: string
+                  description: Transaction serial number
+                txDate:
+                  type: string
+                  description: Transaction date and time
+                txID:
+                  type: string
+                  description: Transaction ID, fixed as DPB0082
+                cID:
+                  type: string
+                  description: Client ID
+                file:
+                  type: string
+                  format: binary
+                  description: Uploaded file
+              required:
+                - txSN
+                - txDate
+                - txID
+                - cID
+                - file
+            example:
+              txSN: "1250506180531aW2ABA"
+              txDate: "20250506T180531+0800"
+              txID: "DPB0082"
+              cID: "YWRtaW5Db25zb2xl"
+              file: "(binary file content)"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      tempFileName:
+                        type: string
+                        description: Temporary file name, format is timestamp.wait.original filename
+                    required:
+                      - tempFileName
+              example:
+                ResHeader:
+                  txSN: "1250506180531aW2ABA"
+                  txDate: "20250506T180531+0800"
+                  txID: "DPB0082"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  tempFileName: "1746525931821.wait.exportAPI_2025-05-05 14-57-19.json"
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1203'
+                          - '1133'
+                          - '1233'
+                        description: "Error Code: 1203(File write error), 1133(File not included), 1233(File cannot be empty)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                File write error:
+                  value:
+                    ResHeader:
+                      txSN: "1250506180531aW2ABA"
+                      txDate: "20250506T180531+0800"
+                      txID: "DPB0082"
+                      rtnCode: "1203"
+                      rtnMsg: "1203 - File write error"
+                File not included:
+                  value:
+                    ResHeader:
+                      txSN: "1250506180531aW2ABA"
+                      txDate: "20250506T180531+0800"
+                      txID: "DPB0082"
+                      rtnCode: "1133"
+                      rtnMsg: "1133 - File not included"
+                File is empty:
+                  value:
+                    ResHeader:
+                      txSN: "1250506180531aW2ABA"
+                      txDate: "20250506T180531+0800"
+                      txID: "DPB0082"
+                      rtnCode: "1233"
+                      rtnMsg: "1233 - File cannot be empty"
+          
+  /dgrv4/11/AA0318:
+    post:
+      summary: Upload Registered/Combined APIs
+      description: |-
+        Uploads registered/combined API files and previews content and checks results.
+
+      operationId: uploadRegCompAPIs
+      tags:
+        - Scenario 4.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    tempFileName:
+                      type: string
+                      description: Temporary file name, obtained by uploading via DPB0082
+                  required:
+                    - tempFileName
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: 1250506143405h58R3U
+                txDate: 20250506T143405+0800
+                txID: AA0318
+                cID: YWRtaW5Db25zb2xl
+                locale: "zh-TW"
+              ReqBody:
+                tempFileName: 1746513248409.wait.exportAPI_2025-05-05 14-57-19.json
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      batchNo:
+                        type: integer
+                        description: Batch number, generated during processing
+                      apiList:
+                        type: array
+                        description: API list
+                        items:
+                          $ref: '#/components/schemas/AA0318Item'
+                    required:
+                      - batchNo
+                      - apiList
+              example:
+                ResHeader:
+                  txSN: '1201230145402000001'
+                  txDate: 202112365T025402+0800
+                  txID: AA0318Req
+                  rtnCode: '1100'
+                  rtnMsg: null
+                RespBody:
+                  batchNo: 1000
+                  apiList:
+                    - apiKey:
+                        val: API_KEY_R_01
+                        t: false
+                      moduleName:
+                        val: R_MODULE
+                        t: false
+                      apiName:
+                        val: API_NAME_R_01
+                        t: false
+                      apiSrc:
+                        v: R
+                        'n': Registered
+                      endpoint: '[/R_MODULE/API_KEY_R_01]'
+                      checkAct:
+                        v: C
+                        'n': Add
+                      memo:
+                        val: ''
+                        t: false
+                      srcURL: https://example.com/api
+                      failDiscoveryPolicy: NONE
+                      failHandlePolicy: NONE
+                    - apiKey:
+                        val: API_KEY_R2_01
+                        t: false
+                      moduleName:
+                        val: R2_MODULE
+                        t: false
+                      apiName:
+                        val: API_NAME_R2_01
+                        t: false
+                      apiSrc:
+                        v: R
+                        'n': Registered
+                      endpoint: '[/R2_MODULE/API_KEY_R2_01]'
+                      checkAct:
+                        v: U
+                        'n': Update
+                      memo:
+                        val: ''
+                        t: false
+                      srcURL: https://example.com/api2
+                      failDiscoveryPolicy: NONE
+                      failHandlePolicy: NONE
+                    - apiKey:
+                        val: API_KEY_C_01
+                        t: false
+                      moduleName:
+                        val: C_MODULE
+                        t: false
+                      apiName:
+                        val: API_NAME_C_01
+                        t: false
+                      apiSrc:
+                        v: C
+                        'n': Combined
+                      endpoint: '[/C_MODULE/API_KEY_C_01]'
+                      checkAct:
+                        v: 'N'
+                        'n': Cannot operate
+                      memo:
+                        val: Data in TSMP_API is not consistent with TSMP_API_R
+                        t: true
+                        ori: 'Data in TSMP_API is not consistent with TSMP_API_REG: api_key=API_KEY_C_01, module_name=C_MODULE'
+                      srcURL: https://example.com/api3
+                      failDiscoveryPolicy: NONE
+                      failHandlePolicy: NONE
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1129'
+                          - '1133'
+                          - '1203'
+                          - '1233'
+                          - '1258'
+                          - '1273'
+                          - '1291'
+                          - '1443'
+                          - '1445'
+                        description: "Error Code: 1129(File not found), 1133(File not included), 1203(File write error), 1233(File cannot be empty), 1258(User name: Required parameter), 1273(Organization Unit ID: Required parameter), 1291(File parsing error), 1443(Unsupported file type), 1445(File does not contain any API data)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                File not found:
+                  value:
+                    ResHeader:
+                      txSN: '1200227100631000001'
+                      txDate: 20200258T100631+0800
+                      txID: AA0318
+                      rtnCode: '1129'
+                      rtnMsg: 1129 - File not found
+                File not included:
+                  value:
+                    ResHeader:
+                      txSN: '1200227100631000001'
+                      txDate: 20200258T100631+0800
+                      txID: AA0318
+                      rtnCode: '1133'
+                      rtnMsg: 1133 - File not included
+                File write error:
+                  value:
+                    ResHeader:
+                      txSN: '1201230143725000001'
+                      txDate: 202112365T023725+0800
+                      txID: AA0318Req
+                      rtnCode: '1203'
+                      rtnMsg: 1203 - File write error
+                      
+                      
+  /dgrv4/11/AA0319:
+    post:
+      summary: Import Registered/Combined APIs
+      description: |-
+        Specifies the API data to be imported from the registered/combined API file uploaded to digiRunner.
+        
+      operationId: importRegCompAPIs
+      tags:
+        - Scenario 4.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    userName:
+                      type: string
+                      description: User name, obtained from Token
+                    orgId:
+                      type: string
+                      description: Organization Unit ID, obtained from Token
+                    apiList:
+                      type: array
+                      description: API list to be imported
+                      items:
+                        $ref: '#/components/schemas/AA0319ReqItem'
+                    batchNo:
+                      type: integer
+                      description: Batch number, obtained from AA0318 response
+                  required:
+                    - apiList
+                    - batchNo
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505061815290DNxRk"
+                txDate: "20250506T181529+0800"
+                txID: "AA0319"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                batchNo: 1003
+                apiList:
+                  - moduleName: "/mock"
+                    apiKey: "/mock"
+                  - moduleName: "/5555-999"
+                    apiKey: "/5555-999"
+                  - moduleName: "/999-444"
+                    apiKey: "/999-444"
+                  - moduleName: "/226-8877"
+                    apiKey: "/226-8877"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      apiList:
+                        type: array
+                        description: API import result list
+                        items:
+                          $ref: '#/components/schemas/AA0319RespItem'
+                    required:
+                      - apiList
+              example:
+                ResHeader:
+                  txSN: "12505061815290DNxRk"
+                  txDate: "20250506T181529+0800"
+                  txID: "AA0319"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  apiList:
+                    - apiKey: "/mock"
+                      moduleName: "/mock"
+                      result:
+                        v: "S"
+                        n: "Success"
+                    - apiKey: "/5555-999"
+                      moduleName: "/5555-999"
+                      result:
+                        v: "S"
+                        n: "Success"
+                    - apiKey: "/999-444"
+                      moduleName: "/999-444"
+                      result:
+                        v: "S"
+                        n: "Success"
+                    - apiKey: "/226-8877"
+                      moduleName: "/226-8877"
+                      result:
+                        v: "S"
+                        n: "Success"
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1219'
+                          - '1258'
+                          - '1273'
+                          - '1296'
+                          - '1298'
+                          - '1354'
+                          - '1426'
+                          - '2009'
+                        description: "Error Code: 1219(No permission), 1258(User name: Required parameter), 1273(Organization Unit ID: Required parameter), 1296(Missing required parameters), 1298(No data found), 1354([batch_no] does not exist), 1426(Cannot use this module name), 2009(Select at least 1 item)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                No data found:
+                  value:
+                    ResHeader:
+                      txSN: "12505061815290DNxRk"
+                      txDate: "20250506T181529+0800"
+                      txID: "AA0319"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - No data found"
+                Batch number does not exist:
+                  value:
+                    ResHeader:
+                      txSN: "12505061815290DNxRk"
+                      txDate: "20250506T181529+0800"
+                      txID: "AA0319"
+                      rtnCode: "1354"
+                      rtnMsg: "1354 - [batch_no] does not exist: 1003"
+                Select at least 1 item:
+                  value:
+                    ResHeader:
+                      txSN: "12505061815290DNxRk"
+                      txDate: "20250506T181529+0800"
+                      txID: "AA0319"
+                      rtnCode: "2009"
+                      rtnMsg: "2009 - Select at least 1 item"
+                      
+                      
+  /dgrv4/11/AA1121:
+    post:
+      summary: Import Client-Related Data
+      description: Imports JSON formatted client-related data and performs analysis
+      
+      operationId: importClientRelated
+      tags:
+        - Scenario 5.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Imported JSON file, file extension must be .json
+                req:
+                  type: string
+                  description: JSON string of request parameters
+                  example: '{"ReqHeader":{"txSN":"1250506110358E8vTte","txDate":"20250506T110358+0800","txID":"AA1121","cID":"YWRtaW5Db25zb2xl","locale":"zh-TW"},"ReqBody":{}}'
+              required:
+                - file
+                - req
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      lackApiList:
+                        type: array
+                        description: Missing API list
+                        items:
+                          $ref: '#/components/schemas/AA1121LackApi'
+                      clientList:
+                        type: array
+                        description: Client list
+                        items:
+                          $ref: '#/components/schemas/AA1121Client'
+                      groupList:
+                        type: array
+                        description: Group list
+                        items:
+                          $ref: '#/components/schemas/AA1121Group'
+                      vgroupList:
+                        type: array
+                        description: Authorization scope list
+                        items:
+                          $ref: '#/components/schemas/AA1121Vgroup'
+                      groupAuthList:
+                        type: array
+                        description: Authentication method list
+                        items:
+                          $ref: '#/components/schemas/AA1121GroupAuth'
+                      securityLevelList:
+                        type: array
+                        description: Security level list
+                        items:
+                          $ref: '#/components/schemas/AA1121SecurityLevel'
+                      rdbConnectionList:
+                        type: array
+                        description: RDB connection
+                        items:
+                          $ref: '#/components/schemas/AA1121RdbConnection'
+                      longId:
+                        type: string
+                        description: ID, this longId needs to be passed when the frontend performs an action
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1443'
+                          - '1233'
+                          - '1291'
+                          - '1297'
+                        description: Error code
+                      rtnMsg:
+                        type: string
+                        description: Error message
+  /dgrv4/11/AA1128:
+    post:
+      summary: Import Client-Related Data – Full Overwrite on Duplicates
+      description: |-
+        Confirms the import of client-related data, performs the actual data import operation, and overwrites duplicates
+      operationId: importClientRelatedAllCover
+      tags:
+        - Scenario 5.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    longId:
+                      type: string
+                      description: ID obtained from AA1121 response
+                  required:
+                    - longId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: 1250506114435V4g73O
+                txDate: 20250506T114435+0800
+                txID: AA1128
+                cID: YWRtaW5Db25zb2xl
+                locale: "zh-TW"
+              ReqBody:
+                longId: '2316263106968687481'
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    description: Changes the data change status value from R to C (i.e., duplicate becomes overwrite)
+              example:
+                ResHeader:
+                  txSN: '1240201165917000001'
+                  txDate: 20240201T045917+0800
+                  txID: AA1128Req
+                  rtnCode: '1100'
+                  rtnMsg: null
+                RespBody: {}
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1298'
+                          - '1297'
+                          - '1350'
+                        description: "Error Code: 1298(No data found), 1297(Execution error), 1350([{{0}}] is a required field)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              example:
+                ResHeader:
+                  txSN: '1240201170055000001'
+                  txDate: 20240201T050055+0800
+                  txID: AA1128Req
+                  rtnCode: '1298'
+                  rtnMsg: 1298 - No data found
+  /dgrv4/11/AA1129:
+    post:
+      summary: Import Client-Related Data – Confirmation
+      description: Confirms the import of client-related data and performs the actual data import operation
+      
+      operationId: importClientRelatedConfirm
+      tags:
+        - Scenario 5.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    longId:
+                      type: string
+                      description: ID obtained from AA1121 response
+                  required:
+                    - longId
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: 1250506113624pYfEQ9
+                txDate: 20250506T113624+0800
+                txID: AA1129
+                cID: YWRtaW5Db25zb2xl
+                locale: "zh-TW"
+              ReqBody:
+                longId: '2316263106968687481'
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    description: No special return content after import is complete
+              example:
+                ResHeader:
+                  txSN: '1240226155703000001'
+                  txDate: 20240226T035703+0800
+                  txID: AA1129Req
+                  rtnCode: '1100'
+                  rtnMsg: null
+                RespBody: {}
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1298'
+                          - '1297'
+                          - '1350'
+                        description: "Error Code: 1298(No data found), 1297(Execution error), 1350(Parameter error)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              example:
+                ResHeader:
+                  txSN: '1240226155858000001'
+                  txDate: 20240226T035858+0800
+                  txID: AA1129Req
+                  rtnCode: '1298'
+                  rtnMsg: 1298 - No data found
+          
+
+  /dgrv4/11/AA0302:
+    post:
+      summary: Retrieve API Details
+      description: |-
+        Queries detailed API information. By default, retrieves the currently Active Module or the latest API Detail data.
+      operationId: queryAPIDetail
+      tags:
+        - Scenario 6.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReqHeader:
+                  type: object
+                  properties:
+                    txSN:
+                      type: string
+                      description: Transaction serial number
+                    txDate:
+                      type: string
+                      description: Transaction date and time
+                    txID:
+                      type: string
+                      description: Transaction ID
+                    cID:
+                      type: string
+                      description: Client ID
+                    locale:
+                      type: string
+                      description: Locale
+                  required:
+                    - txSN
+                    - txDate
+                    - txID
+                    - cID
+                    - locale
+                ReqBody:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                      description: Organization Unit ID, obtained from Token
+                    moduleName:
+                      type: string
+                      description: Module Name
+                    apiKey:
+                      type: string
+                      description: API ID
+                  required:
+                    - moduleName
+                    - apiKey
+              required:
+                - ReqHeader
+                - ReqBody
+            example:
+              ReqHeader:
+                txSN: "12505081057088pPD8X"
+                txDate: "20250508T105708+0800"
+                txID: "AA0302"
+                cID: "YWRtaW5Db25zb2xl"
+                locale: "zh-TW"
+              ReqBody:
+                moduleName: "/226-8877"
+                apiKey: "/226-8877"
+      responses:
+        '200':
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                        description: Transaction serial number
+                      txDate:
+                        type: string
+                        description: Transaction date and time
+                      txID:
+                        type: string
+                        description: Transaction ID
+                      rtnCode:
+                        type: string
+                        description: Return code
+                      rtnMsg:
+                        type: string
+                        nullable: true
+                        description: Return message
+                  RespBody:
+                    type: object
+                    properties:
+                      apiStatus:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: API Status
+                      moduleId:
+                        type: integer
+                        description: Module Number, -1 means no module number
+                      moduleName:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: Module Name
+                      apiKey:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: API ID
+                      apiName:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: API Name
+                      apiSrc:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: API Source
+                      jweFlag:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: JWT Setting (Request)
+                      jweFlagResp:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: JWT Setting (Response)
+                      methodOfJson:
+                        type: string
+                        description: Http Method
+                      pathOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: Endpoint
+                      protocol:
+                        type: string
+                        description: Protocol of Target URL
+                      srcUrl:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: Target URL
+                      urlRID:
+                        type: string
+                        description: Path Parameter, "0"=None, "1"=Exists
+                      noOAuth:
+                        type: string
+                        description: No OAuth, "0"=No, "1"=Yes
+                      funFlag:
+                        type: integer
+                        description: Function Setting, 1=Token Payload
+                      dataFormat:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: Data Format
+                      regHostId:
+                        type: string
+                        description: Registered Host ID
+                      regHostName:
+                        type: string
+                        description: Registered Host Name
+                      headersOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: Headers
+                      paramsOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: Parameter Values
+                      consumesOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: CONSUMES
+                      producesOfJson:
+                        $ref: '#/components/schemas/AA0302Trunc'
+                        description: PRODUCES
+                      apiDesc:
+                        type: string
+                        description: API Description
+                      apiUUID:
+                        type: string
+                        description: API UUID
+                      orgId:
+                        type: string
+                        description: Organization Unit ID
+                      orgName:
+                        type: string
+                        description: Organization Unit Name
+                      controls:
+                        $ref: '#/components/schemas/AA0302Controls'
+                        description: Field Controls
+                      apiCacheFlag:
+                        $ref: '#/components/schemas/AA0302Pair'
+                        description: API CACHE Method
+                      mockStatusCode:
+                        type: string
+                        description: Mock Status Code
+                      mockHeaders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AA0302KeyVal'
+                        description: Mock Headers (for update)
+                      mockBody:
+                        type: string
+                        description: Mock Body
+                      mockHeadersOfJson:
+                        type: string
+                        description: Mock Headers in JSON format (for details)
+                      labelList:
+                        type: array
+                        items:
+                          type: string
+                        description: Labels
+                      fixedCacheTime:
+                        type: integer
+                        description: Fixed Cache Time
+                      type:
+                        type: string
+                        description: Mode, "0"=tsmpc, "1"=dgrc
+                      failDiscoveryPolicy:
+                        type: string
+                        description: Failure Discovery Policy
+                      failHandlePolicy:
+                        type: string
+                        description: Failure Handling Policy
+                      notifyNameList:
+                        type: array
+                        items:
+                          type: string
+                        description: Webhook Notify Name
+                      enableScheduledDate:
+                        type: integer
+                        format: int64
+                        description: Scheduled Enable Date
+                      disableScheduledDate:
+                        type: integer
+                        format: int64
+                        description: Scheduled Disable Date
+                      createDate:
+                        type: string
+                        description: Creation Date
+                      createUser:
+                        type: string
+                        description: Creator
+                      updateDate:
+                        type: string
+                        description: Update Date
+                      updateUser:
+                        type: string
+                        description: Updater
+              example:
+                ResHeader:
+                  txSN: "1241114144626ydc0Qf"
+                  txDate: "20241114T144626+0800"
+                  txID: "AA0302"
+                  rtnCode: "1100"
+                  rtnMsg: null
+                RespBody:
+                  apiStatus:
+                    v: "1"
+                    n: "Enabled"
+                  moduleId: -1
+                  moduleName:
+                    v: "/api"
+                    t: false
+                  apiKey:
+                    v: "/api/v1/item/card"
+                    t: false
+                  apiName:
+                    v: "Product Data Card Query"
+                    t: false
+                  apiSrc:
+                    v: "R"
+                    n: "Registered"
+                  jweFlag:
+                    v: "0"
+                    n: "Not used"
+                  jweFlagResp:
+                    v: "0"
+                    n: "Not used"
+                  methodOfJson: "GET"
+                  pathOfJson:
+                    v: "[/api/v1/item/c"
+                    t: true
+                    o: "[/api/v1/item/card]"
+                  protocol: "http://"
+                  srcUrl:
+                    v: "http://bncrfr-sit-temp-api-583"
+                    t: true
+                    o: "http://bncrfr-sit-temp-api-5831e7b32ce88782.elb.ap-northeast-1.amazonaws.com:80/api/v1/item/card"
+                  urlRID: "0"
+                  noOAuth: "1"
+                  funFlag: 0
+                  dataFormat:
+                    v: "1"
+                    n: "JSON"
+                  headersOfJson:
+                    v: "[]"
+                    t: false
+                  paramsOfJson:
+                    v: "[]"
+                    t: false
+                  consumesOfJson:
+                    v: "[]"
+                    t: false
+                  producesOfJson:
+                    v: "[\"*/*\"]"
+                    t: false
+                  apiDesc: ""
+                  apiUUID: "C25E450B-05ED-4C13-8151-220243CED88D"
+                  orgId: "100000"
+                  orgName: "TSMPDefaultRoot"
+                  controls:
+                    apiName: true
+                    protocol: true
+                    srcUrl: true
+                    methodOfJson: true
+                    dataFormat: true
+                  apiCacheFlag:
+                    v: "1"
+                    n: "None"
+                  pathType: "dgrc"
+                  dgrPath: "/api/v1/item/card"
+                  mockStatusCode: null
+                  mockHeaders: null
+                  mockHeadersOfJson: null
+                  mockBody: null
+                  headerMaskKey: ""
+                  headerMaskPolicy: "0"
+                  headerMaskPolicyNum: null
+                  headerMaskPolicySymbol: ""
+                  bodyMaskKeyword: ""
+                  bodyMaskPolicy: "0"
+                  bodyMaskPolicyNum: null
+                  bodyMaskPolicySymbol: ""
+                  isRedirectByIp: false
+                  type: "1"
+                  failDiscoveryPolicy: "0"
+                  failHandlePolicy: "0"
+                  labelList: []
+                  redirectByIpDataList: []
+                  fixedCacheTime: 0
+                  enableScheduledDate: 0
+                  disableScheduledDate: 0
+                  createDate: "2024-04-19 16:56:15"
+                  createUser: "zoe"
+                  updateDate: "2024-06-26 15:11:12"
+                  updateUser: "chrisc"
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResHeader:
+                    type: object
+                    properties:
+                      txSN:
+                        type: string
+                      txDate:
+                        type: string
+                      txID:
+                        type: string
+                      rtnCode:
+                        type: string
+                        enum:
+                          - '1108'
+                          - '1296'
+                          - '1298'
+                          - '1436'
+                        description: "Error Code: 1108(No API detail data found), 1296(Missing required parameters), 1298(No data found), 1436(No active or recently uploaded module found)"
+                      rtnMsg:
+                        type: string
+                        description: Error message
+              examples:
+                No API detail data found:
+                  value:
+                    ResHeader:
+                      txSN: "1201125152041000001"
+                      txDate: "202011330T032041+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1108"
+                      rtnMsg: "1108 - No API detail data found"
+                Missing required parameters:
+                  value:
+                    ResHeader:
+                      txSN: "1201125143050000001"
+                      txDate: "202011330T023050+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1296"
+                      rtnMsg: "1296 - Missing required parameters"
+                No data found:
+                  value:
+                    ResHeader:
+                      txSN: "1201125143655000001"
+                      txDate: "202011330T023655+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1298"
+                      rtnMsg: "1298 - No data found"
+                No active or recently uploaded module found:
+                  value:
+                    ResHeader:
+                      txSN: "1201125152135000001"
+                      txDate: "202011330T032135+0800"
+                      txID: "AA0302Req"
+                      rtnCode: "1436"
+                      rtnMsg: "1436 - No active or recently uploaded module found"
+
+
+          
+          
+components:
+  schemas:
+    AA1121LackApi:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: Module name
+        apiId:
+          type: string
+          description: API ID
+      required:
+        - moduleName
+        - apiId
+    AA1121Client:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: Data change status
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        clientId:
+          type: string
+          description: Client account
+        clientName:
+          type: string
+          description: Client code
+        clientAlias:
+          type: string
+          description: Client name
+          nullable: true
+      required:
+        - dataStatus
+        - clientId
+        - clientName
+    AA1121Group:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: Data change status
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        groupName:
+          type: string
+          description: Group code
+        groupAlias:
+          type: string
+          description: Group name
+      required:
+        - dataStatus
+        - groupName
+        - groupAlias
+    AA1121Vgroup:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: Data change status
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        vgroupName:
+          type: string
+          description: Authorization scope code
+        groupAlias:
+          type: string
+          description: Authorization scope name
+      required:
+        - dataStatus
+        - vgroupName
+        - groupAlias
+    AA1121GroupAuth:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: Data change status
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        groupAuthId:
+          type: string
+          description: Authentication method code
+        groupAuthName:
+          type: string
+          description: Authentication method name
+      required:
+        - dataStatus
+        - groupAuthId
+        - groupAuthName
+    AA1121SecurityLevel:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: Data change status
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        securityLevelId:
+          type: string
+          description: Security level code
+        securityLevelName:
+          type: string
+          description: Security level name
+      required:
+        - dataStatus
+        - securityLevelId
+        - securityLevelName
+    AA1121RdbConnection:
+      type: object
+      properties:
+        dataStatus:
+          type: string
+          description: Data change status
+          enum:
+            - A
+            - R
+            - C
+            - CA
+            - CR
+        connectionName:
+          type: string
+          description: Connection Name
+      required:
+        - dataStatus
+        - connectionName
+    AA0318Item:
+      type: object
+      properties:
+        apiKey:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: API ID, TSMP_API_IMP.api_key, truncated if length exceeds 20
+        moduleName:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: Module Name, TSMP_API_IMP.module_name, truncated if length exceeds 15
+        apiName:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: API Name, TSMP_API_IMP.api_name, truncated if length exceeds 20
+        apiSrc:
+          $ref: '#/components/schemas/AA0318Pair'
+          description: API Source, TSMP_API_IMP.api_src, corresponding text ITEM_NO = 'API_SRC'
+        endpoint:
+          type: string
+          description: Endpoint, TSMP_API_IMP.path_of_json
+        checkAct:
+          $ref: '#/components/schemas/AA0318Pair'
+          description: Check Result, TSMP_API_IMP.check_act, corresponding text ITEM_NO = 'API_IMP_CHECK_ACT'
+        memo:
+          $ref: '#/components/schemas/AA0318Trunc'
+          description: Description, TSMP_API_IMP.memo, truncated if length exceeds 50
+        srcURL:
+          type: string
+          description: Target URL, TSMP_API_IMP.SRC_URL
+        srcURLByIpRedirectMap:
+          type: object
+          additionalProperties:
+            type: string
+          description: IP traffic split target URL
+        failDiscoveryPolicy:
+          type: string
+          description: Failure Discovery Policy, TSMP_API_IMP.fail_discovery_policy
+        failHandlePolicy:
+          type: string
+          description: Failure Handling Policy, TSMP_API_IMP.fail_handle_policy
+      required:
+        - apiKey
+        - moduleName
+        - apiName
+        - apiSrc
+        - endpoint
+        - checkAct
+        - srcURL
+        - failDiscoveryPolicy
+        - failHandlePolicy
+    AA0318Trunc:
+      type: object
+      properties:
+        val:
+          type: string
+          description: Display value, the value to be displayed on the screen (may be truncated). If t = TRUE, the frontend should append "...show more" after the v value when displaying.
+        t:
+          type: boolean
+          description: Whether the original value is truncated. If the 'ori' field exceeds the length limit and is truncated, fill in TRUE, otherwise fill in FALSE.
+        ori:
+          type: string
+          description: The value presented by "show more". If t = FALSE, the backend does not need to return this field (not even the key).
+      required:
+        - val
+        - t
+    AA0318Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: Value
+        'n':
+          type: string
+
+    AA0319ReqItem:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: Module name
+        apiKey:
+          type: string
+          description: API ID
+      required:
+        - moduleName
+        - apiKey
+    AA0319RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: Module name
+        result:
+          $ref: '#/components/schemas/AA0319Pair'
+          description: Import result, corresponding text ITEM_NO = 'API_IMP_RESULT'
+        desc:
+          $ref: '#/components/schemas/AA0319Trunc'
+          description: Description, truncated if length exceeds 50
+      required:
+        - apiKey
+        - moduleName
+        - result
+    AA0319Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: Value
+        n:
+          type: string
+          description: Display text
+      required:
+        - v
+    AA0319Trunc:
+      type: object
+      properties:
+        val:
+          type: string
+          description: Display value, the value to be displayed on the screen (may be truncated)
+        t:
+          type: boolean
+          description: Whether the original value is truncated. If the 'ori' field exceeds the length limit and is truncated, fill in TRUE, otherwise fill in FALSE
+        ori:
+          type: string
+          description: The value presented by "show more". If t = FALSE, the backend does not need to return this field
+      required:
+        - val
+        - t
+
+    AA0425RespItem:
+      type: object
+      properties:
+        sort:
+          type: integer
+          description: Sort value
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: Module name
+        apiName:
+          type: string
+          description: API Name
+        apiStatus:
+          type: string
+          description: API status, 1=Enabled, 2=Disabled
+        noAuth:
+          type: boolean
+          description: Whether no authentication is required, FALSE means authentication is required, TRUE means authentication is not required
+        labelList:
+          type: array
+          description: Label list
+          items:
+            type: string
+        oldSrcUrlList:
+          type: array
+          description: Original URL list
+          items:
+            $ref: '#/components/schemas/AA0425RespNewSrcUrlItem'
+        newSrcUrlList:
+          type: array
+          description: New URL list
+          items:
+            $ref: '#/components/schemas/AA0425RespNewSrcUrlItem'
+      required:
+        - sort
+        - apiKey
+        - moduleName
+        - apiName
+        - apiStatus
+        - noAuth
+        - labelList
+        - oldSrcUrlList
+        - newSrcUrlList
+    AA0425RespNewSrcUrlItem:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: IP address, empty string if no IP traffic split
+        srcUrlList:
+          type: array
+          description: URL list
+          items:
+            $ref: '#/components/schemas/AA0425RespPercentageAndSrcUrl'
+        isSuccess:
+          type: boolean
+          description: Whether successful, true=success, false=failure
+      required:
+        - ip
+        - srcUrlList
+        - isSuccess
+    AA0425RespPercentageAndSrcUrl:
+      type: object
+      properties:
+        percentage:
+          type: integer
+          description: Percentage
+        srcUrl:
+          type: string
+          description: Target URL
+      required:
+        - percentage
+        - srcUrl
+        
+    AA1120DgrApikeyUseApi:
+      type: object
+      properties:
+        apiUid:
+          type: string
+          description: UUID
+        moudleName:
+          type: string
+          description: Module name
+        apiId:
+          type: string
+          description: API ID
+      required:
+        - apiUid
+        - moudleName
+        - apiId
+
+
+    AA0301Item:
+      type: object
+      properties:
+        moduleName:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: Module name, TSMP_API.module_name, truncated if length exceeds 15
+        apiKey:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: API ID, TSMP_API.api_key, truncated if length exceeds 20
+        apiStatus:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: Status, TSMP_API.api_status, corresponding text ITEM_NO = 'ENABLE_FLAG', PARAM1 = api_status
+        apiSrc:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: API Source, TSMP_API.api_src, corresponding text ITEM_NO = 'API_SRC'
+        apiName:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: API Name, TSMP_API.api_name, truncated if length exceeds 20
+        apiDesc:
+          $ref: '#/components/schemas/AA0301Trunc'
+          description: API Description, TSMP_API.api_desc, truncated if length exceeds 30
+          nullable: true
+        jweFlag:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: JWT Setting (Request), TSMP_API.jwe_flag, corresponding text ITEM_NO = 'API_JWT_FLAG', if NULL, backend sets to "0"
+        jweFlagResp:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: JWT Setting (Response), TSMP_API.jwe_flag_resp, corresponding text ITEM_NO = 'API_JWT_FLAG', if NULL, backend sets to "0"
+        updateTime:
+          type: string
+          description: Last Modified Date, TSMP_API.create_time / update_time,
+          format: "yyyy-MM-dd HH:mm:ss" # Corrected the format string to be valid
+        org:
+          $ref: '#/components/schemas/AA0301Pair'
+          description: Organization Unit, TSMP_API.org_id, corresponding text TSMP_ORGANIZATION.org_name
+        labelList:
+          type: array
+          description: Label list
+          items:
+            type: string
+        enableScheduledDate:
+          type: integer
+          format: int64
+          description: Scheduled Enable Date, TSMP_API.Enable_Scheduled_Date
+        disableScheduledDate:
+          type: integer
+          format: int64
+          description: Scheduled Disable Date, TSMP_API.Disable_Scheduled_Date
+        createDate:
+          type: string
+          description: Creation Date, TSMP_API.CREATE_TIME
+        createUser:
+          type: string
+          description: Creator, TSMP_API.CREATE_USER
+        updateDate:
+          type: string
+          description: Update Date, TSMP_API.UPDATE_TIME
+          nullable: true
+        updateUser:
+          type: string
+          description: Updater, TSMP_API.UPDATE_USER
+          nullable: true
+      required:
+        - moduleName
+        - apiKey
+        - apiStatus
+        - apiSrc
+        - apiName
+        - jweFlag
+        - jweFlagResp
+        - labelList
+        - enableScheduledDate
+        - disableScheduledDate
+        - createDate
+        - createUser
+    
+    AA0301Trunc:
+      type: object
+      properties:
+        val:
+          type: string
+          description: Display value, the value to be displayed on the screen (may be truncated). If t = TRUE, the frontend should append "...show more" after the v value when displaying.
+        t:
+          type: boolean
+          description: Whether the original value is truncated. If the 'ori' field exceeds the length limit and is truncated, fill in TRUE, otherwise fill in FALSE.
+        ori:
+          type: string
+          description: The value presented by "show more". If t = FALSE, the backend does not need to return this field (not even the key).
+      required:
+        - val
+        - t
+    
+    AA0301Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: Value
+        n:
+          type: string
+          description: Display text, this field may return NULL if the value has no corresponding text
+          nullable: true
+      required:
+        - v
+
+
+    AA0317ReqItem:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: Module name, TSMP_API.module_name
+        apiKey:
+          type: string
+          description: API ID, TSMP_API.api_key
+      required:
+        - moduleName
+        - apiKey
+    
+    AA0317Data:
+      type: object
+      properties:
+        r:
+          type: array
+          description: Registered API list, this field will only have a value when APIs with [API Source] as Registered (R) are exported
+          items:
+            $ref: '#/components/schemas/AA0317Module'
+          nullable: true
+        c:
+          type: array
+          description: Combined API list, this field will only have a value when APIs with [API Source] as Combined (C) are exported
+          items:
+            $ref: '#/components/schemas/AA0317Module'
+          nullable: true
+    
+    AA0317Module:
+      type: object
+      properties:
+        moduleName:
+          type: string
+          description: Module name
+        regModule:
+          $ref: '#/components/schemas/AA0317RegModule'
+          description: Registered module information, this data will only exist when [API Source] is Registered (R) and the module exists in TSMP_REG_MODULE
+          nullable: true
+        apiList:
+          type: array
+          description: API list
+          items:
+            $ref: '#/components/schemas/AA0317RespItem'
+      required:
+        - moduleName
+        - apiList
+    
+    AA0317RegModule:
+      type: object
+      properties:
+        regModuleId:
+          type: integer
+          format: int64
+          description: ID (sequential number), TSMP_REG_MODULE.reg_module_id
+        moduleName:
+          type: string
+          description: Module name, TSMP_REG_MODULE.module_name
+        moduleVersion:
+          type: string
+          description: Module Version, TSMP_REG_MODULE.module_version
+        moduleSrc:
+          type: string
+          description: Creation Source, TSMP_REG_MODULE.module_src
+      required:
+        - regModuleId
+        - moduleName
+        - moduleVersion
+        - moduleSrc
+    
+    AA0317RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API Key
+        moduleName:
+          type: string
+          description: Module name
+        apiName:
+          type: string
+          description: API Name
+        apiDesc:
+          type: string
+          description: API Description
+          nullable: true
+        apiOwner:
+          type: string
+          description: API Owner
+          nullable: true
+        urlRID:
+          type: string
+          description: ResourceID in URL, whether there will be ResourceID in Source URL, "0" means no, "1" means yes
+        apiSrc:
+          type: string
+          description: Source, 'R' means Registered, 'C' means Composed
+        srcURL:
+          type: string
+          description: Source URL (Registered API only)
+          nullable: true
+        apiUUID:
+          type: string
+          description: API UUID (Composered API only)
+          nullable: true
+        contentType:
+          type: string
+          description: CONSUMES
+          nullable: true
+        enpoint:
+          type: string
+          description: End Point
+        httpHeader:
+          type: string
+          description: HEADERS
+          nullable: true
+        httpMethod:
+          type: string
+          description: Http Method
+        params:
+          type: string
+          description: PARAMS
+          nullable: true
+        produce:
+          type: string
+          description: PRODUCES
+          nullable: true
+        flow:
+          type: array
+          description: Composer Flow (composer flow configuration in mongodb)
+          items:
+            type: string
+          nullable: true
+        no_oauth:
+          type: string
+          description: OAuth Redirect setting, 0 means tsmpg does not redirect, 1 means tsmpg allows redirect, default is 0
+          nullable: true
+        jweFlag:
+          type: string
+          description: Has JWE FLAG (Request), 0 means not used, 1 means JWE, 2 means JWS, null means not used
+          nullable: true
+        jweFlagResp:
+          type: string
+          description: Has JWE FLAG (Response), 0 means not used, 1 means JWE, 2 means JWS, null means not used
+          nullable: true
+        funFlag:
+          type: integer
+          description: Function setting, 1 means tokenpayload, will carry the token's payload forward
+          nullable: true
+        apiCacheFlag:
+          type: string
+          description: API CACHE method, 1 means none (default), 2 means adaptive, 3 means fixed
+        fixedCacheTime:
+          type: integer
+          description: Fixed cache time, only has value when apiCacheFlag=3
+          nullable: true
+        failDiscoveryPolicy:
+          type: string
+          description: Failure Discovery Policy, 0 means Policy 0
+        failHandlePolicy:
+          type: string
+          description: Failure Handling Policy, 0 means Policy 0, 1 means Policy 1
+        publicFlag:
+          type: string
+          description: DP API On/Off shelf, E means On shelf (Enable), D means Off shelf (Disable)
+        apiReleaseTime:
+          type: string
+          description: DP API On-shelf time, non-null is longTime
+      required:
+        - apiKey
+        - moduleName
+        - apiName
+        - urlRID
+        - apiSrc
+        - enpoint
+        - httpMethod
+        - apiCacheFlag
+        - failDiscoveryPolicy
+        - failHandlePolicy
+        - publicFlag
+        - apiReleaseTime
+
+    AA0423RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: Module name
+        apiStatus:
+          type: string
+          description: API status
+        apiName:
+          type: string
+          description: API Name
+        srcUrlList:
+          type: array
+          description: Target URL list
+          items:
+            $ref: '#/components/schemas/AA0423RespSrcUrlListItem'
+        noOauth:
+          type: boolean
+          description: Whether OAuth authentication is not required, FALSE means authentication is required, TRUE means authentication is not required
+        labelList:
+          type: array
+          description: Label list
+          items:
+            type: string
+          nullable: true
+      required:
+        - apiKey
+        - moduleName
+        - apiStatus
+        - apiName
+        - srcUrlList
+        - noOauth
+    
+    AA0423RespSrcUrlListItem:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: IP address, empty string if no IP traffic split
+        srcUrlAndPercentageList:
+          type: array
+          description: URL and percentage list
+          items:
+            $ref: '#/components/schemas/AA0423RespSrcUrlAndPercentageItem'
+      required:
+        - ip
+        - srcUrlAndPercentageList
+    
+    AA0423RespSrcUrlAndPercentageItem:
+      type: object
+      properties:
+        percentage:
+          type: string
+          description: Percentage
+        srcUrl:
+          type: string
+          description: Target URL
+      required:
+        - percentage
+        - srcUrl
+
+    AA0424ReqAPIList:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID, TSMP_API.api_key
+        moduleName:
+          type: string
+          description: Module name, TSMP_API.module_name
+      required:
+        - apiKey
+        - moduleName
+    
+    AA0424ReqSrcUrlList:
+      type: object
+      properties:
+        srcUrl:
+          type: string
+          description: Keyword to be replaced or corrected
+        isPercentage:
+          type: boolean
+          description: Whether to correct percentage
+        percentage:
+          type: integer
+          description: Percentage value, required when isPercentage is true
+        isReplace:
+          type: boolean
+          description: Whether to replace text
+        replaceString:
+          type: string
+          description: Text to be replaced, required when isReplace is true
+      required:
+        - srcUrl
+        - isPercentage
+        - isReplace
+
+    AA0426RespItem:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API ID
+        moduleName:
+          type: string
+          description: Module name
+      required:
+        - apiKey
+        - moduleName
+
+
+    AA0302Trunc:
+      type: object
+      properties:
+        v:
+          type: string
+          description: Display value, the value to be displayed on the screen (may be truncated)
+        t:
+          type: boolean
+          description: Whether the original value is truncated. If the 'o' field exceeds the length limit and is truncated, fill in TRUE, otherwise fill in FALSE
+        o:
+          type: string
+          description: Original value, the value presented by "show more". If t = FALSE, the backend does not need to return this field
+      required:
+        - v
+        - t
+        
+    AA0302Pair:
+      type: object
+      properties:
+        v:
+          type: string
+          description: Value
+        n:
+          type: string
+          description: Display text (Name), this field may return NULL if the value has no corresponding text
+      required:
+        - v
+        
+    AA0302Controls:
+      type: object
+      properties:
+        apiName:
+          type: boolean
+          description: Whether API name can be edited, TRUE=Enabled, FALSE=Disabled
+        protocol:
+          type: boolean
+          description: Whether protocol can be edited, TRUE=Enabled, FALSE=Disabled
+        srcUrl:
+          type: boolean
+          description: Whether target URL can be edited, TRUE=Enabled, FALSE=Disabled
+        methodOfJson:
+          type: boolean
+          description: Whether Http Method can be edited, TRUE=Enabled, FALSE=Disabled
+        dataFormat:
+          type: boolean
+          description: Whether data format can be edited, TRUE=Enabled, FALSE=Disabled
+        regHostId:
+          type: boolean
+          description: Whether registered host can be edited, TRUE=Enabled, FALSE=Disabled
+      required:
+        - apiName
+        - protocol
+        - srcUrl
+        - methodOfJson
+        - dataFormat
+        - regHostId
+        
+    AA0302KeyVal:
+      type: object
+      properties:
+        key:
+          type: string
+          description: KEY
+        value:
+          type: string
+          description: VALUE
+      required:
+        - key
+        - value
+
+        
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
