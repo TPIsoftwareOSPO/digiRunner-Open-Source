@@ -271,20 +271,7 @@ docker run -p 18080:18080 digirunner
 
 Open your browser and navigate to: http://localhost:18080/dgrv4/login
 
-## Makefile
 
-You can also build your own jar using the `make` command
-
-### Usage
-
-`make [task]`
-
-tasks:
-- `license-report`: generate dependencies license report to license-report.html
-- `build-jar`: execute gradlew clean and than build, result in dgrv4_Gateway_serv/build/libs/digiRunner-v4.2.25.jar
-- `java-run`: run digiRunner-v4.2.25.jar using java -jar command
-- `build-image`: build docker image
-- `run-container`: run docker container
 
 
 [tpi-url]: https://tpi.dev/
