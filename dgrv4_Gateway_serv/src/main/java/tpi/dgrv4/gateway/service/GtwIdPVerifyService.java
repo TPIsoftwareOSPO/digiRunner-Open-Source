@@ -35,17 +35,20 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Service
 public class GtwIdPVerifyService {
 
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private ObjectMapper objectMapper;
+	private GtwIdPJwksService gtwIdPJwksService;
 
 	@Autowired
-	private GtwIdPJwksService gtwIdPJwksService;
+	public GtwIdPVerifyService(TokenHelper tokenHelper, TsmpSettingService tsmpSettingService,
+			ObjectMapper objectMapper, GtwIdPJwksService gtwIdPJwksService) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.objectMapper = objectMapper;
+		this.gtwIdPJwksService = gtwIdPJwksService;
+	}
 
 	public ResponseEntity<?> verify(HttpServletRequest httpReq, HttpServletResponse httpResp, HttpHeaders headers) {
 		String reqUri = httpReq.getRequestURI();

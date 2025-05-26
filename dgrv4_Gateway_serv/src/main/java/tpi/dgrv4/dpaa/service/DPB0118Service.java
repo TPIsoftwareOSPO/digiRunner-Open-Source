@@ -11,7 +11,6 @@ import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
-import tpi.dgrv4.common.utils.LicenseType;
 import tpi.dgrv4.common.utils.LicenseUtilBase;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0118Req;
@@ -24,18 +23,21 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
 @Service
-@Scope("prototype")
+@Scope("prototype") // non-Singleton
 public class DPB0118Service {
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private VersionService versionService;
-	
-	@Autowired
 	private LicenseUtilBase util;
 	
+	@Autowired
+	public DPB0118Service(TsmpSettingService tsmpSettingService, VersionService versionService, LicenseUtilBase util) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.versionService = versionService;
+		this.util = util;
+	}
+
 	public DPB0118Resp queryModuleVersion(TsmpAuthorization auth, DPB0118Req req) {
 		return queryModuleVersion(null, null, false);
 	}
@@ -74,7 +76,7 @@ public class DPB0118Service {
 			
 			VersionInfo v = versionService.getVersion();
 	
-			resp.setMajorVersionNo(v.MajorVersionNo);
+			resp.setMajorVersionNo(v.majorVersionNo);
 			resp.setVersion(v.strVersion);
 			if (StringUtils.hasLength(ipAddress)) {
 				resp.setRemoteAddr(ipAddress);

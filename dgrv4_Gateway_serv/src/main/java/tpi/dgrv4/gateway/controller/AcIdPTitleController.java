@@ -11,9 +11,13 @@ import tpi.dgrv4.gateway.service.AcIdPTitleService;
 
 @RestController
 public class AcIdPTitleController {
-	@Autowired
 	private AcIdPTitleService service;
 
+	@Autowired
+	public AcIdPTitleController(AcIdPTitleService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/acidp/{idPType}/getTitle")
 	public ResponseEntity<String> getTitle(@PathVariable(value = "idPType", required = true) String idPType) {

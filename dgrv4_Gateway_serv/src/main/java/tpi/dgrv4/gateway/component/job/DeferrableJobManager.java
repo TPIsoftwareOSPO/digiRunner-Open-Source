@@ -7,22 +7,21 @@ import tpi.dgrv4.gateway.component.job.appt.ApptJob;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class DeferrableJobManager extends JobManager {
-
-	public DeferrableJobManager(TPILogger logger) {
-		super(logger);
-	}
-
-	@Autowired
+	
 	private ServiceConfig serviceConfig;
+	
+	@Autowired
+	public DeferrableJobManager(ServiceConfig serviceConfig, JobHelperImpl jobHelper) {
+		super(jobHelper);
+		this.serviceConfig = serviceConfig;
+	}
 
 	private Integer poolSize;
 
@@ -30,7 +29,7 @@ public class DeferrableJobManager extends JobManager {
 	private ExecutorService executor2ndSingle;
 
 	/** 負責執行工作 */
-	public ExecutorService executor2nd;
+//	public ExecutorService executor2nd;
 
 	/**
 	 * Will be called by @PostConstruct in {@link JobManager}
@@ -52,13 +51,13 @@ public class DeferrableJobManager extends JobManager {
 		});
 		
 		AtomicInteger threadCounter = new AtomicInteger(1);
-		this.executor2nd = Executors.newFixedThreadPool(200, r -> {
-		    Thread thread = new Thread(r);
-		    thread.setName("deferrable-Job-Queue-" + threadCounter.getAndIncrement());
-		    return thread;
-		});
+//		this.executor2nd = Executors.newFixedThreadPool(20, r -> {
+//		    Thread thread = new Thread(r);
+//		    thread.setName("deferrable-Job-Queue-" + threadCounter.getAndIncrement());
+//		    return thread;
+//		});
 		
-		super.logger.debugDelay2sec("JobManager(" +this.getClass().getCanonicalName() + ") is initialized with thread-pool-size (" + this.poolSize + ")");
+		TPILogger.tl.debugDelay2sec("JobManager(" +this.getClass().getCanonicalName() + ") is initialized with thread-pool-size (" + this.poolSize + ")");
 	}
 
 	@Override
@@ -67,7 +66,7 @@ public class DeferrableJobManager extends JobManager {
 		while (true) {
 			i = takeDeferrableJob();
 			if (i == 0) {
-				this.logger.error("DeferrableJobManager is terminated unexpectedly!");
+				TPILogger.tl.error("DeferrableJobManager is terminated unexpectedly!");
 				break;
 			}
 		}
@@ -82,7 +81,7 @@ public class DeferrableJobManager extends JobManager {
 			if (job instanceof ApptJob apptJob) {
 				traceMsg += ", appt_id: " + apptJob.getTsmpDpApptJob().getApptJobId();
 			}
-			this.logger.trace(traceMsg);
+			TPILogger.tl.trace(traceMsg);
 			
 			job.runAfter(getJobHelper(), this);
 			job.setIsDeferrableJobDone();
@@ -93,14 +92,14 @@ public class DeferrableJobManager extends JobManager {
 				traceMsg += ", appt_id: " + apptJob.getTsmpDpApptJob().getApptJobId();
 			}
 			traceMsg += ", cost: " + (System.currentTimeMillis() - start) + "ms";
-			this.logger.trace(traceMsg);
+			TPILogger.tl.trace(traceMsg);
 		} catch (InterruptedException e) {
 			// 重新設置中斷狀態
 			Thread.currentThread().interrupt();
-			this.logger.warn("takeDeferrableJob was interrupted: " + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.warn("takeDeferrableJob was interrupted: " + StackTraceUtil.logStackTrace(e));
 			return 0;
 		} catch (Exception e) {
-			this.logger.error("takeDeferrableJob error: " + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("takeDeferrableJob error: " + StackTraceUtil.logStackTrace(e));
 		}
 		return 1;
 	}
@@ -143,7 +142,7 @@ public class DeferrableJobManager extends JobManager {
 	public void take2ndJob() {
 		this.executor2ndSingle.execute(() -> {
 			// 判斷要不要做
-			buff2ndWait();
+//			buff2ndWait__(); //2025.3.11, 在高併發時, 一直是 MM leak 的點, 故不使用它
 
 			// buff2nd 取一個, 並移除一個
 			Map.Entry<String, Job> entry = null;
@@ -158,39 +157,29 @@ public class DeferrableJobManager extends JobManager {
 			if (entry == null) return ;
 			
 			Job valJob = entry.getValue();
-			this.executor2nd.execute(() -> {
+			Thread.startVirtualThread(() -> {
 				// pause and run 2nd Job, 但要檢查 2nd 中是否有相同的 key
-				((DeferrableJob) valJob).runAfter(getJobHelper(), this);
+			    ((DeferrableJob) valJob).runAfter(getJobHelper(), this);//這裡會有阻塞約 6 秒
 			});
-			
-			// 查看執行緒池的狀態
-	        //getExecutor2ndQueueSize();
 
 			// 再觸發一次 take2nd Job
-			doAgaint2nd();
+			doAgainTake2ndJob();
 		});
 	}
 	
 	public int getExecutor2ndQueueSize() {
-		
-		if (executor2nd==null)
-			return -1; // UT 時不會啟動它
-		
-		int queueSize = ((ThreadPoolExecutor) executor2nd).getQueue().size();
-//		System.out.println("Waiting tasks: " + queueSize);
-		return queueSize;
+//		return -1; // UT 時不會啟動它
+		return 19;
 	}
 	
-	public int getExecutor2ndAvalibleSize() {
-		// 查看執行緒池的狀態
-        int activeCount = ((ThreadPoolExecutor) executor2nd).getActiveCount();
-        int poolSize = ((ThreadPoolExecutor) executor2nd).getPoolSize();
-//        System.out.println("Active threads: " + activeCount);
-//        System.out.println("Pool size: " + poolSize);
-		return poolSize - activeCount;
-	}
+//	public int getExecutor2ndAvalibleSize() {
+//		// 查看執行緒池的狀態
+//        int activeCount = ((ThreadPoolExecutor) executor2nd).getActiveCount();
+//        int poolSize = ((ThreadPoolExecutor) executor2nd).getPoolSize();
+//		return poolSize - activeCount;
+//	}
 
-	public void doAgaint2nd() {
+	public void doAgainTake2ndJob() {
 		if (!this.buff2nd.isEmpty()) {
 			executor2ndSingle.execute(() -> {
 				take2ndJob(); // 2nd 若有工作就一直 do Job
@@ -198,20 +187,31 @@ public class DeferrableJobManager extends JobManager {
 		}
 	}
 
+	// 我有一支 DeferrableJobManager.java 程式, 其中的 buff2ndWait() 在系統會被多個線程執行 wait 的動作, 在長時間高併發下會造成 Memory Leak,
+	// 經過分析, 似乎是因為 notifyAll 丟失的問題導致, 故我想增加 notifyAll 的頻率與
 	private void buff2ndWait() {
-		if (this.buff2nd.isEmpty()) {
-			try {
-				synchronized (this.buff2nd) {
-					this.buff2nd.wait(); // take1stJob 有做 notify
+		synchronized (buff2nd) {
+			while (buff2nd.isEmpty()) {  // AI:使用while而非if
+				try {
+					// 經由 Heap dump 的分析, 發現 buff2nd.wait() 會造成多線程進入 buff2nd 無法 GC 的問題, 因此我想在 wait 前後呼叫 notifyAll(), 以此解決信號丟失問題
+					// 同時我想增加監控, 了解進入 wait 的次數與離開 wait 的次數最終應該相等, 而非持續增加
+					buff2nd.notifyAll();
+					//可以在任何地方使用 DeferrableJobManager.buff2ndWaitCount.get() 來獲取當前等待的執行緒數量。
+//					buff2ndWaitCount.incrementAndGet(); //++
+					buff2nd.wait(1);  // 保留超時, JobManager.java: take1stJob 有做 buff2nd.notifyAll(), 但 GKE 實測仍會停頓於此, 故加入 wait time out 避免停頓太久
+//                    buff2ndWaitCount.decrementAndGet(); //--
+					buff2nd.notifyAll();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					break;
 				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
 			}
+			buff2nd.notifyAll();
 		}
 	}
 
 	/** This is only for unit test */
-	public void take2ndJob(LinkedHashMap<String, Job> buff2nd) {
+	public void take2ndJob(Map<String, Job> buff2nd) {
 		// 2nd 若有工作就一直 do Job
 		while (!buff2nd.isEmpty()) {
 			Map.Entry<String, Job> entry = null;
@@ -236,7 +236,7 @@ public class DeferrableJobManager extends JobManager {
 		try {
 			return func.apply(strVal);
 		} catch (Exception e) {
-			this.logger.debug("Error value of " + strVal + ", set to default " + defaultVal);
+			TPILogger.tl.debug("Error value of " + strVal + ", set to default " + defaultVal);
 		}
 		return defaultVal;
 	}

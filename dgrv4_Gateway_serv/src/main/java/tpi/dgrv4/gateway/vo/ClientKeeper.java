@@ -29,6 +29,7 @@ public class ClientKeeper implements Serializable {
 
 	private String cpu;
 	private String mem;
+	private String metaSpace;
 	private String h_used;
 	private String h_free;
 	private String h_total;
@@ -227,7 +228,13 @@ public class ClientKeeper implements Serializable {
 	}
 
 	public String getCpu() {
-		return cpu;
+		try {
+			float c = Float.parseFloat(this.cpu);
+			c = c * 100;
+			return String.format("%.2f%%", c);
+		} catch (Exception e) {
+			return cpu;
+		}
 	}
 
 	public void setCpu(String cpu) {
@@ -236,6 +243,10 @@ public class ClientKeeper implements Serializable {
 
 	public String getMem() {
 		return mem;
+	}
+
+	public String getMetaSpace() {
+		return metaSpace;
 	}
 
 	public void setMem(String mem) {
@@ -388,6 +399,10 @@ public class ClientKeeper implements Serializable {
 	 */
 	public void setDbConnect(String dbConnect) {
 		this.dbConnect = dbConnect;
+	}
+
+	public void setMetaSpace(String metaSpace) {
+		this.metaSpace = metaSpace;
 	}
 
 

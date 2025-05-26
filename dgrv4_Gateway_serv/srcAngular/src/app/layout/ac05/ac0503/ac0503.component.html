@@ -1,0 +1,71 @@
+<app-container [title]="title">
+  <form [formGroup]="form" (ngSubmit)="queryApiAbnormal()">
+    <div class="form-group row">
+      <div class="col-4">
+        <label id="abnormalElapsedTime_label" class="control-label">{{'abnormal_elapsed_time'|translate}}
+          <i class="far fa-question-circle ms-2" pTooltip="{{ 'abnormal_elapsed_time_tip' | translate }}"
+            tooltipStyleClass='tooltip-custom-w'></i>
+        </label>
+        <div class="col-5 d-flex align-items-center">
+          <input type="number" class="form-control text-end" formControlName="abnormalElapsedTime" [min]="-864000000"
+            [max]="864000000">
+          <small class="ms-1">ms</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-12">
+        <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
+      </div>
+    </div>
+  </form>
+  <hr>
+  <p-table [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+    [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th pSortableColumn="nodeName">{{'node_name'|translate}} <p-sortIcon field="nodeName"></p-sortIcon></th>
+        <th pSortableColumn="apiName">{{'api_name'|translate}} <p-sortIcon field="apiName"></p-sortIcon></th>
+        <th pSortableColumn="uri">URI <p-sortIcon field="uri"></p-sortIcon></th>
+        <th>{{'labelList'|translate}}</th>
+        <th pSortableColumn="statusCode">{{'status_code'|translate}} <p-sortIcon field="statusCode"></p-sortIcon></th>
+        <th class="text-end">{{'elapsed_time'|translate}}(ms)</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData>
+      <tr>
+        <td>{{rowData.nodeName}}</td>
+        <td>{{rowData.apiName}}</td>
+        <td>{{rowData.uri}}</td>
+        <td>
+          <label *ngFor="let item of rowData['labelList']; let idx = index;"
+            style="background-color: #666666;color: #fff; border-radius: 5px;" class="m-1 p-1">
+            {{item}}
+          </label>
+        </td>
+        <td>{{rowData.statusCode}}</td>
+        <td class="text-end">{{numberComma(rowData.elapsedTime)}}</td>
+
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <tr *ngIf="tableData.length>0">
+        <td [attr.colspan]="6" style="color: #b7b7b7;">
+          <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+          <!-- <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button> -->
+
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="6">
+          {{'no_rec' | translate}}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</app-container>

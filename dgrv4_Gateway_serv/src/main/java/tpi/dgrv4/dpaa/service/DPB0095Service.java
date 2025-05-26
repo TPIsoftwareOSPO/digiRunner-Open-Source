@@ -24,16 +24,20 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service						
 public class DPB0095Service {						
 						
-	@Autowired					
 	private TsmpClientDao tsmpClientDao;					
-						
-	@Autowired					
 	private ServiceConfig serviceConfig;					
 						
 	private Integer pageSize;					
 				
 	private TPILogger logger = TPILogger.tl;		
 						
+	@Autowired					
+	public DPB0095Service(TsmpClientDao tsmpClientDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB0095Resp queryClientListByRegStatusLike(TsmpAuthorization auth, DPB0095Req req) {	
 		DPB0095Resp resp = new DPB0095Resp();
 

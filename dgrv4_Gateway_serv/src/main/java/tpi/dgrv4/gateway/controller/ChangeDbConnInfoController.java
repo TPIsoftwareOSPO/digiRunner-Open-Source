@@ -15,11 +15,16 @@ import tpi.dgrv4.dpaa.service.ChangeDbConnInfoService;
 
 @Deprecated
 public class ChangeDbConnInfoController {
-	@Autowired
 	private ChangeDbConnInfoService service;
-
-	@Autowired
 	private HikariDataSource dataSource;
+	
+	@Autowired
+	public ChangeDbConnInfoController(ChangeDbConnInfoService service, HikariDataSource dataSource) {
+		super();
+		this.service = service;
+		this.dataSource = dataSource;
+	}
+
 	// 此為測試用，目前棄用 
 	@GetMapping(value = "/dgrv4/onlineConsole2/changeDbConnInfo", produces = "text/plain")
 	public ResponseEntity<?> changeDbConnInfo(@RequestParam(value = "pw", required = false) String pw,

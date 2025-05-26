@@ -41,35 +41,34 @@ public class DPB0147Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private DaoGenericCacheService daoGenericCacheService;
+	private AuthoritiesCacheProxy authoritiesCacheProxy;
 
 	@Autowired
-	private AuthoritiesCacheProxy authoritiesCacheProxy;
+	public DPB0147Service(DgrAcIdpUserDao dgrAcIdpUserDao, TsmpOrganizationDao tsmpOrganizationDao,
+			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao, DgrAuditLogService dgrAuditLogService,
+			TsmpUserDao tsmpUserDao, TsmpTokenHistoryDao tsmpTokenHistoryDao, TsmpSettingService tsmpSettingService,
+			DaoGenericCacheService daoGenericCacheService, AuthoritiesCacheProxy authoritiesCacheProxy) {
+		super();
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.authoritiesCacheProxy = authoritiesCacheProxy;
+	}
 
 	@Transactional
 	public DPB0147Resp updateIdPUser(TsmpAuthorization auth, DPB0147Req req, InnerInvokeParam iip) {

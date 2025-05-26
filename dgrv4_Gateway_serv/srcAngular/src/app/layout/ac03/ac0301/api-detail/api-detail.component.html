@@ -32,13 +32,13 @@
           <div class="p-form-check" [hidden]="apiDetail.pathType =='dgrc'">
             <p-checkbox inputId="path_param1" value="1" disabled [ngModel]="apiDetail.urlRID"
               [ngModelOptions]="{standalone: true}"> </p-checkbox>
-            <label class="mb-0 ml-1" for="path_param1">{{"path_param" | translate}}</label>
+            <label class="mb-0 ms-1" for="path_param1">{{"path_param" | translate}}</label>
           </div>
 
           <div class="p-form-check">
             <p-checkbox disabled inputId="no_auth1" value="1" [ngModel]="apiDetail.noOAuth"
               [ngModelOptions]="{standalone: true}"> </p-checkbox>
-            <label class="mb-0 ml-1" for="no_auth1">{{"no_auth" | translate}}</label>
+            <label class="mb-0 ms-1" for="no_auth1">{{"no_auth" | translate}}</label>
           </div>
         </div>
       </div>
@@ -49,16 +49,16 @@
         {{ "module_name" | translate }}</label>
       <label class="form-control border-line">
         [{{ apiDetail?.moduleId }}]
-         <!-- {{ apiDetail?.moduleName.v }} -->
+        <!-- {{ apiDetail?.moduleName.v }} -->
         <!-- <a *ngIf="apiDetail?.moduleName.t == true" href="javascript:void(0)" pTooltip="{{ apiDetail.moduleName.o }}"
           (click)="copyData(apiDetail.moduleName.o)">...{{ "show_more" | translate }}</a> -->
-          {{ apiDetail?.moduleName.o && !apiDetail?.moduleName.t ? apiDetail?.moduleName.o : apiDetail?.moduleName.v}}
-          <label class="moreless" *ngIf="apiDetail?.moduleName.o" (click)="switchOri(apiDetail.moduleName)">
-            {{apiDetail.moduleName.t ? ("show_more" | translate): '' }}
-            <i class="fas"
-              [ngClass]="[apiDetail.moduleName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
-            {{apiDetail.moduleName.t ? '' : ("show_less" | translate) }}
-          </label>
+        {{ apiDetail?.moduleName.o && !apiDetail?.moduleName.t ? apiDetail?.moduleName.o : apiDetail?.moduleName.v}}
+        <label class="moreless" *ngIf="apiDetail?.moduleName.o" (click)="switchOri(apiDetail.moduleName)">
+          {{apiDetail.moduleName.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.moduleName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.moduleName.t ? '' : ("show_less" | translate) }}
+        </label>
       </label>
     </div>
   </div>
@@ -71,7 +71,7 @@
         <label class="moreless" *ngIf="apiDetail?.apiKey.o" (click)="switchOri(apiDetail.apiKey)">
           {{apiDetail.apiKey.t ? ("show_more" | translate): '' }}
           <i class="fas"
-            [ngClass]="[apiDetail.apiKey.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+            [ngClass]="[apiDetail.apiKey.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
           {{apiDetail.apiKey.t ? '' : ("show_less" | translate) }}
         </label>
       </label>
@@ -83,7 +83,7 @@
         <label class="moreless" *ngIf="apiDetail?.apiName.o" (click)="switchOri(apiDetail.apiName)">
           {{apiDetail.apiName.t ? ("show_more" | translate): '' }}
           <i class="fas"
-            [ngClass]="[apiDetail.apiName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+            [ngClass]="[apiDetail.apiName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
           {{apiDetail.apiName.t ? '' : ("show_less" | translate) }}
         </label>
       </label>
@@ -112,7 +112,7 @@
     <!-- 固定快取時間 -->
     <div class="col-3" *ngIf="apiDetail?.apiSrc.v == 'R' || apiDetail?.apiSrc.v == 'C'">
       <label class="control-label">{{ "fixed_cache_time" | translate }}({{ 'minute'|translate }})<i
-          class="far fa-question-circle ml-2 " pTooltip="{{'fixed_cache_time_tip'|translate}}"
+          class="far fa-question-circle ms-2 " pTooltip="{{'fixed_cache_time_tip'|translate}}"
           [escape]="false"></i></label>
       <label class="form-control border-line">
         {{ apiDetail.fixedCacheTime }}
@@ -154,7 +154,7 @@
         <label class="moreless" *ngIf="apiDetail?.pathOfJson.o" (click)="switchOri(apiDetail.pathOfJson)">
           {{apiDetail.pathOfJson.t ? ("show_more" | translate): '' }}
           <i class="fas"
-            [ngClass]="[apiDetail.pathOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+            [ngClass]="[apiDetail.pathOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
           {{apiDetail.pathOfJson.t ? '' : ("show_less" | translate) }}
         </label>
       </label>
@@ -219,7 +219,7 @@
       <div class="mb-2">
         <p-checkbox [binary]="true" [readonly]="true" [(ngModel)]="apiDetail.isRedirectByIp" name="isRediretByIp">
         </p-checkbox>
-        <label class="mb-0 ml-1">{{'diversionSrcIP'|translate }}</label>
+        <label class="mb-0 ms-1">{{'diversionSrcIP'|translate }}</label>
       </div>
 
       <p-table [value]="ipSrcUrl" selectionMode="single" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
@@ -256,12 +256,12 @@
         <div class="p-form-check mb-2">
           <p-radioButton value="0" [ngModel]="apiDetail.headerMaskPolicy" disabled
             name="headerMaskPolicy0"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
+          <label class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="1" [ngModel]="apiDetail.headerMaskPolicy" disabled
             name="headerMaskPolicy1"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 1: {{
+          <label class="ms-2 mb-0">Policy 1: {{
             'mask.before_after'|translate:{num:(apiDetail.headerMaskPolicyNum?apiDetail.headerMaskPolicyNum:'1'),
             mask:(apiDetail.headerMaskPolicySymbol?apiDetail.headerMaskPolicySymbol:'*')}
             }}</label>
@@ -269,14 +269,14 @@
         <div class="p-form-check mb-2">
           <p-radioButton value="2" [ngModel]="apiDetail.headerMaskPolicy" disabled
             name="headerMaskPolicy2"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 2: {{
+          <label class="ms-2 mb-0">Policy 2: {{
             'mask.before'|translate:{num:(apiDetail.headerMaskPolicyNum?apiDetail.headerMaskPolicyNum:'1'),
             mask:(apiDetail.headerMaskPolicySymbol?apiDetail.headerMaskPolicySymbol:'*')} }}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="3" [ngModel]="apiDetail.headerMaskPolicy" disabled
             name="headerMaskPolicy3"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 3: {{
+          <label class="ms-2 mb-0">Policy 3: {{
             'mask.after'|translate:{num:(apiDetail.headerMaskPolicyNum?apiDetail.headerMaskPolicyNum:'1'),
             mask:(apiDetail.headerMaskPolicySymbol?apiDetail.headerMaskPolicySymbol:'*')} }}</label>
         </div>
@@ -295,30 +295,30 @@
       <div class="col-12 form-group ">
         <div class="p-form-check mb-2">
           <p-radioButton value="0" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy0"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
+          <label class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="1" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy1"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 1: {{
+          <label class="ms-2 mb-0">Policy 1: {{
             'mask.body_before_after'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
             mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'}
             }}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="2" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy2"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 2: {{
+          <label class="ms-2 mb-0">Policy 2: {{
             'mask.body_before'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
             mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="3" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy3"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 3: {{
+          <label class="ms-2 mb-0">Policy 3: {{
             'mask.body_after'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
             mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="4" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy4"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 4: {{
+          <label class="ms-2 mb-0">Policy 4: {{
             'mask.body_after_regex'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
             mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
         </div>
@@ -342,7 +342,7 @@
         <div class="p-form-check mb-2">
           <p-radioButton value="0" [ngModel]="apiDetail.failDiscoveryPolicy" disabled
             name="failDiscoveryPolicy0"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 0: {{'fail_discovery_policy.policy_0'|translate}}</label>
+          <label class="ms-2 mb-0">Policy 0: {{'fail_discovery_policy.policy_0'|translate}}</label>
         </div>
       </div>
     </div>
@@ -352,12 +352,12 @@
         <div class="p-form-check mb-2">
           <p-radioButton value="0" [ngModel]="apiDetail.failHandlePolicy" disabled
             name="failHandlePolicy0"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 0: {{'fail_handle_policy.policy_0'|translate}}</label>
+          <label class="ms-2 mb-0">Policy 0: {{'fail_handle_policy.policy_0'|translate}}</label>
         </div>
         <div class="p-form-check mb-2">
           <p-radioButton value="1" [ngModel]="apiDetail.failHandlePolicy" disabled
             name="failHandlePolicy1"></p-radioButton>
-          <label class="ml-2 mb-0">Policy 1: {{'fail_handle_policy.policy_1'|translate}}</label>
+          <label class="ms-2 mb-0">Policy 1: {{'fail_handle_policy.policy_1'|translate}}</label>
         </div>
       </div>
     </div>
@@ -366,43 +366,64 @@
   <div class="form-group row">
     <div class="col-12">
       <label class="control-label">{{ "headers" | translate }}：</label>
-      <span>{{ originString(apiDetail?.headersOfJson) }}
-        <a *ngIf="apiDetail?.headersOfJson.o" href="javascript:void(0)"
-          (click)="switchOri(apiDetail.headersOfJson)">{{
+      <label class="control-label">{{ originString(apiDetail?.headersOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.headersOfJson.o" (click)="switchOri(apiDetail.headersOfJson)">
+          {{apiDetail.headersOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.headersOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.headersOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+      </label>
+      <!-- <span>{{ originString(apiDetail?.headersOfJson) }}
+        <a *ngIf="apiDetail?.headersOfJson.o" href="javascript:void(0)" (click)="switchOri(apiDetail.headersOfJson)">{{
           apiDetail.headersOfJson.t
           ? "..." + ("show_more" | translate)
           : ("show_less" | translate)
           }}</a>
-      </span>
+      </span> -->
       <br />
       <label class="control-label" style="font-weight: bolder">{{ "params" | translate }}：</label>
-      <span>{{ originString(apiDetail?.paramsOfJson) }}
+      <label class="control-label">{{ originString(apiDetail?.paramsOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.paramsOfJson.o" (click)="switchOri(apiDetail.paramsOfJson)">
+          {{apiDetail.paramsOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.paramsOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.paramsOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+      </label>
+      <!-- <span>{{ originString(apiDetail?.paramsOfJson) }}
         <a *ngIf="apiDetail?.paramsOfJson.o" href="javascript:void(0)" (click)="switchOri(apiDetail.paramsOfJson)">{{
           apiDetail.paramsOfJson.t
           ? "..." + ("show_more" | translate)
           : ("show_less" | translate)
           }}</a>
-      </span>
+      </span> -->
       <br />
       <label class="control-label" style="font-weight: bolder">{{ "content_type" | translate }}：</label>
-      <span>{{ originString(apiDetail?.consumesOfJson) }}
-        <a *ngIf="apiDetail?.consumesOfJson.o" href="javascript:void(0)"
-          (click)="switchOri(apiDetail.consumesOfJson)">{{
-          apiDetail.consumesOfJson.t
-          ? "..." + ("show_more" | translate)
-          : ("show_less" | translate)
-          }}</a>
-      </span>
+      <label class="control-label">{{ originString(apiDetail?.consumesOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.consumesOfJson.o" (click)="switchOri(apiDetail.consumesOfJson)">
+          {{apiDetail.consumesOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.consumesOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.consumesOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+      </label>
       <br />
       <label class="control-label" style="font-weight: bolder">{{ "produces" | translate }}：</label>
-      <span>{{ originString(apiDetail?.producesOfJson) }}
-        <a *ngIf="apiDetail?.producesOfJson.o" href="javascript:void(0)"
+      <label class="control-label">{{ originString(apiDetail?.producesOfJson) }}
+        <label class="moreless" *ngIf="apiDetail?.producesOfJson.o" (click)="switchOri(apiDetail.producesOfJson)">
+          {{apiDetail.producesOfJson.t ? ("show_more" | translate): '' }}
+          <i class="fas"
+            [ngClass]="[apiDetail.producesOfJson.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+          {{apiDetail.producesOfJson.t ? '' : ("show_less" | translate) }}
+        </label>
+        <!-- <a *ngIf="apiDetail?.producesOfJson.o" href="javascript:void(0)"
           (click)="switchOri(apiDetail.producesOfJson)">{{
           apiDetail.producesOfJson.t
           ? "..." + ("show_more" | translate)
           : ("show_less" | translate)
-          }}</a>
-      </span>
+          }}</a> -->
+      </label>
     </div>
   </div>
 
@@ -429,8 +450,8 @@
     <!-- Mock Headers-->
     <div class="col-12">
       <label class="control-label">Mock Headers</label>
-      <textarea class="form-control" rows="5" style="resize: none" [innerHtml]="apiDetail.mockHeadersOfJson"
-        readonly autoResize="autoResize"></textarea>
+      <textarea class="form-control" rows="5" style="resize: none" [innerHtml]="apiDetail.mockHeadersOfJson" readonly
+        autoResize="autoResize"></textarea>
     </div>
   </div>
 
@@ -449,16 +470,13 @@
       <p-table *ngIf="detailCols" [columns]="detailCols" [value]="apiGroupList" selectionMode="single"
         styleClass="p-datatable-striped" [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
-          <form [formGroup]="detailForm" (ngSubmit)="queryApiGroupList()">
+          <form [formGroup]="detailForm">
 
             <div class="row col-12">
-              <span class="p-input-icon-right" style="width: 100%">
-                <i class="pi pi-search tpi-i-search" (click)="queryApiGroupList()"></i>
-                <input type="text" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                  placeholder="{{ 'group_name' | translate }}、{{
-                    'group_alias' | translate
-                  }}、{{ 'group_desc' | translate }}" />
-              </span>
+              <app-search-input placeholder="{{ 'group_name' | translate }}、{{
+                              'group_alias' | translate
+                            }}、{{ 'group_desc' | translate }}" [control]="detailForm.get('keyword')"
+                [searchFn]="queryApiGroupList.bind(this)" class="col-12"></app-search-input>
             </div>
           </form>
         </ng-template>

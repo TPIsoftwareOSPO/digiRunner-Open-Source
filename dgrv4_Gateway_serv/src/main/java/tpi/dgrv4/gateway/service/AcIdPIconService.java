@@ -22,14 +22,18 @@ public class AcIdPIconService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao;
-
-	@Autowired
 	private DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
+	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
 
 	@Autowired
-	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
+	public AcIdPIconService(DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao, DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao,
+			DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao) {
+		super();
+		this.dgrAcIdpInfoLdapDao = dgrAcIdpInfoLdapDao;
+		this.dgrAcIdpInfoMLdapMDao = dgrAcIdpInfoMLdapMDao;
+		this.dgrAcIdpInfoApiDao = dgrAcIdpInfoApiDao;
+	}
 
 	public String getIcon(String idPType) {
 		String iconFile = IdPHelper.DEFULT_ICON_FILE;

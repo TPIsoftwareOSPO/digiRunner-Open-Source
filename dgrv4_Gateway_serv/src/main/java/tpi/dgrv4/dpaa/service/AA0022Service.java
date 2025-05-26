@@ -30,19 +30,22 @@ public class AA0022Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0022Service(TsmpRoleDao tsmpRoleDao, TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao,
+			AuthoritiesDao authoritiesDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+		this.authoritiesDao = authoritiesDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	/**
 	 * 1.若AA0022Req.roleFlag為true進行步驟2查詢，反之則進行步驟3查詢。

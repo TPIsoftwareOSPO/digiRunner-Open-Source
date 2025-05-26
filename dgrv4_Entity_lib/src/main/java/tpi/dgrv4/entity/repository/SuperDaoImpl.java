@@ -21,8 +21,12 @@ public abstract class SuperDaoImpl<T> implements SuperDao<T> {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Autowired
     private ConfigurableListableBeanFactory beanFactory;
+ 
+    @Autowired
+	public void setSuperDaoImpl(ConfigurableListableBeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
 
 	@Override
 	public Optional<T> findByLongId(Long l_id) {

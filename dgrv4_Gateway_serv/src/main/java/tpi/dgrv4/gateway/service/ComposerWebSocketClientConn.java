@@ -30,29 +30,27 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 @Component
 @DependsOn("staticResourceInitializer")
 public class ComposerWebSocketClientConn {
-
-	public static Session session;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private static String SSL_KEY="server.ssl.key-store";
-	
-	
 	private static String SSL_MIMA="server.ssl.key-store-password";
-	
-	
 	private static String SSL_TYPE="server.ssl.keyStoreType";
 	
+	public static Session session;
 	private static Environment env;
 	
+	@Autowired
+	public ComposerWebSocketClientConn(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 	
 	/*@PostConstruct
 	public void init() {
 		this.startWS();
 	}*/
-	
-    public void startWS() {
+
+	public void startWS() {
         try {
         	
         	TPILogger.tl.debug("prepare composer ws client connection to server");

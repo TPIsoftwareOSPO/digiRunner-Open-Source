@@ -6,7 +6,7 @@ export interface ReqDPB0227 extends BaseReq {
 }
 
 export interface DPB0227Req {
-  siteUrl:string;
+  dgrMtlsClientCertId:string;
 }
 
 export interface RespDPB0227 extends BaseRes {

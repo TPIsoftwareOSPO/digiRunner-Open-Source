@@ -43,28 +43,29 @@ public class AA0202Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpSecurityLevelDao securityLVDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0202Service(TsmpClientDao tsmpClientDao, TsmpDpClientextDao tsmpDpClientextDao,
+			TsmpSecurityLevelDao securityLVDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			TsmpSettingDao tsmpSettingDao, BcryptParamHelper bcryptParamHelper, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.securityLVDao = securityLVDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0202Resp queryClientList(AA0202Req req, ReqHeader reqHeader) {
 		AA0202Resp resp = null;

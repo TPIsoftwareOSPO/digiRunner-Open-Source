@@ -31,17 +31,20 @@ public class AA0401Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private FileHelper fileHelper;
+	
+	@Autowired
+	public AA0401Service(TsmpApiModuleDao tsmpApiModuleDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpSettingService tsmpSettingService, FileHelper fileHelper) {
+		super();
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.fileHelper = fileHelper;
+	}
 
 	public AA0401Resp uploadModuleFile(TsmpAuthorization tsmpAuthorization, String uploadFileName, byte[] fileContent) {
 		String userName = tsmpAuthorization.getUserName();

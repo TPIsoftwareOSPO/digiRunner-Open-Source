@@ -1,81 +1,70 @@
 <app-container [title]="title">
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-        <div class="row">
-            <div class="col-12 ">
-
-              <span class="p-input-icon-right" style="width:40vw">
-                <i class="pi pi-search tpi-i-search" (click)="submitForm();"></i>
-                <input type="search" class="form-control tpi-i-input" id="moduleName" formControlName="moduleName"
-                       placeholder="{{'module_name'|translate}}">
-                </span>
-                <!-- <div class="form-group row">
-                    <div class="col-12">
-                        <label for="moduleName">{{'module_name' | translate}}</label>
-                        <input type="text" class="form-control" id="moduleName" formControlName="moduleName"
-                            placeholder="{{'module_name' | translate}}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-warning pull-right">{{'button.search' | translate}}</button>
-                </div> -->
-            </div>
-        </div>
-    </form>
-    <hr>
-    <!-- <div class="h-100" style="word-break:break-word;"> -->
-    <p-table *ngIf="cols" [columns]="cols" [value]="moduleList" [(selection)]="selectedModules" styleClass="p-datatable-striped"
-        (onRowSelect)="handleDeniedStatus($event);" (onRowUnselect)="handleDeniedStatus($event);"
-        (onHeaderCheckboxToggle)="handleDeniedStatus($event);" [style]="{'word-break':'break-word'}">
-        <ng-template pTemplate="caption">
-            <div class="ui-helper-clearfix">
-                <button type="button" class="btn tpi-primary float-left mr-1" (click)="saveDenied()" [disabled]="selectedModules.length==0">
-                    {{'button.setting' | translate}}
-                </button>
-            </div>
-        </ng-template>
-        <ng-template pTemplate="colgroup" let-columns>
-            <colgroup>
-                <col style="width: 2.25em">
-                <col *ngFor="let col of columns" [ngStyle]="{'width': col.field === 'deniedString' ? '10%' : 'auto'}">
-            </colgroup>
-        </ng-template>
-        <ng-template pTemplate="header" let-columns>
-            <tr>
-                <th style="width: 2.25em" scope="col">
-                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-                </th>
-                <th *ngFor="let col of columns" [ngStyle]="{'width': col.field === 'deniedString' ? '10%' : 'auto'}" scope="col">
-                    {{col.header}}
-                </th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-rowData let-columns="columns">
-            <tr>
-                <td style="width: 2.25em">
-                    <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
-                </td>
-                <td *ngFor="let col of columns" [ngStyle]="{'width': col.field === 'deniedString' ? '10%' : 'auto'}">
-                    {{rowData[col.field]}}
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="footer" let-columns>
-            <tr *ngIf="rowCount">
-                <td [attr.colspan]="columns.length+1">
-                    <span>{{'row_count' | translate}}: {{rowCount}}</span>
-                    <button type="button" class="btn btn-warning pull-right ml-3"
-                        (click)="moreDate();">{{'button.more'|translate}}</button>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage" let-columns>
-            <tr>
-                <td [attr.colspan]="columns.length+1">
-                    {{'no_rec' | translate}}
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
-    <!-- </div> -->
+  <form [formGroup]="form">
+    <div class="row">
+      <div class="col-12 ">
+        <app-search-input placeholder="{{'module_name' | translate }}" [control]="form.get('moduleName')"
+          [searchFn]="submitForm.bind(this)" class="col-9 col-lg-4 col-sm-6"></app-search-input>
+      </div>
+    </div>
+  </form>
+  <hr>
+  <!-- <div class="h-100" style="word-break:break-word;"> -->
+  <p-table *ngIf="cols" [columns]="cols" [value]="moduleList" [(selection)]="selectedModules"
+    styleClass="p-datatable-striped" (onRowSelect)="handleDeniedStatus($event);"
+    (onRowUnselect)="handleDeniedStatus($event);" (onHeaderCheckboxToggle)="handleDeniedStatus($event);"
+    [style]="{'word-break':'break-word'}">
+    <ng-template pTemplate="caption">
+      <div class="ui-helper-clearfix">
+        <button type="button" class="btn tpi-primary float-start me-1" (click)="saveDenied()"
+          [disabled]="selectedModules.length==0">
+          {{'button.setting' | translate}}
+        </button>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="colgroup" let-columns>
+      <colgroup>
+        <col style="width: 2.25em">
+        <col *ngFor="let col of columns" [ngStyle]="{'width': col.field === 'deniedString' ? '10%' : 'auto'}">
+      </colgroup>
+    </ng-template>
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th style="width: 2.25em" scope="col">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th *ngFor="let col of columns" [ngStyle]="{'width': col.field === 'deniedString' ? '10%' : 'auto'}"
+          scope="col">
+          {{col.header}}
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+      <tr>
+        <td style="width: 2.25em">
+          <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+        </td>
+        <td *ngFor="let col of columns" [ngStyle]="{'width': col.field === 'deniedString' ? '10%' : 'auto'}">
+          {{rowData[col.field]}}
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer" let-columns>
+      <tr *ngIf="rowCount">
+        <td [attr.colspan]="columns.length+1">
+          <span>{{'row_count' | translate}}: {{rowCount}}</span>
+          <button type="button" class="btn btn-warning pull-right ms-3"
+            (click)="moreDate();">{{'button.more'|translate}}</button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage" let-columns>
+      <tr>
+        <td [attr.colspan]="columns.length+1">
+          {{'no_rec' | translate}}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <!-- </div> -->
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

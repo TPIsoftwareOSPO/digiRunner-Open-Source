@@ -3,31 +3,26 @@ package tpi.dgrv4.dpaa.component.scheduledEnableDisable;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class EnableDisableProcessingFlow {
 
-	@Autowired
 	private PassDisableDetectApis passDisableDetectApis;
-	@Autowired
 	private PassEnableDetectApis passEnableDetectApis;
-	@Autowired
 	private RemoveAPIsImmediatelyDisable removeAPIsImmediatelyDisable;
-	@Autowired
 	private RemoveAPIsImmediatelyEnalbe removeAPIsImmediatelyEnalbe;
-	@Autowired
 	private RemoveIllegalAPIs1551 removeIllegalAPIs1551;
-	@Autowired
 	private RemoveIllegalAPIs1552 removeIllegalAPIs1552;
-	@Autowired
 	private RemoveIllegalAPIs1553 removeIllegalAPIs1553;
-	@Autowired
 	private RemoveIllegalAPIs1554 removeIllegalAPIs1554;
-	@Autowired
 	private RemoveIllegalAPIs1557 removeIllegalAPIs1557;
-	@Autowired
 	private RemoveIllegalAPIs1558 removeIllegalAPIs1558;
 
 	public ApiPublicFlagHandlerInterface getDisableProcessingFlow() {

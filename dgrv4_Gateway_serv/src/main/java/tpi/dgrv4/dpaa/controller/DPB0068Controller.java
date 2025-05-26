@@ -26,8 +26,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0068Controller {
 
-	@Autowired
 	private DPB0068Service dpb0068Service;
+
+	@Autowired
+	public DPB0068Controller(DPB0068Service dpb0068Service) {
+		super();
+		this.dpb0068Service = dpb0068Service;
+	}
 
 	/**
 	 * query個人申請單/審核工作單ByPk

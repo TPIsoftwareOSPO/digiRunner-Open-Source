@@ -6,9 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -18,6 +15,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.BcryptFieldValueEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.BcryptParamDecodeException;
@@ -40,24 +41,20 @@ import tpi.dgrv4.entity.repository.TsmpRoleDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class AA0701Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private TsmpAlertDao tsmpAlertDao;
-	@Autowired
-	private TsmpRoleAlertDao tsmpRoleAlertDao;
-	@Autowired
-	private TsmpRoleDao tsmpRoleDao;
-	@Autowired
-	private SeqStoreService seqStoreService;
-	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
-    private DpaaAlertDispatcherIfs dpaaAlertDispatcher;
-	
+	private final TsmpAlertDao tsmpAlertDao;
+	private final TsmpRoleAlertDao tsmpRoleAlertDao;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final SeqStoreService seqStoreService;
+	private final BcryptParamHelper bcryptParamHelper;
+    private final DpaaAlertDispatcherIfs dpaaAlertDispatcher;
+
 	private void checkParam(AA0701Req req) throws JsonParseException, JsonMappingException, IOException {
 		String aa0701_alertName = req.getAlertName();
 		List<String> aa0701_roleIDList = req.getRoleIDList();

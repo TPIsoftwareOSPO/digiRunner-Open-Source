@@ -3,7 +3,6 @@ package tpi.dgrv4.dpaa.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -28,10 +27,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0202Controller {
 		
-	@Autowired
 	private AA0202Service service;
 		
-	
+	@Autowired
+	public AA0202Controller(AA0202Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 
 	 * 1.表格需要使用分頁查詢。

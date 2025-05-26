@@ -40,7 +40,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private CloseableHttpClient proxyClient;
 
-	private String targetHost;
+	private static String targetHost;
 
 	@Override
 	public void init() throws ServletException {

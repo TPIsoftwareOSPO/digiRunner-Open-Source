@@ -6,20 +6,21 @@ export interface ReqDPB0226 extends BaseReq {
 }
 
 export interface DPB0226Req {
-  siteUrl: string;
+  dgrMtlsClientCertId: string;
+  host: string;
+  port: string;
   rootCa: string;
   clientCert?: string;
   clientKey: string;
-  keyPassword?: string;
-  tag?: string;
-  enable:boolean
+  keyMima?: string;
+  remark?: string;
 }
 
 export interface RespDPB0226 extends BaseRes {
   RespBody: DPB0226Resp;
 }
 
-export interface DPB0226Resp { }
+export interface DPB0226Resp {}
 
 export interface DPB0226RespBefore extends BaseRes {
   RespBody: RespDPB0226RespBefore;
@@ -28,4 +29,3 @@ export interface DPB0226RespBefore extends BaseRes {
 export interface RespDPB0226RespBefore {
   constraints: Array<ValidatorFormat>;
 }
-

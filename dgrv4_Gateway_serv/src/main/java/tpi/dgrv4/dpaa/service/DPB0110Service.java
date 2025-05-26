@@ -30,17 +30,20 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Transactional
 public class DPB0110Service {
 
-	@Autowired
 	private TsmpRoleCacheProxy tsmpRoleCacheProxy;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-
-	@Autowired
 	private TsmpRoleTxidMapDao tsmpRoleTxidMapDao;
+	private BcryptParamHelper bcryptParamHelper;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public DPB0110Service(TsmpRoleCacheProxy tsmpRoleCacheProxy, AuthoritiesDao authoritiesDao,
+			TsmpRoleTxidMapDao tsmpRoleTxidMapDao, BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRoleCacheProxy = tsmpRoleCacheProxy;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleTxidMapDao = tsmpRoleTxidMapDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0110Resp createRTMap(TsmpAuthorization auth, DPB0110Req req, ReqHeader reqHeader) {
 		String local = ServiceUtil.getLocale(reqHeader.getLocale());

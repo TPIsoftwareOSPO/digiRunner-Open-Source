@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,13 +18,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.alert.DpaaAlertDetectResult;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertDispatcherJobHelper;
 import tpi.dgrv4.dpaa.component.alert.DpaaAlertEvent;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierCustom;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierLine;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierRoleEmail;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.dpaa.es.DgrESService;
 import tpi.dgrv4.dpaa.service.TsmpSettingService;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
+import tpi.dgrv4.entity.repository.TsmpAlertDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
@@ -31,14 +39,24 @@ public class DpaaAlertDetectorJobKeyword extends DpaaAlertDetectorJob<DpaaAlertD
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private DgrESService dgrESService;
-	@Autowired
+	
 	private TsmpSettingService tsmpSettingService;
 	
-	public DpaaAlertDetectorJobKeyword(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper) //
-		throws Exception {
-		super(tsmpDpApptJob, objectMapper, DpaaAlertDetectorJobKeywordParams.class);
+	@Autowired
+	public DpaaAlertDetectorJobKeyword(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper,
+			ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao,
+			DpaaAlertNotifierRoleEmail dpaaAlertNotifierRoleEmail, DpaaAlertNotifierLine dpaaAlertNotifierLine,
+			DpaaAlertNotifierCustom dpaaAlertNotifierCustom, DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper,
+			TsmpAlertDao tsmpAlertDao, @Nullable DgrESService dgrESService, TsmpSettingService tsmpSettingService)
+			throws Exception {
+		super(tsmpDpApptJob, objectMapper, DpaaAlertDetectorJobKeywordParams.class, apptJobDispatcher, tsmpDpApptJobDao,
+				dpaaAlertNotifierRoleEmail, dpaaAlertNotifierLine, dpaaAlertNotifierCustom,
+				dpaaAlertDispatcherJobHelper, tsmpAlertDao);
+
+		this.dgrESService = dgrESService;
+		this.tsmpSettingService = tsmpSettingService;
 	}
 
 	@SuppressWarnings("unchecked")

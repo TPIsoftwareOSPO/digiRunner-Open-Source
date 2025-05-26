@@ -26,11 +26,15 @@ import tpi.dgrv4.gateway.service.AcIdPCallbackService;
 @RestController
 public class AcIdPCallbackController {
 	
+    private AcIdPCallbackService acIdpCallbackService;
+
     @Autowired
-    AcIdPCallbackService acIdpCallbackService;
+    public AcIdPCallbackController(AcIdPCallbackService acIdpCallbackService) {
+		super();
+		this.acIdpCallbackService = acIdpCallbackService;
+	}
 
-
-    @GetMapping(value = "/dgrv4/ssotoken/acidp/{idPType}/acIdPCallback")
+	@GetMapping(value = "/dgrv4/ssotoken/acidp/{idPType}/acIdPCallback")
     public void acIdPCallback(@RequestHeader HttpHeaders headers, 
     		@PathVariable("idPType") String idPType, 
     		HttpServletRequest req, 

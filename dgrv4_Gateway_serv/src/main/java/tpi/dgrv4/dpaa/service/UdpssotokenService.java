@@ -89,65 +89,58 @@ public class UdpssotokenService{
 	String eventNo = AuditLogEvent.LOGIN.value();
 	String auditClientId = "";
 	
-	@Autowired
-	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
-	
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
-	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-	@Autowired
-	private ServiceConfig serviceConfig;
-	
-	@Autowired
-	private SsoAuthResultDao ssoAuthResultDao;
-	
-	@Autowired
-	private TsmpSsoUserSecretDao tsmpSsoUserSecretDao;
-	
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
-	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
-	private UsersDao usersDao;
-	
-	@Autowired
-	private AA1001Service aa1001Service;
-	
-	@Autowired
-	private AA0011Service aa0011Service;
-	
-	@Autowired
-	private AA0001Service aa0001Service;
-	
-	@Autowired
-	private DPB0123Service dpb0123Service;
-	
-	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
-	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
-	private ApplicationContext ctx;
-
-	@Autowired
-	private JobHelper jobHelper;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
+	private TsmpUserDao tsmpUserDao;	
+	private TsmpSettingDao tsmpSettingDao;	
+	private TsmpSettingService tsmpSettingService;	
+	private TsmpTAEASKHelper tsmpTAEASKHelper;	
+	private ServiceConfig serviceConfig;	
+	private SsoAuthResultDao ssoAuthResultDao;	
+	private TsmpSsoUserSecretDao tsmpSsoUserSecretDao;	
+	private TsmpOrganizationDao tsmpOrganizationDao;	
+	private TsmpRoleDao tsmpRoleDao;	
+	private UsersDao usersDao;	
+	private AA1001Service aa1001Service;	
+	private AA0011Service aa0011Service;	
+	private AA0001Service aa0001Service;	
+	private DPB0123Service dpb0123Service;	
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;	
+	private TsmpRtnCodeDao tsmpRtnCodeDao;	
+	private ApplicationContext ctx;	
+	private JobHelper jobHelper;	
+	private DgrAuditLogService dgrAuditLogService;	
 	private OAuthTokenService oAuthTokenService;
+
+	@Autowired
+	public UdpssotokenService(TsmpUserDao tsmpUserDao, TsmpSettingDao tsmpSettingDao,
+			TsmpSettingService tsmpSettingService, TsmpTAEASKHelper tsmpTAEASKHelper, ServiceConfig serviceConfig,
+			SsoAuthResultDao ssoAuthResultDao, TsmpSsoUserSecretDao tsmpSsoUserSecretDao,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpRoleDao tsmpRoleDao, UsersDao usersDao,
+			AA1001Service aa1001Service, AA0011Service aa0011Service, AA0001Service aa0001Service,
+			DPB0123Service dpb0123Service, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpRtnCodeDao tsmpRtnCodeDao,
+			ApplicationContext ctx, JobHelper jobHelper, DgrAuditLogService dgrAuditLogService,
+			OAuthTokenService oAuthTokenService) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.serviceConfig = serviceConfig;
+		this.ssoAuthResultDao = ssoAuthResultDao;
+		this.tsmpSsoUserSecretDao = tsmpSsoUserSecretDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.usersDao = usersDao;
+		this.aa1001Service = aa1001Service;
+		this.aa0011Service = aa0011Service;
+		this.aa0001Service = aa0001Service;
+		this.dpb0123Service = dpb0123Service;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.oAuthTokenService = oAuthTokenService;
+	}
 
 	private class InvokeBean {
 		private String rawData;

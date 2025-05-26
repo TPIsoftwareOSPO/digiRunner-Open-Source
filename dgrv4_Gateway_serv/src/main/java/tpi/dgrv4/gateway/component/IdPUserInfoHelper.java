@@ -22,10 +22,7 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Component
 public class IdPUserInfoHelper {
 	
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private TokenHelper tokenHelper;
 	
 	public static class UserInfoData {
@@ -37,7 +34,14 @@ public class IdPUserInfoHelper {
 		public String userPicture;
 	}
     
-    /**
+	@Autowired
+    public IdPUserInfoHelper(ObjectMapper objectMapper, TokenHelper tokenHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tokenHelper = tokenHelper;
+	}
+
+	/**
      * 打 IdP 的 UserInfo API, 取得 User 資料
      */
 	public UserInfoData getUserInfoData(String userInfoUrl, String accessTokenJwtstr, String reqUri)

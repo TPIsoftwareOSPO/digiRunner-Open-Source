@@ -4,9 +4,11 @@ import java.util.Map;
 
 import org.springframework.util.StringUtils;
 
-import tpi.dgrv4.common.constant.LocaleType;
+import tpi.dgrv4.common.keeper.ITPILogger;
 
 public class ControllerUtil {
+	
+	private static ITPILogger logger;
 	
 	/**
 	 * Locale 修改成符合資料表中的資料格式, ex. zh-TW
@@ -45,7 +47,11 @@ public class ControllerUtil {
 //			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			if(logger != null) {
+				logger.error(StackTraceUtil.logStackTrace(e));
+			}else {
+				locale = "en-US";
+			}
 		}
 		
 		return locale;
@@ -63,6 +69,9 @@ public class ControllerUtil {
 		return template;
 	}
 	
-	
+	public static void setLogger(ITPILogger logger) {
+		ControllerUtil.logger = logger;
+	}
 	
 }
+

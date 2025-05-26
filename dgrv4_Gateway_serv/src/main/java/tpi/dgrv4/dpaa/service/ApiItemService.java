@@ -34,23 +34,25 @@ import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
 @Service
 public class ApiItemService {
 
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-	
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
+	private TsmpDpFileDao tsmpDpFileDao;
 
 	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
+	public ApiItemService(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpApiThemeDao tsmpDpApiThemeDao,
+			TsmpApiExtDao tsmpApiExtDao, TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpDpFileDao tsmpDpFileDao) {
+		super();
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+	}
 
 	public List<TsmpApiItem> getApiItemList(List<TsmpApi> apiList, String locale) {
 		List<TsmpApiItem> itemList = new ArrayList<TsmpApiItem>();

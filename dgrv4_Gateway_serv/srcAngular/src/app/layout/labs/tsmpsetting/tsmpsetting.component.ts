@@ -30,6 +30,8 @@ import * as FileSaver from 'file-saver';
 import * as dayjs from 'dayjs';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ReportTestConnectionComponent } from './report-test-connection/report-test-connection.component';
 
 @Component({
   selector: 'app-tsmpsetting',
@@ -68,7 +70,8 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
     private router: Router,
     private confirmationService: ConfirmationService,
     private message: MessageService,
-    private ngxService: NgxUiLoaderService
+    private ngxService: NgxUiLoaderService,
+    private dialogService: DialogService
   ) {
     super(route, tr);
   }
@@ -399,6 +402,43 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
 
   headerReturn() {
     this.changePage('query');
+  }
+
+  async testConnection(type: string) {
+    const code = ['button.connect_test'];
+    const dict = await this.toolService.getDict(code);
+
+    if (type == 'ES') {
+      this.ngxService.start();
+      this.serverService.testEsConnection().subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.dialogService.open(ReportTestConnectionComponent, {
+            data: {
+              type: type,
+              esResp: res.RespBody.esRespMap,
+            },
+            header: `${type} ${dict['button.connect_test']}`,
+            width: '700px',
+          });
+          this.ngxService.stop();
+        }
+      });
+    } else {
+      this.ngxService.start();
+      this.serverService.testKibanaConnection().subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.dialogService.open(ReportTestConnectionComponent, {
+            data: {
+              type: type,
+              kibanaResp: res.RespBody,
+            },
+            header: `${type} ${dict['button.connect_test']}`,
+            width: '800px',
+          });
+          this.ngxService.stop();
+        }
+      });
+    }
   }
 
   async fileChange(event: any) {

@@ -30,15 +30,18 @@ import tpi.dgrv4.gateway.vo.JweEncryptionResp;
 @RestController
 public class GtwIdPMockJSLoginUiController {
  
-	@Autowired
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-	@Autowired
 	private JweEncryptionService jweEncryptionService;
 	
+	@Autowired
+	public GtwIdPMockJSLoginUiController(TokenHelper tokenHelper, TsmpTAEASKHelper tsmpTAEASKHelper,
+			JweEncryptionService jweEncryptionService) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.jweEncryptionService = jweEncryptionService;
+	}
 
 	@GetMapping(value = "/dgrv4/mockac/gtwidp/{idPType}/loginui")
 	public ResponseEntity<?> loginUi(@RequestHeader HttpHeaders headers, 

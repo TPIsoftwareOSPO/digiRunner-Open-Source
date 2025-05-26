@@ -36,16 +36,25 @@ public class AA0238Service {
 	private TPILogger logger = TPILogger.tl;
 
 	private Integer pageSize;
-	@Autowired
+	
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	@Autowired
 	private ServiceConfig serviceConfig;
+
+	@Autowired
+	public AA0238Service(TsmpGroupDao tsmpGroupDao, TsmpSecurityLevelDao tsmpSecurityLevelDao,
+			TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao, TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 
 	public AA0238Resp queryGroupList_1(TsmpAuthorization authorization, AA0238Req req) {
 		AA0238Resp resp = new AA0238Resp();

@@ -16,9 +16,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="queryRTMappingList();">{{'button.search' | translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-right" (click)="changePage('create');"
+          <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
             [disabled]="canCreate == false">{{'button.create'|translate}}</button>
         </div>
       </div>
@@ -55,7 +55,7 @@
               {{originStringTable(rowData)}}
               <label class="moreless" *ngIf="rowData.txId!=rowData.oriTxId" (click)="switchOri(rowData)">
                 {{rowData.isTxIdTruncated ? ("show_more" | translate) :'' }}
-                <i class="fas" [ngClass]="[ rowData.isTxIdTruncated ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                <i class="fas" [ngClass]="[ rowData.isTxIdTruncated ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData.isTxIdTruncated ? '' : ("show_less" | translate) }}
               </label>
             </span>
@@ -71,7 +71,7 @@
               [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
 
             <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);"
+                            <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);"
                                 [disabled]="canUpdate == false">
                                 <span class="fa fa-edit">{{'button.update' | translate}}</span>
                             </button>
@@ -87,7 +87,7 @@
         <tr *ngIf="rtMappingListRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span>{{'row_count' | translate}}: {{rtMappingListRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreRTMappingList();">{{'button.more'|translate}}</button> -->
             <!-- 查詢更多 -->
             <button type="button" class="btn tpi-header-return" (click)="moreRTMappingList()">{{ 'button.more'|
@@ -114,7 +114,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="roleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
               (click)="queryRoleList();"></button>
           </div>
         </div>
@@ -122,7 +122,7 @@
       <div class="form-group row">
         <div class="col-4 col-lg-4">
           <label id="txId_label" for="txId" class="control-label">{{'txid' | translate}}</label>
-          <small class="control-label text-danger ml-2">{{'input_example.txid' | translate}}</small>
+          <small class="control-label text-danger ms-2">{{'input_example.txid' | translate}}</small>
           <input type="text" class="form-control" id="txId" formControlName="txId">
           <div *ngIf="txId?.invalid && (txId?.dirty || txId?.touched)" class="text-danger">
             <small class="form-text">{{txId.errors.isRequired}}</small>
@@ -148,10 +148,10 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3"
             [disabled]="form.invalid || roleAlias!.value == null"
             (click)="createRTMapping();">{{'button.create'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -165,7 +165,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="newRoleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
               (click)="queryRoleList();"></button>
           </div>
         </div>
@@ -173,7 +173,7 @@
       <div class="form-group row">
         <div class="col-4 col-lg-4">
           <label id="newTxId_label" for="newTxId" class="control-label">{{'txid' | translate}}</label>
-          <small class="control-label text-danger ml-2">{{'input_example.txid' | translate}}</small>
+          <small class="control-label text-danger ms-2">{{'input_example.txid' | translate}}</small>
           <input type="text" class="form-control" id="newTxId" formControlName="newTxId">
           <div *ngIf="newTxId?.invalid && (newTxId?.dirty || newTxId?.touched)" class="text-danger">
             <small class="form-text">{{newTxId.errors.isRequired}}</small>
@@ -199,10 +199,10 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-primary tpi-btn float-left mr-3"
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-3"
             [disabled]="form.invalid || newRoleAlias!.value == null"
             (click)="updateRTMapping();">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-primary tpi-btn float-left"
+          <button type="button" class="btn tpi-primary tpi-btn float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

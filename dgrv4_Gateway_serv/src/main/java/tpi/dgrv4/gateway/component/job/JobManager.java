@@ -7,7 +7,6 @@ import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.exceptions.DgrException;
-import tpi.dgrv4.entity.exceptions.DgrRtnCode;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
@@ -18,33 +17,53 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobManager implements Runnable {
 
-	protected TPILogger logger;
-
-	@Autowired
 	protected JobHelperImpl jobHelper;
 
 	private final int capacity;
 
-	private final LinkedBlockingQueue<Job> queue;
+	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<>(200);
 	
-	public final LinkedHashMap<String, Job> buff1st = new LinkedHashMap<>();
-	public final LinkedHashMap<String, Job> buff2nd = new LinkedHashMap<>();
+	// 使用 LinkedHashMap 的子類來限制大小
+	public final Map<String, Job> buff1st = Collections.synchronizedMap(
+	    new LinkedHashMap<String, Job>() {
+	        private static final int MAX_SIZE = 200; // 設定最大大小
+	        
+	        @Override
+	        protected boolean removeEldestEntry(Map.Entry<String, Job> eldest) {
+	            return size() > MAX_SIZE;
+	        }
+	    }
+	);
+	public final Map<String, Job> buff2nd = Collections.synchronizedMap(
+	    new LinkedHashMap<String, Job>() {
+	        private static final int MAX_SIZE = 50; // 設定最大大小
+	        
+	        @Override
+	        protected boolean removeEldestEntry(Map.Entry<String, Job> eldest) {
+	            return size() > MAX_SIZE;
+	        }
+	    }
+	);
+//	public static final AtomicInteger buff2ndWaitCount = new AtomicInteger(0); // 使用一個 AtomicInteger
+
 
 	protected final Object queueLock = new Object();
 
 	protected final ConcurrentHashMap<String, Long> jobLogs;
 
-	public JobManager(TPILogger logger) {
-		this(Integer.MAX_VALUE, logger);
+	@Autowired
+	public JobManager(JobHelperImpl jobHelper) {
+//		this(Integer.MAX_VALUE, logger);
+		this(100, jobHelper);
 	}
 
-	public JobManager(int capacity, TPILogger logger) {
-		this.logger = logger;
+	public JobManager(int capacity, JobHelperImpl jobHelper) {
 		this.capacity = capacity;
-		this.queue = new LinkedBlockingQueue<>(this.capacity);
+//		this.queue = new LinkedBlockingQueue<>(this.capacity);
 		
 		this.jobLogs = new ConcurrentHashMap<String, Long>();
-		this.logger.debugDelay2sec("JobManager(" + this.getClass().getCanonicalName() +") is initialized with capacity (" + this.capacity + ")");
+		TPILogger.tl.debugDelay2sec("JobManager(" + this.getClass().getCanonicalName() +") is initialized with capacity (" + this.capacity + ")");
+		this.jobHelper = jobHelper;
 	}
 
 	@PostConstruct
@@ -59,7 +78,7 @@ public class JobManager implements Runnable {
 		while(true) {
 			i = takeJob();
 			if (i == 0) {
-				this.logger.error("JobManager is terminated unexpectedly!");
+				TPILogger.tl.error("JobManager is terminated unexpectedly!");
 				break;
 			}
 		}
@@ -75,7 +94,7 @@ public class JobManager implements Runnable {
 			if (job instanceof ApptJob apptJob) {
 				traceMsg += ", appt_id: " + apptJob.getTsmpDpApptJob().getApptJobId();
 			}
-			this.logger.trace(traceMsg);
+			TPILogger.tl.trace(traceMsg);
 			
 			job.run(getJobHelper(), this);
 			job.setIsDone();
@@ -86,13 +105,13 @@ public class JobManager implements Runnable {
 				traceMsg += ", appt_id: " + apptJob.getTsmpDpApptJob().getApptJobId();
 			}
 			traceMsg += ", cost: " + (System.currentTimeMillis() - start) + "ms";
-			this.logger.trace(traceMsg);
+			TPILogger.tl.trace(traceMsg);
 		}catch (InterruptedException e) {
-			this.logger.debug("takeJob error: \n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.debug("takeJob error: \n" + StackTraceUtil.logStackTrace(e));
 		    // Restore interrupted state...
 		    Thread.currentThread().interrupt();
 		}catch (Exception e) {
-			this.logger.debug("takeJob error: \n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.debug("takeJob error: \n" + StackTraceUtil.logStackTrace(e));
 		}
 		return 1;
 	}
@@ -127,27 +146,25 @@ public class JobManager implements Runnable {
 				boolean removed = this.queue.remove(job);
 				if (removed) {
 					removedCount++;
-					logger.debug("Job removed: " + job.getId());
+					TPILogger.tl.debug("Job removed: " + job.getId());
 				} else {
 					// 元素未能被移除，可能需要進行錯誤處理或日誌記錄
-					logger.warn("Failed to remove job: " + job.getId());
+					TPILogger.tl.warn("Failed to remove job: " + job.getId());
 				}
 			}
 		}
-		logger.info("Removed " + removedCount + " jobs for group: " + groupId);
+		TPILogger.tl.info("Removed " + removedCount + " jobs for group: " + groupId);
 	}
 
 	public void put(Job job) throws InterruptedException, DgrException {
 		job.setTimestamp();
 		
-		// 2020.05.05
-		if (this.queue.remainingCapacity() < 1) {
-			throw DgrRtnCode._1292.throwing();
-		}
-		
-		this.queue.put(job);
-		if (this.queue.size() > (this.capacity - 100)) {
-			this.logger.warn(getClass().getCanonicalName() + " queue is almost full: " + this.queue.size() + "/" + this.capacity);
+	    if (queue.remainingCapacity() == 0) {  // 隊列已滿
+	        queue.poll();  // 移除隊首元素
+	    }
+	    
+		if (!queue.offer(job)) {// 添加新元素到隊尾
+			TPILogger.tl.warn("Failed to insert job into queue");
 		}
 	}
 
@@ -165,6 +182,12 @@ public class JobManager implements Runnable {
 
 	public int size() {
 		return this.queue.size();
+	}
+	
+	public void clear() {
+		this.queue.clear();
+		this.buff1st.clear();
+		this.buff2nd.clear();
 	}
 
 	public int count(String groupId) {
@@ -229,7 +252,7 @@ public class JobManager implements Runnable {
 		return this.jobHelper;
 	}
 	
-	public void doAgaint2nd() {
+	public void doAgainTake2ndJob() {
 		//為了被 override
 	}
 	

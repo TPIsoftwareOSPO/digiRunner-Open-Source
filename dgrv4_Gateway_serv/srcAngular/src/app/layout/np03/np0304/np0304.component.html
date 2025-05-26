@@ -1,328 +1,319 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
-    <!-- 用戶列表 -->
-    <div [hidden]="pageNum != 1">
-        <form [formGroup]="form" (ngSubmit)="queryClientList()">
-            <div class="form-group row col-12" >
-                <!-- <div class="col-4 col-xl-4 col-lg-4">
-                    <label class="control-label"
-                        for="keyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="keyword" formControlName="keyword"
-                        placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-                </div> -->
-                <span class="p-input-icon-right" style="width:40vw">
-                  <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-                  <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                         placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-                </span>
-            </div>
-            <!-- <div class="form-group row">
-                <div class="col-3 col-xl-3 col-lg-3">
-                    <button type="button" class="btn btn-warning float-left mr-3"
-                        (click)="queryClientList();">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
-        </form>
-        <hr>
-        <p-table *ngIf="clientListCols" [columns]="clientListCols" [value]="clientList" selectionMode="single" styleClass="p-datatable-striped"
-            [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
-            <ng-template pTemplate="colgroup" let-columns>
-                <colgroup>
-                    <col *ngFor="let col of columns" [style.width]="col.width">
-                </colgroup>
-                <colgroup style="width:50px;">{{'action'|translate}}</colgroup>
-            </ng-template>
-            <ng-template pTemplate="header" let-columns>
-                <tr>
-                    <th *ngFor="let col of columns" scope="col">
-                        {{col.header}}
-                    </th>
-                    <th style="width:50px;" scope="col">{{'action'|translate}}
-                    </th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-rowData let-columns="columns">
-                <tr>
-                    <td *ngFor="let col of columns" [style.width]="col.width">
-                        <span>
-                            {{rowData[col.field]}}
-                        </span>
-                    </td>
-                    <td style="text-align:center;width: 50px">
-                        <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5" (click)="viewClientOpenApiList(rowData);">
+  <!-- 用戶列表 -->
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group col-12">
+        <app-search-input
+          placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+          [control]="form.get('keyword')" [searchFn]="queryClientList.bind(this)"
+          class="col-9 col-lg-4 col-sm-6"></app-search-input>
+      </div>
+
+    </form>
+    <hr>
+    <p-table *ngIf="clientListCols" [columns]="clientListCols" [value]="clientList" selectionMode="single"
+      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+          <col *ngFor="let col of columns" [style.width]="col.width">
+        </colgroup>
+        <colgroup style="width:50px;">{{'action'|translate}}</colgroup>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngFor="let col of columns" scope="col">
+            {{col.header}}
+          </th>
+          <th style="width:50px;" scope="col">{{'action'|translate}}
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td *ngFor="let col of columns" [style.width]="col.width">
+            <span>
+              {{rowData[col.field]}}
+            </span>
+          </td>
+          <td style="text-align:center;width: 50px">
+            <!-- <div class="btn-group">
+                            <button type="button" class="btn btn-deta me-5" (click)="viewClientOpenApiList(rowData);">
                                 <span class="fa fa-search">{{'button.view'|translate}}</span>
                             </button>
                         </div> -->
-                        <button pButton pRipple type="button" icon="pi pi-eye"
-                                class="p-button-rounded p-button-text p-button-plain" (click)="viewClientOpenApiList(rowData)"
-                                [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
-                    </td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="footer" let-columns>
-                <tr *ngIf="clientListRowcount">
-                    <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
-                        <span style="vertical-align: middle;">{{'row_count' | translate}}: {{clientListRowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              (click)="viewClientOpenApiList(rowData)" [pTooltip]="'button.detail' | translate"
+              tooltipPosition="top"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="clientListRowcount">
+          <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{clientListRowcount}}</span>
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreClientList();">{{'button.more'|translate}}</button> -->
 
-                            <!-- 查詢更多 -->
-                            <button  type="button" class="btn tpi-header-return" (click)="moreClientList()">{{ 'button.more'| translate}}
-                                <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
-                            </button>
-                    </td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage" let-columns>
-                <tr>
-                    <td [attr.colspan]="columns.length+1">
-                        {{'no_rec' | translate}}
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
-    </div>
-    <!-- 用戶的 Open API Key 列表 -->
-    <div [hidden]="pageNum != 2">
-        <form>
-            <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-second loat-left mr-3" (click)="applyOpenApiKey('create');"
-                        [disabled]="canCreate == false">{{'button.apply'|translate}}</button>
-                </div>
-            </div>
-            <hr>
-            <p-table *ngIf="openApiKeyListCols" [columns]="openApiKeyListCols" [value]="openApiKeyList" styleClass="p-datatable-striped"
-                selectionMode="single" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
-                <ng-template pTemplate="colgroup" let-columns>
-                    <colgroup>
-                        <col *ngFor="let col of columns" [style.width]="col.width">
-                    </colgroup>
-                    <colgroup style="width:150px;">{{'action'|translate}}</colgroup>
-                </ng-template>
-                <ng-template pTemplate="header" let-columns>
-                    <tr>
-                        <th *ngFor="let col of columns" scope="col">
-                            {{col.header}}
-                        </th>
-                        <th style="width:150px;" scope="col">{{'action'|translate}}
-                        </th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-rowData let-columns="columns">
-                    <tr>
-                        <td *ngFor="let col of columns" [style.width]="col.width">
-                            <span>
-                                {{rowData[col.field]}}
-                            </span>
-                        </td>
-                        <td style="text-align:center;width: 150px">
-                            <!-- <div class="btn-group"> -->
-                                <!-- <button type="button" class="btn btn-deta mr-5"
+            <!-- 查詢更多 -->
+            <button type="button" class="btn tpi-header-return" (click)="moreClientList()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="columns.length+1">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <!-- 用戶的 Open API Key 列表 -->
+  <div [hidden]="pageNum != 2">
+    <form>
+      <div class="form-group row">
+        <div class="col-12 col-xl-12 col-lg-12">
+          <button type="button" class="btn tpi-btn tpi-second loat-left me-3" (click)="applyOpenApiKey('create');"
+            [disabled]="canCreate == false">{{'button.apply'|translate}}</button>
+        </div>
+      </div>
+      <hr>
+      <p-table *ngIf="openApiKeyListCols" [columns]="openApiKeyListCols" [value]="openApiKeyList"
+        styleClass="p-datatable-striped" selectionMode="single" [style]="{'word-break':'break-word'}"
+        responsiveLayout="scroll">
+        <ng-template pTemplate="colgroup" let-columns>
+          <colgroup>
+            <col *ngFor="let col of columns" [style.width]="col.width">
+          </colgroup>
+          <colgroup style="width:150px;">{{'action'|translate}}</colgroup>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th *ngFor="let col of columns" scope="col">
+              {{col.header}}
+            </th>
+            <th style="width:150px;" scope="col">{{'action'|translate}}
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+          <tr>
+            <td *ngFor="let col of columns" [style.width]="col.width">
+              <span>
+                {{rowData[col.field]}}
+              </span>
+            </td>
+            <td style="text-align:center;width: 150px">
+              <!-- <div class="btn-group"> -->
+              <!-- <button type="button" class="btn btn-deta me-5"
                                     (click)="queryOpenApiKeyDetail(rowData);">
                                     <span class="fa fa-search">{{'button.detail'|translate}}</span>
                                 </button> -->
-                                <button pButton pRipple type="button" icon="pi pi-eye"
-                                        class="p-button-rounded p-button-text p-button-plain" (click)="queryOpenApiKeyDetail(rowData)"
-                                        [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
-                                <!-- <button *ngIf="rowData['updateVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+              <button pButton pRipple type="button" icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-plain" (click)="queryOpenApiKeyDetail(rowData)"
+                [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+              <!-- <button *ngIf="rowData['updateVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="applyOpenApiKey('update', rowData);" [disabled]="canCreate == false">
                                     <span class="fa fa-search">{{'button.change'|translate}}</span>
                                   </button>-->
-                                  <button pButton pRipple type="button" icon="fa fa-edit" *ngIf="rowData['updateVisiable'] == 'Y'" [disabled]="canCreate == false"
-                                          class="p-button-rounded p-button-text p-button-plain" (click)="applyOpenApiKey('update', rowData);"
-                                          [pTooltip]="'button.change' | translate" tooltipPosition="top"></button>
-                                <!-- <button *ngIf="rowData['revokeVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+              <button pButton pRipple type="button" icon="fa fa-edit" *ngIf="rowData['updateVisiable'] == 'Y'"
+                [disabled]="canCreate == false" class="p-button-rounded p-button-text p-button-plain"
+                (click)="applyOpenApiKey('update', rowData);" [pTooltip]="'button.change' | translate"
+                tooltipPosition="top"></button>
+              <!-- <button *ngIf="rowData['revokeVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="applyOpenApiKey('revoke', rowData);" [disabled]="canCreate == false">
                                     <span class="fa fa-search">{{'button.revoke'|translate}}</span>
                                 </button> -->
-                                <button pButton pRipple type="button" icon="fa fa-trash-alt" *ngIf="rowData['revokeVisiable'] == 'Y'"  [disabled]="canCreate == false"
-                                        class="p-button-rounded p-button-text p-button-plain"
-                                        (click)="applyOpenApiKey('revoke', rowData)" [pTooltip]="'button.revoke' | translate" tooltipPosition="top"></button>
-                            <!-- </div> -->
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="footer" let-columns>
-                    <tr *ngIf="openApiKeyListRowcount">
-                        <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
-                            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{openApiKeyListRowcount}}</span>
-                            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+              <button pButton pRipple type="button" icon="fa fa-trash-alt" *ngIf="rowData['revokeVisiable'] == 'Y'"
+                [disabled]="canCreate == false" class="p-button-rounded p-button-text p-button-plain"
+                (click)="applyOpenApiKey('revoke', rowData)" [pTooltip]="'button.revoke' | translate"
+                tooltipPosition="top"></button>
+              <!-- </div> -->
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer" let-columns>
+          <tr *ngIf="openApiKeyListRowcount">
+            <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+              <span style="vertical-align: middle;">{{'row_count' | translate}}: {{openApiKeyListRowcount}}</span>
+              <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                                 (click)="moreOpenApiList();">{{'button.more'|translate}}</button> -->
 
-                                <!-- 查詢更多 -->
-                                <button  type="button" class="btn tpi-header-return" (click)="moreOpenApiList()">{{ 'button.more'| translate}}
-                                  <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
-                                </button>
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage" let-columns>
-                    <tr>
-                        <td [attr.colspan]="columns.length+1">
-                            {{'no_rec' | translate}}
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-            <br>
-            <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
-                        (click)="changePage('queryClientList', false);">{{'button.return_to_list'|translate}}</button>
-                </div>
-            </div>
-        </form>
-    </div>
-    <!-- Open API Key Detail -->
-    <div [hidden]="pageNum != 3">
-        <div class="card card-body bg-light mt-3">
-            <form *ngIf="openApiKeyDetailData">
-                <div class="form-group row">
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'client_id'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.clientId}}</label>
+              <!-- 查詢更多 -->
+              <button type="button" class="btn tpi-header-return" (click)="moreOpenApiList()">{{ 'button.more'|
+                translate}}
+                <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage" let-columns>
+          <tr>
+            <td [attr.colspan]="columns.length+1">
+              {{'no_rec' | translate}}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <br>
+      <div class="form-group row">
+        <div class="col-12 col-xl-12 col-lg-12">
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
+            (click)="changePage('queryClientList', false);">{{'button.return_to_list'|translate}}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <!-- Open API Key Detail -->
+  <div [hidden]="pageNum != 3">
+    <div class="card card-body bg-light mt-3">
+      <form *ngIf="openApiKeyDetailData">
+        <div class="form-group row">
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'client_id'|translate}}</label>：
+            <label>{{openApiKeyDetailData.clientId}}</label>
+          </div>
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'client_name'|translate}}</label>：
+            <label>{{openApiKeyDetailData.clientName}}</label>
+          </div>
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'client_alias'|translate}}</label>：
+            <label>{{openApiKeyDetailData.clientAlias}}</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-12 col-xl-12 col-lg-12">
+            <label class="control-label">Open API Key</label>：
+            <label>{{openApiKeyDetailData.openApiKey}}</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-12 col-xl-12 col-lg-12">
+            <label class="control-label">{{'open_api_key_alias'|translate}}</label>：
+            <label>{{openApiKeyDetailData.openApiKeyAlias}}</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-12 col-xl-12 col-lg-12">
+            <label class="control-label">Secret Key</label>：
+            <label>{{openApiKeyDetailData.secretKey}}</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'status'|translate}}</label>：
+            <label>{{openApiKeyDetailData.openApiKeyStatusName}}</label>
+          </div>
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'times_quota'|translate}}</label>：
+            <label>{{openApiKeyDetailData.timesQuota}}</label>
+          </div>
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'use_quota'|translate}}</label>：
+            <label>{{openApiKeyDetailData.timesThreshold}}</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'create_date'|translate}}</label>：
+            <label>{{openApiKeyDetailData.createDateTime}}</label>
+          </div>
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'expired_date'|translate}}</label>：
+            <label>{{openApiKeyDetailData.expiredAt}}</label>
+          </div>
+          <div class="col-4 col-xl-4 col-lg-4">
+            <label class="control-label">{{'revoked_date'|translate}}</label>：
+            <label>{{openApiKeyDetailData.revokedAt}}</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-12 col-xl-12 col-lg-12">
+            <label class="control-label">{{'auth_api'|translate}}</label>：
+            <p-table *ngIf="openApiKeyDetailCols" [columns]="openApiKeyDetailCols" styleClass="p-datatable-striped"
+              [value]="openApiKeyDetailData.dataList" selectionMode="single" [style]="{'word-break':'break-word'}">
+              <ng-template pTemplate="colgroup" let-columns>
+                <colgroup>
+                  <col *ngFor="let col of columns" [style.width]="col.width">
+                </colgroup>
+              </ng-template>
+              <ng-template pTemplate="header" let-columns>
+                <tr>
+                  <th *ngFor="let col of columns" scope="col">
+                    {{col.header}}
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-rowData let-columns="columns">
+                <tr>
+                  <td *ngFor="let col of columns" [style.width]="col.width">
+                    <span *ngIf="col.field != 'themeDatas' && col.field != 'fileName'">
+                      {{rowData[col.field]}}
+                    </span>
+                    <div *ngIf="col.field == 'themeDatas'">
+                      <span *ngFor="let themeItem of rowData[col.field] | keyvalue;let i = index">
+                        {{themeItem.value}}
+                        <span *ngIf="checkLength(rowData[col.field], i);">，</span>
+                      </span>
                     </div>
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'client_name'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.clientName}}</label>
-                    </div>
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'client_alias'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.clientAlias}}</label>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-12 col-xl-12 col-lg-12">
-                        <label class="control-label">Open API Key</label>：
-                        <label>{{openApiKeyDetailData.openApiKey}}</label>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-12 col-xl-12 col-lg-12">
-                        <label class="control-label">{{'open_api_key_alias'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.openApiKeyAlias}}</label>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-12 col-xl-12 col-lg-12">
-                        <label class="control-label">Secret Key</label>：
-                        <label>{{openApiKeyDetailData.secretKey}}</label>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'status'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.openApiKeyStatusName}}</label>
-                    </div>
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'times_quota'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.timesQuota}}</label>
-                    </div>
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'use_quota'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.timesThreshold}}</label>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'create_date'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.createDateTime}}</label>
-                    </div>
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'expired_date'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.expiredAt}}</label>
-                    </div>
-                    <div class="col-4 col-xl-4 col-lg-4">
-                        <label class="control-label">{{'revoked_date'|translate}}</label>：
-                        <label>{{openApiKeyDetailData.revokedAt}}</label>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-12 col-xl-12 col-lg-12">
-                        <label class="control-label">{{'auth_api'|translate}}</label>：
-                        <p-table *ngIf="openApiKeyDetailCols" [columns]="openApiKeyDetailCols" styleClass="p-datatable-striped"
-                            [value]="openApiKeyDetailData.dataList" selectionMode="single"
-                            [style]="{'word-break':'break-word'}">
-                            <ng-template pTemplate="colgroup" let-columns>
-                                <colgroup>
-                                    <col *ngFor="let col of columns" [style.width]="col.width">
-                                </colgroup>
-                            </ng-template>
-                            <ng-template pTemplate="header" let-columns>
-                                <tr>
-                                    <th *ngFor="let col of columns" scope="col">
-                                        {{col.header}}
-                                    </th>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="body" let-rowData let-columns="columns">
-                                <tr>
-                                    <td *ngFor="let col of columns" [style.width]="col.width">
-                                        <span *ngIf="col.field != 'themeDatas' && col.field != 'fileName'">
-                                            {{rowData[col.field]}}
-                                        </span>
-                                        <div *ngIf="col.field == 'themeDatas'">
-                                            <span *ngFor="let themeItem of rowData[col.field] | keyvalue;let i = index">
-                                                {{themeItem.value}}
-                                                <span *ngIf="checkLength(rowData[col.field], i);">，</span>
-                                            </span>
-                                        </div>
-                                        <span *ngIf="col.field == 'fileName'">
-                                            <a href="javascript:void(0)"
-                                                (click)="downloadFile(rowData['filePath'],rowData['fileName']);">
-                                                {{rowData[col.field]}}
-                                            </a>
-                                        </span>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="footer" let-columns>
-                                <tr *ngIf="openApiKeyDetailRowcount">
-                                    <td [attr.colspan]="columns.length" style="color: #b7b7b7;">
-                                        <span>{{'row_count' | translate}}: {{openApiKeyDetailRowcount}}</span>
-                                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                    <span *ngIf="col.field == 'fileName'">
+                      <a href="javascript:void(0)" (click)="downloadFile(rowData['filePath'],rowData['fileName']);">
+                        {{rowData[col.field]}}
+                      </a>
+                    </span>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="footer" let-columns>
+                <tr *ngIf="openApiKeyDetailRowcount">
+                  <td [attr.colspan]="columns.length" style="color: #b7b7b7;">
+                    <span>{{'row_count' | translate}}: {{openApiKeyDetailRowcount}}</span>
+                    <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                                             (click)="moreOpenApiKeyDetailData();">{{'button.more'|translate}}</button> -->
 
-                                            <!-- 查詢更多 -->
-                                            <button  type="button" class="btn tpi-header-return" (click)="moreOpenApiKeyDetailData()">{{ 'button.more'| translate}}
-                                            <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
-                                            </button>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="emptymessage" let-columns>
-                                <tr>
-                                    <td [attr.colspan]="columns.length">
-                                        {{'no_rec' | translate}}
-                                    </td>
-                                </tr>
-                            </ng-template>
-                        </p-table>
-                    </div>
-                </div>
-            </form>
+                    <!-- 查詢更多 -->
+                    <button type="button" class="btn tpi-header-return" (click)="moreOpenApiKeyDetailData()">{{
+                      'button.more'| translate}}
+                      <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage" let-columns>
+                <tr>
+                  <td [attr.colspan]="columns.length">
+                    {{'no_rec' | translate}}
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
         </div>
-        <br>
-        <div class="row">
-            <div class="col-12 col-xl-12 col-lg-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
-                    (click)="changePage('viewClientOpenApiList', false);">{{'button.return_to_list'|translate}}</button>
-            </div>
-        </div>
+      </form>
     </div>
-    <!-- Open API Key申請單 -->
-    <div *ngIf="pageNum == 4">
-        <app-open-api-key-form #openApiKeyForm *ngIf="applyOpenApiKeyDataParams" [data]="applyOpenApiKeyDataParams"
-            (refresh)="refreshData($event);">
-        </app-open-api-key-form>
-        <br>
-        <div class="row">
-            <div class="col-12 col-xl-12 col-lg-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
-                    (click)="changePage('viewClientOpenApiList', true);">{{'button.return_to_list'|translate}}</button>
-            </div>
-        </div>
+    <br>
+    <div class="row">
+      <div class="col-12 col-xl-12 col-lg-12">
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
+          (click)="changePage('viewClientOpenApiList', false);">{{'button.return_to_list'|translate}}</button>
+      </div>
     </div>
+  </div>
+  <!-- Open API Key申請單 -->
+  <div *ngIf="pageNum == 4">
+    <app-open-api-key-form #openApiKeyForm *ngIf="applyOpenApiKeyDataParams" [data]="applyOpenApiKeyDataParams"
+      (refresh)="refreshData($event);">
+    </app-open-api-key-form>
+    <br>
+    <div class="row">
+      <div class="col-12 col-xl-12 col-lg-12">
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
+          (click)="changePage('viewClientOpenApiList', true);">{{'button.return_to_list'|translate}}</button>
+      </div>
+    </div>
+  </div>
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

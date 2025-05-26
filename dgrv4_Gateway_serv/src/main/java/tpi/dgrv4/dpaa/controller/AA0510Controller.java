@@ -1,6 +1,7 @@
 package tpi.dgrv4.dpaa.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,12 +29,17 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0510Controller {
 
-	@Autowired
 	private AA0510Service service;
 
+	@Autowired
+	public AA0510Controller(ApplicationContext applicationContext) {
+		super();
+		if (applicationContext != null) {
+			this.service = applicationContext.getBean(AA0510Service.class);
+		}
+	}
+
 	/**
-	 * 。
-	 * 
 	 * @param headers
 	 * @param req
 	 * @return

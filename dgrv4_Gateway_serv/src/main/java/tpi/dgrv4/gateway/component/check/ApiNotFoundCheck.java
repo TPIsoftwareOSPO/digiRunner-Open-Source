@@ -10,11 +10,15 @@ import tpi.dgrv4.gateway.service.TsmpRtnCodeService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Component
 public class ApiNotFoundCheck implements ICheck{
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpRtnCodeService tsmpRtnCodeService;
+
+	@Autowired
+	public ApiNotFoundCheck(TsmpSettingService tsmpSettingService, TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+	}
 
 	protected TsmpSettingService getTsmpSettingService() {
 		return tsmpSettingService;

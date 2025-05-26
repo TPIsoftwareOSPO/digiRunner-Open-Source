@@ -22,13 +22,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0039Service {
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0039Service(TsmpUserDao tsmpUserDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0039Resp queryTsmpUserLikeList(TsmpAuthorization authorization, DPB0039Req req) {
 		String userStatus = "1";

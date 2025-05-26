@@ -1,48 +1,54 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <div class="form-group row">
-      <div class="col-12 col-xl-12 col-lg-12">
+      <div class="d-flex">
+        <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="selected.length == 0"
+          (click)="procEnableClientCert('Y')">{{'button.enable'|translate}}</button>
+        <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="selected.length == 0"
+          (click)="procEnableClientCert('N')">{{'button.disable'|translate}}</button>
 
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+        <button type="button" class="btn tpi-btn tpi-second ms-auto"
           (click)="changePage('create')">{{'button.create'|translate}}</button>
       </div>
     </div>
-    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" styleClass="p-datatable-striped"
-      [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
-      <ng-template pTemplate="colgroup" let-columns>
-        <colgroup>
-          <col *ngFor="let col of columns" [style.width]="col.width">
-        </colgroup>
-        <colgroup style="width:80px;">{{'action'|translate}}</colgroup>
-      </ng-template>
-      <ng-template pTemplate="header" let-columns>
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" [(selection)]="selected" selectionMode="single"
+      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      <ng-template pTemplate="header" let-columns selectionMode="multiple">
         <tr>
+          <th style="width: 2.25em" scope="col" class="text-center">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
           <th *ngFor="let col of columns" scope="col">
             {{col.header}}
           </th>
-          <th style="width:180px;" scope="col">{{'action'|translate}}
+          <th style="width:120px;" scope="col">{{'action'|translate}}
           </th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-rowData let-columns="columns">
         <tr>
+          <td>
+            <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+          </td>
+
           <td *ngFor="let col of columns" [style.width]="col.width">
             <div style="text-align: center;">
-              <img [alt]="rowData.enable == 1" style="width: 20px; height: 20px" *ngIf="col.field == 'enable'"
-                [src]="rowData.enable ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+              <img [alt]="rowData.enable" style="width: 20px; height: 20px" *ngIf="col.field == 'enable'"
+                [src]="rowData.enable === 'Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
             </div>
             <span *ngIf="col.field != 'enable'">
-              {{rowData[col.field]}}
+
+              {{['rootCAExpireDate','crtexpireDate','updateDateTime'].includes(col.field) ?
+              formateDate(rowData[col.field])
+              :rowData[col.field]
+              }}
             </span>
           </td>
-          <td style="text-align:center;width: 180px">
-            <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5"
-                                (click)="showDialog(rowData,formOperate.detail)">
-                                <span
-                                    class="fa fa-search">{{'button.detail'|translate}}</span>
-                            </button>
-                        </div> -->
+          <td style="text-align:center;width: 120px">
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              [pTooltip]="'button.detail' | translate" tooltipPosition="top"
+              (click)="changePage('detail', rowData)"></button>
+
             <button pButton pRipple type="button" icon="fa fa-edit"
               class="p-button-rounded p-button-text p-button-plain" [pTooltip]="'button.update' | translate"
               tooltipPosition="top" (click)="changePage('update', rowData)"></button>
@@ -50,22 +56,12 @@
             <button pButton pRipple type="button" icon="fa fa-trash-alt"
               class="p-button-rounded p-button-text p-button-plain" [pTooltip]="'button.delete' | translate"
               tooltipPosition="top" (click)="changePage('delete', rowData)"></button>
-
-            <button pButton pRipple type="button" icon="pi pi-ellipsis-v"
-              class="p-button-rounded p-button-text p-button-plain" (click)="toggleBtnMenu($event, rowData)"></button>
-
-            <p-overlayPanel #op styleClass="tpi-op">
-              <ng-template pTemplate>
-                <p-menu [popup]="false" [model]="btnData"></p-menu>
-              </ng-template>
-            </p-overlayPanel>
-
           </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="footer" let-columns>
         <tr *ngIf="this.dataList.length>0">
-          <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+          <td [attr.colspan]="columns.length+2" style="color: #b7b7b7;">
             <span style="vertical-align:middle;">{{'row_count' | translate}}: {{this.dataList.length}}</span>
             <!-- <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
                               <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
@@ -75,7 +71,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage" let-columns>
         <tr>
-          <td [attr.colspan]="columns.length+1">
+          <td [attr.colspan]="columns.length+2">
             {{'no_rec' | translate}}
           </td>
         </tr>
@@ -86,82 +82,111 @@
   <div [hidden]="pageNum != 2">
     <form [formGroup]="form">
       <div class="form-group row">
+        <div class="col-4">
+          <label id="host_label" class="control-label">Host</label>
+          <input formControlName="host" type="text" class="form-control">
+          <div *ngIf="host?.invalid && (host?.dirty || host?.touched)" class="text-danger">
+            <small class="form-text">{{host?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+
+        <div class="col-2">
+          <label id="port_label" class="control-label">Port</label>
+          <input formControlName="port" type="number" class="form-control">
+          <div *ngIf="port?.invalid && (port?.dirty || port?.touched)" class="text-danger">
+            <small class="form-text">{{port?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
         <div class="col-6">
-          <label id="siteUrl_label" class="control-label">{{'site'|translate}}</label>
-          <input formControlName="siteUrl" type="text" class="form-control">
-          <div *ngIf="siteUrl?.invalid && (siteUrl?.dirty || siteUrl?.touched)" class="text-danger">
-            <small class="form-text">{{cusName.errors.isRequired}}</small>
-            <small class="form-text">{{cusName.errors.pattern}}</small>
+          <div class="field-flex-space-between">
+            <label id="rootCa_label" class="control-label font-weight-bold">Root CA</label>
+            <button type="button" class="btn tpi-detail" (click)="procSSLDecoder(rootCa?.value, 'Root CA')">
+              [ {{ "button.detail" | translate }} ]
+            </button>
           </div>
-        </div>
-        <div class="col-3 form-group">
-          <label id="cusStatus_label" class="control-label">{{"status"|translate}}</label>
-          <div class="p-form-check-line">
-            <ng-container>
-              <div class="p-form-check">
-                <p-radioButton formControlName="enable" value="1" inputId="enableY"></p-radioButton>
-                <label for="cusStatusY" class="ml-2 mb-0">{{"button.enable"|translate}}</label>
-              </div>
-              <div class="p-form-check">
-                <p-radioButton formControlName="enable" value="0" inputId="enableN"></p-radioButton>
-                <label for="cusStatusN" class="ml-2 mb-0">{{"button.disable"|translate}}</label>
-              </div>
-            </ng-container>
-          </div>
-          <div *ngIf="enable?.invalid && (enable?.dirty || enable?.touched)" class="text-danger">
-            <small class="form-text">{{status?.errors.isRequired | translate}}</small>
-          </div>
-        </div>
-      </div>
-      <div class="form-group row">
-        <div class="col-12">
-          <label id="rootCa_label" class="control-label">Root CA</label>
           <div style="display:block">
-            <textarea rows="5" style="width:100%" id="rootCa" formControlName="rootCa" class="form-control"
-              pInputTextarea></textarea>
+            <div class="p-inputtextarea p-inputtext p-component textarea-placeholder">
+              <span>-----BEGIN CERTIFICATE-----</span>
+              <textarea class="form-control textarea-noborder" id="rootCa" formControlName="rootCa"
+                pInputTextarea></textarea>
+              <span>-----END CERTIFICATE-----</span>
+            </div>
+            <!-- <textarea rows="5" style="width:100%" id="rootCa" formControlName="rootCa" class="form-control"
+              pInputTextarea></textarea> -->
+          </div>
+          <div *ngIf="rootCa?.invalid && (rootCa?.dirty || rootCa?.touched)" class="text-danger">
+            <small class="form-text">{{rootCa?.errors.isRequired | translate}}</small>
           </div>
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-12">
-          <label id="clientCert_label" class="control-label">Client Cert</label>
+        <div class="col-6">
+          <div class="field-flex-space-between">
+            <label id="clientCert_label" class="control-label font-weight-bold">Client Cert</label>
+            <button type="button" class="btn tpi-detail" (click)="procSSLDecoder(clientCert?.value, 'Client Cert')">
+              [ {{ "button.detail" | translate }} ]
+            </button>
+          </div>
           <div style="display:block">
-            <textarea rows="5" style="width:100%" id="clientCert" formControlName="clientCert" class="form-control"
-              pInputTextarea></textarea>
+            <div class="p-inputtextarea p-inputtext p-component textarea-placeholder">
+              <span>-----BEGIN CERTIFICATE-----</span>
+              <textarea class="form-control textarea-noborder" id="clientCert" formControlName="clientCert"
+                pInputTextarea></textarea>
+              <span>-----END CERTIFICATE-----</span>
+            </div>
+            <!-- <textarea rows="5" style="width:100%" id="clientCert" formControlName="clientCert" class="form-control"
+              pInputTextarea></textarea> -->
+          </div>
+          <div *ngIf="clientCert?.invalid && (clientCert?.dirty || clientCert?.touched)" class="text-danger">
+            <small class="form-text">{{clientCert?.errors.isRequired | translate}}</small>
           </div>
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-12">
+        <div class="col-6">
           <label id="clientKey_label" class="control-label">Client Key</label>
           <div style="display:block">
-            <textarea rows="5" style="width:100%" id="clientKey" formControlName="clientKey" class="form-control"
-              pInputTextarea></textarea>
+            <div class="p-inputtextarea p-inputtext p-component textarea-placeholder">
+              <span>-----BEGIN ENCRYPTED PRIVATE KEY-----</span>
+              <textarea class="form-control textarea-noborder" id="clientKey" formControlName="clientKey"
+                pInputTextarea></textarea>
+              <span>-----END ENCRYPTED PRIVATE KEY-----</span>
+            </div>
+            <!-- <textarea rows="5" style="width:100%" id="clientKey" formControlName="clientKey" class="form-control"
+              pInputTextarea></textarea> -->
+          </div>
+          <div *ngIf="clientKey?.invalid && (clientKey?.dirty || clientKey?.touched)" class="text-danger">
+            <small class="form-text">{{clientKey?.errors.isRequired | translate}}</small>
           </div>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-6">
-          <label id="keyPassword_label" class="control-label">{{'clientKeyMima'|translate}}</label>
-          <input formControlName="mima" type="password" class="form-control">
+          <label id="keyMima_label" class="control-label">{{'clientKeyMima'|translate}}</label>
+          <input formControlName="keyMima" [type]="'password'" class="form-control">
+          <div *ngIf="keyMima?.invalid && (keyMima?.dirty || keyMima?.touched)" class="text-danger">
+
+            <small class="form-text">{{keyMima?.errors.maxlength | translate}}</small>
+          </div>
         </div>
-        <div *ngIf="mima?.invalid && (mima?.dirty || mima?.touched)" class="text-danger">
-          <small class="form-text">{{status?.errors.minlength | translate}}</small>
-          <small class="form-text">{{status?.errors.maxlength | translate}}</small>
-        </div>
+
       </div>
       <div class="form-group row">
         <div class="col-6">
-          <label id="tag" class="control-label">{{ "label_tag" | translate }}</label>
-          <div>
-            <p-chips id="tag" formControlName="tag" [allowDuplicate]="false"></p-chips>
+          <label id="remark_label" class="control-label">{{ "memo" | translate }}</label>
+          <input formControlName="remark" type="text" class="form-control">
+          <div *ngIf="remark?.invalid && (remark?.dirty || remark?.touched)" class="text-danger">
+            <small class="form-text">{{remark?.errors.maxlength | translate}}</small>
           </div>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-12">
-          <button type="button" class="btn tpi-btn tpi-night float-left mr-2" [disabled]="!form.valid"
-            (click)="connectionTest();">{{'button.connect_test'|translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-night" (click)="connectionTest()">
+            {{ "button.connect_test" | translate }}
+          </button>
         </div>
       </div>
       <div class="form-group row">
@@ -177,6 +202,116 @@
         </div>
       </div>
     </form>
+  </div>
+  <!-- 詳細資料 -->
+  <div [hidden]="pageNum != 3">
+    <div class="form-group row">
+      <div class="col-1">
+        <label class="control-label">{{ "status" | translate }}</label>
+        <label class="form-control border-line">
+          <img *ngIf="detailData?.enable == 'Y'" style="width: 20px; height: 20px" src="assets/images/icon_acg.png"
+            alt="enable" />
+          <img *ngIf="detailData?.enable == 'N'" style="width: 20px; height: 20px" src="assets/images/icon_acr.png"
+            alt="disable" />
+        </label>
+      </div>
+      <div class="col-4">
+        <label id="host_label" class="control-label">Host</label>
+        <label class="form-control border-line">{{detailData?.host}}</label>
+      </div>
+
+      <div class="col-1">
+        <label id="port_label" class="control-label">Port</label>
+        <label class="form-control border-line">{{detailData?.port}}</label>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-6 ">
+        <div class="field-flex-space-between">
+          <label id="rootCa_label" class="control-label font-weight-bold">Root CA</label>
+          <button type="button" class="btn tpi-detail" (click)="procSSLDecoder(detailData?.rootCa, 'Root CA')">
+            [ {{ "button.detail" | translate }} ]
+          </button>
+        </div>
+        <div style="display:block">
+          <textarea rows="5" style="width:100%" id="rootCa" class="form-control" [value]="detailData?.rootCa" readOnly
+            pInputTextarea></textarea>
+        </div>
+
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-6 ">
+        <div class="field-flex-space-between">
+          <label id="clientCert_label" class="control-label font-weight-bold">Client Cert</label>
+          <button type="button" class="btn tpi-detail" (click)="procSSLDecoder(detailData?.clientCert, 'Client Cert')">
+            [ {{ "button.detail" | translate }} ]
+          </button>
+        </div>
+        <div style="display:block">
+          <textarea rows="5" style="width:100%" id="clientCert" class="form-control" [value]="detailData?.clientCert"
+            readOnly pInputTextarea></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-6">
+        <label id="clientKey_label" class="control-label">Client Key</label>
+        <div style="display:block">
+          <textarea rows="5" style="width:100%" id="clientKey" class="form-control" [value]="detailData?.clientKey"
+            readOnly pInputTextarea></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-6">
+        <label id="keyMima_label" class="control-label">{{'clientKeyMima'|translate}}</label>
+        <div style="display:block">
+          <textarea rows="5" style="width:100%" id="clientKey" class="form-control" [value]="detailData?.keyMima"
+            readOnly pInputTextarea></textarea>
+        </div>
+      </div>
+
+    </div>
+    <div class="form-group row">
+      <div class="col-6">
+        <label id="remark_label" class="control-label">{{ "memo" | translate }}</label>
+        <div style="display:block">
+          <textarea rows="2" style="width:100%" id="clientKey" class="form-control" [value]="detailData?.remark"
+            readOnly pInputTextarea></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-3">
+        <label>{{'create_date'|translate}}</label>
+        <label class="form-control border-line">{{formateDate(detailData?.createDateTime)}}</label>
+      </div>
+      <div class="col-3">
+        <label>{{'create_by'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.createUser}}</label>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-3">
+        <label>{{'update_date'|translate}}</label>
+        <label class="form-control border-line">{{formateDate(detailData?.updateDateTime)}}</label>
+      </div>
+      <div class="col-3">
+        <label>{{'update_user'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.updateUser}}</label>
+      </div>
+    </div>
+
+
+    <div class="form-group row">
+      <div class="col-12">
+        <button type="button" class="btn tpi-btn tpi-primary" (click)="changePage('default')">
+          {{ "button.return_to_list" | translate }}
+        </button>
+      </div>
+    </div>
+
   </div>
 </app-container>
 

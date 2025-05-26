@@ -1,6 +1,5 @@
 package tpi.dgrv4.gateway.controller;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,8 +17,14 @@ import tpi.dgrv4.gateway.service.DGRCServicePostRaw;
 @RestController
 public class DGRCControllerPostRaw {
 	
-	@Autowired
 	private DGRCServicePostRaw service;
+	
+	@Autowired
+	public DGRCControllerPostRaw(DGRCServicePostRaw service) {
+		super();
+		this.service = service;
+	}
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = "/dgrc/**", 
 			produces = MediaType.ALL_VALUE)
@@ -28,9 +33,9 @@ public class DGRCControllerPostRaw {
 														 @RequestHeader HttpHeaders headers,
 														 @RequestBody(required = false) String payload) throws Exception {
 
-		String selectWorkThread = httpReq.getAttribute(GatewayFilter.setWorkThread).toString();
+		String selectWorkThread = httpReq.getAttribute(GatewayFilter.SETWORK_THREAD).toString();
         CompletableFuture<ResponseEntity<?>> resp;
-        if (selectWorkThread.equals(GatewayFilter.fast)) {
+        if (selectWorkThread.equals(GatewayFilter.FAST)) {
             resp = service.forwardToPostRawDataAsyncFast(headers, httpReq, httpRes, payload);
         } else { // "slow"
             resp = service.forwardToPostRawDataAsync(headers, httpReq, httpRes, payload);

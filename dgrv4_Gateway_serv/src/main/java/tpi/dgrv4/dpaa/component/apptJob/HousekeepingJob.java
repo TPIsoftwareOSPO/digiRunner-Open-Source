@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +60,7 @@ import tpi.dgrv4.entity.repository.TsmpSettingDao;
 import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
 import tpi.dgrv4.gateway.component.check.TrafficCheck;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import tpi.dgrv4.gateway.service.WebsiteService;
@@ -74,60 +74,52 @@ public class HousekeepingJob extends ApptJob {
 
     private TPILogger logger = TPILogger.tl;
 
-    @Autowired
     private TsmpEventsDao tsmpEventsDao;
-
-    @Autowired
     private TsmpClientLogDao tsmpClientLogDao;
-
-    @Autowired
     private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-    @Autowired
     private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-    @Autowired
     private DpReqServiceFactory dpReqServiceFactory;
-
-    @Autowired
     private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-    @Autowired
     private TsmpNoticeLogDao tsmpNoticeLogDao;
-
-    @Autowired
     private TsmpDpFileDao tsmpDpFileDao;
-
-    @Autowired
     private TsmpSettingDao tsmpSettingDao;
-
-    @Autowired
     private TsmpClientDao tsmpClientDao;
-
-    @Autowired
     private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-
-    @Autowired
     private DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao;
-
-    @Autowired
     private DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao;
-
-    @Autowired
     private TrafficCheck trafficCheck;
-
-    @Autowired
     private WebsiteService websiteService;
-
-    @Autowired
     private DgrWebsiteCacheProxy dgrWebsiteCacheProxy;
-
-    @Autowired
     private TsmpSettingService tsmpSettingService;
 
-    public HousekeepingJob(TsmpDpApptJob tsmpDpApptJob) {
-        super(tsmpDpApptJob, TPILogger.tl);
-    }
+    @Autowired
+	public HousekeepingJob(TsmpDpApptJob tsmpDpApptJob, TsmpEventsDao tsmpEventsDao, TsmpClientLogDao tsmpClientLogDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			TsmpNoticeLogDao tsmpNoticeLogDao, TsmpDpFileDao tsmpDpFileDao, TsmpSettingDao tsmpSettingDao,
+			TsmpClientDao tsmpClientDao, TsmpTokenHistoryDao tsmpTokenHistoryDao,
+			DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao, DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao,
+			TrafficCheck trafficCheck, WebsiteService websiteService, DgrWebsiteCacheProxy dgrWebsiteCacheProxy,
+			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpEventsDao = tsmpEventsDao;
+		this.tsmpClientLogDao = tsmpClientLogDao;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.dpReqServiceFactory = dpReqServiceFactory;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpNoticeLogDao = tsmpNoticeLogDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.dgrAcIdpAuthCodeDao = dgrAcIdpAuthCodeDao;
+		this.dgrImportClientRelatedTempDao = dgrImportClientRelatedTempDao;
+		this.trafficCheck = trafficCheck;
+		this.websiteService = websiteService;
+		this.dgrWebsiteCacheProxy = dgrWebsiteCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
     @Override
     public String runApptJob() throws Exception {

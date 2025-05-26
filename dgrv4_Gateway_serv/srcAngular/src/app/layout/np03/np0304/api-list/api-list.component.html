@@ -4,7 +4,7 @@
             <div class="ui-inputgroup">
                 <input class="form-control" type="search" placeholder="{{'keyword_search'|translate}}" (keyup.enter)="searchAPI()"
                     [(ngModel)]='keyword'>
-                <button pButton type="button" icon="pi pi-search" class="tpi-night ml-1"
+                <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
                     (click)="searchAPI();"></button>
             </div>
         </div>
@@ -59,7 +59,7 @@
             <tr *ngIf="rowcount">
                 <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                     <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                    <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                    <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                         (click)="moreData();">{{'button.more'|translate}}</button> -->
 
                         <!-- 查詢更多 -->

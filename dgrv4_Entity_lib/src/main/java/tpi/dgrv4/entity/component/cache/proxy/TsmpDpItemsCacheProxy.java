@@ -1,9 +1,13 @@
 package tpi.dgrv4.entity.component.cache.proxy;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.common.component.cache.proxy.ITsmpDpItemsCacheProxy;
 import tpi.dgrv4.common.constant.LocaleType;
@@ -19,8 +23,13 @@ import java.util.function.Supplier;
 @Component
 public class TsmpDpItemsCacheProxy extends DaoCacheProxy implements ITsmpDpItemsCacheProxy{
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+
+	@Autowired
+	public TsmpDpItemsCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache, TsmpDpItemsDao tsmpDpItemsDao) {
+		super(objectMapper, cache);
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	public List<ITsmpDpItems> queryBcryptParam(String itemNo, String locale) {
 		Supplier<List<ITsmpDpItems>> supplier = () -> {			

@@ -65,39 +65,49 @@ public class AA0004Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	@Autowired
 	private UsersDao usersDao;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
 	private ApplicationContext ctx;
-	@Autowired
 	private JobHelper jobHelper;
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	@Autowired
 	private DaoGenericCacheService daoGenericCacheService;
-	@Autowired
 	private AuthoritiesCacheProxy authoritiesCacheProxy;
 	
 	private String sendTime;
 	
+	@Autowired
+	public AA0004Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpUserDao tsmpUserDao, TsmpRoleDao tsmpRoleDao,
+			AuthoritiesDao authoritiesDao, UsersDao usersDao, BcryptParamHelper bcryptParamHelper,
+			ApplicationContext ctx, JobHelper jobHelper, TsmpDpMailTpltDao tsmpDpMailTpltDao,
+			DgrAuditLogService dgrAuditLogService, DgrAcIdpUserDao dgrAcIdpUserDao,
+			TsmpTokenHistoryDao tsmpTokenHistoryDao, TsmpSettingService tsmpSettingService,
+			DaoGenericCacheService daoGenericCacheService, AuthoritiesCacheProxy authoritiesCacheProxy) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.authoritiesDao = authoritiesDao;
+		this.usersDao = usersDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.authoritiesCacheProxy = authoritiesCacheProxy;
+	}
+
 	@PostConstruct
 	public void init() {
 		this.sendTime = "0"; //設為0,不等待,因重置密碼,必須馬上寄發Email

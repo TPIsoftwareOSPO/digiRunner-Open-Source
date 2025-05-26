@@ -3,41 +3,31 @@
   <!-- 查詢 -->
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
-      <div class="form-group col-12 px-0">
-        <!-- <div class="col-12"> -->
-        <!-- <label class="control-label">{{'keyword_search'|translate}}</label> -->
-        <!-- <input type="text" class="form-control" formControlName="keyword" (keyup.enter)="queryTsmpSettingList()"
-            placeholder="{{'key'|translate}}、{{'value'|translate}}、{{'memo'|translate}}"> -->
-
-        <span class="p-input-icon-right" style="width: 40vw;">
-          <i class="pi pi-search tpi-i-search" (click)="queryTsmpSettingList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'key'|translate}}、{{'value'|translate}}、{{'memo'|translate}}"
-            (keyup.enter)="queryTsmpSettingList()">
-        </span>
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+      <div class="form-group col-12 px-0 d-flex align-items-center">
+        <app-search-input placeholder="{{'key'|translate}}、{{'value'|translate}}、{{'memo'|translate}}"
+          [control]="keyword" [searchFn]="queryTsmpSettingList.bind(this)"
+          class="col-9 col-lg-4 col-sm-6"></app-search-input>
+        <button type="button" class="btn tpi-btn tpi-second ms-auto"
           (click)="changePage('create');">{{'button.create'|translate}}</button>
-
-        <!-- </div> -->
       </div>
       <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
         <!-- 匯出 tsmp setting -->
         <div style="display: flex;align-items: center;">
           <button type="button" class="btn tpi-btn tpi-primary"
             (click)="changePage('export');">{{'button.export'|translate}}</button>
-          <i class="far fa-question-circle ml-2 " pTooltip="{{'check_filename_before_import'|translate }}"
+          <i class="far fa-question-circle ms-2 " pTooltip="{{'check_filename_before_import'|translate }}"
             [escape]="false"></i>
         </div>
         <!-- 匯入 -->
         <div style="display: flex;align-items: center;">
-          <div class="ui-inputgroup mr-2">
+          <div class="ui-inputgroup me-2">
             <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
             <input type="text" class="form-control" value="{{fileName}}" readOnly
               placeholder="{{'upload_file' | translate}}">
-            <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
               [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
           </div>
-          <button type="button" class="btn tpi-btn tpi-primary mr-2" [disabled]="!fileName"
+          <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!fileName"
             (click)="importTsmpSetting();">{{'button.import'|translate}}</button>
           <i class="far fa-question-circle" pTooltip="{{'import_key_tip'|translate:{key:'ID'} }}" [escape]="false"></i>
         </div>
@@ -45,14 +35,20 @@
       </div>
       <!-- <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12"> -->
-      <!-- <button type="button" class="btn tpi-btn tpi-primary float-left"
+      <!-- <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="queryTsmpSettingList();">{{'button.search' | translate}}</button> -->
 
       <!-- [disabled]="canCreate == false" -->
       <!-- </div>
       </div> -->
     </form>
-    <hr>
+    <hr class="m-2">
+    <div class="form-group d-flex">
+      <button type="button" class="btn tpi-btn tpi-night me-2" (click)="testConnection('ES');">ES
+        {{'button.connect_test'|translate}}</button>
+      <button type="button" class="btn tpi-btn tpi-night me-2" (click)="testConnection('Kibana');">Kibana
+        {{'button.connect_test'|translate}}</button>
+    </div>
     <p-table *ngIf="cols" [columns]="cols" [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
       [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
@@ -80,7 +76,7 @@
               {{ originStringTable(rowData[col.field]) }}
               <a *ngIf="rowData[col.field].ori" href="javascript:void(0)" (click)="switchOri(rowData[col.field])">
                   <label>{{!rowData[col.field].t ? ("show_less" | translate) : ("show_more" | translate)}}
-                    <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-left mt-1 mr-1': 'fa-angle-double-right ']"></i></label>
+                    <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-start mt-1 me-1': 'fa-angle-double-right ']"></i></label>
               </a>
             </span> -->
             <span *ngIf="col.field != 'id'">
@@ -88,12 +84,12 @@
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate) :'' }}
                 <i class="fas"
-                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
               <!-- <a *ngIf="rowData[col.field].ori" href="javascript:void(0)" (click)="switchOri(rowData[col.field])">
                 <label>{{!rowData[col.field].t ? ("show_less" | translate) : ("show_more" | translate)}}
-                  <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-left mt-1 mr-1': 'fa-angle-double-right ']"></i></label>
+                  <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-start mt-1 me-1': 'fa-angle-double-right ']"></i></label>
               </a> -->
               <!-- <span *ngIf="rowData[col.field].t">
                 ...
@@ -107,7 +103,7 @@
               <button pButton pRipple type="button" icon="fa fa-edit"
                 class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
                 [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
-              <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);">
+              <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);">
                 <span class="fa fa-edit">{{'button.update' | translate}}</span>
               </button> -->
               <button pButton pRipple type="button" icon="fa fa-trash-alt"
@@ -124,7 +120,7 @@
         <tr *ngIf="tableDataRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableDataRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
               (click)="getMoreData();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
@@ -181,13 +177,13 @@
       <div class="form-group row">
         <label *ngIf="pageNum==2" id="encrptionType_label" for="encrptionType"></label>
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="form.invalid"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="form.invalid"
             (click)="procData('ENC');">{{btnName}}(ENC)</button>
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="form.invalid"
             (click)="procData('TAEASK');">{{btnName}}(TAEASK)</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -224,13 +220,13 @@
       <div class="form-group row">
         <label *ngIf="pageNum==3" id="encrptionType_label" for="encrptionType"></label>
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
             (click)="procData('ENC');">{{btnName}}(ENC)</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
             (click)="procData('TAEASK');">{{btnName}}(TAEASK)</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -260,9 +256,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

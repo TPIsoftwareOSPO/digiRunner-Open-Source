@@ -43,7 +43,6 @@ import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
 import tpi.dgrv4.entity.repository.TsmpDpMailTpltDao;
 import tpi.dgrv4.escape.MailHelper;
-import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
@@ -53,35 +52,33 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0005Service {
 
 	private TPILogger logger = TPILogger.tl;
-
-	@Autowired
-	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
-	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-
-	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
-	private JobHelper jobHelper;
-
-	@Autowired
-	private ApplicationContext ctx;
-	
-	@Autowired
-	private ServiceConfig serviceConfig;
 	
 	private String sendTime;
+
+	private TsmpDpClientextDao tsmpDpClientextDao;
+	private TsmpClientDao tsmpClientDao;
+	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private JobHelper jobHelper;
+	private ApplicationContext ctx;
+	private DgrAuditLogService dgrAuditLogService;
+	private TsmpSettingService tsmpSettingService;
 	
 	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-	 
+	public DPB0005Service(TsmpDpClientextDao tsmpDpClientextDao, TsmpClientDao tsmpClientDao,
+			TsmpDpMailTpltDao tsmpDpMailTpltDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, JobHelper jobHelper,
+			ApplicationContext ctx, DgrAuditLogService dgrAuditLogService, TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@PostConstruct
 	public void init() {
 	}
@@ -236,12 +233,12 @@ public class DPB0005Service {
 		}
 		
 		//使用 Job 寫入 APPT_JOB Table & 建立 Mail 檔案, 由排程來寄信
-		DPB0005Job job = getDPB0005Job(authorization, mailEvents, getSendTime());
+		DPB0005Job job = getDPB0005Job(authorization, mailEvents);
 		
 		return job;
 	}
 	
-	protected DPB0005Job getDPB0005Job(TsmpAuthorization authorization, List<TsmpMailEvent> mailEvents, String sendTime) {
+	protected DPB0005Job getDPB0005Job(TsmpAuthorization authorization, List<TsmpMailEvent> mailEvents) {
 		DPB0005Job job = (DPB0005Job) getCtx().getBean("dpb0005Job", authorization, mailEvents, getSendTime());
 		getJobHelper().add(job);
 		return job;

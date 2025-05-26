@@ -36,31 +36,31 @@ public class AA0014Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private TsmpRoleFuncDao tsmpRoleFuncDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private  TsmpRoleTxidMapDao tsmpRoleTxidMapDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
+	@Autowired
+	public AA0014Service(TsmpFuncDao tsmpFuncDao, TsmpRoleDao tsmpRoleDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			AuthoritiesDao authoritiesDao, TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao,
+			DgrAuditLogService dgrAuditLogService, TsmpRoleTxidMapDao tsmpRoleTxidMapDao,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpRoleTxidMapDao = tsmpRoleTxidMapDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@Transactional
 	public AA0014Resp deleteTRole (TsmpAuthorization auth, AA0014Req req, InnerInvokeParam iip) {
 		//寫入 Audit Log M

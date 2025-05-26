@@ -30,12 +30,16 @@ public class AA0018Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
 	
+	@Autowired
+	public AA0018Service(TsmpRoleDao tsmpRoleDao, TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+	}
+
 	@Transactional
 	public AA0018Resp updateTRoleRoleMap(TsmpAuthorization authorization, AA0018Req req) {
 		AA0018Resp resp = new AA0018Resp();

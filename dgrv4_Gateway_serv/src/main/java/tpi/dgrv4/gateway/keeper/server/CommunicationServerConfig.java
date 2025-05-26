@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import tpi.dgrv4.entity.entity.jpql.DgrNodeLostContact;
 import tpi.dgrv4.entity.repository.DgrNodeLostContactDao;
 import tpi.dgrv4.escape.CheckmarxUtils;
 import tpi.dgrv4.gateway.keeper.TPILogInfo;
+import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.tcp.utils.communication.CommunicationServer;
 import tpi.dgrv4.tcp.utils.communication.LinkerServer;
@@ -39,14 +42,11 @@ public class CommunicationServerConfig {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private DgrNodeLostContactDao dgrNodeLostContactDao;
 
 	// Connected Notifier
-	public Notifier notify;
+	private Notifier notifyObj;
 
 	// 用來放最近的 n 條訊息
 	public static LinkedBlockingQueue<TPILogInfo> logPool = new LinkedBlockingQueue<>(8);
@@ -54,22 +54,33 @@ public class CommunicationServerConfig {
 	// 提供給刪除資料使用
 //	ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
+	@Autowired
+	public CommunicationServerConfig(TsmpSettingService tsmpSettingService,
+			DgrNodeLostContactDao dgrNodeLostContactDao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrNodeLostContactDao = dgrNodeLostContactDao;
+	}
+	
 	@PostConstruct
 	public void init() {
 		// keeper server go live with [Notifier]
-		notify = new Notifier() {
+		notifyObj = new Notifier() {
 			@Override
 			public void runConnection(LinkerServer conn) {
-				new Thread() {
-					public void run() {
+				try(ExecutorService executor = Executors.newFixedThreadPool(10)) {
+					executor.submit(() -> {
 						try {
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
 							Thread.currentThread().interrupt();
 						}
 						printoutAllClient();
-					}
-				}.start();
+					});
+				} catch (Exception e) {
+				    TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+				    Thread.currentThread().interrupt();
+				}
 			}
 
 			@Override
@@ -131,7 +142,7 @@ public class CommunicationServerConfig {
 		
 		boolean canConnect = telenetPort("127.0.0.1", getTsmpSettingService().getVal_DGRKEEPER_PORT());
 		if ( !canConnect ) {
-			new CommunicationServer(getTsmpSettingService().getVal_DGRKEEPER_PORT(), notify);
+			new CommunicationServer(getTsmpSettingService().getVal_DGRKEEPER_PORT(), notifyObj);
 			StringBuffer msgbuf = new StringBuffer();
 			String s = "\r\n"
 					+ " __  ___ .______          _______.____    ____  _______ .______      \r\n"
@@ -156,7 +167,7 @@ public class CommunicationServerConfig {
 
 		logger.info("......Keeper Server bind port END.....");
 	}
-	
+
 	public boolean telenetPort(String ip, int port) {
 		try (Socket server = new Socket()){
 			InetSocketAddress address = new InetSocketAddress(ip, port);

@@ -1,14 +1,14 @@
 <app-container [title]="title">
   <form [formGroup]="form" (ngSubmit)="submitForm()">
-    <div class="form-group row col">
-      <label class="control-label">{{'date_range'|translate}}</label>
-      <div class="row col-12 d-flex">
+    <div class="form-group col">
+      <label class="control-label fw-bold">{{'date_range'|translate}}</label>
+      <div class="col-12 d-flex">
         <p-button type="button" icon="pi pi-caret-left" styleClass="tpi-dark" (onClick)="preMonth();"></p-button>
         <div class="d-flex mx-2">
           <span style="font-size: 1.25rem; padding: 4px;">{{currentDate.getMonth() +
             1}}{{'calendar.month'|translate}}</span>
         </div>
-        <p-button type="button" icon="pi pi-caret-right" styleClass="tpi-dark" class="mr-3"
+        <p-button type="button" icon="pi pi-caret-right" styleClass="tpi-dark" class="me-3"
           (onClick)="nextMonth()"></p-button>
         <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
           formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
@@ -29,18 +29,18 @@
   </form>
   <hr>
   <div class="form-group col-12 px-0" style="display: flex;justify-content: space-between;">
-    <button type="button" class="btn tpi-btn tpi-primary mr-2"
+    <button type="button" class="btn tpi-btn tpi-primary me-2"
       (click)="exportJwe()">{{'button.export'|translate}}</button>
     <div style="display: flex;align-items: center;">
 
-      <div class="ui-inputgroup mr-2">
+      <div class="ui-inputgroup me-2">
         <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
         <input type="text" class="form-control" [value]="file?.name" readOnly
           placeholder="{{'upload_file' | translate}}">
-        <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary" [pTooltip]="'upload_file' | translate"
+        <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary" [pTooltip]="'upload_file' | translate"
           tooltipPosition="top" (click)="openFileBrowser();"></button>
       </div>
-      <button type="button" class="btn tpi-btn tpi-primary mr-2" [disabled]="!file?.name"
+      <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!file?.name"
         (click)="importJwe()">{{'button.import'|translate}}</button>
       <i class="far fa-question-circle" pTooltip="{{'import_key_tip'|translate:{key:'CLIENT_ID+CERT_FILE_NAME'} }}"
         [escape]="false"></i>
@@ -51,11 +51,11 @@
     [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped">
     <ng-template pTemplate="caption">
       <div class="ui-helper-clearfix">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-1"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-1"
           (click)="downloadFile('multiple', 'zip', selected);">
           {{ 'button.download_zip' | translate }}
         </button>
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-1"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-1"
           (click)="downloadFile('multiple', 'txt', selected);">
           {{ 'button.download_txt' | translate }}
         </button>
@@ -96,10 +96,10 @@
         </td>
         <td style="text-align:center;width: 180px">
           <!-- <div style="flex-wrap: wrap;"> -->
-          <!-- <button type="button" class="btn btn-deta mr-5 mb-1" (click)="showDialog(rowData)">
+          <!-- <button type="button" class="btn btn-deta me-5 mb-1" (click)="showDialog(rowData)">
                             <span class="fa fa-trash-alt">{{'button.delete'|translate}}</span>
                         </button> -->
-          <!-- <button type="button" class="btn btn-deta mr-5 mb-1" (click)="downloadFile('single', 'zip', rowData);">
+          <!-- <button type="button" class="btn btn-deta me-5 mb-1" (click)="downloadFile('single', 'zip', rowData);">
                             <span class="fa fa-download">{{'button.download'|translate}} {{'file.zip'|translate}}</span>
                         </button> -->
           <!-- <button type="button" class="btn btn-deta" (click)="downloadFile('single', 'txt', rowData);">
@@ -122,7 +122,7 @@
       <tr *ngIf="rowcount">
         <td [attr.colspan]="columns.length+2" style="color: #b7b7b7;">
           <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-          <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+          <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                         (click)="moreData();">{{'button.more'|translate}}</button> -->
 
           <!-- 查詢更多 -->

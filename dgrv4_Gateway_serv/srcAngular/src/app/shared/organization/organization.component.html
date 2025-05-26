@@ -1,35 +1,16 @@
 <form [formGroup]="form" (ngSubmit)="filter();">
-  <!-- <div class="row"> -->
-  <!-- <div class="col-12 col-lg-3"> -->
   <div class="form-group row ">
     <div class="col-12">
-
-
-      <!-- <div [ngClass]="{'col-6': showCreateBtn == false, 'col-6 col-lg-6': showCreateBtn == true}"> -->
-      <!-- <div class="ui-inputgroup"> -->
-
       <p-autoComplete class="ui-fluid" [suggestions]="orgNameSuggestions" (completeMethod)="autoComplete($event)"
         formControlName="orgName" placeholder="{{'org_name' | translate}}">
       </p-autoComplete>
-      <button pButton type="submit" icon="pi pi-search" class="ml-1 tpi-primary"></button>
-
-      <!-- </div> -->
-      <!-- <div class="col-6 col-lg-6"> -->
-      <button *ngIf="showCreateBtn" type="button" class="btn tpi-btn tpi-second ml-2 float-right"
+      <button pButton type="submit" icon="pi pi-search" class="ms-1 tpi-primary"></button>
+      <button *ngIf="showCreateBtn" type="button" class="btn tpi-btn tpi-second ms-2 float-end"
         (click)="showCreateDialog();">{{'button.create'|translate}}</button>
-      <!-- </div> -->
+
     </div>
   </div>
-  <!-- </div> -->
-  <!-- <div class="col-12 col-lg-3">
-            <div class="form-group row">
-                <div class="col-12">
-                    <button type="submit"
-                        class="btn btn-warning pull-right ml-1">{{'button.search' | translate}}</button>
-                </div>
-            </div>
-        </div> -->
-  <!-- </div> -->
+
 </form>
 <hr class="my-0 mb-2">
 <div class="w-100" style="overflow: auto;height: 85%;">
@@ -47,9 +28,9 @@
 </div>
 <p-footer *ngIf="showFooterBtn">
   <div class="w-100" style="justify-content: center;margin-top: 10px;text-align: center;">
-    <button type="button" class="btn tpi-btn tpi-primary mr-2" (click)="saveConfirmData()">{{'button.confirm' |
+    <button type="button" class="btn tpi-btn tpi-primary me-2" (click)="saveConfirmData()">{{'button.confirm' |
       translate}}</button>
-    <button type="button" class="btn tpi-btn tpi-cancel mr-2" (click)="cancelOrgDialog()">{{'button.cancel' |
+    <button type="button" class="btn tpi-btn tpi-cancel me-2" (click)="cancelOrgDialog()">{{'button.cancel' |
       translate}}</button>
   </div>
 

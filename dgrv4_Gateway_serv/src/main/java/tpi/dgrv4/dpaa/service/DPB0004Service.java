@@ -29,16 +29,20 @@ import tpi.dgrv4.gateway.component.ServiceConfig;
 //@Service
 public class DPB0004Service {
 
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0004Service(TsmpDpClientextDao tsmpDpClientextDao, TsmpDpFileDao tsmpDpFileDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0004Resp queryUnReleaseMember(String clientId, DPB0004Req req) {
 		List<TsmpDpClientext> unreleasedList = getUnreleasedList(req);

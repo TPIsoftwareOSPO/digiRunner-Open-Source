@@ -27,7 +27,7 @@
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="apiAlias"
                             placeholder="{{'module_name' | translate}}-{{'api_name'|translate}}({{'api_key'|translate}})">
-                        <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
                             (click)="changePage('api_list');"></button>
                     </div>
                 </div>
@@ -58,16 +58,11 @@
                         selectedItemsLabel="{{'cols_selected'|translate:selectedColumns.length}}"
                         [style]="{minWidth: '200px','z-index':'999'}" defaultLabel="{{'chs_cols'|translate}}">
                     </p-multiSelect>
-                    <div class="pl-1" style="display:table-cell;vertical-align: middle">
-                        <button *ngIf="auditLogList" class="btn tpi-btn tpi-primary float-right p-1 ml-2"
+                    <div class="ps-1" style="display:table-cell;vertical-align: middle">
+                        <button *ngIf="auditLogList" class="btn tpi-btn tpi-primary float-end p-1 ms-2"
                             (click)="exportFile(true)">{{
                             'button.export_excel' | translate }}</button>
                     </div>
-                    <!-- <div class="pl-1" style="display:table-cell;vertical-align: middle">
-                        <button *ngIf="auditLogList" class="btn btn-warning float-right p-0 ml-2"
-                            (click)="exportFile(false)">{{
-                            'button.export_csv' | translate }}</button>
-                    </div> -->
                 </div>
             </ng-template>
             <ng-template pTemplate="header" let-columns>
@@ -85,7 +80,7 @@
                     </td>
                     <td style="text-align:center;width: 130px;">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail',rowData)">
+                            <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData)">
                                 <span class="fa fa-search">{{'button.detail'|translate}}</span>
                             </button>
                         </div>
@@ -96,7 +91,7 @@
                 <tr *ngIf="rowcount">
                     <td [attr.colspan]="columns.length+1">
                         {{'row_count' | translate}}: {{rowcount}}
-                        <button type="button" class="btn btn-warning pull-right ml-3"
+                        <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreAuditLogData();">{{'button.more'|translate}}</button>
                     </td>
                 </tr>
@@ -163,7 +158,7 @@
                 <tr *ngIf="apiListRowcount">
                     <td [attr.colspan]="columns.length+1">
                         {{'row_count' | translate}}: {{apiListRowcount}}
-                        <button type="button" class="btn btn-warning pull-right ml-3"
+                        <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreApiList();">{{'button.more'|translate}}</button>
                     </td>
                 </tr>
@@ -179,9 +174,9 @@
         <br>
         <div class="form-group row">
             <div class="col-6 col-xl-6">
-                <button type="button" class="btn btn-warning pull-right mr-3"
+                <button type="button" class="btn btn-warning pull-right me-3"
                     (click)="chooseApi();">{{'button.confirm'|translate}}</button>
-                <button type="button" class="btn btn-warning pull-right mr-3"
+                <button type="button" class="btn btn-warning pull-right me-3"
                     (click)="cancelApi();">{{'button.cancel'|translate}}</button>
             </div>
         </div>
@@ -205,7 +200,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-xl-12">
-                    <button type="button" class="btn btn-warning pull-right mr-3"
+                    <button type="button" class="btn btn-warning pull-right me-3"
                         (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>

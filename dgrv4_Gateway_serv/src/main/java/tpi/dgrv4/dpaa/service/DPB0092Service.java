@@ -49,39 +49,37 @@ public class DPB0092Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-	
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-	
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-	
-	@Autowired
 	private ApiItemService apiItemService;
-	
-	@Autowired
 	private BcryptParamHelper helper;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
  
+	@Autowired
+	public DPB0092Service(TsmpApiDao tsmpApiDao, TsmpClientDao tsmpClientDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpOpenApiKeyDao tsmpOpenApiKeyDao, TsmpDpApiThemeDao tsmpDpApiThemeDao,
+			TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpApiExtDao tsmpApiExtDao, ApiItemService apiItemService,
+			BcryptParamHelper helper, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.apiItemService = apiItemService;
+		this.helper = helper;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+	}
+	
 	public DPB0092Resp writeOpenApiKeyReq(TsmpAuthorization tsmpAuthorization, DPB0092Req req, ReqHeader reqHeader) {
 		DPB0092Resp resp = new DPB0092Resp();
 		try {
@@ -221,7 +219,7 @@ public class DPB0092Service {
 		}
 		return resp;
 	}
-	
+
 	/**
 	 * 前台: 效期 = 現在時間 + 預設效期天數
 	 * @return

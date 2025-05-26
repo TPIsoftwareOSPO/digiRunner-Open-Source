@@ -24,18 +24,22 @@ import tpi.dgrv4.gateway.service.GtwIdPCallbackService;
 
 @RestController
 public class GtwIdPCallbackController {
-	@Autowired
-	GtwIdPCallbackService service;
+	private GtwIdPCallbackService service;
+	private GtwCusIdPCallbackService gtwCusIdPCallbackService;
 
 	@Autowired
-	private GtwCusIdPCallbackService gtwCusIdPCallbackService;
+	public GtwIdPCallbackController(GtwIdPCallbackService service, GtwCusIdPCallbackService gtwCusIdPCallbackService) {
+		super();
+		this.service = service;
+		this.gtwCusIdPCallbackService = gtwCusIdPCallbackService;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/gtwIdPCallback")
 	public ResponseEntity<?> gtwIdPCallback(@RequestHeader HttpHeaders headers, @PathVariable("idPType") String idPType,
 			HttpServletRequest httpReq, HttpServletResponse httpResp, //
 			@RequestParam Map<String, String> queryParams) throws IOException {
 
-		TPILogger.tl.info("\n--【" + httpReq.getRequestURL().toString() + "】--");
+		TPILogger.tl.info("\n--【" + httpReq.getRequestURL().toString() + "?" + httpReq.getQueryString() + "】--");
 
 		if (DgrIdPType.CUS.equalsIgnoreCase(idPType)) {
 			gtwCusIdPCallbackService.gtwCusIdPCallback(headers, httpReq, httpResp, queryParams);

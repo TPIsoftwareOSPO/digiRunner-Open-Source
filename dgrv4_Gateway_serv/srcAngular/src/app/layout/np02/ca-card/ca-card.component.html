@@ -1,13 +1,13 @@
 <div class="row">
   <div class="col-12 form-inline">
-      <div class="card bg-light mr-1 mt-1" style="width: 30rem;"  *ngFor="let card of cards">
+      <div class="card bg-light me-1 mt-1" style="width: 30rem;"  *ngFor="let card of cards">
           <div class="card-body">
               <div class="form-group row">
                   <div class="col-12 d-flex" *ngFor="let item of card | keyvalue">
                       <div class="col-4 text-right">
                           <span class="control-label">{{item.key}}</span>
                       </div>
-                      <div class="col-8 text-left">
+                      <div class="col-8 text-start">
                           <span class="control-label">{{item.value}}</span>
                       </div>
                   </div>

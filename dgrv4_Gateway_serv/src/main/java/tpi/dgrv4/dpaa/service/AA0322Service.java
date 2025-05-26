@@ -37,20 +37,22 @@ public class AA0322Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private CApiKeyService capiKeyService;
-
-	@Autowired
 	private DgrComposerFlowDao dgrComposerFlowDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
+	private TsmpApiDao tsmpApiDao;
 
 	@Autowired
-	private TsmpApiDao tsmpApiDao;
+	public AA0322Service(CApiKeyService capiKeyService, DgrComposerFlowDao dgrComposerFlowDao,
+			DgrAuditLogService dgrAuditLogService, TsmpApiRegDao tsmpApiRegDao, TsmpApiDao tsmpApiDao) {
+		super();
+		this.capiKeyService = capiKeyService;
+		this.dgrComposerFlowDao = dgrComposerFlowDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpApiDao = tsmpApiDao;
+	}
 
 	public AA0322Resp saveComposerFlow(List<AA0322Req> req, ReqHeader reqHeader,
 			HttpHeaders headers, InnerInvokeParam iip) {

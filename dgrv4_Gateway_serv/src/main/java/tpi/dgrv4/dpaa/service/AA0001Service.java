@@ -6,15 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.BcryptFieldValueEnum;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
@@ -34,6 +35,7 @@ import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.AA0001Req;
 import tpi.dgrv4.dpaa.vo.AA0001Resp;
 import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.constant.TsmpSequenceName;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.daoService.SeqStoreService;
@@ -59,65 +61,37 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+@RequiredArgsConstructor
 @Service
+@Getter(AccessLevel.PROTECTED)
 public class AA0001Service {
-
+	
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
-	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
-	private SeqStoreService seqStoreService;
-	
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
-	private UsersDao usersDao;
-	
-	@Autowired
-	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
-	private TsmpSequenceDao tsmpSequenceDao;
-	
-	@Autowired
-	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
-	
-	@Autowired
-	private JobHelper jobHelper;
-
-	@Autowired
-	private ApplicationContext ctx;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final SeqStoreService seqStoreService;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final UsersDao usersDao;
+	private final AuthoritiesDao authoritiesDao;
+	private final TsmpSequenceDao tsmpSequenceDao;
+	private final TsmpUserDao tsmpUserDao;
+	private final BcryptParamHelper bcryptParamHelper;
+	private final ServiceConfig serviceConfig;
+	private final JobHelper jobHelper;
+	private final ApplicationContext ctx;
+	private final TsmpApiDao tsmpApiDao;
+	private final TsmpDpMailTpltDao tsmpDpMailTpltDao;
+	private final DgrAuditLogService dgrAuditLogService;
+	private final TsmpSettingService tsmpSettingService;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
 	private String sendTime;
-	
-	@Autowired
-	private TsmpApiDao tsmpApiDao;
 
-	@Autowired
-	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	
 	@PostConstruct
 	public void init() {
 	}
-	
+
 	@Transactional
 	public AA0001Resp addTUser(TsmpAuthorization auth, AA0001Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		
@@ -514,7 +488,6 @@ public class AA0001Service {
 		return aa0001_emailParams;
 	}
 	
-	
 	protected String base64Decode(String userBlock) {
 		return new String(ServiceUtil.base64Decode(userBlock));
 			
@@ -533,81 +506,13 @@ public class AA0001Service {
 		emailParams.put("tUser", req.getUserName());
 		return emailParams;
 	}
-
-	protected ServiceConfig getServiceConfig() {
-		return this.serviceConfig;
-	}
-
-	protected TsmpRoleDao getTsmpRoleDao() {
-		return this.tsmpRoleDao;
-	}
-
-	protected TsmpOrganizationDao getTsmpOrganizationDao() {
-		return this.tsmpOrganizationDao;
-	}
-	
-	protected BcryptParamHelper getBcryptParamHelper() {
-		return this.bcryptParamHelper;
-	}
-
-	protected UsersDao getUsersDao() {
-		return this.usersDao;
-	}
-	
-	protected JobHelper getJobHelper() {
-		return this.jobHelper;
-	}
-
-	protected AuthoritiesDao getAuthoritiesDao() {
-		return this.authoritiesDao;
-	}
-	
-	protected TsmpUserDao getTsmpUserDao() {
-		return this.tsmpUserDao;
-	}
-	
-	protected SeqStoreService getSeqStoreService() {
-		return this.seqStoreService;
-	}
-
-	protected ApplicationContext getCtx() {
-		return this.ctx;
-	}
-	
+ 
 	protected String getSendTime() {
 		this.sendTime = this.getTsmpSettingService().getVal_MAIL_SEND_TIME();//多久後寄發Email(ms)
 		return this.sendTime;
 	}
-	
-	protected TsmpApiDao getTsmpApiDao() {
-		return this.tsmpApiDao;
-	}
 
-	protected TsmpDpMailTpltDao getTsmpDpMailTpltDao() {
-		return this.tsmpDpMailTpltDao;
-	}
-	
-	protected TsmpSequenceDao getTsmpSequenceDao() {
-		return this.tsmpSequenceDao;
-	}
-	
-	protected MailHelper getMailHelper() {
-		return this.getMailHelper();
-	}
-	
 	protected AA0001Job getAA0001Job(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime) {
 		return (AA0001Job) getCtx().getBean("aa0001Job", auth, mailEvents, getSendTime());
-	}
-	
-	protected DgrAuditLogService getDgrAuditLogService() {
-		return dgrAuditLogService;
-	}
-	
-	protected TsmpSettingService getTsmpSettingService() {
-		return this.tsmpSettingService;
-	}
-
-	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
-		return this.dgrAcIdpUserDao;
 	}
 }

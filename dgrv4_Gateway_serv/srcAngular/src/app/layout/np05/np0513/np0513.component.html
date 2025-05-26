@@ -55,9 +55,9 @@
             </div>
             <div class="form-group row mb-0">
                 <div class="col-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3"
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3"
                         [disabled]="form.invalid">{{'button.search'|translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-second float-right" (click)="create();">
+                    <button type="button" class="btn tpi-btn tpi-second float-end" (click)="create();">
                         {{'button.create'|translate}}
                     </button>
                 </div>
@@ -109,11 +109,11 @@
                         <!-- <span>{{rowData.identifData | string_length:100}}</span>-->
                             <!-- <a *ngIf="rowData.identifData.length>100" href="javascript:void(0)" (click)="switchOri(rowData)">
                               <label>{{rowData.t ? ("show_less" | translate) : ("show_more" | translate)}}
-                                <i class="fas" [ngClass]="[rowData.t ? 'fa-angle-double-left float-left mt-1 mr-1': 'fa-angle-double-right ']"></i></label>
+                                <i class="fas" [ngClass]="[rowData.t ? 'fa-angle-double-left float-start mt-1 me-1': 'fa-angle-double-right ']"></i></label>
                             </a> -->
                             <label class="moreless" *ngIf="rowData.identifData.length>100" (click)="switchOri(rowData)">
                               {{rowData.t ? '' : ("show_more" | translate)}}
-                              <i  class="fas" [ngClass]="[rowData.t ? 'fa-angle-double-left  mt-1 mr-1': 'fa-angle-double-right mt-1 ']"></i>
+                              <i  class="fas" [ngClass]="[rowData.t ? 'fa-angle-double-left  mt-1 me-1': 'fa-angle-double-right mt-1 ']"></i>
                               {{rowData.t ? ("show_less" | translate) : ''}}
                             </label>
 
@@ -130,7 +130,7 @@
                     </td>
                     <td rowspan="2" style="text-align:center;width: 150px;">
                         <!-- <div class="btn-group"> -->
-                            <!-- <button type="button" class="btn btn-deta mr-5"
+                            <!-- <button type="button" class="btn btn-deta me-5"
                                 (click)="showDialog(rowData,formOperate.detail)">
                                 <span class="fa fa-search">{{'detail'|translate}}</span>
                             </button> -->
@@ -139,7 +139,7 @@
                              [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
 
                             <!-- <button *ngIf="rowData['status'].includes('W') || rowData['status'].includes('C')"
-                                type="button" class="btn btn-deta mr-5" (click)="showDialog(rowData,formOperate.run)">
+                                type="button" class="btn btn-deta me-5" (click)="showDialog(rowData,formOperate.run)">
                                 <span class="fa fa-tasks">{{'button.run'|translate}}</span>
                             </button> -->
 
@@ -197,12 +197,12 @@
                     </td>
                     <td style="text-align:center;width: 150px;">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5"
+                            <button type="button" class="btn btn-deta me-5"
                                 (click)="showDialog(rowData,formOperate.detail)">
                                 <span class="fa fa-search">{{'button.query'|translate}}</span>
                             </button>
                             <button *ngIf="rowData['status'].includes('W') || rowData['status'].includes('C')" type="button"
-                                class="btn btn-deta mr-5" (click)="showDialog(rowData,formOperate.run)">
+                                class="btn btn-deta me-5" (click)="showDialog(rowData,formOperate.run)">
                                 <span class="fa fa-tasks">{{'button.run'|translate}}</span>
                             </button>
                             <button *ngIf="rowData['status'].includes('W')" type="button" class="btn btn-deta"
@@ -221,9 +221,6 @@
                 <tr *ngIf="rowcount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span style="vertical-align:middle ;">{{'row_count' | translate}}: {{rowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                            (click)="moreData();">{{'button.more'|translate}}</button> -->
-
                             <!-- 查詢更多 -->
                             <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
                             <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>

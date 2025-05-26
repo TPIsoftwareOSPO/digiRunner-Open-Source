@@ -1,13 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <!-- 用戶列表 -->
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="formIndex" (ngSubmit)="queryClientList()">
-      <div class="form-group row col-12">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-        </span>
+    <form [formGroup]="formIndex">
+      <div class="form-group row col-12 ">
+        <app-search-input
+          placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+          [control]="formIndex.get('keyword')" [searchFn]="queryClientList.bind(this)"
+          class="col-9 col-lg0-6 col-sm-6"></app-search-input>
       </div>
     </form>
     <hr>
@@ -70,7 +69,7 @@
         <label class="control-label">{{'client_id' | translate}}: {{selectedGtwIdPinfo?.clientId}}</label>
         <!-- <button type="button" class="btn tpi-btn tpi-primary"
           (click)="activeSelectedITem()">{{'button.active'|translate}}</button> -->
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+        <button type="button" class="btn tpi-btn tpi-second float-end"
           (click)="changePage('create')">{{'button.create'|translate}}</button>
       </div>
     </div>
@@ -156,7 +155,7 @@
 
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('queryClientList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -182,21 +181,21 @@
           <ng-container>
             <div class="p-form-check">
               <p-radioButton value="Y" [ngModel]="selectedGtwIdP?.status" disabled></p-radioButton>
-              <label class="ml-2 mb-0">Y</label>
+              <label class="ms-2 mb-0">Y</label>
             </div>
             <div class="p-form-check">
               <p-radioButton value="N" [ngModel]="selectedGtwIdP?.status" disabled></p-radioButton>
-              <label class="ml-2 mb-0">N</label>
+              <label class="ms-2 mb-0">N</label>
             </div>
           </ng-container>
         </div>
         <!-- <div class="border-line">
-          <div class="form-check-inline ml-3 mt-1">
+          <div class="form-check-inline ms-3 mt-1">
             <label class="form-check-label">
               <input type="radio" class="form-check-input" name="status" disabled
                 [checked]="selectedGtwIdP?.status == 'Y'">Y
             </label>
-            <label class="form-check-label ml-3">
+            <label class="form-check-label ms-3">
               <input type="radio" class="form-check-input" name="status" disabled
                 [checked]="selectedGtwIdP?.status == 'N'">N
             </label>
@@ -247,7 +246,7 @@
         <!-- Icon -->
         <label class="control-label">Icon</label>
         <div class="border-line">
-          <img class="ml-1 mt-1" [src]="selectedGtwIdP?.iconFile">
+          <img class="ms-1 mt-1" [src]="selectedGtwIdP?.iconFile">
         </div>
       </div>
     </div>
@@ -282,7 +281,7 @@
 
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('ClientIDList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -314,24 +313,14 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="Y" inputId="statusY"></p-radioButton>
-                <label for="statusY" class="ml-2 mb-0">Y</label>
+                <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="N" inputId="statusN"></p-radioButton>
-                <label for="statusN" class="ml-2 mb-0">N</label>
+                <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
           </div>
-          <!-- <div class="col-12">
-            <div class="form-check-inline col-12">
-              <label class="form-check-label">
-                <input type="radio" class="form-check-input" formControlName="status" value="Y"> Y
-              </label>
-              <label class="form-check-label ml-5">
-                <input type="radio" class="form-check-input" formControlName="status" value="N"> N
-              </label>
-            </div>
-          </div> -->
           <div *ngIf="status?.invalid && (status?.dirty || status?.touched)" class="text-danger">
             <small class="form-text">{{status?.errors.pattern | translate}}</small>
             <small class="form-text">{{status?.errors.isRequired | translate}}</small>
@@ -407,8 +396,8 @@
         <div class="col-8">
           <label for="iconFile" class="control-label">Icon</label>
 
-          <div class="row col-auto">
-            <div class="mr-2">
+          <div class="d-flex col-auto">
+            <div class="me-2">
               <button type="button" class="btn tpi-btn tpi-night pull-right"
                 (click)="openFileBrowser();">{{'chs_file'|translate}}</button>
             </div>
@@ -436,11 +425,11 @@
 
       <div class="form-group row mt-3">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="form.invalid"
-            (click)="create()">{{'button.create'|translate}}</button>
-          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
-            (click)="update()">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-start me-3"
+            [disabled]="form.invalid" (click)="create()">{{'button.create'|translate}}</button>
+          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
+            [disabled]="form.invalid" (click)="update()">{{'button.update'|translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="changePage('ClientIDList')">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -451,7 +440,7 @@
   <!-- <div [hidden]="pageNum != 5">
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('ClientIDList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>

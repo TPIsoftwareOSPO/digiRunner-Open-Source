@@ -22,10 +22,7 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Component
 public class IdPWellKnownHelper {
 	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private TokenHelper tokenHelper;
 	
 	public static class WellKnownData {
@@ -38,6 +35,13 @@ public class IdPWellKnownHelper {
 		public String userinfoEndpoint;
 		public String jwksUri;
 		public String scopeStr;
+	}
+
+	@Autowired
+	public IdPWellKnownHelper(ObjectMapper objectMapper, TokenHelper tokenHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tokenHelper = tokenHelper;
 	}
 
 	/*

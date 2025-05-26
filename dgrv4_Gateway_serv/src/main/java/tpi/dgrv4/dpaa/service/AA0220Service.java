@@ -28,13 +28,20 @@ public class AA0220Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0220Service(TsmpClientDao tsmpClientDao, BcryptParamHelper bcryptParamHelper,
+			DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
+
 	public AA0220Resp updateStatusSettingByClient(TsmpAuthorization authorization, AA0220Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		//寫入 Audit Log M
 		String lineNumber = StackTraceUtil.getLineNumber();

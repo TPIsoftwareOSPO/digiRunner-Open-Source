@@ -37,34 +37,36 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class AcIdPLoginService {
 
-	@Autowired
 	private AcIdPHelper acIdPHelper;
-
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private LdapHelper ldapHelper;
-
-	@Autowired
 	private DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao;
-	
-	@Autowired
 	private DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
-	
-	@Autowired
 	private DgrAcIdpInfoMLdapDDao dgrAcIdpInfoMLdapDDao;
-	
-	@Autowired 
 	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
+	private TokenHelper tokenHelper;
+	private IdPApiHelper idPApiHelper;
+	
 	
 	@Autowired
-	private TokenHelper tokenHelper;
-	@Autowired
-	private IdPApiHelper idPApiHelper;
+	public AcIdPLoginService(AcIdPHelper acIdPHelper, DgrAuditLogService dgrAuditLogService,
+			TsmpSettingService tsmpSettingService, LdapHelper ldapHelper, DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao,
+			DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao, DgrAcIdpInfoMLdapDDao dgrAcIdpInfoMLdapDDao,
+			DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao, TokenHelper tokenHelper, IdPApiHelper idPApiHelper) {
+		super();
+		this.acIdPHelper = acIdPHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.ldapHelper = ldapHelper;
+		this.dgrAcIdpInfoLdapDao = dgrAcIdpInfoLdapDao;
+		this.dgrAcIdpInfoMLdapMDao = dgrAcIdpInfoMLdapMDao;
+		this.dgrAcIdpInfoMLdapDDao = dgrAcIdpInfoMLdapDDao;
+		this.dgrAcIdpInfoApiDao = dgrAcIdpInfoApiDao;
+		this.tokenHelper = tokenHelper;
+		this.idPApiHelper = idPApiHelper;
+	}
+
 	/*
 	 * 驗證 User 帳號 & 密碼
 	 */

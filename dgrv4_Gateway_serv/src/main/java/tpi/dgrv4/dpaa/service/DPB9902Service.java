@@ -5,6 +5,7 @@ import static tpi.dgrv4.dpaa.util.ServiceUtil.isValueTooLargeException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import tpi.dgrv4.common.constant.AuditLogEvent;
@@ -15,7 +16,6 @@ import tpi.dgrv4.common.ifs.TsmpCoreTokenBase;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DPB9902Req;
 import tpi.dgrv4.dpaa.vo.DPB9902Resp;
-import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
 import tpi.dgrv4.entity.entity.TsmpSetting;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
@@ -31,21 +31,25 @@ public class DPB9902Service {
         ENC,TAEASK,NONE
     }
     
-    
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
 	
-	@Autowired
+	private TsmpSettingDao tsmpSettingDao;
+	private DgrAuditLogService dgrAuditLogService;
     private TsmpTAEASKHelper tsmpTAEASKHelper;
 	
+    @Autowired
+	public DPB9902Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, TsmpSettingDao tsmpSettingDao,
+			DgrAuditLogService dgrAuditLogService, TsmpTAEASKHelper tsmpTAEASKHelper) {
+		super();
+		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+	}
+
 	public DPB9902Resp addTsmpSetting(TsmpAuthorization auth, DPB9902Req req, InnerInvokeParam iip) throws Exception {
 		
 		//寫入 Audit Log M

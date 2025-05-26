@@ -29,11 +29,15 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 public class DPB9926Controller {
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private DPB9926Service service;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	public DPB9926Controller(DPB9926Service service, ObjectMapper objectMapper) {
+		super();
+		this.service = service;
+		this.objectMapper = objectMapper;
+	}
 
 	@PostMapping(value = "/dgrv4/17/DPB9926", //
 			consumes = MediaType.MULTIPART_FORM_DATA_VALUE, //

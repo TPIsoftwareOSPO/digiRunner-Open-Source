@@ -6,6 +6,7 @@ import { PrimengModule } from 'src/app/shared/primeng.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReportTestConnectionComponent } from './report-test-connection/report-test-connection.component';
 
 @NgModule({
   imports: [
@@ -16,7 +17,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     FormsModule,
     TsmpsettingRoutingModule
   ],
-  declarations: [TsmpsettingComponent],
+  declarations: [TsmpsettingComponent, ReportTestConnectionComponent],
   providers:[TokenExpiredGuard]
 })
 export class TsmpsettingModule { }

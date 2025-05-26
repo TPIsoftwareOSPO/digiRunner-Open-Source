@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.vo.AcCusIdPLoginUrl;
 @RestController
 public class AcCusIdPLoginInfoController {
 
-	@Autowired
 	private AcCusIdPLoginUrlService acCusIdPLoginUrlService;
+
+	@Autowired
+	public AcCusIdPLoginInfoController(AcCusIdPLoginUrlService acCusIdPLoginUrlService) {
+		super();
+		this.acCusIdPLoginUrlService = acCusIdPLoginUrlService;
+	}
 
 	@GetMapping(value = { "/dgrv4/ssotoken/acCusIdp/login/getCusLoginUrl" })
 	public List<AcCusIdPLoginUrl> getCusLoginUrl(HttpServletRequest httpReq, HttpServletResponse httpResp, //

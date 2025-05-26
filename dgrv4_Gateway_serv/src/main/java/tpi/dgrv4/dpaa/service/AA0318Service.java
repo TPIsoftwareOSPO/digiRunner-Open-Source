@@ -35,29 +35,29 @@ public class AA0318Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpApiImpDao tsmpApiImpDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private FileHelper fileHelper;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	public AA0318Service(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy,
+			TsmpDpFileDao tsmpDpFileDao, TsmpApiImpDao tsmpApiImpDao, TsmpApiDao tsmpApiDao,
+			TsmpApiRegDao tsmpApiRegDao, FileHelper fileHelper, ObjectMapper objectMapper) {
+		super();
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpApiImpDao = tsmpApiImpDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.fileHelper = fileHelper;
+		this.objectMapper = objectMapper;
+	}
 
 	public AA0318Resp uploadRegCompAPIs(TsmpAuthorization auth, AA0318Req req, final String locale) {
 		String userName = auth.getUserName();

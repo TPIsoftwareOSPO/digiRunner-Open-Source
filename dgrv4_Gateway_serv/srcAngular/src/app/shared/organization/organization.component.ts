@@ -5,7 +5,6 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToolService } from '../services/tool.service';
 import { Console } from 'console';
 import { DynamicDialogConfig,DynamicDialogRef } from 'primeng/dynamicdialog';
-import { E } from 'chart.js/dist/chunks/helpers.core';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -48,7 +47,7 @@ export class OrganizationComponent implements OnInit, AfterViewInit {
     }else{
       this.showFooterBtn = false;
     }
-    
+
 
     this.uuid = this._uuid();
     this.form = this.fb.group({
@@ -80,7 +79,7 @@ export class OrganizationComponent implements OnInit, AfterViewInit {
     }
 
     this.orgs = orgChart.find(org => org.data.master == true) ? [orgChart.find(org => org.data.master == true)!] : [];
-    
+
     // if (this.config.data){
 
     //   if(this.config.data.orgName!==''){
@@ -88,8 +87,8 @@ export class OrganizationComponent implements OnInit, AfterViewInit {
     //     this.form.get('orgName')?.setValue(this.config.data.orgName);
     //     this.filter();
     //   }
-      
-    // } 
+
+    // }
   }
 
   ngAfterViewInit() {

@@ -16,10 +16,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0178Service {
 
-	@Autowired
 	private DgrWebSocketMappingDao dgrWebSocketMappingDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0178Service(DgrWebSocketMappingDao dgrWebSocketMappingDao) {
+		super();
+		this.dgrWebSocketMappingDao = dgrWebSocketMappingDao;
+	}
 
 	public DPB0178Resp deleteWs(TsmpAuthorization auth, DPB0178Req req) {
 		DPB0178Resp resp = new DPB0178Resp();

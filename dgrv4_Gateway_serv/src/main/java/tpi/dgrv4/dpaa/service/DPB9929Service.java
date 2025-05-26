@@ -43,11 +43,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9929Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrWebsiteDao dgrWebsiteDao;
+	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
 
 	@Autowired
-	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
+	public DPB9929Service(DgrWebsiteDao dgrWebsiteDao, DgrWebsiteDetailDao dgrWebsiteDetailDao) {
+		super();
+		this.dgrWebsiteDao = dgrWebsiteDao;
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+	}
 
 	public DPB9929Resp exportWebsiteProxy(TsmpAuthorization tsmpAuthorization, DPB9929Req req,
 			HttpServletResponse response) {

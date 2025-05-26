@@ -12,12 +12,16 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Component
 public class XxeCheck implements ICheck{
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpRtnCodeService tsmpRtnCodeService;
 	
+	@Autowired
+	public XxeCheck(TsmpSettingService tsmpSettingService, TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+	}
+
 	public boolean check(String str, boolean isSettingDecideCheck) {
 		boolean isEnabled = true;
 		if(isSettingDecideCheck) {

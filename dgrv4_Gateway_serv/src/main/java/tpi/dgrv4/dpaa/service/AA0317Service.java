@@ -55,26 +55,27 @@ public class AA0317Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
-
-	@Autowired
 	private ComposerService composerService;
-
-	@Autowired
 	private ObjectMapper objectMapper;
+	private DgrComposerFlowDao dgrComposerFlowDao;
 	
 	@Autowired
-	private DgrComposerFlowDao dgrComposerFlowDao;
+	public AA0317Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao,
+			TsmpRegModuleDao tsmpRegModuleDao, ComposerService composerService, ObjectMapper objectMapper,
+			DgrComposerFlowDao dgrComposerFlowDao) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.composerService = composerService;
+		this.objectMapper = objectMapper;
+		this.dgrComposerFlowDao = dgrComposerFlowDao;
+	}
 
 	protected class ApiData {
 

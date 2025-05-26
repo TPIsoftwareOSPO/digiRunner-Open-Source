@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.constant.DgrCusAcIdpLogin;
@@ -38,20 +39,21 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class GtwCusIdPCallbackService extends CusIdPService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
-	private AcIdPHelper acIdPHelper;
-
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private GtwIdPCallbackService gtwIdPCallbackService;
+	private GtwIdPAuthService gtwIdPAuthService;
 
 	@Autowired
-	private GtwIdPAuthService gtwIdPAuthService;
+	public GtwCusIdPCallbackService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
+			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper,
+			GtwIdPCallbackService gtwIdPCallbackService, GtwIdPAuthService gtwIdPAuthService) {
+
+		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
+		this.objectMapper = objectMapper;
+		this.gtwIdPCallbackService = gtwIdPCallbackService;
+		this.gtwIdPAuthService = gtwIdPAuthService;
+	}
 
 	/**
 	 * 處理 CUS 帳戶登入流程
@@ -271,16 +273,6 @@ public class GtwCusIdPCallbackService extends CusIdPService {
 
 	protected ObjectMapper getObjectMapper() {
 		return this.objectMapper;
-	}
-
-	@Override
-	protected AcIdPHelper getAcIdPHelper() {
-		return this.acIdPHelper;
-	}
-
-	@Override
-	protected TsmpSettingService getTsmpSettingService() {
-		return tsmpSettingService;
 	}
 
 	protected GtwIdPCallbackService getGtwIdPCallbackService() {

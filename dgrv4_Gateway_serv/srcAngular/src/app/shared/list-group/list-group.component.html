@@ -8,18 +8,20 @@
                         <div class="checkbox">
                             <div>
                                 <input type="checkbox" value="" (change)="menuChange($event,menu.main)" [formControlName]="menu.main">
-                                <a class="btn collapsed" data-toggle="collapse" [href]="'#mains'+menu.main" role="button" aria-expanded="true" >
-                                  {{menu.main | transform_menu}} ({{menu.main}})<span class="mr-3"></span>
+                                <a class="btn collapsed" data-bs-toggle="collapse" [attr.href]="'#mains'+menu.main" role="button" aria-expanded="true"
+                                [attr.aria-controls]="'mains' + menu.main">
+                                  {{menu.main | transform_menu}} ({{menu.main}})<span class="me-3"></span>
                                 </a>
                             </div>
                         </div>
 
                         <div class="collapse" [id]="'mains'+menu.main" *ngIf="menu.subs && menu.subs.length">
-                            <div class="form-check" class="list-group-item" *ngFor="let sub of menu.subs">
-                                <input type="checkbox" (change)="menuChange($event,sub.name)" class="form-check-input" [id]="sub.name" [formControlName]="sub.name">
-                                <label class="form-check-label" [for]="sub.name" style="margin-left:10px;position:absolute;bottom:18px;">
-                      {{sub.name | transform_menu}} ({{sub.name}})</label>
-                            </div>
+                          <div class="form-check" class="list-group-item" *ngFor="let sub of menu.subs">
+                            <input type="checkbox" (change)="menuChange($event,sub.name)" class="form-check-input" [id]="sub.name" style="margin-top: .1em;"
+                              [formControlName]="sub.name">
+                            <label class="form-check-label" [for]="sub.name" style="margin-left:10px;margin-top: 3px;">
+                              {{sub.name | transform_menu}} ({{sub.name}})</label>
+                          </div>
 
                         </div>
                         <hr>

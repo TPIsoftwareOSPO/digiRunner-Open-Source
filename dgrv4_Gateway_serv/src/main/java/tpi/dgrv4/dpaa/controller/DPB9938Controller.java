@@ -18,10 +18,15 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 
 @RestController
 public class DPB9938Controller {
-    @Autowired
     private DPB9938Service service;
 
-    @PostMapping(value = "/dgrv4/17/DPB9938", //
+    @Autowired
+    public DPB9938Controller(DPB9938Service service) {
+		super();
+		this.service = service;
+	}
+
+	@PostMapping(value = "/dgrv4/17/DPB9938", //
             consumes = MediaType.APPLICATION_JSON_VALUE, //
             produces = MediaType.APPLICATION_JSON_VALUE)
     public TsmpBaseResp<DPB9938Resp> testEsConnection(@RequestHeader HttpHeaders headers //

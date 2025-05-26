@@ -22,31 +22,32 @@ import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.TsmpUser;
 import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
 public class DpaaAlertJob_RoleEmail extends ApptJob {
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private PrepareMailService prepareMailService;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 
-	public DpaaAlertJob_RoleEmail(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public DpaaAlertJob_RoleEmail(TsmpDpApptJob tsmpDpApptJob, TsmpUserDao tsmpUserDao,
+			PrepareMailService prepareMailService, ServiceConfig serviceConfig, ObjectMapper objectMapper,
+			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpUserDao = tsmpUserDao;
+		this.prepareMailService = prepareMailService;
+		this.serviceConfig = serviceConfig;
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
 	}
 
 	@Override

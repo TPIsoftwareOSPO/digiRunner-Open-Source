@@ -54,26 +54,28 @@ public class AA0301Service {
 
 	private Integer pageSize;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	private String[] keyList = { "apiKey", "apiSrc", "moduleName", "apiName" };
 	private String[] valueList = { "asc", "desc" };
+
+	@Autowired
+	public AA0301Service(TsmpApiDao tsmpApiDao, ServiceConfig serviceConfig, BcryptParamHelper bcryptParamHelper,
+			TsmpOrganizationDao tsmpOrganizationDao, TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.serviceConfig = serviceConfig;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpOrganizationCacheProxy = tsmpOrganizationCacheProxy;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public AA0301Resp queryAPIList(TsmpAuthorization authorization, AA0301Req req, ReqHeader reqHeader) {
 		AA0301Resp resp = new AA0301Resp();

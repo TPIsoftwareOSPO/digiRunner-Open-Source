@@ -8,11 +8,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esotericsoftware.kryo.Kryo;
 
 import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
 
 public class CommunicationServer implements Runnable {
+	private static Logger logger = LoggerFactory.getLogger(CommunicationServer.class);
+	
 	ServerSocket server = null;
 
 	public static CommunicationServer cs;
@@ -31,9 +36,11 @@ public class CommunicationServer implements Runnable {
 	public ConcurrentHashMap<String, Packet_i> ExternalDgrInfoMap;
 	public ConcurrentHashMap<String, Packet_i> ExternalUndertowMetricsInfoMap;
 	public ConcurrentHashMap<String, Packet_i> ExternalUrlStatusInfoMap;
+	public ConcurrentHashMap<String, Packet_i> ExternalRealtimeDashboardInfoMap;
 	public ConcurrentHashMap<String, Packet_i> httpNodeInfo;
 	public UndertowMetricsInfoMap undertowMetricsInfos = new UndertowMetricsInfoMap();
 	public UrlStatusInfoMap urlStatusInfos = new UrlStatusInfoMap();
+	public RealtimeDashboardInfoMap realtimeDashboardInfos = new RealtimeDashboardInfoMap();
 
 	public CommunicationServer(int port) {
 		this(port, null);
@@ -67,14 +74,15 @@ public class CommunicationServer implements Runnable {
 
 	public void run() {
 		Socket user = null;
-		while (true) {
+		boolean isRunning = true;
+		while (isRunning) {
 			try {
 				user = server.accept();
 				doConnectionProc(user);
 			} catch (Exception e) {
 //				e.printStackTrace();
 				System.err.println("TCP server.accept()結束");
-				break;
+				isRunning = false;
 			}
 		}
 	}
@@ -83,7 +91,7 @@ public class CommunicationServer implements Runnable {
 		try {
 			server.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 	}
 
@@ -92,6 +100,7 @@ public class CommunicationServer implements Runnable {
 			try {
 				wait();
 			} catch (Exception e) {
+				Thread.currentThread().interrupt();
 			}
 		}
 
@@ -119,7 +128,7 @@ public class CommunicationServer implements Runnable {
 			for (Notifier noti : notifiers) {
 				noti.runDisconnect(conn);
 			}
-			notify();
+			notifyAll();
 		}
 	}
 

@@ -32,8 +32,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9925Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
+
+	@Autowired
+	public DPB9925Service(TsmpDpMailTpltDao tsmpDpMailTpltDao) {
+		super();
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+	}
 
 	public void exportTsmpDpMailTplt(TsmpAuthorization tsmpAuthorization, DPB9925Req req, HttpServletResponse response) {
 

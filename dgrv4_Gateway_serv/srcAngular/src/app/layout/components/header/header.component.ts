@@ -9,7 +9,6 @@ import { UserService } from 'src/app/shared/services/api-user.service';
 import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
 import * as dayjs from 'dayjs';
 import * as base64 from 'js-base64';
-import Swal from 'sweetalert2';
 import { MenuItem } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -56,6 +55,16 @@ export class HeaderComponent implements OnInit {
       }
     });
     this.acConf = this.toolService.getAcConf();
+    if (this.acConf && this.acConf.edition) {
+      const editionMap: { [key: string]: string } = {
+        'Express': 'Community',
+        'Alpha': 'Alpha',
+        'Enterprise': '',
+        'Enterprise_Lite': 'Enterprise Lite'
+      };
+
+      this.acConf.edition = editionMap[this.acConf.edition] ?? this.acConf.edition;
+    }
     this.aliveSec = sessionStorage.getItem('expires_in')
       ? Number(sessionStorage.getItem('expires_in'))
       : undefined;
@@ -211,7 +220,6 @@ export class HeaderComponent implements OnInit {
       dialog.destroy();
     });
     //
-    Swal.close();
     this.userService.logoutTUser().subscribe(() => {
       this.logoutService.logout();
     });

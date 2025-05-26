@@ -21,8 +21,9 @@ public class ClearDaoCacheProxyPacket implements Packet_i{
 			synchronized (TPILogger.lc) {
 				IDaoGenericCache<?, ?> igc = (IDaoGenericCache<?, ?>) lc.paramObj.get("DaoGenericCache");
 				igc.clear();
-				TPILogger.tl.debug("Client [" + lc.userName + "] IDaoGenericCache is totally cleared.");
+				TPILogger.tl.info("Client [" + lc.userName + "] IDaoGenericCache is totally cleared.");
 			}
+			TPILogger.tl.updateESLogFlag();
 		}catch(Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 		}

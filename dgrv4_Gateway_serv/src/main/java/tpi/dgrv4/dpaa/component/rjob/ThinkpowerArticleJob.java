@@ -2,16 +2,17 @@ package tpi.dgrv4.dpaa.component.rjob;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd4;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd4Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 /**
@@ -20,19 +21,20 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
  * 工作說明: 最後一關審核同意時, 要發送apptJob更新tsmp_dp_req_orderd4.is_publish = '1'
  *
  */
+
 @SuppressWarnings("serial")
 public class ThinkpowerArticleJob extends ApptJob {
 
 	private static TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao;
 
-	public ThinkpowerArticleJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, logger);
+	public ThinkpowerArticleJob(TsmpDpApptJob tsmpDpApptJob, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, logger, apptJobDispatcher, tsmpDpApptJobDao);
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd4Dao = tsmpDpReqOrderd4Dao;
 	}
 
 	@Override

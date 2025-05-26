@@ -8,20 +8,20 @@
             </div>
             <div class="col-4 col-xl-4 col-lg-4">
                 <label class="required control-label">{{'apply_date'|translate}}</label>
-                <div class="row">
-                    <div class="col-5 col-xl-5">
+                <div class="d-flex align-items-center">
+
                         <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                             formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
                         </p-calendar>
-                    </div>
-                    <div class="col-1 col-xl-1 text-center">
-                        <label style="padding: 3px 20px;">～</label>
-                    </div>
-                    <div class="col-5 col-xl-5">
+
+
+                        <label class="me-2">～</label>
+
+
                         <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="endDate" appendTo="body"
                             dateFormat="yy/mm/dd" [showIcon]="true">
                         </p-calendar>
-                    </div>
+
                 </div>
             </div>
             <!-- <div
@@ -50,7 +50,7 @@
         </div>
         <div class="form-group row">
             <div class="col-3 col-xl-3">
-                <button type="submit" class="btn tpi-btn tpi-primary pull-right mr-2">{{'button.search'|translate}}</button>
+                <button type="submit" class="btn tpi-btn tpi-primary pull-right me-2">{{'button.search'|translate}}</button>
             </div>
         </div>
     </form>
@@ -86,7 +86,7 @@
                         </td>
                         <td style="text-align: center;width: 15%;">
                             <!-- <div class="btn-group" style="flex-wrap: wrap;"> -->
-                                <!-- <button *ngIf="rowData['reviewVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+                                <!-- <button *ngIf="rowData['reviewVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.review)">
                                     <span class="fa fa-edit">{{'button.review'|translate}}</span>
                                 </button> -->
@@ -96,7 +96,7 @@
                                         (click)="showDialog(rowData,formOperate.review)"
                                         [pTooltip]="'button.review' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['trakerVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+                                <!-- <button *ngIf="rowData['trakerVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.traker)">
                                     <span class="fa fa-edit">{{'button.traker'|translate}}</span>
                                 </button> -->
@@ -106,7 +106,7 @@
                                         (click)="showDialog(rowData,formOperate.traker)"
                                         [pTooltip]="'button.tracker' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['closeVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+                                <!-- <button *ngIf="rowData['closeVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.settle)">
                                     <span class="fa fa-edit">{{'button.close'|translate}}</span>
                                 </button> -->
@@ -116,7 +116,7 @@
                                         (click)="showDialog(rowData,formOperate.settle)"
                                         [pTooltip]="'button.close' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['resendVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+                                <!-- <button *ngIf="rowData['resendVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.resend)">
                                     <span class="fa fa-edit">{{'button.resend'|translate}}</span>
                                 </button> -->
@@ -126,7 +126,7 @@
                                         (click)="showDialog(rowData,formOperate.resend)"
                                         [pTooltip]="'button.resend' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['updateVisiable'] == 'Y'" type="button" class="btn btn-deta mr-5"
+                                <!-- <button *ngIf="rowData['updateVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.update)">
                                     <span class="fa fa-edit">{{'button.edit'|translate}}</span>
                                 </button> -->
@@ -136,7 +136,7 @@
                                         (click)="showDialog(rowData,formOperate.update)"
                                         [pTooltip]="'button.edit' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['sendVisible'] == 'Y'" type="button" class="btn btn-deta mr-5"
+                                <!-- <button *ngIf="rowData['sendVisible'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.create)">
                                     <span class="fa fa-edit">{{'button.submit_for_review'|translate}}</span>
                                 </button> -->
@@ -153,7 +153,7 @@
                     <tr *ngIf="rowcount">
                         <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                             <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                                 (click)="moreData();">{{'button.more'|translate}}</button> -->
 
                                 <!-- 查詢更多 -->
@@ -208,13 +208,13 @@
         <div class="text-center">
             <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary"
                 (click)="executeReg('ACCEPT');">{{'button.approve'|translate}}</button>
-            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ml-2"
+            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
                 (click)="executeReg('RETURN');">{{'button.return'|translate}}</button>
-            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ml-2"
+            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
                 (click)="executeReg('DENIED');">{{'button.reject'|translate}}</button>
-            <button *ngIf="closeBtnFlag" type="button" class="btn tpi-btn tpi-primary ml-2"
+            <button *ngIf="closeBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
                 (click)="executeReg('END');">{{'button.confirm'|translate}}</button>
-            <button *ngIf="resendBtnFlag" type="button" class="btn tpi-btn tpi-primary ml-2"
+            <button *ngIf="resendBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
                 (click)="doResend();">{{'button.resend'|translate}}</button>
         </div>
     <!-- </p-footer> -->

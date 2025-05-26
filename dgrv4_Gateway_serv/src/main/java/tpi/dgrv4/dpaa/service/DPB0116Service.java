@@ -31,19 +31,22 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0116Service {
 
-	@Autowired
 	private TsmpDpMailLogDao tsmpDpMailLogDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	private Integer pageSize;
 	
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	public DPB0116Service(TsmpDpMailLogDao tsmpDpMailLogDao, BcryptParamHelper bcryptParamHelper,
+			ServiceConfig serviceConfig, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpMailLogDao = tsmpDpMailLogDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.serviceConfig = serviceConfig;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0116Resp queryMailLogList(TsmpAuthorization auth, DPB0116Req req, ReqHeader reqHeader) {
 		String local = ServiceUtil.getLocale(reqHeader.getLocale());

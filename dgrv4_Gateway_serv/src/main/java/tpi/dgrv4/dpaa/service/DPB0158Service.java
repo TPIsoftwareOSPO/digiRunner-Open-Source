@@ -25,13 +25,17 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0158Service {
 
-	@Autowired
 	private DgrWebsiteDao dgrWebsiteDao;
-
-	@Autowired
 	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0158Service(DgrWebsiteDao dgrWebsiteDao, DgrWebsiteDetailDao dgrWebsiteDetailDao) {
+		super();
+		this.dgrWebsiteDao = dgrWebsiteDao;
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+	}
 
 	@Transactional
 	public DPB0158Resp getWebsiteInfo(TsmpAuthorization auth, DPB0158Req req, ReqHeader header) {

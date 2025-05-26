@@ -300,6 +300,57 @@ export class ApiBaseService {
     });
   }
 
+  excuteNpPost_ignoreAll<T extends BaseRes>(path: string, body?: any, rtnCodes?: string[]): Observable<T> {
+    return new Observable(obser => {
+      let token = this.toolService.getToken();
+      let signCode = this.cryptSignCode(body);
+      let header = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'SignCode': signCode,
+        'Authorization': `Bearer ${token}`,
+      });
+      this.toolService.setExpiredTime();
+      let $object = this.httpClient.post<T>(`${this.npBaseUrl}/${path}`, body, { headers: header }).pipe(
+        // let $object = this.httpClient.post<T>(`/${path}`, body, { headers: header }).pipe(
+        tap(r => {
+          if (!rtnCodes) {
+            if (r.ResHeader) {
+              // Digirunner APIM底層Error
+              if (r.ResHeader.rtnCode != '1100' && r.ResHeader.rtnCode != '1298' && r.ResHeader.rtnCode != '1297') {
+                // let req_0206 = this.toolService.getEventLog('AC2', r.ResHeader.rtnMsg) as AA0206Req;
+                // this.eventLog(req_0206);
+                if (!(r.ResHeader.rtnCode as string).includes('9914') && !(r.ResHeader.rtnCode as string).includes('9929')) {
+                  this.alert.ok(`Return code : ${r.ResHeader.rtnCode}`, r.ResHeader.rtnMsg); // 判斷不為1100 , show rtnMsg
+                  if (r.ResHeader.rtnCode == '0001') {
+                    if (this.router) this.logoutService.logout();;
+                  }
+                }
+                this.ngxService.stopAll();
+              }
+            }
+          } else {
+            if (r.ResHeader) {
+              if (!rtnCodes.includes(r.ResHeader.rtnCode) && r.ResHeader.rtnCode != '1100' && r.ResHeader.rtnCode != '1298' && r.ResHeader.rtnCode != '1297') {
+                // let req_0206 = this.toolService.getEventLog('AC2', r.ResHeader.rtnMsg) as AA0206Req;
+                // this.eventLog(req_0206);
+                if (!(r.ResHeader.rtnCode as string).includes('9914') && !(r.ResHeader.rtnCode as string).includes('9929')) {
+                  this.alert.ok(`Return code : ${r.ResHeader.rtnCode}`, r.ResHeader.rtnMsg); // 判斷後兩碼如不為00 , show rtnMsg
+                  if (r.ResHeader.rtnCode == '0001') {
+                    if (this.router) this.logoutService.logout();
+                  }
+                }
+                this.ngxService.stopAll();
+              }
+            }
+          }
+        })
+      )
+      $object.subscribe(r => {
+        obser.next(r);
+      })
+    })
+  }
+
   public excuteNpPost_ignore1298<T extends BaseRes>(path: string, body?: any, rtnCodes?: string[]): Observable<T> {
     return new Observable(obser => {
       let token = this.toolService.getToken();

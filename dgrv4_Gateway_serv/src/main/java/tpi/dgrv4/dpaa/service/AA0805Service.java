@@ -20,10 +20,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0805Service {
 
-	@Autowired
 	private TsmpRegHostDao tsmpRegHostDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public AA0805Service(TsmpRegHostDao tsmpRegHostDao) {
+		super();
+		this.tsmpRegHostDao = tsmpRegHostDao;
+	}
 
 	public AA0805Resp sendHeartbeat(TsmpAuthorization auth, AA0805Req req) {
 		AA0805Resp resp = null;

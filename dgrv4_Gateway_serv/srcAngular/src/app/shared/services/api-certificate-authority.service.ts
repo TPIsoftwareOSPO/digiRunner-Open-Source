@@ -20,6 +20,7 @@ import { DPB0228Req, RespDPB0228 } from 'src/app/models/api/ServerService/dpb022
 import { DPB0227Req, RespDPB0227 } from 'src/app/models/api/ServerService/dpb0227.interface';
 import { DPB0230Req, RespDPB0230 } from 'src/app/models/api/ServerService/dpb0230.interface';
 import { DPB0231Req, RespDPB0231 } from 'src/app/models/api/ServerService/dpb0231.interface';
+import { RespSSLDecoder, SSLDecoderReq } from 'src/app/models/api/ServerService/ssl-decoder.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -172,25 +173,34 @@ export class ClientCAService {
     //查詢站台
     querySiteList(): Observable<RespDPB0229> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.querySiteList)
+          ReqHeader: this.api.getReqHeader(TxID.querySiteList),
+          ReqBody: {}
       };
       const path = `${this.basePath}/DPB0229`;
       return this.api.excuteNpPost<RespDPB0229>(path, body);
     }
+    querySiteList_ignore1298(): Observable<RespDPB0229> {
+      let body = {
+          ReqHeader: this.api.getReqHeader(TxID.querySiteList),
+          ReqBody: {}
+      };
+      const path = `${this.basePath}/DPB0229`;
+      return this.api.excuteNpPost_ignore1298<RespDPB0229>(path, body);
+    }
 
     // 新增站台
-    createSite(ReqBody:DPB0225Req): Observable<RespDPB0225> {
+    createClientCert(ReqBody:DPB0225Req): Observable<RespDPB0225> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.createSite),
+          ReqHeader: this.api.getReqHeader(TxID.createClientCert),
           ReqBody: ReqBody,
       };
       const path = `${this.basePath}/DPB0225`;
       return this.api.excuteNpPost<RespDPB0225>(path, body);
     }
 
-    createSite_before(): Observable<DPB0225RespBefore> {
+    createClientCert_before(): Observable<DPB0225RespBefore> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.createSite),
+          ReqHeader: this.api.getReqHeader(TxID.createClientCert),
           ReqBody: {},
       };
       const path = `${this.basePath}/DPB0225?before`;
@@ -198,18 +208,18 @@ export class ClientCAService {
     }
 
     // 修改站台
-    updateSite(ReqBody:DPB0226Req): Observable<RespDPB0226> {
+    updateClientCert(ReqBody:DPB0226Req): Observable<RespDPB0226> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.updateSite),
+          ReqHeader: this.api.getReqHeader(TxID.updateClientCert),
           ReqBody: ReqBody,
       };
       const path = `${this.basePath}/DPB0226`;
       return this.api.excuteNpPost<RespDPB0226>(path, body);
     }
 
-    updateSite_before(): Observable<DPB0226RespBefore> {
+    updateClientCert_before(): Observable<DPB0226RespBefore> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.createSite),
+          ReqHeader: this.api.getReqHeader(TxID.updateClientCert),
           ReqBody: {},
       };
       const path = `${this.basePath}/DPB0226?before`;
@@ -217,9 +227,9 @@ export class ClientCAService {
     }
 
     // 刪除站台
-    deleteSite(ReqBody:DPB0227Req): Observable<RespDPB0227> {
+    deleteClientCert(ReqBody:DPB0227Req): Observable<RespDPB0227> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.deleteSite),
+          ReqHeader: this.api.getReqHeader(TxID.deleteClientCert),
           ReqBody: ReqBody,
       };
       const path = `${this.basePath}/DPB0227`;
@@ -227,9 +237,9 @@ export class ClientCAService {
     }
 
     // 查詢站台明細
-    queryOneSite(ReqBody:DPB0228Req): Observable<RespDPB0228> {
+    queryClientCertDetail(ReqBody:DPB0228Req): Observable<RespDPB0228> {
       let body = {
-          ReqHeader: this.api.getReqHeader(TxID.queryOneSite),
+          ReqHeader: this.api.getReqHeader(TxID.queryClientCertDetail),
           ReqBody: ReqBody,
       };
       const path = `${this.basePath}/DPB0228`;
@@ -237,7 +247,7 @@ export class ClientCAService {
     }
 
     // 啟動 / 停用站台
-    enableSite(ReqBody:DPB0230Req): Observable<RespDPB0230> {
+    enableClientCert(ReqBody:DPB0230Req): Observable<RespDPB0230> {
       let body = {
           ReqHeader: this.api.getReqHeader(TxID.enableSite),
           ReqBody: ReqBody,
@@ -256,4 +266,13 @@ export class ClientCAService {
       return this.api.excuteNpPost<RespDPB0231>(path, body);
     }
 
+    // SSLDecoder
+    SSLDecoder(ReqBody:SSLDecoderReq): Observable<RespSSLDecoder> {
+      let body = {
+          ReqHeader: this.api.getReqHeader(TxID.SSLDecoder),
+          ReqBody: ReqBody,
+      };
+      const path = `dgrv4/SSLDecoder`;
+      return this.api.excuteNpPost<RespSSLDecoder>(path, body);
+    }
 }

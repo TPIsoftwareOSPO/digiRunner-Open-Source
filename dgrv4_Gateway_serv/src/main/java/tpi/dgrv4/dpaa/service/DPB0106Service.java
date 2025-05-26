@@ -34,16 +34,19 @@ public class DPB0106Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpEventsDao tsmpEventsDao;
-
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0106Service(TsmpEventsDao tsmpEventsDao, TsmpDpItemsDao tsmpDpItemsDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpEventsDao = tsmpEventsDao;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0106Resp queryEventByDateLike(TsmpAuthorization auth, DPB0106Req req, ReqHeader reqHeader) {
 		DPB0106Resp resp = null;

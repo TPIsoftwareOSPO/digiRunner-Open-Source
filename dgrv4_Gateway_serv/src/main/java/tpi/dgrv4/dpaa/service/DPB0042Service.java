@@ -29,8 +29,13 @@ public class DPB0042Service {
 	
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpDpNewsDao tsmpDpNewsDao;
+
+	@Autowired
+	public DPB0042Service(TsmpDpNewsDao tsmpDpNewsDao) {
+		super();
+		this.tsmpDpNewsDao = tsmpDpNewsDao;
+	}
 
 	public DPB0042Resp createNews_v3_4(TsmpAuthorization tsmpAuthorization, DPB0042Req req) {
 		DPB0042Resp resp = new DPB0042Resp();

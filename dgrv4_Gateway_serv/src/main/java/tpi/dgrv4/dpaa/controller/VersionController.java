@@ -1,6 +1,7 @@
 package tpi.dgrv4.dpaa.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -18,10 +19,17 @@ import tpi.dgrv4.escape.ESAPI;
 
 @RestController
 public class VersionController {
-	@Autowired
+	
 	private DPB0118Service service;
 	
-	
+	@Autowired
+	public VersionController(ApplicationContext applicationContext) {
+		super();
+		if (applicationContext != null) {
+			this.service = applicationContext.getBean(DPB0118Service.class); // non-Singleton
+		}
+	}
+
 	@GetMapping(value = "/dgrv4/version")
 	public ResponseEntity<?> queryVersion(HttpServletRequest request,
 			@RequestParam(value = "url", required = false) String url) {

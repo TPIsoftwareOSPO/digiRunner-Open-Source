@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  *  需要Autowired 此class 的必須掛 @Scope("prototype") 因為是多例
  */
 @Component
-@Scope("prototype")
+@Scope("prototype") // non-Singleton
 public class LicenseUtilBase {
 	public String getEdition(String key){
 		return "Express";

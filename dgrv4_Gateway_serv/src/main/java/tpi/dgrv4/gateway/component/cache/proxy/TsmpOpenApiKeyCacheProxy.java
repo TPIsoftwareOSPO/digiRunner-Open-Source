@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpOpenApiKey;
 import tpi.dgrv4.entity.repository.TsmpOpenApiKeyDao;
@@ -16,8 +18,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class TsmpOpenApiKeyCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
+
+	@Autowired
+	public TsmpOpenApiKeyCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			TsmpOpenApiKeyDao tsmpOpenApiKeyDao) {
+		super(objectMapper, cache);
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+	}
 
 	public TsmpOpenApiKey findFirstByOpenApiKey(String openApiKey) {
 		Supplier<TsmpOpenApiKey> supplier = () -> {

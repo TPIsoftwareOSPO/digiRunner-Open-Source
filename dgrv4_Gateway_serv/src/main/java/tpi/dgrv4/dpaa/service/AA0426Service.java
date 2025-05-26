@@ -44,19 +44,23 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0426Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
+	private TsmpApiRegDao tsmpApiRegDao;
 
 	@Autowired
-	private TsmpApiRegDao tsmpApiRegDao;
+	public AA0426Service(ObjectMapper objectMapper, FileHelper fileHelper, TsmpDpFileDao tsmpDpFileDao,
+			TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao) {
+		super();
+		this.objectMapper = objectMapper;
+		this.fileHelper = fileHelper;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+	}
 
 	public AA0426Resp batchModify(TsmpAuthorization authorization, AA0426Req req) {
 		AA0426Resp resp = new AA0426Resp();

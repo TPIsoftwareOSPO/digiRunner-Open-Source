@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.tcp.utils.communication.CommunicationServer;
 import tpi.dgrv4.tcp.utils.communication.LinkerClient;
 import tpi.dgrv4.tcp.utils.communication.LinkerServer;
@@ -12,6 +14,8 @@ import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
 
 public class RequireUrlStatusInfosPacket implements Packet_i {
+	
+	public final static Object waitKey = new Object();
 
 	private Collection<UrlStatusPacket> urlStatusInfos;
 
@@ -35,7 +39,15 @@ public class RequireUrlStatusInfosPacket implements Packet_i {
 
 	@Override
 	public void runOnClient(LinkerClient lc) {
-		lc.paramObj.put("urlStatusInfos", urlStatusInfos);
+		try {
+			lc.paramObj.put("urlStatusInfos", urlStatusInfos);
+		} catch (Exception e) {
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		} finally {
+			synchronized (RequireUrlStatusInfosPacket.waitKey) {
+				RequireUrlStatusInfosPacket.waitKey.notifyAll(); // SonarQube
+			}
+		}
 	}
 
 	/**
@@ -109,7 +121,7 @@ public class RequireUrlStatusInfosPacket implements Packet_i {
 		long lastUpdateTime = packet.getLastUpdateTime();
 		// 獲取當前時間
 		long currentTime = System.currentTimeMillis();
-		// 判斷當前時間是否大於封包最後更新時間 10 秒
-		return currentTime - lastUpdateTime > 10000; // 10000 毫秒等於 10 秒
+		// 判斷當前時間是否大於封包最後更新時間 60 秒
+		return currentTime - lastUpdateTime > 60000; // 10000 毫秒等於 60 秒
 	}
 }

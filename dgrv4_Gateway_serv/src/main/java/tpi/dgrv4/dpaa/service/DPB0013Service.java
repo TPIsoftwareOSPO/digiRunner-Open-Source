@@ -27,19 +27,22 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0013Service {
 
-	@Autowired
 	private TsmpDpAppCategoryDao tsmpDpappCategoryDao;
-
-	@Autowired
 	private TsmpDpAppDao tsmpDpAppDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0013Service(TsmpDpAppCategoryDao tsmpDpappCategoryDao, TsmpDpAppDao tsmpDpAppDao,
+			TsmpOrganizationDao tsmpOrganizationDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpappCategoryDao = tsmpDpappCategoryDao;
+		this.tsmpDpAppDao = tsmpDpAppDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0013Resp queryAppLikeList(TsmpAuthorization authorization, DPB0013Req req) {
 		String orgId = authorization.getOrgId();

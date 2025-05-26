@@ -27,7 +27,7 @@
         </div>
         <div class="form-group row">
             <div class="col-12 col-xl-12 col-lg-12">
-                <button type="submit" class="btn btn-warning pull-right mr-2">{{'button.search'|translate}}</button>
+                <button type="submit" class="btn btn-warning pull-right me-2">{{'button.search'|translate}}</button>
             </div>
         </div>
     </form>
@@ -76,7 +76,7 @@
                 </td>
                 <td style="text-align: center;width: 200px;">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-deta mr-5"
+                        <button type="button" class="btn btn-deta me-5"
                             (click)="showDialog(rowData,formOperate.detail)">
                             <span class="fa fa-search">{{'detail'|translate}}</span>
                         </button>
@@ -88,7 +88,7 @@
             <tr *ngIf="rowcount">
                 <td [attr.colspan]="columns.length+1">
                     <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                    <button type="button" class="btn btn-warning pull-right ml-3"
+                    <button type="button" class="btn btn-warning pull-right ms-3"
                         (click)="moreData();">{{'button.more'|translate}}</button>
                 </td>
             </tr>

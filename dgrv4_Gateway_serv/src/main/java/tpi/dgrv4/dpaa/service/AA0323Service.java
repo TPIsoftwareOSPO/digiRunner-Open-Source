@@ -25,11 +25,15 @@ public class AA0323Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrComposerFlowDao dgrComposerFlowDao;
-	
-	@Autowired
 	private CApiKeyService capiKeyService;
+
+	@Autowired
+	public AA0323Service(DgrComposerFlowDao dgrComposerFlowDao, CApiKeyService capiKeyService) {
+		super();
+		this.dgrComposerFlowDao = dgrComposerFlowDao;
+		this.capiKeyService = capiKeyService;
+	}
 
 	public AA0323Resp exportComposerFlow(AA0323Req req, ReqHeader reqHeader,
 			HttpHeaders headers) {

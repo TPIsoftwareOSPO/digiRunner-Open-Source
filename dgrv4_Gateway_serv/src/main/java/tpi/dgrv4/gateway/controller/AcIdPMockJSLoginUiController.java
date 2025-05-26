@@ -29,9 +29,14 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @RestController
 public class AcIdPMockJSLoginUiController {
 
-	@Autowired
 	TokenHelper tokenHelper;
  
+	@Autowired
+	public AcIdPMockJSLoginUiController(TokenHelper tokenHelper) {
+		super();
+		this.tokenHelper = tokenHelper;
+	}
+
 	//https://localhost:8080/dgrv4/mockac/idpsso/LDAP/acIdPLogin?username=minildap&password=mini123
 	@RequestMapping(value = "/dgrv4/mockac/idpsso/{idPType}/acIdPLogin", method = RequestMethod.POST)
 	public ResponseEntity<?> loginUi(@RequestHeader HttpHeaders headers, 

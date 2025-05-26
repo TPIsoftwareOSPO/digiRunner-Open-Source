@@ -38,23 +38,24 @@ public class DPB0014Service {
 
 	private TPILogger logger = TPILogger.tl;;
 
-	@Autowired
 	private TsmpDpAppDao tsmpDpAppDao;
-
-	@Autowired
 	private TsmpDpApiAppDao tsmpDpApiAppDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpDpAppCategoryDao tsmpDpAppCategoryDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0014Service(TsmpDpAppDao tsmpDpAppDao, TsmpDpApiAppDao tsmpDpApiAppDao, TsmpDpFileDao tsmpDpFileDao,
+			TsmpApiDao tsmpApiDao, TsmpDpAppCategoryDao tsmpDpAppCategoryDao, FileHelper fileHelper) {
+		super();
+		this.tsmpDpAppDao = tsmpDpAppDao;
+		this.tsmpDpApiAppDao = tsmpDpApiAppDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpDpAppCategoryDao = tsmpDpAppCategoryDao;
+		this.fileHelper = fileHelper;
+	}
 
 	public DPB0014Resp queryAppById(TsmpAuthorization authorization, DPB0014Req req) {
 		Long appId = req.getAppId();

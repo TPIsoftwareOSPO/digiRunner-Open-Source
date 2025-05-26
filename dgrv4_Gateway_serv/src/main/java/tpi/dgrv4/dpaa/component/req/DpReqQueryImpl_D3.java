@@ -17,6 +17,7 @@ import tpi.dgrv4.common.constant.TsmpDpModule;
 import tpi.dgrv4.common.constant.TsmpDpPublicFlag;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpDpClientext;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
@@ -24,7 +25,12 @@ import tpi.dgrv4.entity.entity.TsmpDpItemsId;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd3;
 import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
+import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd3Dao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.escape.MailHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -39,17 +45,24 @@ public class DpReqQueryImpl_D3 extends DpReqQueryAbstract<DpReqQueryResp_D3> imp
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
+	private MailHelper mailHelper;
 
 	@Autowired
-	private MailHelper mailHelper;
+	public DpReqQueryImpl_D3(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
+			DpReqServiceFactory dpReqServiceFactory,
+			TsmpDpClientextDao tsmpDpClientextDao, TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao, MailHelper mailHelper) {
+		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
+				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
+		this.mailHelper = mailHelper;
+	}
 
 	@Override
 	protected List<DpReqQueryResp_D3> doQueryDetail(Long reqOrdermId, String locale) {

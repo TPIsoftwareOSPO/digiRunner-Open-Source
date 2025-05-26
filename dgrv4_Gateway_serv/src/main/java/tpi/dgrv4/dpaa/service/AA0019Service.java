@@ -41,27 +41,27 @@ public class AA0019Service {
 	
 	private Integer pageSize;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private UsersDao usersDao;
-	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
+	@Autowired
+	public AA0019Service(TsmpOrganizationDao tsmpOrganizationDao, UsersDao usersDao, AuthoritiesDao authoritiesDao,
+			TsmpRoleDao tsmpRoleDao, TsmpUserDao tsmpUserDao, ServiceConfig serviceConfig,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.usersDao = usersDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.serviceConfig = serviceConfig;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 	@Transactional
 	public AA0019Resp queryTUserList(TsmpAuthorization auth, AA0019Req req, ReqHeader reqHeader) {
 		AA0019Resp resp = null;

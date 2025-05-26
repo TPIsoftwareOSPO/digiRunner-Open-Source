@@ -1,18 +1,23 @@
 package tpi.dgrv4.gateway.service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import tpi.dgrv4.codec.constant.I302;
 import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -28,32 +33,32 @@ import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 
+/**
+ * [ZH] 檢查傳入的資料, 例如: state、redirect_uri, 若正常則產生 dgRcode, 並重新導向 302 到 redirect_uri <br>
+ * [EN] Check the incoming data, such as: state, redirect_uri, if normal, generate dgRcode, and redirect 302 to redirect_uri <br>
+ * (LDAP / API / JDBC) <br>
+ * 
+ * @author Mini <br>
+ */
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class GtwIdPApproveService {
 	
-	@Autowired
-	private GtwIdPAuthService gtwIdPAuthService;
+	private I302 i302;
+	private final GtwIdPAuthService gtwIdPAuthService;
+	private final DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
+	private final DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao; 
+	private final TokenHelper tokenHelper;
+	private final OAuthTokenService oAuthTokenService;
+	private final OAuthAuthorizationService oAuthAuthorizationService;
+	private final DgrOauthApprovalsDao dgrOauthApprovalsDao; 
+	private final GtwIdPHelper gtwIdPHelper;
 	
 	@Autowired
-	private DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
-	
-	@Autowired
-	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
- 
-	@Autowired
-	private TokenHelper tokenHelper;
-	
-	@Autowired
-	private OAuthTokenService oAuthTokenService;
-	
-	@Autowired
-	private OAuthAuthorizationService oAuthAuthorizationService;
-	
-	@Autowired
-	private DgrOauthApprovalsDao dgrOauthApprovalsDao;
- 
-	@Autowired
-	private GtwIdPHelper gtwIdPHelper;
+	public void setI302(@Nullable I302 i302) {
+		this.i302 = i302;
+	}
 	
 	public ResponseEntity<?> gtwIdPApprove(HttpHeaders headers, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
@@ -152,12 +157,26 @@ public class GtwIdPApproveService {
 				state
 		);
 		
-		TPILogger.tl.debug("Redirect to URL【dgR Client Redirect URL】: " + redirectUrl);
-		httpResp.sendRedirect(redirectUrl);
+		/*
+		 * [ZH] 6.轉導
+		 * [EN] 6.redirect
+		 */
+		handleSendRedirect(httpResp, redirectUrl);
 		
 		return null;
 	}
 	
+	/**
+	 * [ZH] 轉導
+	 * [EN] redirect
+	 */
+	private void handleSendRedirect(HttpServletResponse httpResp, String redirectUrl) throws IOException {
+		if (i302 != null) {
+			TPILogger.tl.debug("Redirect to URL【dgR Client Redirect URL】: " + redirectUrl);
+			i302.sendRedirect(httpResp, redirectUrl);
+		}
+	}
+
 	/**
 	 * 檢查傳入的資料
 	 */

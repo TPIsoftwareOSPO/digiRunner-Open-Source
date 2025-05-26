@@ -17,8 +17,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0009Service {
 
-	@Autowired
 	private TsmpDpAppCategoryDao tsmpDpAppCategoryDao;
+
+	@Autowired
+	public DPB0009Service(TsmpDpAppCategoryDao tsmpDpAppCategoryDao) {
+		super();
+		this.tsmpDpAppCategoryDao = tsmpDpAppCategoryDao;
+	}
 
 	public DPB0009Resp queryAppCateById(TsmpAuthorization authorization, DPB0009Req req) {
 		String userName = authorization.getUserName();

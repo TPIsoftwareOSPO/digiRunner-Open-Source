@@ -34,18 +34,21 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
  */
 @Component
 public class IdPJdbcHelper {
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private DPB0189Service dpb0189Service;
-
-	@Autowired
 	private ObjectMapper objectMapper;
 	
 	public static String The_user_was_not_found = "The user was not found. username: ";
 	public static String This_user_cannot_find_the_password_data = "This user cannot find the password data.";
 	public static String User_account_or_password_is_incorrect = "User account or password is incorrect.";
+
+	@Autowired
+	public IdPJdbcHelper(TokenHelper tokenHelper, DPB0189Service dpb0189Service, ObjectMapper objectMapper) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.dpb0189Service = dpb0189Service;
+		this.objectMapper = objectMapper;
+	}
 
 	public UserInfoData checkUserAuth(String connName, String sqlPtmt, String sqlParams, String reqUserName,
 			String reqUserMima, String userMimaAlg, String userMimaColName, String idtSubColName, String idtNameColName,
@@ -62,8 +65,8 @@ public class IdPJdbcHelper {
 		// 3.設定查詢 RDB 的 request
 		DPB0189Req dpb0189Req = new DPB0189Req();
 		dpb0189Req.setConnName(connName);
-		dpb0189Req.setStrSql(sqlPtmt);
-		dpb0189Req.setParamList(paramList);
+		dpb0189Req.setStrSql(sqlPtmt);	//"SELECT * FROM users WHERE user = ? AND pass = ?";
+		dpb0189Req.setParamList(paramList); //["user", "pass"]
 
 		// 4.執行 SQL,查詢 user 資料
 		DPB0189Resp dpb0189Resp = getDPB0189Service().executeSql(dpb0189Req, null, false, false);

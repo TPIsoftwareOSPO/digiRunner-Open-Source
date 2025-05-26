@@ -1,11 +1,8 @@
 package tpi.dgrv4.dpaa.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,7 +15,6 @@ import tpi.dgrv4.dpaa.vo.AA0324Req;
 import tpi.dgrv4.dpaa.vo.AA0324Resp;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
-import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 
 /***
  * 
@@ -30,8 +26,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0324Controller {
 
-	@Autowired
 	private AA0324Service service;
+
+	@Autowired
+	public AA0324Controller(AA0324Service service) {
+		super();
+		this.service = service;
+	}
 
 
 	@PostMapping(value = "/dgrv4/11/AA0324", //

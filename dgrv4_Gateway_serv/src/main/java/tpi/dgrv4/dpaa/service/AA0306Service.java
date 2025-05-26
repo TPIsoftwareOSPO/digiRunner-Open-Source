@@ -41,14 +41,17 @@ public class AA0306Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
+	private BcryptParamHelper bcryptParamHelper;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public AA0306Service(TsmpApiDao tsmpApiDao, TsmpRtnCodeDao tsmpRtnCodeDao, BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	/**
 	 * 取消已排程的日期，根據請求中的撤銷標誌進行相應操作。

@@ -25,6 +25,8 @@ public class DpaaSystemInfo {
 
 	private Long davail;
 
+	private double metaspacePercent;
+
 	public void setCpu(Float cpu) {
 		this.cpu = cpu;
 	}
@@ -111,6 +113,14 @@ public class DpaaSystemInfo {
 
 	public void setDavail(Long davail) {
 		this.davail = davail;
+	}
+
+	public void setMetaspacePercent(double monitorMetaspace) {
+		this.metaspacePercent = monitorMetaspace;
+	}
+
+	public String getMetaspacePercent() {
+		return String.format("%.2f%%", this.metaspacePercent);
 	}
 
 }

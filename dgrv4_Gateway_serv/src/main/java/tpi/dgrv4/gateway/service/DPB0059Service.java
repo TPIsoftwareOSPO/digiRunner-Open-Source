@@ -36,17 +36,19 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0059Service {
     
 
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
-
     
-    protected void refreshMemList() {
+	@Autowired
+    public DPB0059Service(TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ApptJobDispatcher apptJobDispatcher) {
+		super();
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.apptJobDispatcher = apptJobDispatcher;
+	}
+	protected void refreshMemList() {
         try {
 
             synchronized (TPILogger.lc) {//

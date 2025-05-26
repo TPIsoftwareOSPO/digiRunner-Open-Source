@@ -24,18 +24,21 @@ import tpi.dgrv4.gateway.util.InnerInvokeParam;
 @Service
 public class AcIdPReviewService {
  
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    
-    @Autowired
     private DgrAcIdpUserDao dgrAcIdpUserDao;
-    
-    @Autowired
     private AcIdPHelper acIdPHelper;
-    
-    @Autowired
     private DgrAuditLogService dgrAuditLogService;
  
+    @Autowired
+	public AcIdPReviewService(TsmpSettingService tsmpSettingService, DgrAcIdpUserDao dgrAcIdpUserDao,
+			AcIdPHelper acIdPHelper, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.acIdPHelper = acIdPHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	public void acIdPReview(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpResp)
 			throws Exception {
  

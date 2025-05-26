@@ -52,32 +52,37 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class AA0231Service {
 
 	private TPILogger logger = TPILogger.tl;
-	
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-	@Autowired
-	private OauthClientDetailsDao oauthClientDetailsDao;
-	@Autowired
-	private ApplicationContext ctx;
-	@Autowired
-	private JobHelper jobHelper;
-	@Autowired
-	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-	@Autowired
-	private ServiceConfig serviceConfig;
 	private String sendTime;
-	@Autowired
+	
+	private TsmpClientDao tsmpClientDao;
+	private OauthClientDetailsDao oauthClientDetailsDao;
+	private ApplicationContext ctx;
+	private JobHelper jobHelper;
+	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
+	private ServiceConfig serviceConfig;
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-	
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-    @Autowired
     private DaoGenericCacheService daoGenericCacheService;
 	
+    @Autowired
+	public AA0231Service(TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao,
+			ApplicationContext ctx, JobHelper jobHelper, TsmpDpMailTpltDao tsmpDpMailTpltDao,
+			ServiceConfig serviceConfig, DgrAuditLogService dgrAuditLogService, TsmpSettingDao tsmpSettingDao,
+			TsmpTAEASKHelper tsmpTAEASKHelper, DaoGenericCacheService daoGenericCacheService) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.serviceConfig = serviceConfig;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.daoGenericCacheService = daoGenericCacheService;
+	}
+
 	@PostConstruct
 	public void init() {
 		this.sendTime = "0"; //設為0,不等待,因重置密碼,必須馬上寄發Email

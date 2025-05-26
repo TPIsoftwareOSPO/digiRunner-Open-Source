@@ -2,10 +2,22 @@ package tpi.dgrv4.dpaa.component;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.management.MBeanServer;
+
+import org.apache.catalina.User;
 
 import com.sun.management.OperatingSystemMXBean;
 
@@ -20,186 +32,228 @@ import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 public class DpaaSystemInfoHelper {
+    private static class InstanceHolder {
+        private static final DpaaSystemInfoHelper INSTANCE = new DpaaSystemInfoHelper();
+    }
+    
+    private final String appPath;
+    private final OperatingSystemMXBean osMXBean;
+    private final SystemInfo systemInfo;
+    private final ScheduledExecutorService scheduler;
+    private final AtomicReference<DpaaSystemInfo> cachedInfo;
 
-	private final String appPath;
+    private DpaaSystemInfoHelper() {
+        this.appPath = FileHelper.filterPath(new File(".").getAbsolutePath(), false);
+        this.osMXBean = ManagementFactory.getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class);
+        this.systemInfo = new SystemInfo();
+        this.cachedInfo = new AtomicReference<>(new DpaaSystemInfo());
+        
+        // 使用守護線程來執行定期更新
+        ThreadFactory threadFactory = r -> {
+            Thread thread = new Thread(r, "SystemInfoUpdater");
+            thread.setDaemon(true);
+            return thread;
+        };
+        
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        
+        // 註冊 JVM 關閉鉤子
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            scheduler.shutdown();
+            try {
+                if (!scheduler.awaitTermination(2, TimeUnit.SECONDS)) {
+                    scheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+            	TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+                scheduler.shutdownNow();
+    		    Thread.currentThread().interrupt();
+            }
+        }));
+        
+        // 啟動定期更新任務
+        startUpdateTask();
+    }
 
-	private OperatingSystemMXBean osMXBean;
+    public static DpaaSystemInfoHelper getInstance() {
+        return InstanceHolder.INSTANCE;
+    }
 
-	// 前次系統監測值
-	/* 2021.07.26 改呼叫library的API取得CPU使用率
-	private OSProcess previousProcessStatus;
-	*/
+    private void startUpdateTask() {
+        // 初始化時立即更新一次
+        updateSystemInfo();
+        
+        
+//        scheduler.scheduleAtFixedRate(
+//        	    要執行的任務,
+//        	    等待多久才開始第一次執行,
+//        	    每次執行的間隔時間,
+//        	    時間單位
+//        	)
+        // 每5秒更新一次
+        scheduler.scheduleAtFixedRate(this::updateSystemInfo, 5, 5, TimeUnit.SECONDS);
+    }
 
-	public DpaaSystemInfoHelper() {
-		this.appPath = FileHelper.filterPath(new File(".").getAbsolutePath(), false);
-		this.osMXBean = ManagementFactory.getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class);
-	}
+    private void updateSystemInfo() {
+        try {
+            DpaaSystemInfo newInfo = new DpaaSystemInfo();
+            updateCpuAndMem(newInfo);
+            updateDiskInfo(newInfo);
+            updateRuntimeInfo(newInfo);
+            cachedInfo.set(newInfo);
+        } catch (Exception e) {
+            TPILogger.tl.warn(StackTraceUtil.logStackTrace(e));
+        }
+    }
 
-	public SystemInfo getSystemInfo() {
-		return new SystemInfo();
-	}
+    public DpaaSystemInfo getCachedSystemInfo() {
+        return cachedInfo.get();
+    }
 
-	public DpaaSystemInfo getCpuUsedRateAndMem() {
-		DpaaSystemInfo vo = new DpaaSystemInfo();
-		setCpuUsedRateAndMem(vo);
-		return vo;
-	}
+    // 原有的公開方法，使用快取資料
+    public void setCpuUsedRateAndMem(DpaaSystemInfo infoVo) {
+        if (infoVo != null) {
+            DpaaSystemInfo cached = cachedInfo.get();
+            infoVo.setCpu(cached.getCpu());
+            infoVo.setMem(cached.getMem());
+        }
+    }
 
-	public void setCpuUsedRateAndMem(DpaaSystemInfo dpaaSystemInfo) {
-		SystemInfo systemInfo = getSystemInfo();
-		setCpuUsedRateAndMem(systemInfo, dpaaSystemInfo);
-	}
+    public void setDiskInfo(DpaaSystemInfo infoVo) {
+        if (infoVo != null) {
+            DpaaSystemInfo cached = cachedInfo.get();
+            infoVo.setDused(cached.getDused());
+            infoVo.setDtotal(cached.getDtotal());
+            infoVo.setDfs(cached.getDfs());
+            infoVo.setDusage(cached.getDusage());
+            infoVo.setDavail(cached.getDavail());
+        }
+    }
 
-	public void setCpuUsedRateAndMem(SystemInfo systemInfo, DpaaSystemInfo dpaaSystemInfo) {
-		
-		try {
-			OperatingSystem os = systemInfo.getOperatingSystem();
-			int processId = os.getProcessId();
-			OSProcess currentProcess = os.getProcess(processId);
-			int logicalProcessorCount = systemInfo.getHardware().getProcessor().getLogicalProcessorCount();
-			float cpu = getCpuUsedRate(currentProcess, logicalProcessorCount);
-			int mem = to1024MegaConversion(currentProcess.getResidentSetSize());
-			dpaaSystemInfo.setCpu(cpu);
-			dpaaSystemInfo.setMem(mem);
-		} catch (Exception e) {
-			dpaaSystemInfo.setCpu(0f);
-			dpaaSystemInfo.setMem(0);
-			TPILogger.tl.warn(StackTraceUtil.logStackTrace(e));
-		}
+    public void setRuntimeInfo(DpaaSystemInfo infoVo) {
+        if (infoVo != null) {
+            DpaaSystemInfo cached = cachedInfo.get();
+            infoVo.setHtotal(cached.getHtotal());
+            infoVo.setHmax(cached.getHmax());
+            infoVo.setHfree(cached.getHfree());
+            infoVo.setHused(cached.getHused());
+        }
+    }
 
-		
-	}
+    private static final double THRESHOLD = 0.85; // 85% 記憶體使用率警戒線
+    // 內部更新方法
+    private void updateCpuAndMem(DpaaSystemInfo dpaaSystemInfo) {
+        try {
+            OperatingSystem os = systemInfo.getOperatingSystem();
+            int processId = os.getProcessId();
+            OSProcess currentProcess = os.getProcess(processId);
+            int logicalProcessorCount = systemInfo.getHardware().getProcessor().getLogicalProcessorCount();
+            float cpu = getCpuUsedRate(currentProcess, logicalProcessorCount);
+            int mem = to1024MegaConversion(currentProcess.getResidentSetSize());
+            dpaaSystemInfo.setCpu(cpu);
+            dpaaSystemInfo.setMem(mem);
+        } catch (Exception e) {
+            dpaaSystemInfo.setCpu(0f);
+            dpaaSystemInfo.setMem(0);
+            TPILogger.tl.warn(StackTraceUtil.logStackTrace(e));
+        }
+    }
+    
+    private long getUsedMemorySimple() {
+        Runtime runtime = Runtime.getRuntime();
+        return runtime.totalMemory() - runtime.freeMemory();
+    }
 
-	public DpaaSystemInfo getRuntimeInfo() {
-		DpaaSystemInfo vo = new DpaaSystemInfo();
-		setRuntimeInfo(vo);
-		return vo;
-	}
+    private void updateDiskInfo(DpaaSystemInfo dpaaSystemInfo) {
+        OperatingSystem os = systemInfo.getOperatingSystem();
+        FileSystem fs = os.getFileSystem();
+        List<OSFileStore> fsArray = fs.getFileStores();
+        OSFileStore osFileStore = null;
 
-	public void setRuntimeInfo(DpaaSystemInfo dpaaSystemInfo) {
-		if (dpaaSystemInfo != null) {
-			Runtime runtime = Runtime.getRuntime();
-			int htotal = to1024MegaConversion(runtime.totalMemory());
-			dpaaSystemInfo.setHtotal(htotal);
-			int hmax = to1024MegaConversion(runtime.maxMemory());
-			dpaaSystemInfo.setHmax(hmax);
-			int hfree = to1024MegaConversion(runtime.freeMemory());
-			dpaaSystemInfo.setHfree(hfree);
-			int hused = htotal - hfree;
-			dpaaSystemInfo.setHused(hused);
-		}
-	}
+        String lastPath = "";
+        for (OSFileStore fsStore : fsArray) {
+            String mount = FileHelper.filterPath(fsStore.getMount(), false);
+            if (this.appPath.startsWith(mount)) {
+                if (mount.length() > lastPath.length()) {
+                    osFileStore = fsStore;
+                }
+                lastPath = mount;
+            }
+        }
 
-	public DpaaSystemInfo getDiskInfo() {
-		DpaaSystemInfo vo = new DpaaSystemInfo();
-		setDiskInfo(vo);
-		return vo;
-	}
+        long totalSpace = osFileStore == null ? 0 : osFileStore.getTotalSpace();
+        long freeSpace = osFileStore == null ? 0 : osFileStore.getUsableSpace();
+        long diskUsed = totalSpace - freeSpace;
+        String diskFileSystem = "";
+        if (osFileStore != null) {
+            diskFileSystem = Optional.ofNullable(osFileStore.getMount()).orElse("");
+        }
 
-	public void setDiskInfo(DpaaSystemInfo dpaaSystemInfo) {
-		SystemInfo systemInfo = getSystemInfo();
-		setDiskInfo(systemInfo, dpaaSystemInfo);
-	}
+        float diskUsagePercent = 0;
+        if (totalSpace != 0) {
+            diskUsagePercent = new BigDecimal(diskUsed)
+                    .divide(new BigDecimal(totalSpace), 4, BigDecimal.ROUND_HALF_UP)
+                    .floatValue();
+        }
 
-	public void setDiskInfo(SystemInfo systemInfo, DpaaSystemInfo dpaaSystemInfo) {
-		
-		OperatingSystem os = systemInfo.getOperatingSystem();
-		FileSystem fs = os.getFileSystem();
-		List<OSFileStore> fsArray = fs.getFileStores();
-		OSFileStore osFileStore = null;
+        dpaaSystemInfo.setDused(diskUsed);
+        dpaaSystemInfo.setDtotal(totalSpace);
+        dpaaSystemInfo.setDfs(diskFileSystem);
+        dpaaSystemInfo.setDusage(diskUsagePercent);
+        dpaaSystemInfo.setDavail(freeSpace);
+    }
 
-		String lastPath = "";
-		for (OSFileStore fsStore : fsArray) {
-			String mount = fsStore.getMount();
-			// 轉成系統預設的路徑分割符號
-			mount = FileHelper.filterPath(mount, false);
+    private void updateRuntimeInfo(DpaaSystemInfo dpaaSystemInfo) {
+        if (dpaaSystemInfo != null) {
+            Runtime runtime = Runtime.getRuntime();
+            int htotal = to1024MegaConversion(runtime.totalMemory());
+            dpaaSystemInfo.setHtotal(htotal);
+            int hmax = to1024MegaConversion(runtime.maxMemory());
+            dpaaSystemInfo.setHmax(hmax);
+            int hfree = to1024MegaConversion(runtime.freeMemory());
+            dpaaSystemInfo.setHfree(hfree);
+            int hused = htotal - hfree;
+            dpaaSystemInfo.setHused(hused);
+            dpaaSystemInfo.setMetaspacePercent(monitorMetaspace());
+        }
+    }
+    
+    private double monitorMetaspace() {
+        try {
+			MemoryUsage metaspace = ManagementFactory.getMemoryPoolMXBeans().stream()
+					.filter(bean -> "Metaspace".equals(bean.getName())).findFirst()
+					.orElseThrow(() -> new RuntimeException("Metaspace memory pool not found")).getUsage();
 
-			// 只監控 digiLogs 所在的磁碟區(可能為mount)
-			if (this.appPath.startsWith(mount)) {
-				if (mount.length() > lastPath.length()) {
-					osFileStore = fsStore;
-				}
-				lastPath = mount;
-			}
-		}
+			var usedMB = metaspace.getUsed() / (1024 * 1024);
+			var committedMB = metaspace.getCommitted() / (1024 * 1024);
+			var maxMB = metaspace.getMax() / (1024 * 1024); // 你設置的 512MB
+			
+	        // 改用與最大容量的比較
+	        var usagePercentage = (double) metaspace.getUsed() / metaspace.getMax() * 100;
+                          
+            if (usagePercentage > 80) {
+				TPILogger.tl.warn("""
+						\n\tMetaspace.getUsed()::\t%d
+						\tMetaspace.Committed()::\t%d
+						\tMetaspace.getMax()::\t\t%d
+						\tMetaspace usage is high!::\t%.2f%%
+						""".formatted(usedMB, committedMB, maxMB, usagePercentage));
+            }
+            return usagePercentage;
+        } catch (Exception e) {
+        		TPILogger.tl.error(StackTraceUtil.logTpiShortStackTrace(e));
+        }
+        return 0.0;
+    }
 
-		long totalSpace = osFileStore == null ? 0 : osFileStore.getTotalSpace();
-		long freeSpace = osFileStore == null ? 0 : osFileStore.getUsableSpace();
-		long diskUsed = totalSpace - freeSpace;
-		// 為相容於目前設計, 僅取Root "/" (Linux) or "C:\" (Windows)
-		String diskFileSystem = "";
-		if (osFileStore != null) {
-			diskFileSystem = Optional.ofNullable(osFileStore.getMount()).orElse("");
-		}
+    private float getCpuUsedRate(OSProcess currentProcess, int logicalProcessorCount) {
+        return BigDecimal.valueOf(this.osMXBean.getProcessCpuLoad())
+                .setScale(4, RoundingMode.HALF_UP).floatValue();
+    }
 
-		// 判斷硬碟空間是否為零
-		float diskUsagePercent = 0;
-		if (totalSpace != 0) {
-			diskUsagePercent = new BigDecimal(diskUsed) //
-					.divide(new BigDecimal(totalSpace), 4, BigDecimal.ROUND_HALF_UP) //
-					.floatValue();
-		}
-
-		dpaaSystemInfo.setDused(diskUsed);
-		dpaaSystemInfo.setDtotal(totalSpace);
-		dpaaSystemInfo.setDfs(diskFileSystem);
-		dpaaSystemInfo.setDusage(diskUsagePercent);
-		dpaaSystemInfo.setDavail(freeSpace);
-
-	}
-
-	private float getCpuUsedRate(OSProcess currentProcess, int logicalProcessorCount) {
-		/* 2021.07.26 改呼叫library的API取得CPU使用率
-		long currentKernelTime = currentProcess.getKernelTime();
-		long currentUserTime = currentProcess.getUserTime();
-		long currentUpTime = currentProcess.getUpTime();
-
-		long previousKernelTime = 0;
-		long previousUserTime = 0;
-		long previousUpTime = 0;
-		if (this.previousProcessStatus != null) {
-			previousKernelTime = this.previousProcessStatus.getKernelTime();
-			previousUserTime = this.previousProcessStatus.getUserTime();
-			previousUpTime = this.previousProcessStatus.getUpTime();
-		}
-
-		this.previousProcessStatus = currentProcess;
-
-		int diffKernelTime = Math.toIntExact(currentKernelTime - previousKernelTime);
-		int diffUserTime = Math.toIntExact(currentUserTime - previousUserTime);
-		int diffUpTime = Math.toIntExact(currentUpTime - previousUpTime);
-
-		float cpuRate = (100f * (diffKernelTime + diffUserTime) / diffUpTime);
-
-		if (Float.compare(cpuRate, Float.POSITIVE_INFINITY) == 0){
-			cpuRate = 100.0f;
-		}else if (Float.compare(cpuRate, Float.NEGATIVE_INFINITY) == 0 || Float.compare(cpuRate, Float.NaN) == 0){
-			cpuRate = 0.0f;
-		}
-		return BigDecimal.valueOf(cpuRate).setScale(2, RoundingMode.HALF_UP).floatValue();
-		*/
-
-		/* 2021.08.07
-		 * 已知 currentProcess.calculateCpuPercent() 得到的值
-		 * 等於 (diffKernelTime + diffUserTime) / diffUpTime
-		double cpuRate = currentProcess.calculateCpuPercent();
-		return BigDecimal.valueOf(cpuRate) //
-			.divide(BigDecimal.valueOf(logicalProcessorCount), 4, RoundingMode.HALF_UP) //
-			.floatValue();
-		*/
-		return BigDecimal.valueOf(this.osMXBean.getProcessCpuLoad()) //
-			.setScale(4, RoundingMode.HALF_UP).floatValue();
-	}
-
-	/**
-	 * 將 byte 轉為 megabytes (四捨五入為整數)
-	 * @param value
-	 * @return
-	 */
-	private int to1024MegaConversion(long value) {
-		BigDecimal b = new BigDecimal(value);
-		b = b.divide(new BigDecimal(1024 * 1024), BigDecimal.ROUND_HALF_UP);
-		return b.intValue();
-	}
-
+    private int to1024MegaConversion(long value) {
+        BigDecimal b = new BigDecimal(value);
+        b = b.divide(new BigDecimal(1024 * 1024), BigDecimal.ROUND_HALF_UP);
+        return b.intValue();
+    }
 }

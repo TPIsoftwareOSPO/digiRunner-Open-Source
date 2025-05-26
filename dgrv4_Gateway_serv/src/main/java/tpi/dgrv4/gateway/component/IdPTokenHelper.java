@@ -22,10 +22,7 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Component
 public class IdPTokenHelper {
 	
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private TokenHelper tokenHelper;
 	
 	public static class TokenData {
@@ -37,7 +34,14 @@ public class IdPTokenHelper {
 		public String apiResp;
 	}
 	
-    /**
+	@Autowired
+    public IdPTokenHelper(ObjectMapper objectMapper, TokenHelper tokenHelper) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tokenHelper = tokenHelper;
+	}
+
+	/**
      *  用授權碼打 IdP(GOOGLE/MS) 的 token API, <br>
      *  取得 Access token、Refresh token、ID token <br>
      */

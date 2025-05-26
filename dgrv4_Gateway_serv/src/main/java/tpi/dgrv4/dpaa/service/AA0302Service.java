@@ -68,50 +68,46 @@ public class AA0302Service {
 
 	private Long moduleId;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpnApiModuleDao tsmpnApiModuleDao;
-
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpnSiteModuleDao tsmpnSiteModuleDao;
-
-	@Autowired
 	private TsmpnSiteDao tsmpnSiteDao;
-
-	@Autowired
 	private TsmpnApiDetailDao tsmpnApiDetailDao;
-
-	@Autowired
 	private TsmpApiDetailDao tsmpApiDetailDao;
-
-	@Autowired
 	private TsmpDcDao tsmpDcDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ObjectMapper objectMapper;
+	private TsmpRegHostDao tsmpRegHostDao;
 
 	@Autowired
-	private TsmpRegHostDao tsmpRegHostDao;
+	public AA0302Service(TsmpApiDao tsmpApiDao, TsmpnApiModuleDao tsmpnApiModuleDao, TsmpApiModuleDao tsmpApiModuleDao,
+			TsmpnSiteModuleDao tsmpnSiteModuleDao, TsmpnSiteDao tsmpnSiteDao, TsmpnApiDetailDao tsmpnApiDetailDao,
+			TsmpApiDetailDao tsmpApiDetailDao, TsmpDcDao tsmpDcDao, TsmpApiRegDao tsmpApiRegDao,
+			TsmpRegModuleDao tsmpRegModuleDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ObjectMapper objectMapper, TsmpRegHostDao tsmpRegHostDao) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpnApiModuleDao = tsmpnApiModuleDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpnSiteModuleDao = tsmpnSiteModuleDao;
+		this.tsmpnSiteDao = tsmpnSiteDao;
+		this.tsmpnApiDetailDao = tsmpnApiDetailDao;
+		this.tsmpApiDetailDao = tsmpApiDetailDao;
+		this.tsmpDcDao = tsmpDcDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpOrganizationCacheProxy = tsmpOrganizationCacheProxy;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.objectMapper = objectMapper;
+		this.tsmpRegHostDao = tsmpRegHostDao;
+	}
 
 	public AA0302Resp queryAPIDetail(TsmpAuthorization authorization, AA0302Req req, ReqHeader reqHeader) {
 		AA0302Resp resp = new AA0302Resp();

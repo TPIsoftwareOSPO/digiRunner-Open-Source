@@ -6,8 +6,6 @@ import java.util.List;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -34,19 +32,19 @@ public class DPB0067Job extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private DpReqServiceFactory dpReqServiceFactory;
 
 	private String locale;
 
-	public DPB0067Job(String locale) {
+	public DPB0067Job(String locale, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrdermDao tsmpDpReqOrdermDao,
+			DpReqServiceFactory dpReqServiceFactory) {
+		super();
 		this.locale = locale;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.dpReqServiceFactory = dpReqServiceFactory;
 	}
 
 	@Override

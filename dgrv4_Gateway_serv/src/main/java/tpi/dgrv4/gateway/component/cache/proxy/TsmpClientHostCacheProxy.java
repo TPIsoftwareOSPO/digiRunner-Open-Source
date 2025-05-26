@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.component.cache.proxy.DaoCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpClientGroup;
@@ -21,8 +23,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Component
 public class TsmpClientHostCacheProxy extends DaoCacheProxy {
 
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
+
+	@Autowired
+	public TsmpClientHostCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache,
+			TsmpClientHostDao tsmpClientHostDao) {
+		super(objectMapper, cache);
+		this.tsmpClientHostDao = tsmpClientHostDao;
+	}
 
 	public List<TsmpClientHost> findByClientId(String clientId) {
 		Supplier<List<TsmpClientHost>> supplier = () -> {

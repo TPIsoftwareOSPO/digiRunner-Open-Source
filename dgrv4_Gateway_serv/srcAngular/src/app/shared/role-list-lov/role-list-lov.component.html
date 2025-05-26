@@ -13,7 +13,7 @@
           pButton
           type="button"
           icon="pi pi-search"
-          class="ml-1 tpi-night"
+          class="ms-1 tpi-night"
           (click)="searchRoleDetailList('search')"
         ></button>
       </div>
@@ -72,13 +72,6 @@
       <tr *ngIf="roleDetailList.length>0">
         <td [attr.colspan]="columns.length + 1" style="color: #b7b7b7;">
           <span style="vertical-align:middle ;">{{ "row_count" | translate }}: {{ roleDetailList.length }}</span>
-          <!-- <button
-            type="button"
-            class="btn btn-warning pull-right ml-3"
-            (click)="moreData()"
-          >
-            {{ "button.more" | translate }}
-          </button> -->
           <button  type="button" icon=""
           class="btn tpi-header-return"
          (click)="moreData()">
@@ -100,7 +93,7 @@
   <div class="text-center">
     <button
       type="button"
-      class="btn tpi-btn tpi-primary mr-3"
+      class="btn tpi-btn tpi-primary me-3"
       (click)="chooseRole()"
       [disabled]="roleDetailList.length == 0"
     >
@@ -111,7 +104,7 @@
     </button>
   </div>
   <!-- <div class="text-center">
-        <button type="button" class="btn btn-warning mr-3" [disabled]="rowcount == 0"
+        <button type="button" class="btn btn-warning me-3" [disabled]="rowcount == 0"
             (click)="chooseRole()">{{'button.confirm'|translate</button>
         <button type="button" class="btn btn-warning" (click)="cancelRole();">{{'button.cancel' |translate}</button>
     </div> -->

@@ -14,8 +14,13 @@ import java.util.LinkedList;
 @Component
 public class TsmpCoreTokenInitializerInit implements ITsmpCoreTokenInitializerInit {
 
-	@Autowired
 	private IVersionService versionService;
+
+	@Autowired
+	public TsmpCoreTokenInitializerInit(IVersionService versionService) {
+		super();
+		this.versionService = versionService;
+	}
 
 	@Override
 	public StringBuffer init(ContextRefreshedEvent e, StringBuffer info) {

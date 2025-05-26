@@ -58,11 +58,15 @@ public class DgrCusController {
 
 	public final static String KEY_OF_RID_COOKIE = "_embedded_link_reportId";
 
-	@Autowired
 	private TsmpReportUrlDao tsmpReportUrlDao;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public DgrCusController(TsmpReportUrlDao tsmpReportUrlDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping( //

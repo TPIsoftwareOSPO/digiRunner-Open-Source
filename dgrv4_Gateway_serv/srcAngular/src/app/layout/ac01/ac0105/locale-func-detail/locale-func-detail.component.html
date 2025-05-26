@@ -1,9 +1,9 @@
 <div
-  class="form-group col ldapdetail"
+  class="form-group col ldapdetail d-flex"
   [formGroup]="form"
-  style="align-items: center; display: flex"
+  style="align-items: center;"
 >
-  <div class="col-2">
+  <div class="col-2 mx-2">
     <label id="locale_label" for="locale" class="control-label required">{{
       "fun_locale" | translate
     }}</label>
@@ -28,7 +28,7 @@
       <small class="form-text">{{ locale.errors.required | translate }}</small>
     </div>
   </div>
-  <div class="col-3">
+  <div class="col-3 mx-2">
     <label for="funcName" class="control-label required">{{
       "fun_name" | translate
     }}</label>
@@ -72,7 +72,7 @@
   </div>
   <button
     type="button"
-    class="btn tpi-primary ml-1"
+    class="btn tpi-primary ms-1"
     (click)="deleteItem()"
     style="border-radius: 50%"
   >

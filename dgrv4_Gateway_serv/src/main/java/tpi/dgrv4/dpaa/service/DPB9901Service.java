@@ -16,8 +16,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB9901Service {
 
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
+
+	@Autowired
+	public DPB9901Service(TsmpSettingDao tsmpSettingDao) {
+		super();
+		this.tsmpSettingDao = tsmpSettingDao;
+	}
 
 	public DPB9901Resp queryTsmpSettingDetail(TsmpAuthorization auth, DPB9901Req req) {
 		String id = Optional.ofNullable(req.getId()) //

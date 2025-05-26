@@ -1,13 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
 
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryClientList()">
+    <form [formGroup]="form">
       <div class="form-group row col-12">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-        </span>
+        <app-search-input
+        placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryClientList.bind(this)"
+        class="col-9 col-lg0-6 col-sm-6"></app-search-input>
       </div>
     </form>
     <hr>
@@ -71,7 +70,7 @@
       </div>
       <div class="col-12">
         <label class="control-label">When multiple profiles are enabled, the profile created last will be used.</label>
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+        <button type="button" class="btn tpi-btn tpi-second float-end"
           (click)="changePage('create')">{{'button.create'|translate}}</button>
       </div>
     </div>
@@ -147,7 +146,7 @@
 
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('queryClientList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -178,24 +177,14 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="Y" inputId="statusY"></p-radioButton>
-                <label for="statusY" class="ml-2 mb-0">Y</label>
+                <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="N" inputId="statusN"></p-radioButton>
-                <label for="statusN" class="ml-2 mb-0">N</label>
+                <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
           </div>
-          <!-- <div class="col-12">
-            <div class="form-check-inline col-12">
-              <label class="form-check-label">
-                <input type="radio" class="form-check-input" formControlName="status" value="Y"> Y
-              </label>
-              <label class="form-check-label ml-5">
-                <input type="radio" class="form-check-input" formControlName="status" value="N"> N
-              </label>
-            </div>
-          </div> -->
           <div *ngIf="status?.invalid && (status?.dirty || status?.touched)" class="text-danger">
             <small class="form-text">{{status?.errors.pattern | translate}}</small>
             <small class="form-text">{{status?.errors.isRequired | translate}}</small>
@@ -225,8 +214,8 @@
         <div class="col-8">
           <label for="iconFile" class="control-label">Icon</label>
 
-          <div class="row col-auto" [hidden]="currentAction ==='detail'">
-            <div class="mr-2">
+          <div class="d-flex col-auto" [hidden]="currentAction ==='detail'">
+            <div class="me-2">
               <button type="button" class="btn tpi-btn tpi-night pull-right"
                 (click)="openFileBrowser();">{{'chs_file'|translate}}</button>
             </div>
@@ -256,7 +245,7 @@
           <!-- <input type="text" class="form-control" id="connectionName" formControlName="connectionName"> -->
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="connectionName" placeholder="" readonly>
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
               (click)="queryRdbConnectionInfoList();"></button>
           </div>
           <div *ngIf="connectionName?.invalid && (connectionName?.dirty || connectionName?.touched)"
@@ -274,7 +263,7 @@
             <small class="form-text">{{sqlPtmt?.errors.isRequired | translate}}</small>
           </div>
         </div>
-        <div class="col-12 pl-5">
+        <div class="col-12 ps-5">
           <label class="control-label">SQL (Prepare Statement) Example</label>
           <input type="text" class="form-control"
             value="select * from users u, tsmp_user ts where upper(u.username) = upper(?) and u.enabled = ?  and u.username = ts.user_name"
@@ -290,11 +279,11 @@
             <small class="form-text">{{sqlParams?.errors.isRequired | translate}}</small>
           </div>
         </div>
-        <div class="col-12 pl-5 form-group">
+        <div class="col-12 ps-5 form-group">
           <label class="control-label">Parameters Example</label>
           <input type="text" class="form-control" [value]="paramsExp" disabled>
         </div>
-        <div class="col-12 pl-5">
+        <div class="col-12 ps-5">
           <label class="control-label">SQL String Result Example</label>
           <!-- <textarea rows="2" style="width:100%" class="form-control" [value]="sqlResult" pInputTextarea
             readonly></textarea> -->
@@ -380,7 +369,7 @@
               <label class="control-label">DB Query Result Example</label>
               <div>
                 <table class="table table-bordered" style="font-size: 0.8rem;">
-                  <thead class="thead-dark">
+                  <thead class="table-dark">
                     <tr>
                       <th>xxx</th>
                       <th>user_password</th>
@@ -436,12 +425,12 @@
       <div class="form-group row">
         <div class="col-12 col-lg-12">
 
-          <button *ngIf="currentAction == 'create'" type="button" class="btn tpi-btn tpi-second float-left mr-3"
+          <button *ngIf="currentAction == 'create'" type="button" class="btn tpi-btn tpi-second float-start me-3"
             [disabled]="!formEdit.valid" (click)="create();">{{'button.create'|translate}}</button>
-          <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="!formEdit.valid" (click)="update();">{{'button.update'|translate}}</button>
 
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('clientList');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

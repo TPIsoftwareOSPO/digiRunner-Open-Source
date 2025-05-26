@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 
 @RestController
 public class AA0431Controller {
-	@Autowired
 	private AA0431Service service;
+
+	@Autowired
+	public AA0431Controller(AA0431Service service) {
+		super();
+		this.service = service;
+	}
 
 
 	@PostMapping(value = "/dgrv4/11/AA0431", 

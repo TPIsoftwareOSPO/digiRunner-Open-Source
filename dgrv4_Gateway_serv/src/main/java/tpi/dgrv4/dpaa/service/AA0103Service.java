@@ -43,27 +43,28 @@ public class AA0103Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private TsmpRoleFuncDao tsmpRoleFuncDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpReportUrlDao tsmpReportUrlDao;
-	
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
 	
+	@Autowired
+	public AA0103Service(TsmpFuncDao tsmpFuncDao, TsmpRoleDao tsmpRoleDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			ServiceConfig serviceConfig, TsmpReportUrlDao tsmpReportUrlDao, TsmpDpItemsDao tsmpDpItemsDao,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.serviceConfig = serviceConfig;
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
+
 	private Integer pageSize;
 
 	public AA0103Resp queryTFuncList(AA0103Req req, ReqHeader reqHeader) {

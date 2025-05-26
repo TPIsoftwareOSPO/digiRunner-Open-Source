@@ -1,15 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="changePage('query')">
     <div [hidden]="pageNum != 1">
-        <form [formGroup]="form" (ngSubmit)="submitForm()">
+        <form [formGroup]="form">
           <div class="form-group row">
-            <div class="col-12 ">
-              <span class="p-input-icon-right" style="width:40vw">
-                <i class="pi pi-search tpi-i-search" (click)="submitForm();"></i>
-                <input type="text" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                  placeholder="{{'login_role'|translate}}">
-              </span>
-
-              <button type="button" class="btn tpi-btn tpi-second float-right"
+            <div class="col-12 d-flex align-items-center">
+              <app-search-input placeholder="{{'login_role'|translate}}"
+              [control]="keyword" [searchFn]="submitForm.bind(this)"
+              class="col-9 col-lg-4 col-sm-6"></app-search-input>
+              <button type="button" class="btn tpi-btn tpi-second ms-auto "
                 (click)="changePage('create');">{{'button.create'|translate}}</button>
             </div>
           </div>
@@ -22,8 +19,8 @@
             </div>
             <div class="form-group row">
                 <div class="col-3 col-xl-3">
-                    <button type="submit" class="btn btn-warning float-left mr-3">{{'button.search'|translate}}</button>
-                    <button type="button" class="btn btn-primary float-left"
+                    <button type="submit" class="btn btn-warning float-start me-3">{{'button.search'|translate}}</button>
+                    <button type="button" class="btn btn-primary float-start"
                         (click)="changePage('create');">{{'button.create' | translate}}</button>
                 </div>
             </div> -->
@@ -67,14 +64,14 @@
                                   <!-- </a> -->
                                 <label class="moreless" *ngIf="rowData.msgTruncated" (click)="switchOri(rowData)">
                                   {{rowData.t ? '' : ("show_more" | translate)}}
-                                  <i  class="fas" [ngClass]="[rowData.t ? 'fa-angle-double-left  mt-1 mr-1': 'fa-angle-double-right mt-1 ']"></i>
+                                  <i  class="fas" [ngClass]="[rowData.t ? 'fa-angle-double-left  mt-1 me-1': 'fa-angle-double-right mt-1 ']"></i>
                                   {{rowData.t ? ("show_less" | translate) : ''}}
                                 </label>
                         </span>
                     </td>
                     <td style="width:140px;text-align: center;">
                         <!-- <div class="btn-group w-100">
-                            <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);">
+                            <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);">
                                 <span class="fa fa-edit">{{'button.update' | translate}}</span>
                             </button>
                         </div> -->
@@ -98,8 +95,6 @@
                 <tr *ngIf="rowcount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                            (click)="moreData();">{{'button.more'|translate}}</button> -->
                             <!-- 查詢更多 -->
                           <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
                             <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
@@ -124,7 +119,7 @@
                     <div *ngIf="currentAction == 'create'" class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="roleAlias"
                             placeholder="{{'login_role' | translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
                             (click)="queryRoleList('role');"></button>
                     </div>
                     <label *ngIf="currentAction == 'update'"
@@ -135,7 +130,7 @@
                 <div class="col-12">
                     <label for="roleAliasMapping"
                         class="required control-label">{{'role_alias_mapping' | translate}}</label>
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night ml-2 mb-1"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2 mb-1"
                         (click)="queryRoleList('mappingRole');"></button>
                     <label class="form-control border-line" style="height: unset;">
                         <div *ngIf="roleAliasMapping!.value.length > 0" class="ui-chips ui-widget">
@@ -155,10 +150,10 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-second float-left mr-3"
+                    <button type="button" class="btn tpi-btn tpi-second float-start me-3"
                         [disabled]="form.invalid || roleNameMapping!.value.length == 0"
                         (click)="createOrUpdate();">{{btnName}}</button>
-                    <button type="button" class="btn tpi-btn tpi-primary float-left"
+                    <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>

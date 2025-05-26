@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.service.OAuthIntrospectionService;
 @RestController
 public class OAuthIntrospectionController {
 
-	@Autowired
 	private OAuthIntrospectionService oauthIntrospectionService;
 	
+	@Autowired
+	public OAuthIntrospectionController(OAuthIntrospectionService oauthIntrospectionService) {
+		super();
+		this.oauthIntrospectionService = oauthIntrospectionService;
+	}
+
 	@PostMapping(value = "/oauth/introspection",
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)

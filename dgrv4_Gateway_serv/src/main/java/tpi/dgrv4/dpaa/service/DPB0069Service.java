@@ -43,34 +43,35 @@ public class DPB0069Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
-	
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private TsmpDpChkLogDao tsmpDpChkLogDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
 	private DPB0067Service dpb0067Service;
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
 
 	private Integer pageSize;
 	
+	@Autowired
+	public DPB0069Service(ServiceConfig serviceConfig, AuthoritiesDao authoritiesDao,
+			TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpUserDao tsmpUserDao,
+			TsmpDpChkLogDao tsmpDpChkLogDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, DPB0067Service dpb0067Service,
+			DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.serviceConfig = serviceConfig;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpDpChkLogDao = tsmpDpChkLogDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.dpb0067Service = dpb0067Service;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
+
 	public DPB0069Resp queryHistoryByPk(TsmpAuthorization tsmpAuthorization, DPB0069Req req, ReqHeader reqHeader) {
 		DPB0069Resp resp = new DPB0069Resp();
 

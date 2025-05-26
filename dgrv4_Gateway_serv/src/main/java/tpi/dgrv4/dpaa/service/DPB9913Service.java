@@ -26,8 +26,13 @@ public class DPB9913Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private CusSettingDao cusSettingDao;
+
+	@Autowired
+	public DPB9913Service(CusSettingDao cusSettingDao) {
+		super();
+		this.cusSettingDao = cusSettingDao;
+	}
 
 	public DPB9913Resp updateCusSetting(TsmpAuthorization auth, DPB9913Req req) {
 		try {

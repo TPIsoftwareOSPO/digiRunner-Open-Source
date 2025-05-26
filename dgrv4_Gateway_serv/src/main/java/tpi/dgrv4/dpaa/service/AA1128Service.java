@@ -23,11 +23,16 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class AA1128Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
 	private DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao;
 	
+	@Autowired
+	public AA1128Service(ObjectMapper objectMapper, DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao) {
+		super();
+		this.objectMapper = objectMapper;
+		this.dgrImportClientRelatedTempDao = dgrImportClientRelatedTempDao;
+	}
+
 	public AA1128Resp importClientRelatedAllCover(TsmpAuthorization tsmpAuthorization, AA1128Req req) {
 
 		try {

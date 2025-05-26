@@ -21,6 +21,13 @@ import tpi.dgrv4.common.constant.TsmpDpSeqStoreKey;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.dpaa.component.job.DPB0065Job;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
+import tpi.dgrv4.dpaa.service.SendAPIApplicationMailService;
+import tpi.dgrv4.dpaa.service.SendClientRegMailService;
+import tpi.dgrv4.dpaa.service.SendReviewMailService;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
+import tpi.dgrv4.entity.daoService.BcryptParamHelper;
+import tpi.dgrv4.entity.daoService.SeqStoreService;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpDpFile;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
@@ -30,13 +37,25 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd2;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd2d;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.entity.sql.TsmpDpThemeCategory;
+import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
+import tpi.dgrv4.entity.repository.SeqStoreDao;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiExtDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLayerDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLogDao;
+import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2dDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
 import tpi.dgrv4.entity.repository.TsmpDpThemeCategoryDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.job.JobHelper;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -51,26 +70,41 @@ public class DpReqServiceImpl_D2 extends DpReqServiceAbstract implements DpReqSe
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao;
-
-	@Autowired
 	private TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
+	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
+	protected SeqStoreDao seqStoreDao;
 
 	@Autowired
-	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
+	public DpReqServiceImpl_D2(ApptJobDispatcher apptJobDispatcher, TsmpClientDao tsmpClientDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpUserDao tsmpUserDao,
+			SeqStoreService seqStoreService, TsmpDpReqOrdersDao tsmpDpReqOrdersDao, FileHelper fileHelper,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpDpChkLogDao tsmpDpChkLogDao,
+			BcryptParamHelper bcryptParamHelper, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, SendReviewMailService mailService,
+			SendClientRegMailService sendClientRegMailService,
+			SendAPIApplicationMailService sendAPIApplicationMailService, DgrAuditLogService dgrAuditLogService,
+			DgrAcIdpUserDao dgrAcIdpUserDao, TsmpDpReqOrderd2Dao tsmpDpReqOrderd2Dao,
+			TsmpDpReqOrderd2dDao tsmpDpReqOrderd2dDao, TsmpApiExtDao tsmpApiExtDao, ApplicationContext ctx,
+			JobHelper jobHelper, TsmpApiDao tsmpApiDao, TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao,
+			SeqStoreDao seqStoreDao) {
+		super(apptJobDispatcher, tsmpClientDao, tsmpDpItemsCacheProxy, tsmpDpReqOrdermDao, tsmpUserDao, seqStoreService,
+				tsmpDpReqOrdersDao, fileHelper, tsmpDpFileDao, tsmpDpChkLayerDao, tsmpDpChkLogDao, bcryptParamHelper,
+				tsmpOrganizationDao, tsmpDpApptJobDao, mailService, sendClientRegMailService,
+				sendAPIApplicationMailService, dgrAuditLogService, dgrAcIdpUserDao);
+		this.tsmpDpReqOrderd2Dao = tsmpDpReqOrderd2Dao;
+		this.tsmpDpReqOrderd2dDao = tsmpDpReqOrderd2dDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.seqStoreDao = seqStoreDao;
+	}
 
 	@Override
 	protected <Q extends DpReqServiceSaveDraftReq> void checkDetailReq(Q q, String locale) throws TsmpDpAaException {
@@ -690,7 +724,7 @@ public class DpReqServiceImpl_D2 extends DpReqServiceAbstract implements DpReqSe
 	}
 
 	protected DPB0065Job getDpb0065Job(String locale) {
-		return (DPB0065Job) getCtx().getBean("dpb0065Job", locale);
+		return (DPB0065Job) getCtx().getBean("dpb0065Job", locale, this.tsmpDpItemsCacheProxy, this.seqStoreDao);
 	}
 
 	protected TsmpApiDao getTsmpApiDao() {

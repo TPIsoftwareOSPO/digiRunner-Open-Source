@@ -21,8 +21,13 @@ public class DPB0108Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpEventsDao tsmpEventsDao;
+
+	@Autowired
+	public DPB0108Service(TsmpEventsDao tsmpEventsDao) {
+		super();
+		this.tsmpEventsDao = tsmpEventsDao;
+	}
 
 	public DPB0108Resp keepEventByPk(TsmpAuthorization auth, DPB0108Req req) {
 		DPB0108Resp resp = null;

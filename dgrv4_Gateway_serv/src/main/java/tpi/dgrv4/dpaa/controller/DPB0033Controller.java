@@ -25,8 +25,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0033Controller {
 
-	@Autowired
 	private DPB0033Service dpb0033Service;
+
+	@Autowired
+	public DPB0033Controller(DPB0033Service dpb0033Service) {
+		super();
+		this.dpb0033Service = dpb0033Service;
+	}
 
 	/**
 	 * 網站地圖新增節點<br/>

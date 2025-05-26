@@ -2,30 +2,15 @@
     <!-- 查詢 -->
     <div [hidden]="pageNum != 1">
         <form [formGroup]="form" (ngSubmit)="queryScopeAuthoritiesList()">
+          <div class="col-12 d-flex align-items-center">
+            <app-search-input
+              placeholder="{{'auth_id'|translate}}、{{'auth_name'|translate}}、{{'group_auth_desc'|translate}}、{{'auth_level'|translate}}"
+              [control]="form.get('keyword')" [searchFn]="queryScopeAuthoritiesList.bind(this)"
+              class="col-9 col-lg-6 col-sm-6"></app-search-input>
 
-          <span class="p-input-icon-right" style="width:40vw">
-            <i class="pi pi-search tpi-i-search" (click)="queryScopeAuthoritiesList();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'auth_id'|translate}}、{{'auth_name'|translate}}、{{'group_auth_desc'|translate}}、{{'auth_level'|translate}}">
-          </span>
-
-          <button type="button" class="btn tpi-btn tpi-second float-right" (click)="changePage('create');"
-          [disabled]="canCreate == false">{{'button.create'|translate}}</button>
-            <!-- <div class="form-group row">
-                <div class="col-4 col-xl-4 col-lg-4">
-                    <label id="keyword_label" class="control-label" for="keyword">{{'keyword_search'|translate}}</label>
-                    <input type="text" class="form-control" id="keyword" formControlName="keyword"
-                        placeholder="{{'auth_id'|translate}}、{{'auth_name'|translate}}、{{'group_auth_desc'|translate}}、{{'auth_level'|translate}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
-                        (click)="queryScopeAuthoritiesList();">{{'button.search' | translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-second float-right" (click)="changePage('create');"
-                        [disabled]="canCreate == false">{{'button.create'|translate}}</button>
-                </div>
-            </div> -->
+            <button type="button" class="btn tpi-btn tpi-second ms-auto" (click)="changePage('create');"
+              [disabled]="canCreate == false">{{'button.create'|translate}}</button>
+          </div>
         </form>
         <hr>
         <p-table *ngIf="cols" [columns]="cols" [value]="groupAuthoritiesList" selectionMode="single"
@@ -65,11 +50,11 @@
                               [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
 
                         <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail',rowData);"
+                            <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData);"
                                 [disabled]="canDetail == false">
                                 <span class="fa fa-search">{{'button.detail'|translate}}</span>
                             </button>
-                            <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);"
+                            <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);"
                                 [disabled]=" canUpdate==false">
                                 <span class="fa fa-edit">{{'button.update'|translate}}</span>
                             </button>
@@ -85,7 +70,7 @@
                 <tr *ngIf="groupAuthoritiesListRowCount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span>{{'row_count' | translate}}: {{groupAuthoritiesListRowCount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                        <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreScopeAuthoritiesList();">{{'button.more'|translate}}</button> -->
 
                             <!-- 查詢更多 -->
@@ -144,7 +129,7 @@
                 <div class="col-sm-6">
                     <label id="groupAuthoritieLevel_label"
                         class="control-label">{{'group_auth_level'|translate}}</label>
-                    <small class="control-label text-danger ml-2">({{'auth_level_remark' | translate}})</small>
+                    <small class="control-label text-danger ms-2">({{'auth_level_remark' | translate}})</small>
                     <input type="text" class="form-control" formControlName="groupAuthoritieLevel"
                         placeholder="{{'group_auth_level'|translate}}">
                     <div *ngIf="groupAuthoritieLevel?.invalid && (groupAuthoritieLevel?.dirty || groupAuthoritieLevel?.touched)"
@@ -157,9 +142,9 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+                    <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
                         (click)="create();">{{'button.create'|translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-primary float-left"
+                    <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>
@@ -207,7 +192,7 @@
                 <div class="col-sm-6">
                     <label id="newGroupAuthoritieLevel_label"
                         class="control-label">{{'group_auth_level'|translate}}</label>
-                    <small class="control-label text-danger ml-2">({{'auth_level_remark' | translate}})</small>
+                    <small class="control-label text-danger ms-2">({{'auth_level_remark' | translate}})</small>
                     <input type="text" class="form-control" formControlName="newGroupAuthoritieLevel"
                         placeholder="{{'group_auth_level'|translate}}">
                     <div *ngIf="newGroupAuthoritieLevel?.invalid && (newGroupAuthoritieLevel?.dirty || newGroupAuthoritieLevel?.touched)"
@@ -220,9 +205,9 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+                    <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
                         (click)="update();">{{'button.update'|translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-primary float-left"
+                    <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>
@@ -248,13 +233,13 @@
                 </div>
                 <div class="col-sm-6">
                     <label class="control-label">{{'group_auth_level'|translate}}</label>
-                    <small class="control-label text-danger ml-2">({{'auth_level_remark' | translate}})</small>
+                    <small class="control-label text-danger ms-2">({{'auth_level_remark' | translate}})</small>
                     <label class="form-control border-line">{{groupAuthoritiesDetail.groupAuthoritieLevel}}</label>
                 </div>
             </div>
             <div class="form-group row">
                 <div class="col-12 col-lg-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-left"
+                    <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>

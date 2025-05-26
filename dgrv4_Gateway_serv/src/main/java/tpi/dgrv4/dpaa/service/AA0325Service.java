@@ -41,13 +41,17 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class AA0325Service {
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	private ExecutorService executor = Executors.newCachedThreadPool(new CustomizableThreadFactory("AA0325Service"));;
 
-	@Autowired
+	private ObjectMapper objectMapper;
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public AA0325Service(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public AA0325Resp compSync(AA0325Req req, HttpServletRequest httpReq) throws JsonProcessingException {
 

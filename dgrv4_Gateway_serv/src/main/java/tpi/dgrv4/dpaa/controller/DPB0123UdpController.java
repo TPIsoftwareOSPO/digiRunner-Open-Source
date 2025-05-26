@@ -22,8 +22,13 @@ public class DPB0123UdpController {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DPB0123UdpService service;
+
+	@Autowired
+	public DPB0123UdpController(DPB0123UdpService service) {
+		super();
+		this.service = service;
+	}
 
 
 	@GetMapping(value = "/dgrv4/udpssotoken/DPB0123Udp", //

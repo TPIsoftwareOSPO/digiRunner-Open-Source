@@ -24,9 +24,14 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @RestController
 public class TptokenController {
 	
-	@Autowired
 	private TptokenService service;
 	
+	@Autowired
+	public TptokenController(TptokenService service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 由 tptoken Bridge 轉接取得token
 	 * 			

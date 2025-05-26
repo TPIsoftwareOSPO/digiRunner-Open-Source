@@ -71,7 +71,7 @@
                         </button>
                         <button
                             [disabled]="rowData.status === '1' && rowData.moduleName === 'tsmpnaa' ? true : false || rowData.moduleID === 0 && rowData.moduleName === null"
-                            type="button" class="btn btn-deta mr-5" (click)="startStop(rowData)">
+                            type="button" class="btn btn-deta me-5" (click)="startStop(rowData)">
                             <span class="fa"
                                 [ngClass]="{'fa-lock': rowData.status === '1' , 'fa-lock-open': rowData.status === '0'}">
                                 {{rowData.status === '1' ? inactive : active}}

@@ -4,28 +4,18 @@
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
       <div class="form-group row">
-        <div class="col-6">
-          <!-- <label class="control-label">{{'keyword_search'|translate}}</label> -->
-          <!-- <input type="text" class="form-control" formControlName="keyword" (keyup.enter)="queryCusSettingList()"
-            placeholder="{{'cate_name'|translate}}、{{'subitem_name'|translate}}"> -->
+        <div class="col-12 d-flex">
 
-            <span class="p-input-icon-right" style="width: 100%;">
-              <i class="pi pi-search tpi-i-search" (click)="queryCusSettingList();"></i>
-              <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-                placeholder="{{'cate_name'|translate}}、{{'subitem_name'|translate}}"
-                (keyup.enter)="queryCusSettingList()">
-            </span>
-
-        </div>
-        <div class="col-6">
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+            <app-search-input placeholder="{{'cate_name'|translate}}、{{'subitem_name'|translate}}" [control]="form.get('keyword')"
+            [searchFn]="queryCusSettingList.bind(this)" class="col-9 col-lg-6 col-sm-6"></app-search-input>
+            <button type="button" class="btn tpi-btn tpi-second ms-auto"
           (click)="changePage('create');">{{'button.create'|translate}}</button>
         </div>
 
       </div>
       <!-- <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="queryCusSettingList();">{{'button.search' | translate}}</button>
 
         </div>
@@ -73,7 +63,7 @@
               {{originStringTable(rowData[col.field])}}
               <a *ngIf="rowData[col.field].ori" href="javascript:void(0)" (click)="switchOri(rowData[col.field])">
                 <label>{{!rowData[col.field].t ? ("show_less" | translate) : ("show_more" | translate)}}
-                  <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-left mt-1 mr-1': 'fa-angle-double-right ']"></i></label>
+                  <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-start mt-1 me-1': 'fa-angle-double-right ']"></i></label>
               </a>
 
             </span>
@@ -94,10 +84,10 @@
                         [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
 
             <!-- <div class="btn-group">
-              <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail',rowData);">
+              <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData);">
                 <span class="fa fa-edit">{{'button.detail' | translate}}</span>
               </button>
-              <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);">
+              <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);">
                 <span class="fa fa-edit">{{'button.update' | translate}}</span>
               </button>
               <button type="button" class="btn btn-deta" (click)="changePage('delete',rowData);">
@@ -244,10 +234,10 @@
 
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn float-start me-3" [disabled]="form.invalid"
           [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -329,9 +319,9 @@
 
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid" [hidden]="currentAction=='detail'"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid" [hidden]="currentAction=='detail'"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

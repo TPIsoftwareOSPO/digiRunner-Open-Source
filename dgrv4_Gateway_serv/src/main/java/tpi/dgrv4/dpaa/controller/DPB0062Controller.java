@@ -25,10 +25,15 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0062Controller {
 
-	@Autowired
 	private DPB0062Service dpb0062Service;
-
 	
+	@Autowired
+	public DPB0062Controller(DPB0062Service dpb0062Service) {
+		super();
+		this.dpb0062Service = dpb0062Service;
+	}
+
+
 	/**
 	 * 提供外部新增一筆 Job
 	 * 新增一筆 Record 供排程執行

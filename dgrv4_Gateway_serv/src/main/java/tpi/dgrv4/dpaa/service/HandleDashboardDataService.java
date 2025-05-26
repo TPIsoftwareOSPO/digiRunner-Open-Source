@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -49,25 +50,18 @@ import tpi.dgrv4.gateway.service.ISysInfoService;
 @Service
 public class HandleDashboardDataService {
 
-	@Autowired
-	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
-	@Autowired
-	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
-	@Autowired
-	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
-	@Autowired
-    private TsmpDpApptJobDao tsmpDpApptJobDao;
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	@Autowired
-	private TsmpApiDao tsmpApiDao;
-	@Autowired
-	private HandleDashboardDataByYearService handleDashboardDataByYearService;
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private ISysInfoService sysInfoService;
 	
+	private DgrDashboardLastDataDao dgrDashboardLastDataDao;
+	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
+	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
+    private TsmpDpApptJobDao tsmpDpApptJobDao;
+	private TsmpApiCacheProxy tsmpApiCacheProxy;
+	private TsmpApiDao tsmpApiDao;
+	private HandleDashboardDataByYearService handleDashboardDataByYearService;
+	private TsmpSettingService tsmpSettingService;
+
 	private DateFormat yyyyMMddHHmmssSSS = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 	private DateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 	private DateFormat yyyyMMddHH = new SimpleDateFormat("yyyy/MM/dd HH");
@@ -77,6 +71,23 @@ public class HandleDashboardDataService {
 	private DateFormat MMdd = new SimpleDateFormat("MM/dd");
 	
 	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
+	
+	@Autowired
+	public HandleDashboardDataService(@Nullable ISysInfoService sysInfoService, DgrDashboardLastDataDao dgrDashboardLastDataDao,
+			TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao, DgrDashboardEsLogDao dgrDashboardEsLogDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpApiCacheProxy tsmpApiCacheProxy, TsmpApiDao tsmpApiDao,
+			HandleDashboardDataByYearService handleDashboardDataByYearService, TsmpSettingService tsmpSettingService) {
+		super();
+		this.sysInfoService = sysInfoService;
+		this.dgrDashboardLastDataDao = dgrDashboardLastDataDao;
+		this.tsmpReqResLogHistoryDao = tsmpReqResLogHistoryDao;
+		this.dgrDashboardEsLogDao = dgrDashboardEsLogDao;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.tsmpApiDao = tsmpApiDao;
+		this.handleDashboardDataByYearService = handleDashboardDataByYearService;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 	
 	@Transactional
 	public void exec(Date execDate, boolean isEs, Long jobId) {

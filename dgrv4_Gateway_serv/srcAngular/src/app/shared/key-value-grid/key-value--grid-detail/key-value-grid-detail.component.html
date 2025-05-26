@@ -1,7 +1,7 @@
 
 <div [formGroup]="form" style="display: flex; width: 100%; margin-bottom: 20px">
-  <!-- <input type="checkbox" formControlName="selected" class="mr-1"> -->
-  <p-checkbox [binary]="true" formControlName="selected" class="mr-1"></p-checkbox>
+  <!-- <input type="checkbox" formControlName="selected" class="me-1"> -->
+  <p-checkbox [binary]="true" formControlName="selected" class="me-1"></p-checkbox>
   <div
    style="
       display: flex;
@@ -36,7 +36,7 @@
       <input type="text" style="width: 100%" class="form-control" name="value" formControlName="value" [hidden]="valueType.value=='file'"/>
       <button type="button" class="btn tpi-btn tpi-primary pull-right" [hidden]="valueType.value=='text' || this._fileName != ''" (click)="openFileBrowser();">{{'chs_file'|translate}}</button>
       <input type="file" [id]="'fileField'+ no" (change)="onFileChange($event)"  [hidden]="valueType.value=='text'" style="display: none;"/>
-      <span class="p-input-icon-right mr-2" style="width: 100%;" [hidden]="_fileName==''">
+      <span class="p-input-icon-right me-2" style="width: 100%;" [hidden]="_fileName==''">
         <i class="pi pi-trash tpi-i-search" (click)="removeFile();"></i>
         <input type="text" class="form-control tpi-i-input" readonly [value]="_fileName">
       </span>

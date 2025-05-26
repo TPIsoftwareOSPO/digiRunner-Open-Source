@@ -1,31 +1,33 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryFuncList()">
+    <form [formGroup]="form">
       <div class="form-group">
-        <span class="p-input-icon-right" style="width: 40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryFuncList()"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder="{{ 'fun_code' | translate }}、{{
-            'fun_name' | translate
-          }}、{{ 'fun_desc' | translate }}、{{ 'role_name' | translate }}、{{
-            'role_alias' | translate
-          }}" />
-        </span>
+        <div class="col-12 d-flex align-items-center">
+          <app-search-input placeholder="{{ 'fun_code' | translate }}、{{
+                'fun_name' | translate
+              }}、{{ 'fun_desc' | translate }}、{{ 'role_name' | translate }}、{{
+                'role_alias' | translate
+              }}" [control]="keyword" [searchFn]="queryFuncList.bind(this)"
+            class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
+        </div>
+
       </div>
     </form>
     <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
 
-      <button type="button" class="btn tpi-btn tpi-primary mr-2"
+      <button type="button" class="btn tpi-btn tpi-primary me-2"
         (click)="exportTsmpFunc()">{{'button.export'|translate}}</button>
 
       <div style="display: flex;align-items: center;">
-        <div class="ui-inputgroup mr-2">
+        <div class="ui-inputgroup me-2">
           <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
           <input type="text" class="form-control" [value]="file?.name" readOnly
             placeholder="{{'upload_file' | translate}}">
-          <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+          <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
             [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
         </div>
-        <button type="button" class="btn tpi-btn tpi-primary mr-2" [disabled]="!file?.name"
+        <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!file?.name"
           (click)="importTsmpFunc()">{{'button.import'|translate}}</button>
         <i class="far fa-question-circle" pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"FUNC_CODE+LOCALE"} }}</li><li>{{"use_in_multi_language"|translate }}</li></ol>'
           [escape]="false"></i>
@@ -64,7 +66,7 @@
               class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
               [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
             <!-- <div class="btn-group">
-              <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail', rowData)"
+              <button type="button" class="btn btn-deta me-5" (click)="changePage('detail', rowData)"
                 [disabled]="canDetail == false">
                 <span class="fa fa-search">{{
                   "button.roles" | translate
@@ -84,9 +86,6 @@
         <tr *ngIf="funcInfoList.length>0">
           <td [attr.colspan]="columns.length + 1" style="color: #b7b7b7">
             <span style="vertical-align: middle">{{ "row_count" | translate }}: {{ funcInfoList.length }}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3" (click)="moreFuncList()">
-              {{ "button.more" | translate }}
-            </button> -->
             <!-- 查詢更多 -->
             <button type="button" class="btn tpi-header-return" (click)="moreFuncList()">
               {{ "button.more" | translate }}
@@ -140,7 +139,7 @@
       </div>
     </div>
     <hr />
-    <form [formGroup]="detailForm" (ngSubmit)="queryRoleList()">
+    <form [formGroup]="detailForm">
       <div class="form-group row">
         <div class="col-4 col-xl-4 col-lg-4">
           <label id="keyword_label" class="control-label">{{
@@ -154,19 +153,19 @@
               'role_desc' | translate
             }}"
           /> -->
-          <span class="p-input-icon-right" style="width: 40vw">
-            <i class="pi pi-search tpi-i-search" (click)="queryRoleList()"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder="{{ 'role_name' | translate }}、{{
-                'role_desc' | translate
-              }}" />
-          </span>
+          <app-search-input placeholder="{{ 'role_name' | translate }}、{{
+            'role_desc' | translate
+          }}"
+          [control]="detailForm.get('keyword')" [searchFn]="queryRoleList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
         </div>
       </div>
       <!-- <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
           <button
             type="button"
-            class="btn tpi-btn tpi-primary float-left mr-3"
+            class="btn tpi-btn tpi-primary float-start me-3"
             (click)="queryRoleList()"
           >
             {{ "button.search" | translate }}
@@ -218,7 +217,7 @@
     <br />
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+        <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
           {{ "button.return_to_list" | translate }}
         </button>
       </div>
@@ -280,7 +279,7 @@
       <div class="form-group" *ngIf="currentFuncInfo?.reportUrl">
         <div>
           <label for="newReportUrl">Report URL<span style="color: red">*</span></label>
-          <small class="pl-2">
+          <small class="ps-2">
             (
             {{
             "funcCode_kibana_prefix" | translate
@@ -315,11 +314,11 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
             (click)="updateFunc()">
             {{ "button.update" | translate }}
           </button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
             {{ "button.return_to_list" | translate }}
           </button>
         </div>

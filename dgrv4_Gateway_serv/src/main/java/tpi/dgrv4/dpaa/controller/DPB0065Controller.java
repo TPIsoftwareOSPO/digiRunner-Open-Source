@@ -31,9 +31,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0065Controller {
 
-	@Autowired
 	private DPB0065Service dpb0065Service;
 					
+	@Autowired
+	public DPB0065Controller(DPB0065Service dpb0065Service) {
+		super();
+		this.dpb0065Service = dpb0065Service;
+	}
+
 	/**
 	 * create申請單<br/>
 	 * 建立不同類型的申請單

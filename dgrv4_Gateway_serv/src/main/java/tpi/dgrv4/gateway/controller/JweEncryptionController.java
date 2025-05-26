@@ -22,8 +22,13 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @RestController
 public class JweEncryptionController {
 
-	@Autowired
 	private JweEncryptionService service;
+
+	@Autowired
+	public JweEncryptionController(JweEncryptionService service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/ssotoken/jweEncryption", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, // 使用 application/json 格式

@@ -38,15 +38,15 @@ public class SendDbInfoMapPacket implements Packet_i {
 
 	@Override
 	public void runOnServer(LinkerServer ls) {
-		if (ls.paramObj.containsKey(TPILogger.DBINFOMAP) == false) {
-			ls.paramObj.put(TPILogger.DBINFOMAP, new HashMap<String, String>());
+		if (ls.paramObj.containsKey(TPILogger.DBINFOMAP_TITLE) == false) {
+			ls.paramObj.put(TPILogger.DBINFOMAP_TITLE, new HashMap<String, String>());
 		}
-		data = (Map<String, String>) ls.paramObj.get(TPILogger.DBINFOMAP);
+		data = (Map<String, String>) ls.paramObj.get(TPILogger.DBINFOMAP_TITLE);
 
 		data.put(TPILogger.DBINFO, dbInfoJson);
 
 		if (ls.paramObj.containsKey(CHANGEDBINFO) == false && DbActionEnum.APPLY_DB_CONNECT.name().equals(action)) {
-			ls.paramObj.put(CHANGEDBINFO, new ChangeDbConnInfoService());
+			ls.paramObj.put(CHANGEDBINFO, new ChangeDbConnInfoService(null));
 		}
 
 		CommunicationServer.cs.sendToAll(ls, this);
@@ -55,8 +55,8 @@ public class SendDbInfoMapPacket implements Packet_i {
 	@Override
 	public void runOnClient(LinkerClient lc) {
 
-		lc.paramObj.put(TPILogger.DBINFOMAP, data);
-		Map<String, Object> map = (Map<String, Object>) lc.paramObj.get(TPILogger.DBINFOMAP);
+		lc.paramObj.put(TPILogger.DBINFOMAP_TITLE, data);
+		Map<String, Object> map = (Map<String, Object>) lc.paramObj.get(TPILogger.DBINFOMAP_TITLE);
 
 		ObjectMapper om = new ObjectMapper();
 		JsonNode jsonNode = null;

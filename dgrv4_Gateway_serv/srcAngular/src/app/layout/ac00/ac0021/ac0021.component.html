@@ -8,13 +8,13 @@
         </div>
         <div class="col-4">
           <label class="control-label" for="alertEnabled">{{'cusStatus'|translate}}</label>
-          <div class="pl-2">
+          <div class="ps-2">
             <div class="p-form-check-line form-group">
               <ng-container *ngFor="let stat of cusStatusData">
                 <div class="p-form-check">
                   <p-radioButton formControlName="cusStatus" value={{stat.value}}
                     inputId="cusStatus{{stat.value}}"></p-radioButton>
-                  <label for="cusStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                  <label for="cusStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                 </div>
               </ng-container>
             </div>
@@ -23,9 +23,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="axios_queryIdPInfoList_cus()">{{'button.search'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+          <button type="button" class="btn tpi-btn tpi-second float-end"
             (click)="changePage('create')">{{'button.create'|translate}}</button>
         </div>
       </div>
@@ -111,7 +111,7 @@
         </div>
         <div class="col-md-7 col-sm-12">
           <label id="cusName_label" class="control-label">{{'cusName'|translate}}</label><i
-            class="far fa-question-circle ml-2" pTooltip="{{ 'cusName_tip' | translate }}" [escape]="false"></i>
+            class="far fa-question-circle ms-2" pTooltip="{{ 'cusName_tip' | translate }}" [escape]="false"></i>
           <input formControlName="cusName" type="text" class="form-control" (focus)="isShowBtnSVG=true" (focusout)="isShowBtnSVG=false">
           <div *ngIf="cusName?.invalid && (cusName?.dirty || cusName?.touched)" class="text-danger">
             <!-- <small class="form-text">{{cusName.errors.isRequired}}</small> -->
@@ -124,11 +124,11 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="cusStatus" value="Y" inputId="cusStatusY"></p-radioButton>
-                <label for="cusStatusY" class="ml-2 mb-0">{{"button.enable"|translate}}</label>
+                <label for="cusStatusY" class="ms-2 mb-0">{{"button.enable"|translate}}</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="cusStatus" value="N" inputId="cusStatusN"></p-radioButton>
-                <label for="cusStatusN" class="ml-2 mb-0">{{"button.disable"|translate}}</label>
+                <label for="cusStatusN" class="ms-2 mb-0">{{"button.disable"|translate}}</label>
               </div>
             </ng-container>
           </div>
@@ -139,7 +139,7 @@
         </div>
         <div class="col-12" (mouseenter)="(currentAction=='detail') && focusStep('step02')" (mouseleave)="(currentAction=='detail') && defaultColor()">
           <label id="cusLoginUrl_label" class="control-label" >{{'cusLoginUrl'|translate}}</label><i
-          class="far fa-question-circle ml-2" pTooltip="{{ 'cusLoginUrl_tip' | translate }}" [escape]="false"></i>
+          class="far fa-question-circle ms-2" pTooltip="{{ 'cusLoginUrl_tip' | translate }}" [escape]="false"></i>
 
           <input formControlName="cusLoginUrl" type="text" class="form-control" (focus)="focusStep('step02')" (focusout)="defaultColor()">
           <div *ngIf="cusLoginUrl?.invalid && (cusLoginUrl?.dirty || cusLoginUrl?.touched)" class="text-danger">
@@ -193,12 +193,12 @@
 
         <div class="col-12 field-flex-start pt-3">
 
-          <button *ngIf="currentAction == 'create'" type="button" class="btn tpi-btn tpi-second float-left mr-3"
+          <button *ngIf="currentAction == 'create'" type="button" class="btn tpi-btn tpi-second float-start me-3"
             [disabled]="!formEdit.valid" (click)="create();">{{'button.create'|translate}}</button>
-          <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="!formEdit.valid" (click)="update();">{{'button.update'|translate}}</button>
 
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('default');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

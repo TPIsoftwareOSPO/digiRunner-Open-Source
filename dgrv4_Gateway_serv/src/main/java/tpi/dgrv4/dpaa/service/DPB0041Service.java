@@ -27,11 +27,15 @@ public class DPB0041Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
+	private TsmpDpDeniedModuleDao tsmpDpDeniedModuleDao;
 
 	@Autowired
-	private TsmpDpDeniedModuleDao tsmpDpDeniedModuleDao;
+	public DPB0041Service(TsmpApiModuleDao tsmpApiModuleDao, TsmpDpDeniedModuleDao tsmpDpDeniedModuleDao) {
+		super();
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpDpDeniedModuleDao = tsmpDpDeniedModuleDao;
+	}
 
 	@Transactional
 	public DPB0041Resp saveDeniedModule(TsmpAuthorization authorization, DPB0041Req req) {

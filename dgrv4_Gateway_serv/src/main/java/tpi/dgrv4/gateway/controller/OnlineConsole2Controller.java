@@ -44,14 +44,18 @@ public class OnlineConsole2Controller {
 
 	public static Object lockObj = new Object();
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private OnlineConsole2Service onlineConsole2Service;
+	private TPILogger logger;
 
 	@Autowired
-	private TPILogger logger;
+	public OnlineConsole2Controller(TsmpSettingService tsmpSettingService, OnlineConsole2Service onlineConsole2Service,
+			TPILogger logger) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.onlineConsole2Service = onlineConsole2Service;
+		this.logger = logger;
+	}
 
 	@PostMapping(value = "/onlineConsole2/api")
 	public ResponseEntity<?> onlineconsole2(HttpServletRequest request, @RequestBody CurrentLogReq req) {
@@ -86,7 +90,7 @@ public class OnlineConsole2Controller {
 		} else {
 			TPILogger.tl.error("<Keeper Server> Lost Connection");
 		}
-
+		//allClientInfoData.getAllClientList().get(0).getMem();
 		return ResponseEntity.ok(allClientInfoData);
 	}
 

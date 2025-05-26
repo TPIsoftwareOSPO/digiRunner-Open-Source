@@ -3,6 +3,7 @@ package tpi.dgrv4.gateway.component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -11,18 +12,26 @@ import tpi.dgrv4.gateway.service.ILogbackService;
 
 @Component
 public class DgrApplicationEventListener {
-	@Autowired(required = false)
+	
+//	@Autowired(required = false)
 	private ILogbackService service;
 	
 	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
+	private static final String TPI_DGRV4 = "tpi.dgrv4";
 	
+	@Autowired
+	public DgrApplicationEventListener(@Nullable ILogbackService service) {
+		super();
+		this.service = service;
+	}
+
 	@EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
 
 		//停用tpi.dgrv4的fileerr
 		String rs = "";
 		if (service != null) {
-			rs = service.stop("tpi.dgrv4", "fileerr");
+			rs = service.stop(TPI_DGRV4, "fileerr");
 		} else {
 			rs = NO_ENTERPRISE_SERVICE;
 		}
@@ -31,7 +40,7 @@ public class DgrApplicationEventListener {
 		
 		//停用tpi.dgrv4的fileloguuid
 		if (service != null) {
-			rs = service.stop("tpi.dgrv4", "fileloguuid");
+			rs = service.stop(TPI_DGRV4, "fileloguuid");
 		} else {
 			rs = NO_ENTERPRISE_SERVICE;
 		}
@@ -47,7 +56,7 @@ public class DgrApplicationEventListener {
 		
 		//停用tpi.dgrv4的file_sys_info
 		if (service != null) {
-			rs = service.stop("tpi.dgrv4", "file_sys_info");
+			rs = service.stop(TPI_DGRV4, "file_sys_info");
 		} else {
 			rs = NO_ENTERPRISE_SERVICE;
 		}

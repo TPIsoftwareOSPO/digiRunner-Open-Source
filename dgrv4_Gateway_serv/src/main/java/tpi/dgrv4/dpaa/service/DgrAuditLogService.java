@@ -55,39 +55,37 @@ public class DgrAuditLogService {
 	
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private DgrAuditLogMDao dgrAuditLogMDao;
-	
-	@Autowired
 	private DgrAuditLogDDao dgrAuditLogDDao;
-	
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private FileHelper fileHelper;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
 	
+	@Autowired
+	public DgrAuditLogService(DgrAuditLogMDao dgrAuditLogMDao, DgrAuditLogDDao dgrAuditLogDDao,
+			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao, FileHelper fileHelper, ObjectMapper objectMapper,
+			TsmpUserDao tsmpUserDao, TsmpSettingService tsmpSettingService, TsmpGroupDao tsmpGroupDao,
+			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpClientDao tsmpClientDao) {
+		super();
+		this.dgrAuditLogMDao = dgrAuditLogMDao;
+		this.dgrAuditLogDDao = dgrAuditLogDDao;
+		this.authoritiesDao = authoritiesDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.fileHelper = fileHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpClientDao = tsmpClientDao;
+	}
+
 	/**
 	 * 寫入 Audit Log M
 	 * 
@@ -851,11 +849,6 @@ public class DgrAuditLogService {
 
 	protected TsmpClientDao getTsmpClientDao() {
 		return tsmpClientDao;
-	}
-
-	public static void main(String[] args) {
-		String txnUid = new DgrAuditLogService().getTxnUid();
-		System.out.println("txnUid:" + txnUid);
 	}
 }
 

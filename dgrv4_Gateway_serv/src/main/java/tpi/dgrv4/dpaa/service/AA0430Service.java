@@ -29,11 +29,16 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0430Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpApiDao tsmpApiDao;
+	private TsmpApiRegDao tsmpApiRegDao;
 
 	@Autowired
-	private TsmpApiRegDao tsmpApiRegDao;
+	public AA0430Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+	}
 
 	@Transactional
 	public AA0430Resp batchNoOauthModify(TsmpAuthorization authorization, AA0430Req req) {

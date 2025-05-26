@@ -32,22 +32,24 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class TsmpSettingService {
 
-	private TPILogger logger = TPILogger.tl;
-	
 	@Value("${digiRunner.gtw.deploy.role}")
 	private String deployRole;
 	
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
+	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
 
 	@Autowired
-	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
+	public TsmpSettingService(TsmpSettingCacheProxy tsmpSettingCacheProxy,
+			TsmpTAEASKHelper tsmpTAEASKHelper, ObjectMapper objectMapper,
+			TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy) {
+		super();
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
+	}
 
 	// =========================================================
 	// ==================== COMMON METHODS =====================
@@ -97,7 +99,7 @@ public class TsmpSettingService {
 				return Integer.valueOf(gateway_val);
 			} catch (Exception gateway_e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(gateway_e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(gateway_e));
 					return defaultVal;
 				}
 				throw gateway_e;
@@ -118,7 +120,7 @@ public class TsmpSettingService {
 				return Long.valueOf(gateway_val);
 			} catch (Exception gateway_e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(gateway_e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(gateway_e));
 					return defaultVal;
 				}
 				throw gateway_e;
@@ -169,7 +171,7 @@ public class TsmpSettingService {
 	private TsmpSetting findById(String id) {
 		Optional<TsmpSetting> opt = getTsmpSettingCacheProxy().findById(id);
 		if (!opt.isPresent()) {
-			logger.debug("id=" + id);
+			TPILogger.tl.debug("id=" + id);
 			throw DgrRtnCode._1202.throwing();
 
 		}
@@ -618,7 +620,7 @@ public class TsmpSettingService {
 				gateway_args = getObjectMapper().readValue(val, //
 						new TypeReference<Map<String, Object>>(){}); // converts JSON to Map
 			} catch (Exception e) {
-				this.logger.error(StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			}
 			return gateway_args;
 		});
@@ -1434,4 +1436,23 @@ public class TsmpSettingService {
 		String key = getKey_HIGHWAY_THRESHOLD();
     	return getIntegerVal(key, 1000);
 	}
+
+	public String getKey_ES_LOGFILE_FAIL_RETRY() {
+		return TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY;
+	}
+
+	public boolean getVal_ES_LOGFILE_FAIL_RETRY() {
+		String key = getKey_ES_LOGFILE_FAIL_RETRY();
+		return getBooleanVal(key, false);
+	}
+	public String getKey_ES_CHECK_CONNECTION() {
+		return TsmpSettingDao.Key.ES_CHECK_CONNECTION;
+	}
+
+	public boolean getVal_ES_CHECK_CONNECTION() {
+		String key = getKey_ES_CHECK_CONNECTION();
+		return getBooleanVal(key, false);
+	}
+
+
 }

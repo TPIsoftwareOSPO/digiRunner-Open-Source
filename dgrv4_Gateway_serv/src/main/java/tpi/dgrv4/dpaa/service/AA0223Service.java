@@ -38,23 +38,25 @@ public class AA0223Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpSecurityLevelCacheProxy tsmpSecurityLevelCacheProxy;
-
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	public AA0223Service(TsmpSecurityLevelCacheProxy tsmpSecurityLevelCacheProxy, TsmpVgroupDao tsmpVgroupDao,
+			TsmpVgroupAuthoritiesMapDao tsmpVgroupAuthoritiesMapDao, TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao,
+			TsmpDpItemsDao tsmpDpItemsDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpSecurityLevelCacheProxy = tsmpSecurityLevelCacheProxy;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpVgroupAuthoritiesMapDao = tsmpVgroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public AA0223Resp queryVGroupByPk(AA0223Req req, ReqHeader reqHeader) {
 		AA0223Resp resp = new AA0223Resp();

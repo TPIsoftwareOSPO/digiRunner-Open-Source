@@ -48,9 +48,9 @@
              styleClass="p-datatable-striped" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
             <div class="ui-helper-clearfix">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-1" [disabled]="selected.length==0"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-1" [disabled]="selected.length==0"
                     (click)="updateIndexStatus(1)">{{'button.on'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-1" [disabled]="selected.length==0"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-1" [disabled]="selected.length==0"
                     (click)="updateIndexStatus(0)">{{'button.close'|translate}}</button>
             </div>
         </ng-template>
@@ -87,7 +87,6 @@
             <tr *ngIf="rowcount">
                 <td [attr.colspan]="columns.length+1">
                     <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                    <!-- <button type="button" class="btn btn-warning pull-right ml-3" (click)="moreData();">more</button> -->
                 </td>
             </tr>
         </ng-template>

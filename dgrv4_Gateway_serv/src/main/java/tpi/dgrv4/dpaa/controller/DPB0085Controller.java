@@ -21,9 +21,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0085Controller {
 	
-	@Autowired
 	private DPB0085Service service;
 	
+	@Autowired
+	public DPB0085Controller(DPB0085Service service) {
+		super();
+		this.service = service;
+	}
+
 	/** 
 	 *	ClientPEM檔-上傳/解析/save				
 	 *	1. 上傳憑證PEM檔

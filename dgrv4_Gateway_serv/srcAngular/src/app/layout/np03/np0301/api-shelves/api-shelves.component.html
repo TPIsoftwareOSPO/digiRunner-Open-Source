@@ -3,7 +3,7 @@
         <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="apiName" placeholder="{{'api_list' | translate}}"
                 [attr.disabled]="true">
-            <button pButton type="button" icon="pi pi-search" class="tpi-night ml-1" (click)="searchAPI();"
+            <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1" (click)="searchAPI();"
                 [disabled]="subType == 'API_ON_UPDATE'"></button>
         </div>
         <div *ngIf="apiName?.invalid && (apiName?.dirty || apiName?.touched)" class="text-danger">
@@ -14,7 +14,7 @@
         <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="themeName"
                 placeholder="{{'theme_name' | translate}}" [attr.disabled]="true">
-            <button pButton type="button" icon="pi pi-search" class="tpi-night ml-1" (click)="searchTheme();"></button>
+            <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1" (click)="searchTheme();"></button>
         </div>
         <div *ngIf="themeName?.invalid && (themeName?.dirty || themeName?.touched)" class="text-danger">
             <small class="form-text">{{themeName.errors.required | translate}}</small>
@@ -25,7 +25,7 @@
             <input id="choose-file_{{no}}" type="file" style="display: none">
             <input type="text" class="form-control" formControlName="fileName"
                 placeholder="{{'api_doc_upload' | translate}}">
-            <button pButton type="button" icon="pi pi-upload" class="tpi-night ml-1"
+            <button pButton type="button" icon="pi pi-upload" class="tpi-night ms-1"
                 (click)="openFileBrowser()"></button>
         </div>
     </div>

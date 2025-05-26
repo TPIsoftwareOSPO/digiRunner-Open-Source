@@ -53,17 +53,18 @@ public class SystemDefaultRjobInitializer {
 		this.bcryptParamHelper = bcryptParamHelper;
 
 		// [報表排程]: 預設每一天的0點10分執行一次，為了統計到前一天的允許數值
-		register( //
+		//20250407 no execute
+		/*register( //
 				"Report Schedule", "預設排程報表", //
 				new DPB0101CronBuilder() //
-						.frequency(3) // 每一天
+						.frequency(3) // 每10分
 						.hour(0) //
 						.minute(0) //
 						.build(), //
 				new DPB0101ItemsBuilder(this.bcryptParamHelper) //
 						.refItemNo("REPORT_BATCH", 8) //
 						.sortBy(0) //
-						.build());
+						.build());*/
 
 		// [Open API Key 快到期檢查]: 預設每一天的12點1分執行一次
 		register( //

@@ -39,7 +39,6 @@ import tpi.dgrv4.entity.repository.TsmpOpenApiKeyDao;
 import tpi.dgrv4.entity.repository.TsmpOpenApiKeyMapDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.escape.MailHelper;
-import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -49,47 +48,42 @@ public class SendOpenApiKeyMailService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy;
-	
-	@Autowired
 	private MailHelper mailHelper;
-	
-	@Autowired
 	private TsmpDpChkLogDao tsmpDpChkLogDao;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private ApplicationContext ctx;
-	
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private DpReqQueryFactory dpReqQueryFactory;
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private String sendTime;
  
+	@Autowired
+	public SendOpenApiKeyMailService(TsmpDpMailTpltCacheProxy tsmpDpMailTpltCacheProxy, MailHelper mailHelper,
+			TsmpDpChkLogDao tsmpDpChkLogDao, TsmpUserDao tsmpUserDao, ApplicationContext ctx, JobHelper jobHelper,
+			DpReqQueryFactory dpReqQueryFactory, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao, TsmpClientDao tsmpClientDao, TsmpApiDao tsmpApiDao,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpDpMailTpltCacheProxy = tsmpDpMailTpltCacheProxy;
+		this.mailHelper = mailHelper;
+		this.tsmpDpChkLogDao = tsmpDpChkLogDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.dpReqQueryFactory = dpReqQueryFactory;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpOpenApiKeyMapDao = tsmpOpenApiKeyMapDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@PostConstruct
 	public void init() {
 	}
@@ -261,8 +255,8 @@ public class SendOpenApiKeyMailService {
 	
 	protected SendOpenApiKeyMailJob getSendOpenApiKeyMailJob(TsmpAuthorization auth, String sendTime, Long openApiKeyId, 
 			String openApiKeyType, String reqOrderNo) {
-		return (SendOpenApiKeyMailJob) getCtx().getBean("sendOpenApiKeyMailJob", auth, getSendTime()
-				, openApiKeyId, openApiKeyType, reqOrderNo);
+		return (SendOpenApiKeyMailJob) getCtx().getBean("sendOpenApiKeyMailJob", auth, getSendTime(), openApiKeyId,
+				openApiKeyType, reqOrderNo);
 	}
 	
 	protected TsmpDpMailTpltCacheProxy getTsmpDpMailTpltCacheProxy() {

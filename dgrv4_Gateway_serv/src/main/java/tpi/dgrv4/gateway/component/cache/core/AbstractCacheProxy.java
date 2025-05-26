@@ -3,13 +3,14 @@ package tpi.dgrv4.gateway.component.cache.core;
 import com.esotericsoftware.kryo.Kryo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.el.MethodNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
+
 import tpi.dgrv4.gateway.component.job.DummyJob;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.component.job.RefreshCacheJob;
-import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,32 +20,36 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/** API 自適用快取使用此 proxy */
 public abstract class AbstractCacheProxy {
 
 	private static final String NO_PARAM_KEY = "0";
 
-	@Autowired
 	protected GenericCache cache;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
-	private TPILogger logger;
 
 	private final CacheValueAdapter adapter;
 
-	public AbstractCacheProxy() {
+	@Autowired
+	protected AbstractCacheProxy(GenericCache cache, ObjectMapper objectMapper, ApplicationContext ctx) {
 		this.adapter = new CacheValueKryoAdapter(getClass().getName(), this::kryoRegistration);
+		this.cache = cache;
+		this.objectMapper = objectMapper;
+		this.ctx = ctx;
+	}
+	
+	/*
+	 * Because using constructor injection will cause a circular dependency, use method injection instead
+	 */
+	@Autowired
+	public void setJobHelper(JobHelper jobHelper) {
+		this.jobHelper = jobHelper;
 	}
 
 	protected <R> Optional<R> getOne(String methodName, Supplier<R> supplier, Class<R> returnType, Object...params) {
+		// API '自適應' cache 會啟用 addRefreshCacheJob() & addDummyJob()
 		R r = get(methodName, supplier, (obj) -> {
 			return returnType.cast(obj);
 		}, params);
@@ -67,7 +72,7 @@ public abstract class AbstractCacheProxy {
 
 	private <R> R get(String methodName, Supplier<R> supplier, Function<Object, R> caster, Object...params) {
 		String cacheKey = genCacheKey(getDaoClass(), methodName, params);
-		addRefreshCacheJob(cacheKey, supplier);
+		addRefreshCacheJob(cacheKey, supplier);  
 		
 		// 如果有存入過 cache
 		boolean hasCacheEntry = getCache().containsKey(cacheKey);
@@ -81,7 +86,9 @@ public abstract class AbstractCacheProxy {
 		}
 		
 		// 某一種情況是：從 cache 取出的值為空，可能是過期被清掉了，應該要重查並放回 cache
-		addDummyJob(cacheKey);	// 不是從 cache 取值時才需要加入此工作。利用 job 的 replace 機制，抑制首次 RefreshCacheJob 的執行
+		// 2025.3.11, 新機制下, 不需要 DummyJob 
+		// addDummyJob(cacheKey);	// 不是從 cache 取值時才需要加入此工作。利用 job 的 replace 機制，抑制首次 RefreshCacheJob 的執行
+		
 		R r = supplier.get();
 		getCache().put(cacheKey, r, getCacheValueAdapter());
 		return r;
@@ -151,7 +158,7 @@ public abstract class AbstractCacheProxy {
 
 	private void addDummyJob(String cacheKey) {
 		String groupId = RefreshCacheJob.GROUP_ID.concat("-").concat(cacheKey);
-		DummyJob job = new DummyJob(groupId, 0, getLogger());
+		DummyJob job = new DummyJob(groupId, 0);
 		getJobHelper().add(job);
 	}
 
@@ -169,10 +176,6 @@ public abstract class AbstractCacheProxy {
 
 	protected JobHelper getJobHelper() {
 		return this.jobHelper;
-	}
-
-	protected TPILogger getLogger() {
-		return this.logger;
 	}
 
 	protected RefreshCacheJob getRefreshCacheJob(String key, Supplier<?> supplier) {

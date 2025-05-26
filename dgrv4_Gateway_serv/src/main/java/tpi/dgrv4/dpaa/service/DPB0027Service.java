@@ -29,19 +29,22 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0027Service {
 
-	@Autowired
 	private TsmpDpFaqQuestionDao tsmpDpFaqQuestionDao;
-
-	@Autowired
 	private TsmpDpFaqAnswerDao tsmpDpFaqAnswerDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0027Service(TsmpDpFaqQuestionDao tsmpDpFaqQuestionDao, TsmpDpFaqAnswerDao tsmpDpFaqAnswerDao,
+			ServiceConfig serviceConfig, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpFaqQuestionDao = tsmpDpFaqQuestionDao;
+		this.tsmpDpFaqAnswerDao = tsmpDpFaqAnswerDao;
+		this.serviceConfig = serviceConfig;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0027Resp queryFaqLikeList_0(TsmpAuthorization authorization, DPB0027Req req, ReqHeader reqHeader) {
 		List<String> dataStatusList = getDataStatusList(req.getDataStatus());

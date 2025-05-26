@@ -16,14 +16,18 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class CusIdPService {
 
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private AcIdPHelper acIdPHelper;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public CusIdPService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
+			TsmpSettingService tsmpSettingService) {
+
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.acIdPHelper = acIdPHelper;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	protected void getCusLoginFailedHandler(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String customErrorMsg) throws RedirectException {

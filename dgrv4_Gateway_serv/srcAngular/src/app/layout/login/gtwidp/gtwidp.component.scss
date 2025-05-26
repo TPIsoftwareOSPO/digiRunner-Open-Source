@@ -3,6 +3,7 @@
   outline: 0;
 }
 
+
 a:link,
 a:visited ,.list-group-item label{
   /* color: #222; */
@@ -28,6 +29,12 @@ hr{
 a{
   width: 95%;
   text-align: left;
+}
+.list-group-item {
+  margin-left: 2rem;
+  padding-top: 10px!important;
+  border: 0px;
+  background: #f6f6f6;
 }
 
 .list-group-item span {

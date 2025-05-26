@@ -58,49 +58,45 @@ public class DPB0002Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private SeqStoreService seqStoreService;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private String sendTime;
+	
+	@Autowired
+	public DPB0002Service(TsmpDpApiAuth2Dao tsmpDpApiAuth2Dao, TsmpClientDao tsmpClientDao, TsmpApiDao tsmpApiDao,
+			TsmpApiModuleDao tsmpApiModuleDao, TsmpOrganizationDao tsmpOrganizationDao, TsmpGroupApiDao tsmpGroupApiDao,
+			TsmpClientGroupDao tsmpClientGroupDao, TsmpDpMailTpltDao tsmpDpMailTpltDao, TsmpGroupDao tsmpGroupDao,
+			SeqStoreService seqStoreService, JobHelper jobHelper, ApplicationContext ctx, ServiceConfig serviceConfig,
+			TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpDpApiAuth2Dao = tsmpDpApiAuth2Dao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.seqStoreService = seqStoreService;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.serviceConfig = serviceConfig;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@Transactional
 	public DPB0002Resp updateApiStatus(TsmpAuthorization authorization, DPB0002Req req) {
@@ -396,7 +392,8 @@ public class DPB0002Service {
 		return job;
 	}
 
-	protected DPB0002Job getDPB0002Job(TsmpAuthorization authorization, List<TsmpMailEvent> mailEvents, String sendTime) {
+	protected DPB0002Job getDPB0002Job(TsmpAuthorization authorization, List<TsmpMailEvent> mailEvents,
+			String sendTime) {
 		DPB0002Job job = (DPB0002Job) getCtx().getBean("dpb0002Job", authorization, mailEvents, sendTime);
 		getJobHelper().add(job);
 		return job;

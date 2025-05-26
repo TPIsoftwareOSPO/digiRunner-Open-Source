@@ -1,12 +1,10 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryClientList()">
+    <form [formGroup]="form">
       <div class="form-group row col-12">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryClientList.bind(this)"
+        class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
     </form>
     <hr>
@@ -67,7 +65,7 @@
     <div class="form-group row">
       <div class="col-12 col-xl-12 col-lg-12">
         <label class="control-label">{{'client_id' | translate}}: {{currentClient?.clientId}}</label>
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+        <button type="button" class="btn tpi-btn tpi-second float-end"
           (click)="changePage('create')">{{'button.create'|translate}}</button>
       </div>
     </div>
@@ -139,7 +137,7 @@
 
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('queryClientList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -164,21 +162,21 @@
           <ng-container>
             <div class="p-form-check">
               <p-radioButton value="Y" [ngModel]="gtwIdPInfo?.status" disabled></p-radioButton>
-              <label class="ml-2 mb-0">Y</label>
+              <label class="ms-2 mb-0">Y</label>
             </div>
             <div class="p-form-check">
               <p-radioButton value="N" [ngModel]="gtwIdPInfo?.status" disabled></p-radioButton>
-              <label class="ml-2 mb-0">N</label>
+              <label class="ms-2 mb-0">N</label>
             </div>
           </ng-container>
         </div>
         <!-- <div class="border-line">
-          <div class="form-check-inline ml-3 mt-1">
+          <div class="form-check-inline ms-3 mt-1">
             <label class="form-check-label">
               <input type="radio" class="form-check-input" name="status" disabled
                 [checked]="gtwIdPInfo?.status == 'Y'">Y
             </label>
-            <label class="form-check-label ml-3">
+            <label class="form-check-label ms-3">
               <input type="radio" class="form-check-input" name="status" disabled
                 [checked]="gtwIdPInfo?.status == 'N'">N
             </label>
@@ -271,7 +269,7 @@
 
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('clientList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -301,11 +299,11 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="Y"  inputId="statusY"></p-radioButton>
-                <label for="statusY" class="ml-2 mb-0">Y</label>
+                <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="N"  inputId="statusN"></p-radioButton>
-                <label for="statusN" class="ml-2 mb-0">N</label>
+                <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
           </div>
@@ -314,7 +312,7 @@
               <label class="form-check-label">
                 <input type="radio" class="form-check-input" formControlName="status" value="Y"> Y
               </label>
-              <label class="form-check-label ml-5">
+              <label class="form-check-label ms-5">
                 <input type="radio" class="form-check-input" formControlName="status" value="N"> N
               </label>
             </div>
@@ -417,11 +415,11 @@
 
       <div class="form-group row mt-3">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="formEdit.invalid"
+          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="formEdit.invalid"
             (click)="create()">{{'button.create'|translate}}</button>
-          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="formEdit.invalid"
+          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="formEdit.invalid"
             (click)="update()">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="changePage('clientList')">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

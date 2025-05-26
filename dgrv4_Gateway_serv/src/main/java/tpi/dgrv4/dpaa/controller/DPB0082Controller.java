@@ -23,11 +23,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0082Controller {
 
-	private TPILogger logger = TPILogger.tl;
-	
-	@Autowired
 	private DPB0082Service service;
 	
+	@Autowired
+	public DPB0082Controller(DPB0082Service service) {
+		super();
+		this.service = service;
+	}
+
 	/** 
 	 * for MultiPart X JSON整合設計-上傳檔案	
 	 * 為了避免上傳檔案太大, 造成連線逾時, 故使用單一檔案上傳				

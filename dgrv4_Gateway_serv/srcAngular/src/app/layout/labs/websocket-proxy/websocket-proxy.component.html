@@ -1,38 +1,35 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
-      <div class="form-group row">
-        <div class="col-6">
-          <span class="p-input-icon-right" style="width: 100%;">
-            <i class="pi pi-search tpi-i-search" (click)="queryWsList();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'site_name'|translate}}、{{'target_ws'|translate}}" (keyup.enter)="queryWsList()">
-          </span>
-        </div>
-        <div class="col-6">
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+      <div class="form-group">
+        <div class="col-12 d-flex">
+          <app-search-input placeholder="{{'site_name'|translate}}、{{'target_ws'|translate}}" [control]="form.get('keyword')"
+            [searchFn]="queryWsList.bind(this)" class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
+          <button type="button" class="btn tpi-btn tpi-second ms-auto"
             (click)="changePage('create');">{{'button.create'|translate}}</button>
+
         </div>
       </div>
 
       <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
 
-        <button type="button" class="btn tpi-btn tpi-primary mr-2"
+        <button type="button" class="btn tpi-btn tpi-primary me-2"
           (click)="exportWebsocketProxy()">{{'button.export'|translate}}</button>
 
         <div style="display: flex;align-items: center;">
 
-          <div class="ui-inputgroup mr-2">
+          <div class="ui-inputgroup me-2">
             <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
             <input type="text" class="form-control" value="{{file?.name}}" readOnly
               placeholder="{{'upload_file' | translate}}">
-            <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
               [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
           </div>
-          <button type="button" class="btn tpi-btn tpi-primary mr-2" [disabled]="!file?.name"
+          <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!file?.name"
             (click)="importWebsocketProxy()">{{'button.import'|translate}}</button>
           <i class="far fa-question-circle tip" pTooltip="{{'import_key_tip'|translate:{key:'SITE_NAME'} }}"
-           [escape]="false"></i>
+            [escape]="false"></i>
         </div>
       </div>
     </form>
@@ -121,21 +118,24 @@
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-6">
+        <div class="col-6 " >
           <!-- 目標WS -->
           <!-- <label id="targetWs_label" for="targetWs" class="control-label">{{ 'target_ws' | translate}}</label> -->
-          <div class="row col-12 pr-0" style="justify-content: space-between;">
-            <div class="col-4 px-0">
-              <label id="targetWs_label" for="targetWs" class="control-label">{{ 'target_ws' | translate}}</label>
+
+          <div class="d-flex justify-content-between">
+
+            <div class="col">
+              <label id="targetWs_label" for="targetWs" class="control-label fw-bold">{{ 'target_ws' | translate}}</label>
             </div>
-            <div class="col-8 row pr-0"  style="justify-content: end;">
-              <div class="flex align-items-center ml-3">
+            <div class="col d-flex justify-content-end">
+              <div class="d-flex align-items-center ms-3">
                 <p-checkbox [binary]="true" inputId="auth" trueValue="Y" falseValue="N" formControlName="auth"></p-checkbox>
-                <label class="mb-0 ml-2" for="auth">Auth</label>
+                <label class="mb-0 ms-2" for="auth">Auth</label>
               </div>
             </div>
-
           </div>
+
+
           <div [hidden]="currentAction!='create' && currentAction!='update'">
             <input type="text" class="form-control" id="targetWs" formControlName="targetWs">
             <div *ngIf="targetWs.invalid && (targetWs.dirty || targetWs.touched)" class="text-danger">
@@ -165,10 +165,10 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn float-start me-3" [disabled]="form.invalid"
             [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -190,18 +190,15 @@
       <div class="col-12">
         <!-- 目標WS -->
         <!-- <label class="control-label">{{ 'target_ws' | translate}}</label> -->
-        <div class="row col-12 pr-0" style="justify-content: space-between;">
-          <div class="col-4 px-0">
-            <label class="control-label">{{ 'target_ws' | translate}}</label>
+        <div class="d-flex justify-content-between">
+          <div class="col-4 ">
+            <label class="control-label fw-bold">{{ 'target_ws' | translate}}</label>
           </div>
-          <div class="col-8 row pr-0"  style="justify-content: end;">
-            <!-- <div>
-              <input id="noauth" type="checkbox" />
-              <label class="pl-1" for="noauth">Auth</label>
-            </div> -->
-            <div class="flex align-items-center ml-3">
-              <p-checkbox [binary]="true" trueValue="Y" falseValue="N" [ngModel]="selectedItem?.['au'+'th']" [ngModelOptions]="{standalone: true}" [readonly]="true"></p-checkbox>
-              <label class="mb-0 ml-2">Auth</label>
+          <div class="col d-flex justify-content-end">
+            <div class="d-flex align-items-center ms-3">
+              <p-checkbox [binary]="true" trueValue="Y" falseValue="N" [ngModel]="selectedItem?.['au'+'th']"
+                [ngModelOptions]="{standalone: true}" [readonly]="true"></p-checkbox>
+              <label class="mb-0 ms-2">Auth</label>
             </div>
           </div>
 
@@ -242,7 +239,7 @@
 
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left"
+        <button type="button" class="btn tpi-btn tpi-primary float-start"
           (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>

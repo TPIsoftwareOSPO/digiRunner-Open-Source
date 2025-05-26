@@ -2,27 +2,29 @@ package tpi.dgrv4.gateway.service;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PreDestroy;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.apache.tomcat.util.buf.HexUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +44,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 
+import jakarta.annotation.PreDestroy;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import oshi.util.tuples.Pair;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.CApiKeyUtils;
@@ -51,6 +63,7 @@ import tpi.dgrv4.codec.utils.JWScodec;
 import tpi.dgrv4.codec.utils.MaskUtil;
 import tpi.dgrv4.codec.utils.PEMUtil;
 import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
+import tpi.dgrv4.codec.utils.RandomUtil;
 import tpi.dgrv4.codec.utils.SHA256Util;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -59,6 +72,7 @@ import tpi.dgrv4.common.utils.CheckmarxCommUtils;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.es.DiskSpaceMonitor;
 import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
@@ -96,7 +110,10 @@ import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 import tpi.dgrv4.gateway.vo.TsmpApiLogResp;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
+import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Slf4j
 @Service
 public class CommForwardProcService {
@@ -104,30 +121,12 @@ public class CommForwardProcService {
 	@Value("${cors.allow.headers}")
 	private String corsAllowHeaders;
 
-	@Autowired(required = false)
-	private TraceCodeUtilIfs traceCodeUtil;
-
 	public static Map<String, FixedCacheVo> fixedCacheMap = new HashMap<>();
-
-	@Autowired
-	private TokenHelper tokenHelper;
-
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-
-	@Autowired
-	private DgrcRoutingHelper dgrcRoutingHelper;
-
-	@Autowired
-	private JobHelper jobHelper;
-
 	public static final String AUTHORIZATION = "authorization";
-
 	public static final String TOKENPAYLOAD = "tokenpayload";
-
 	public static final String BACKAUTH = "backauth";
-
-	public static final List<String> MASK_TOKEN_LIST = new ArrayList<>();
+	private static final String MODULE_NAME = "moduleName";
+	private static final List<String> MASK_TOKEN_LIST = new ArrayList<>();
 
 	static {
 		MASK_TOKEN_LIST.add(CommForwardProcService.AUTHORIZATION);
@@ -135,46 +134,72 @@ public class CommForwardProcService {
 		MASK_TOKEN_LIST.add(CommForwardProcService.BACKAUTH);
 	}
 
-	@Autowired
-	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-
-	@Autowired
-	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-
-	@Autowired
-	private OAuthTokenService oAuthTokenService;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
-	private TokenCheck tokenCheck;
-
-	@Autowired
-	private TsmpReqLogDao tsmpReqLogDao;
-
-	@Autowired
-	private TsmpResLogDao tsmpResLogDao;
-
 	private ExecutorService executor;
-
-	@Autowired
+	
+//	@Autowired(required = false)
+	private TraceCodeUtilIfs traceCodeUtil;
+	
+	private DgrcRoutingHelper dgrcRoutingHelper;
+	private OAuthTokenService oAuthTokenService;
+	
+	private TokenHelper tokenHelper;
+	private TsmpApiCacheProxy tsmpApiCacheProxy;
+	private JobHelper jobHelper;
+	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
+	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private ObjectMapper objectMapper;
+	private TsmpSettingService tsmpSettingService;
+	private TokenCheck tokenCheck;
+	private TsmpReqLogDao tsmpReqLogDao;
+	private TsmpResLogDao tsmpResLogDao;
 	private TsmpClientCacheProxy tsmpClientCacheProxy;
-
-	@Autowired
 	private TsmpClientCertCacheProxy tsmpClientCertCacheProxy;
 
 	public static class ClientPublicKeyData {
-		public ResponseEntity<?> errRespEntity;
-		public PublicKey clientPublicKey;
+		private ResponseEntity<?> errRespEntity;
+		private PublicKey clientPublicKey;
+		public ResponseEntity<?> getErrRespEntity() {
+			return errRespEntity;
+		}
+		public void setErrRespEntity(ResponseEntity<?> errRespEntity) {
+			this.errRespEntity = errRespEntity;
+		}
+		public PublicKey getClientPublicKey() {
+			return clientPublicKey;
+		}
+		public void setClientPublicKey(PublicKey clientPublicKey) {
+			this.clientPublicKey = clientPublicKey;
+		}
 	}
-
+ 
 	@Autowired
-	public CommForwardProcService() {
+	public void setCommForwardProcService(@Nullable TraceCodeUtilIfs traceCodeUtil, DgrcRoutingHelper dgrcRoutingHelper,
+			OAuthTokenService oAuthTokenService, TokenHelper tokenHelper, TsmpApiCacheProxy tsmpApiCacheProxy,
+			JobHelper jobHelper, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
+			TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, ObjectMapper objectMapper,
+			TsmpSettingService tsmpSettingService, TokenCheck tokenCheck, TsmpReqLogDao tsmpReqLogDao,
+			TsmpResLogDao tsmpResLogDao, TsmpClientCacheProxy tsmpClientCacheProxy,
+			TsmpClientCertCacheProxy tsmpClientCertCacheProxy) {
 		this.executor = Executors.newCachedThreadPool(new CustomizableThreadFactory("CommForwardProcService"));
+		this.traceCodeUtil = traceCodeUtil;
+
+		this.tokenHelper = tokenHelper;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.jobHelper = jobHelper;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tokenCheck = tokenCheck;
+		this.tsmpReqLogDao = tsmpReqLogDao;
+		this.tsmpResLogDao = tsmpResLogDao;
+		this.tsmpClientCacheProxy = tsmpClientCacheProxy;
+		this.tsmpClientCertCacheProxy = tsmpClientCertCacheProxy;
+
+		// Because using constructor injection will cause a circular dependency, use
+		// method injection instead
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.oAuthTokenService = oAuthTokenService;
 	}
 
 	@PreDestroy
@@ -185,13 +210,13 @@ public class CommForwardProcService {
 	}
 
 	// No Auth 找不到有效的憑證
-	public static String No_Auth_no_valid_credentials_found = "'No Auth' no valid credentials found.";
+	public static final String NO_AUTH_NO_VALID_CREDENTIALS_FOUND = "'No Auth' no valid credentials found.";
 	// 沒有 client ID 找不到有效的憑證
-	public static String Missing_client_ID_no_valid_certificate_found = "Missing client ID, no valid certificate found.";
+	public static final String MISSING_CLIENT_ID_NO_VALID_CERTIFICATE_FOUND = "Missing client ID, no valid certificate found.";
 	// 找不到有效的憑證
-	public static String No_valid_certificate_found = "No valid certificate found, client_id: ";
+	public static final String NO_VALID_CERTIFICATE_FOUND = "No valid certificate found, client_id: ";
 	// 產生公鑰失敗
-	public static String Failed_to_generate_public_key = "Failed to generate public key, client_id: ";
+	public static final String FAILED_TO_GENERATE_PUBLIC_KEY = "Failed to generate public key, client_id: ";
 
 
 	/**
@@ -241,7 +266,7 @@ public class CommForwardProcService {
 	 * @param isThrowing 是否要丟出例外
 	 * @return
 	 */
-	public LinkedList<String[]> getSrcUrlToTargetUrlAndProbabilityList(String srcUrl, boolean isThrowing) {
+	public List<String[]> getSrcUrlToTargetUrlAndProbabilityList(String srcUrl, boolean isThrowing) {
 		// 1.若 srcUrl 沒有值，則 return null
 		if (!StringUtils.hasLength(srcUrl)) {
 			TPILogger.tl.debug("srcUrl has no value");
@@ -344,12 +369,12 @@ public class CommForwardProcService {
 	 */
 	public List<String> getSortSrcUrlListForLB(String srcUrl) {
 		boolean isThrowing = false;// 是否要丟出例外
-		LinkedList<String[]> dataList = getSrcUrlToTargetUrlAndProbabilityList(srcUrl, isThrowing);
+		LinkedList<String[]> dataList = (LinkedList<String[]>) getSrcUrlToTargetUrlAndProbabilityList(srcUrl, isThrowing);
 		if (CollectionUtils.isEmpty(dataList)) {
 			return null;
 		}
 
-		List<String> srcUrlList = new ArrayList<String>();// 排過順序的URL
+		List<String> srcUrlList = new ArrayList<>();// 排過順序的URL
 		// 只有一筆資料，即要打的URL
 		if (dataList.size() == 1) {
 			String[] arr = dataList.get(0);
@@ -374,7 +399,8 @@ public class CommForwardProcService {
 	 */
 	public String getSrcUrlForLB(String srcUrl) {
 		boolean isThrowing = false;// 是否要丟出例外
-		LinkedList<String[]> dataList = getSrcUrlToTargetUrlAndProbabilityList(srcUrl, isThrowing);
+		LinkedList<String[]> dataList = (LinkedList<String[]>) getSrcUrlToTargetUrlAndProbabilityList(srcUrl,
+				isThrowing);
 		if (CollectionUtils.isEmpty(dataList)) {
 			return null;
 		}
@@ -408,31 +434,31 @@ public class CommForwardProcService {
 	}
 
 	public TsmpApi getTsmpApi(HttpServletRequest httpReq) throws Exception {
-		String moduleName = getAttribute(httpReq, GatewayFilter.moduleName);
-		String apiId = getAttribute(httpReq, GatewayFilter.apiId);
+		String moduleName = getAttribute(httpReq, GatewayFilter.MODULE_NAME);
+		String apiId = getAttribute(httpReq, GatewayFilter.API_ID);
 
 		TsmpApi tsmpApi = null;
 		TsmpApiId tsmpApiId = new TsmpApiId(apiId, moduleName);
-		Optional<TsmpApi> opt_tsmpApi = getTsmpApiCacheProxy().findById(tsmpApiId);
-		if (!opt_tsmpApi.isPresent()) {
+		Optional<TsmpApi> optTsmpApi = getTsmpApiCacheProxy().findById(tsmpApiId);
+		if (!optTsmpApi.isPresent()) {
 			throw new Exception("TSMP_API not found, api_key:" + apiId + "\t,module_name:" + moduleName);
 		} else {
-			tsmpApi = opt_tsmpApi.get();
+			tsmpApi = optTsmpApi.get();
 		}
 		return tsmpApi;
 	}
 
 	public TsmpApiReg getTsmpApiReg(HttpServletRequest httpReq) throws Exception {
-		String moduleName = getAttribute(httpReq, GatewayFilter.moduleName);
-		String apiId = getAttribute(httpReq, GatewayFilter.apiId);
+		String moduleName = getAttribute(httpReq, GatewayFilter.MODULE_NAME);
+		String apiId = getAttribute(httpReq, GatewayFilter.API_ID);
 
 		TsmpApiReg tsmpApiReg = null;
 		TsmpApiRegId apiRegId = new TsmpApiRegId(apiId, moduleName);
-		Optional<TsmpApiReg> opt_apiReg = getTsmpApiRegCacheProxy().findById(apiRegId);
-		if (!opt_apiReg.isPresent()) {
+		Optional<TsmpApiReg> optApiReg = getTsmpApiRegCacheProxy().findById(apiRegId);
+		if (!optApiReg.isPresent()) {
 			throw new Exception("TSMP_API_REG not found, api_key:" + apiId + "\t,module_name:" + moduleName);
 		} else {
-			tsmpApiReg = opt_apiReg.get();
+			tsmpApiReg = optApiReg.get();
 		}
 		return tsmpApiReg;
 	}
@@ -450,7 +476,6 @@ public class CommForwardProcService {
 			HttpHeaders httpHeaders, TsmpApiReg apiReg, String payload, boolean isGet) throws Exception {
 
 		// 說明 dgr-v4 流程使用, 沒有注入就不會引用
-//		if (traceCodeUtil != null) { traceCodeUtil.logger(this); } 
 
 		// 檢查是否要驗 Authorization (No Auth 機制)
 		String noAuth = apiReg.getNoOauth();
@@ -463,7 +488,7 @@ public class CommForwardProcService {
 
 		} else {
 			// 驗證打 API 的 authorization 或 x-api-key
-			String auth = httpHeaders.getFirst("Authorization");
+			String auth = httpHeaders.getFirst(AUTHORIZATION);
 			String xApiKey = httpHeaders.getFirst("x-api-key");
 			
 			if (StringUtils.hasText(auth)) {
@@ -512,17 +537,17 @@ public class CommForwardProcService {
 
 	public void takeTurnsSleeping(String clientid, Integer priority) throws InterruptedException {
 
-		initProability_50_50();
-		String sleepStrFlag = ProbabilityAlgUtils.getProbabilityAns(probMap5050);
+//		initProability_50_50();
+		//String sleepStrFlag = ProbabilityAlgUtils.getProbabilityAns(probMap5050);
 				
 		int jobQueueSizeThreshold = 300;
 		// 0:high / 5:default / 9:low
 		// 在 JobQueueSize > 300 的時候，中優先度與低優先度的請求皆停止100毫秒。
-		if (jobHelper.getJobQueueSize(1) > jobQueueSizeThreshold && priority > 4 ) {
-			// 加入機率判定是否要 sleep
-			if (sleepStrFlag != null && sleepStrFlag.equals("true")) {
-				Thread.sleep(100); // 有 20% 的機率不會停 
-			}
+		if (jobHelper.getJobQueueSize(1) > jobQueueSizeThreshold && priority > 4 && RandomUtil.getIntRandom(100) < 20) {
+			// 取代原有的 ProbabilityAlgUtils.getProbabilityAns(probMap5050);
+			// 隨機數判斷 - 產生 0-99 的數字,小於 20 代表 20% 的機率,
+			// 要改成 30% 的機率,就改成 nextInt(100) < 30
+			Thread.sleep(100);
 		}
 
 		// 在 JobQueueSize > 300 的時候，低優先度的請求皆停止100毫秒。
@@ -531,20 +556,20 @@ public class CommForwardProcService {
 		}
 	}
 	
-	private static List<String[]> dataList5050 = null; //機率表之原始陣列資料
-	private static Map<Integer, String> probMap5050 = null;//機率表轉換為 Map
+	//機率表轉換為 Map, 執行緒安全的初始化 (高併發優化版)
+//	private static final Map<Integer, String> probMap5050 = initProability_50_50_v2();
 	
-	// 初始化機率表, 轉化為 Map
-	public static void initProability_50_50() {
-		if (dataList5050 != null && probMap5050 != null) {
-			return;
-		}
-		// 不用一直重覆做
-		dataList5050 = new LinkedList<String[]>();
-		dataList5050.add(new String[]{"50","true"});
-		dataList5050.add(new String[]{"50","false"});
-		probMap5050 = ProbabilityAlgUtils.getProbabilityMap(dataList5050);
-	}
+//	private static Map<Integer, String> initProability_50_50_v2() {
+//	    Map<Integer, String> map = new HashMap<>(100);
+//	    for (int i = 0; i < 50; i++) {
+//	        map.put(i, "true");
+//	    }
+//	    for (int i = 50; i < 100; i++) {
+//	        map.put(i, "false");
+//	    }
+//	    return Collections.unmodifiableMap(map);
+//	}
+
 
 	public Map<String, List<String>> getConvertHeader(HttpServletRequest httpReq, HttpHeaders httpHeaders,
 			int tokenPayloadFlag, Boolean cApiKeySwitch, String uuid, String srcUrl) throws Exception {
@@ -616,7 +641,7 @@ public class CommForwardProcService {
 				isBackAuth = true;
 				backAuthValueList = headerValueList;
 
-			} else if ("authorization".equalsIgnoreCase(key)) {
+			} else if (AUTHORIZATION.equalsIgnoreCase(key)) {
 				if ("1".equals(noAuth)) {// 有勾選 No Auth
 					isOrigAuth = true;
 					origAuthValueList = headerValueList;
@@ -641,23 +666,23 @@ public class CommForwardProcService {
 		if ("1".equals(noAuth)) {// 有勾選 No Auth
 			// 若 header 中有 "authorization", 將值放入或取代
 			if (isOrigAuth) {
-				headers.put("authorization", origAuthValueList);
+				headers.put(AUTHORIZATION, origAuthValueList);
 			}
 
 			// 若 header 中有 "backAuth", 將值放入或取代
 			if (isBackAuth) {
-				headers.put("authorization", backAuthValueList);
+				headers.put(AUTHORIZATION, backAuthValueList);
 			}
 
 		} else {// 沒有勾選 No Auth
 			// 若 header 中有 "backAuth", 將值放入或取代
 			if (isBackAuth) {
-				headers.put("authorization", backAuthValueList);
+				headers.put(AUTHORIZATION, backAuthValueList);
 			}
 
 			// 若 header 中有 "id-token", 將值放入或取代
 			if (isIdToken) {
-				headers.put("authorization", idTokenValueList);
+				headers.put(AUTHORIZATION, idTokenValueList);
 			}
 		}
 
@@ -855,19 +880,43 @@ public class CommForwardProcService {
 	}
 
 	/**
+	 * DGRC 用, 將 http status code 放到 header, <br>
+	 * 記錄 response 的時間 & http status code
+	 */
+	private void doFetchUriHistoryAfter(HttpServletRequest httpReq, int httpCode) {
+		if(httpReq != null) {
+			httpReq.setAttribute(GatewayFilter.HTTP_CODE, httpCode);
+			
+			// 記錄 response 的時間 & http status code
+			GatewayFilter.fetchUriHistoryAfter(httpReq);
+		}
+	}
+	
+	/**
 	 * 取得調用API時,驗證token失敗的log
-	 *
-	 * @param respEntity
-	 * @param maskInfo
-	 * @return
 	 */
 	public StringBuffer getLogResp(ResponseEntity<?> respEntity) {
 		return getLogResp(respEntity, null);
 	}
 
+	/**
+	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br> 
+	 * 註: 僅 DGRC, TSMPC 呼叫
+	 */
+	public StringBuffer getLogResp(ResponseEntity<?> respEntity, Map<String, String> maskInfo,
+			HttpServletRequest httpReq) {
+		int httpCode = respEntity.getStatusCode().value();
+		doFetchUriHistoryAfter(httpReq, httpCode);
+
+		return getLogResp(respEntity, maskInfo);
+	}
+
+	/**
+	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br> 
+	 * 註: 僅 TSMPC 呼叫, 20250407 tsmpc no call
+	 */
 	public StringBuffer getLogResp(ResponseEntity<?> respEntity, Map<String, String> maskInfo) {
 		StringBuffer log = new StringBuffer();
-
 		// print header
 		writeLogger(log, "--【Http Resp Header】--");
 
@@ -905,25 +954,47 @@ public class CommForwardProcService {
 	}
 
 	/**
-	 * 取得調用API的response log
-	 *
-	 * @param httpRes
-	 * @param httpRespStr
-	 * @param content_Length
-	 * @param maskInfo
-	 * @return
-	 * @throws IOException
+	 * 註: 僅 TSMPC 由此直接呼叫,20250407 tsmpc no call
 	 */
-	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int content_Length)
-			throws IOException {
-		return getLogResp(httpRes, httpRespStr, content_Length, null);
-	}
-
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int content_Length,
 			Map<String, String> maskInfo) throws IOException {
 		return getLogResp(httpRes, httpRespStr, content_Length, null, maskInfo);
 	}
+	
+	/**
+	 * 註: 僅 DGRC, TSMPC, Mock API Test 由此直接呼叫
+	 */
+	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
+			Map<String, String> maskInfo, HttpServletRequest httpReq) throws IOException {
+		int httpCode = -1;
+		if (httpRes != null) {
+			//記錄 response 的時間 & http status code
+			httpCode = httpRes.getStatus();
+			doFetchUriHistoryAfter(httpReq, httpCode);
+		}
 
+		return getLogResp(httpRes, httpRespStr, contentLength, null, maskInfo);
+	}
+	/**
+	 * 取得調用目標URL 的 response log
+	 * 註: 僅 TSMPCServicePostForm 由此直接呼叫
+	 */
+	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
+			StringBuffer cfp_log, Map<String, String> maskInfo, HttpServletRequest httpReq) throws IOException {
+		int httpCode = -1;
+		if (httpRes != null) {
+			//記錄 response 的時間 & http status code
+			httpCode = httpRes.getStatus();
+			doFetchUriHistoryAfter(httpReq, httpCode);
+		}
+
+		return getLogResp(httpRes, httpRespStr, contentLength, cfp_log, maskInfo);
+		
+	}
+	/**
+	 * 取得調用目標URL 的 response log
+	 * 註: 僅 TSMPCServicePostForm 由此直接呼叫, 20250407 TSMPCServicePostForm no call
+	 */
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
 			StringBuffer cfp_log, Map<String, String> maskInfo) throws IOException {
 		if (cfp_log == null) {
@@ -960,7 +1031,6 @@ public class CommForwardProcService {
 		writeLogger(cfp_log, "--【Resp payload / Form Data】");
 		writeLogger(cfp_log, httpRespStr);
 		writeLogger(cfp_log, "--【End】--\r\n");
-
 		return cfp_log;
 	}
 
@@ -1055,8 +1125,8 @@ public class CommForwardProcService {
 		logParams.put("url", httpReq.getRequestURI());
 		logParams.put("queryString", httpReq.getQueryString());
 		// 找不到 module 就改用 uri
-		logParams.put("moduleName", getAttribute(httpReq, GatewayFilter.moduleName));
-		logParams.put("txid", getAttribute(httpReq, GatewayFilter.apiId));
+		logParams.put(MODULE_NAME, getAttribute(httpReq, GatewayFilter.MODULE_NAME));
+		logParams.put("txid", getAttribute(httpReq, GatewayFilter.API_ID));
 		logParams.put("httpMethod", httpReq.getMethod());
 		logParams.put("orgId", httpReq.getAttribute(TokenHelper.ORG_ID) == null ? ""
 				: ((String) httpReq.getAttribute(TokenHelper.ORG_ID)));
@@ -1079,12 +1149,17 @@ public class CommForwardProcService {
 		if (value == null) value = httpReq.getRequestURI();
 		return value.toString();
 	}
-
+	
+	private static boolean esDisable = false;			// Setting Flag
+	private static boolean checkStatusFromFile = false; // diskSpaceMonitor 檢查器
+	private static final AtomicLong ES_API_LOG_LAST_LOG_TIME = new AtomicLong(0);
+	private static final long ES_API_LOG_LOG_INTERVAL = 60000; // 例如每分鐘最多記錄一次
+	
 	public TsmpApiLogReq addEsTsmpApiLogReq1(String uuid, Map<String, String> logParams, //
 			Map<String, List<String>> esHeaderMap, String mbody, String entry, String aType) throws Exception {
 
 		String url = logParams.get("url");
-		String moduleName = logParams.get("moduleName");
+		String moduleName = logParams.get(MODULE_NAME);
 		String txid = logParams.get("txid");
 		String httpMethod = logParams.get("httpMethod");
 
@@ -1092,12 +1167,21 @@ public class CommForwardProcService {
 		reqVo.setModuleName(moduleName);
 		reqVo.setTxid(txid);
 		reqVo.setHttpMethod(httpMethod);
-
+        
 		// 是否禁止紀錄ES的LOG
-		boolean esDisable = getTsmpSettingService().getVal_ES_LOG_DISABLE();
-		if (esDisable) {
-			TPILogger.tl.debug("ES_LOG_DISABLE is true");
-			reqVo.setIgnore(esDisable);
+		esDisable = getTsmpSettingService().getVal_ES_LOG_DISABLE();
+		checkStatusFromFile = DiskSpaceMonitor.checkStatusFromFile();
+		if (esDisable || checkStatusFromFile) {
+		    long currentTime = System.currentTimeMillis();
+		    long lastLogTime = ES_API_LOG_LAST_LOG_TIME.get();
+		    
+		    // 如果距離上次日誌已經過了指定時間，則輸出日誌
+		    if (currentTime - lastLogTime > ES_API_LOG_LOG_INTERVAL && ES_API_LOG_LAST_LOG_TIME.compareAndSet(lastLogTime, currentTime)) {
+		        TPILogger.tl.warn(String.format("ES_LOG_DISABLE is [%b] or DiskSpaceMonitor.checkStatusFromFile() is [%b]",
+		            esDisable, checkStatusFromFile));
+		    }
+			
+			reqVo.setIgnore(esDisable || checkStatusFromFile); // true 略過不寫 ES
 			return reqVo;
 		}
 
@@ -1225,9 +1309,10 @@ public class CommForwardProcService {
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
 //		String esReqUrl = DgrApiLog2ESQueue.getEsReqUrl(arrEsUrl, arrIdPwd, indexName, timeout);
 		String esReqUrl = arrEsUrl[0] + indexName + "/_bulk"; // 上面那一行會造成 gateway 的 bottleneck
-		DgrApiLog2ESQueue
-				.put(new DgrApiLog2ESQueue(arrEsUrl, arrIdPwd, timeout, indexName, strJson, esReqUrl, id + "-" + type));
-
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(arrEsUrl, arrIdPwd, timeout, indexName, strJson, esReqUrl, id + "-" + type)
+						, TPILogger.tl.diskFreeThreshHold
+						, TPILogger.tl.deletePercent
+						, TPILogger.tl.allowWriteElastic);
 //		this.execute(() -> {
 //			try {
 //				HttpRespData resp = HttpUtil.httpReqByRawData(esReqUrl, HttpMethod.POST.toString(), strJson, header, false);
@@ -1253,17 +1338,28 @@ public class CommForwardProcService {
 		return reqVo;
 	}
 
+//	public boolean checkConnection_old(String strUrl) {
+//		try (Socket socket = new Socket()) {
+//		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
+//		URL url = new URL(strUrl);
+//		int port = url.getPort()==-1?url.getDefaultPort():url.getPort();
+//		socket.connect(new InetSocketAddress(url.getHost(), port), timeout);
+//			return true;
+//		} catch (Exception e) {
+//			TPILogger.tl.error("Url = " + strUrl + "\n" + StackTraceUtil.logStackTrace(e));
+//			return false;
+//		}
+//	}
+	
 	public boolean checkConnection(String strUrl) {
-		try (Socket socket = new Socket()) {
-			int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-			URL url = new URL(strUrl);
-			int port = url.getPort()==-1?url.getDefaultPort():url.getPort();
-			socket.connect(new InetSocketAddress(url.getHost(), port), timeout);
-			return true;
-		} catch (Exception e) {
-			TPILogger.tl.error("Url = " + strUrl + "\n" + StackTraceUtil.logStackTrace(e));
-			return false;
-		}
+	    try {
+	    	// 未來有需要再改
+	    	// int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
+	        return HttpsConnectionChecker.checkConnection(strUrl);
+	    } catch (Exception e) {
+	        TPILogger.tl.error("Connection failed! Url = " + strUrl + "\n" + StackTraceUtil.logStackTrace(e));
+	        return false;
+	    }
 	}
 
 	public boolean checkIgnoreApi(String entry, String api, String uri) {
@@ -1388,7 +1484,10 @@ public class CommForwardProcService {
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type));
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type)
+				, TPILogger.tl.diskFreeThreshHold
+				, TPILogger.tl.deletePercent
+				, TPILogger.tl.allowWriteElastic);
 
 //		this.execute(() -> {
 //			try {
@@ -1499,7 +1598,10 @@ public class CommForwardProcService {
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type));
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type)
+				, TPILogger.tl.diskFreeThreshHold
+				, TPILogger.tl.deletePercent
+				, TPILogger.tl.allowWriteElastic);
 
 //		this.execute(() -> {
 //			try {
@@ -1609,7 +1711,10 @@ public class CommForwardProcService {
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type));
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type)
+				, TPILogger.tl.diskFreeThreshHold
+				, TPILogger.tl.deletePercent
+				, TPILogger.tl.allowWriteElastic);
 
 //		this.execute(() -> {
 //			try {
@@ -1810,7 +1915,7 @@ public class CommForwardProcService {
 		Map<String, String> header = new HashMap<>();
 		header.put("Accept", "application/json");
 		header.put("Content-Type", "application/json");
-		header.put("Authorization", "Basic " + idPwd);
+		header.put(AUTHORIZATION, "Basic " + idPwd);
 
 		HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl, HttpMethod.HEAD.toString(), null, header, false, null);
 		if (resp.statusCode == HttpStatus.OK.value()) {
@@ -1837,7 +1942,7 @@ public class CommForwardProcService {
 		Map<String, String> header = new HashMap<>();
 		header.put("Accept", "application/json");
 		header.put("Content-Type", "application/json");
-		header.put("Authorization", "Basic " + idPwd);
+		header.put(AUTHORIZATION, "Basic " + idPwd);
 
 		HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl, HttpMethod.PUT.toString(), null, header, false, null);
 		TPILogger.tl.debug(resp.getLogStr());
@@ -2021,7 +2126,7 @@ public class CommForwardProcService {
 		// 1.是否為 No Auth
 		if ("1".equals(noAuth)) {// No Auth,沒有驗證,就沒有 client
 			// No Auth 找不到有效的憑證
-			String errMsg = No_Auth_no_valid_credentials_found;
+			String errMsg = NO_AUTH_NO_VALID_CREDENTIALS_FOUND;
 			TPILogger.tl.debug(errMsg);
 			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
 					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
@@ -2033,7 +2138,7 @@ public class CommForwardProcService {
 		// 2.沒有 client ID
 		if (!StringUtils.hasLength(clientId)) {
 			// 沒有 client ID 找不到有效的憑證
-			String errMsg = Missing_client_ID_no_valid_certificate_found;
+			String errMsg = MISSING_CLIENT_ID_NO_VALID_CERTIFICATE_FOUND;
 			TPILogger.tl.debug(errMsg);
 			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
 					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
@@ -2048,7 +2153,7 @@ public class CommForwardProcService {
 			// Table [TSMP_CLIENT_CERT] 查不到 client
 			TPILogger.tl.debug("Table [TSMP_CLIENT_CERT] can't find valid certificate, client_id:" + clientId);
 			// 找不到有效的憑證
-			String errMsg = No_valid_certificate_found + clientId;
+			String errMsg = NO_VALID_CERTIFICATE_FOUND + clientId;
 			TPILogger.tl.debug(errMsg);
 			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
 					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
@@ -2065,7 +2170,7 @@ public class CommForwardProcService {
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			// 產生公鑰失敗
-			String errMsg = Failed_to_generate_public_key + clientId;
+			String errMsg = FAILED_TO_GENERATE_PUBLIC_KEY + clientId;
 			TPILogger.tl.debug(errMsg);
 			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
 					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
@@ -2451,8 +2556,8 @@ public class CommForwardProcService {
 			String mbody, String entry, String aType) throws Exception {
 		Map<String, String> logParams = new HashMap<>();
 		logParams.put("uri", httpReq.getRequestURI());
-		logParams.put("moduleName", getAttribute(httpReq, GatewayFilter.moduleName));
-		logParams.put("txid", getAttribute(httpReq, GatewayFilter.apiId));
+		logParams.put(MODULE_NAME, getAttribute(httpReq, GatewayFilter.MODULE_NAME));
+		logParams.put("txid", getAttribute(httpReq, GatewayFilter.API_ID));
 		logParams.put("httpMethod", httpReq.getMethod());
 		logParams.put("orgId", httpReq.getAttribute(TokenHelper.ORG_ID) == null ? ""
 				: ((String) httpReq.getAttribute(TokenHelper.ORG_ID)));
@@ -2481,7 +2586,7 @@ public class CommForwardProcService {
 		reqVo.setDgrcUri(uri);
 
 		// moduleName
-		String moduleName = logParams.get("moduleName");
+		String moduleName = logParams.get(MODULE_NAME);
 		reqVo.setModuleName(moduleName);
 
 		// txid
@@ -2734,57 +2839,5 @@ public class CommForwardProcService {
 	protected String getAesKey() {
 		String key = System.getenv("TAEASK");
 		return key;
-	}
-
-	protected TsmpApiRegCacheProxy getTsmpApiRegCacheProxy() {
-		return tsmpApiRegCacheProxy;
-	}
-
-	protected TsmpCoreTokenEntityHelper getTsmpCoreTokenHelper() {
-		return tsmpCoreTokenHelper;
-	}
-
-	protected OAuthTokenService getOAuthTokenService() {
-		return oAuthTokenService;
-	}
-
-	protected ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-
-	protected TsmpSettingService getTsmpSettingService() {
-		return tsmpSettingService;
-	}
-
-	protected TokenHelper getTokenHelper() {
-		return tokenHelper;
-	}
-
-	protected TsmpApiCacheProxy getTsmpApiCacheProxy() {
-		return tsmpApiCacheProxy;
-	}
-
-	protected DgrcRoutingHelper getDgrcRoutingHelper() {
-		return dgrcRoutingHelper;
-	}
-
-	protected TokenCheck getTokenCheck() {
-		return tokenCheck;
-	}
-
-	protected TsmpReqLogDao getTsmpReqLogDao() {
-		return this.tsmpReqLogDao;
-	}
-
-	protected TsmpResLogDao getTsmpResLogDao() {
-		return this.tsmpResLogDao;
-	}
-
-	protected TsmpClientCacheProxy getTsmpClientCacheProxy() {
-		return this.tsmpClientCacheProxy;
-	}
-
-	protected TsmpClientCertCacheProxy getTsmpClientCertCacheProxy() {
-		return tsmpClientCertCacheProxy;
 	}
 }

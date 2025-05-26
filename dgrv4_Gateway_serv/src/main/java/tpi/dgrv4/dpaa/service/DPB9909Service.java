@@ -36,8 +36,13 @@ public class DPB9909Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+
+	@Autowired
+	public DPB9909Service(TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	@Transactional
 	public DPB9909Resp updateTsmpDpItemsDetail(TsmpAuthorization auth, DPB9909Req req) {
@@ -146,16 +151,32 @@ public class DPB9909Service {
 				.map((i) -> i.getSubitemName()) //
 				.orElse(null);
 			if (StringUtils.hasLength(newSubitemName)) {
+				String params0 = null;
+				String params1 = null;
+				String params2 = null;
+				String params3 = null;
+				String params4 = null;
+				Long version = null;
+				
+				if(dgl9909Item != null) {
+					params0 = dgl9909Item.getParams().get(0);
+					params1 = dgl9909Item.getParams().get(1);
+					params2 = dgl9909Item.getParams().get(2);
+					params3 = dgl9909Item.getParams().get(3);
+					params4 = dgl9909Item.getParams().get(4);
+					version = dgl9909Item.getVersion();
+				}
+				
 				copiedEntity.setIsDefault(req.getIsDefault());
 				copiedEntity.setSubitemName(newSubitemName);
-				copiedEntity.setParam1(dgl9909Item.getParams().get(0));
-				copiedEntity.setParam2(dgl9909Item.getParams().get(1));
-				copiedEntity.setParam3(dgl9909Item.getParams().get(2));
-				copiedEntity.setParam4(dgl9909Item.getParams().get(3));
-				copiedEntity.setParam5(dgl9909Item.getParams().get(4));
+				copiedEntity.setParam1(params0);
+				copiedEntity.setParam2(params1);
+				copiedEntity.setParam3(params2);
+				copiedEntity.setParam4(params3);
+				copiedEntity.setParam5(params4);
 				copiedEntity.setUpdateDateTime(DateTimeUtil.now());
 				copiedEntity.setUpdateUser(userName);
-				copiedEntity.setVersion(dgl9909Item.getVersion());
+				copiedEntity.setVersion(version);
 				
 				// 樂觀鎖
 				try {
@@ -177,6 +198,20 @@ public class DPB9909Service {
 				.map((i) -> i.getSubitemName()) //
 				.orElse(null);
 			if (StringUtils.hasLength(newSubitemName)) {
+				String params0 = null;
+				String params1 = null;
+				String params2 = null;
+				String params3 = null;
+				String params4 = null;
+				
+				if(dgl9909Item != null) {
+					params0 = dgl9909Item.getParams().get(0);
+					params1 = dgl9909Item.getParams().get(1);
+					params2 = dgl9909Item.getParams().get(2);
+					params3 = dgl9909Item.getParams().get(3);
+					params4 = dgl9909Item.getParams().get(4);
+				}
+				
 				TsmpDpItems newEntity = new TsmpDpItems();
 				newEntity.setItemId(oriEntity.getItemId());
 				newEntity.setItemNo(oriEntity.getItemNo());
@@ -185,11 +220,11 @@ public class DPB9909Service {
 				newEntity.setSubitemName(newSubitemName);
 				newEntity.setSortBy(oriEntity.getSortBy());
 				newEntity.setIsDefault(req.getIsDefault());
-				newEntity.setParam1(dgl9909Item.getParams().get(0));
-				newEntity.setParam2(dgl9909Item.getParams().get(1));
-				newEntity.setParam3(dgl9909Item.getParams().get(2));
-				newEntity.setParam4(dgl9909Item.getParams().get(3));
-				newEntity.setParam5(dgl9909Item.getParams().get(4));
+				newEntity.setParam1(params0);
+				newEntity.setParam2(params1);
+				newEntity.setParam3(params2);
+				newEntity.setParam4(params3);
+				newEntity.setParam5(params4);
 				newEntity.setLocale(locale);
 				newEntity.setCreateDateTime(oriEntity.getCreateDateTime());
 				newEntity.setCreateUser(oriEntity.getCreateUser());

@@ -26,14 +26,18 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class GtwIdPUserInfoService {
 
-	@Autowired
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
- 
-	@Autowired
 	private GtwIdPVerifyService gtwIdPVerifyService;
+
+	@Autowired
+	public GtwIdPUserInfoService(TokenHelper tokenHelper, TsmpTokenHistoryDao tsmpTokenHistoryDao,
+			GtwIdPVerifyService gtwIdPVerifyService) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.gtwIdPVerifyService = gtwIdPVerifyService;
+	}
 
 	public ResponseEntity<?> getUserInfo(HttpServletRequest httpReq, HttpServletResponse httpResp,
 			HttpHeaders headers) {

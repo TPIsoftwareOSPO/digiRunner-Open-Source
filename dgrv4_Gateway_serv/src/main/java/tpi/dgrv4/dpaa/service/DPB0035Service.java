@@ -12,8 +12,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0035Service {
 	
-	@Autowired
 	private TsmpDpSiteMapDao tsmpDpSiteMapDao;
+
+	@Autowired
+	public DPB0035Service(TsmpDpSiteMapDao tsmpDpSiteMapDao) {
+		super();
+		this.tsmpDpSiteMapDao = tsmpDpSiteMapDao;
+	}
 
 	public DPB0035Resp deleteNodeById(TsmpAuthorization authorization, DPB0035Req req) {
 		Long siteId = req.getSiteId();

@@ -10,20 +10,20 @@
                 <form [formGroup]="oasForm">
                     <p-fieldset>
                         <p-header>{{'import_exn_spec'|translate}}</p-header>
-                        <div class="form-group row ml-2" [hidden]="pathType!='2'">
+                        <div class="form-group row ms-2" [hidden]="pathType!='2'">
 
                           <!-- 模式 -->
                           <div class="col-12 px-2">
-                            <!-- <label class="control-label mr-3">{{'api_reg_mode' | translate}}</label> -->
+                            <!-- <label class="control-label me-3">{{'api_reg_mode' | translate}}</label> -->
                             <div class="p-form-check-line form-group">
                               <ng-container>
                                 <div class="p-form-check">
                                   <p-radioButton formControlName="type" value="0" inputId="type_0"></p-radioButton>
-                                  <label for="type_0" class="ml-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
+                                  <label for="type_0" class="ms-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
                                 </div>
                                 <div class="p-form-check">
                                   <p-radioButton formControlName="type" value="1" inputId="type_1"></p-radioButton>
-                                  <label for="type_1" class="ml-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
+                                  <label for="type_1" class="ms-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
                                 </div>
                               </ng-container>
                             </div>
@@ -32,12 +32,12 @@
                         </div>
                         <hr [hidden]="pathType!='2'">
 
-                        <div class="form-group row ml-2">
+                        <div class="form-group row ms-2">
                             <div class="col-12 d-flex">
                                 <div class="col-4 py-2">
                                     <div class="p-form-check">
                                       <p-radioButton formControlName="uploadDoc" value="0" inputId="uploadDoc_0"></p-radioButton>
-                                      <label for="uploadDoc_0" class="ml-2 mb-0">{{'upload_doc'|translate}}</label>
+                                      <label for="uploadDoc_0" class="ms-2 mb-0">{{'upload_doc'|translate}}</label>
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -47,18 +47,18 @@
                                         (change)="fileChangeHandler($event)" formControlName="uploadfile" #upload_file>
                                 </div>
                                 <div class="col-1">
-                                    <button type="button" class="btn tpi-btn tpi-primary ml-2"
+                                    <button type="button" class="btn tpi-btn tpi-primary ms-2"
                                         [disabled]="uploadDoc.value==='1'"
                                         (click)="uploadClickHandler(uploadfile.value)">{{'button.upload'|translate}}</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group row ml-2">
+                        <div class="form-group row ms-2">
                             <div class="col-12 d-flex">
                                 <div class="col-4">
                                     <div class="p-form-check">
                                       <p-radioButton formControlName="uploadDoc" value="1" inputId="uploadDoc_1"></p-radioButton>
-                                      <label for="uploadDoc_1" class="ml-2 mb-0">{{'doc_url'|translate}}</label>
+                                      <label for="uploadDoc_1" class="ms-2 mb-0">{{'doc_url'|translate}}</label>
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -66,13 +66,13 @@
                                     <input type="url" class="form-control w-100" formControlName="docUrl">
                                 </div>
                                 <div class="col-1">
-                                    <button type="button" class="btn tpi-btn tpi-primary ml-2"
+                                    <button type="button" class="btn tpi-btn tpi-primary ms-2"
                                         [disabled]="uploadDoc.value==='0'"
                                         (click)="uploadClickHandler(docUrl.value)">{{'button.upload'|translate}}</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group row ml-2" [hidden]="!showHostUrl">
+                        <div class="form-group row ms-2" [hidden]="!showHostUrl">
                             <div class="col-12 d-flex">
                                 <div class="col-4">
                                     <label class="form-check-label">{{'host_url'|translate}}</label>
@@ -142,13 +142,19 @@
                             </div> -->
                         </div>
                         <br>
-                        <span>{{'row_count' | translate}}: {{openApiListRowcount}}</span>
-                        <button type="button" class="btn tpi-primary tpi-btn mr-5 float-right mb-1" (click)="closeTableAllExpand();">
-                            <span class="fa fa-compress">{{'button.collapse_all'|translate}}</span>
-                        </button>
-                        <button type="button" class="btn tpi-primary tpi-btn mr-5 float-right mb-1" (click)="openTableAllExpand();">
-                            <span class="fa fa-expand">{{'button.expansion_all'|translate}}</span>
-                        </button>
+
+                        <div class="d-flex col-12 align-items-center form-group">
+                          <span>{{'row_count' | translate}}: {{openApiListRowcount}}</span>
+
+                          <div class="ms-auto">
+                            <button type="button" class="btn tpi-primary tpi-btn me-2" (click)="closeTableAllExpand();">
+                              <span class="fa fa-compress">{{'button.collapse_all' | translate}}</span>
+                            </button>
+                            <button type="button" class="btn tpi-primary tpi-btn" (click)="openTableAllExpand();">
+                              <span class="fa fa-expand">{{'button.expansion_all' | translate}}</span>
+                            </button>
+                          </div>
+                        </div>
                         <p-table *ngIf="openApiCols" [columns]="openApiCols" [value]="openApiList" styleClass="p-datatable-striped"
                             selectionMode="single" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
                             <ng-template pTemplate="colgroup" let-columns>
@@ -265,7 +271,7 @@
                                                                   <div class="p-form-check-line">
                                                                     <div class="p-form-check">
                                                                       <p-checkbox [binary]="true" inputId="urlRID_{{i}}" formControlName="urlRID_{{i}}" ></p-checkbox>
-                                                                      <label class="ml-2 mb-0" for="urlRID_{{i}}">{{'path_param' | translate}}</label>
+                                                                      <label class="ms-2 mb-0" for="urlRID_{{i}}">{{'path_param' | translate}}</label>
                                                                     </div>
                                                                   </div>
                                                                     <!-- <div class="form-check">
@@ -280,7 +286,7 @@
                                                                   <div class="p-form-check-line">
                                                                     <div class="p-form-check">
                                                                       <p-checkbox [binary]="true" inputId="noOAuth_{{i}}" formControlName="noOAuth_{{i}}" ></p-checkbox>
-                                                                      <label class="ml-2 mb-0" for="noOAuth_{{i}}">{{'no_auth' | translate}}</label>
+                                                                      <label class="ms-2 mb-0" for="noOAuth_{{i}}">{{'no_auth' | translate}}</label>
                                                                     </div>
                                                                   </div>
                                                                     <!-- <div class="form-check">
@@ -302,7 +308,7 @@
                                                                     <div class="p-form-check-line">
                                                                       <div class="p-form-check">
                                                                         <p-checkbox [binary]="true" inputId="tokenPayload_{{i}}" formControlName="tokenPayload_{{i}}" ></p-checkbox>
-                                                                        <label class="ml-2 mb-0" for="tokenPayload_{{i}}">{{'token_payload' | translate}}</label>
+                                                                        <label class="ms-2 mb-0" for="tokenPayload_{{i}}">{{'token_payload' | translate}}</label>
                                                                       </div>
                                                                     </div>
                                                                 </div>
@@ -314,7 +320,7 @@
                                                     <div class="row">
                                                         <div class="col-12">
                                                             <label
-                                                                class="control-label mr-2">{{'data_format'|translate}}</label>
+                                                                class="control-label me-2">{{'data_format'|translate}}</label>
                                                             <p-dropdown [options]="apiDataFormats"
                                                                 formControlName="dataFormat_{{i}}"
                                                                 placeholder="{{'plz_chs'|translate}}"></p-dropdown>
@@ -379,22 +385,7 @@
                                     </td>
                                 </tr>
                             </ng-template>
-                            <!-- <ng-template pTemplate="footer" let-columns>
-                                <tr *ngIf="rowcount">
-                                    <td [attr.colspan]="columns.length+1">
-                                        <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                                        <button type="button" class="btn btn-warning pull-right ml-3"
-                                            (click)="moreRtnCodeList();">{{'button.more'|translate}}</button>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="emptymessage" let-columns>
-                                <tr>
-                                    <td [attr.colspan]="columns.length+1">
-                                        {{'no_rec' | translate}}
-                                    </td>
-                                </tr>
-                            </ng-template> -->
+
                         </p-table>
                         <br>
                         <div class="form-group row">
@@ -419,7 +410,7 @@
                                 <input type="text" class="form-control" formControlName="apiAlias"
                                     placeholder="{{'module_name'|translate}}-{{'api_name'|translate}}({{'api_key'|translate}})"
                                     readonly>
-                                <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+                                <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
                                     (click)="changePage('api_list');"></button>
                             </div>
                         </div>
@@ -432,19 +423,19 @@
                         </div>
                     </div>
                     <!-- 模式是只有當呼叫 /17/DPB9901, req.id=DGR_PATHS_COMPATIBILITY, resp.value=2時才出現,0:tsmpc,1:dgrc -->
-                    <div class="form-group row ml-1" [hidden]="pathType!='2'">
+                    <div class="form-group row ms-1" [hidden]="pathType!='2'">
 
                       <div class="col-12 px-2">
-                        <!-- <label class="control-label mr-3">{{'api_reg_mode' | translate}}</label> -->
+                        <!-- <label class="control-label me-3">{{'api_reg_mode' | translate}}</label> -->
                         <div class="p-form-check-line form-group">
                           <ng-container>
                             <div class="p-form-check">
                               <p-radioButton formControlName="type" value="0" inputId="type0"></p-radioButton>
-                              <label for="type0" class="ml-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
+                              <label for="type0" class="ms-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
                             </div>
                             <div class="p-form-check">
                               <p-radioButton formControlName="type" value="1" inputId="type1"></p-radioButton>
-                              <label for="type1" class="ml-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
+                              <label for="type1" class="ms-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
                             </div>
                           </ng-container>
                         </div>
@@ -456,7 +447,7 @@
                             <div  class="form-group" *ngIf="c_type.value =='1'">
                               <!--  formControlName="byHosturl" trueValue="Y" falseValue="N" -->
                               <p-checkbox [binary]="true" inputId="redirectByIp" formControlName="redirectByIp"> </p-checkbox>
-                              <label class="mb-0 ml-2" for="redirectByIp" >{{'diversionSrcIP'|translate}}</label>
+                              <label class="mb-0 ms-2" for="redirectByIp" >{{'diversionSrcIP'|translate}}</label>
                             </div>
                             <!-- class="p-3" style="background-color: #eaeaea;border-radius: 15px;" -->
                             <div [hidden]="redirectByIp.value">
@@ -495,23 +486,23 @@
                           <ng-container >
                             <div class="p-form-check py-1">
                               <p-radioButton formControlName="headerMaskPolicy" value="0"  inputId="headerMaskPolicy0"></p-radioButton>
-                              <label for="headerMaskPolicy0" class="ml-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
+                              <label for="headerMaskPolicy0" class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
                             </div>
                             <div class="p-form-check py-1">
                               <p-radioButton formControlName="headerMaskPolicy" value="1"  inputId="headerMaskPolicy1"></p-radioButton>
-                              <label for="headerMaskPolicy1" class="ml-2 mb-0">Policy 1: {{ 'mask.before_after'|translate:{num:headerMaskPolicyNum.value, mask:headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*' } }}</label>
+                              <label for="headerMaskPolicy1" class="ms-2 mb-0">Policy 1: {{ 'mask.before_after'|translate:{num:headerMaskPolicyNum.value, mask:headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*' } }}</label>
                             </div>
                             <div class="p-form-check py-1">
                               <p-radioButton formControlName="headerMaskPolicy" value="2"  inputId="headerMaskPolicy2"></p-radioButton>
-                              <label for="headerMaskPolicy2" class="ml-2 mb-0">Policy 2: {{ 'mask.before'|translate:{num:headerMaskPolicyNum.value, mask:headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*' } }}</label>
+                              <label for="headerMaskPolicy2" class="ms-2 mb-0">Policy 2: {{ 'mask.before'|translate:{num:headerMaskPolicyNum.value, mask:headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*' } }}</label>
                             </div>
                             <div class="p-form-check py-1">
                               <p-radioButton formControlName="headerMaskPolicy" value="3"  inputId="headerMaskPolicy3"></p-radioButton>
-                              <label for="headerMaskPolicy3" class="ml-2 mb-0">Policy 3: {{ 'mask.after'|translate:{num:headerMaskPolicyNum.value, mask:headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*' } }}</label>
+                              <label for="headerMaskPolicy3" class="ms-2 mb-0">Policy 3: {{ 'mask.after'|translate:{num:headerMaskPolicyNum.value, mask:headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*' } }}</label>
                             </div>
                             <div class="mt-1" [hidden]="headerMaskPolicy.value == '0'">
-                              <label class="control-label required mr-1" style="font-weight: 400;">{{ 'mask.word'|translate}}</label> <input type="number" [min]="1" [max]="9999" class="form-control mr-2" formControlName="headerMaskPolicyNum" style="display: inline;width: 75px;"/>
-                              <label class="control-label required mr-1">{{ 'mask.mask'|translate}}</label> <input type="text" class="form-control" formControlName="headerMaskPolicySymbol" style="display: inline;width: 100px;" [maxlength]="10" [minlength]="1" (focusout)="checkheaderMaskPolicySymbol()"/>
+                              <label class="control-label required me-1" style="font-weight: 400;">{{ 'mask.word'|translate}}</label> <input type="number" [min]="1" [max]="9999" class="form-control me-2" formControlName="headerMaskPolicyNum" style="display: inline;width: 75px;"/>
+                              <label class="control-label required me-1">{{ 'mask.mask'|translate}}</label> <input type="text" class="form-control" formControlName="headerMaskPolicySymbol" style="display: inline;width: 100px;" [maxlength]="10" [minlength]="1" (focusout)="checkheaderMaskPolicySymbol()"/>
                             </div>
                           </ng-container>
                         </div>
@@ -532,32 +523,32 @@
                         <div class="col-12 form-group ">
                           <div class="p-form-check py-1">
                             <p-radioButton formControlName="bodyMaskPolicy" value="0"  inputId="bodyMaskPolicy0"></p-radioButton>
-                            <label for="bodyMaskPolicy0" class="ml-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
+                            <label for="bodyMaskPolicy0" class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
                           </div>
                           <div class="p-form-check py-1">
                             <p-radioButton formControlName="bodyMaskPolicy" value="1"  inputId="bodyMaskPolicy1"></p-radioButton>
-                            <label for="bodyMaskPolicy1" class="ml-2 mb-0">Policy 1: {{ 'mask.body_before_after'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+                            <label for="bodyMaskPolicy1" class="ms-2 mb-0">Policy 1: {{ 'mask.body_before_after'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
                           </div>
                           <div class="p-form-check py-1">
                             <p-radioButton formControlName="bodyMaskPolicy" value="2"  inputId="bodyMaskPolicy2"></p-radioButton>
-                            <label for="bodyMaskPolicy2" class="ml-2 mb-0">Policy 2: {{ 'mask.body_before'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+                            <label for="bodyMaskPolicy2" class="ms-2 mb-0">Policy 2: {{ 'mask.body_before'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
                           </div>
                           <div class="p-form-check py-1">
                             <p-radioButton formControlName="bodyMaskPolicy" value="3"  inputId="bodyMaskPolicy3"></p-radioButton>
-                            <label for="bodyMaskPolicy3" class="ml-2 mb-0">Policy 3: {{ 'mask.body_after'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+                            <label for="bodyMaskPolicy3" class="ms-2 mb-0">Policy 3: {{ 'mask.body_after'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
                           </div>
                           <div class="p-form-check py-1">
                             <p-radioButton formControlName="bodyMaskPolicy" value="4"  inputId="bodyMaskPolicy4"></p-radioButton>
-                            <label for="bodyMaskPolicy4" class="ml-2 mb-0">Policy 4: {{ 'mask.body_after_regex'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+                            <label for="bodyMaskPolicy4" class="ms-2 mb-0">Policy 4: {{ 'mask.body_after_regex'|translate:{num:bodyMaskPolicyNum.value, mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
                           </div>
                           <div class="mt-1" [hidden]="bodyMaskPolicy.value=='0'">
-                            <label class="control-label required mr-1" style="font-weight: 400;">{{ 'mask.word'|translate}}</label> <input type="number" [min]="1" [max]="9999" class="form-control mr-2" formControlName="bodyMaskPolicyNum" style="display: inline;width: 75px;"/>
-                            <label class="control-label required mr-1">{{ 'mask.mask'|translate}}</label> <input type="text" class="form-control" formControlName="bodyMaskPolicySymbol" style="display: inline;width: 100px;" [minlength]="1" [maxlength]="10" (focusout)="checkbodyMaskPolicySymbol()"/>
+                            <label class="control-label required me-1" style="font-weight: 400;">{{ 'mask.word'|translate}}</label> <input type="number" [min]="1" [max]="9999" class="form-control me-2" formControlName="bodyMaskPolicyNum" style="display: inline;width: 75px;"/>
+                            <label class="control-label required me-1">{{ 'mask.mask'|translate}}</label> <input type="text" class="form-control" formControlName="bodyMaskPolicySymbol" style="display: inline;width: 100px;" [minlength]="1" [maxlength]="10" (focusout)="checkbodyMaskPolicySymbol()"/>
                           </div>
                         </div>
-                        <div class="col-12 pr-0" [hidden]="bodyMaskPolicy.value=='0'">
+                        <div class="col-12 pe-0" [hidden]="bodyMaskPolicy.value=='0'">
                           <div class="col-12 px-0 form-group" style="align-items: center;display: flex;">
-                            <label class="control-label required mr-1" style="white-space: nowrap;">{{ bodyMaskPolicy.value=='4'? 'Regular expression':'keyword'|translate }}</label>
+                            <label class="control-label required me-1" style="white-space: nowrap;">{{ bodyMaskPolicy.value=='4'? 'Regular expression':'keyword'|translate }}</label>
                             <input type="text" class="form-control" formControlName="bodyMaskKeyword"
                                 [placeholder]="bodyMaskPolicy.value=='4'?'':('input_example.text' | translate)">
                           </div>
@@ -575,7 +566,7 @@
                         <div class="col-12 form-group ">
                           <div class="p-form-check">
                             <p-radioButton formControlName="failDiscoveryPolicy" value="0" inputId="failDiscoveryPolicy0"></p-radioButton>
-                            <label for="failDiscoveryPolicy0" class="ml-2 mb-0">Policy 0: {{'fail_discovery_policy.policy_0'|translate}}</label>
+                            <label for="failDiscoveryPolicy0" class="ms-2 mb-0">Policy 0: {{'fail_discovery_policy.policy_0'|translate}}</label>
                           </div>
                         </div>
                       </div>
@@ -587,11 +578,11 @@
                           <ng-container >
                             <div class="p-form-check py-1">
                               <p-radioButton formControlName="failHandlePolicy" value="0" inputId="failHandlePolicy0"></p-radioButton>
-                              <label for="failHandlePolicy0" class="ml-2 mb-0">Policy 0: {{'fail_handle_policy.policy_0'|translate}}</label>
+                              <label for="failHandlePolicy0" class="ms-2 mb-0">Policy 0: {{'fail_handle_policy.policy_0'|translate}}</label>
                             </div>
                             <div class="p-form-check py-1">
                               <p-radioButton formControlName="failHandlePolicy" value="1" inputId="failHandlePolicy1"></p-radioButton>
-                              <label for="failHandlePolicy1" class="ml-2 mb-0">Policy 1: {{'fail_handle_policy.policy_1'|translate}}</label>
+                              <label for="failHandlePolicy1" class="ms-2 mb-0">Policy 1: {{'fail_handle_policy.policy_1'|translate}}</label>
                             </div>
                           </ng-container>
                         </div>
@@ -636,16 +627,16 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-8">
-                            <label class="col-auto" style="padding-left: 1px;" >{{(c_type.value=='0')? ('digirunner_url'|translate):'digiRunner Proxy Path'}}<label class="mb-0" style="color: red;font-weight: bold;" *ngIf="c_type.value=='1'">*</label><i class="far fa-question-circle ml-2 " pTooltip="{{'proxy_path_tip'|translate}}" *ngIf="c_type.value=='1'" [escape]="false"></i></label>
-                            <div class="col-auto" class="float-right" >
+                            <label class="col-auto" style="padding-left: 1px;" >{{(c_type.value=='0')? ('digirunner_url'|translate):'digiRunner Proxy Path'}}<label class="mb-0" style="color: red;font-weight: bold;" *ngIf="c_type.value=='1'">*</label><i class="far fa-question-circle ms-2 " pTooltip="{{'proxy_path_tip'|translate}}" *ngIf="c_type.value=='1'" [escape]="false"></i></label>
+                            <div class="col-auto" class="float-end" >
                               <div class="p-form-check-line">
                                 <div class="p-form-check" *ngIf="c_type.value=='0'">
                                   <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID" ></p-checkbox>
-                                  <label class="ml-2 mb-0" for="urlRID">{{(c_type.value=='0')?('path_param'|translate):''}}</label>
+                                  <label class="ms-2 mb-0" for="urlRID">{{(c_type.value=='0')?('path_param'|translate):''}}</label>
                                 </div>
                                 <div class="p-form-check">
                                   <p-checkbox [binary]="true" inputId="noOAuth" formControlName="noOAuth" ></p-checkbox>
-                                  <label class="ml-2 mb-0" for="noOAuth">{{'no_auth' | translate}}</label>
+                                  <label class="ms-2 mb-0" for="noOAuth">{{'no_auth' | translate}}</label>
                                 </div>
                               </div>
                               <!-- <input type="checkbox" formControlName="urlRID" *ngIf="c_type.value=='0'">{{(c_type.value=='0')?('path_param'|translate):''}} -->
@@ -677,7 +668,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-2">
-                            <label class="control-label mr-2">{{'data_format'|translate}}</label>
+                            <label class="control-label me-2">{{'data_format'|translate}}</label>
                             <div style="display:block">
                                 <p-dropdown [options]="apiDataFormats" formControlName="dataFormat"
                                     placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%','height':'36px'}"
@@ -741,7 +732,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-12 d-flex justify-content-center">
-                            <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="registerCustomApi();"
+                            <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="registerCustomApi();"
                                 >{{'button.register'|translate}}</button>
                                 <!-- [disabled]="customForm.invalid" -->
                             <button type="button" class="btn tpi-btn tpi-primary"
@@ -806,14 +797,14 @@
                 <div class="col-3">
                   <div class="d-flex align-items-center">
                     <p-checkbox [binary]="true" formControlName="requestHeader" inputId="requestHeader"></p-checkbox>
-                    <label class="form-check-label font-weight-normal ml-3" for="requestHeader">{{'req_header'|translate}}</label>
+                    <label class="form-check-label font-weight-normal ms-3" for="requestHeader">{{'req_header'|translate}}</label>
                   </div>
                 </div>
                 <!-- 增加 -->
               </div>
               <div class="form-froup row" *ngIf="requestHeader.value">
                 <div class="col-8">
-                  <div class="key-value-row-has-add-btn mb-3 ml-4" >
+                  <div class="key-value-row-has-add-btn mb-3 ms-4" >
                     <app-key-value name="keyvalue" keyLabel="{{'key'|translate}}" valueLabel="{{'value'|translate}}"
                         #keyValueRequest formControlName="keyValueRequest"></app-key-value>
 
@@ -840,25 +831,25 @@
                         <p-checkbox [binary]="true" formControlName="requestBodyCheck" inputId="requestBodyCheck"></p-checkbox>
                         <!-- <input type="checkbox" class="form-check-input" id="requestBodyCheck"
                             formControlName="requestBodyCheck" (change)="requestBodyCheckChangeHandler($event)"> -->
-                        <label class="form-check-label ml-3" for="requestBodyCheck">{{'req_body'|translate}}</label>
+                        <label class="form-check-label ms-3" for="requestBodyCheck">{{'req_body'|translate}}</label>
                        </div>
                         <!-- <br> -->
                         <!-- 純文字 -->
-                        <div class="p-form-check form-group ml-4">
+                        <div class="p-form-check form-group ms-4">
                           <p-radioButton formControlName="requestBody" value="body"  inputId="requestBody_body"></p-radioButton>
-			                    <label for="requestBody_body" class="ml-2 mb-0">{{'plain_text'|translate}}</label>
+			                    <label for="requestBody_body" class="ms-2 mb-0">{{'plain_text'|translate}}</label>
                         </div>
                         <ng-container *ngIf="requestBody.value == 'body' && requestBodyCheck.value == true">
-                            <textarea rows="5" cols="50" class="form-control mb-3 ml-4" formControlName="bodyText" style="resize: none;width: 98%;"></textarea>
+                            <textarea rows="5" cols="50" class="form-control mb-3 ms-4" formControlName="bodyText" style="resize: none;width: 98%;"></textarea>
                         </ng-container>
                         <!-- 表單 -->
-                        <div class="p-form-check form-group ml-4">
+                        <div class="p-form-check form-group ms-4">
 
                           <p-radioButton formControlName="requestBody" value="form"  inputId="requestBody_form"></p-radioButton>
-			                    <label for="requestBody_form" class="ml-2 mb-0">{{'form'|translate}}</label>
+			                    <label for="requestBody_form" class="ms-2 mb-0">{{'form'|translate}}</label>
                         </div>
                         <ng-container *ngIf="requestBody.value == 'form' && requestBodyCheck.value == true">
-                          <div class="key-value-row-has-add-btn ml-4" >
+                          <div class="key-value-row-has-add-btn ms-4" >
                               <app-key-value name="keyvalue" #keyValueForm keyLabel="{{'key'|translate}}"
                                   valueLabel="{{'value'|translate}}" formControlName="keyValueForm"></app-key-value>
                                   <button type="button" class="btn-icon tpi-second mb-1" [disabled]="disabledReqBody"
@@ -870,7 +861,7 @@
             </div>
             <div class="form-group row text-center">
                 <div class="col-12">
-                    <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="testAPI();"
+                    <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="testAPI();"
                         [disabled]="testForm.invalid">{{'button.host_send_req'|translate}}</button>
                     <button *ngIf="!showResult" type="button" class="btn tpi-btn tpi-primary"
                         (click)="changePage('regist');">{{'button.return_to_list'|translate}}</button>
@@ -934,7 +925,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
                 </div>
             </div>
         </form>
@@ -997,9 +988,6 @@
                 <tr *ngIf="apiListRowcount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span style="vertical-align: middle;">{{'row_count' | translate}}: {{apiListRowcount}} </span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                            (click)="moreApiList();">{{'button.more'|translate}}</button> -->
-
                             <!-- 查詢更多 -->
                             <button  type="button" class="btn tpi-header-return" (click)="moreApiList()">{{ 'button.more'| translate}}
                             <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
@@ -1019,9 +1007,9 @@
         <br>
         <div class="form-group row">
             <div class="col-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" (click)="chooseApi();"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3" (click)="chooseApi();"
                     [disabled]="joinBtnFlag">{{'button.join'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="changePage('regist');">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>

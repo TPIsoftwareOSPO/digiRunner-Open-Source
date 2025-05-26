@@ -33,9 +33,14 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB9936Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
 	
+	@Autowired
+	public DPB9936Service(TsmpRtnCodeDao tsmpRtnCodeDao) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+	}
+
 	@Transactional
 	public DPB9936Resp importTsmpRtnCode(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {
 

@@ -21,24 +21,26 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Component
 public class DpaaStaticResourceInitializer {
 
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-
-	@Autowired
 	private DPB0115Service dpb0115Service;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-
-	@Autowired
 	private TsmpSettingService gatewayTsmpSettingService;
-	
-	@Autowired
 	private TsmpAuthorizationService tsmpAuthorizationService;
 	
+	@Autowired
+	public DpaaStaticResourceInitializer(TsmpRtnCodeDao tsmpRtnCodeDao, DPB0115Service dpb0115Service,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy,
+			TsmpSettingService gatewayTsmpSettingService, TsmpAuthorizationService tsmpAuthorizationService) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.dpb0115Service = dpb0115Service;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
+		this.gatewayTsmpSettingService = gatewayTsmpSettingService;
+		this.tsmpAuthorizationService = tsmpAuthorizationService;
+	}
+
 	@PostConstruct
 	public void init() {
 		BeforeControllerRespValueRtnCodeBuilder.setTsmpRtnCodeDao(getTsmpRtnCodeDao());

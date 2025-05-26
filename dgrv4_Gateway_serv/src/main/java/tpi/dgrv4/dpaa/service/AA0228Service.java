@@ -41,24 +41,27 @@ public class AA0228Service {
 	
 	private Integer pageSize;
 	
-	@Autowired
 	private TsmpSecurityLevelDao securityLVDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
+	@Autowired
+	public AA0228Service(TsmpSecurityLevelDao securityLVDao, TsmpClientDao tsmpClientDao,
+			TsmpApiDao tsmpApiDao, TsmpGroupApiDao tsmpGroupApiDao, TsmpGroupDao tsmpGroupDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.securityLVDao = securityLVDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.serviceConfig = serviceConfig;
+	}
+
+
 	public AA0228Resp queryGroupList(AA0228Req req) {
 		AA0228Resp resp = new AA0228Resp();
 		try {

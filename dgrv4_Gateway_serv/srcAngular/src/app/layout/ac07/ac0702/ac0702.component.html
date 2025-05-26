@@ -12,13 +12,13 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="roleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
               (click)="changePage('query_role');"></button>
           </div>
         </div>
         <div class="col-4">
           <label class="control-label" for="alertEnabled">{{'status'|translate}}</label>
-          <div class="pl-2">
+          <div class="ps-2">
             <!-- <div class="form-check-inline" *ngFor="let stat of queryStatus">
               <label class="form-check-label">
                 <input type="radio" class="form-check-input" formControlName="alertEnabled"
@@ -29,7 +29,7 @@
               <ng-container *ngFor="let stat of queryStatus">
                 <div class="p-form-check">
                   <p-radioButton formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled{{stat.value}}"></p-radioButton>
-                  <label for="alertEnabled{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                  <label for="alertEnabled{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                 </div>
               </ng-container>
             </div>
@@ -38,8 +38,8 @@
       </div>
       <div class="form-group row">
         <div class="col-12">
-          <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+          <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-second float-end"
             (click)="changePage('create');">{{'button.create'|translate}}</button>
         </div>
       </div>
@@ -98,7 +98,7 @@
         <tr *ngIf="alertSettingListRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span>{{'row_count' | translate}}: {{alertSettingListRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreAlertData();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
@@ -119,25 +119,12 @@
   </div>
   <!-- 搜尋 > 角色選擇 -->
   <div [hidden]="pageNum != 2">
-    <form [formGroup]="roleForm" (ngSubmit)="queryRoleMappingList()">
+    <form [formGroup]="roleForm">
       <div class="form-group row col-12">
-        <!-- <div class="col-4">
-                    <label class="control-label">{{'keyword_search'|translate}}</label>
-                    <input type="text" formControlName="keyword" class="form-control"
-                        placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}">
-                </div> -->
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryRoleMappingList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}"
+          [control]="roleForm.get('keyword')" [searchFn]="queryRoleMappingList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
-      <!-- <div class="form-group row">
-                <div class="col-12">
-                    <button type="button" class="btn btn-warning float-left mr-3"
-                        (click)="queryRoleMappingList();">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
     </form>
     <hr>
     <p-table *ngIf="roleInfoListCols" [columns]="roleInfoListCols" [value]="roleInfoList"
@@ -174,7 +161,7 @@
         <tr *ngIf="roleInfoListRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7; ">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{roleInfoListRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreData();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
@@ -195,9 +182,9 @@
     <br>
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="chooseRole();">{{'button.confirm'|translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -251,7 +238,7 @@
             <ng-container *ngFor="let stat of createStatus">
               <div class="p-form-check">
                 <p-radioButton formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled{{stat.value}}"></p-radioButton>
-                <label for="alertEnabled{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="alertEnabled{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -293,10 +280,10 @@
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="threshold_label" class="control-label">{{'threshold'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex">
             <input formControlName="threshold" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'times'|translate}}</span>
+            <span class="ms-1">{{'times'|translate}}</span>
           </div>
           <div *ngIf="threshold?.invalid && (threshold?.dirty || threshold?.touched)" class="text-danger">
             <small class="form-text">{{threshold.errors.isRequired}}</small>
@@ -306,10 +293,10 @@
         </div>
         <div class="col-3 col-sm-3">
           <label id="duration_label" class="control-label">{{'duration'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex">
             <input formControlName="duration" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'sec'|translate}}</span>
+            <span class="ms-1">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="duration?.invalid && (duration?.dirty || duration?.touched)" class="text-danger">
             <small class="form-text">{{duration.errors.isRequired}}</small>
@@ -319,10 +306,10 @@
         </div>
         <div class="col-3 col-sm-3">
           <label id="alertInterval_label" class="control-label">{{'alert_interval'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex">
             <input formControlName="alertInterval" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'sec'|translate}}</span>
+            <span class="ms-1">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="alertInterval?.invalid && (alertInterval?.dirty || alertInterval?.touched)" class="text-danger">
             <small class="form-text">{{alertInterval.errors.isRequired}}</small>
@@ -335,7 +322,7 @@
           <div class="form-inline">
             <input type="number" class="form-control w-75" formControlName="elapse" min="0"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'milli_sec'|translate}}</span>
+            <span class="ms-1">{{'milli_sec'|translate}}</span>
           </div>
         </div>
       </div>
@@ -379,16 +366,18 @@
             <small class="form-text">{{exDays.errors.maxlength}}</small>
           </div>
         </div>
-        <div class="col-6 col-sm-6">
-          <label class="control-label mr-3">{{'start_time'|translate}}</label>
-          <label class="control-label ml-5" style="font-weight: bolder;">{{'end_time'|translate}}</label>
-          <div class="input-group">
-            <app-timepicker formControlName="exTimeS"></app-timepicker>
-            <div class="input-group-append">
-              <span class="px-1 py-1 mt-1">～</span>
+        <div class="col-6 d-flex">
+
+            <div class="col">
+              <label class="control-label  fw-bold">{{'start_time'|translate}}</label>
+              <app-timepicker formControlName="exTimeS"></app-timepicker>
+            </div>
+
+            <div class="col">
+              <label class="control-label fw-bold">{{'end_time'|translate}}</label>
               <app-timepicker formControlName="exTimeE"></app-timepicker>
             </div>
-          </div>
+
         </div>
         <div class="col-3 col-sm-3"></div>
         <div class="col-9 col-sm-9">
@@ -408,7 +397,7 @@
       <div class="form-group row">
         <div class="col-12 col-sm-12">
           <label class="required control-label">{{'alert_role_list'|translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="tpi-night ml-2"
+          <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2"
             (click)="showAlerRoleList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="pageNum == 3 && roleName!.value.length > 0" class="ui-chips ui-widget">
@@ -431,13 +420,13 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-sm-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" (click)="createAlertm();"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" (click)="createAlertm();"
             [disabled]="form.invalid || roleIDList!.value.length == 0"
             *ngIf="currentAction == 'create'">{{'button.create'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" (click)="updateAlertm();"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" (click)="updateAlertm();"
             [disabled]="form.invalid || roleIDList.value.length == 0"
             *ngIf="currentAction == 'update'">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -447,23 +436,10 @@
   <div [hidden]="pageNum != 4">
     <form [formGroup]="roleForm" (ngSubmit)="queryRoleMappingList()">
       <div class="form-group row col-12">
-        <!-- <div class="col-4">
-                    <label class="control-label">{{'keyword_search'|translate}}</label>
-                    <input type="text" formControlName="keyword" class="form-control"
-                        placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}">
-                </div> -->
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryRoleMappingList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'role_id'|translate}}、{{'role.name'|translate}}、{{'role.alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'role_id'|translate}}、{{'role_name'|translate}}、{{'role_alias'|translate}}"
+          [control]="roleForm.get('keyword')" [searchFn]="queryRoleMappingList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
-      <!-- <div class="form-group row">
-                <div class="col-12">
-                    <button type="button" class="btn btn-warning float-left mr-3"
-                        (click)="queryRoleMappingList();">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
     </form>
     <hr>
     <p-table *ngIf="roleInfoListCols" [columns]="roleInfoListCols" [value]="roleInfoList"
@@ -502,7 +478,7 @@
         <tr *ngIf="roleInfoListRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{roleInfoListRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreData();">{{'button.more'|translate}}</button> -->
 
 
@@ -525,9 +501,9 @@
     <br>
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="chooseAlertRole();">{{'button.confirm'|translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="chooseAlertRole_return();">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -573,28 +549,28 @@
         <div class="col-3 col-sm-3">
           <label class="control-label">{{'threshold'|translate}}</label>
           <label class="form-control border-line">{{currentAlertDetail.threshold}}<span
-              class="ml-1">{{'times'|translate}}</span>
+              class="ms-1">{{'times'|translate}}</span>
           </label>
         </div>
         <div class="col-3 col-sm-3">
           <label class="control-label">{{'duration'|translate}}</label>
           <label class="form-control border-line">
             {{currentAlertDetail.duration}}
-            <span class="ml-1">{{'sec'|translate}}</span>
+            <span class="ms-1">{{'sec'|translate}}</span>
           </label>
         </div>
         <div class="col-3 col-sm-3">
           <label class="control-label">{{'alert_interval'|translate}}</label>
           <label class="form-control border-line">
             {{currentAlertDetail.alertInterval}}
-            <span class="ml-1">{{'sec'|translate}}</span>
+            <span class="ms-1">{{'sec'|translate}}</span>
           </label>
         </div>
         <div *ngIf="currentAlertDetail.alertType == 'responseTime'" class="col-3 col-sm-3">
           <label class="control-label">{{'response_time'|translate}}</label>
           <label class="form-control border-line">
             {{responseTimeTransform(currentAlertDetail.searchMapString)}}
-            <span class="ml-1">{{'milli_sec'|translate}}</span>
+            <span class="ms-1">{{'milli_sec'|translate}}</span>
           </label>
         </div>
       </div>
@@ -624,7 +600,7 @@
           <label class="form-control border-line">{{currentAlertDetail.exDays}}</label>
         </div>
         <div class="col-3 col-sm-3">
-          <label class="control-label mr-3">{{'alert_time'|translate}}</label>
+          <label class="control-label me-3">{{'alert_time'|translate}}</label>
           <label class="form-control border-line">{{currentAlertDetail.exTime}}</label>
         </div>
       </div>
@@ -643,7 +619,7 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-sm-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -698,7 +674,7 @@
             <ng-container *ngFor="let stat of createStatus">
               <div class="p-form-check">
                 <p-radioButton formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled_{{stat.value}}"></p-radioButton>
-                <label for="alertEnabled_{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="alertEnabled_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -735,7 +711,7 @@
           <div class="form-inline">
             <input formControlName="threshold" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'times'|translate}}</span>
+            <span class="ms-1">{{'times'|translate}}</span>
           </div>
           <div *ngIf="threshold.invalid && (threshold.dirty || threshold.touched)" class="text-danger">
             <small class="form-text">{{threshold.errors.isRequired}}</small>
@@ -748,7 +724,7 @@
           <div class="form-inline">
             <input formControlName="duration" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'sec'|translate}}</span>
+            <span class="ms-1">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="duration.invalid && (duration.dirty || duration.touched)" class="text-danger">
             <small class="form-text">{{duration.errors.isRequired}}</small>
@@ -761,7 +737,7 @@
           <div class="form-inline">
             <input formControlName="alertInterval" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'sec'|translate}}</span>
+            <span class="ms-1">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="alertInterval.invalid && (alertInterval.dirty || alertInterval.touched)" class="text-danger">
             <small class="form-text">{{alertInterval.errors.isRequired}}</small>
@@ -774,7 +750,7 @@
           <div class="form-inline">
             <input type="number" class="form-control w-75" formControlName="elapse" min="0"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ml-1">{{'milli_sec'|translate}}</span>
+            <span class="ms-1">{{'milli_sec'|translate}}</span>
           </div>
         </div>
       </div>
@@ -819,8 +795,8 @@
           </div>
         </div>
         <div class="col-6 col-sm-6">
-          <label class="control-label mr-3">{{'start_time'|translate}}</label>
-          <label class="control-label ml-5" style="font-weight: bolder;">{{'end_time'|translate}}</label>
+          <label class="control-label me-3">{{'start_time'|translate}}</label>
+          <label class="control-label ms-5" style="font-weight: bolder;">{{'end_time'|translate}}</label>
           <div class="input-group">
             <app-timepicker formControlName="exTimeS"></app-timepicker>
             <div class="input-group-append">
@@ -847,7 +823,7 @@
       <div class="form-group row">
         <div class="col-12 col-sm-12">
           <label class="required control-label">{{'alert_role_list'|translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="tpi-night ml-2"
+          <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2"
             (click)="showAlerRoleList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="pageNum == 6 && roleName.value.length > 0" class="ui-chips ui-widget">
@@ -870,7 +846,7 @@
       </div>
       <div class="form-group row">
         <div class="col-12 ">
-          <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="updateAlertm();"
+          <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="updateAlertm();"
             [disabled]="form.invalid || roleIDList.value.length == 0">{{'button.update'|translate}}</button>
           <button type="button" class="btn tpi-btn tpi-primary"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>

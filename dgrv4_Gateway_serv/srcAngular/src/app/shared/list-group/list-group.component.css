@@ -48,9 +48,10 @@ a{
 }
 
 .list-group-item a{
-    margin-bottom:15px;
+    margin-bottom:10px;
     padding-left: 10px;
-
+    --bs-btn-active-border-color:transparent;
+    --bs-btn-active-color:var(--tpi-orange);
 }
 .list-group-item a.btn span {
   transform: rotate(-140deg);

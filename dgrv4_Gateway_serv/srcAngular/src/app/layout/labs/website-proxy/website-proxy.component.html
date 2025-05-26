@@ -4,13 +4,8 @@
 
       <div class="form-group row">
         <div class="col-6">
-          <!-- <label id="status_label" class="control-label">{{ "keyword_search" | translate }}</label> -->
-          <span class="p-input-icon-right" style="width: 100%;">
-            <i class="pi pi-search tpi-i-search" (click)="queryData();"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-              placeholder="{{'website_name'|translate}}、URL、Context Path、{{'remark'| translate}}"
-              (keyup.enter)="queryData()">
-          </span>
+          <app-search-input placeholder="{{'website_name'|translate}}、URL、Context Path、{{'remark'| translate}}" [control]="form.get('keyword')" [searchFn]="queryData.bind(this)"
+            class="col-9 col-lg-4 col-sm-6"></app-search-input>
         </div>
         <div class="col-4">
           <!-- <label id="status_label" class="control-label">{{ "status" | translate }}</label> -->
@@ -19,43 +14,43 @@
               <div class="p-form-check">
                 <p-radioButton formControlName="websiteStatus" value={{stat.value}}
                   inputId="websiteStatus{{stat.value}}"></p-radioButton>
-                <label for="websiteStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="websiteStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
         </div>
         <div class="col">
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+          <button type="button" class="btn tpi-btn tpi-second float-end"
             (click)="changePage('create');">{{'button.create'|translate}}</button>
         </div>
 
       </div>
       <!-- <div class="form-group row">
         <div class="col-6">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3 "
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3 "
             (click)="queryData();">{{'button.search' | translate}}</button>
         </div>
         <div class="col-6">
 
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+          <button type="button" class="btn tpi-btn tpi-second float-end"
             (click)="changePage('create');">{{'button.create'|translate}}</button>
         </div>
       </div> -->
       <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
 
-        <button type="button" class="btn tpi-btn tpi-primary mr-2"
+        <button type="button" class="btn tpi-btn tpi-primary me-2"
           (click)="exportWebsiteProxy()">{{'button.export'|translate}}</button>
 
         <div style="display: flex;align-items: center;">
 
-          <div class="ui-inputgroup mr-2">
+          <div class="ui-inputgroup me-2">
             <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
             <input type="text" class="form-control" value="{{fileName}}" readOnly
               placeholder="{{'upload_file' | translate}}">
-            <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
               [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
           </div>
-          <button type="button" class="btn tpi-btn tpi-primary mr-2" [disabled]="!fileName"
+          <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!fileName"
             (click)="importWebsiteProxy()">{{'button.import'|translate}}</button>
           <!-- <i class="far fa-question-circle" pTooltip="{{'import_key_tip'|translate:{key:'WEBSITE_NAME'} }}" -->
           <i class="far fa-question-circle tip" pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"WEBSITE_NAME"} }}</li><li>{{"target_url_remove_n_import"|translate }}</li></ol>'
@@ -93,7 +88,7 @@
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate) :'' }}
                 <i class="fas"
-                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
             </span>
@@ -158,13 +153,13 @@
               <div class="p-form-check">
                 <p-radioButton formControlName="websiteStatus" value={{stat.value}}
                   inputId="websiteStatus_{{stat.value}}"></p-radioButton>
-                <label for="websiteStatus_{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="websiteStatus_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
           <!-- <div>
             <div class="form-check-inline" *ngFor="let stat of statusListIgnoreAll">
-              <label class="form-check-label ml-2">
+              <label class="form-check-label ms-2">
                 <input type="radio" class="form-check-input" formControlName="websiteStatus" value="{{ stat.value }}"
                   [ngClass]="(stat.value=='Y'||stat.value=='N') ? stat.value=='Y'? 'bluerdo':'redrdo' : ''" />{{stat.label}}
               </label>
@@ -182,30 +177,30 @@
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="auth" formControlName="auth" trueValue="Y"
                 falseValue="N"></p-checkbox>
-              <label class="mb-0 ml-2" for="auth">Auth</label>
+              <label class="mb-0 ms-2" for="auth">Auth</label>
             </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="sqlInj" formControlName="sqlInjection" trueValue="Y"
                 falseValue="N"></p-checkbox>
-              <label class="mb-0 ml-2" for="sqlInj">SQL Injection</label>
+              <label class="mb-0 ms-2" for="sqlInj">SQL Injection</label>
             </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="tps" formControlName="traffic" trueValue="Y"
                 falseValue="N"></p-checkbox>
-              <label class="mb-0 ml-2" for="tps">TPS</label>
+              <label class="mb-0 ms-2" for="tps">TPS</label>
             </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="xss" formControlName="xss" trueValue="Y" falseValue="N"></p-checkbox>
-              <label class="mb-0 ml-2" for="xss">XSS</label>
+              <label class="mb-0 ms-2" for="xss">XSS</label>
             </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="xxe" formControlName="xxe" trueValue="Y" falseValue="N"></p-checkbox>
-              <label class="mb-0 ml-2" for="xxe">XXE</label>
+              <label class="mb-0 ms-2" for="xxe">XXE</label>
             </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="showLog" formControlName="showLog" trueValue="Y"
                 falseValue="N"></p-checkbox>
-              <label class="mb-0 ml-2" for="showLog">Show Log</label>
+              <label class="mb-0 ms-2" for="showLog">Show Log</label>
             </div>
           </div>
         </div>
@@ -217,7 +212,7 @@
             <label class="form-check-label">
               <input type="radio" class="form-check-input" formControlName="showLog" value="Y">{{ 'yes'| translate}}
             </label>
-            <label class="form-check-label ml-5">
+            <label class="form-check-label ms-5">
               <input type="radio" class="form-check-input" formControlName="showLog" value="N">{{ 'negate'| translate}}
             </label>
           </div>
@@ -257,11 +252,11 @@
 
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn float-left mr-3" [hidden]="currentAction=='detail'"
+          <button type="button" class="btn tpi-btn float-start me-3" [hidden]="currentAction=='detail'"
             [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']"
             [disabled]="!formC.valid || !this._formValid" (click)="procData();">{{btnName}}</button>
 
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

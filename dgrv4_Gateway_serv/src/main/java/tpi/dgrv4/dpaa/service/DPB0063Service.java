@@ -35,12 +35,16 @@ public class DPB0063Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private SeqStoreService seqStoreService;
-	
-	@Autowired
 	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
 	
+	@Autowired
+	public DPB0063Service(SeqStoreService seqStoreService, TsmpDpChkLayerDao tsmpDpChkLayerDao) {
+		super();
+		this.seqStoreService = seqStoreService;
+		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
+	}
+
 	@Transactional
 	public DPB0063Resp saveLayer(TsmpAuthorization authorization, DPB0063Req req) {
 		DPB0063Resp resp = new DPB0063Resp();

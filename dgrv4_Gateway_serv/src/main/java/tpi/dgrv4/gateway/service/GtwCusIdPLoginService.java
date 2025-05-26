@@ -23,6 +23,7 @@ import tpi.dgrv4.codec.utils.RandomSeqLongUtil;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.entity.entity.DgrGtwIdpAuthM;
 import tpi.dgrv4.entity.entity.DgrGtwIdpInfoCus;
 import tpi.dgrv4.entity.repository.DgrGtwIdpInfoCusDao;
@@ -36,29 +37,32 @@ import tpi.dgrv4.gateway.util.CusGatewayLoginStateStore;
 @Service
 public class GtwCusIdPLoginService extends CusIdPService {
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private AcIdPHelper acIdPHelper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private GtwIdPCallbackService gtwIdPCallbackService;
-
-	@Autowired
 	private GtwIdPAuthService gtwIdPAuthService;
-
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private GtwIdPHelper gtwIdPHelper;
+	private DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao;
 
 	@Autowired
-	private DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao;
+	public GtwCusIdPLoginService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
+			TsmpSettingService tsmpSettingService, ObjectMapper objectMapper,
+			GtwIdPCallbackService gtwIdPCallbackService, GtwIdPAuthService gtwIdPAuthService, TokenHelper tokenHelper,
+			GtwIdPHelper gtwIdPHelper, DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao) {
+
+		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
+		this.objectMapper = objectMapper;
+		this.acIdPHelper = acIdPHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.gtwIdPCallbackService = gtwIdPCallbackService;
+		this.gtwIdPAuthService = gtwIdPAuthService;
+		this.tokenHelper = tokenHelper;
+		this.gtwIdPHelper = gtwIdPHelper;
+		this.dgrGtwIdpInfoCusDao = dgrGtwIdpInfoCusDao;
+	}
 
 	public void gtwCusIdPLogin(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpResp,
 			Map<String, String> queryParams) {

@@ -26,12 +26,19 @@ public class AA1110Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
+
+	@Autowired
+	public AA1110Service(TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao,
+			TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao, TsmpGroupDao tsmpGroupDao) {
+		super();
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+	}
+
 
 	public AA1110Resp deleteTGroupAuthority(TsmpAuthorization authorization, AA1110Req req) {
 		AA1110Resp resp = new AA1110Resp();

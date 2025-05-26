@@ -26,13 +26,19 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class HandleDashboardLogDataService {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpReqLogDao tsmpReqLogDao;
-	@Autowired
 	private TsmpResLogDao tsmpResLogDao;
+	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
 
 	@Autowired
-	private TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao;
+	public HandleDashboardLogDataService(TsmpReqLogDao tsmpReqLogDao, TsmpResLogDao tsmpResLogDao,
+			TsmpReqResLogHistoryDao tsmpReqResLogHistoryDao) {
+		super();
+		this.tsmpReqLogDao = tsmpReqLogDao;
+		this.tsmpResLogDao = tsmpResLogDao;
+		this.tsmpReqResLogHistoryDao = tsmpReqResLogHistoryDao;
+	}
 
 	@Transactional
 	public Map<String, Object> exec(Date execDate, String createUser) {
@@ -53,10 +59,12 @@ public class HandleDashboardLogDataService {
 		List<TsmpReqResLogHistory> deleteList = getTsmpReqResLogHistoryDao().findByRtimeLessThan(oneYearAgo);
 		this.logger.info("TsmpReqResLogHistory will delete count: " + deleteList.size());
 		if (deleteList.size() > 0) {
-			getTsmpReqResLogHistoryDao().deleteAllInBatch(deleteList); // 這裡刪除太久了
-//			deleteList.forEach(dvo -> {
-//				getTsmpReqResLogHistoryDao().delete(dvo);
-//			});
+			//該行太多筆資料會報java.lang.StackOverflowError
+			//Too many pieces of information in this line will report java.lang.StackOverflowError
+//			getTsmpReqResLogHistoryDao().deleteAllInBatch(deleteList); // 這裡刪除太久了
+			deleteList.forEach(dvo -> {
+				getTsmpReqResLogHistoryDao().delete(dvo);
+			});
 			this.logger.info("TsmpReqResLogHistory 已刪除 " + deleteList.size() + " 筆超過一年的紀錄");
 		}
 		List<TsmpReqLog> reqList = getTsmpReqLogDao().findByRtimeLessThanOrderByRtimeAsc(nowIntervalDate);
@@ -138,6 +146,7 @@ public class HandleDashboardLogDataService {
 		}
 		deleteReqList.removeAll(removeFromDeleteReqList);
 
+		this.logger.info("TsmpReqResLogHistory prepare to write " + insertList.size() + " records");
 		getTsmpReqResLogHistoryDao().saveAll(insertList);  //-- 寫入太久
 		this.logger.info("TsmpReqResLogHistory 已寫入 " + insertList.size() + " 筆紀錄");
 		if (deleteReqList.size() > 0) {

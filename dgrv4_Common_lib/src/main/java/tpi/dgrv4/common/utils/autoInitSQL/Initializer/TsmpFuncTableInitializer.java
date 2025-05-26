@@ -28,11 +28,12 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319",
 			//監控管理(AC0706為無建立功能的告警頁面)
-			"AC05","AC0501","AC0502","AC0508","AC0509","AC0510","AC0702","AC0706",
+			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0702","AC0706",
 			//報表管理(Kibana)
 			"AC09","AC0901","AC0902","AC0903","AC0904","AC0905","AC0906","AC0907","AC0908","AC0909","AC0910",
 			//報表管理(JS)
-			"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
+			//20250407 no execute
+			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
 			//入口網後台管理
 			"NP01","NP0105","NP0113","NP0114","NP0115","NP0116",
 			//用戶憑證管理
@@ -54,7 +55,7 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319",
 			//監控管理
-			"AC05","AC0501","AC0502","AC0508","AC0509","AC0510","AC0702",
+			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0702",
 			//報表管理(Kibana)
 			"AC09","AC0901","AC0902","AC0903","AC0904","AC0905","AC0906","AC0907","AC0908","AC0909","AC0910",
 			//用戶憑證管理
@@ -76,9 +77,10 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319",
 			//監控管理(AC0706為無建立功能的告警頁面)
-			"AC05","AC0501","AC0509","AC0706",
+			"AC05","AC0501","AC0503","AC0509","AC0706",
 			//報表管理(JS)
-			"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
+			//20250407 no execute
+			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
 			//用戶憑證管理
 			"NP02","NP0201","NP0202","NP0203","NP0204",
 			//各類申請單
@@ -98,9 +100,10 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0316","AC0318","AC0319",
 			//監控管理
-			"AC05","AC0501","AC0509","AC0706",
+			"AC05","AC0501","AC0503","AC0509","AC0706",
 			//報表管理(JS)
-			"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
+			//20250407 no execute
+			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
 			//用戶憑證管理
 			"NP02","NP0201","NP0202","NP0203","NP0204",
 			//各類申請單
@@ -169,6 +172,8 @@ public class TsmpFuncTableInitializer {
 	    	createTsmpFunc("AC0501","digiRunner監控","digiRunnerMonitor","digiRunner Server監控",null,"zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0502","System Resource","","digiRunner儀表板",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0502","digiRunner儀表板","digiRunnerDashboard","digiRunner儀表板",null,"zh-TW","manager",DateTimeUtil.now());
+	    	createTsmpFunc("AC0503","API Abnormal Report","API Abnormal Report","API Abnormal Report","","en-US","manager",DateTimeUtil.now());
+            createTsmpFunc("AC0503","API異常報表","API Abnormal Report","API異常報表","","zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0508","Elastic Stack","","",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0508","ELK儀表板","","",null,"zh-TW","manager",DateTimeUtil.now());
 	    	

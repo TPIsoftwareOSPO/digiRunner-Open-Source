@@ -198,15 +198,15 @@ export class ModuleService {
      * 更新 Site (IIS 站台)。
      * @param req_0413
      */
-    public updateSite(req_0413: Req_0413): Observable<model.ResNAA0413> {
-        let body = {
-            ReqHeader: this.api.getReqHeader(TxID.updateSite),
-            Req_0413: req_0413
-        } as model.ReqNAA0413
-        const path = `${this.basedotNetPath}/NAA0413`;
-        // const path = `${this.testDotNetPath}/naa0413`;
-        return this.api.dotNetPost<model.ResNAA0413>(path, body);
-    }
+    // public updateSite(req_0413: Req_0413): Observable<model.ResNAA0413> {
+    //     let body = {
+    //         ReqHeader: this.api.getReqHeader(TxID.updateSite),
+    //         Req_0413: req_0413
+    //     } as model.ReqNAA0413
+    //     const path = `${this.basedotNetPath}/NAA0413`;
+    //     // const path = `${this.testDotNetPath}/naa0413`;
+    //     return this.api.dotNetPost<model.ResNAA0413>(path, body);
+    // }
     /**
      * NAA0414: 啟動/停止 Site
      * 啟動/停止 TSMPN 配置的 Site。
@@ -227,15 +227,15 @@ export class ModuleService {
      * 預設查全部。
      * @param req_0415
      */
-    public deleteSite(req_0415: Req_0415): Observable<model.ResNAA0415> {
-        let body = {
-            ReqHeader: this.api.getReqHeader(TxID.deleteSite),
-            Req_0415: req_0415
-        } as model.ReqNAA0415
-        const path = `${this.basedotNetPath}/NAA0415`;
-        // const path = `${this.testDotNetPath}/naa0415`;
-        return this.api.dotNetPost<model.ResNAA0415>(path, body);
-    }
+    // public deleteSite(req_0415: Req_0415): Observable<model.ResNAA0415> {
+    //     let body = {
+    //         ReqHeader: this.api.getReqHeader(TxID.deleteSite),
+    //         Req_0415: req_0415
+    //     } as model.ReqNAA0415
+    //     const path = `${this.basedotNetPath}/NAA0415`;
+    //     // const path = `${this.testDotNetPath}/naa0415`;
+    //     return this.api.dotNetPost<model.ResNAA0415>(path, body);
+    // }
 
     /**
      * 忽略查無資料

@@ -33,14 +33,18 @@ public class OAuthRevocationService {
 	public static String token_revoke_success = "token_revoke_success";
 	public static String token_already_revoked = "token_already_revoked";
 
-	@Autowired
-	OAuthIntrospectionService oauthIntrospectionService;
-
-	@Autowired
+	private OAuthIntrospectionService oauthIntrospectionService;
 	private TokenHelper tokenHelper;
+	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
 
 	@Autowired
-	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	public OAuthRevocationService(OAuthIntrospectionService oauthIntrospectionService, TokenHelper tokenHelper,
+			TsmpTokenHistoryDao tsmpTokenHistoryDao) {
+		super();
+		this.oauthIntrospectionService = oauthIntrospectionService;
+		this.tokenHelper = tokenHelper;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+	}
 
 	public ResponseEntity<?> revocation(HttpServletRequest httpReq, HttpServletResponse httpRes) {
 		String reqUri = httpReq.getRequestURI();

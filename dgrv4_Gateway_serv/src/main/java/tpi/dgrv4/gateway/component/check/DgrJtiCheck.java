@@ -20,15 +20,19 @@ import tpi.dgrv4.gateway.util.JsonNodeUtil;
 @Component
 public class DgrJtiCheck {
 	
-	@Autowired
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TsmpRtnCodeService tsmpRtnCodeService;
 	
+	@Autowired
+	public DgrJtiCheck(TokenHelper tokenHelper, TsmpSettingService tsmpSettingService,
+			TsmpRtnCodeService tsmpRtnCodeService) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpRtnCodeService = tsmpRtnCodeService;
+	}
+
 	public ResponseEntity<?> check(String uri, HttpServletRequest request) {
 		String reqUri = request.getRequestURI();
 		

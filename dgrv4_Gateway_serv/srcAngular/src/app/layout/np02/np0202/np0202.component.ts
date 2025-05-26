@@ -276,7 +276,7 @@ export class Np0202Component extends BaseComponent implements OnInit {
     }
 
     headerReturn() {
-      console.log(this.pageNum === EmPageBlock.CLIENT_DETAIL)
+      // console.log(this.pageNum === EmPageBlock.CLIENT_DETAIL)
       if(this.pageNum === EmPageBlock.CLIENT_DETAIL)
       {
         this.redirectList();

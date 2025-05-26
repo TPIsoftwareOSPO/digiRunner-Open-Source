@@ -24,10 +24,13 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
  */
 @RestController
 public class UdpssotokenController {
-	private TPILogger logger = TPILogger.tl;
+	private UdpssotokenService service;
 
 	@Autowired
-	private UdpssotokenService service;
+	public UdpssotokenController(UdpssotokenService service) {
+		super();
+		this.service = service;
+	}
 
 	/**
 	 * 由 Udpssotoken Bridge 轉接取得token

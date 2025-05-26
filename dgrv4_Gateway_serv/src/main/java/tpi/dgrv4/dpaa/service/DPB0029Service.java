@@ -22,14 +22,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0029Service {
 
-	@Autowired
 	private TsmpDpFaqQuestionDao tsmpDpFaqQuestionDao;
-
-	@Autowired
 	private TsmpDpFaqAnswerDao tsmpDpFaqAnswerDao;
+	private TsmpDpFileDao tsmpDpFileDao;
 
 	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
+	public DPB0029Service(TsmpDpFaqQuestionDao tsmpDpFaqQuestionDao, TsmpDpFaqAnswerDao tsmpDpFaqAnswerDao,
+			TsmpDpFileDao tsmpDpFileDao) {
+		super();
+		this.tsmpDpFaqQuestionDao = tsmpDpFaqQuestionDao;
+		this.tsmpDpFaqAnswerDao = tsmpDpFaqAnswerDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+	}
 
 	public DPB0029Resp queryFaqById(TsmpAuthorization authorization, DPB0029Req req) {
 		TsmpDpFaqQuestion q = getQ(req.getQuestionId());

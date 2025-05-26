@@ -26,12 +26,16 @@ public class DPB0107Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpEventsDao tsmpEventsDao;
-
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
 	
+	@Autowired
+	public DPB0107Service(TsmpEventsDao tsmpEventsDao, TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.tsmpEventsDao = tsmpEventsDao;
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
+
 	public DPB0107Resp queryEventByPk(TsmpAuthorization auth, DPB0107Req req, ReqHeader reqHeader) {
 		DPB0107Resp resp = null;
 

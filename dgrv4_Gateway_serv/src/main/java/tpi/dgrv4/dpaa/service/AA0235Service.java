@@ -28,14 +28,17 @@ public class AA0235Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
+	private TsmpApiDao tsmpApiDao;
 
 	@Autowired
-	private TsmpApiDao tsmpApiDao;
+	public AA0235Service(TsmpGroupDao tsmpGroupDao, TsmpGroupApiDao tsmpGroupApiDao, TsmpApiDao tsmpApiDao) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpApiDao = tsmpApiDao;
+	}
 
 	public AA0235Resp queryModuleListByGroupId(TsmpAuthorization authorization, AA0235Req req) {
 		AA0235Resp resp = new AA0235Resp();

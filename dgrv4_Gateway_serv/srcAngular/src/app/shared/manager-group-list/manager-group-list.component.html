@@ -1,16 +1,9 @@
 <div class=" py-1">
-  <form [formGroup]="form" (ngSubmit)="queryGroupList()">
+  <form [formGroup]="form">
     <div class="form-group">
-      <!-- <div class="col-4 col-xl-4 col-lg-4">
-        <label for="keyword">{{'keyword_search'|translate}}</label>
-        <input type="text" class="form-control" formControlName="keyword"
-          placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}">
-      </div> -->
-      <span class="p-input-icon-right" style="width:40vw">
-        <i class="pi pi-search tpi-i-search" (click)="queryGroupList();"></i>
-        <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-          placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}">
-      </span>
+      <app-search-input placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryGroupList.bind(this)"
+        class="col-9 col-lg-4 col-sm-6"></app-search-input>
     </div>
     <p-scrollPanel [style]="{width: '100%', height: '70vh'}">
       <p-table *ngIf="groupInfoListCols" [columns]="groupInfoListCols" [value]="groupInfoList" selectionMode="single"
@@ -50,10 +43,13 @@
         </ng-template>
         <ng-template pTemplate="footer" let-columns>
           <tr *ngIf="groupInfoList.length>0">
-            <td [attr.colspan]="columns.length+1">
-              <span>{{'row_count' | translate}}: {{groupInfoList.length}}</span>
-              <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
-                (click)="moreGroupList();">{{'button.more'|translate}}</button>
+            <td [attr.colspan]="columns.length+1" >
+              <span class="align-middle">{{'row_count' | translate}}: {{groupInfoList.length}}</span>
+              <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
+                (click)="moreGroupList();">{{'button.more'|translate}}</button> -->
+                <button type="button" class="btn tpi-header-return" (click)="moreGroupList()">{{ 'button.more'| translate}}
+                  <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+                </button>
             </td>
           </tr>
         </ng-template>
@@ -69,7 +65,7 @@
     <br />
 
     <div class="text-center">
-      <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="chooseGroup()"
+      <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="chooseGroup()"
         [disabled]="selectedGroups.length == 0">
         {{ "button.confirm" | translate }}
       </button>

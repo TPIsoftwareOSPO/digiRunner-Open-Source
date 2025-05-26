@@ -66,20 +66,23 @@ public class DPB0142Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private ObjectMapper objectMapper;
+	private ComposerWebSocketClientConn composerWebSocketClient;
 
 	@Autowired
-	private ObjectMapper objectMapper;
-	
-	@Autowired
-	private ComposerWebSocketClientConn composerWebSocketClient;
+	public DPB0142Service(TsmpApiDao tsmpApiDao, TsmpSettingService tsmpSettingService,
+			TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, ObjectMapper objectMapper,
+			ComposerWebSocketClientConn composerWebSocketClient) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+		this.objectMapper = objectMapper;
+		this.composerWebSocketClient = composerWebSocketClient;
+	}
 
 	public DPB0142Resp getACEntryTicket(DPB0142Req req, String userIP, String authorization) {
 		String resource = req.getResource();

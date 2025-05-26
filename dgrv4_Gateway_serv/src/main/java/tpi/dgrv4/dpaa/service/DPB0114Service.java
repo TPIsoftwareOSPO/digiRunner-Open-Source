@@ -23,11 +23,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Transactional
 public class DPB0114Service {
 
-	@Autowired
 	private TsmpRoleTxidMapDao tsmpRoleTxidMapDao;
+	private BcryptParamHelper bcryptParamHelper;
 
 	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
+	public DPB0114Service(TsmpRoleTxidMapDao tsmpRoleTxidMapDao, BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRoleTxidMapDao = tsmpRoleTxidMapDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0114Resp deleteRTMap(TsmpAuthorization auth, DPB0114Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

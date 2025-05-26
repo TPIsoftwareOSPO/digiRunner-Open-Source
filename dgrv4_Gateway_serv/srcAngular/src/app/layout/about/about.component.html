@@ -3,12 +3,12 @@
         <div class="form-group row">
             <div class="col-12 col-lg-12">
                 <div id="center_div" class="text-center">
-                    <img id="logo_img" src="assets/images/DigiFusion_digiRunner_logo.png" width="250px" alt="">
+                    <img id="logo_img" src="assets/images/digiRunner_vertical_logo.png" width="250px" alt="">
                     <br>
                     <h1 [hidden]="!setComp">{{versionInfo.majorVersionNo}}</h1>
-                    <p id="edition_p" class="text-left" [hidden]="!setComp"> {{edition}} Exp：{{editionDate}}</p>
-                    <p id="version_p" class="text-left" [hidden]="!setComp"> Version：{{versionInfo.version}}</p>
-                    <p id="account_p" class="text-left" [hidden]="!setComp || ( versionInfo.account == undefined || versionInfo?.account == '' )"> Account：{{versionInfo.account}}</p>
+                    <p id="edition_p" class="text-start" [hidden]="!setComp"> {{edition}} Exp：{{editionDate}}</p>
+                    <p id="version_p" class="text-start" [hidden]="!setComp"> Version：{{versionInfo.version}}</p>
+                    <p id="account_p" class="text-start" [hidden]="!setComp || ( versionInfo.account == undefined || versionInfo?.account == '' )"> Account：{{versionInfo.account}}</p>
                     <!-- <p id="{{idx}}_p" class="text-left" *ngFor="let item of versionInfo.dataList;let idx = index" [hidden]="!setComp">
                         {{item.moduleName}} Ver：{{item.moduleVersion}}
                     </p> -->

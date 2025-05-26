@@ -26,13 +26,17 @@ public class AA0104Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public AA0104Service(TsmpRoleDao tsmpRoleDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0104Resp queryTFuncRoleList(AA0104Req req) {
 		

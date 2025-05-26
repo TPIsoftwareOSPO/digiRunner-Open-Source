@@ -39,30 +39,31 @@ public class AcIdPService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private OAuthTokenService oAuthTokenService;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private TptokenService tptokenService;
-	
-	@Autowired
 	private TokenHelper tokenHelper;
-	
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
 	
 	//Audit Log使用
-	String eventNo = AuditLogEvent.LOGIN.value(); 
+	private String eventNo = AuditLogEvent.LOGIN.value(); 
  
+	@Autowired
+	public AcIdPService(OAuthTokenService oAuthTokenService, TsmpSettingService tsmpSettingService,
+			TptokenService tptokenService, TokenHelper tokenHelper, TsmpTAEASKHelper tsmpTAEASKHelper,
+			DgrAuditLogService dgrAuditLogService, ObjectMapper objectMapper) {
+		super();
+		this.oAuthTokenService = oAuthTokenService;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tptokenService = tptokenService;
+		this.tokenHelper = tokenHelper;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.objectMapper = objectMapper;
+	}
+
 	public ResponseEntity<?> getAcToken(HttpHeaders httpHeaders, HttpServletRequest httpReq, 
 			HttpServletResponse httpRes, String dgRcode) throws Exception {
 		

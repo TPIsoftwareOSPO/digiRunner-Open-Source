@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0102Controller {
 
-	@Autowired
 	private DPB0102Service dpb0102Service;
 	
+	@Autowired
+	public DPB0102Controller(DPB0102Service dpb0102Service) {
+		super();
+		this.dpb0102Service = dpb0102Service;
+	}
+
 	/**
 	 * 提供[關鍵字](UID、名稱、備註、大分類、子項目)、[狀態](全部、停用、啟動、暫停、執行中)搜尋週期排程設定檔
 	 *

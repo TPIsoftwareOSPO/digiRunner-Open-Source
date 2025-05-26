@@ -26,8 +26,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
  */
 @RestController
 public class DPB0173Controller {
-	@Autowired
 	private DPB0173Service service;
+
+	@Autowired
+	public DPB0173Controller(DPB0173Service service) {
+		super();
+		this.service = service;
+	}
 
 
 	@PostMapping(value = "/dgrv4/11/DPB0173", //

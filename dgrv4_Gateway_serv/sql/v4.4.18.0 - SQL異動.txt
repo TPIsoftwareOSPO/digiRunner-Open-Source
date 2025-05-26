@@ -1,0 +1,17 @@
+-- 【dgRv4.4.18.0 - SQL 異動】
+
+
+-- 修改 292 項目的英文描述 , Kevin Cheng , 20250305
+UPDATE tsmp_dp_items 
+SET subitem_name = 'Cancel Scheduled Enablement'
+WHERE item_id = 292 AND locale = 'en-US';
+
+-- 修改 293 項目的英文描述 , Kevin Cheng , 20250305
+UPDATE tsmp_dp_items 
+SET subitem_name = 'Cancel Scheduled Disablement'
+WHERE item_id = 293 AND locale = 'en-US';
+
+-- 修改 294 項目的英文描述 , Kevin Cheng , 20250305
+UPDATE tsmp_dp_items 
+SET subitem_name = 'Cancel Both Schedules'
+WHERE item_id = 294 AND locale = 'en-US';

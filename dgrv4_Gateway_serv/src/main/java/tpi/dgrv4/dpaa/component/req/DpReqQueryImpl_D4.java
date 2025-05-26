@@ -9,9 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import tpi.dgrv4.dpaa.vo.TsmpMailEvent;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpUser;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd4;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd4Dao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
+import tpi.dgrv4.entity.repository.TsmpDpReqOrdersDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -22,11 +28,19 @@ public class DpReqQueryImpl_D4 extends DpReqQueryAbstract<DpReqQueryResp_D4> //
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao;
+	private TsmpUserDao tsmpUserDao;
 
 	@Autowired
-	private TsmpUserDao tsmpUserDao;
+	public DpReqQueryImpl_D4(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
+			DpReqServiceFactory dpReqServiceFactory, TsmpDpReqOrderd4Dao tsmpDpReqOrderd4Dao) {
+		super(tsmpDpReqOrdermDao, tsmpDpReqOrdersDao, tsmpDpItemsCacheProxy, tsmpOrganizationDao, tsmpUserDao,
+				tsmpClientDao, tsmpDpFileDao, dpReqServiceFactory);
+		this.tsmpDpReqOrderd4Dao = tsmpDpReqOrderd4Dao;
+		this.tsmpUserDao = tsmpUserDao;
+	}
 
 	@Override
 	protected List<DpReqQueryResp_D4> doQueryDetail(Long reqOrdermId, String locale) {

@@ -21,9 +21,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0086Controller {
 	
-	@Autowired
 	private DPB0086Service service;
 	
+	@Autowired
+	public DPB0086Controller(DPB0086Service service) {
+		super();
+		this.service = service;
+	}
+
 	/** 
 	 *	移除ClientCA
 	 *	1. 依指定的 clientId + client_cert_id 移除檔案

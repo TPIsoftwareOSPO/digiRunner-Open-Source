@@ -30,9 +30,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class UdpLdapController {
 
-	@Autowired
 	private UdpLdapService service;
 	
+	@Autowired
+	public UdpLdapController(UdpLdapService service) {
+		super();
+		this.service = service;
+	}
+
 
 	@PostMapping(value = "/dgrv4/udpssotoken/udpLdap", //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //

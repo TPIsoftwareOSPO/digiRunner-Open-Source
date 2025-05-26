@@ -57,54 +57,48 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
  */
 @Service
 public class GtwIdPCallbackService {
-    @Autowired
+
     private TsmpSettingService tsmpSettingService;
-    
-    @Autowired
     private GtwIdPAuthService gtwIdPAuthService;
-    
-    @Autowired
     private ObjectMapper objectMapper;
-    
-    @Autowired
     private DgrAuditLogService dgrAuditLogService;
-    
-    @Autowired
     private OAuthTokenService oAuthTokenService;
-    
-    @Autowired
     private DgrAcIdpInfoDao dgrAcIdpInfoDao;
-    
-    @Autowired
     private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
-    
-    @Autowired
     private DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
-    
-    @Autowired
     private OauthClientDetailsDao oauthClientDetailsDao;
-    
-    @Autowired
     private TokenHelper tokenHelper;
-    
-    @Autowired
     private IdPWellKnownHelper idPWellKnownHelper;
-    
-    @Autowired
     private IdPUserInfoHelper idPUserInfoHelper;
-    
-    @Autowired
     private IdPTokenHelper idPTokenHelper;
- 
-    @Autowired
     private GtwIdPHelper gtwIdPHelper;
-    
-    @Autowired
     private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
     
-	// Audit Log使用
-	String eventNo = AuditLogEvent.LOGIN.value(); 
-	
+    @Autowired
+	public GtwIdPCallbackService(TsmpSettingService tsmpSettingService, GtwIdPAuthService gtwIdPAuthService,
+			ObjectMapper objectMapper, DgrAuditLogService dgrAuditLogService, OAuthTokenService oAuthTokenService,
+			DgrAcIdpInfoDao dgrAcIdpInfoDao, DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao,
+			DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao, OauthClientDetailsDao oauthClientDetailsDao,
+			TokenHelper tokenHelper, IdPWellKnownHelper idPWellKnownHelper, IdPUserInfoHelper idPUserInfoHelper,
+			IdPTokenHelper idPTokenHelper, GtwIdPHelper gtwIdPHelper, DgrGtwIdpInfoODao dgrGtwIdpInfoODao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.gtwIdPAuthService = gtwIdPAuthService;
+		this.objectMapper = objectMapper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.oAuthTokenService = oAuthTokenService;
+		this.dgrAcIdpInfoDao = dgrAcIdpInfoDao;
+		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
+		this.dgrGtwIdpAuthCodeDao = dgrGtwIdpAuthCodeDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tokenHelper = tokenHelper;
+		this.idPWellKnownHelper = idPWellKnownHelper;
+		this.idPUserInfoHelper = idPUserInfoHelper;
+		this.idPTokenHelper = idPTokenHelper;
+		this.gtwIdPHelper = gtwIdPHelper;
+		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
+	}
+
 	public ResponseEntity<?> gtwIdPCallback(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
 		

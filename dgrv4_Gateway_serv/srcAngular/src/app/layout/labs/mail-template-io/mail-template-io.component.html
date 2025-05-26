@@ -22,7 +22,7 @@
       <div class="col-5">
         <label class="control-label"
           >{{ "button.import" | translate}}
-          <i class="far fa-question-circle ml-2 " pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"CODE"} }}</li><li>{{"use_in_multi_language"|translate }}</li></ol>' [escape]="false"></i>
+          <i class="far fa-question-circle ms-2 " pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"CODE"} }}</li><li>{{"use_in_multi_language"|translate }}</li></ol>' [escape]="false"></i>
         </label>
         <div>
           <div class="ui-inputgroup">
@@ -45,12 +45,12 @@
               pButton
               type="button"
               icon="pi pi-file"
-              class="ml-1 tpi-primary"
+              class="ms-1 tpi-primary"
               (click)="openFileBrowser()"
             ></button>
             <button
               type="button"
-              class="btn tpi-btn tpi-primary ml-2"
+              class="btn tpi-btn tpi-primary ms-2"
               (click)="uploadFile()"
               [disabled]="!_file"
             >

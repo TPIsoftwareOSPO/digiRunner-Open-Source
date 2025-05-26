@@ -13,7 +13,7 @@
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="groupAuthoritiesID"
                             placeholder="{{'authorities'|translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
                             (click)="queryAuthoritiesList();"></button>
                     </div>
                 </div>
@@ -27,8 +27,8 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-second float-right" (click)="create()">
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
+                    <button type="button" class="btn tpi-btn tpi-second float-end" (click)="create()">
                         {{'button.group'|translate}}
                     </button>
                 </div>
@@ -85,11 +85,11 @@
                               [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
 
                         <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5"
+                            <button type="button" class="btn btn-deta me-5"
                                 (click)="showDialog(rowData,formOperate.detail)">
                                 <span class="fa fa-search">{{'button.detail'|translate}}</span>
                             </button>
-                            <button type="button" class="btn btn-deta mr-5"
+                            <button type="button" class="btn btn-deta me-5"
                                 (click)="showDialog(rowData,formOperate.update)">
                                 <span class="fa fa-edit">{{'button.update'|translate}}</span>
                             </button>
@@ -104,7 +104,7 @@
                 <tr *ngIf="rowcount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                        <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreData();">{{'button.more'|translate}}</button> -->
 
                             <!-- 查詢更多 -->
@@ -125,23 +125,21 @@
     </div>
     <!-- 群組維護 > 授權核身加入 -->
     <div [hidden]="pageNum != 2">
-        <form [formGroup]="form_page2" (ngSubmit)="queryauthorities()">
-            <div class="form-group ">
+        <form [formGroup]="form_page2">
+            <div class="form-group col-12 d-flex">
                 <!-- <div class="col-3 col-xl-3 col-lg-3">
                     <label for="authoritieskeyword">{{'keyword_search'|translate}}</label>
                     <input type="text" class="form-control" id="authoritieskeyword" formControlName="authoritieskeyword"
                         placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
                 </div> -->
+                <app-search-input placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}"
+                [control]="form_page2.get('authoritieskeyword')" [searchFn]="queryauthorities.bind(this)"
+                class="col-9 col-lg-6 col-sm-6"></app-search-input>
 
-                <span class="p-input-icon-right" style="width:40vw">
-                  <i class="pi pi-search tpi-i-search" (click)="queryauthorities();"></i>
-                  <input type="search" class="form-control tpi-i-input" id="authoritieskeyword" formControlName="authoritieskeyword"
-                         placeholder="{{'group_auth_id'|translate}}、{{'group_auth_name'|translate}}、{{'group_auth_desc'|translate}}">
-                </span>
             </div>
             <!-- <div class="form-group row">
                 <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
                 </div>
             </div> -->
         </form>
@@ -193,9 +191,9 @@
         </p-table>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
                     (click)="chooseAuthorities();">{{'button.add'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="return_to_list();">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>
@@ -308,7 +306,7 @@
         </form>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-primary tpi-btn float-left"
+                <button type="button" class="btn tpi-primary tpi-btn float-start"
                     (click)="return_to_list();">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>
@@ -421,7 +419,7 @@
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="groupAuthoritiesName"
                             placeholder="{{'authorities'|translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
                             (click)="queryAuthoritiesList_page4();"></button>
                     </div>
                 </div>
@@ -460,7 +458,7 @@
 
             <div class="form-group row">
                 <div class="col-12">
-                    <label for="moduleList" class="control-label mr-3">{{'module_list'|translate}}</label>
+                    <label for="moduleList" class="control-label me-3">{{'module_list'|translate}}</label>
                     <button type="button" class="btn tpi-primary"
                         (click)="Choose_Module();">{{'button.chs_module'|translate}}</button>
                 </div>
@@ -506,8 +504,8 @@
 
             <div class="form-group row">
                 <div class="col-12 col-lg-12 mt-2">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form_page4.invalid">{{'button.update'|translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-primary float-left"
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form_page4.invalid">{{'button.update'|translate}}</button>
+                    <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="return_to_list();">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>
@@ -526,7 +524,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
                 </div>
             </div>
         </form>
@@ -576,9 +574,9 @@
         </p-table>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
                     (click)="chooseAuthorities_page4();">{{'button.add'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="return_to_list_page4();">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>
@@ -636,9 +634,9 @@
                         <tr *ngIf="rowcount_page6">
                             <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                                 <span>{{'row_count' | translate}}: {{rowcount_page6}}</span>
-                                <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+                                <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
                                     (click)="select_all_page6();">{{'button.select_all'|translate}}</button>
-                                <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+                                <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
                                     (click)="moreData_page6();">{{'button.more'|translate}}</button> -->
 
                                     <!-- 查詢更多 -->
@@ -664,7 +662,7 @@
             <div class="col-sm-6">
                 <div class="row" style="margin-bottom: 2px; margin-top: 41px;">
                     <div class="col-3 col-xl-3 col-lg-3">
-                        <label class="control-label mr-3">{{'been_chs_api'|translate}}</label>
+                        <label class="control-label me-3">{{'been_chs_api'|translate}}</label>
                     </div>
                 </div>
                 <p-table *ngIf="ChooseApiList" [columns]="ChooseApiList" [value]="been_choose_api_list" styleClass="p-datatable-striped"
@@ -708,7 +706,7 @@
         </div>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="save_choose_API();">{{'button.apply2'|translate}}</button>
             </div>
         </div>
@@ -766,9 +764,9 @@
                         <tr *ngIf="rowcount_page7">
                             <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                                 <span>{{'row_count' | translate}}: {{rowcount_page7}}</span>
-                                <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+                                <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
                                     (click)="select_all_page7();">{{'button.select_all'|translate}}</button>
-                                <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+                                <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
                                     (click)="moreData_page7();">{{'button.more'|translate}}</button> -->
 
                                     <!-- 查詢更多 -->
@@ -795,7 +793,7 @@
             <div class="col-sm-6">
                 <div class="row" style="margin-bottom: 2px; margin-top: 41px;">
                     <div class="col-3 col-xl-3 col-lg-3">
-                        <label class="control-label mr-3">{{'been_chs_module'|translate}}</label>
+                        <label class="control-label me-3">{{'been_chs_module'|translate}}</label>
                     </div>
                 </div>
                 <p-table *ngIf="ChooseModuleList" [columns]="ChooseModuleList" [value]="been_choose_module_list" styleClass="p-datatable-striped"
@@ -839,7 +837,7 @@
         </div>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn  tpi-primary float-left"
+                <button type="button" class="btn tpi-btn  tpi-primary float-start"
                     (click)="save_choose_Module();">{{'button.apply2'|translate}}</button>
             </div>
         </div>
@@ -938,9 +936,9 @@
         </form>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3"
+                <button type="submit" class="btn tpi-btn tpi-primary float-start me-3"
                     (click)="delete_group();">{{'button.delete'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="return_to_list();">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>
@@ -1030,7 +1028,7 @@
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="groupAuthoritiesName"
                             placeholder="{{'authorities'|translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="tpi-primary ml-1"
+                        <button pButton type="button" icon="pi pi-search" class="tpi-primary ms-1"
                             (click)="queryAuthoritiesList_page9();"></button>
                     </div>
                 </div>
@@ -1070,7 +1068,7 @@
 
             <div class="form-group row">
                 <div class="col-12">
-                    <label for="moduleList" class="control-label mr-3">{{'module_list'|translate}}</label>
+                    <label for="moduleList" class="control-label me-3">{{'module_list'|translate}}</label>
                     <button type="button" class="btn tpi-primary"
                         (click)="Choose_Module_paage9();">{{'button.chs_module'|translate}}</button>
                 </div>
@@ -1116,8 +1114,8 @@
 
             <div class="form-group row">
                 <div class="col-12 col-lg-12 mt-2">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form_page9.invalid">{{'button.create'|translate}}</button>
-                    <button type="button" class="btn tpi-btn tpi-primary float-left"
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form_page9.invalid">{{'button.create'|translate}}</button>
+                    <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="return_to_list();">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>
@@ -1136,7 +1134,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-12 col-xl-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
                 </div>
             </div>
         </form>
@@ -1186,9 +1184,9 @@
         </p-table>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
                     (click)="chooseAuthorities_page9();">{{'button.add'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="return_to_list_page9();">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>
@@ -1247,9 +1245,9 @@
                         <tr *ngIf="rowcount_page11">
                             <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                                 <span>{{'row_count' | translate}}: {{rowcount_page11}}</span>
-                                <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+                                <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
                                     (click)="select_all_page11();">{{'button.select_all'|translate}}</button>
-                                <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+                                <!-- <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
                                     (click)="moreData_page11();">{{'button.more'|translate}}</button> -->
 
                                     <!-- 查詢更多 -->
@@ -1275,7 +1273,7 @@
             <div class="col-sm-6">
                 <div class="row" style="margin-bottom: 2px; margin-top: 41px;">
                     <div class="col-12 col-xl-6 col-lg-6">
-                        <label class="control-label mr-3">{{'been_chs_module'|translate}}</label>
+                        <label class="control-label me-3">{{'been_chs_module'|translate}}</label>
                     </div>
                 </div>
                 <p-table *ngIf="ChooseModuleList_page11" [columns]="ChooseModuleList_page11" styleClass="p-datatable-striped"
@@ -1321,7 +1319,7 @@
         </div>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="save_choose_Module_page11();">{{'button.apply2'|translate}}</button>
             </div>
         </div>
@@ -1380,9 +1378,9 @@
                         <tr *ngIf="rowcount_page12">
                             <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                                 <span>{{'row_count' | translate}}: {{rowcount_page12}}</span>
-                                <button type="button" class="btn  tpi-btn tpi-primary pull-right ml-3"
+                                <button type="button" class="btn  tpi-btn tpi-primary pull-right ms-3"
                                     (click)="select_all_page12();">{{'button.select_all'|translate}}</button>
-                                <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                                <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                                     (click)="moreData_page12();">{{'button.more'|translate}}</button> -->
 
                                     <!-- 查詢更多 -->
@@ -1409,7 +1407,7 @@
             <div class="col-sm-6">
                 <div class="row" style="margin-bottom: 2px; margin-top: 41px;">
                     <div class="col-3 col-xl-3 col-lg-3">
-                        <label class="control-label mr-3">{{'been_chs_api'|translate}}</label>
+                        <label class="control-label me-3">{{'been_chs_api'|translate}}</label>
                     </div>
                 </div>
                 <p-table *ngIf="ChooseApiList_page12" [columns]="ChooseApiList_page12" styleClass="p-datatable-striped"
@@ -1454,7 +1452,7 @@
         </div>
         <div class="form-group row">
             <div class="col-12 col-lg-12 mt-2">
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="save_choose_API_page12();">{{'button.apply2'|translate}}</button>
             </div>
         </div>

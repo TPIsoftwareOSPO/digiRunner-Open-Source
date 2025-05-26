@@ -37,16 +37,17 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
  */
 @Service
 public class DgrESService {
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	@Autowired
 	private ObjectMapper objectMapper;
+	
 	int index = 0;
 
-	public DgrESService(ObjectMapper objectMapper) {
+	@Autowired
+	public DgrESService(TsmpSettingService tsmpSettingService, ObjectMapper objectMapper) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
 		this.objectMapper = objectMapper;
-	};
-
+	}
 
 	/**
 	 * 請在使用其他method之前 先使用此方法確認連線

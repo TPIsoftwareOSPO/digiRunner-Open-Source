@@ -28,17 +28,21 @@ public class DPB0076Service {
 	
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-	
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	
 	private Integer pageSize;
 	
-	@Autowired
+	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
+	private TsmpOrganizationDao tsmpOrganizationDao;
 	private ServiceConfig serviceConfig;
 	
+	@Autowired
+	public DPB0076Service(TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao,
+			TsmpOrganizationDao tsmpOrganizationDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB0076Resp queryThemeLov(TsmpAuthorization authorization, DPB0076Req req) {
 		DPB0076Resp resp = new DPB0076Resp();
 

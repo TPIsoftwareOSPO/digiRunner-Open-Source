@@ -31,12 +31,18 @@ public class LdapService{
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	@Autowired
 	private DPB0122Service dpb0122Service;
-	@Autowired
 	private LdapAuthResultDao ldapAuthResultDao;
+
+	@Autowired
+	public LdapService(TsmpSettingService tsmpSettingService, DPB0122Service dpb0122Service,
+			LdapAuthResultDao ldapAuthResultDao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.dpb0122Service = dpb0122Service;
+		this.ldapAuthResultDao = ldapAuthResultDao;
+	}
 
 	public LdapResp checkAccountByLdap(TsmpAuthorization auth, LdapReq req, String localBaseUrl) {
 

@@ -6,7 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpApptJobStatus;
@@ -53,6 +55,7 @@ public class SerialApptJob extends DeferrableJob {
 
 	private ApptRjobDispatcher apptRjobDispatcher;
 
+	@Autowired
 	public SerialApptJob(ApptJob apptJob, TsmpDpApptJobDao tsmpDpApptJobDao, //
 			TsmpDpApptRjobDao tsmpDpApptRjobDao, TsmpDpApptRjobDDao tsmpDpApptRjobDDao, //
 			ApptJobDispatcher apptJobDispatcher, ApptRjobDispatcher apptRjobDispatcher,
@@ -148,7 +151,14 @@ public class SerialApptJob extends DeferrableJob {
 			}
 			rjob.setUpdateDateTime(DateTimeUtil.now());
 			rjob.setUpdateUser("SYS");
-			rjob = this.tsmpDpApptRjobDao.save(rjob);
+			try {
+				rjob = this.tsmpDpApptRjobDao.save(rjob); //JpaSystemException: could not execute statement [The database is read only
+			} catch (JpaSystemException e) {
+				String msg = StackTraceUtil.logTpiShortStackTrace(e);
+				if (msg.indexOf("The database is read only") == -1) {
+					throw e;
+				}
+			}
 			return rjob.getStatus();
 		}
 		return null;

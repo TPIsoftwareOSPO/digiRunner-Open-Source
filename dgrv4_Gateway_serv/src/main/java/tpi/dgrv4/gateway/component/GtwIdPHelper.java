@@ -35,13 +35,8 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Component
 public class GtwIdPHelper {
 
-	@Autowired
-	TokenHelper tokenHelper;
-
-	@Autowired
+	private TokenHelper tokenHelper;
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
 
 	// cookie 名稱
@@ -50,6 +45,15 @@ public class GtwIdPHelper {
 
 	public static String COOKIE_JTI = "jti";
 	public static String COOKIE_IDP_TYPE = "idp_type";
+
+	@Autowired
+	public GtwIdPHelper(TokenHelper tokenHelper, TsmpSettingService tsmpSettingService,
+			DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao) {
+		super();
+		this.tokenHelper = tokenHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
+	}
 
 	/**
 	 * 目前 GTW IdP 支援的 IdP Type

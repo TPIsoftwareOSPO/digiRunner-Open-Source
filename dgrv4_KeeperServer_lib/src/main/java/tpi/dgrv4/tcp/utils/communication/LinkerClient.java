@@ -297,8 +297,9 @@ public class LinkerClient implements Runnable {
 				cn.runDisconnect(this);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			logger.error(LinkerServer.logTpiShortStackTrace(e));
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -309,7 +310,8 @@ public class LinkerClient implements Runnable {
 		try {
 			snd.put(obj);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error("", e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -353,8 +355,9 @@ public class LinkerClient implements Runnable {
 //	        Thread.sleep(0,2000);
 	        
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			logger.error(LinkerServer.logTpiShortStackTrace(e));
+			Thread.currentThread().interrupt();
 		}
 	}
 	
@@ -384,7 +387,8 @@ public class LinkerClient implements Runnable {
 //				System.out.println("Linker CLIENT REV Queue size:" + rev.size());
 //			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -394,7 +398,7 @@ public class LinkerClient implements Runnable {
 //			out.close();
 			socket.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			logger.error(LinkerServer.logTpiShortStackTrace(e));
 		}
 	}

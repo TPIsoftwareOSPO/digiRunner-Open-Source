@@ -37,17 +37,20 @@ public class DPB0061Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0061Service(TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpFileDao tsmpDpFileDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, FileHelper fileHelper) {
+		super();
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.fileHelper = fileHelper;
+	}
 
 	public DPB0061Resp queryByPk(TsmpAuthorization auth, DPB0061Req req, ReqHeader reqHeader) {
 		// 檢查必要參數

@@ -1,16 +1,17 @@
-<div class="row mb-1 col-12" [formGroup]="form">
+<div class="d-flex mb-1 col-12" [formGroup]="form">
   <div class="col-auto p-0">
 
-    <label class="control-label" [ngClass]="{'required': !readonly}" [hidden]="no!=0">{{ 'probability' |
+    <label class="control-label fw-bold" [ngClass]="{'required': !readonly}" [hidden]="no!=0">{{ 'probability' |
       translate}}</label>
-    <div class="form-inline">
+    <div class="d-flex align-items-center">
       <input type="number" class="form-control" formControlName="probability" min="0" max="100"
         onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)" style="width:80px">
-      <label class="mx-1">%</label>
+      <label class="mx-1 mb-0">%</label>
     </div>
   </div>
   <div class="col-5 p-0">
-    <label class="control-label" [ngClass]="{'required': !readonly}" [hidden]="no!=0">{{ 'tar_url' | translate}}</label>
+    <label class="control-label fw-bold" [ngClass]="{'required': !readonly}" [hidden]="no!=0">{{ 'tar_url' |
+      translate}}</label>
     <input type="text" class="form-control" name="url" formControlName="url" style="width:100%">
     <div *ngIf="url?.invalid && (url?.dirty || url?.touched)" class="text-danger">
       <!-- <small class="form-text">{{userName?.errors.pattern | translate}}</small>
@@ -20,16 +21,16 @@
       <small class="form-text">{{url?.errors.pattern | translate }}</small>
     </div>
   </div>
-  <div class="col-5 " >
+  <div class="col-5 ">
     <div>
       <label class="control-label" [hidden]="no!=0">&nbsp;</label>
     </div>
-    <div class="form-inline">
-      <div >
+    <div class="d-flex">
+      <div>
         <label class="pt-1" [hidden]="!readonly">Req:{{req}} ,Resp:{{resp}}</label>
       </div>
       <button type="button" class="btn tpi-primary mx-1" (click)="delete($event)"
-        style="border-radius: 50%;width: 38px;" [hidden]="readonly">
+        style="border-radius: 50%;" [hidden]="readonly">
         <i class="fa fa-minus"></i>
       </button>
     </div>

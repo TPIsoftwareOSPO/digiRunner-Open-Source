@@ -30,8 +30,13 @@ public class DPB9906Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+
+	@Autowired
+	public DPB9906Service(TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	public DPB9906Resp queryTsmpDpItemsDetail(TsmpAuthorization auth, DPB9906Req req) {
 		String locale = req.getLocale();

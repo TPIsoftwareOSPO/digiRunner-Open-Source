@@ -12,9 +12,13 @@ import tpi.dgrv4.gateway.service.AcIdPReviewService;
 
 @RestController
 public class AcIdPReviewController {
-	@Autowired
 	AcIdPReviewService service;
  
+	@Autowired
+	public AcIdPReviewController(AcIdPReviewService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/acidp/acIdPReview")
 	public void acIdPReview(@RequestHeader HttpHeaders httpHeaders, 

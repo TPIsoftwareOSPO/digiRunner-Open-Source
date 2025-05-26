@@ -1,6 +1,7 @@
 package tpi.dgrv4.dpaa.component.req;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -37,62 +38,59 @@ public abstract class DpReqServiceAbstract implements DpReqServiceIfs {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
-	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
-	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
-	private SeqStoreService seqStoreService;
-
-	@Autowired
-	private TsmpDpReqOrdersDao tsmpDpReqOrdersDao;
-
-	@Autowired
-	private FileHelper fileHelper;
-
-	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
-	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
-
-	@Autowired
-	private TsmpDpChkLogDao tsmpDpChkLogDao;
-
-	@Autowired
-	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired(required=false)
+//	@Autowired(required=false)
 	private ApptJobDispatcher apptJobDispatcher;
-
-	@Autowired
+	
+	private TsmpClientDao tsmpClientDao;
+	protected TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
+	private TsmpUserDao tsmpUserDao;
+	private SeqStoreService seqStoreService;
+	private TsmpDpReqOrdersDao tsmpDpReqOrdersDao;
+	private FileHelper fileHelper;
+	private TsmpDpFileDao tsmpDpFileDao;
+	private TsmpDpChkLayerDao tsmpDpChkLayerDao;
+	private TsmpDpChkLogDao tsmpDpChkLogDao;
+	private BcryptParamHelper bcryptParamHelper;
+	private TsmpOrganizationDao tsmpOrganizationDao;
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
+	private SendReviewMailService mailService;
+	private SendClientRegMailService sendClientRegMailService;
+	private SendAPIApplicationMailService sendAPIApplicationMailService;
+	private DgrAuditLogService dgrAuditLogService;
+	private DgrAcIdpUserDao dgrAcIdpUserDao;
 
 	@Autowired
-	private SendReviewMailService mailService;
-	
-	@Autowired
-	private SendClientRegMailService sendClientRegMailService;
-	
-	@Autowired
-	private SendAPIApplicationMailService sendAPIApplicationMailService;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	public DpReqServiceAbstract(@Nullable ApptJobDispatcher apptJobDispatcher, TsmpClientDao tsmpClientDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpUserDao tsmpUserDao,
+			SeqStoreService seqStoreService, TsmpDpReqOrdersDao tsmpDpReqOrdersDao, FileHelper fileHelper,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpDpChkLogDao tsmpDpChkLogDao,
+			BcryptParamHelper bcryptParamHelper, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, SendReviewMailService mailService,
+			SendClientRegMailService sendClientRegMailService,
+			SendAPIApplicationMailService sendAPIApplicationMailService, DgrAuditLogService dgrAuditLogService,
+			DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.seqStoreService = seqStoreService;
+		this.tsmpDpReqOrdersDao = tsmpDpReqOrdersDao;
+		this.fileHelper = fileHelper;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpDpChkLayerDao = tsmpDpChkLayerDao;
+		this.tsmpDpChkLogDao = tsmpDpChkLogDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.mailService = mailService;
+		this.sendClientRegMailService = sendClientRegMailService;
+		this.sendAPIApplicationMailService = sendAPIApplicationMailService;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	@Override
 	public <R extends DpReqServiceResp, Q extends DpReqServiceSaveDraftReq> R saveDraft(Q req, //

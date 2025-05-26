@@ -1,7 +1,6 @@
 package tpi.dgrv4.dpaa.component.job;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -31,15 +30,18 @@ public class DeleteExpiredOpenApiKeyJob extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
+	public DeleteExpiredOpenApiKeyJob(TsmpOpenApiKeyDao tsmpOpenApiKeyDao, TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpOpenApiKeyMapDao = tsmpOpenApiKeyMapDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	@Override
 	public void runJob(JobHelperImpl jobHelper, JobManager jobManager) {
 		try {

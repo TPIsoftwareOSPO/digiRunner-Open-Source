@@ -64,44 +64,41 @@ public class AA0313Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiRegDao tsmpApiRegDao;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
+	private DaoGenericCacheService daoGenericCacheService;
+	private DgrAcIdpUserDao dgrAcIdpUserDao;
 
 	@Autowired
-	private DaoGenericCacheService daoGenericCacheService;
-	
-	@Autowired
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	public AA0313Service(TsmpUserDao tsmpUserDao, TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao,
+			TsmpApiRegDao tsmpApiRegDao, TsmpRegModuleDao tsmpRegModuleDao, BcryptParamHelper bcryptParamHelper,
+			ApplicationContext ctx, JobHelper jobHelper, ObjectMapper objectMapper,
+			DgrAuditLogService dgrAuditLogService, CommForwardProcService commForwardProcService,
+			DaoGenericCacheService daoGenericCacheService, DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.objectMapper = objectMapper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.commForwardProcService = commForwardProcService;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	@Transactional
 	public AA0313Resp updateRegCompAPI(TsmpAuthorization auth, AA0313Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
@@ -504,7 +501,7 @@ public class AA0313Service {
 	
 	protected LinkedList<String[]> checkSrcUrl(String srcUrl) {
 		boolean isThrowing = true;
-		LinkedList<String[]> dataList = getCommForwardProcService().getSrcUrlToTargetUrlAndProbabilityList(srcUrl, isThrowing);
+		LinkedList<String[]> dataList = (LinkedList<String[]>) getCommForwardProcService().getSrcUrlToTargetUrlAndProbabilityList(srcUrl, isThrowing);
 		return dataList;
 	}
 	

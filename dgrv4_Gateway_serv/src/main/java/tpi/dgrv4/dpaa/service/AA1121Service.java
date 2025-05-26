@@ -32,29 +32,38 @@ import java.util.stream.Collectors;
 public class AA1121Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-	@Autowired
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
-	@Autowired
 	private DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao;
-	@Autowired
 	private DgrRdbConnectionDao dgrRdbConnectionDao;
-	@Autowired
 	private TsmpClientHostDao tsmpClientHostDao;
 	
+	@Autowired
+	public AA1121Service(ObjectMapper objectMapper, TsmpClientDao tsmpClientDao, TsmpApiCacheProxy tsmpApiCacheProxy,
+			TsmpGroupDao tsmpGroupDao, TsmpVgroupDao tsmpVgroupDao, TsmpGroupApiDao tsmpGroupApiDao,
+			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpSecurityLevelDao tsmpSecurityLevelDao,
+			DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao, DgrRdbConnectionDao dgrRdbConnectionDao,
+			TsmpClientHostDao tsmpClientHostDao) {
+		super();
+		this.objectMapper = objectMapper;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+		this.dgrImportClientRelatedTempDao = dgrImportClientRelatedTempDao;
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		this.tsmpClientHostDao = tsmpClientHostDao;
+	}
+
 	public AA1121Resp importClientRelated(TsmpAuthorization tsmpAuthorization, MultipartFile mFile) {
 
 		try {

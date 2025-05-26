@@ -1,6 +1,5 @@
 package tpi.dgrv4.dpaa.component.job;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -29,12 +28,15 @@ public class DeleteExpiredMailJob extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpMailLogDao tsmpDpMailLogDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
+	public DeleteExpiredMailJob(TsmpDpMailLogDao tsmpDpMailLogDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpMailLogDao = tsmpDpMailLogDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	@Override
 	public void runJob(JobHelperImpl jobHelper, JobManager jobManager) {
 		try {

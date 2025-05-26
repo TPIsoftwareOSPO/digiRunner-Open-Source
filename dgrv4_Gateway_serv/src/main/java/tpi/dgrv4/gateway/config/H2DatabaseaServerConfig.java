@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import tpi.dgrv4.gateway.keeper.TPILogger;
@@ -26,9 +27,15 @@ public class H2DatabaseaServerConfig {
 	@Value("${digi.h2.port:9090}")
 	private String h2Port ;
 
-	@Autowired(required = false)
+//	@Autowired(required = false)
 	private IDgrv4H2Config dgrv4H2Config;
 	
+	@Autowired
+	public H2DatabaseaServerConfig(@Nullable IDgrv4H2Config dgrv4h2Config) {
+		super();
+		dgrv4H2Config = dgrv4h2Config;
+	}
+
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public Object inMemoryH2DatabaseaServer() throws SQLException {
 		StringBuffer buf = new StringBuffer();

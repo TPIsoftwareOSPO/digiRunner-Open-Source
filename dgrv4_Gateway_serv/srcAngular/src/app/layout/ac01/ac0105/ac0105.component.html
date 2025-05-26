@@ -1,35 +1,35 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryFuncList()">
+    <form [formGroup]="form">
       <div class="form-group">
-        <span class="p-input-icon-right" style="width: 40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryFuncList()"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder="{{ 'fun_code' | translate }}、{{
-              'fun_name' | translate
-            }}、{{ 'fun_desc' | translate }}、{{ 'role_name' | translate }}、{{
-              'role_alias' | translate
-            }}" />
-        </span>
+        <div class="col-12 d-flex align-items-center">
+          <app-search-input placeholder="{{ 'fun_code' | translate }}、{{
+                    'fun_name' | translate
+                  }}、{{ 'fun_desc' | translate }}、{{ 'role_name' | translate }}、{{
+                    'role_alias' | translate
+                  }}" [control]="form.get('keyword')" [searchFn]="queryFuncList.bind(this)"
+            class="col-9 col-lg-4 col-sm-6"></app-search-input>
 
-        <button type="button" class="btn tpi-btn tpi-second float-right" (click)="changePage('create')">
-          {{ "button.create" | translate }}
-        </button>
+          <button type="button" class="btn tpi-btn tpi-second ms-auto" (click)="changePage('create')">
+            {{ "button.create" | translate }}
+          </button>
+        </div>
       </div>
     </form>
     <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
 
-      <button type="button" class="btn tpi-btn tpi-primary mr-2"
+      <button type="button" class="btn tpi-btn tpi-primary me-2"
         (click)="exportTsmpFunc()">{{'button.export'|translate}}</button>
 
       <div style="display: flex;align-items: center;">
-        <div class="ui-inputgroup mr-2">
+        <div class="ui-inputgroup me-2">
           <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
           <input type="text" class="form-control" [value]="file?.name" readOnly
             placeholder="{{'upload_file' | translate}}">
-          <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+          <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
             [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
         </div>
-        <button type="button" class="btn tpi-btn tpi-primary mr-2" [disabled]="!file?.name"
+        <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!file?.name"
           (click)="importTsmpFunc()">{{'button.import'|translate}}</button>
         <i class="far fa-question-circle" pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"FUNC_CODE+LOCALE"} }}</li><li>{{"use_in_multi_language"|translate }}</li></ol>'
           [escape]="false"></i>
@@ -137,26 +137,19 @@
       </div>
     </div>
     <hr />
-    <form [formGroup]="detailForm" (ngSubmit)="queryRoleList()">
+    <form [formGroup]="detailForm">
       <div class="form-group row">
         <div class="col-4 col-xl-4 col-lg-4">
           <label id="keyword_label" class="control-label">{{
             "keyword_search" | translate
             }}</label>
-          <!-- <input
-            type="text"
-            class="form-control"
-            formControlName="keyword"
-            placeholder="{{ 'role_name' | translate }}、{{
-              'role_desc' | translate
-            }}"
-          /> -->
-          <span class="p-input-icon-right" style="width: 40vw">
-            <i class="pi pi-search tpi-i-search" (click)="queryRoleList()"></i>
-            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder="{{ 'role_name' | translate }}、{{
-                'role_desc' | translate
-              }}" />
-          </span>
+
+          <app-search-input placeholder="{{ 'role_name' | translate }}、{{
+            'role_desc' | translate
+          }}"
+          [control]="detailForm.get('keyword')" [searchFn]="queryRoleList.bind(this)"
+          class="col-9 col-lg-4 col-sm-6"></app-search-input>
+
         </div>
       </div>
 
@@ -205,7 +198,7 @@
     <br />
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+        <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
           {{ "button.return_to_list" | translate }}
         </button>
       </div>
@@ -282,7 +275,7 @@
         <div class="col-12 row">
           <div class="p-form-check" >
             <p-checkbox [binary]="true" inputId="kibanaReport" [ngModel]="currentFuncInfo?.reportType=='SYS_RPT'" [ngModelOptions]="{standalone: true}" [readonly]="true"></p-checkbox>
-            <label class="ml-2 mb-0" for="kibanaReport">Kibana
+            <label class="ms-2 mb-0" for="kibanaReport">Kibana
                <small class="px-2">
               (
               {{
@@ -296,10 +289,6 @@
         <div class="col-12">
           <label for="newReportUrl">Embedded URL<i class="far fa-question-circle tip" tooltipStyleClass='tooltip-custom-w' [pTooltip]="embbededUrlTip"
               [escape]="false"></i><span style="color: red">*</span></label>
-            <!-- <small class="pl-2">({{
-              "funcCode_kibana_prefix" | translate
-              }})
-            </small> -->
           <input type="text" class="form-control" id="newReportUrl" formControlName="newReportUrl" />
           <div *ngIf="
             newReportUrl.invalid && (newReportUrl.dirty || newReportUrl.touched)
@@ -329,11 +318,11 @@
       </div> -->
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="form.invalid" (click)="updateFunc()">
             {{ "button.update" | translate }}
           </button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
             {{ "button.return_to_list" | translate }}
           </button>
         </div>
@@ -350,13 +339,13 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="type" [value]="0" inputId="type0"></p-radioButton>
-                <label for="type0" class="ml-2 mb-0">{{'main_func'|translate}}</label>
+                <label for="type0" class="ms-2 mb-0">{{'main_func'|translate}}</label>
               </div>
             </ng-container>
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="type" [value]="1" inputId="type1"></p-radioButton>
-                <label for="type1" class="ml-2 mb-0">{{'sub_func'|translate}}</label>
+                <label for="type1" class="ms-2 mb-0">{{'sub_func'|translate}}</label>
               </div>
             </ng-container>
           </div>
@@ -370,7 +359,7 @@
         <div class="col-12">
           <div class="p-form-check">
             <p-checkbox [binary]="true" inputId="kibanaReport" formControlName="isKibana"></p-checkbox>
-            <label class="ml-2 mb-0" for="kibanaReport">Kibana
+            <label class="ms-2 mb-0" for="kibanaReport">Kibana
                <small class="px-2">
               (
               {{
@@ -443,14 +432,14 @@
 
       <div class="form-group">
         <div class="col-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="editForm.invalid"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="editForm.invalid"
             (click)="create()">
             {{ "button.create" | translate }}
           </button>
-          <!-- <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <!-- <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="!form.valid || !checkLdapDataListValid()"
             (click)="update();">{{'button.update'|translate}}</button> -->
-          <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
             {{ "button.return_to_list" | translate }}
           </button>
         </div>

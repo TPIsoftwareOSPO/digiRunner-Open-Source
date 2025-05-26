@@ -7,7 +7,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.component.validator.ReqValidator;
-import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.StackTraceUtil;

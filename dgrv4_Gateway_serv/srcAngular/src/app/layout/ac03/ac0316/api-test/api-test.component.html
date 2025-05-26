@@ -1,98 +1,4 @@
 <form [formGroup]="form">
-  <!-- <div>・{{ "token" | translate }}</div> -->
-  <!-- <div class="form-row align-items-center">
-
-    <div class="card card-body" style="width: 100%">
-      <div [style]="{
-          display: 'flex',
-          width: '100%',
-          marginBottom: '27px'
-        }">
-        <div [style]="{
-            display: 'flex',
-            'align-items': 'center',
-            width: '100%'
-          }">
-          <div class="form-check" style="margin-top: 8px">
-            <input type="checkbox" class="form-check-input" formControlName="enableClientAuth"
-              (change)="enableClientAuthHandler()" />
-          </div>
-          <div [style]="{
-              display: 'flex',
-              width: '100%',
-              'flex-direction': 'column',
-              'align-items': 'start',
-              'flex-grow': '1',
-              marginLeft: '12px'
-            }">
-            <label for="clientId" class="col-form-label mr-2 required">
-              {{"client_id" | translate }}<span style="color:red">*</span>
-            </label>
-            <input class="form-control mr-2" id="clientId" formControlName="clientId" style="width: 100%"
-              autocomplete="off" />
-          </div>
-          <div [style]="{
-              display: 'flex',
-              width: '100%',
-              'flex-direction': 'column',
-              'align-items': 'start',
-              'flex-grow': '1',
-              marginLeft: '20px'
-            }">
-            <label for="clientPwd" class="col-form-label mr-2 required">{{
-              "client_password" | translate
-              }} <span style="color:red">*</span></label>
-            <input type="password" class="form-control" id="clientPwd" formControlName="clientPasswd"
-              style="width: 100%" autocomplete="off" />
-          </div>
-        </div>
-      </div>
-      <div [style]="{
-          display: 'flex',
-          width: '100%'
-        }">
-        <div [style]="{
-            display: 'flex',
-            'align-items': 'center',
-            width: '100%'
-          }">
-          <div class="form-check" style="margin-top: 8px">
-            <input type="checkbox" class="form-check-input" formControlName="enableUserAuth"
-              (change)="enableUserAuthHandler()" />
-          </div>
-          <div [style]="{
-              display: 'flex',
-              width: '100%',
-              'flex-direction': 'column',
-              'align-items': 'start',
-              'flex-grow': '1',
-              marginLeft: '12px'
-            }">
-            <label for="userName" class="col-form-label mr-2 required">{{
-              "user_name" | translate
-              }}</label>
-            <input class="form-control mr-2" id="userName" formControlName="userName" style="width: 100%"
-              autocomplete="off" />
-          </div>
-          <div [style]="{
-              display: 'flex',
-              width: '100%',
-              'flex-direction': 'column',
-              'align-items': 'start',
-              'flex-grow': '1',
-              marginLeft: '20px'
-            }">
-            <label for="passwd" class="col-form-label mr-2 required">{{
-              "password" | translate
-              }}</label>
-            <input type="password" class="form-control" id="passwd" formControlName="passwd" style="width: 100%"
-              autocomplete="off" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
   <!-- 請求 -->
   <label class="panel-title">{{ "request" | translate }}</label>
 
@@ -119,7 +25,7 @@
 
 
         <!-- 新表頭區塊 -->
-        <label class="area-title required mr-2">{{ "digirunner_url" | translate }}<span style="color:red;">*</span></label>
+        <label class="area-title required me-2">{{ "digirunner_url" | translate }}<span style="color:red;">*</span></label>
         <div class="col-12" class="d-flex align-items-center" style="gap:1rem">
           <!-- {{ protocol }}// -->
           <p-dropdown [options]="methods" formControlName="method"></p-dropdown>
@@ -166,14 +72,14 @@
 
         <div class="row" [hidden]="authType.value != 'pwd' && authType.value != 'cc'  && authType.value != 'ba'" >
           <div class="col-3">
-            <label for="clientId" class="col-form-label mr-2   required">
+            <label for="clientId" class="col-form-label me-2   required">
               {{"client_id" | translate }}<span style="color:red;">*</span>
             </label>
-            <input class="form-control mr-2" id="clientId" formControlName="clientId" style="width: 100%"
+            <input class="form-control me-2" id="clientId" formControlName="clientId" style="width: 100%"
               autocomplete="off" />
           </div>
           <div class="col-3">
-            <label for="clientPwd" class="col-form-label mr-2 required">{{
+            <label for="clientPwd" class="col-form-label me-2 required">{{
               "client_password" | translate
               }}<span style="color:red;">*</span></label>
             <input type="password" class="form-control" id="clientPwd" formControlName="clientPasswd"
@@ -184,15 +90,15 @@
         <div class="form-group" [hidden]="authType.value != 'pwd'">
           <div class="row">
             <div class="col-3">
-              <label for="user_name" class="col-form-label mr-2 required">
+              <label for="user_name" class="col-form-label me-2 required">
                 {{"user_name" | translate }}<span style="color:red;">*</span>
               </label>
-              <input class="form-control mr-2" id="userName" formControlName="userName" style="width: 100%"
+              <input class="form-control me-2" id="userName" formControlName="userName" style="width: 100%"
                 autocomplete="off" />
             </div>
 
             <div class="col-3">
-              <label for="clientPwd" class="col-form-label mr-2 required">{{
+              <label for="clientPwd" class="col-form-label me-2 required">{{
                 "password" | translate
                 }}<span style="color:red;">*</span></label>
               <input type="password" class="form-control" id="passwd" formControlName="passwd"
@@ -204,14 +110,14 @@
         <div  [hidden]="authType.value != 'dgrk'">
           <div class="row">
             <div class="col-12">
-              <label for="user_name" class="col-form-label mr-2 required">API Key
+              <label for="user_name" class="col-form-label me-2 required">API Key
                 <span style="color:red;">*</span></label>
-              <input class="form-control mr-2" id="apiKey" formControlName="apiKey" style="width: 100%"
+              <input class="form-control me-2" id="apiKey" formControlName="apiKey" style="width: 100%"
                 autocomplete="off" />
             </div>
 
             <div class="col-12">
-              <label for="clientPwd" class="col-form-label mr-2 required">Secret Key<span style="color:red;">*</span></label>
+              <label for="clientPwd" class="col-form-label me-2 required">Secret Key<span style="color:red;">*</span></label>
               <input type="password" class="form-control" id="secretKey" formControlName="secretKey"style="width: 100%" autocomplete="off" />
             </div>
           </div>
@@ -298,19 +204,19 @@
           <ng-container>
             <div class="p-form-check">
               <p-radioButton formControlName="requestBody" value="none"  inputId="requestBody_none"></p-radioButton>
-              <label for="requestBody_none" class="ml-2 mb-0">{{"none" | translate}}</label>
+              <label for="requestBody_none" class="ms-2 mb-0">{{"none" | translate}}</label>
             </div>
             <div class="p-form-check">
               <p-radioButton formControlName="requestBody" value="form"  inputId="requestBody_form"></p-radioButton>
-              <label for="requestBody_form" class="ml-2 mb-0">form-data</label>
+              <label for="requestBody_form" class="ms-2 mb-0">form-data</label>
             </div>
             <div class="p-form-check">
               <p-radioButton formControlName="requestBody" value="formurl"  inputId="requestBody_formurl"></p-radioButton>
-              <label for="requestBody_formurl" class="ml-2 mb-0">x-www-form-urlencoded</label>
+              <label for="requestBody_formurl" class="ms-2 mb-0">x-www-form-urlencoded</label>
             </div>
             <div class="p-form-check">
               <p-radioButton formControlName="requestBody" value="body"  inputId="requestBody_body"></p-radioButton>
-              <label for="requestBody_body" class="ml-2 mb-0">raw</label>
+              <label for="requestBody_body" class="ms-2 mb-0">raw</label>
             </div>
           </ng-container>
         </div>
@@ -352,11 +258,11 @@
       </div>
 
       <div>
-        <button type="button" class="btn tpi-btn tpi-night mr-2 " (click)="send()">
+        <button type="button" class="btn tpi-btn tpi-night me-2 " (click)="send()">
           {{ "test" | translate }}
         </button>
 
-        <button type="button" class="btn tpi-btn tpi-night mr-2 " (click)="send(true)">
+        <button type="button" class="btn tpi-btn tpi-night me-2 " (click)="send(true)">
           Mock {{ "test" | translate }}
         </button>
       </div>
@@ -377,7 +283,7 @@
           <div class="form-inline">
             <input type="text" readonly class="form-input form-control" formControlName="resStatus"
               style="width: 100%" />
-            <span class="ml-2 text-danger">{{ resTime }}</span>
+            <span class="ms-2 text-danger">{{ resTime }}</span>
           </div>
         </div>
         <div style="width: 100%">

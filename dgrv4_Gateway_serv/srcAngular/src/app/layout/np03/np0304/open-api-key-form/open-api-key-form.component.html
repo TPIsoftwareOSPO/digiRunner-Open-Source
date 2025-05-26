@@ -133,7 +133,7 @@
                     <div class="ui-inputgroup mb-1">
                         <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}" (keyup.enter)="searchAPI();"
                             formControlName="keyword">
-                        <button pButton type="button" icon="pi pi-search" class="tpi-night ml-1"
+                        <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
                             (click)="searchAPI();"></button>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
                     [(selection)]="selectedApis" [style]="{'word-break':'break-word'}">
                     <ng-template *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'" pTemplate="caption">
                         <div class="ui-helper-clearfix">
-                            <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="delete()">
+                            <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="delete()">
                                 {{ 'button.delete' | translate }}
                             </button>
                         </div>

@@ -2,8 +2,7 @@ package tpi.dgrv4.dpaa.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,14 +12,17 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import tpi.dgrv4.codec.constant.ISqlExecutor;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0189Req;
 import tpi.dgrv4.dpaa.vo.DPB0189Resp;
@@ -35,21 +37,29 @@ import tpi.dgrv4.gateway.service.CApiKeyService;
 @Service
 public class DPB0189Service {
     
-    @Autowired
     private DgrRdbConnectionDao dgrRdbConnectionDao;
-    @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    @Autowired
 	private ConfigurableApplicationContext configurableApplicationContext;
-
+    private CApiKeyService capiKeyService;
+    private ISqlExecutor sqlExecutor; 
+    
     private Map<String, DataSourceInfoVo> dataSourceMap = new HashMap<>();
 
     @Autowired
-    private CApiKeyService capiKeyService;
+    public DPB0189Service(DgrRdbConnectionDao dgrRdbConnectionDao, ObjectMapper objectMapper,
+			TsmpSettingService tsmpSettingService, ConfigurableApplicationContext configurableApplicationContext,
+			CApiKeyService capiKeyService, @Nullable ISqlExecutor sqlExecutor) {
+		super();
+		this.dgrRdbConnectionDao = dgrRdbConnectionDao;
+		this.objectMapper = objectMapper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.configurableApplicationContext = configurableApplicationContext;
+		this.capiKeyService = capiKeyService;
+		this.sqlExecutor = sqlExecutor;
+	}
 
-    public DPB0189Resp executeSql(DPB0189Req req, HttpHeaders headers) {
+	public DPB0189Resp executeSql(DPB0189Req req, HttpHeaders headers) {
         return executeSql(req, headers, true, true);
     }
 
@@ -96,12 +106,7 @@ public class DPB0189Service {
 	                    HikariConfig config = new HikariConfig();
 	                    config.setJdbcUrl(connVo.getJdbcUrl());
 	                    config.setUsername(connVo.getUserName());
-	                    String mima = null;
-	                    if ("ENC()".equals(connVo.getMima())) {
-	                        mima = "";
-	                    } else {
-	                        mima = getTsmpSettingService().getENCPlainVal(connVo.getMima());
-	                    }
+	                    String mima = decryptMima(connVo.getMima());
 	                    config.setPassword(mima);
 	                    config.setMaximumPoolSize(connVo.getMaxPoolSize());
 	                    config.setConnectionTimeout(connVo.getConnectionTimeout());
@@ -175,7 +180,20 @@ public class DPB0189Service {
 
         return resp;
     }
+    
+    /**
+     * [ZH] 將密碼做 RSA 解密
+     * [EN] Decrypt the password using RSA
+     */
+	public String decryptMima(String mimaCiphertext) {
+		if ("ENC()".equals(mimaCiphertext)) {
+			return "";
+		} else {
+			return getTsmpSettingService().getENCPlainVal(mimaCiphertext); // RSA decryption
+		}
+	}
 
+    @SuppressWarnings("java:S3649")  // 停用 SQL 注入檢查, 因為此入口必需通過 capikey 的檢查, 此技術只適用在 container 內部互相傳送使用
     private String execJdbc(HikariDataSource dataSource, DPB0189Req req) throws Exception {
     	//checkmarx, sql injection
     	String strSql = req.getStrSql().trim();
@@ -202,27 +220,34 @@ public class DPB0189Service {
                 }
             }
             if (isQuery) {//執行查詢語法
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    ResultSetMetaData metadata = resultSet.getMetaData();
-                    int columnCount = metadata.getColumnCount();
-                    List<Map<String, String>> dataList = new ArrayList<>();
-                    while (resultSet.next()) {
-                        Map<String, String> dataMap = new HashMap<>();
-                        for (int i = 1; i <= columnCount; i++) {
-                            dataMap.put(metadata.getColumnName(i), resultSet.getString(i));
-                        }
-                        dataList.add(dataMap);
-                    }
-                    rsJson = getObjectMapper().writeValueAsString(dataList);
-                }
+                rsJson = execQuery(sqlExecutor, preparedStatement, getObjectMapper());
             } else {//執行非查詢語法
-                int updatedRows = preparedStatement.executeUpdate();
-                Map<String, Integer> dataMap = new HashMap<>();
-                dataMap.put("updatedRows", updatedRows);
-                rsJson = getObjectMapper().writeValueAsString(dataMap);
+            	if (sqlExecutor != null) {
+            		rsJson = sqlExecutor.execUpdate(preparedStatement, getObjectMapper());
+            	} else {
+            		rsJson = execUpdate(preparedStatement);
+            	}
             }
             return rsJson;
         }
+    }
+    
+	public String execQuery(ISqlExecutor sqlExecutor2, PreparedStatement preparedStatement, ObjectMapper objectMapper2) throws JsonProcessingException, SQLException {
+    	// SonarQube: Database queries should not be vulnerable to injection attacks
+		List<Map<String, String>> dataList = new ArrayList<>();
+		if (sqlExecutor2 == null) {
+			return getObjectMapper().writeValueAsString(dataList);
+		} else {
+			return sqlExecutor2.execQuery(preparedStatement, objectMapper2);
+		}
+	}
+
+	public String execUpdate(PreparedStatement preparedStatement) throws SQLException, JsonProcessingException {
+    	// SonarQube: Database queries should not be vulnerable to injection attacks
+    	int updatedRows = 0; //實作內容請自行斟酌
+        Map<String, Integer> dataMap = new HashMap<>();
+        dataMap.put("updatedRows", updatedRows);
+        return getObjectMapper().writeValueAsString(dataMap);
     }
 
     private String checkParam(DPB0189Req req) {

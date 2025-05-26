@@ -25,9 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0093Controller {
 	
-	@Autowired
 	private DPB0093Service service;
 	
+	@Autowired
+	public DPB0093Controller(DPB0093Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 提供前/後台開窗查詢 API, 需要分頁
 	 * 所有組織、上下架的API都可以查到									

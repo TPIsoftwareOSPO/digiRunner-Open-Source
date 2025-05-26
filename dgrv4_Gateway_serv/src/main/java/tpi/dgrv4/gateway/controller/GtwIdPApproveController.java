@@ -1,9 +1,5 @@
 package tpi.dgrv4.gateway.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.GtwIdPApproveService;
@@ -20,10 +21,11 @@ import tpi.dgrv4.gateway.service.GtwIdPApproveService;
 /**
  * @author Mini
  */
+@AllArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @RestController
 public class GtwIdPApproveController {
 	
-	@Autowired
 	private GtwIdPApproveService service;
 
 	// 前端使用

@@ -39,7 +39,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-3 col-xl-3 col-lg-3">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
                 </div>
             </div>
         </form>
@@ -71,7 +71,7 @@
                     </td>
                     <td style="text-align:center;width: 200px">
                         <div class="btn-group">
-                            <!-- <button type="button" class="btn btn-deta mr-5" (click)="queryOpenApiKeyDetail(rowData);">
+                            <!-- <button type="button" class="btn btn-deta me-5" (click)="queryOpenApiKeyDetail(rowData);">
                                 <span class="fa fa-search">{{'button.detail'|translate}}</span>
                             </button> -->
                             <button pButton pRipple type="button" icon="pi pi-eye"
@@ -85,9 +85,6 @@
                 <tr *ngIf="clientOpenApiKeyRowcount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span>{{'row_count' | translate}}: {{clientOpenApiKeyRowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                            (click)="moreClientOpenApiKeyList();">{{'button.more'|translate}}</button> -->
-
                             <!-- 查詢更多 -->
                             <button  type="button" class="btn tpi-header-return" (click)="moreClientOpenApiKeyList()">{{ 'button.more'| translate}}
                             <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
@@ -198,9 +195,6 @@
                                 <tr *ngIf="openApiKeyDetailRowcount">
                                     <td [attr.colspan]="columns.length" style="color: #b7b7b7;">
                                         <span>{{'row_count' | translate}}: {{openApiKeyDetailRowcount}}</span>
-                                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                                            (click)="moreOpenApiKeyDetailData();">{{'button.more'|translate}}</button> -->
-
                                             <button  type="button" class="btn tpi-header-return" (click)="moreOpenApiKeyDetailData()">{{ 'button.more'| translate}}
                                               <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
                                               </button>
@@ -222,7 +216,7 @@
         <br>
         <div class="row">
             <div class="col-12 col-xl-12 col-lg-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
                     (click)="changePage('query');">{{'button.return'|translate}}</button>
             </div>
         </div>

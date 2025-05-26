@@ -68,7 +68,7 @@
             <div class="form-group row">
                 <div class="col-12">
                     <label id="apiUidList_label" class="required control-label">{{'choose_api'|translate}}</label>
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night  ml-2"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night  ms-2"
                         (click)="changePage('api_list');"></button>
                     <label class="form-control border-line" style="height: unset;">
                         <div *ngIf="apiNameList.value.length > 0" class="ui-chips ui-widget">
@@ -89,9 +89,9 @@
             </div>
             <div class="form-group row">
                 <div class="col-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3"
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3"
                         [disabled]="form.invalid">{{'button.search'|translate}}</button>
-                    <!-- <button type="button" class="btn tpi-btn tpi-primary  float-left mr-3" (click)="exportReport();"
+                    <!-- <button type="button" class="btn tpi-btn tpi-primary  float-start me-3" (click)="exportReport();"
                         [disabled]="form.invalid">{{'button.export'|translate}}</button> -->
                 </div>
             </div>
@@ -102,24 +102,10 @@
     </div>
     <div [hidden]="pageNum != 2">
         <form [formGroup]="form">
-            <div class="form-group row col-auto" >
-                <!-- <div class="col-6">
-                    <label class="control-label">{{'keyword_search'|translate}}</label>
-                    <input type="text" formControlName="keyword" class="form-control"
-                        placeholder="{{'api_name'|translate}}、{{'api_desc'|translate}}">
-                </div> -->
-                <span class="p-input-icon-right" style="width:40vw">
-                  <i class="pi pi-search tpi-i-search" (click)="queryApiList();"></i>
-                  <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" (keydown.enter)="queryApiList()"
-                    placeholder="{{'api_name'|translate}}">
-                </span>
+            <div class="form-group d-flex col-auto" >
+              <app-search-input placeholder="{{'api_name'|translate}}" [control]="form.get('keyword')"
+              [searchFn]="queryApiList.bind(this)" class="col-9 col-lg-6 col-sm-6"></app-search-input>
             </div>
-            <!-- <div class="form-group row">
-                <div class="col-12">
-                    <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
-                        (click)="queryApiList();">{{'button.search'|translate}}</button>
-                </div>
-            </div> -->
         </form>
         <hr>
         <p-table *ngIf="apiListCols" [columns]="apiListCols" [value]="apiListData" selectionMode="single"
@@ -160,7 +146,7 @@
                 <tr *ngIf="apiListRowcount">
                   <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                     <span style="vertical-align:middle;">{{'row_count' | translate}}: {{apiListRowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                        <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreApiList();">{{'button.more'|translate}}</button> -->
                               <!-- 查詢更多 -->
                         <button  type="button" class="btn tpi-header-return" (click)="moreApiList()">{{ 'button.more'| translate}}
@@ -180,9 +166,9 @@
         <br>
         <div class="form-gruop row">
             <div class="col-12 col-xl-12 col-lg-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" (click)="chooseApi();"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3" (click)="chooseApi();"
                     [disabled]="selectedApi.length == 0">{{'button.confirm'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
                     (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
             </div>
         </div>

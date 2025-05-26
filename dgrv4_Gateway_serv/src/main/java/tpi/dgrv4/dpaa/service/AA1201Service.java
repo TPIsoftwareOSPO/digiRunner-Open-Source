@@ -40,23 +40,24 @@ public class AA1201Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpReportDataDao tsmpReportDataDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
-	
-	
+	@Autowired
+	public AA1201Service(TsmpReportDataDao tsmpReportDataDao, TsmpApiDao tsmpApiDao,
+			BcryptParamHelper bcryptParamHelper, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpReportDataDao = tsmpReportDataDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	public AA1201Resp queryApiUsageStatistics(TsmpAuthorization authorization, AA1201Req req, ReqHeader reqHeader) {
 		AA1201Resp resp = null;
 		try {

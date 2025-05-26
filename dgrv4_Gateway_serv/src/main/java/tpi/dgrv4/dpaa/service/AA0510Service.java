@@ -27,14 +27,18 @@ public class AA0510Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+	private TsmpSettingDao tsmpSettingDao;
+	private LicenseUtilBase licenseUtil;
 
 	@Autowired
-	private TsmpSettingDao tsmpSettingDao;
-	
-	@Autowired
-	private LicenseUtilBase licenseUtil;
+	public AA0510Service(TsmpSettingService tsmpSettingService, TsmpSettingDao tsmpSettingDao,
+			LicenseUtilBase licenseUtil) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.licenseUtil = licenseUtil;
+	}
 
 	public AA0510Resp getAcConf(TsmpAuthorization authorization, AA0510Req req) {
 		AA0510Resp resp = new AA0510Resp();

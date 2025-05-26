@@ -1,6 +1,5 @@
 package tpi.dgrv4.gateway.controller;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import tpi.dgrv4.gateway.filter.GatewayFilter;
@@ -21,8 +19,14 @@ import tpi.dgrv4.gateway.service.DGRCServicePostForm;
 @RestController
 public class DGRCControllerPostForm {
 	
-	@Autowired
 	private DGRCServicePostForm service;
+	
+	@Autowired
+	public DGRCControllerPostForm(DGRCServicePostForm service) {
+		super();
+		this.service = service;
+	}
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = "/dgrc/**", 
 			consumes = MediaType.MULTIPART_FORM_DATA_VALUE, // 使用 Form Data 格式
@@ -31,9 +35,9 @@ public class DGRCControllerPostForm {
 														 HttpServletResponse httpRes,
 														 @RequestHeader HttpHeaders headers) throws Exception {
 
-		String selectWorkThread = httpReq.getAttribute(GatewayFilter.setWorkThread).toString();
+		String selectWorkThread = httpReq.getAttribute(GatewayFilter.SETWORK_THREAD).toString();
 		CompletableFuture<ResponseEntity<?>> resp;
-		if (selectWorkThread.equals(GatewayFilter.fast)) {
+		if (selectWorkThread.equals(GatewayFilter.FAST)) {
 			resp = service.forwardToPostFormDataAsyncFast(headers, httpReq, httpRes);
 		} else {
 			resp = service.forwardToPostFormDataAsync(headers, httpReq, httpRes);

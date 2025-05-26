@@ -37,6 +37,7 @@ public class AsyncConfig {
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(0);
         executor.setThreadNamePrefix(systemThreadNamePrefix + "healthcheck-");
+        executor.setThreadPriority(Thread.MAX_PRIORITY);
         executor.initialize();
         return executor;
     }

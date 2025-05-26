@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -31,12 +30,16 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 public class AA0325Controller {
 
 	public static Long ts = -1l;
-	@Autowired
+	
 	private AA0325Service service;
-
-	@Autowired
 	private CApiKeyService capiKeyService;
 
+	@Autowired
+	public AA0325Controller(AA0325Service service, CApiKeyService capiKeyService) {
+		super();
+		this.service = service;
+		this.capiKeyService = capiKeyService;
+	}
 
 	@PostMapping(value = "/dgrv4/11/AA0325", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //

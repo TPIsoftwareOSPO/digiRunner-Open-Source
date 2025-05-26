@@ -58,7 +58,7 @@
         <div class="form-group row">
             <div class="col-12">
                 <button type="submit" class="btn tpi-btn tpi-primary ">{{'button.search'|translate}}</button>
-                <button type="button" class="btn tpi-btn tpi-second float-right"
+                <button type="button" class="btn tpi-btn tpi-second float-end"
                     (click)="create();">{{'button.create'|translate}}</button>
             </div>
         </div>
@@ -68,7 +68,7 @@
         [style]="{'word-break':'break-word'}">
         <!-- <ng-template pTemplate="caption">
             <div class="ui-helper-clearfix">
-                <button type="button" class="btn btn-warning float-left" (click)="delete()">
+                <button type="button" class="btn btn-warning float-start" (click)="delete()">
                     {{ 'button.delete' | translate }}
                 </button>
             </div>
@@ -108,15 +108,15 @@
                 </td>
                 <td style="text-align: center;width: 320px">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-deta mr-5"
+                        <button type="button" class="btn btn-deta me-5"
                             (click)="showDialog(rowData,formOperate.update)">
                             <span class="fa fa-edit">{{'button.update'|translate}}</span>
                         </button>
-                        <button type="button" class="btn btn-deta mr-5" (click)="showDialog(rowData,formOperate.switch)"
+                        <button type="button" class="btn btn-deta me-5" (click)="showDialog(rowData,formOperate.switch)"
                             [disabled]="rowData['status'] == '1'">
                             <span class="fa fa-toggle-on">{{'active'|translate}}</span>
                         </button>
-                        <button type="button" class="btn btn-deta mr-5" (click)="delete(rowData)"
+                        <button type="button" class="btn btn-deta me-5" (click)="delete(rowData)"
                             [disabled]="rowData['status'] == '0'">
                             <span class="fa fa-toggle-off">{{'inactive'|translate}}</span>
                         </button>
@@ -128,7 +128,7 @@
             <tr *ngIf="rowcount">
                 <td [attr.colspan]="columns.length+1">
                     <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                    <button type="button" class="btn btn-warning pull-right ml-3"
+                    <button type="button" class="btn btn-warning pull-right ms-3"
                         (click)="moreData();">{{'button.more'|translate}}</button>
                 </td>
             </tr>

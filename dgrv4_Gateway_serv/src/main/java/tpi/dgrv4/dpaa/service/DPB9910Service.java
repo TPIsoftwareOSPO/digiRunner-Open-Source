@@ -30,13 +30,17 @@ public class DPB9910Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private CusSettingDao cusSettingDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB9910Service(CusSettingDao cusSettingDao, ServiceConfig serviceConfig) {
+		super();
+		this.cusSettingDao = cusSettingDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB9910Resp queryCusSettingList(TsmpAuthorization auth, DPB9910Req req) {
 		try {

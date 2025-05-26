@@ -4,12 +4,9 @@ export const environment = {
     isv4: true,
     reportUrl: location.protocol + '//' + location.hostname + ':8080',
     apiUrl: location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : ''),
-    // apiUrl: 'https://203.69.248.109:38452',
     netApiUrl: location.protocol + '//' + location.hostname + ':8080',
     subPath: 'ac4/',
     iframeDomain: location.protocol + '//' + location.hostname,
     dpPath: location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : ''),
     cusHostName: location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : ''),
-    // dpPath: 'https://203.69.248.109:38452',
-    // netApiUrl: 'https://192.168.1.156:48083',
 };

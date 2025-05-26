@@ -45,18 +45,11 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Service
 public class HandleESApiDataService {
-	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
 	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
-	@Autowired
 	private DgrESService dgrESService;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
 
 	List<Object> searchAfter = new ArrayList<>();
@@ -64,6 +57,19 @@ public class HandleESApiDataService {
 	public final static String indexPrefix = "tsmp_api_log_"; // index前綴
 	private final static String createTimestemp = "createTimestamp";
 	private final static String notMatchListStr = "notMatchList";
+
+	@Autowired
+	public HandleESApiDataService(ObjectMapper objectMapper, DgrDashboardEsLogDao dgrDashboardEsLogDao,
+			DgrESService dgrESService, TsmpDpFileDao tsmpDpFileDao, TsmpApiDao tsmpApiDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super();
+		this.objectMapper = objectMapper;
+		this.dgrDashboardEsLogDao = dgrDashboardEsLogDao;
+		this.dgrESService = dgrESService;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+	}
 
 	// 為了UT可以驗證起訖時間
 	public Date getStartDate(Date execDate) {

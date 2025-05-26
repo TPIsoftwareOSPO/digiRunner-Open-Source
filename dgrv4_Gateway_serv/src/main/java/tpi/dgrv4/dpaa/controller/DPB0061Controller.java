@@ -25,8 +25,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0061Controller {
 
-	@Autowired
 	private DPB0061Service dpb0061Service;
+
+	@Autowired
+	public DPB0061Controller(DPB0061Service dpb0061Service) {
+		super();
+		this.dpb0061Service = dpb0061Service;
+	}
 
 	/**
 	 * 查看一筆工作明細

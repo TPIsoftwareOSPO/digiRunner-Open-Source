@@ -24,11 +24,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0204Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;
+	private TsmpClientDao tsmpClientDao;
 
 	@Autowired
-	private TsmpClientDao tsmpClientDao;
+	public DPB0204Service(DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao, TsmpClientDao tsmpClientDao) {
+		super();
+		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
+		this.tsmpClientDao = tsmpClientDao;
+	}
 
 	public DPB0204Resp createGtwIdPInfo_jdbc(TsmpAuthorization authorization, DPB0204Req req) {
 		DPB0204Resp resp = new DPB0204Resp();

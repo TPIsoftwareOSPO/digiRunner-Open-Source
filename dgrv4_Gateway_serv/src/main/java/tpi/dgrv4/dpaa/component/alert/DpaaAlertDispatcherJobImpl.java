@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
@@ -35,29 +37,20 @@ import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 @Primary
 public class DpaaAlertDispatcherJobImpl implements DpaaAlertDispatcherIfs {
 
-	private final TPILogger logger = TPILogger.tl;
+	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private ServiceConfig serviceConfig;
-
-	@Autowired
-	private TsmpAlertDao tsmpAlertDao;
-
-	@Autowired
-	private DpaaAlertDispatcherJobHelper helper;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private ApptJobDispatcher apptJobDispatcher;
-
-	@Autowired
-	private TsmpDpApptJobDao tsmpDpApptJobDao;
+	private final ServiceConfig serviceConfig;
+	private final TsmpAlertDao tsmpAlertDao;
+	private final DpaaAlertDispatcherJobHelper helper;
+	private final ObjectMapper objectMapper;
+	private final ApptJobDispatcher apptJobDispatcher;
+	private final TsmpDpApptJobDao tsmpDpApptJobDao;
 
 	private ScheduledExecutorService executor;
 	

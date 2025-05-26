@@ -20,8 +20,13 @@ public class DPB9914Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private CusSettingDao cusSettingDao;
+
+	@Autowired
+	public DPB9914Service(CusSettingDao cusSettingDao) {
+		super();
+		this.cusSettingDao = cusSettingDao;
+	}
 
 	public DPB9914Resp deleteCusSetting(TsmpAuthorization auth, DPB9914Req req) {
 		try {

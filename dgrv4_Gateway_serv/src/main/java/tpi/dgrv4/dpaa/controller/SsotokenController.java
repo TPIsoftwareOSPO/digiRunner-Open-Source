@@ -23,9 +23,14 @@ import tpi.dgrv4.dpaa.service.SsotokenService;
 @RestController
 public class SsotokenController {
 	
-	@Autowired
 	private SsotokenService service;
 	
+	@Autowired
+	public SsotokenController(SsotokenService service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 由 Ssotoken Bridge 轉接取得token
 	 * 			

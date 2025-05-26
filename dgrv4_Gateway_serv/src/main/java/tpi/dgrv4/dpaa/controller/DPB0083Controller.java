@@ -21,9 +21,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0083Controller {
 
-	@Autowired
 	private DPB0083Service service;
 	
+	@Autowired
+	public DPB0083Controller(DPB0083Service service) {
+		super();
+		this.service = service;
+	}
+
 	/** 
 	 *查找Client清單
 	 *1. 查找憑證清單, 以CLIENT_ID, CLIENT_NAME, CLIENT_ALIAS作為模糊搜尋條件

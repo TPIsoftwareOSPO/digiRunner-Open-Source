@@ -33,19 +33,22 @@ public class AA0229Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpSecurityLevelDao securityLVDao;
-	
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0229Service(TsmpVgroupDao tsmpVgroupDao, TsmpApiDao tsmpApiDao, TsmpSecurityLevelDao securityLVDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.securityLVDao = securityLVDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	/**
 	 * 1.將TSMP_VGROUP、TSMP_VGROUP_GROUP與TSMP_GROUP_API與TSMP_API進行查詢並ORDER BY TSMP_VGROUP.VGROUP_NAME, TSMP_VGROUP.VGROUP_ID，條件 TSMP_VGROUP.SECURITY_LEVEL_ID =AA0229Req.securityLevelID + TSMP_VGROUP.VGROUP_ID NOT IN (select VGROUP_ID TSMP_CLIENT_VGROUP.CLIENT_ID = AA0229Req.clientID) +分頁 + 關鍵字搜尋，資料不可以重複。

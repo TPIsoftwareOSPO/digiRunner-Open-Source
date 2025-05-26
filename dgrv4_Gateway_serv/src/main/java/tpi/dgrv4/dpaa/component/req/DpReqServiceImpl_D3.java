@@ -13,14 +13,21 @@ import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.constant.RegexpConstant;
 import tpi.dgrv4.dpaa.constant.TsmpDpAaConstant;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
+import tpi.dgrv4.dpaa.service.SendAPIApplicationMailService;
+import tpi.dgrv4.dpaa.service.SendClientRegMailService;
+import tpi.dgrv4.dpaa.service.SendReviewMailService;
 import tpi.dgrv4.dpaa.util.OAuthUtil;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
+import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.constant.TsmpSequenceName;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
+import tpi.dgrv4.entity.daoService.SeqStoreService;
 import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd3;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.repository.*;
+import tpi.dgrv4.gateway.component.FileHelper;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -38,35 +45,44 @@ public class DpReqServiceImpl_D3 extends DpReqServiceAbstract implements DpReqSe
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
+	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
+	private DgrAuditLogService dgrAuditLogService;
 
 	@Autowired
-	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
-	
-	@Autowired
-	private DgrAuditLogService dgrAuditLogService;
+	public DpReqServiceImpl_D3(ApptJobDispatcher apptJobDispatcher, TsmpClientDao tsmpClientDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpUserDao tsmpUserDao,
+			SeqStoreService seqStoreService, TsmpDpReqOrdersDao tsmpDpReqOrdersDao, FileHelper fileHelper,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpChkLayerDao tsmpDpChkLayerDao, TsmpDpChkLogDao tsmpDpChkLogDao,
+			BcryptParamHelper bcryptParamHelper, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, SendReviewMailService mailService,
+			SendClientRegMailService sendClientRegMailService,
+			SendAPIApplicationMailService sendAPIApplicationMailService, DgrAuditLogService dgrAuditLogService,
+			DgrAcIdpUserDao dgrAcIdpUserDao, TsmpGroupDao tsmpGroupDao, TsmpClientGroupDao tsmpClientGroupDao,
+			TsmpApiDao tsmpApiDao, TsmpGroupApiDao tsmpGroupApiDao, TsmpDpClientextDao tsmpDpClientextDao,
+			OauthClientDetailsDao oauthClientDetailsDao, TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao) {
+		super(apptJobDispatcher, tsmpClientDao, tsmpDpItemsCacheProxy, tsmpDpReqOrdermDao, tsmpUserDao, seqStoreService,
+				tsmpDpReqOrdersDao, fileHelper, tsmpDpFileDao, tsmpDpChkLayerDao, tsmpDpChkLogDao, bcryptParamHelper,
+				tsmpOrganizationDao, tsmpDpApptJobDao, mailService, sendClientRegMailService,
+				sendAPIApplicationMailService, dgrAuditLogService, dgrAcIdpUserDao);
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
 
 	@Override
 	protected <Q extends DpReqServiceSaveDraftReq> void checkDetailReq(Q q, String locale) throws TsmpDpAaException {

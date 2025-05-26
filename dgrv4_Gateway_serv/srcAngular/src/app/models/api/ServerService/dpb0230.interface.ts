@@ -6,8 +6,8 @@ export interface ReqDPB0230 extends BaseReq {
 }
 
 export interface DPB0230Req {
-  siteUrl: string;
-  enable: number;
+  idList: Array<String>;
+  enable: string;
 }
 
 export interface RespDPB0230 extends BaseRes {

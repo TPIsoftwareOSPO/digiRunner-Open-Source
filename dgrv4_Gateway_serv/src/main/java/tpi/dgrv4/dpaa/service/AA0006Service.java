@@ -38,26 +38,27 @@ public class AA0006Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private UsersDao usersDao;
+	private TsmpRoleDao tsmpRoleDao;
 	
 	@Autowired
-	private TsmpRoleDao tsmpRoleDao;
+	public AA0006Service(TsmpOrganizationDao tsmpOrganizationDao, DgrAuditLogService dgrAuditLogService,
+			AuthoritiesDao authoritiesDao, BcryptParamHelper bcryptParamHelper, TsmpUserDao tsmpUserDao,
+			UsersDao usersDao, TsmpRoleDao tsmpRoleDao) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.authoritiesDao = authoritiesDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpUserDao = tsmpUserDao;
+		this.usersDao = usersDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+	}
 
 	@Transactional
 	public AA0006Resp updateTUserData(TsmpAuthorization auth, AA0006Req req, InnerInvokeParam iip) {
@@ -87,7 +88,7 @@ public class AA0006Service {
 	}
 	
 	/**
-	 * 
+	 * 檢查輸入的參數
 	 * 1.若AA0006Req.userBlock為空，AA0006Req.newUserBlock不回空，則throw RTN CODE 1236。
 	 * 2.若AA0006Req.userBlock不為空，AA0006Req.newUserBlock為空，則throw RTN CODE 1234。
 	 * 3.若AA0006Req.userBlock與AA0006Req.newUserBlock一樣，則throw RTN CODE 1235。
@@ -97,23 +98,6 @@ public class AA0006Service {
 	 * 7.AA0006Req.userName與AA0006Req.newUserName一樣，則步驟8與9不用執行。
 	 * 8.以AA0006Req.newUserName對TSMP_USER資料表(USER_ID與USER_NAME欄位)查詢，若存在資料則throw RTN CODE 1232。
 	 * 9.對AUTHORITIES進行更新，以AUTHORITIES.USERNAME欄位 = AA0006Req.userName為條件，更新AUTHORITIES.USERNAME=AA0006Req.newUserName。
-
-	 * 
-	 * 1234:新密碼不可為空, 
-	 * 1237:至少輸入一項, 
-	 * 1238:原密碼不正確, 
-	 * 1235:新密碼與原密碼相同, 
-	 * 1236:原密碼不可為空, 
-	 * 1232:使用者名稱已存在, 
-	 * 1231:使用者不存在, 
-	 * 1286:更新失敗, 
-	 * 
-	 * 1246:使用者帳號:長度限制 [{{0}}] 字內，您輸入[{{1}}] 個字, 
-	 * 1247:使用者名稱:長度限制 [{{0}}] 字內，您輸入[{{1}}] 個字, 
-	 * 1254:密碼:長度限制 [{{0}}] 字內，您輸入[{{1}}] 個字, 
-	 * 1244:使用者E-mail:只能為Email格式, 
-	 * 1252:使用者E-mail:長度限制 [{{0}}] 字內，您輸入[{{1}}] 個字
-	 * 1313:使用者帳號：只能輸入英文字母(a~z,A~Z)、@及數字且不含空白
 	 * 				
 	 * @param tsmpAuthorization
 	 * @param req
@@ -167,28 +151,34 @@ public class AA0006Service {
 		
 		//==========================================================================================================
 
-		//1236:原密碼不可為空
-		if(StringUtils.isEmpty(userBlock) && !StringUtils.isEmpty(newUserBlock) )
-			throw TsmpDpAaRtnCode._1236.throwing();
+		// 若原密碼為空,但新密碼有值,則拋出錯誤
+		// If the original password is empty but the new password has a value, an error is thrown
+		if(!StringUtils.hasLength(userBlock) && StringUtils.hasLength(newUserBlock) )
+			throw TsmpDpAaRtnCode._1236.throwing(); // 1236:原密碼不可為空
 		
-		//1234:新密碼不可為空
-		if(!StringUtils.isEmpty(userBlock) && StringUtils.isEmpty(newUserBlock))
-			throw TsmpDpAaRtnCode._1234.throwing();
+		// 若原密碼有值,但新密碼為空,則拋出錯誤
+		// If the original password has a value but the new password is empty, an error is thrown
+		if(StringUtils.hasLength(userBlock) && !StringUtils.hasLength(newUserBlock))
+			throw TsmpDpAaRtnCode._1234.throwing(); // 1234:新密碼不可為空
 	
-		if(!StringUtils.isEmpty(userBlock) || !StringUtils.isEmpty(newUserBlock)) {
-			//1238:原密碼不正確
+		// 原密碼和新密碼都有值,則檢查資料
+		// If both the original password and the new password have values, check the data
+		if(StringUtils.hasLength(userBlock) && StringUtils.hasLength(newUserBlock)) {
+			// 檢查原密碼是否正確
+			//Check if the original password is correct
 			boolean checkOriginPassword = checkOriginPassword(userName, userBlock);
 			if(!checkOriginPassword)
-				throw TsmpDpAaRtnCode._1238.throwing();
+				throw TsmpDpAaRtnCode._1238.throwing(); // 1238:原密碼不正確
 			
-			//1235:新密碼與原密碼相同
+			// 檢查新密碼與原密碼是否相同
+			// Check if the new password is the same as the original password
 			if (userBlock.equals(newUserBlock)) 
-				throw TsmpDpAaRtnCode._1235.throwing();
+				throw TsmpDpAaRtnCode._1235.throwing(); // 1235:新密碼與原密碼相同
 			
-			//1248:密碼:長度限制 [{{0}}] 字內，您輸入[{{1}}] 個字
+			// 檢查新密碼長度
+			// Check new password length
 			String decodePassword = base64Decode(req.getNewUserBlock());
-			checkPassword(decodePassword);
-			
+			checkPassword(decodePassword); // 1248:密碼:長度限制 [{{0}}] 字內，您輸入[{{1}}] 個字
 		}
 		
 		//userName equlas newUserName

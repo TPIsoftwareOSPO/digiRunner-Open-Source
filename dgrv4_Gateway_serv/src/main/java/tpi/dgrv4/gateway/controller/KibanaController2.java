@@ -1,10 +1,8 @@
 package tpi.dgrv4.gateway.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -12,13 +10,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import tpi.dgrv4.gateway.service.KibanaService2;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import tpi.dgrv4.gateway.service.IKibanaService2;
 
 @RestController
 public class KibanaController2 {
 
+	private IKibanaService2 service;
+
 	@Autowired
-	private KibanaService2 service;
+	public KibanaController2(@Nullable IKibanaService2 service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/kibana/login")
 	public void login2(@RequestHeader HttpHeaders httpHeaders, @RequestParam String reportURL,

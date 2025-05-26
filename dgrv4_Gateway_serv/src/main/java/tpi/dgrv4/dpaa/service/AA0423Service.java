@@ -32,11 +32,16 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class AA0423Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpApiDao tsmpApiDao;
+	private TsmpApiRegDao tsmpApiRegDao;
 
 	@Autowired
-	private TsmpApiRegDao tsmpApiRegDao;
+	public AA0423Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+	}
 
 	public AA0423Resp queryAPIListBySrcUrlOrLabel(AA0423Req req) {
 		AA0423Resp resp = new AA0423Resp();

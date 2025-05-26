@@ -31,22 +31,29 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class AcIdPCallbackService {
 	
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-    @Autowired
     private DgrAcIdpInfoDao dgrAcIdpInfoDao;
-	@Autowired
 	private IdPWellKnownHelper idPWellKnownHelper;
-	@Autowired
 	private IdPTokenHelper idPTokenHelper;
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	@Autowired
 	private IdPUserInfoHelper idPUserInfoHelper;
-	@Autowired	
 	private AcIdPHelper acIdPHelper;
  
-    /**
+	@Autowired	
+    public AcIdPCallbackService(TsmpSettingService tsmpSettingService, DgrAcIdpInfoDao dgrAcIdpInfoDao,
+			IdPWellKnownHelper idPWellKnownHelper, IdPTokenHelper idPTokenHelper, DgrAuditLogService dgrAuditLogService,
+			IdPUserInfoHelper idPUserInfoHelper, AcIdPHelper acIdPHelper) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrAcIdpInfoDao = dgrAcIdpInfoDao;
+		this.idPWellKnownHelper = idPWellKnownHelper;
+		this.idPTokenHelper = idPTokenHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.idPUserInfoHelper = idPUserInfoHelper;
+		this.acIdPHelper = acIdPHelper;
+	}
+
+	/**
      * 以 IdP(GOOGLE / MS / OIDC) 的授權碼, 取得 IdP 的 token, <br>
      * 若 user 狀態為 allow, 則重新導向到前端以登入AC
      */

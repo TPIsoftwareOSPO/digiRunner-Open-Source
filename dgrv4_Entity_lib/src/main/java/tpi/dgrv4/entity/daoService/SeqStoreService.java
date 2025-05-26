@@ -1,25 +1,23 @@
 package tpi.dgrv4.entity.daoService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.keeper.ITPILogger;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.constant.TsmpSequenceName;
 import tpi.dgrv4.entity.repository.SeqStoreDao;
 import tpi.dgrv4.entity.repository.TsmpSequenceDao;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class SeqStoreService {
 
-	@Autowired
-	private SeqStoreDao seqStoreDao;
-	
-	@Autowired
-	private TsmpSequenceDao tsmpSequenceDao;
-	
-	@Autowired
-	private ITPILogger logger;
+	private final SeqStoreDao seqStoreDao;
+	private final TsmpSequenceDao tsmpSequenceDao;
 
 	private static Object lock = new Object();
 
@@ -56,7 +54,7 @@ public class SeqStoreService {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
-					logger.tl.debug("InterruptedException:\n" + StackTraceUtil.logStackTrace(e));
+					ITPILogger.tl.debug("InterruptedException:\n" + StackTraceUtil.logStackTrace(e));
 					Thread.currentThread().interrupt();
 					nextVal = initial;
 				}
@@ -74,7 +72,7 @@ public class SeqStoreService {
 		try {
 			return getTsmpSequenceDao().nextSequence(sequenceName.name());
 		} catch (Exception e) {
-			logger.tl.error(StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			return null;
 		}
 	}

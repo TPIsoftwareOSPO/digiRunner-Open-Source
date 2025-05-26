@@ -1,10 +1,21 @@
 
-<div class="row mb-1 form-inline col-12" [formGroup]="form" style="box-sizing: border-box;">
+<div class="d-flex form-group col-12" [formGroup]="form">
+  <div class="col-5 me-1">
+    <label [hidden]="no!=0" class="fw-bold">Mock Headers Key</label>
+    <input type="text" class="form-control me-1" name="key" formControlName="key">
+  </div>
+  <div class="col-5">
+    <label [hidden]="no!=0" class="fw-bold">Mock Headers Value</label>
+    <input type="text" class="form-control" name="value" formControlName="value" >
 
-  <input type="text" class="form-control mr-1" name="key" formControlName="key"  style="width:45%">
-  <input type="text" class="form-control" name="value" formControlName="value"  style="width:45%">
+  </div>
+  <div>
+    <div>
+      <label class="control-label" [hidden]="no!=0">&nbsp;</label>
+    </div>
+    <button type="button" class="btn tpi-primary ms-1" (click)="deleteRow()" style="border-radius: 50%">
+      <i class="fa fa-minus"></i>
+    </button>
+  </div>
 
-  <button type="button" class="btn tpi-primary ml-1" (click)="deleteRow()" style="border-radius: 50%">
-    <i class="fa fa-minus"></i>
-  </button>
 </div>

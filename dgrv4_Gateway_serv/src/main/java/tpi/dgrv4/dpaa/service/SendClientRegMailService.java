@@ -29,7 +29,6 @@ import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpDpMailTpltDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.escape.MailHelper;
-import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -39,28 +38,26 @@ public class SendClientRegMailService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpDpMailTpltDao tsmpDpMailTpltDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private String sendTime;
+
+	@Autowired
+	public SendClientRegMailService(JobHelper jobHelper, ApplicationContext ctx, TsmpUserDao tsmpUserDao,
+			TsmpClientDao tsmpClientDao, TsmpDpMailTpltDao tsmpDpMailTpltDao, TsmpSettingService tsmpSettingService) {
+		super();
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpMailTpltDao = tsmpDpMailTpltDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@PostConstruct
 	public void init() {
@@ -76,10 +73,9 @@ public class SendClientRegMailService {
 		return job;
 	}
 
-	protected DPB0071MailJob getDPB0071MailJob(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime, Long reqOrdermId) {
-		DPB0071MailJob job = (DPB0071MailJob) getCtx().getBean("dpb0071MailJob", auth, mailEvents,
-				sendTime, reqOrdermId);
-		return job;
+	protected DPB0071MailJob getDPB0071MailJob(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime,
+			Long reqOrdermId) {
+		return (DPB0071MailJob) getCtx().getBean("dpb0071MailJob", auth, mailEvents, sendTime, reqOrdermId);
 	}
 
 	protected ApplicationContext getCtx() {

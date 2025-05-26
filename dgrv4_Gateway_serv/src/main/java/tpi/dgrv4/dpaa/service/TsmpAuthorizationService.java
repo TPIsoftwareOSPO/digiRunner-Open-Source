@@ -13,8 +13,13 @@ public class TsmpAuthorizationService {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
+
+	@Autowired
+	public TsmpAuthorizationService(DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	public String  getIdTokenJwtstr(String userName, String idpType) {
 		if(StringUtils.hasText(idpType) && StringUtils.hasText(userName)) {

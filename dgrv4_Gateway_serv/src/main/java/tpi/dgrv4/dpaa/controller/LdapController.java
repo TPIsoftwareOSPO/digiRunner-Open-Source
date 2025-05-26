@@ -27,9 +27,13 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class LdapController {
 	
-	@Autowired
 	private LdapService service;
 	
+	@Autowired
+	public LdapController(LdapService service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/ssotoken/ldap", //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //

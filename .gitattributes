@@ -1,0 +1,8 @@
+# 保持所有檔案的原始換行符
+* -text
+
+# 特定檔案保持原樣
+*.sh -text
+*.sql -text
+*.java -text
+*.properties -text

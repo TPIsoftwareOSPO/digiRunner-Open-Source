@@ -31,20 +31,20 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class AA0106Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpReportUrlDao tsmpReportUrlDao;
 
 	private static final String funcCodePrefix = "AC09";
-	
 	private static final String cusFuncCodePrefix = "ZA";
-	
 	private static final Integer START = 11;
 	private static final Integer END = 99;
 	
-	
+	@Autowired
+	public AA0106Service(TsmpFuncDao tsmpFuncDao, TsmpReportUrlDao tsmpReportUrlDao) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+	}
 	protected  Integer  start() { // 從AC0911開始
 		return START;
 	}

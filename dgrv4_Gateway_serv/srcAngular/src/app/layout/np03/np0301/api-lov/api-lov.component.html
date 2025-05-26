@@ -65,8 +65,6 @@
             <tr *ngIf="rowcount">
                 <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                     <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                    <!-- <button type="button" class="btn btn-warning pull-right ml-3" (click)="moreData();">{{'button.more'|translate}}</button> -->
-
                     <!-- 查詢更多 -->
                     <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
                       <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>

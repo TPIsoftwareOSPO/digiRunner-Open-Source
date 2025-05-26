@@ -45,23 +45,26 @@ public class TsmpInvokeHelper {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
 
 	@PersistenceContext
 	private EntityManager em;
+
+	@Autowired
+	public TsmpInvokeHelper(ObjectMapper objectMapper, FileHelper fileHelper,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpApptJobDao tsmpDpApptJobDao,
+			ApptJobDispatcher apptJobDispatcher) {
+		super();
+		this.objectMapper = objectMapper;
+		this.fileHelper = fileHelper;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.apptJobDispatcher = apptJobDispatcher;
+	}
 
 	public <T> Long createApptJobAndFile(String mockId, String apiType, Map<String, String> cgReqHeader, 
 			T cgReqBody, String userName, String httpMethod, String queryString) {

@@ -1,10 +1,10 @@
 <div class="form-group" style="background: #eee;" [formGroup]="form">
-  <div class="col-12 px-0" [style]="{display: 'flex',width: '100%','align-items': 'center'}">
-    <div class="col-12">
-      <div class="form-group row">
+  <div class="col-12" [style]="{display: 'flex',width: '100%','align-items': 'center'}">
+    <div class="col-12 p-2">
+      <div class="form-group d-flex">
         <div class="col-12 mt-2">
           <label [id]="'srcUrl_label'+no" [for]="'srcUrl'+no" class="control-label required">{{ 'search_replace_target'|
-            translate}}</label><i class="far fa-question-circle ml-2 " pTooltip="{{'api_url_setting_tip'|translate}}"
+            translate}}</label><i class="far fa-question-circle ms-2 " pTooltip="{{'api_url_setting_tip'|translate}}"
             [escape]="false"></i>
           <input type="text" class="form-control" [id]="'srcUrl'+no" formControlName="srcUrl" placeholder="">
           <!-- <div *ngIf="srcUrl?.invalid && (srcUrl?.dirty || srcUrl?.touched)" class="text-danger"> -->
@@ -15,19 +15,19 @@
       </div>
       <div class="form-group row">
         <div class="col-12" [style]="{display: 'flex',width: '100%','align-items': 'center'}">
-          <p-checkbox [binary]="true" formControlName="isPercentage" class="mr-1"></p-checkbox>
+          <p-checkbox [binary]="true" formControlName="isPercentage" class="me-1"></p-checkbox>
           <label [id]="'percentage_label'+no" [for]="'percentage'+no" class="control-label mb-0" style="width: 120px;">{{
             'percentage'|translate}}</label>
           <input type="number" class="form-control" [id]="'percentage'+no" style="width: 100px;" formControlName="percentage"
             placeholder="" min="0" max="100" onkeyup="this.value=Math.round(this.value)"
             onafterpaste="this.value=Math.round(this.value)" pattern="[0-9]">
 
-          <small *ngIf="beyoungRange" class="form-text text-danger ml-2">{{'equal100'|translate}}</small>
+          <small *ngIf="beyoungRange" class="form-text text-danger ms-2">{{'equal100'|translate}}</small>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-12" [style]="{display: 'flex',width: '100%','align-items': 'center'}">
-          <p-checkbox [binary]="true" formControlName="isReplace" class="mr-1"></p-checkbox>
+          <p-checkbox [binary]="true" formControlName="isReplace" class="me-1"></p-checkbox>
           <label [id]="'replaceString_label'+no" [for]="'replaceString'+no" class="control-label mb-0"
             style="width: 120px;">{{'replace_string'|translate}}</label>
           <input type="text" class="form-control col" [id]="'replaceString'+no" formControlName="replaceString" placeholder="">
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <button type="button" class="btn tpi-primary ml-1" style="border-radius: 50%" (click)="deleteItem()">
+    <button type="button" class="btn tpi-primary ms-1" style="border-radius: 50%" (click)="deleteItem()">
       <i class="fa fa-minus"></i>
     </button>
   </div>

@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.management.ImmutableDescriptor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -21,8 +19,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.RandomSeqLongUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.entity.entity.DgrAcIdpInfoCus;
 import tpi.dgrv4.entity.repository.DgrAcIdpInfoCusDao;
+import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.constant.DgrCusAcIdpLogin;
 import tpi.dgrv4.gateway.funcInterFace.CusLoginFailedHandler;
@@ -32,11 +32,18 @@ import tpi.dgrv4.gateway.util.CusAcLoginStateStore;
 @Service
 public class AcCusIdPLoginService extends CusIdPService {
 
-	@Autowired
 	private DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao;
+	private TsmpSettingService tsmpSettingService;
 
 	@Autowired
-	private TsmpSettingService tsmpSettingService;
+	public AcCusIdPLoginService(DgrAuditLogService dgrAuditLogService, AcIdPHelper acIdPHelper,
+			TsmpSettingService tsmpSettingService, DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao) {
+
+		super(dgrAuditLogService, acIdPHelper, tsmpSettingService);
+
+		this.dgrAcIdpInfoCusDao = dgrAcIdpInfoCusDao;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	/**
 	 * 處理 CUS 帳號登入前的預處理邏輯。

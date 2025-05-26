@@ -17,11 +17,15 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @RequestMapping("/dgrv4")
 public class OnlineConsole2TestController {
 
-	@Autowired
 	private TPILogger logger;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService; 
+
+	@Autowired
+	public OnlineConsole2TestController(TPILogger logger, TsmpSettingService tsmpSettingService) {
+		super();
+		this.logger = logger;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@GetMapping(value = "/onlineConsole2/testonlineconsole2", produces = MediaType.TEXT_HTML_VALUE)
 	@ResponseBody

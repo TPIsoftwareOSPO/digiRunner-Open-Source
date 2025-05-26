@@ -6,7 +6,7 @@ export interface ReqDPB0228 extends BaseReq {
 }
 
 export interface DPB0228Req {
-  siteUrl: string;
+  dgrMtlsClientCertId: string;
 }
 
 export interface RespDPB0228 extends BaseRes {
@@ -14,15 +14,17 @@ export interface RespDPB0228 extends BaseRes {
 }
 
 export interface DPB0228Resp {
-  siteUrl:string;
-  rootCa:string;
-  clientCert:string;
-  clientKey:string;
-  keyPassword:string;
-  tag:string;
-  enable:string;
-  createDateTime:string;
-  createUser:string;
-  updateDateTime:string;
-  updateUser:string;
+  dgrMtlsClientCertId: string;
+  host: string;
+  port: string;
+  rootCa: string;
+  clientCert: string;
+  clientKey: string;
+  keyMima: string;
+  remark: string;
+  enable: string;
+  createDateTime: string;
+  createUser: string;
+  updateDateTime: string;
+  updateUser: string;
 }

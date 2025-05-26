@@ -35,17 +35,20 @@ public class DgrcRoutingHelper {
 	
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	
-	@Autowired
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-	
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
+
+	@Autowired
+	public DgrcRoutingHelper(TsmpApiCacheProxy tsmpApiCacheProxy, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
+			TsmpSettingCacheProxy tsmpSettingCacheProxy, CommForwardProcService commForwardProcService) {
+		super();
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.commForwardProcService = commForwardProcService;
+	}
 
 	public TsmpApiReg calculateRoute(String reqUrl) {
 
@@ -194,6 +197,7 @@ public class DgrcRoutingHelper {
 	/**
 	 * 依設定是否依Source IP分流, <br>
 	 * 取得要打的目標URL順序清單 <br>
+	 * IP, CIDR, FQDN <br>
 	 */
 	private List<String> getSrcuUrlList(HttpServletRequest httpReq, TsmpApiReg apiReg) {
 		List<String> sortSrcUrlList = null;

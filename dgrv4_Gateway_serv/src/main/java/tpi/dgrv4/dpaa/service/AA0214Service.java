@@ -57,33 +57,34 @@ public class AA0214Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupAPiDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao;
-
-	@Autowired
 	private TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpSecurityLevelCacheProxy securityLevelCacheProxy;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0214Service(TsmpGroupDao tsmpGroupDao, TsmpGroupApiDao tsmpGroupAPiDao,
+			TsmpGroupAuthoritiesMapDao tsmpGroupAuthoritiesMapDao,
+			TsmpGroupAuthoritiesCacheProxy tsmpGroupAuthoritiesCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
+			BcryptParamHelper bcryptParamHelper, TsmpApiDao tsmpApiDao,
+			TsmpSecurityLevelCacheProxy securityLevelCacheProxy, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpGroupAPiDao = tsmpGroupAPiDao;
+		this.tsmpGroupAuthoritiesMapDao = tsmpGroupAuthoritiesMapDao;
+		this.tsmpGroupAuthoritiesCacheProxy = tsmpGroupAuthoritiesCacheProxy;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpApiDao = tsmpApiDao;
+		this.securityLevelCacheProxy = securityLevelCacheProxy;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0214Resp updateGroup(TsmpAuthorization auth, AA0214Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		
@@ -121,8 +122,8 @@ public class AA0214Service {
 	}
 
 	private void checkAndUpdateTsmpGroup(TsmpAuthorization auth, AA0214Req req, TsmpGroup group, Integer allowDays, InnerInvokeParam iip) {
-		String newGroupName = nvl(req.getGroupName());
-		String newGroupAlias = nvl(req.getGroupAlias());
+		String newGroupName = (req.getGroupName() == null) ? "" : req.getGroupName();
+		String newGroupAlias = (req.getGroupAlias() == null) ? "" : req.getGroupAlias();
 		String oriGroupName = nvl(group.getGroupName());
 		String oriGroupAlias = nvl(group.getGroupAlias());
 		Integer oriAllowDays = group.getAllowDays();

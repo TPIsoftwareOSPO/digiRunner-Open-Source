@@ -19,9 +19,14 @@ public class DPB0082Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private FileHelper fileHelper;
 	
+	@Autowired
+	public DPB0082Service(FileHelper fileHelper) {
+		super();
+		this.fileHelper = fileHelper;
+	}
+
 	public DPB0082Resp uploadFile2(TsmpAuthorization tsmpAuthorization, String decFileName, byte[] fileContent) {
 		DPB0082Resp resp = new DPB0082Resp();
 		

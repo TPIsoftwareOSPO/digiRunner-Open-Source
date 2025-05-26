@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -16,14 +17,9 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Component
 public class JobHelperImpl implements JobHelper {
-
-	@Autowired
-	private TPILogger logger;
-
 	/**
 	 * 需要初始Queue的大小，故在 {@link #JobConfig} 使用 {@link Autowired} by name
 	 */
-	@Autowired
 	private JobManager mainJobManager;
 
 	/**
@@ -31,7 +27,6 @@ public class JobHelperImpl implements JobHelper {
 	 * 因為此類別有兩個 {@link DeferrableJobManager}<br>
 	 * 故在 {@link #JobConfig} 使用{@link Autowired} by name
 	 */
-	@Autowired
 	private DeferrableJobManager deferrableJobManager;
 
 	/**
@@ -39,21 +34,35 @@ public class JobHelperImpl implements JobHelper {
 	 * 因為此類別有兩個 {@link DeferrableJobManager}<br>
 	 * 故在 {@link #JobConfig} 使用{@link Autowired} by name
 	 */
-	@Autowired
 	private DeferrableJobManager refreshCacheJobManager;
-	
-	public JobHelperImpl(TPILogger logger) {
-		this.logger = logger;
+
+	public static boolean STRESS_MODE = true;
+
+	/*
+	 * Because using constructor injection will cause a circular dependency, use method injection instead
+	 */
+	@Autowired
+	public void setDeferrableJobManager(@Qualifier("deferrableJobManager") DeferrableJobManager deferrableJobManager) {
+		this.deferrableJobManager = deferrableJobManager;
 	}
 	
-	public static boolean STRESS_MODE = false;
+	@Autowired
+	public void setRefreshCacheJobManager(@Qualifier("refreshCacheJobManager") DeferrableJobManager refreshCacheJobManager) {
+		this.refreshCacheJobManager = refreshCacheJobManager;
+	}
+	
+	@Autowired
+	public void setMainJobManager(@Qualifier("mainJobManager") JobManager mainJobManager) {
+		this.mainJobManager = mainJobManager;
+	}
+
 
 	@Override
 	public void add(Job job) throws DgrException {
 		try {
 			
 			// 壓測造成太多 RefreshCaheJob 了所以不放入, 這只會影響到快取的更新
-			if (JobHelperImpl.STRESS_MODE && getMainJobManager().size() > 500
+			if (JobHelperImpl.STRESS_MODE && getMainJobManager().size() > 100
 					&& (job instanceof RefreshCacheJob || job instanceof DummyJob)) {
 				return ; 
 			}
@@ -61,7 +70,7 @@ public class JobHelperImpl implements JobHelper {
 			//System.out.println("排入主要佇列：" + job.getId());
 			getMainJobManager().put(job);
 		} catch (InterruptedException e) {
-			logger.error("JobAdd InterruptedException:\n" + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error("JobAdd InterruptedException:\n" + StackTraceUtil.logStackTrace(e));
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -82,18 +91,44 @@ public class JobHelperImpl implements JobHelper {
 					sum += getMainJobManager().size();
 				} else if (type == 2) {
 //					sum += getDeferrableJobManager().size();
-					//int queueSize = ((ThreadPoolExecutor) getDeferrableJobManager().executor2nd).getQueue().size();//UT時會發生NullPointException
-					int queueSize = getDeferrableJobManager().getExecutor2ndQueueSize();
-					sum += getDeferrableJobManager().buff2nd.size() + queueSize;
+					sum += getDeferrableJobManager().size() + getDeferrableJobManager().buff1st.size() + 
+							getDeferrableJobManager().buff2nd.size();
 				} else if (type == 3) {
 //					sum += getRefreshCacheJobManager().size();
-					//int queueSize = ((ThreadPoolExecutor) getRefreshCacheJobManager().executor2nd).getQueue().size();//UT時會發生NullPointException
-					int queueSize = getDeferrableJobManager().getExecutor2ndQueueSize();
-					sum += getRefreshCacheJobManager().buff2nd.size() + queueSize;
+					sum += getDeferrableJobManager().buff1st.size() + 
+							getDeferrableJobManager().buff2nd.size() + 
+							getDeferrableJobManager().size();
 				}
 			}
 		}
 		return sum;
+	}
+	
+	@Override
+	public String getQueueStatus(int type) {
+		String status = "(";
+		if (type == 1) {
+			status += getMainJobManager().size() + ", ";
+			status += getMainJobManager().buff1st.size() + ", ";
+			status += getMainJobManager().buff2nd.size() + ")";
+		} else if (type == 2) {
+			status += getDeferrableJobManager().size() + ", ";
+			status += getDeferrableJobManager().buff1st.size() + ", ";
+			status += getDeferrableJobManager().buff2nd.size() + ")";
+		} else if (type == 3) {
+			status += getRefreshCacheJobManager().size() + ", ";
+			status += getRefreshCacheJobManager().buff1st.size() + ", ";
+			status += getRefreshCacheJobManager().buff2nd.size() + ")";
+		}
+		clear3Q();
+		return status;
+	}
+	
+	@Override
+	public void clear3Q() {
+		this.mainJobManager.clear();
+		this.deferrableJobManager.clear();
+		this.refreshCacheJobManager.clear();
 	}
 
 	@Override
@@ -134,27 +169,6 @@ public class JobHelperImpl implements JobHelper {
 		});
 	}
 
-	// SonarQube 弱掃處理
-//	public void take1stJob__(final LinkedHashMap<String, Job> buff1st,final LinkedHashMap<String, Job> buff2nd) {
-//		Map.Entry<String, Job> entry = null;
-//		// 取出第一個元素 (取出 1st job 放入 2nd)
-//		synchronized (buff1st) {
-//			Iterator<Map.Entry<String, Job>> itr = buff1st.entrySet().iterator();
-//			if (itr.hasNext()) {
-//				entry = itr.next(); //NoSuchElementException 
-//				itr.remove(); // ConcurrentModificationException
-//			}
-//		}
-//		
-//		if (entry==null) {return;}
-//		
-//		Job valJob = entry.getValue();
-//		
-//		synchronized (buff2nd) {
-//			buff2nd.put(valJob.getGroupId(), valJob);
-//			buff2nd.notify();
-//		}
-//	}
 
 	public void defer(DeferrableJob job) {
 		DeferrableJobManager jm = getDeferrableJobManagerByType(job);
@@ -190,6 +204,7 @@ public class JobHelperImpl implements JobHelper {
 		}
 		return getDeferrableJobManager();
 	}
+	
 
 	protected JobManager getMainJobManager() {
 		return this.mainJobManager;

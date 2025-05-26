@@ -23,16 +23,20 @@ import tpi.dgrv4.gateway.component.ServiceConfig;
 @Service
 public class DPB0040Service {
 
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpDpDeniedModuleDao tsmpDpDeniedModuleDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0040Service(TsmpApiModuleDao tsmpApiModuleDao, TsmpDpDeniedModuleDao tsmpDpDeniedModuleDao,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpDpDeniedModuleDao = tsmpDpDeniedModuleDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0040Resp queryModuleLikeList(String clientId, DPB0040Req req) {
 				

@@ -20,8 +20,13 @@ import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 @RestController
 public class RefreshGTWController {
 
-	@Autowired
 	private RefreshGTWService service;
+
+	@Autowired
+	public RefreshGTWController(RefreshGTWService service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/ImGTW/refreshGTW", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //

@@ -1,6 +1,7 @@
 package tpi.dgrv4.dpaa.component.apptJob;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -12,7 +13,9 @@ import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
 import tpi.dgrv4.entity.repository.TsmpAlertDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.time.DateTimeException;
@@ -30,19 +33,10 @@ public abstract class DpaaAlertDetectorJob<P extends DpaaAlertDetectorJobParams>
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DpaaAlertNotifierRoleEmail dpaaAlertNotifierRoleEmail;
-
-	@Autowired
 	private DpaaAlertNotifierLine dpaaAlertNotifierLine;
-
-	@Autowired
 	private DpaaAlertNotifierCustom dpaaAlertNotifierCustom;
-
-	@Autowired
 	private DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper;
-
-	@Autowired
 	private TsmpAlertDao tsmpAlertDao;
 
 	private ObjectMapper objectMapper;
@@ -54,13 +48,23 @@ public abstract class DpaaAlertDetectorJob<P extends DpaaAlertDetectorJobParams>
 
 	private P params;
 
-	public DpaaAlertDetectorJob(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper, Class<P> clazz) //
+	@Autowired
+	public DpaaAlertDetectorJob(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper, Class<P> clazz
+			, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao, 
+			DpaaAlertNotifierRoleEmail dpaaAlertNotifierRoleEmail, DpaaAlertNotifierLine dpaaAlertNotifierLine,
+			DpaaAlertNotifierCustom dpaaAlertNotifierCustom, DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper,
+			TsmpAlertDao tsmpAlertDao) //
 		throws Exception {
-		super(tsmpDpApptJob, TPILogger.tl);
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
 		this.objectMapper = objectMapper;	// Couldn't use auto-wired bean in constructor
 		this.currentDetectSDt = new Date();
 		this.paramsType = clazz;
 		this.params = parseInParams();
+		this.dpaaAlertNotifierRoleEmail = dpaaAlertNotifierRoleEmail;
+		this.dpaaAlertNotifierLine = dpaaAlertNotifierLine;
+		this.dpaaAlertNotifierCustom = dpaaAlertNotifierCustom;
+		this.dpaaAlertDispatcherJobHelper = dpaaAlertDispatcherJobHelper;
+		this.tsmpAlertDao = tsmpAlertDao;
 	}
 
 	private P parseInParams() throws Exception {

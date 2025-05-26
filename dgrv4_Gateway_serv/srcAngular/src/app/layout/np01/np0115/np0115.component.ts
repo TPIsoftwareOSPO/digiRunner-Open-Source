@@ -10,7 +10,6 @@ import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { DetailComponent } from './detail/detail.component';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPF0011Node } from 'src/app/models/api/SiteMapService/dpf0011.interface';
-import { NestableSettings } from 'ngx-nestable/lib/nestable.models';
 import { of, Observable } from 'rxjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { FormBuilder } from '@angular/forms';

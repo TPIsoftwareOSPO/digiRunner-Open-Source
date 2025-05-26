@@ -24,16 +24,19 @@ public class AA0233Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0233Service(TsmpApiDao tsmpApiDao, TsmpOrganizationDao tsmpOrganizationDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0233Resp queryModuleByClinetOrgId(TsmpAuthorization authorization, AA0233Req req) {
 		AA0233Resp resp = new AA0233Resp();

@@ -12,7 +12,7 @@
       <div class="col-12">
         <label class="control-label required">{{
           "fail_discovery_policy.label" | translate
-        }}</label><i class="far fa-question-circle ml-2 " pTooltip="{{'fail_discovery_policy.tip'|translate}}" [escape]="false"></i>
+        }}</label><i class="far fa-question-circle ms-2 " pTooltip="{{'fail_discovery_policy.tip'|translate}}" [escape]="false"></i>
         <div class="col-12 form-group">
           <div class="p-form-check mb-2">
             <!-- <input
@@ -26,7 +26,7 @@
               {{ "fail_discovery_policy.policy_0" | translate }}</label
             > -->
             <p-radioButton formControlName="failDiscoveryPolicy" value="0"  inputId="failDiscoveryPolicy0"></p-radioButton>
-			      <label for="failDiscoveryPolicy0" class="ml-2 mb-0"> {{ "fail_discovery_policy.policy_0" | translate }}</label>
+			      <label for="failDiscoveryPolicy0" class="ms-2 mb-0"> {{ "fail_discovery_policy.policy_0" | translate }}</label>
           </div>
         </div>
       </div>
@@ -35,15 +35,15 @@
       <div class="col-12">
         <label class="control-label required">{{
           "fail_handle_policy.label" | translate
-        }}</label><i class="far fa-question-circle ml-2 " pTooltip="{{'fail_handle_policy.tip'|translate}}" [escape]="false"></i>
+        }}</label><i class="far fa-question-circle ms-2 " pTooltip="{{'fail_handle_policy.tip'|translate}}" [escape]="false"></i>
         <div class="col-12 form-group">
           <div class="p-form-check mb-2">
             <p-radioButton formControlName="failHandlePolicy" value="0"  inputId="failHandlePolicy0"></p-radioButton>
-			      <label for="failHandlePolicy0" class="ml-2 mb-0">{{ "fail_handle_policy.policy_0" | translate }}</label>
+			      <label for="failHandlePolicy0" class="ms-2 mb-0">{{ "fail_handle_policy.policy_0" | translate }}</label>
           </div>
           <div class="p-form-check mb-2">
             <p-radioButton formControlName="failHandlePolicy" value="1"  inputId="failHandlePolicy1"></p-radioButton>
-			      <label for="failHandlePolicy1" class="ml-2 mb-0">Policy 1: {{ "fail_handle_policy.policy_1" | translate }}</label>
+			      <label for="failHandlePolicy1" class="ms-2 mb-0">Policy 1: {{ "fail_handle_policy.policy_1" | translate }}</label>
           </div>
         </div>
       </div>
@@ -53,7 +53,7 @@
   <div class="text-center">
     <button
       type="button"
-      class="btn tpi-btn tpi-primary mr-3"
+      class="btn tpi-btn tpi-primary me-3"
       (click)="chooseRole()"
     >
       {{ "button.confirm" | translate }}

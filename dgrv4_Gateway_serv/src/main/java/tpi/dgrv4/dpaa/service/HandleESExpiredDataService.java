@@ -17,8 +17,13 @@ import java.util.List;
 @Service
 public class HandleESExpiredDataService {
 	
-	@Autowired
 	private DgrDashboardEsLogDao dgrDashboardEsLogDao;
+
+	@Autowired
+	public HandleESExpiredDataService(DgrDashboardEsLogDao dgrDashboardEsLogDao) {
+		super();
+		this.dgrDashboardEsLogDao = dgrDashboardEsLogDao;
+	}
 
 	@Transactional
 	public void exec(Date execDate, Long jobId) throws Exception {

@@ -3,3 +3,23 @@
        padding: 0px;
      }
 }
+
+
+.form-group label {
+  background: #F6F6F6;
+}
+
+.border-line{
+  border: 0;
+  border-top:1px solid #ddd;
+}
+
+.textarea-noborder{
+  border: 0px;
+  background-color: transparent;
+  height: 80px;
+}
+
+.textarea-placeholder span{
+  color: var(--gray-300);
+}

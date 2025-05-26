@@ -8,10 +8,14 @@ import { ClientCAService } from 'src/app/shared/services/api-certificate-authori
 import { DPB0229RespItem } from 'src/app/models/api/ServerService/dpb0229.interface';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { AlertService } from 'src/app/shared/services/alert.service';
-import { AlertType } from 'src/app/models/common.enum';
-import { DPB0226Req } from 'src/app/models/api/ServerService/dpb0226.interface';
 import { DPB0225Req } from 'src/app/models/api/ServerService/dpb0225.interface';
+import * as dayjs from 'dayjs';
+import { DPB0228Resp } from 'src/app/models/api/ServerService/dpb0228.interface';
+import { DPB0226Req } from 'src/app/models/api/ServerService/dpb0226.interface';
 import { DPB0231Req } from 'src/app/models/api/ServerService/dpb0231.interface';
+import { AlertType } from 'src/app/models/common.enum';
+import { DialogService } from 'primeng/dynamicdialog';
+import { SslDecoderComponent } from './ssl-decoder/ssl-decoder.component';
 
 @Component({
   selector: 'app-np0205',
@@ -22,12 +26,14 @@ import { DPB0231Req } from 'src/app/models/api/ServerService/dpb0231.interface';
 export class Np0205Component extends BaseComponent implements OnInit {
   form: FormGroup;
   cols: { field: string; header: string; width?: string }[] = [];
-  dataList: Array<DPB0229RespItem> = new Array<DPB0229RespItem>();
+  dataList: Array<DPB0229RespItem> = [];
+  selected: Array<DPB0229RespItem> = [];
   pageNum: number = 1;
   currentTitle = this.title;
   currentAction: string = '';
   btnData: MenuItem[] = [];
-  @ViewChild('op') op;
+
+  detailData?: DPB0228Resp;
 
   constructor(
     route: ActivatedRoute,
@@ -37,55 +43,51 @@ export class Np0205Component extends BaseComponent implements OnInit {
     private clientCA: ClientCAService,
     private confirmationService: ConfirmationService,
     private alertService: AlertService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private dialogService: DialogService
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      siteUrl: new FormControl(''),
+      host: new FormControl(''),
+      port: new FormControl(''),
       rootCa: new FormControl(''),
       clientCert: new FormControl(''),
       clientKey: new FormControl(''),
-      mima: new FormControl(''),
-      tag: new FormControl(''),
-      enable: new FormControl(''),
+      keyMima: new FormControl(''),
+      remark: new FormControl(''),
     });
   }
 
   ngOnInit() {
     this.init();
+    this.port?.valueChanges.subscribe((res) => {
+      if (!res) this.port?.setValue('', { emitEvent: false });
+    });
   }
 
   async init() {
     const codes = [
       'status',
-      'site',
       'ca_expired_time',
-      'alert_desc',
-      'label_tag',
-      'last_update_user',
+      'expired_time',
+      'update_time',
+      'update_user',
     ];
     const dict = await this.toolService.getDict(codes);
 
     this.cols = [
       { field: 'enable', header: dict['status'] },
-      { field: 'siteUrl', header: dict['site'], width: '300px' },
-      { field: 'expireDate', header: dict['ca_expired_time'] },
-      { field: 'alert', header: dict['alert_desc'] },
-      { field: 'tag', header: dict['label_tag'] },
-      { field: 'updateUser', header: dict['last_update_user'] },
+      { field: 'hostAndPort', header: 'Host & Post', width: '300px' },
+      { field: 'rootCAExpireDate', header: `CA ${dict['ca_expired_time']}` },
+      { field: 'crtexpireDate', header: `CRT ${dict['expired_time']}` },
+      { field: 'updateDateTime', header: dict['update_time'] },
+      { field: 'updateUser', header: dict['update_user'] },
     ];
-    this.dataList = [
-      {
-        enable: 1,
-        siteUrl: 'https://api01.server.com:8443',
-        expireDate: '2027/12/31',
-        alert: '',
-        tag: '核對戶籍用',
-        updateDateTime: 1696993570720,
-        updateUser: 'JUNIT_TEST',
-      },
-    ];
-    // this.querySiteList();
+    this.clientCA.querySiteList_ignore1298().subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        this.dataList = res.RespBody.infoList;
+      }
+    });
   }
 
   querySiteList() {
@@ -109,12 +111,13 @@ export class Np0205Component extends BaseComponent implements OnInit {
       'button.disable',
       'cfm_mtls_enable',
       'cfm_mtls_disable',
-      'fail'
+      'message.fail',
     ];
     const dict = await this.toolService.getDict(codes);
     this.resetFormValidator(this.form);
     this.currentAction = action;
     this.form.enable();
+    this.selected = [];
 
     switch (action) {
       case 'default':
@@ -122,49 +125,70 @@ export class Np0205Component extends BaseComponent implements OnInit {
         this.pageNum = 1;
         break;
       case 'create':
-        // this.clientCA.createSite_before().subscribe((res) => {
-        //   if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        //     this.addFormValidator(this.form, res.RespBody.constraints);
-            this.enable?.setValue('1'); //預設啟用
+        this.clientCA.createClientCert_before().subscribe((res) => {
+          if (this.toolService.checkDpSuccess(res.ResHeader)) {
+            this.addFormValidator(this.form, res.RespBody.constraints);
             this.currentTitle += `> ${dict['button.create']}`;
             this.pageNum = 2;
-        //   }
-        // });
+          }
+        });
+        break;
+      case 'detail':
+        this.clientCA
+          .queryClientCertDetail({
+            dgrMtlsClientCertId: rowData!.dgrMtlsClientCertId,
+          })
+          .subscribe((res) => {
+            if (this.toolService.checkDpSuccess(res.ResHeader)) {
+              this.detailData = res.RespBody;
+              this.currentTitle += `> ${dict['button.detail']}`;
+              this.pageNum = 3;
+            }
+          });
         break;
       case 'update':
         this.clientCA
-          .queryOneSite({ siteUrl: rowData!.siteUrl })
+          .queryClientCertDetail({
+            dgrMtlsClientCertId: rowData!.dgrMtlsClientCertId,
+          })
           .subscribe((res) => {
             if (this.toolService.checkDpSuccess(res.ResHeader)) {
-              this.siteUrl?.setValue(res.RespBody.siteUrl);
-              this.enable?.setValue(res.RespBody.enable);
+              this.detailData = res.RespBody;
+              this.host?.setValue(res.RespBody.host);
+              this.port?.setValue(res.RespBody.port);
               this.rootCa?.setValue(res.RespBody.rootCa);
               this.clientCert?.setValue(res.RespBody.clientCert);
               this.clientKey?.setValue(res.RespBody.clientKey);
-              this.mima?.setValue(res.RespBody.keyPassword);
-              this.tag?.setValue(res.RespBody.tag.split(','));
+              this.keyMima?.setValue(res.RespBody.keyMima);
+              this.remark?.setValue(res.RespBody.remark);
 
-              this.clientCA.updateSite_before().subscribe((valid) => {
-                this.addFormValidator(this.form, valid.RespBody.constraints);
-                this.currentTitle += `> ${dict['button.update']}`;
-                this.pageNum = 2;
+              this.clientCA.updateClientCert_before().subscribe((resValid) => {
+                if (this.toolService.checkDpSuccess(resValid.ResHeader)) {
+                  this.addFormValidator(
+                    this.form,
+                    resValid.RespBody.constraints
+                  );
+                  this.currentTitle += `> ${dict['button.update']}`;
+                  this.pageNum = 2;
+                }
               });
             }
           });
-
         break;
       case 'delete':
         this.confirmationService.confirm({
           header: dict['cfm_del'],
-          message: `${dict['site']}:<br> ${rowData?.siteUrl}`,
+          message: `${rowData?.hostAndPort}`,
           accept: () => {
             this.clientCA
-              .deleteSite({ siteUrl: rowData!.siteUrl })
+              .deleteClientCert({
+                dgrMtlsClientCertId: rowData!.dgrMtlsClientCertId,
+              })
               .subscribe(async (res) => {
                 if (this.toolService.checkDpSuccess(res.ResHeader)) {
                   this.messageService.add({
                     severity: 'success',
-                    summary: `${dict['message.delete']} GTW API IdP Client List`,
+                    summary: `${dict['message.delete']}`,
                     detail: `${dict['message.delete']} ${dict['message.success']}!`,
                   });
                   this.querySiteList();
@@ -174,151 +198,120 @@ export class Np0205Component extends BaseComponent implements OnInit {
         });
 
         break;
-      case 'active':
-        this.confirmationService.confirm({
-          header: dict['button.active'],
-          message: dict['cfm_mtls_enable'],
-          accept: () => {
-            this.clientCA
-              .enableSite({ siteUrl: rowData!.siteUrl, enable: 1 })
-              .subscribe((res) => {
-                if (this.toolService.checkDpSuccess(res.ResHeader)) {
-                  this.alertService.ok(
-                    res.RespBody.enable ? `${ dict['cfm_mtls_enable']} ${dict['message.success']}` : `${ dict['cfm_mtls_enable']} ${dict['message.fail']}`,
-                    '',
-                    res.RespBody.enable ? AlertType.success : AlertType.error
-                  );
-                }
-                this.querySiteList();
-              });
-          },
-        });
-
-        break;
-      case 'inactive':
-        this.confirmationService.confirm({
-          header: dict['button.disable'],
-          message: dict['cfm_mtls_disable'],
-          accept: () => {
-            this.clientCA
-              .enableSite({ siteUrl: rowData!.siteUrl, enable: 0 })
-              .subscribe((res) => {
-                if (this.toolService.checkDpSuccess(res.ResHeader)) {
-                  this.alertService.ok(
-                    res.RespBody.enable ? `${ dict['cfm_mtls_disable']} ${dict['message.success']}` : `${ dict['cfm_mtls_disable']} ${dict['message.fail']}`,
-                    '',
-                    res.RespBody.enable ? AlertType.success : AlertType.error
-                  );
-                }
-                this.querySiteList();
-              });
-          },
-        });
-
-        break;
     }
+  }
+
+  async procEnableClientCert(state: string) {
+    const codes = [
+      'message.success',
+      'message.update',
+      'button.active',
+      'button.disable',
+      'cfm_mtls_enable',
+      'cfm_mtls_disable',
+    ];
+    const dict = await this.toolService.getDict(codes);
+    this.confirmationService.confirm({
+      header: state == 'Y' ? dict['button.active'] : dict['button.disable'],
+      message:
+        state == 'Y' ? dict['cfm_mtls_enable'] : dict['cfm_mtls_disable'],
+      accept: () => {
+        const _IdList: Array<String> = this.selected.map(
+          (row) => row.dgrMtlsClientCertId
+        );
+        this.clientCA
+          .enableClientCert({ idList: _IdList!, enable: state })
+          .subscribe((res) => {
+            if (this.toolService.checkDpSuccess(res.ResHeader)) {
+              // this.alertService.ok(
+                // `${dict['message.update']} ${dict['message.success']}`
+              // );
+              this.messageService.add({ severity: 'success', summary: `${dict['message.update']}`, detail: `${dict['message.update']} ${dict['message.success']}` });
+              this.querySiteList();
+            }
+          });
+      },
+    });
   }
 
   headerReturn() {
     this.changePage('default');
   }
 
+  formateDate(date: Date) {
+    return dayjs(date).format('YYYY-MM-DD') != 'Invalid Date'
+      ? dayjs(date).format('YYYY-MM-DD')
+      : '';
+  }
+
   async create() {
     let req = {
-      siteUrl: this.siteUrl?.value,
+      host: this.host?.value,
+      port: this.port?.value,
       rootCa: this.rootCa?.value,
       clientCert: this.clientCert?.value,
       clientKey: this.clientKey?.value,
-      tag: this.tag?.value ? (this.tag?.value).join(',') : this.tag?.value,
-      enable: this.enable?.value,
+      keyMima: this.keyMima?.value,
+      remark: this.remark?.value,
     } as DPB0225Req;
-    const ky = ["ke","yPa","ssword"]; //checkmarx
-    req[ky.join('')] = this.mima?.value;
-    console.log(req);
-    // this.clientCA.createSite(req).subscribe(async (res) => {
-    //   if (this.toolService.checkDpSuccess(res.ResHeader)) {
-    //     const code = ['message.create', 'message.success'];
-    //     const dict = await this.toolService.getDict(code);
-    //     this.messageService.add({
-    //       severity: 'success',
-    //       summary: `${dict['message.create']}`,
-    //       detail: `${dict['message.create']} ${dict['message.success']}!`,
-    //     });
 
-    //     this.querySiteList();
-    //     this.changePage('default');
-    //   }
-    // });
+    this.clientCA.createClientCert(req).subscribe(async (res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        const code = ['message.create', 'message.success'];
+        const dict = await this.toolService.getDict(code);
+        this.messageService.add({
+          severity: 'success',
+          summary: `${dict['message.create']}`,
+          detail: `${dict['message.create']} ${dict['message.success']}!`,
+        });
+        this.querySiteList();
+        this.changePage('default');
+      }
+    });
   }
 
   update() {
     let req = {
-      siteUrl: this.siteUrl?.value,
+      dgrMtlsClientCertId: this.detailData?.dgrMtlsClientCertId,
+      host: this.host?.value,
+      port: this.port?.value,
       rootCa: this.rootCa?.value,
       clientCert: this.clientCert?.value,
       clientKey: this.clientKey?.value,
-
-      tag: this.tag?.value,
-      enable: this.enable?.value,
+      keyMima: this.keyMima?.value,
+      remark: this.remark?.value,
     } as DPB0226Req;
-    const ky = ["ke","yPa","ssword"]; //checkmarx
-    req[ky.join('')] = this.mima?.value;
-    // this.clientCA.updateSite(req).subscribe(async (res) => {
-    //   if (this.toolService.checkDpSuccess(res.ResHeader)) {
-    //     const code = ['message.update', 'message.success'];
-    //     const dict = await this.toolService.getDict(code);
-    //     this.messageService.add({
-    //       severity: 'success',
-    //       summary: `${dict['message.update']}`,
-    //       detail: `${dict['message.update']} ${dict['message.success']}!`,
-    //     });
 
-    //     this.querySiteList();
-    //     this.changePage('default');
-    //   }
-    // });
-  }
-
-  async toggleBtnMenu(evt, rowData: DPB0229RespItem) {
-    this.btnData = [];
-    const code = ['button.active', 'button.disable'];
-    const dict = await this.toolService.getDict(code);
-
-    // 啟動
-    let item = {
-      label: dict['button.active'],
-      command: () => {
-        this.op.hide();
-        this.changePage('active', rowData);
-      },
-    };
-    this.btnData?.push(item);
-
-    // 停用
-    let disable = {
-      label: dict['button.disable'],
-      command: () => {
-        this.op.hide();
-        this.changePage('inactive', rowData);
-      },
-    };
-    this.btnData?.push(disable);
-
-    this.op.toggle(evt);
+    this.clientCA.updateClientCert(req).subscribe(async (res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        const code = ['message.update', 'message.success'];
+        const dict = await this.toolService.getDict(code);
+        this.messageService.add({
+          severity: 'success',
+          summary: `${dict['message.update']}`,
+          detail: `${dict['message.update']} ${dict['message.success']}!`,
+        });
+        this.querySiteList();
+        this.changePage('default');
+      }
+    });
   }
 
   connectionTest() {
     let req = {
-      siteUrl: this.siteUrl?.value,
+      host: this.host?.value,
+      port: this.port?.value,
       rootCa: this.rootCa?.value,
       clientCert: this.clientCert?.value,
       clientKey: this.clientKey?.value,
+      keyMima: this.keyMima?.value,
     } as DPB0231Req;
-    const ky = ["ke","yPa","ssword"]; //checkmarx
-    req[ky.join('')] = this.mima?.value;
+
     this.clientCA.checkMtlsConnection(req).subscribe((res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         if (res.RespBody.success) {
+          console.log(res.RespBody.msg);
+
           this.alertService.ok(
             'Connect Success',
             res.RespBody.msg,
@@ -335,8 +328,24 @@ export class Np0205Component extends BaseComponent implements OnInit {
     });
   }
 
-  public get siteUrl() {
-    return this.form.get('siteUrl');
+  procSSLDecoder(_value, type) {
+    this.clientCA.SSLDecoder({ cert: _value }).subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        const ref = this.dialogService.open(SslDecoderComponent, {
+          data: { details: res.RespBody },
+          header: type,
+          width: '800px',
+          styleClass: 'cHeader cContent cIcon',
+        });
+      }
+    });
+  }
+
+  public get host() {
+    return this.form.get('host');
+  }
+  public get port() {
+    return this.form.get('port');
   }
   public get rootCa() {
     return this.form.get('rootCa');
@@ -347,13 +356,10 @@ export class Np0205Component extends BaseComponent implements OnInit {
   public get clientKey() {
     return this.form.get('clientKey');
   }
-  public get mima() {
-    return this.form.get('mima');
+  public get keyMima() {
+    return this.form.get('keyMima');
   }
-  public get tag() {
-    return this.form.get('tag');
-  }
-  public get enable() {
-    return this.form.get('enable');
+  public get remark() {
+    return this.form.get('remark');
   }
 }

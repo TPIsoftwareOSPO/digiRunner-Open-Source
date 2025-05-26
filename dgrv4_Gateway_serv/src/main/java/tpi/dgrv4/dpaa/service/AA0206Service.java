@@ -27,13 +27,18 @@ public class AA0206Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientLogDao tsmpClientLogDao;
-	@Autowired
 	private SeqStoreService seqStoreService;
-	@Autowired
 	private SeqStoreDao seqStoreDao;
 	
+	@Autowired
+	public AA0206Service(TsmpClientLogDao tsmpClientLogDao, SeqStoreService seqStoreService, SeqStoreDao seqStoreDao) {
+		super();
+		this.tsmpClientLogDao = tsmpClientLogDao;
+		this.seqStoreService = seqStoreService;
+		this.seqStoreDao = seqStoreDao;
+	}
+
 	/**
 	 * 1.若AA0206Req.eventMsg.length() >100，則 AA0206Req.eventMsg = AA0206Req.eventMsg.substring(0, 100)。
 	 * 2.前端傳送的ReqHeader有txSN、txDate，但TsmpHttpHeader沒有去接收，所以需要修改TsmpHttpHeader程式，去接收txSN、txDate。

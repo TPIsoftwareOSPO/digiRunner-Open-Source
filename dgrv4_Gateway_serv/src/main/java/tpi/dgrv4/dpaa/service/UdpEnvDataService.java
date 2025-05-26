@@ -26,11 +26,16 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class UdpEnvDataService {
 	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	
 	private TPILogger logger = TPILogger.tl;
 	
+	@Autowired
+	public UdpEnvDataService(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
+
 	public UdpEnvDataResp getUdpEnvData(TsmpAuthorization auth, HttpServletRequest httpReq, UdpEnvDataReq req, 
 			ReqHeader reqHeader, HttpHeaders headers) {
 		UdpEnvDataResp resp = null;

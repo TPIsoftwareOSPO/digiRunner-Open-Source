@@ -2,7 +2,7 @@
   <div [hidden]="pageNum !== 1">
     <div class="form-group row">
       <div class="col-12">
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+        <button type="button" class="btn tpi-btn tpi-second float-end"
           (click)="changePage('create');">{{'button.create'|translate}}</button>
       </div>
     </div>
@@ -135,19 +135,12 @@
 
               <div class="p-form-check">
                 <p-radioButton formControlName="ldapStatus" value="Y"  inputId="ldapStatusY"></p-radioButton>
-                <label for="ldapStatusY" class="ml-2 mb-0">Y</label>
+                <label for="ldapStatusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="ldapStatus" value="N"  inputId="ldapStatusN"></p-radioButton>
-                <label for="ldapStatusN" class="ml-2 mb-0">N</label>
+                <label for="ldapStatusN" class="ms-2 mb-0">N</label>
               </div>
-
-              <!-- <label class="form-check-label">
-                <input type="radio" class="form-check-input" formControlName="ldapStatus" value="Y"> Y
-              </label>
-              <label class="form-check-label ml-5">
-                <input type="radio" class="form-check-input" formControlName="ldapStatus" value="N"> N
-              </label> -->
             </div>
 
 
@@ -190,8 +183,8 @@
         <div class="col-8">
           <label for="iconFile" class="control-label">Icon</label>
 
-          <div class="row col-auto">
-            <div class="mr-2">
+          <div class="d-flex col-auto">
+            <div class="me-2">
               <button type="button" class="btn tpi-btn tpi-night pull-right"
                 (click)="openFileBrowser();">{{'chs_file'|translate}}</button>
             </div>
@@ -213,17 +206,17 @@
         <div class="col-auto" *ngIf="_fileSrc">
           <img [src]="_fileSrc">
         </div>
-        <div class="col-12 ml-3"  class="noimg" *ngIf="!_fileSrc"></div>
+        <div class="col-12 ms-3"  class="noimg" *ngIf="!_fileSrc"></div>
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <!-- <button *ngIf="currentAction == 'delete'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <!-- <button *ngIf="currentAction == 'delete'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="deleteAcOauth();">{{'button.delete'|translate}}</button> -->
-          <button *ngIf="currentAction == 'create'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button *ngIf="currentAction == 'create'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="form.invalid" (click)="create();">{{'button.create'|translate}}</button>
-          <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="form.invalid" (click)="update();">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

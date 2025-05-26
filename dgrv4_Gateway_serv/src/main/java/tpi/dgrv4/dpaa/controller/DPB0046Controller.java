@@ -25,9 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0046Controller {
 
-	@Autowired
 	private DPB0046Service service;
 	
+	@Autowired
+	public DPB0046Controller(DPB0046Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 公告消息-delete
 	 * 於後台中delete by Id, 支援多筆一次更新				

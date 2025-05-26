@@ -6,11 +6,13 @@ export interface ReqDPB0231 extends BaseReq {
 }
 
 export interface DPB0231Req {
-  siteUrl: string;
+  host: string;
+  port: string;
   rootCa: string;
   clientCert: string;
   clientKey: string;
-  keyPassword?: string;
+  keyMima?: string;
+
 }
 
 export interface RespDPB0231 extends BaseRes {

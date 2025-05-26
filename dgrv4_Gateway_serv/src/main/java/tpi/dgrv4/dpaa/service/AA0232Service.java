@@ -30,13 +30,17 @@ public class AA0232Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientLogDao tsmpClientLogDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0232Service(TsmpClientLogDao tsmpClientLogDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpClientLogDao = tsmpClientLogDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public AA0232Resp queryClientEventLog(TsmpAuthorization authorization, AA0232Req req) {
 		AA0232Resp resp = new AA0232Resp();

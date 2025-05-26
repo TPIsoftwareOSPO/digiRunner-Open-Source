@@ -7,21 +7,31 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.List;
 
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import tpi.dgrv4.codec.utils.CipherInstanceUtil;
 import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.common.keeper.ITPILogger;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -32,14 +42,14 @@ import tpi.dgrv4.entity.component.IVersionService;
 import tpi.dgrv4.entity.entity.TsmpDpFile;
 import tpi.dgrv4.entity.repository.TsmpDpFileDao;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class TsmpCoreTokenInitializer {
 
 	public static final TsmpDpFileType KEY_PAIR_FILE_TYPE = TsmpDpFileType.KEY_PAIR;
 
 	public static final Long KEY_PAIR_REF_ID = 0L;
-
-	public static final String DEFAULT_ALGORITHM = "RSA";
 
 	public static String KEY_PAIR_FILE_NAME;
 
@@ -53,27 +63,11 @@ public class TsmpCoreTokenInitializer {
 
 	private static final String KEY_ALIAS = "digiRunner.token.keyAlias";
 	
-	@Autowired
-	private ITPILogger logger;
-
-	@Autowired
-	private Environment env;
-
-	@Autowired
-	private IFileHelper fileHelper;
-
-	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
-	private IVersionService versionService;
-
-	@Autowired
-	private ITsmpCoreTokenInitializerInit tsmpCoreTokenInitializerInit;
-
-	public TsmpCoreTokenInitializer(ITPILogger logger) {
-		this.logger = logger;
-	}
+	private final Environment env;
+	private final IFileHelper fileHelper;
+	private final TsmpDpFileDao tsmpDpFileDao;
+	private final IVersionService versionService;
+	private final ITsmpCoreTokenInitializerInit tsmpCoreTokenInitializerInit;
 
 	/**
 	 * 在環境初始時即從 ${digiRunner.token.key-store.path} 路徑下取得 JKS 的 KeyPair<br>
@@ -104,7 +98,7 @@ public class TsmpCoreTokenInitializer {
 				sb.append("\n");
 				infoStr.append(sb.toString());
 				mySleepTsmpCoreTokenInitializer(delayTime); // 等待 keeper 連線
-				logger.tl.info(infoStr.toString());
+				ITPILogger.tl.info(infoStr.toString());
 			}
 		}.start();
 		
@@ -116,7 +110,7 @@ public class TsmpCoreTokenInitializer {
 			localKeyPair = remoteKeyPair;
 			if (remoteKeyPair == null) {
 				// 如果找不到 KeyPair 就自行產生一組
-				localKeyPair = generateKeyPair(TsmpCoreTokenInitializer.DEFAULT_ALGORITHM, 2048);
+				localKeyPair = generateKeyPair(CipherInstanceUtil.getCipherInstance3(), 2048);
 			}
 		} else if (remoteKeyPair != null) {
 			if (!isSameHashCode(localKeyPair, remoteKeyPair)) {
@@ -135,7 +129,7 @@ public class TsmpCoreTokenInitializer {
 
 		// 留給 {@link TsmpCoreTokenHelper} 用
 		TsmpCoreTokenInitializer.KEY_PAIR_FILE_NAME = getKeyStoreName();
-		logger.tl.debugDelay2sec("=== Token keyPair initialize successfully! ===");
+		ITPILogger.tl.debugDelay2sec("=== Token keyPair initialize successfully! ===");
 		
 		final StringBuffer buf = new StringBuffer();
 		new Thread() {
@@ -176,20 +170,20 @@ public class TsmpCoreTokenInitializer {
 				TsmpCoreTokenInitializer.KEY_PAIR_FILE_TYPE.value(), TsmpCoreTokenInitializer.KEY_PAIR_REF_ID,
 				tsmpDpFileName);
 		if (CollectionUtils.isEmpty(tsmpDpFiles)) {
-			this.logger.debugDelay2sec("No such fileName in [tsmp_dp_file]: " + tsmpDpFileName);
+			ITPILogger.tl.debugDelay2sec("No such fileName in [tsmp_dp_file]: " + tsmpDpFileName);
 			return null;
 		}
 
 		TsmpDpFile tsmpDpFile = tsmpDpFiles.get(0);
 
 		String fullTsmpDpFilePath = tsmpDpFile.getFilePath() + tsmpDpFile.getFileName();
-		this.logger.debugDelay2sec("Downloading KeyPair from: " + fullTsmpDpFilePath);
+		ITPILogger.tl.debugDelay2sec("Downloading KeyPair from: " + fullTsmpDpFilePath);
 
 		byte[] content = null;
 		try {
 			content = getFileHelper().download(tsmpDpFile);
 		} catch (Exception e) {
-			this.logger.error(String.format("Fail to read blob from db: %s\n", fullTsmpDpFilePath)
+			ITPILogger.tl.error(String.format("Fail to read blob from db: %s\n", fullTsmpDpFilePath)
 					+ StackTraceUtil.logStackTrace(e));
 		}
 
@@ -199,11 +193,11 @@ public class TsmpCoreTokenInitializer {
 				keyPair = deserializeKeyPair(content);
 			}
 		} catch (Exception e) {
-			this.logger.error("Fail to deserialize from blob\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error("Fail to deserialize from blob\n" + StackTraceUtil.logStackTrace(e));
 		}
 
 		if (keyPair == null) {
-			this.logger.debugDelay2sec("KeyPair not exists");
+			ITPILogger.tl.debugDelay2sec("KeyPair not exists");
 		}
 
 		return keyPair;
@@ -235,7 +229,7 @@ public class TsmpCoreTokenInitializer {
 				tsmpDpFile = getFileHelper().upload("SYSTEM", TsmpCoreTokenInitializer.KEY_PAIR_FILE_TYPE,
 						TsmpCoreTokenInitializer.KEY_PAIR_REF_ID, //
 						getKeyStoreName(), content, "N");
-				this.logger.debugDelay2sec("KeyPair is saved: [" + tsmpDpFile.getFileId() + "]"
+				ITPILogger.tl.debugDelay2sec("KeyPair is saved: [" + tsmpDpFile.getFileId() + "]"
 						+ (tsmpDpFile.getFilePath() + tsmpDpFile.getFileName()));
 			} else {
 				tsmpDpFile.setBlobData(content);
@@ -244,16 +238,27 @@ public class TsmpCoreTokenInitializer {
 
 				// 在AWS上同時啟動 8 台dgR，會出現ObjectOptimisticLocking問題。
 				try {
-					tsmpDpFile = getTsmpDpFileDao().save(tsmpDpFile);
+					tsmpDpFile = getTsmpDpFileDao().save(tsmpDpFile);  // Database ReadOnly
+				} catch (JpaSystemException e) {
+					String msg = StackTraceUtil.logTpiShortStackTrace(e);
+					if (msg.indexOf("The database is read only") == -1 ||
+							msg.indexOf("read-only") == -1
+							) {
+						throw e;
+					}
+				} catch (InvalidDataAccessResourceUsageException e) {
+					String msg = StackTraceUtil.logTpiShortStackTrace(e);
+					if (msg.indexOf("permission denied") == -1) {
+						throw e;
+					}
 				} catch (ObjectOptimisticLockingFailureException e) {
-					this.logger.warn("KeyPair is updated: Optimistic locking occurs");
+					ITPILogger.tl.warn("KeyPair is updated: Optimistic locking occurs");
 				}
 
-				this.logger
-						.debugDelay2sec("KeyPair is updated: " + (tsmpDpFile.getFilePath() + tsmpDpFile.getFileName()));
+				ITPILogger.tl.debugDelay2sec("KeyPair is updated: " + (tsmpDpFile.getFilePath() + tsmpDpFile.getFileName()));
 			}
 		} catch (Exception e) {
-			this.logger.debug("Fail to save KeyPair in TsmpDpFile\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.debug("Fail to save KeyPair in TsmpDpFile\n" + StackTraceUtil.logStackTrace(e));
 			throw e;
 		}
 		return tsmpDpFile;
@@ -267,7 +272,7 @@ public class TsmpCoreTokenInitializer {
 	private KeyPair loadAndExtractKeyPair() {
 		boolean isReadyToLoad = isReadyToLoadKeyStore();
 		if (!isReadyToLoad) {
-			this.logger.debugDelay2sec(
+			ITPILogger.tl.debugDelay2sec(
 					"Unable to load KeyStore. Please check 'digiRunner Token Keypair Setting' in application.properties.");
 			return null;
 		}
@@ -281,23 +286,23 @@ public class TsmpCoreTokenInitializer {
 				keyStore = KeyStore.getInstance(keystoreType);
 			}
 		} catch (Exception e) {
-			this.logger.debug("Fail to get KeyStore instance with type: " + getKeyStoreType());
+			ITPILogger.tl.debug("Fail to get KeyStore instance with type: " + getKeyStoreType());
 			return null;
 		}
 
 		String ksURI = getKeyStorePath() + getKeyStoreName();
-		this.logger.debugDelay2sec("Loading KeyStore from: " + ksURI);
+		ITPILogger.tl.debugDelay2sec("Loading KeyStore from: " + ksURI);
 
 		try (FileInputStream fis = new FileInputStream(ksURI)) {
 			keyStore.load(fis, getKeyStorePassword());
 		} catch (FileNotFoundException e) {
-			this.logger.error("KeyStore not found!");
+			ITPILogger.tl.error("KeyStore not found!");
 		} catch (Exception e) {
-			this.logger.error("Load KeyStore error!\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error("Load KeyStore error!\n" + StackTraceUtil.logStackTrace(e));
 		}
 
 		if (!isKeyStoreLoaded(keyStore)) {
-			this.logger.debugDelay2sec("KeyStore is not loaded");
+			ITPILogger.tl.debugDelay2sec("KeyStore is not loaded");
 			return null;
 		}
 
@@ -307,11 +312,11 @@ public class TsmpCoreTokenInitializer {
 		try {
 			hasKeyAlias = keyStore.containsAlias(getKeyAlias());
 		} catch (Exception e) {
-			this.logger.error("Unable to verify key alias: " + getKeyAlias() + "\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error("Unable to verify key alias: " + getKeyAlias() + "\n" + StackTraceUtil.logStackTrace(e));
 		}
 
 		if (!hasKeyAlias) {
-			this.logger.debugDelay2sec("No such key alias " + getKeyAlias());
+			ITPILogger.tl.debugDelay2sec("No such key alias " + getKeyAlias());
 			return null;
 		}
 
@@ -319,11 +324,11 @@ public class TsmpCoreTokenInitializer {
 		try {
 			key = keyStore.getKey(getKeyAlias(), getKeyStorePassword());
 		} catch (Exception e) {
-			this.logger.error("Get key error!\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error("Get key error!\n" + StackTraceUtil.logStackTrace(e));
 		}
 
 		if (key == null || !(key instanceof PrivateKey)) {
-			this.logger.debugDelay2sec("Fail to get key from KeyStore " + getKeyAlias());
+			ITPILogger.tl.debugDelay2sec("Fail to get key from KeyStore " + getKeyAlias());
 			return null;
 		}
 
@@ -332,11 +337,11 @@ public class TsmpCoreTokenInitializer {
 			Certificate cert = keyStore.getCertificate(getKeyAlias());
 			publicKey = cert.getPublicKey();
 		} catch (Exception e) {
-			this.logger.error("Get public key error\n" + StackTraceUtil.logStackTrace(e));
+			ITPILogger.tl.error("Get public key error\n" + StackTraceUtil.logStackTrace(e));
 		}
 
 		if (publicKey == null) {
-			this.logger.debugDelay2sec("Fail to get public key " + getKeyAlias());
+			ITPILogger.tl.debugDelay2sec("Fail to get public key " + getKeyAlias());
 			return null;
 		}
 
@@ -354,13 +359,13 @@ public class TsmpCoreTokenInitializer {
 	private KeyPair generateKeyPair(String algorithm, int keySize) throws Exception {
 		KeyPair keyPair = null;
 		try {
-			this.logger.debugDelay2sec("Generating KeyPair...");
+			ITPILogger.tl.debugDelay2sec("Generating KeyPair...");
 
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);
 			keyPairGenerator.initialize(keySize);
 			keyPair = keyPairGenerator.generateKeyPair();
 		} catch (Exception e) {
-			this.logger.error(String.format("Fail to generate KeyPair, algorithm=%s, keySize=%d\n", //
+			ITPILogger.tl.error(String.format("Fail to generate KeyPair, algorithm=%s, keySize=%d\n", //
 					algorithm, keySize) + StackTraceUtil.logStackTrace(e));
 		}
 		return keyPair;

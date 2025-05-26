@@ -1,0 +1,36 @@
+<div *ngIf="config.data.type=='ES'">
+  <div *ngFor="let esItem of esRespArray" >
+    <div class="card m-2">
+      <div class="card-body p-2">
+        <div class="d-flex align-items-center">
+          <i *ngIf="!esItem.connection" class="fas fa-times-circle text-danger fs-4"></i>
+          <i *ngIf="esItem.connection" class="far fa-check-circle text-success fs-4"></i>
+          <span class="fw-bold ms-2">{{esItem.url}}</span>
+        </div>
+        <div class="py-2">
+          <textarea [rows]="esItem?.resp?10:3" style="width:100%" class="form-control" [readOnly]="true" pInputTextarea
+            [value]="esItem?.resp"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="config.data.type=='Kibana'">
+  <div class="card m-2">
+    <div class="card-body p-2">
+      <div class="d-flex align-items-center">
+        <i *ngIf="!config.data.kibanaResp.connection" class="fas fa-times-circle text-danger fs-4"></i>
+        <i *ngIf="config.data.kibanaResp.connection" class="far fa-check-circle text-success fs-4"></i>
+        <span class="fw-bold ms-2">( {{config.data.kibanaResp.auth}} ) {{config.data.kibanaResp.statusApiUrl}}</span>
+      </div>
+      <div class="py-2">
+        <textarea rows="20" style="width:100%" class="form-control" [readOnly]="true" pInputTextarea
+          [value]="config.data.kibanaResp?.resp"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-3">
+  <button autofocus  type="button" (click)="onAccept()" class="btn tpi-btn tpi-primary me-2 focus-ring">{{'button.return_to_list'|translate}}</button>
+</div>

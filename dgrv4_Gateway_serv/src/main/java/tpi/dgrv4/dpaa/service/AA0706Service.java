@@ -37,28 +37,29 @@ public class AA0706Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
 	private TsmpAlertDao tsmpAlertDao;
-
-	@Autowired
 	private TsmpRoleAlertDao tsmpRoleAlertDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private DpaaAlertDispatcherIfs dpaaAlertDispatcher;
 
 	private Integer pageSize;
+
+	@Autowired
+	public AA0706Service(TsmpRoleDao tsmpRoleDao, TsmpAlertDao tsmpAlertDao, TsmpRoleAlertDao tsmpRoleAlertDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ServiceConfig serviceConfig,
+			BcryptParamHelper bcryptParamHelper, DpaaAlertDispatcherIfs dpaaAlertDispatcher) {
+		super();
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpAlertDao = tsmpAlertDao;
+		this.tsmpRoleAlertDao = tsmpRoleAlertDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dpaaAlertDispatcher = dpaaAlertDispatcher;
+	}
 
 	public AA0706Resp queryAlarmSettings(TsmpAuthorization authorization, AA0706Req req, ReqHeader reqHeader) {
 		AA0706Resp resp = new AA0706Resp();

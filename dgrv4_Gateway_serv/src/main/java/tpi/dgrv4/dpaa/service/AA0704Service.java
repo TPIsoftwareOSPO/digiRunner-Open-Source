@@ -38,17 +38,23 @@ public class AA0704Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpAlertDao tsmpAlertDao;
-	@Autowired
 	private TsmpRoleAlertDao tsmpRoleAlertDao;
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	@Autowired
     private DpaaAlertDispatcherIfs dpaaAlertDispatcher;
 	
+    @Autowired
+	public AA0704Service(TsmpAlertDao tsmpAlertDao, TsmpRoleAlertDao tsmpRoleAlertDao, TsmpRoleDao tsmpRoleDao,
+			BcryptParamHelper bcryptParamHelper, DpaaAlertDispatcherIfs dpaaAlertDispatcher) {
+		super();
+		this.tsmpAlertDao = tsmpAlertDao;
+		this.tsmpRoleAlertDao = tsmpRoleAlertDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dpaaAlertDispatcher = dpaaAlertDispatcher;
+	}
+
 	@Transactional
 	public AA0704Resp updateAlertSetting(TsmpAuthorization authorization, AA0704Req req, ReqHeader reqHeader) {
 		AA0704Resp resp = new AA0704Resp();

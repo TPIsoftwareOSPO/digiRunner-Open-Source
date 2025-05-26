@@ -27,3 +27,8 @@
     border-bottom: 1px solid #ddd;
   }
 }
+
+.focus-ring:focus{
+  border-color:rgb(237, 75, 6);
+  box-shadow: 0 0 0 0.15rem rgba(231, 84, 51, 0.68);
+}

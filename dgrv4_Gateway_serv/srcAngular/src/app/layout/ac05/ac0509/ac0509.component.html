@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="form-group pt-2">
-                <button type="submit" class="btn tpi-btn tpi-primary pull-right mr-3" [disabled]="form.invalid">{{'button.search' |
+                <button type="submit" class="btn tpi-btn tpi-primary pull-right me-3" [disabled]="form.invalid">{{'button.search' |
                     translate}}</button>
             </div>
         </form>
@@ -94,7 +94,7 @@
 
                     <td rowspan="2" style="text-align:center">
                         <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail',rowData)">
+                            <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData)">
                                 <span class="fa fa-search">{{'detail'|translate}}</span>
                             </button>
                         </div> -->
@@ -127,7 +127,7 @@
                 <tr *ngIf="tableData && tableData.length>0">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData && tableData.length}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+                        <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                             (click)="moreData();">{{'button.more'|translate}}</button> -->
 
                             <!-- 查詢更多 -->
@@ -252,10 +252,10 @@
 
         <div class="form-group row">
             <div class="col-12 col-lg-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-2" [disabled]="generated"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-2" [disabled]="generated"
                     (click)="getDetailData()">{{'button.expansion'|translate}}</button>
 
-                <button type="button" class="btn tpi-btn tpi-primary float-left"
+                <button type="button" class="btn tpi-btn tpi-primary float-start"
                     (click)="changePage('default');">{{'button.return_to_list'|translate}}</button>
             </div>
 

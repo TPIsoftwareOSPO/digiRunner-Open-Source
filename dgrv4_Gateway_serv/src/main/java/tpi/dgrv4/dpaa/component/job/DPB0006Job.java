@@ -1,6 +1,5 @@
 package tpi.dgrv4.dpaa.component.job;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import tpi.dgrv4.common.constant.*;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -44,38 +43,36 @@ public class DPB0006Job extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
+	
+	public DPB0006Job(TsmpClientDao tsmpClientDao, TsmpGroupDao tsmpGroupDao, TsmpClientGroupDao tsmpClientGroupDao,
+			TsmpGroupApiDao tsmpGroupApiDao, TsmpDpClientextDao tsmpDpClientextDao,
+			OauthClientDetailsDao oauthClientDetailsDao, TsmpDpFileDao tsmpDpFileDao, FileHelper fileHelper,
+			TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
 
 	@Override
 	public void runJob(JobHelperImpl jobHelper, JobManager jobManager) {

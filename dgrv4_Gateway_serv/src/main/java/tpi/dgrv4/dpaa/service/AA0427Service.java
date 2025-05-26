@@ -22,8 +22,14 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0427Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpApiDao tsmpApiDao;
+
+	@Autowired
+	public AA0427Service(TsmpApiDao tsmpApiDao) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+	}
 
 	public AA0427Resp queryAllLabel(TsmpAuthorization authorization, AA0427Req req) {
 		AA0427Resp resp = new AA0427Resp();

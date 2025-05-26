@@ -21,12 +21,18 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class HandleApiDataAndLogService {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpReqLogDao tsmpReqLogDao;
-	@Autowired
 	private TsmpResLogDao tsmpResLogDao;
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
+
+	@Autowired
+	public HandleApiDataAndLogService(TsmpReqLogDao tsmpReqLogDao, TsmpResLogDao tsmpResLogDao, TsmpApiDao tsmpApiDao) {
+		super();
+		this.tsmpReqLogDao = tsmpReqLogDao;
+		this.tsmpResLogDao = tsmpResLogDao;
+		this.tsmpApiDao = tsmpApiDao;
+	}
 
 	@Transactional
 	public void insertTsmpApiAndDeleteLog(List<TsmpReqLog> reqList, List<TsmpResLog> res) {

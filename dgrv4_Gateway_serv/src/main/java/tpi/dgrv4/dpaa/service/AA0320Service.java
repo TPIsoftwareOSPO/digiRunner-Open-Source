@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,20 +35,23 @@ public class AA0320Service {
 
 	private Integer pageSize;
 
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private TsmpVgroupDao tsmpVgroupDao;
-	
-	@Autowired
 	private TsmpVgroupGroupDao tsmpVgroupGroupDao;
-
-	@Autowired
 	private TsmpGroupApiDao tsmpGroupApiDao;
+	private ServiceConfig serviceConfig;
 
 	@Autowired
-	private ServiceConfig serviceConfig;
+	public AA0320Service(TsmpGroupDao tsmpGroupDao, TsmpVgroupDao tsmpVgroupDao, TsmpVgroupGroupDao tsmpVgroupGroupDao,
+			TsmpGroupApiDao tsmpGroupApiDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.tsmpVgroupDao = tsmpVgroupDao;
+		this.tsmpVgroupGroupDao = tsmpVgroupGroupDao;
+		this.tsmpGroupApiDao = tsmpGroupApiDao;
+		this.serviceConfig = serviceConfig;
+	}
+
 
 	public AA0320Resp queryGroupApiList(AA0320Req req) {
 		AA0320Resp resp = new AA0320Resp();

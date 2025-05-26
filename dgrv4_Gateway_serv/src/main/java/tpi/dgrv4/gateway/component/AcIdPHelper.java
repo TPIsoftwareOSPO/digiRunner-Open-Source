@@ -75,53 +75,24 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Component
 public class AcIdPHelper {
 	
-    @Autowired
     private TsmpSettingService tsmpSettingService;
-	
-    @Autowired	
     private DgrAcIdpUserDao dgrAcIdpUserDao;
-    
-    @Autowired	
     private DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao;
-    
-    @Autowired	
     private PrepareMailService prepareMailService;
-    
-    @Autowired	
     private MailHelper mailHelper;
-    
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
-	
-	@Autowired
 	private OAuthTokenService oAuthTokenService;
-	
-    @Autowired
     private SsotokenService ssotokenService;
-    
-    @Autowired
     private TsmpRoleDao tsmpRoleDao;
-    
-    @Autowired
     private AuthoritiesDao authoritiesDao;
-    
-    @Autowired
     private AA0011Service aa0011Service;
-    
-    @Autowired
     private DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao;
-    
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-	
-	@Autowired
 	private DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
-	
-	@Autowired
 	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
-	
+
 	// Audit Log使用
-	String eventNo = AuditLogEvent.LOGIN.value(); 
+	private String eventNo = AuditLogEvent.LOGIN.value(); 
     
     private String sendTime;
     
@@ -171,7 +142,32 @@ public class AcIdPHelper {
 	// Audit log
     // 訊息:User 狀態不正確
     public static String MSG_DELEGATE_AC_USER_STATUS_IS_INCORRECT = "Delegate AC User status '%s' is incorrect.";
- 
+	
+	@Autowired
+	public AcIdPHelper(TsmpSettingService tsmpSettingService, DgrAcIdpUserDao dgrAcIdpUserDao,
+			DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao, PrepareMailService prepareMailService, MailHelper mailHelper,
+			DgrAuditLogService dgrAuditLogService, OAuthTokenService oAuthTokenService, SsotokenService ssotokenService,
+			TsmpRoleDao tsmpRoleDao, AuthoritiesDao authoritiesDao, AA0011Service aa0011Service,
+			DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao, TsmpUserDao tsmpUserDao,
+			DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao, DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.dgrAcIdpAuthCodeDao = dgrAcIdpAuthCodeDao;
+		this.prepareMailService = prepareMailService;
+		this.mailHelper = mailHelper;
+		this.dgrAuditLogService = dgrAuditLogService;
+		this.oAuthTokenService = oAuthTokenService;
+		this.ssotokenService = ssotokenService;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.authoritiesDao = authoritiesDao;
+		this.aa0011Service = aa0011Service;
+		this.dgrAcIdpInfoLdapDao = dgrAcIdpInfoLdapDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.dgrAcIdpInfoMLdapMDao = dgrAcIdpInfoMLdapMDao;
+		this.dgrAcIdpInfoApiDao = dgrAcIdpInfoApiDao;
+	}
+    
     /**
      * 依 User 狀態,寄信通知審核者 或 建立 dgRcode 重新導向到前端,以登入AC <br>
      * 1.若查無 User 資料, 建立 DGR_AC_IDP_USER,並寄信給審核者,以執行同意/拒絕動作 <br>

@@ -15,6 +15,7 @@ import { MockHeadersInputDetailComponent } from './mock-headers-input-detail/moc
 import { ApiStatusComponent } from './api-status/api-status.component';
 import { ApiStatusModifyComponent } from './api-status-modify/api-status-modify.component';
 import { ApiDetailComponent } from './api-detail/api-detail.component';
+import { JwtSettingComponent } from './jwt-setting/jwt-setting.component';
 
 @NgModule({
   imports: [
@@ -26,7 +27,7 @@ import { ApiDetailComponent } from './api-detail/api-detail.component';
     FormsModule,
 
   ],
-  declarations: [Ac0301Component,  SwaggerComponent, MockHeadersInputComponent, MockHeadersInputDetailComponent ],
+  declarations: [Ac0301Component,  SwaggerComponent, MockHeadersInputComponent, MockHeadersInputDetailComponent , JwtSettingComponent],
   providers:[TokenExpiredGuard]
 })
 export class Ac0301Module { }

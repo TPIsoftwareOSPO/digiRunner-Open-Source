@@ -7,7 +7,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="copy_target"
               placeholder="{{'module_name'|translate}}-{{'api_name'|translate}}({{'api_key'|translate}})" readonly>
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
               (click)="change_to_copy();"></button>
           </div>
         </div>
@@ -44,22 +44,18 @@
       </div>
       <div class="form-group row">
         <div class="col-8 col-xl-8 col-lg-8">
-          <div class="row col-12 pr-0" style="justify-content: space-between;">
-            <div class="col-4 px-0">
-              <label for="tsmpUrl" style="padding-left: 1px;">{{'tar_url'|translate}}</label>
+          <div class="d-flex col-12 pe-0" style="justify-content: space-between;">
+            <div class="col-4 ">
+              <label for="tsmpUrl" class="fw-bold" >{{'tar_url'|translate}}</label>
             </div>
-            <div class="col-8 row pr-0" style="justify-content: end;">
-              <div class="mr-3">
-                <!-- <input type="checkbox" id="urlRID" formControlName="urlRID" class="mr-1">
-                <label for="urlRID">{{'path_param'|translate}}</label> -->
+            <div class="col-8 d-flex pe-0" style="justify-content: end;">
+              <div class="me-3">
                 <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID"></p-checkbox>
-                <label class="ml-2 mb-0" for="urlRID">{{'path_param' | translate}}</label>
+                <label class="ms-2 mb-0" for="urlRID">{{'path_param' | translate}}</label>
               </div>
               <div>
-                <!-- <input type="checkbox" id="noOauth" formControlName="no_oauth">
-                <label for="noOauth">{{'no_auth'|translate}}</label> -->
                 <p-checkbox [binary]="true" inputId="no_oauth" formControlName="no_oauth"></p-checkbox>
-                <label class="ml-2 mb-0" for="no_oauth">{{'no_auth' | translate}}</label>
+                <label class="ms-2 mb-0" for="no_oauth">{{'no_auth' | translate}}</label>
               </div>
             </div>
 
@@ -87,8 +83,8 @@
           </div>
         </div>
       </div>
-      <div class="form-group row">
-        <div class="col-4 pl-0">
+      <div class="form-group row g-3">
+        <div class="col-4">
           <label class="col-auto col-xl-12 control-label">{{'data_format'|translate}}</label>
           <div class="col-xl-12">
             <p-dropdown [options]="dataFormats" formControlName="dataFormat" placeholder="{{'plz_chs'|translate}}"
@@ -96,12 +92,12 @@
             </p-dropdown>
           </div>
         </div>
-        <div class="col-1 col-xl-1 col-lg-1">
+        <div class="col-1">
           <label class="col-auto col-xl-12 control-label">{{'jwt_setting'|translate}}</label>
           <label class="control-label col-xl-12">{{'body_encode'|translate}}</label>
         </div>
         <div class="col-7 col-xl-7 col-lg-7">
-          <div class="row">
+          <div class="d-flex">
             <div class="col-1">
               <label class="col-xl-12 control-label"></label>
               <p-inputSwitch formControlName="jwtSetting">
@@ -126,8 +122,8 @@
           </div>
         </div>
       </div>
-      <div class="form-group row">
-        <label for="apiDesc" class="col-xl-2 col-form-label">{{'api_desc'|translate}}</label>
+      <div class="form-group ">
+        <label for="apiDesc" class="fw-bold">{{'api_desc'|translate}}</label>
         <div class="col-12">
           <textarea class="form-control" rows="5" style="resize: none;" formControlName="apiDesc"></textarea>
         </div>
@@ -146,12 +142,12 @@
     </form>
     <div clas="row">
       <div class="col-auto d-flex justify-content-center mt-2 mb-4">
-        <button type="button" class="btn tpi-btn tpi-primary float-left text-center mr-2"
+        <button type="button" class="btn tpi-btn tpi-primary float-start text-center me-2"
           (click)="composer()">{{'button.composer'|translate}}</button>
-        <!-- <button type="button" class="btn btn-warning float-left text-center mr-2"
+        <!-- <button type="button" class="btn btn-warning float-start text-center me-2"
                     [disabled]="!commonAPIFormIsValid"
                     (click)="composer()">{{'button.composer'|translate}}</button> -->
-        <button type="button" class="btn tpi-btn tpi-primary float-left text-center"
+        <button type="button" class="btn tpi-btn tpi-primary float-start text-center"
           (click)="clearCopyTarget()">{{'button.clear'|translate}}</button>
       </div>
     </div>
@@ -171,7 +167,7 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+          <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
         </div>
       </div>
     </form>
@@ -219,7 +215,7 @@
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate): '' }}
                 <i class="fas"
-                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
               <!-- {{rowData[col.field].val}}
@@ -232,7 +228,7 @@
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate): '' }}
                 <i class="fas"
-                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
               <!-- {{rowData[col.field].val}}
@@ -256,9 +252,6 @@
         <tr *ngIf="rowcount">
           <td [attr.colspan]="columns.length+2" style="color: #b7b7b7;">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                            (click)="moreData();">{{'button.more'|translate}}</button> -->
-
             <!-- 查詢更多 -->
             <button type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
               <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
@@ -276,9 +269,9 @@
     </p-table>
     <div class="form-group row mt-2">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="choose_copy_api();">{{'button.join'|translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-primary float-left"
+        <button type="button" class="btn tpi-btn tpi-primary float-start"
           (click)="return();">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>

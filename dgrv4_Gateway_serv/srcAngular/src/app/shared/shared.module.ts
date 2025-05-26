@@ -47,7 +47,6 @@ import { EditFuncListComponent } from '../layout/ac00/ac0012/edit-func-list/edit
 import { HostInputComponent } from '../layout/ac02/ac0202/host-input/host-input.component';
 import { HostInputDetailComponent } from '../layout/ac02/ac0202/host-input-detail/host-input-detail.component';
 import { JobFormComponent } from '../layout/np05/np0513/job-form/job-form.component';
-import { NestableModule } from 'ngx-nestable';
 import { KeyValueGridDetailComponent } from './key-value-grid/key-value--grid-detail/key-value-grid-detail.component';
 import { FieldsFormComponent } from '../layout/components/fields/fields-form/fields-form.component';
 import { FieldsFormDetailComponent } from '../layout/components/fields/fields-form-detail/fields-form-detail.component';
@@ -70,6 +69,10 @@ import { WhiteListDetailComponent } from '../layout/labs/lb0010/white-list-detai
 import { ApiDetailComponent } from '../layout/ac03/ac0301/api-detail/api-detail.component';
 import { ApiStatusModifyComponent } from '../layout/ac03/ac0301/api-status-modify/api-status-modify.component';
 import { ApiStatusComponent } from '../layout/ac03/ac0301/api-status/api-status.component';
+import { CustomAlertComponent } from './custom-alert/custom-alert.component';
+import { ClientCAComponent } from './../layout/np02/np0202/client-ca/client-ca.component';
+import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-detail.component';
+import { SearchInputComponent } from '../layout/components/search-input/search-input.component';
 
 
 @NgModule({
@@ -85,7 +88,6 @@ import { ApiStatusComponent } from '../layout/ac03/ac0301/api-status/api-status.
   ],
   exports: [
     TranslateModule,
-    NestableModule,
     SharedPipesModule,
     ContainerComponent,
     OrganizationComponent,
@@ -137,7 +139,11 @@ import { ApiStatusComponent } from '../layout/ac03/ac0301/api-status/api-status.
     WhiteListDetailComponent,
     ApiDetailComponent,
     ApiStatusComponent,
-    ApiStatusModifyComponent
+    ApiStatusModifyComponent,
+    CustomAlertComponent,
+    ClientCAComponent,
+    UserDetailComponent,
+    SearchInputComponent,
   ],
   declarations: [
     ContainerComponent,
@@ -188,7 +194,11 @@ import { ApiStatusComponent } from '../layout/ac03/ac0301/api-status/api-status.
     WhiteListDetailComponent,
     ApiDetailComponent,
     ApiStatusComponent,
-    ApiStatusModifyComponent
+    ApiStatusModifyComponent,
+    CustomAlertComponent,
+    ClientCAComponent,
+    UserDetailComponent,
+    SearchInputComponent
   ],
   providers: [ApiBaseService, MessageService],
 })

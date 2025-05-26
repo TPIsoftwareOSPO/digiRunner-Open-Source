@@ -21,8 +21,13 @@ public class DPB0079Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private FileHelper fileHelper;
+
+	@Autowired
+	public DPB0079Service(FileHelper fileHelper) {
+		super();
+		this.fileHelper = fileHelper;
+	}
 
 	private byte[] getFile(String tsmpDpFilePath, String filename) {
 		try {

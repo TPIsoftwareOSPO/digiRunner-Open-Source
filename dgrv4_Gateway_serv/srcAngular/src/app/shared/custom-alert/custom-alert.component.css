@@ -1,0 +1,27 @@
+.custom-dialog{
+  width: 32em;
+  border-radius: 8px;
+  max-width: 100%;  /* 避免超出畫面 */
+  overflow-x: hidden; /* 禁止橫向捲軸 */
+  padding: 1rem;
+
+}
+
+.icon-large {
+  font-size: 4rem; /* 縮小 i 圖示避免超出 */
+  margin-right: 10px;
+  max-width: 100%;
+}
+
+.text-wrap {
+  word-wrap: break-word; /* 讓長文字自動換行 */
+  white-space: normal; /* 確保不強制單行 */
+}
+
+.overflow-hidden {
+  overflow: hidden; /* 防止過長的 HTML 內容導致橫向捲軸 */
+}
+
+button {
+  min-width: 100px; /* 讓按鈕不會變太小 */
+}

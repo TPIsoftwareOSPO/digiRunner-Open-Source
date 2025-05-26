@@ -2,6 +2,7 @@ package tpi.dgrv4.gateway.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -46,47 +47,42 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class DGRCServiceGet implements IApiCacheService{
 	
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-	
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-	
-	@Autowired
 	private DgrcRoutingHelper dgrcRoutingHelper;
-	
-	@Autowired
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
 	
 	private static Map<String, String> maskInfo ;
 
+	@Autowired
+	public DGRCServiceGet(TsmpApiCacheProxy tsmpApiCacheProxy, ObjectMapper objectMapper,
+			CommForwardProcService commForwardProcService, ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy,
+			DgrcRoutingHelper dgrcRoutingHelper, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
+			TsmpSettingService tsmpSettingService, MockApiTestService mockApiTestService) {
+		super();
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.objectMapper = objectMapper;
+		this.commForwardProcService = commForwardProcService;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.mockApiTestService = mockApiTestService;
+	}
+
 	@Async("async-workers-highway")
 	public CompletableFuture<ResponseEntity<?>> forwardToGetAsyncFast(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes) throws Exception {
 		var response = forwardToGet(httpHeaders, httpReq, httpRes);
-		// 記錄 response 的時間
-		GatewayFilter.fetchUriHistoryAfter(httpReq);
-
 		return CompletableFuture.completedFuture(response);
 	}
 	
 	@Async("async-workers")
 	public CompletableFuture<ResponseEntity<?>> forwardToGetAsyncSlow(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes) throws Exception {
 		var response = forwardToGet(httpHeaders, httpReq, httpRes);
-		// 記錄 response 的時間
-		GatewayFilter.fetchUriHistoryAfter(httpReq);
-
 		return CompletableFuture.completedFuture(response);
 	}
 
@@ -96,11 +92,11 @@ public class DGRCServiceGet implements IApiCacheService{
 			String reqUrl = httpReq.getRequestURI();
 			
 			TsmpApiReg apiReg = null;
-			if (null == httpReq.getAttribute(GatewayFilter.moduleName)) {
+			if (null == httpReq.getAttribute(GatewayFilter.MODULE_NAME)) {
 				throw new Exception("TSMP_API_REG module_name is null");
 			}
-			String dgrcGet_moduleName = httpReq.getAttribute(GatewayFilter.moduleName).toString();
-			String apiId = httpReq.getAttribute(GatewayFilter.apiId).toString();
+			String dgrcGet_moduleName = httpReq.getAttribute(GatewayFilter.MODULE_NAME).toString();
+			String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
 			TsmpApiRegId tsmpApiRegId = new TsmpApiRegId(apiId, dgrcGet_moduleName);
 			Optional<TsmpApiReg> opt_tsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId);		
 			if (opt_tsmpApiReg.isPresent()) {
@@ -135,7 +131,7 @@ public class DGRCServiceGet implements IApiCacheService{
 			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start DGRC】--\n" + reqLog.toString());
 
-			// 檢查資料
+			// 檢查授權
 			ResponseEntity<?> verifyResp = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders, apiReg, null, true);
 			
 			// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
@@ -143,9 +139,10 @@ public class DGRCServiceGet implements IApiCacheService{
 			// 第一組RDB REQ
 			TsmpApiLogReq dgrcGetDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq, "", "dgrc", aType);
 			
-			// JWT 資料驗證有錯誤
+			// 授權錯誤,則回覆錯誤訊息
 			if(verifyResp != null) {
-				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" + getCommForwardProcService().getLogResp(verifyResp, maskInfo).toString());
+				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n"
+						+ getCommForwardProcService().getLogResp(verifyResp, maskInfo, httpReq).toString());
 				//第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(verifyResp.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(verifyResp, dgrcGetDgrReqVo, respMbody);
@@ -153,6 +150,7 @@ public class DGRCServiceGet implements IApiCacheService{
 				return verifyResp;
 			}
 			
+			// 計算依來源IP取得轉發的目地的
 			List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
 
 			// 沒有目標URL,則回覆錯誤訊息
@@ -160,7 +158,7 @@ public class DGRCServiceGet implements IApiCacheService{
 				ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
 
 				TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n"
-						+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo).toString());
+						+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo, httpReq).toString());
 				// 第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(srcUrlListErrResp.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(srcUrlListErrResp, dgrcGetDgrReqVo, respMbody);
@@ -186,7 +184,13 @@ public class DGRCServiceGet implements IApiCacheService{
 			// 調用目標URL
 			Map<String, Object> convertResponseBodyMap = forwardToByPolicy(httpHeaders, httpReq, httpRes, apiReg, uuid,
 					tokenPayload, cApiKeySwitch, dgrcGetDgrReqVo, dgrcGetDgrReqVo_rdb, srcUrlList);
-
+			
+			if (convertResponseBodyMap == null) {
+				// Response alread commited HTTP code : 503 --> null
+				// 不寫 ES , 不輸出 online console
+				return null;
+			}
+			
 			byte[] httpArray = null;
 			String httpRespStr = null;
 			if (convertResponseBodyMap != null) {
@@ -208,7 +212,7 @@ public class DGRCServiceGet implements IApiCacheService{
 			
 			// 印出第四道log
 			StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length,
-					maskInfo);
+					maskInfo, httpReq);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" + resLog.toString());
 
 			// 第一組ES RESP
@@ -276,7 +280,7 @@ public class DGRCServiceGet implements IApiCacheService{
 					dgrcGetDgrReqVo, dgrcGetDgrReqVo_rdb, cApiKeySwitch, null);
 		}
 
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 
 	protected Map<String, Object> forwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
@@ -284,8 +288,8 @@ public class DGRCServiceGet implements IApiCacheService{
 			TsmpApiLogReq dgrcGetDgrReqVo, TsmpApiLogReq dgrcGetDgrReqVo_rdb, Boolean cApiKeySwitch, String tryNumWord)
 			throws Exception {
 
-		// 2. tsmpc req header / body
-		// 3. tsmpc resp header / body / code
+		// 2. dgrc req header / body
+		// 3. dgrc resp header / body / code
 
 		// http header
 		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders, tokenPayload,cApiKeySwitch, uuid, srcUrl);
@@ -359,7 +363,7 @@ public class DGRCServiceGet implements IApiCacheService{
 		Map<String, Object> convertResponseBodyMap = getCommForwardProcService().convertResponseBody(httpRes, httpReq,
 				dgrcGet_respObj.httpRespArray, dgrcGet_respObj.respStr);
  
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 	
 	public HttpRespData callback(AutoCacheParamVo vo) {
@@ -370,8 +374,8 @@ public class DGRCServiceGet implements IApiCacheService{
 			
 			//第二組ES REQ
 			TsmpApiLogReq dgrcGetBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
-	
-			HttpRespData respObj = getHttpRespData(vo.getHeader(), vo.getSrcUrl());
+
+			HttpRespData respObj = getHttpRespData(vo.getHeader(), vo.getSrcUrl(), null);
 			respObj.fetchByte(maskInfo); // because Enable inputStream
 			sb.append(respObj.getLogStr());
 			TPILogger.tl.debug(sb.toString());
@@ -412,7 +416,7 @@ public class DGRCServiceGet implements IApiCacheService{
 		//第二組ES REQ
 		TsmpApiLogReq dgrcGetBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header, srcUrl,
 				"");
-		HttpRespData respObj = getHttpRespData(header, srcUrl);
+		HttpRespData respObj = getHttpRespData(header, srcUrl,httpRes.getOutputStream());
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		dgrcGet_sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(dgrcGet_sb.toString());
@@ -475,8 +479,8 @@ public class DGRCServiceGet implements IApiCacheService{
 	}
 	
 	private HttpRespData getHttpRespData(Map<String, List<String>> header, 
-			String reqUrl) throws Exception {
-		HttpRespData dgrcGet_httpRespData = HttpUtil.httpReqByGetList(reqUrl, header, true, false, maskInfo);
+			String reqUrl, OutputStream sseOutput) throws Exception {
+		HttpRespData dgrcGet_httpRespData = HttpUtil.httpReqByGetList(reqUrl, header, true, false, maskInfo, sseOutput);
 		
 		return dgrcGet_httpRespData;
 	}

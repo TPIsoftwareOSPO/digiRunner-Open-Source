@@ -2,7 +2,7 @@
     <div class="">
         <!-- <div class="rootItem">
             {{siteMaps?.siteDesc}}
-            <button type="submit" class="btn btn-deta float-right pt-0"
+            <button type="submit" class="btn btn-deta float-end pt-0"
                 (click)="showDialog(siteMaps,formOperate.create)"> <span
                     class="fa fa-plus-circle">{{'button.add'|translate}}</span></button>
         </div> -->
@@ -16,7 +16,7 @@
                         </div>
                         <!-- <span class="subItem">
                             {{item.siteDesc}}
-                            <div class="btn-group float-right">
+                            <div class="btn-group float-end">
                                 <button type="button" class="btn btn-deta"
                                     (click)="showDialog(item,formOperate.update)">
                                     <span class="fa fa-edit">{{'button.update'|translate}}</span>
@@ -36,7 +36,7 @@
                                 <li *ngFor="let node of tree">
                                     <span class="subItem">
                                         {{node.siteDesc}}
-                                        <div class="btn-group float-right">
+                                        <div class="btn-group float-end">
                                             <button type="button" class="btn btn-deta"
                                                 (click)="showDialog(node,formOperate.update)">
                                                 <span class="fa fa-edit">{{'button.update'|translate}}</span>
@@ -69,7 +69,7 @@
                             <li *ngFor="let node of site.nodes">
                                 <span class="subItem">
                                     {{node.siteDesc}}
-                                    <div class="btn-group float-right">
+                                    <div class="btn-group float-end">
                                         <button type="button" class="btn btn-deta"
                                             (click)="showDialog(node,formOperate.update)">
                                             <span class="fa fa-edit">{{'button.update'|translate}}</span>
@@ -93,11 +93,11 @@
 
 
         <!-- 測試ngx-nestable元件 -->
-        <div class="mx-2 my-2">
-            <button type="button" class="btn tpi-primary mb-2 mr-2" [disabled]="allDisabled" (click)="plus('',itemTemplate)">
+        <!-- <div class="mx-2 my-2">
+            <button type="button" class="btn tpi-primary mb-2 me-2" [disabled]="allDisabled" (click)="plus('',itemTemplate)">
                 <span class="fa fa-plus-circle">&nbsp;{{'button.create'|translate}}</span>
             </button>
-            <button type="button" class="btn tpi-primary mb-2 mr-2" [disabled]="allDisabled" (click)="collapseAll($event)">
+            <button type="button" class="btn tpi-primary mb-2 me-2" [disabled]="allDisabled" (click)="collapseAll($event)">
                 <span class="fa fa-compress">&nbsp;{{'button.collapse'|translate}}</span>
             </button>
             <button type="button" class="btn tpi-primary mb-2" [disabled]="allDisabled" (click)="expandAll($event)">
@@ -109,7 +109,7 @@
                     </ngx-nestable>
                 </div>
             </div>
-        </div>
+        </div> -->
         <ng-template #itemTemplate let-row>
             <div class="w-100 d-flex" style="margin-bottom: 5px;align-items: center;">
                 <div [ngxNestableDragHandle]="row">
@@ -128,7 +128,7 @@
                 <div>
                     <div class="sitemapText" [id]="'span_'+ row.item.id" (click)="onClickHandler(row)" #span>{{row.item.name}}</div>
                     <div style="display: none;" [id]="'input_'+row.item.id">
-                        <input aria-label="name" type="text" class="form-control mr-2" #inputName
+                        <input aria-label="name" type="text" class="form-control me-2" #inputName
                             (keydown.enter)="onClickHandler(row)" [value]="row.item.name" (keydown.escape)="onEscapeHandler(row)">
                         <input aria-label="name" type="text" class="form-control" #inputUrl (keydown.escape)="onEscapeHandler(row)"
                             (keydown.enter)="onClickHandler(row)" [value]="row.item.url">
@@ -136,10 +136,10 @@
                 </div>
 
                 <div style="margin-right: 15px;margin-left: auto;" class="btn-group">
-                    <!-- <button (click)="xxx(row)" class="btn  mr-1" style="background: transparent;font-size: 24px;"><i class="fa fa-edit"></i></button>
-                    <button (click)="plus(row)" class="btn  mr-1" style="background: transparent;font-size: 24px;"><i class="fa fa-plus"></i></button>
-                    <button (click)="xxx(row)" class="btn  mr-1" style="background: transparent;font-size: 24px;"><i class="fa fa-minus"></i></button> -->
-                    <div class="btn-group float-right" *ngTemplateOutlet="row.item.focus?focus:view"></div>
+                    <!-- <button (click)="xxx(row)" class="btn  me-1" style="background: transparent;font-size: 24px;"><i class="fa fa-edit"></i></button>
+                    <button (click)="plus(row)" class="btn  me-1" style="background: transparent;font-size: 24px;"><i class="fa fa-plus"></i></button>
+                    <button (click)="xxx(row)" class="btn  me-1" style="background: transparent;font-size: 24px;"><i class="fa fa-minus"></i></button> -->
+                    <div class="btn-group float-end" *ngTemplateOutlet="row.item.focus?focus:view"></div>
                     <ng-template #view>
                         <button type="button" class="btn btn-deta" [disabled]="allDisabled" (click)="plus(row,itemTemplate)">
                             <span class="fa fa-plus-circle">&nbsp;{{'button.add'|translate}}</span>

@@ -34,25 +34,27 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0018Service {
 
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpnApiModuleDao tsmpnApiModuleDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0018Service(TsmpApiDao tsmpApiDao, TsmpApiModuleDao tsmpApiModuleDao,
+			TsmpDpClientextDao tsmpDpClientextDao, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpnApiModuleDao tsmpnApiModuleDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpnApiModuleDao = tsmpnApiModuleDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0018Resp queryApiLikeList_1(TsmpAuthorization authorization, DPB0018Req req) {
 		String orgId = authorization.getOrgId();

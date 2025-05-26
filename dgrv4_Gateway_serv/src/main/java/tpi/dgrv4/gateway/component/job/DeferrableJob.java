@@ -13,9 +13,6 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @SuppressWarnings("serial")
 public abstract class DeferrableJob extends Job {
 
-	@Autowired
-	private TPILogger logger;
-
 	/**
 	 * 被丟入Deferrable佇列的時間點
 	 */
@@ -75,6 +72,11 @@ public abstract class DeferrableJob extends Job {
 			} catch(ObjectOptimisticLockingFailureException e) {
 				TPILogger.tl.warn(StackTraceUtil.logTpiShortStackTrace(e));
 			}
+		}
+		
+		// 2025.3.7 - All DeferrableJob 在執行完也要 notify, 以免高併發, 長時間堆積
+		synchronized (jobManager.buff2nd) {
+			jobManager.buff2nd.notifyAll();
 		}
 	}
 

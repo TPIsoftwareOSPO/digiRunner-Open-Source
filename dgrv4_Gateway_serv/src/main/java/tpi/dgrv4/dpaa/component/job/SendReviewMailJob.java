@@ -20,10 +20,7 @@ public class SendReviewMailJob extends Job {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
-	private SendReviewMailService service;
-	
-	@Autowired
+	private SendReviewMailService sendReviewMailService;
 	private PrepareMailService prepareMailService;
 
 	private final TsmpAuthorization auth;
@@ -38,14 +35,18 @@ public class SendReviewMailJob extends Job {
 	
 	private final String locale;
 
-	public SendReviewMailJob(TsmpAuthorization auth, Long reqOrdermId, 
-			String reqType, String sendTime, String reqOrderNo, String locale) {
+	@Autowired
+	public SendReviewMailJob(TsmpAuthorization auth, Long reqOrdermId, String reqType, String sendTime,
+			String reqOrderNo, String locale, SendReviewMailService sendReviewMailService,
+			PrepareMailService prepareMailService) {
 		this.auth = auth;
 		this.reqOrdermId = reqOrdermId;
 		this.reqType = reqType;
 		this.sendTime = sendTime;
 		this.reqOrderNo = reqOrderNo;
 		this.locale = locale;
+		this.sendReviewMailService = sendReviewMailService;
+		this.prepareMailService = prepareMailService;
 	}
 
 	@Override
@@ -53,18 +54,22 @@ public class SendReviewMailJob extends Job {
 		try {
 			this.logger.debug("--- Begin SendReviewMailJob ---");
 			if (this.auth == null) {
-				throw new Exception("未傳入授權資訊, 無法寄出簽核通知信");
+				// 未傳入授權資訊, 無法寄出簽核通知信
+				throw new Exception("Authorization information was not passed in, so the approval notification email cannot be sent out");
 			}
 			if (this.reqOrdermId == null) {
-				throw new Exception("未指定申請單主檔序號, 無法寄出簽核通知信");
+				// 未指定申請單主檔序號, 無法寄出簽核通知信
+				throw new Exception("The application master number is not specified, so the approval notification email cannot be sent out");
 			}
 			if (!StringUtils.hasLength(this.reqType)) {
-				throw new Exception("未指定申請單簽核類型, 無法寄出簽核通知信");
+				// 未指定申請單簽核類型, 無法寄出簽核通知信
+				throw new Exception("The approval type of the application form has not been specified, so the approval notification email cannot be sent out.");
 			}
-			List<TsmpMailEvent> mailEvents = service.getTsmpMailEventList( //
+			List<TsmpMailEvent> mailEvents = sendReviewMailService.getTsmpMailEventList( //
 					this.auth, this.reqOrdermId, this.reqType, this.locale);
 			if (mailEvents == null || mailEvents.isEmpty()) {
-				throw new Exception("取得信件參數失敗, 無法寄出簽核通知信");
+				// 取得信件參數失敗, 無法寄出簽核通知信
+				throw new Exception("Failed to obtain the letter parameters, unable to send the approval notification letter");
 			}
 			
 			/* 20200525; Mini; 寫入 APPT_JOB Table & 建立 Mail 檔案, 改由排程來寄信

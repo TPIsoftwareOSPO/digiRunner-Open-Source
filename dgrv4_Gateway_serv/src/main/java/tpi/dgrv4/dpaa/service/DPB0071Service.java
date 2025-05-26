@@ -2,13 +2,12 @@ package tpi.dgrv4.dpaa.service;
 
 import java.util.function.Supplier;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import jakarta.transaction.Transactional;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpReqReviewType;
 import tpi.dgrv4.common.constant.TsmpDpReqReviewType.ItemContainer;
@@ -25,8 +24,6 @@ import tpi.dgrv4.dpaa.component.req.DpReqServiceSignReq;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0071Req;
 import tpi.dgrv4.dpaa.vo.DPB0071Resp;
-import tpi.dgrv4.entity.entity.DgrAcIdpUser;
-import tpi.dgrv4.entity.entity.TsmpUser;
 import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.component.job.JobHelper;
@@ -39,20 +36,23 @@ public class DPB0071Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private DpReqServiceFactory dpReqServiceFactory;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
 	
+	@Autowired
+	public DPB0071Service(DpReqServiceFactory dpReqServiceFactory, JobHelper jobHelper, ApplicationContext ctx,
+			DgrAcIdpUserDao dgrAcIdpUserDao, TsmpUserDao tsmpUserDao) {
+		super();
+		this.dpReqServiceFactory = dpReqServiceFactory;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpUserDao = tsmpUserDao;
+	}
+
 	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
 		return dgrAcIdpUserDao;
 	}

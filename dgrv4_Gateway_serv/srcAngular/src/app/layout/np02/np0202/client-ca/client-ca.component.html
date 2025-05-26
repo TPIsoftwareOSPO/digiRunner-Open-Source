@@ -1,0 +1,131 @@
+<div class="  py-1">
+  <div class="row">
+      <div class="col-md-12  ">
+          <div class="row">
+              <div class="col-md-12">
+                  <div class="ui-inputgroup">
+                      <input type="file" id="fileName" accept=".pem" (change)="fileChange($event.target.files)"
+                          [(ngModel)]="fileName" style="display: none;">
+                      <input type="text" class="form-control" style="display: unset;"
+                          placeholder="{{'upload_file' | translate}}" value="{{_fileName}}" disabled>
+                      <button pButton type="button" icon="pi pi-upload" class="tpi-night ml-1"
+                          (click)="openFileBrowser()"></button>
+                  </div>
+              </div>
+          </div>
+          <br>
+          <div class="row">
+              <div class="col-md-12">
+                  <p-table *ngIf="cols" [columns]="cols" [value]="certList" selectionMode="single" styleClass="p-datatable-striped"
+                      [style]="{'word-break':'break-word'}">
+                      <ng-template pTemplate="colgroup" let-columns>
+                          <colgroup>
+                              <col *ngFor="let col of columns" [style.width]="col.width">
+                          </colgroup>
+                          <colgroup style="width:280px;">{{'action'|translate}}</colgroup>
+                      </ng-template>
+                      <ng-template pTemplate="header" let-columns>
+                          <tr>
+                              <th *ngFor="let col of columns" scope="col">
+                                  {{col.header}}
+                              </th>
+                              <th style="width:280px;" scope="col">{{'action'|translate}}
+                              </th>
+                          </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-rowData let-columns="columns">
+                          <tr>
+                              <td *ngFor="let col of columns" [style.width]="col.width">
+                                  <span *ngIf="col.field != 'expiredAt'">
+                                      {{rowData[col.field]}}
+                                  </span>
+                                  <span *ngIf="col.field == 'expiredAt'"
+                                      [style.color]="highlight(rowData[col.field])">
+                                      {{rowData[col.field]}}
+                                  </span>
+                              </td>
+                              <td style="text-align:center;width: 280px">
+                                  <div style="flex-wrap: wrap;">
+                                    <button pButton pRipple type="button" icon="pi pi-eye"
+                                            class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.detail)"
+                                            [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+                                      <!-- <button type="button" class="btn btn-deta mr-5 mb-1"
+                                          (click)="showDialog(rowData,formOperate.detail)">
+                                          <span class="fa fa-search">{{'button.detail'|translate}}</span>
+                                      </button> -->
+                                      <button pButton pRipple type="button" icon="fa fa-trash-alt"
+                                            class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.delete)"
+                                            [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
+                                      <!-- <button type="button" class="btn btn-deta mr-5 mb-1"
+                                          (click)="showDialog(rowData,formOperate.delete)">
+                                          <span class="fa fa-trash">{{'button.delete'|translate}}</span>
+                                      </button> -->
+                                      <button pButton pRipple type="button" icon="fa fa-download"
+                                            class="p-button-rounded p-button-text p-button-plain" (click)="download(rowData)"
+                                            [pTooltip]="'button.download' | translate" tooltipPosition="top"></button>
+
+                                      <!--<button type="button" class="btn btn-deta" (click)="download(rowData);">
+                                          <span class="fa fa-download">{{'button.download'|translate}}</span>
+                                      </button> -->
+                                  </div>
+                              </td>
+                          </tr>
+                      </ng-template>
+                      <ng-template pTemplate="footer" let-columns>
+                          <tr *ngIf="rowcount">
+                              <td [attr.colspan]="columns.length+1">
+                                  <span>{{'row_count' | translate}}: {{rowcount}}</span>
+                              </td>
+                          </tr>
+                      </ng-template>
+                      <ng-template pTemplate="emptymessage" let-columns>
+                          <tr>
+                              <td [attr.colspan]="columns.length+1">
+                                  {{'no_rec' | translate}}
+                              </td>
+                          </tr>
+                      </ng-template>
+                  </p-table>
+              </div>
+              <div class="col-md-12 mt-2" *ngIf="this.isCusEnable === 'Y'">
+                  <button type="button" class="btn btn-warning   mr-3 mb-1"
+                      (click)="bindData($event)">{{'interface_cert'|translate}}</button>
+                  <app-ca-card [cards]="this.cards"></app-ca-card>
+                  <app-ca-stat [type]="this.selectedAction" [apptJobId]="apptJobId" [stackTrace]="stackTrace" [statusName]="statusName"
+                      [cgRespBody]="cgRespBody" (restart)="restart($event)"></app-ca-stat>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<app-dialog [title]="dialogTitle" #dialog [width]="800"></app-dialog>
+<!-- <p-toast position="center" key="delete" (onClose)="onReject()" [baseZIndex]="5000">
+  <ng-template let-message pTemplate="message">
+      <div style="text-align: center">
+          <em class="fas fa-exclamation-triangle fa-3x"></em>
+          <h4>{{message.summary}}</h4>
+          <p>{{message.detail}}</p>
+      </div>
+      <div class="ui-g ui-fluid">
+          <div class="ui-g-6">
+              <button type="button" pButton (click)="onDeleteConfirm()" label="{{'button.confirm'|translate}}"
+                  class="ui-button-success"></button>
+          </div>
+          <div class="ui-g-6">
+              <button type="button" pButton (click)="onReject()" label="{{'button.cancel'|translate}}"
+                  class="ui-button-secondary"></button>
+          </div>
+      </div>
+  </ng-template>
+</p-toast> -->
+
+<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<ng-template pTemplate="footer">
+  <div class="row" style="justify-content: center;">
+    <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+    <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+  </div>
+</ng-template>
+</p-confirmDialog>
+
+<!-- <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast> -->

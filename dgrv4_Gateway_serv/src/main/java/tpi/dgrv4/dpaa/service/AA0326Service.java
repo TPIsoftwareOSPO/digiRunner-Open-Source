@@ -14,8 +14,13 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Service
 public class AA0326Service {
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public AA0326Service(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public AA0326Resp getComposerAllFlag(AA0326Req req, HttpServletRequest httpReq) throws JsonProcessingException {
 

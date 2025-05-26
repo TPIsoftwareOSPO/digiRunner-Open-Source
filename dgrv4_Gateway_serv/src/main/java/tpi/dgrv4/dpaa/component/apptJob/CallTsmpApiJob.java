@@ -17,8 +17,10 @@ import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.dpaa.component.ApiHelper_TSMP;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpCallapi;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpCallapiDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @SuppressWarnings("serial")
@@ -26,14 +28,15 @@ public class CallTsmpApiJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ApiHelper_TSMP apiHelper;
-
-	@Autowired
 	private TsmpDpCallapiDao tsmpDpCallapiDao;
 
-	public CallTsmpApiJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public CallTsmpApiJob(TsmpDpApptJob tsmpDpApptJob, ApiHelper_TSMP apiHelper, TsmpDpCallapiDao tsmpDpCallapiDao,
+			ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.apiHelper = apiHelper;
+		this.tsmpDpCallapiDao = tsmpDpCallapiDao;
 	}
 
 	@Override

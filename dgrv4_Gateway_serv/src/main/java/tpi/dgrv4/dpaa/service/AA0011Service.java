@@ -40,30 +40,30 @@ public class AA0011Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-
-	@Autowired
 	private TsmpRoleDao tsmpRoleDao;
-	
-	@Autowired
 	private TsmpRoleFuncDao tsmpRoleFuncDao;
-	
-	@Autowired
 	private TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao;
-
-	@Autowired
 	private SeqStoreService seqStoreService;
-	
-	@Autowired
 	private TsmpSequenceDao tsmpSequenceDao;
-
-	@Autowired
 	private SeqStoreDao seqStoreDao;
-	
-	@Autowired
 	private DgrAuditLogService dgrAuditLogService;
 	
+	@Autowired
+	public AA0011Service(TsmpFuncDao tsmpFuncDao, TsmpRoleDao tsmpRoleDao, TsmpRoleFuncDao tsmpRoleFuncDao,
+			TsmpRoleRoleMappingDao tsmpRoleRoleMappingDao, SeqStoreService seqStoreService,
+			TsmpSequenceDao tsmpSequenceDao, SeqStoreDao seqStoreDao, DgrAuditLogService dgrAuditLogService) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpRoleFuncDao = tsmpRoleFuncDao;
+		this.tsmpRoleRoleMappingDao = tsmpRoleRoleMappingDao;
+		this.seqStoreService = seqStoreService;
+		this.tsmpSequenceDao = tsmpSequenceDao;
+		this.seqStoreDao = seqStoreDao;
+		this.dgrAuditLogService = dgrAuditLogService;
+	}
+
 	@Transactional
 	public AA0011Resp addTRole (TsmpAuthorization auth, AA0011Req req, InnerInvokeParam iip) {
 		

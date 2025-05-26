@@ -95,7 +95,7 @@
                 <div class="col-sm-12" *ngFor="let file of data.fileList">
                     <label>{{'related_files'|translate}} : </label>
                     <label>{{file.fileName}}</label>
-                    <button type="button" class="btn tpi-btn tpi-primary ml-2 mb-1" (click)="downloadFile(file.filePath,file.fileName)">
+                    <button type="button" class="btn tpi-btn tpi-primary ms-2 mb-1" (click)="downloadFile(file.filePath,file.fileName)">
                         <span class="fa fa-download">{{'button.download'|translate}}</span>
                     </button>
                     <hr style="margin-top: 0;margin-bottom: 0;">
@@ -105,7 +105,7 @@
             </div>
             <div class="form-group row  text-center">
                 <div class="col-12 col-xl-12 col-ls-12">
-                    <button type="button" class="btn tpi-btn tpi-primary mr-2"
+                    <button type="button" class="btn tpi-btn tpi-primary me-2"
                         (click)="changePageHandler($event);">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>

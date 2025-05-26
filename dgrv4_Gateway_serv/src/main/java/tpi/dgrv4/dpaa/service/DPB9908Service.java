@@ -31,8 +31,13 @@ public class DPB9908Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpItemsDao tsmpDpItemsDao;
+
+	@Autowired
+	public DPB9908Service(TsmpDpItemsDao tsmpDpItemsDao) {
+		super();
+		this.tsmpDpItemsDao = tsmpDpItemsDao;
+	}
 
 	@Transactional
 	public DPB9908Resp updateItemNameList(TsmpAuthorization auth, DPB9908Req req) {

@@ -1,6 +1,5 @@
 package tpi.dgrv4.dpaa.component.apptJob;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -9,8 +8,10 @@ import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
 import tpi.dgrv4.entity.entity.TsmpOpenApiKey;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpOpenApiKeyDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.time.LocalDate;
@@ -18,6 +19,9 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 
 /**
@@ -30,17 +34,18 @@ public class OakChkExpiJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private SendOpenApiKeyExpiringMailService sendOpenApiKeyExpiringMailService;
-	
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
- 
-	public OakChkExpiJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+
+	@Autowired
+	public OakChkExpiJob(TsmpDpApptJob tsmpDpApptJob, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao, ApplicationContext applicationContext) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.sendOpenApiKeyExpiringMailService = applicationContext.getBean(SendOpenApiKeyExpiringMailService.class); // non-Singleton
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
 	}
 	
 	@Override

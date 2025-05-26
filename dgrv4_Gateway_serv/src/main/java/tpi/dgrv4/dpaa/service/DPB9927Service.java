@@ -40,14 +40,18 @@ import java.util.List;
 public class DPB9927Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
-	
-	@Autowired
 	private TsmpReportUrlDao tsmpReportUrlDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
+
+	@Autowired
+	public DPB9927Service(TsmpFuncDao tsmpFuncDao, TsmpReportUrlDao tsmpReportUrlDao,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+		this.tsmpReportUrlDao = tsmpReportUrlDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public void exportTsmpFunc(TsmpAuthorization tsmpAuthorization, DPB9927Req req, ReqHeader reqHeader, HttpServletResponse response) {
 		

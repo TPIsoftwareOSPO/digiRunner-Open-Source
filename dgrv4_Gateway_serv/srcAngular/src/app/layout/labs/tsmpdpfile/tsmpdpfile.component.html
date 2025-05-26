@@ -59,11 +59,11 @@
 
       <div class="form-group row">
         <div class="col-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3 " [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3 " [disabled]="form.invalid"
           (click)="queryTsmpdpFileList();">{{'button.search' | translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-second float-right"
+        <button type="button" class="btn tpi-btn tpi-second float-end"
           (click)="changePage('create');">{{'button.create'|translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-primary float-right mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-end me-3"
           (click)="changePage('resource_recycling_bucket');"><i class="fa fa-trash-alt"></i>{{'button.resource_recycling_bucket' | translate}}</button>
         </div>
       </div>
@@ -98,7 +98,7 @@
               {{originStringTable(rowData[col.field])}}
               <a *ngIf="rowData[col.field].ori" href="javascript:void(0)" (click)="switchOri(rowData[col.field])">
                 <label>{{!rowData[col.field].t ? ("show_less" | translate) : ("show_more" | translate)}}
-                  <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-left mt-1 mr-1': 'fa-angle-double-right ']"></i></label>
+                  <i class="fas" [ngClass]="[!rowData[col.field].t ? 'fa-angle-double-left float-start mt-1 me-1': 'fa-angle-double-right ']"></i></label>
               </a>
               <!-- <span *ngIf="rowData[col.field].t">
 
@@ -114,7 +114,7 @@
               <button pButton pRipple type="button" icon="fa fa-edit"
               class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
               [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
-              <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);">
+              <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);">
                 <span class="fa fa-edit">{{'button.update' | translate}}</span> >
               </button>-->
               <button pButton pRipple type="button" icon="fa fa-trash-alt"
@@ -239,9 +239,9 @@
 
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="formAdd.invalid"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="formAdd.invalid"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -396,9 +396,9 @@
 
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="formUpdate.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="formUpdate.invalid"
             (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -426,8 +426,8 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn btn-warning float-left mr-3" (click)="procData();">{{btnName}}</button>
-          <button type="button" class="btn btn-warning float-left"
+          <button type="button" class="btn btn-warning float-start me-3" (click)="procData();">{{btnName}}</button>
+          <button type="button" class="btn btn-warning float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -498,7 +498,7 @@
       </div>
       <div class="form-group row">
         <div class="col-10 col-xl-10 col-lg-10">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="formBucket.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="formBucket.invalid"
             (click)="queryResourceRecyclingBucket();">{{'button.search' | translate}}</button>
 
         </div>
@@ -509,9 +509,9 @@
       [style]="{'word-break':'break-word'}" [(selection)]="selected" styleClass="p-datatable-striped">
       <ng-template pTemplate="caption">
         <div class="ui-helper-clearfix">
-            <button type="button" class="btn tpi-primary float-left mr-3" (click)="multiReductionPopup();"
+            <button type="button" class="btn tpi-primary float-start me-3" (click)="multiReductionPopup();"
             [disabled]="selected.length==0">{{'button.reduction' | translate}}</button>
-            <button type="button" class="btn tpi-night float-left" (click)="multiDeletePopup();"
+            <button type="button" class="btn tpi-night float-start" (click)="multiDeletePopup();"
               [disabled]="selected.length==0">{{'button.delete_permanently'|translate}}</button>
         </div>
       </ng-template>
@@ -546,7 +546,7 @@
               {{originStringTable(rowData.fileName)}}
               <label class="moreless" *ngIf="rowData.fileName.ori" (click)="switchOri(rowData.fileName)">
                 {{rowData.fileName.t ?  ("show_more" | translate): ''}}
-                <i  class="fas" [ngClass]="[rowData.fileName.t ? 'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                <i  class="fas" [ngClass]="[rowData.fileName.t ? 'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData.fileName.t ? '' : ("show_less" | translate)  }}
               </label>
             </span>
@@ -556,10 +556,10 @@
           </td>
           <td style="text-align:center;width: 200px">
             <!-- <div class="btn-group">
-              <button type="button" class="btn btn-deta mr-5" (click)="singleReductionPopup(rowData);">
+              <button type="button" class="btn btn-deta me-5" (click)="singleReductionPopup(rowData);">
                 <span class="fa fa-reply">{{'button.reduction' | translate}}</span>
               </button>
-              <button type="button" class="btn btn-deta mr-5" (click)="singleDeletePops(rowData)">
+              <button type="button" class="btn btn-deta me-5" (click)="singleDeletePops(rowData)">
                 <span class="fa fa-trash-alt">{{'button.delete_permanently' | translate}}</span>
               </button>
               <button *ngIf="rowData['filePath']!==''" type="button" class="btn btn-deta"
@@ -591,7 +591,7 @@
         <tr *ngIf="tableDataRowcountBucket">
           <td [attr.colspan]="columns.length+2" style="color: #b7b7b7;">
             <span>{{'row_count' | translate}}: {{tableDataRowcountBucket}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3" [disabled]="formBucket.invalid"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3" [disabled]="formBucket.invalid"
               (click)="getMoreDataBucket();">{{'button.more'|translate}}</button> -->
 
 
@@ -614,7 +614,7 @@
 
     <div class="form-group row mt-2">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left"
+        <button type="button" class="btn tpi-btn tpi-primary float-start"
           (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>

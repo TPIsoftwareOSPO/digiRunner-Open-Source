@@ -21,8 +21,13 @@ public class AA1103Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSecurityLevelDao tsmpSecurityLevelDao;
+
+	@Autowired
+	public AA1103Service(TsmpSecurityLevelDao tsmpSecurityLevelDao) {
+		super();
+		this.tsmpSecurityLevelDao = tsmpSecurityLevelDao;
+	}
 
 	public AA1103Resp updateSecurityLevel(TsmpAuthorization authorization, AA1103Req req) {
 		AA1103Resp resp = new AA1103Resp();

@@ -26,14 +26,18 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0099Service {
 	
-	@Autowired
 	private TsmpRtnCodeDao tsmpRtnCodeDao;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
 	
 	private TPILogger logger = TPILogger.tl;
 	
+	@Autowired
+	public DPB0099Service(TsmpRtnCodeDao tsmpRtnCodeDao, BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
+
 	public DPB0099Resp updateApiRtnCode(TsmpAuthorization authorization, DPB0099Req req, ReqHeader reqHeader) {
 		DPB0099Resp resp = new DPB0099Resp();
 		try {

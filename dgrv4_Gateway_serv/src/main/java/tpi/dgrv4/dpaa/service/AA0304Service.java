@@ -42,32 +42,32 @@ public class AA0304Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private TsmpRegModuleDao tsmpRegModuleDao;
+	private DaoGenericCacheService daoGenericCacheService;
+	private DgrAcIdpUserDao dgrAcIdpUserDao;
 
 	@Autowired
-	private DaoGenericCacheService daoGenericCacheService;
-	
-	@Autowired
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	public AA0304Service(TsmpUserDao tsmpUserDao, TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao,
+			BcryptParamHelper bcryptParamHelper, ApplicationContext ctx, JobHelper jobHelper,
+			TsmpRegModuleDao tsmpRegModuleDao, DaoGenericCacheService daoGenericCacheService,
+			DgrAcIdpUserDao dgrAcIdpUserDao) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpRegModuleDao = tsmpRegModuleDao;
+		this.daoGenericCacheService = daoGenericCacheService;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+	}
 
 	@Transactional
 	public AA0304Resp updateAPIInfo(TsmpAuthorization auth, AA0304Req req, ReqHeader reqHeader) {

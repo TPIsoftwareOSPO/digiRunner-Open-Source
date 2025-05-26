@@ -33,23 +33,25 @@ public class DPB0021Service {
 
 	private TPILogger logger = TPILogger.tl;;
 
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiModuleDao tsmpApiModuleDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
+	private FileHelper fileHelper;
 
 	@Autowired
-	private FileHelper fileHelper;
+	public DPB0021Service(TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao, TsmpDpApiThemeDao tsmpDpApiThemeDao,
+			TsmpApiDao tsmpApiDao, TsmpApiModuleDao tsmpApiModuleDao, TsmpDpFileDao tsmpDpFileDao,
+			FileHelper fileHelper) {
+		super();
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiModuleDao = tsmpApiModuleDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.fileHelper = fileHelper;
+	}
 
 	public DPB0021Resp queryThemeById(TsmpAuthorization authorization, DPB0021Req req) {
 		TsmpDpThemeCategory category = getCategory(req.getApiThemeId());

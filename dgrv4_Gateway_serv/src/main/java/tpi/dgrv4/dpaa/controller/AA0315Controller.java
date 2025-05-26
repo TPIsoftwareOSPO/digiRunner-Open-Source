@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0315Controller {
 
-	@Autowired
 	private AA0315Service service;
  
+	@Autowired
+	public AA0315Controller(AA0315Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * 上傳外部系統介接規格
 	 * 

@@ -105,6 +105,8 @@ export class ListGroupComponent implements OnInit {
 
             case 'NP03':
               return ctl.indexOf(name) >= 0 || ctl.indexOf('NP04') >= 0;
+            case 'NP05':
+                return ctl.indexOf(name) >= 0 || ctl.indexOf('NP1202') >= 0;
           }
         })
         .forEach((key) => {

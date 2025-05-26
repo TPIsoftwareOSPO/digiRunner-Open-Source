@@ -11,22 +11,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import tpi.dgrv4.common.constant.DateTimeFormatEnum;
+import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.common.constant.TsmpDpPublicFlag;
 import tpi.dgrv4.common.constant.TsmpDpRegStatus;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.vo.ReqHeader;
 import tpi.dgrv4.dpaa.component.job.DPB0006Job;
-import tpi.dgrv4.common.constant.DateTimeFormatEnum;
-import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.dpaa.vo.DPB0006Client;
 import tpi.dgrv4.dpaa.vo.DPB0006File;
 import tpi.dgrv4.dpaa.vo.DPB0006Req;
@@ -55,34 +53,34 @@ public class DPB0006Service {
 
 	private TPILogger logger = TPILogger.tl;;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private TsmpDpClientextDao tsmpDpClientextDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	
-	@Autowired
 	private TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao;
-	
-	@Autowired
 	private TsmpDpReqOrdersDao tsmpDpReqOrdersDao;
-
+	
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0006Service(TsmpClientDao tsmpClientDao, TsmpDpClientextDao tsmpDpClientextDao,
+			TsmpDpFileDao tsmpDpFileDao, JobHelper jobHelper, ApplicationContext ctx, ServiceConfig serviceConfig,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpDpReqOrderd3Dao tsmpDpReqOrderd3Dao,
+			TsmpDpReqOrdersDao tsmpDpReqOrdersDao) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpClientextDao = tsmpDpClientextDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.jobHelper = jobHelper;
+		this.ctx = ctx;
+		this.serviceConfig = serviceConfig;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpDpReqOrderd3Dao = tsmpDpReqOrderd3Dao;
+		this.tsmpDpReqOrdersDao = tsmpDpReqOrdersDao;
+	}
 
 	public DPB0006Resp queryMemberHistory(TsmpAuthorization authorization, DPB0006Req req, ReqHeader reqHeader) {
 		Map<String, Object> map = queryMemberHistory2(authorization, req, reqHeader);
@@ -407,8 +405,7 @@ public class DPB0006Service {
 	}
 	
 	protected DPB0006Job getDPB0006Job() {
-		DPB0006Job job = (DPB0006Job) getCtx().getBean("dpb0006Job");
-		return job;
+		return (DPB0006Job) getCtx().getBean("dpb0006Job");
 	}
 	
 	protected TsmpClientDao getTsmpClientDao() {

@@ -18,7 +18,7 @@
 <div class="form-group row">
     <div class="col-12">
         <label class="control-label">{{'data_type.old' | translate}}
-            <button class="btn tpi-btn tpi-primary ml-2" [disabled]="paramItem?.oldRowBlob==null"
+            <button class="btn tpi-btn tpi-primary ms-2" [disabled]="paramItem?.oldRowBlob==null"
                 (click)="downloadFile(paramItem?.oldRowBlob,paramItem?.txnUid+'_old_data')">{{'button.download'
                 |translate}}</button>
         </label>
@@ -30,7 +30,7 @@
 <div class="form-group row">
     <div class="col-12">
         <label class="control-label">{{'data_type.new' | translate}}
-            <button class="btn tpi-btn tpi-primary ml-2" [disabled]="paramItem?.newRowBlob==null"
+            <button class="btn tpi-btn tpi-primary ms-2" [disabled]="paramItem?.newRowBlob==null"
                 (click)="downloadFile(paramItem?.newRowBlob,paramItem?.txnUid+'_new_data')">{{'button.download'
                 |translate}}</button>
         </label>

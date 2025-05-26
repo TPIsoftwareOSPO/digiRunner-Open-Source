@@ -96,7 +96,7 @@
                             </td>
                             <td rowspan="2" style="text-align:center;width: 130px;">
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-deta mr-5"
+                                    <button type="button" class="btn btn-deta me-5"
                                         (click)="changePage('status',rowData)" [disabled]="canStatus == false">
                                         <span class="fa fa-search">{{'status'|translate}}</span>
                                     </button>
@@ -121,7 +121,7 @@
                         <tr *ngIf="rowcount">
                             <td [attr.colspan]="columns.length+1">
                                 <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                                <button type="button" class="btn btn-warning pull-right ml-3"
+                                <button type="button" class="btn btn-warning pull-right ms-3"
                                     (click)="moreTaskList();">{{'button.more'|translate}}</button>
                             </td>
                         </tr>

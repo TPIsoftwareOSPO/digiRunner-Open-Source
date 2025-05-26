@@ -16,13 +16,13 @@ export interface DPB0229Resp {
 }
 
 export interface DPB0229RespItem {
-  siteUrl: string;
-  expireDate: string;
-  alert: string;
-  tag: string;
-  updateDateTime: string|number;
+  dgrMtlsClientCertId:string;
+  hostAndPort: string;
+  rootCAExpireDate: string;
+  CRTExpireDate: string;
+  updateDateTime: string;
   updateUser: string;
-  enable:number;
+  enable: string;
 }
 
 // export interface DPB0229RespBefore extends BaseRes {

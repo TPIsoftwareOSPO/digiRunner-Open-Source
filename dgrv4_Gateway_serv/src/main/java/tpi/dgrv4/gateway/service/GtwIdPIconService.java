@@ -29,17 +29,20 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service
 public class GtwIdPIconService {
 
-	@Autowired
 	private DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao;
-
-	@Autowired
 	private DgrGtwIdpInfoADao dgrGtwIdpInfoADao;
-
-	@Autowired
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;
+	private DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao;
 
 	@Autowired
-	private DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao;
+	public GtwIdPIconService(DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao, DgrGtwIdpInfoADao dgrGtwIdpInfoADao,
+			DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao, DgrGtwIdpInfoCusDao dgrGtwIdpInfoCusDao) {
+		super();
+		this.dgrGtwIdpInfoLDao = dgrGtwIdpInfoLDao;
+		this.dgrGtwIdpInfoADao = dgrGtwIdpInfoADao;
+		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
+		this.dgrGtwIdpInfoCusDao = dgrGtwIdpInfoCusDao;
+	}
 
 	public ResponseEntity<String> getIcon(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) {

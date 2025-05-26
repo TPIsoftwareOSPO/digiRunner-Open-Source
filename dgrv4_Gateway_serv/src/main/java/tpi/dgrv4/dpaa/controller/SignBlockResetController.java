@@ -29,8 +29,13 @@ public class SignBlockResetController {
 
 	public static String identify = "resetSignBlock";
 	
-	@Autowired
 	private SignBlockResetService service;
+	
+	@Autowired
+	public SignBlockResetController(SignBlockResetService service) {
+		super();
+		this.service = service;
+	}
 	
 	/**
 	 * 換一個新的signBlock，避免signBlock被盜用。

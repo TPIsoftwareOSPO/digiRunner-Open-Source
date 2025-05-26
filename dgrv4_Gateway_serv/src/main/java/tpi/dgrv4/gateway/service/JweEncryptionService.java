@@ -28,10 +28,15 @@ import tpi.dgrv4.gateway.vo.JweEncryptionResp;
 
 @Service
 public class JweEncryptionService {
-	@Autowired
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	@Autowired
+	public JweEncryptionService(TsmpCoreTokenEntityHelper tsmpCoreTokenHelper) {
+		super();
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+	}
 
 	public JweEncryptionResp jweEncryption(HttpServletRequest httpReq, HttpServletResponse httResp,
 			JweEncryptionReq req) {

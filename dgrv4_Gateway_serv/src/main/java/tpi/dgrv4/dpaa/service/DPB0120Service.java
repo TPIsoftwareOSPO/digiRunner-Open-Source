@@ -16,8 +16,13 @@ public class DPB0120Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public DPB0120Service(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public DPB0120Resp queryCusEnable(HttpServletRequest httpReq, TsmpAuthorization authorization) {
 		DPB0120Resp resp = new DPB0120Resp();

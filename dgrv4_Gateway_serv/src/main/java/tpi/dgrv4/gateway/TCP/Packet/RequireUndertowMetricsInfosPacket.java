@@ -113,7 +113,7 @@ public class RequireUndertowMetricsInfosPacket implements Packet_i {
 		long lastUpdateTime = packet.getLastUpdateTime();
 		// 獲取當前時間
 		long currentTime = System.currentTimeMillis();
-		// 判斷當前時間是否大於封包最後更新時間 10 秒
-		return currentTime - lastUpdateTime > 10000; // 10000 毫秒等於 10 秒
+		// 判斷當前時間是否大於封包最後更新時間 60 秒
+		return currentTime - lastUpdateTime > 60000; // 10000 毫秒等於 60 秒
 	}
 }

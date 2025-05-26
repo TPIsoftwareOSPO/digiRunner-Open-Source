@@ -63,7 +63,7 @@
                     <input type="file" id="file" style="display: none;"  (change)="fileChange($event.target.files)">
                     <input type="text" class="form-control" value="{{fileName}}" readOnly
                     placeholder="{{'upload_file' | translate}}">
-                    <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+                    <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
                     [pTooltip]="'upload_file' | translate" tooltipPosition="top"
                     (click)="openFileBrowser();"></button>
                 </div>
@@ -80,14 +80,14 @@
                 <div class="ui-inputgroup mb-1">
                     <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}"
                         formControlName="keyword">
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night ml-1"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
                         (click)="searchAPI();"></button>
                 </div>
                 <p-table *ngIf="cols" [columns]="cols" [value]="authApiList" selectionMode="single" styleClass="p-datatable-striped"
                     [(selection)]="selectedApis" [style]="{'word-break':'break-word'}">
                     <ng-template pTemplate="caption">
                         <div class="ui-helper-clearfix">
-                            <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="delete()">
+                            <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="delete()">
                                 {{ 'button.delete' | translate }}
                             </button>
                         </div>

@@ -12,7 +12,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="groupName"
               placeholder="{{'group_code'|translate}}">
-            <button pButton type="button" icon="pi pi-search" class="tpi-night ml-1"
+            <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
               (click)="changePage('groupInfo_list');"></button>
           </div>
         </div>
@@ -22,7 +22,7 @@
             <ng-container *ngFor="let stat of queryStatusOpt">
               <div class="p-form-check">
                 <p-radioButton formControlName="encodeStatus" value={{stat.value}}  inputId="encodeStatus{{stat.value}}"></p-radioButton>
-                <label for="encodeStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="encodeStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -38,9 +38,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12">
-          <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="submit" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="canQuery == false">{{'button.search'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-right" (click)="changePage('create');"
+          <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
             [disabled]="canCreate == false">
             {{'button.create'|translate}}
           </button>
@@ -87,15 +87,15 @@
               class="p-button-rounded p-button-text p-button-plain" (click)="changePage('delete', rowData)"
               [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
             <!-- <div class="btn-group"> -->
-            <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail',rowData);"
+            <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData);"
               [disabled]="canDetail == false">
               <span class="fa fa-search">{{'button.detail'|translate}}</span>
             </button> -->
-            <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData);"
+            <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);"
               [disabled]="canUpdate == false">
               <span class="fa fa-edit">{{'button.update'|translate}}</span>
             </button> -->
-            <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('security',rowData)">
+            <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('security',rowData)">
               <span class="fa fa-shield-alt">{{'button.security'|translate}}</span>
             </button>
             <button type="button" class="btn btn-deta" (click)="changePage('delete',rowData);"
@@ -110,7 +110,7 @@
         <tr *ngIf="rowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
               (click)="moreData();">{{'button.more'|translate}}</button> -->
             <!-- 查詢更多 -->
             <button type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
@@ -129,23 +129,20 @@
     </p-table>
   </div>
   <div [hidden]="pageNum != 9">
-    <form [formGroup]=form (ngSubmit)="queryGroupListData()">
+    <form [formGroup]="form">
       <div class="form-group row col-12">
         <!-- <div class="col-6 col-xl-6 col-lg-6">
           <label class="control-label">{{'keyword_search'|translate}}</label>
           <input type="text" class="form-control" formControlName="keyword"
             placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}">
         </div> -->
-
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryGroupListData();"></i>
-          <input type="search" class="form-control tpi-i-input" formControlName="keyword"
-            placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}">
-        </span>
+        <app-search-input placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryGroupListData.bind(this)"
+        class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
       <!-- <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="queryGroupListData();">{{'button.search'|translate}}</button>
         </div>
       </div> -->
@@ -188,7 +185,7 @@
         <tr *ngIf="groupListDataRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{groupListDataRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
               (click)="moreGroupListData();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
@@ -210,7 +207,7 @@
     <br>
     <div class="form-gruop row">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="chooseGroup();">{{'button.confirm'|translate}}</button>
       </div>
     </div>
@@ -311,12 +308,10 @@
         </div>
         <div class="col-lg-4">
           <label class="control-label" for="startTime">{{'service_time' | translate}}</label>
-          <div class="input-group">
+          <div class="d-flex">
             <app-timepicker formControlName="svcST"></app-timepicker>
-            <div class="input-group-append">
-              <span class="px-1 py-1 mt-1">～</span>
-              <app-timepicker formControlName="svcET"></app-timepicker>
-            </div>
+            <span class="px-1">～</span>
+            <app-timepicker formControlName="svcET"></app-timepicker>
           </div>
         </div>
       </div>
@@ -363,7 +358,7 @@
             <ng-container *ngFor="let stat of createStatusOpt">
               <div class="p-form-check">
                 <p-radioButton formControlName="createStatus" value={{stat.value}}  inputId="createStatus{{stat.value}}"></p-radioButton>
-                <label for="createStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="createStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -382,7 +377,7 @@
             <ng-container *ngFor="let stat of publicFlags">
               <div class="p-form-check">
                 <p-radioButton formControlName="publicFlag" value={{stat.value}}  inputId="publicFlag{{stat.value}}"></p-radioButton>
-                <label for="publicFlag{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="publicFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -413,9 +408,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3" [disabled]="form.invalid"
             (click)="createClientData();">{{'button.create'|translate}}</button>
-          <button type="button" class="btn  tpi-btn tpi-primary float-left"
+          <button type="button" class="btn  tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -492,12 +487,10 @@
         </div>
         <div class="col-lg-4">
           <label class="control-label" for="startTime">{{'service_time' | translate}}</label>
-          <div class="input-group">
+          <div class="d-flex">
             <app-timepicker formControlName="newSvcST"></app-timepicker>
-            <div class="input-group-append">
-              <span class="px-1 py-1 mt-1">～</span>
-              <app-timepicker formControlName="newSvcET"></app-timepicker>
-            </div>
+            <span class="px-1">～</span>
+            <app-timepicker formControlName="newSvcET"></app-timepicker>
           </div>
         </div>
       </div>
@@ -536,7 +529,7 @@
             <ng-container *ngFor="let stat of publicFlags">
               <div class="p-form-check">
                 <p-radioButton formControlName="newEncodePublicFlag" value={{stat.value}}  inputId="newEncodePublicFlag{{stat.value}}"></p-radioButton>
-                <label for="newEncodePublicFlag{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="newEncodePublicFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -575,9 +568,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
             (click)="updateClientData();">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -618,9 +611,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3" [disabled]="form.invalid"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form.invalid"
             (click)="deleteClientData();">{{'button.delete'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -721,7 +714,7 @@
                     </td>
                     <td style="text-align:center;width: 70px">
                       <!-- <div class="btn-group"> -->
-                      <!-- <button type="button" class="btn btn-deta mr-5">
+                      <!-- <button type="button" class="btn btn-deta me-5">
                                                     <span class="fa fa-search">{{'button.detail'|translate}}</span>
                                                 </button> -->
                       <!-- <button type="button" class="btn btn-deta" (click)="deleteClientGroup(rowData);">
@@ -781,7 +774,7 @@
                     </td>
                     <td style="text-align:center;width: 70px">
                       <!-- <div class="btn-group"> -->
-                      <!-- <button type="button" class="btn btn-deta mr-5">
+                      <!-- <button type="button" class="btn btn-deta me-5">
                                                     <span class="fa fa-search">{{'button.detail'|translate}}</span>
                                                 </button> -->
                       <!-- <button type="button" class="btn btn-deta" (click)="deleteClientVGroup(rowData);">
@@ -829,7 +822,7 @@
                 <div class="row">
                   <div class="col-sm-2">
                     <label class="control-label"
-                      style="margin-top: 38px;font-weight: bolder;">{{'authority_time'|translate}}</label>
+                      style="margin-top: 32px;font-weight: bolder;">{{'authority_time'|translate}}</label>
                   </div>
                   <div class="col-sm-4">
                     <label id="accessTokenValidity_label" class="control-label"
@@ -860,7 +853,7 @@
                   </div>
                   <div class="col-sm-2">
                     <label class="control-label"
-                      style="margin-top: 38px;font-weight: bolder;">{{'authority_times'|translate}}</label>
+                      style="margin-top: 32px;font-weight: bolder;">{{'authority_times'|translate}}</label>
                   </div>
                   <div class="col-sm-4">
                     <label class="control-label" style="background: #fff;">&nbsp;</label>
@@ -885,7 +878,7 @@
                 <div class="row">
                   <div class="col-sm-2">
                     <label class="control-label"
-                      style="margin-top: 38px;font-weight: bolder;">{{'authority_time'|translate}}</label>
+                      style="margin-top: 32px;font-weight: bolder;">{{'authority_time'|translate}}</label>
                   </div>
                   <div class="col-sm-4">
                     <label id="raccessTokenValidity_label" class="control-label"
@@ -916,7 +909,7 @@
                   </div>
                   <div class="col-sm-2">
                     <label class="control-label"
-                      style="margin-top: 38px;font-weight: bolder;">{{'authority_times'|translate}}</label>
+                      style="margin-top: 32px;font-weight: bolder;">{{'authority_times'|translate}}</label>
                   </div>
                   <div class="col-sm-4">
                     <label class="control-label" style="background: #fff;">&nbsp;</label>
@@ -939,7 +932,7 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri_label" class="control-label">Default Redirect URI</label><i
-                class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
                 pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri">
                 <div
@@ -955,7 +948,7 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri1_label" class="control-label">Extends Redirect URI 1</label><i
-                class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
                 pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri1">
                 <div
@@ -968,7 +961,7 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri2_label" class="control-label">Extends Redirect URI 2</label><i
-                class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
                 pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri2">
                 <div
@@ -981,7 +974,7 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri3_label" class="control-label">Extends Redirect URI 3</label><i
-                class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
                 pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri3">
                 <div
@@ -994,7 +987,7 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri4_label" class="control-label">Extends Redirect URI 4</label><i
-                class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
                 pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri4">
                 <div
@@ -1007,7 +1000,7 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri5_label" class="control-label">Extends Redirect URI 5</label><i
-                class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
                 pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri5">
                 <div
@@ -1030,7 +1023,7 @@
         <!-- X Api Key 設定 -->
         <p-tabPanel header="{{'x_api_key.setting'|translate}}" [selected]="xapikeyTab">
           <div *ngIf="!xApiKeyCreate">
-            <div class="form-group col row">
+            <div class="form-group">
               <button type="button" class="btn tpi-btn tpi-second"
                 (click)="changeXAPiKeyStatus('create')">{{'x_api_key.add'|translate}}</button>
             </div>
@@ -1187,8 +1180,8 @@
                   </div> -->
                 </div>
               </div>
-              <div class="form-group col row">
-                <button type="button" class="btn tpi-btn tpi-second float-left mr-2" (click)="createXApiKey()"
+              <div class="form-group">
+                <button type="button" class="btn tpi-btn tpi-second float-start me-2" (click)="createXApiKey()"
                   [disabled]="formX.invalid || groupIdList.value.length == 0">{{'x_api_key.add'|translate}}</button>
                 <button type="button" class="btn tpi-btn tpi-primary"
                   (click)="changeXAPiKeyStatus();">{{'button.cancel'|translate}}</button>
@@ -1246,7 +1239,7 @@
                   <ng-container *ngFor="let stat of updateStatusOpt">
                     <div class="p-form-check">
                       <p-radioButton formControlName="updateStatus" value={{stat.value}}  inputId="updateStatus{{stat.value}}"></p-radioButton>
-                      <label for="updateStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                      <label for="updateStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                     </div>
                   </ng-container>
                 </div>
@@ -1259,7 +1252,7 @@
                   </label> -->
                   <div class="p-form-check">
                     <p-checkbox [binary]="true" inputId="resetPwdFailTimes" formControlName="resetPwdFailTimes" ></p-checkbox>
-                    <label class="ml-2 mb-0" for="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}</label>
+                    <label class="ms-2 mb-0" for="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}</label>
                   </div>
                   <div *ngIf="resetPwdFailTimes.invalid && (resetPwdFailTimes.dirty || resetPwdFailTimes.touched)"
                     class="text-danger">
@@ -1270,7 +1263,7 @@
             </div>
             <div class="form-group row">
               <div class="col-sm-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
                   [disabled]="resetFailLoginTreshhold.invalid || resetPwdFailTimes.invalid"
                   (click)="updateStatusSetting();">{{'button.update'|translate}}</button>
               </div>
@@ -1293,7 +1286,7 @@
               <div class="col-sm-6 mt-2">
                 <div>
                   <p-checkbox [binary]="true" inputId="resetBlock" formControlName="resetBlock"> </p-checkbox>
-                  <label class="mb-0 ml-1" for="resetBlock">{{"reset_password" | translate}}</label>
+                  <label class="mb-0 ms-1" for="resetBlock">{{"reset_password" | translate}}</label>
                 </div>
                 <!-- <div class="form-check mt-4">
                   <label class="form-check-label">
@@ -1332,7 +1325,7 @@
             </div>
             <div class="form-group row">
               <div class="col-sm-12">
-                <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+                <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
                   [disabled]="!resetBlock.value && ( (clientBlock.invalid || newClientBlock.invalid || confirmNewClientBlock.invalid) || (clientBlock.value == ''|| newClientBlock.value == '' || confirmNewClientBlock.value == ''))"
                   (click)="updateClientPwd();">{{'button.update'|translate}}</button>
               </div>
@@ -1343,7 +1336,7 @@
       <br>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -1483,7 +1476,7 @@
             <ng-container *ngFor="let stat of clientDetailStatusOpt">
               <div class="p-form-check">
                 <p-radioButton value={{stat.value}} [ngModelOptions]="{standalone: true}" [(ngModel)]="clientDetail.status" disabled></p-radioButton>
-                <label class="ml-2 mb-0">{{stat.label}}</label>
+                <label class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -1503,7 +1496,7 @@
             <ng-container *ngFor="let stat of publicFlags">
               <div class="p-form-check">
                 <p-radioButton value={{stat.value}} [ngModelOptions]="{standalone: true}" [(ngModel)]="clientDetail.publicFlag" disabled></p-radioButton>
-                <label class="ml-2 mb-0">{{stat.label}}</label>
+                <label class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -1547,7 +1540,7 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -1555,25 +1548,13 @@
   </div>
   <!-- 群組列表 -->
   <div *ngIf="pageNum == 7">
-    <form [formGroup]="form" (ngSubmit)="queryGroupList()">
-      <div class="form-group">
-        <!-- <div class="col-4 col-xl-4 col-lg-4">
-          <label for="keyword">{{'keyword_search'|translate}}</label>
-          <input type="text" class="form-control" formControlName="keyword"
-            placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}">
-        </div> -->
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryGroupList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}">
-        </span>
+    <form [formGroup]="form">
+      <div class="form-group col-12 d-flex">
+        <app-search-input placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryGroupList.bind(this)"
+        class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
-      <!-- <div class="form-group row">
-        <div class="col-3 col-xl-3 col-lg-3">
-          <button type="button" class="btn tpi-btn tpi-primary pull-right mr-3"
-            (click)="queryGroupList();">{{'button.search'|translate}}</button>
-        </div>
-      </div> -->
+
     </form>
     <hr>
     <p-table *ngIf="groupInfoListCols" [columns]="groupInfoListCols" [value]="groupInfoList" selectionMode="single"
@@ -1615,7 +1596,7 @@
         <tr *ngIf="groupInfoListRowcount">
           <td [attr.colspan]="columns.length+1">
             <span>{{'row_count' | translate}}: {{groupInfoListRowcount}}</span>
-            <button type="button" class="btn tpi-btn tpi-primary pull-right ml-3"
+            <button type="button" class="btn tpi-btn tpi-primary pull-right ms-3"
               (click)="moreGroupList();">{{'button.more'|translate}}</button>
           </td>
         </tr>
@@ -1631,34 +1612,24 @@
     <br>
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="updateClientGroup();">{{'button.update'|translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-primary float-left"
+        <button type="button" class="btn tpi-btn tpi-primary float-start"
           (click)="handleTabSelectd();">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
   </div>
   <!-- 虛擬群組列表 -->
   <div *ngIf="pageNum == 8">
-    <form [formGroup]="form" (ngSubmit)="searchVGroupList()">
-      <div class="form-group ">
-        <!-- <div class="col-4 col-xl-4 col-lg-4">
-          <label for="keyword">{{'keyword_search'|translate}}</label>
-          <input type="text" class="form-control" formControlName="keyword"
-            placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}">
-        </div> -->
-        <span class="p-input-icon-right" style="width:50vw">
-          <i class="pi pi-search tpi-i-search" (click)="searchVGroupList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}">
-        </span>
-      </div>
-      <!-- <div class="form-group row">
-        <div class="col-3 col-xl-3 col-lg-3">
-          <button type="button" class="btn tpi-btn tpi-primary pull-right mr-3"
-            (click)="searchVGroupList();">{{'button.search'|translate}}</button>
+    <form [formGroup]="form">
+      <div class="form-group col-12 d-flex">
+        <div class="col-12 d-flex align-items-center">
+          <app-search-input placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}"
+          [control]="form.get('keyword')" [searchFn]="searchVGroupList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
         </div>
-      </div> -->
+      </div>
+
     </form>
     <hr>
     <p-table *ngIf="vgroupInfoListCols" [columns]="vgroupInfoListCols" [value]="vgroupInfoList" selectionMode="single"
@@ -1700,7 +1671,7 @@
         <tr *ngIf="vgroupInfoListRowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span>{{'row_count' | translate}}: {{vgroupInfoListRowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
               (click)="moreVGroupList();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
@@ -1721,9 +1692,9 @@
     <br>
     <div class="form-group row">
       <div class="col-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="updateClientVGroup();">{{'button.update'|translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-primary float-left"
+        <button type="button" class="btn tpi-btn tpi-primary float-start"
           (click)="handleTabSelectd();">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>

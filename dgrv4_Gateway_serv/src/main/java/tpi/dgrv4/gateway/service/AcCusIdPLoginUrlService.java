@@ -17,8 +17,13 @@ import tpi.dgrv4.gateway.vo.AcCusIdPLoginUrl;
 @Service
 public class AcCusIdPLoginUrlService {
 
-	@Autowired
 	private DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao;
+
+	@Autowired
+	public AcCusIdPLoginUrlService(DgrAcIdpInfoCusDao dgrAcIdpInfoCusDao) {
+		super();
+		this.dgrAcIdpInfoCusDao = dgrAcIdpInfoCusDao;
+	}
 
 	public List<AcCusIdPLoginUrl> getCusLoginUrl() {
 

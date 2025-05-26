@@ -30,23 +30,25 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 @Service(value = "dpaaTsmpSettingService")
 public class TsmpSettingService {
 
-	private TPILogger logger = TPILogger.tl;
-
-	@Autowired
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
-
-	@Autowired
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
-
-	@Autowired
 	private TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy;
-
-	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	public void setTsmpSettingService(TsmpSettingCacheProxy tsmpSettingCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper,
+			TsmpCoreTokenHelperCacheProxy tsmpCoreTokenHelperCacheProxy, ObjectMapper objectMapper) {
+		// Because using constructor injection will cause a circular dependency, use method injection instead
+		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.tsmpCoreTokenHelperCacheProxy = tsmpCoreTokenHelperCacheProxy;
+		this.objectMapper = objectMapper;
+	}
+	
 	// =========================================================
 	// ==================== COMMON METHODS =====================
 	// =========================================================
+
 
 	/**
 	 * 判斷若值為"ENC()"括起來,則解密 <br>
@@ -94,7 +96,7 @@ public class TsmpSettingService {
 				return Integer.valueOf(val);
 			} catch (Exception e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
 					return defaultVal;
 				}
 				throw e;
@@ -115,7 +117,7 @@ public class TsmpSettingService {
 				return Long.valueOf(val);
 			} catch (Exception e) {
 				if (defaultVal != null) {
-					logger.debug(StackTraceUtil.logStackTrace(e));
+					TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
 					return defaultVal;
 				}
 				throw e;
@@ -175,7 +177,7 @@ public class TsmpSettingService {
 		Optional<TsmpSetting> opt = getTsmpSettingCacheProxy().findById(id);
 
 		if (opt.isEmpty()) {
-			logger.debug("id=" + id);
+			TPILogger.tl.debug("id=" + id);
 			throw TsmpDpAaRtnCode.NO_ITEMS_DATA.throwing();
 		}
 
@@ -578,7 +580,7 @@ public class TsmpSettingService {
 						new TypeReference<Map<String, Object>>() {
 						}); // converts JSON to Map
 			} catch (Exception e) {
-				this.logger.error(StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			}
 			return args;
 		});

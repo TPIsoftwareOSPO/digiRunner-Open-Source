@@ -27,11 +27,15 @@ public class DPB0060Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	public DPB0060Service(TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	public DPB0060Resp cancelJobByPk(TsmpAuthorization auth, DPB0060Req req, ReqHeader reqHeader) {
 		// 檢查必要參數

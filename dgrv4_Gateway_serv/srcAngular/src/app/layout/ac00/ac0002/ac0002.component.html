@@ -12,7 +12,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="roleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
               (click)="queryRoleList();"></button>
           </div>
         </div>
@@ -20,16 +20,16 @@
           <label for="orgName" class="control-label">{{'org_name' | translate}}</label>
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="orgName" placeholder="{{'org_name' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
               (click)="openOrgDialog();"></button>
           </div>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-12">
-          <!-- <button type="submit" class="btn btn-warning float-left mr-3">{{'button.search' | translate}}</button> -->
-          <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search' | translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-right" (click)="changePage('create');"
+          <!-- <button type="submit" class="btn btn-warning float-start me-3">{{'button.search' | translate}}</button> -->
+          <button type="submit" class="btn tpi-btn tpi-primary me-3">{{'button.search' | translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-second float-end" (click)="changePage('create');"
             [disabled]="canCreate == false">{{'button.create'|translate}}</button>
         </div>
       </div>
@@ -72,13 +72,13 @@
           </td>
           <td style="text-align: center;width: 200px">
             <div class="btn-group">
-              <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('detail',rowData);">
+              <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData);">
                 <span class="fa fa-search">{{'button.detail' | translate}}</span>
               </button> -->
               <button pButton pRipple type="button" icon="pi pi-eye"
                 class="p-button-rounded p-button-text p-button-plain" (click)="changePage('detail', rowData)"
                 [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
-              <!-- <button type="button" class="btn btn-deta mr-5" (click)="changePage('update',rowData)"
+              <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData)"
                 [disabled]="canUpdate == false">
                 <span class="fa fa-edit">{{'button.update' | translate}}</span>
               </button> -->
@@ -97,8 +97,6 @@
         <tr *ngIf="rowcount">
           <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
             <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-              (click)="moreData();">{{'button.more'|translate}}</button> -->
 
             <!-- 查詢更多 -->
             <button type="button" icon="" class="btn tpi-header-return" (click)="moreData()">
@@ -174,9 +172,9 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button *ngIf="currentAction == 'delete'" type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button *ngIf="currentAction == 'delete'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="deleteUser();">{{'button.delete'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -247,7 +245,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" id="orgName" formControlName="orgName"
               placeholder="{{'org_name' | translate}}" [attr.disabled]="true">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary" (click)="openOrgDialog();"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary" (click)="openOrgDialog();"
               [disabled]="currentAction == 'delete'"></button>
           </div>
           <div *ngIf="orgName?.invalid" class="text-danger">
@@ -274,7 +272,7 @@
               <ng-container *ngFor="let stat of createStatus">
                 <div class="p-form-check">
                   <p-radioButton formControlName="encodeStatus" value={{stat.value}}  inputId="encodeStatus{{stat.value}}"></p-radioButton>
-                  <label for="encodeStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                  <label for="encodeStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                 </div>
               </ng-container>
             </div>
@@ -288,7 +286,7 @@
       <div class="form-group row">
         <div class="col-12">
           <label id="roleIDList_label" class="control-label">{{'role_list' | translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
             (click)="queryRoleMappingList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="roleAliasList.length > 0" class="ui-chips ui-widget">
@@ -311,10 +309,10 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-second float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-second float-start me-3"
             [disabled]="form.invalid || roleAliasList.length == 0"
             (click)="createUser();">{{'button.create'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>
@@ -363,7 +361,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" id="newOrgName" formControlName="newOrgName"
               placeholder="{{'org_name' | translate}}" [attr.disabled]="true">
-            <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary" (click)="openOrgDialog();"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary" (click)="openOrgDialog();"
               [disabled]="currentAction == 'delete'"></button>
           </div>
           <div *ngIf="newOrgName?.invalid" class="text-danger">
@@ -378,7 +376,7 @@
             <ng-container *ngFor="let stat of updateStatus">
               <div class="p-form-check">
                 <p-radioButton formControlName="newStatus" value={{stat.value}}  inputId="status{{stat.value}}"></p-radioButton>
-                <label for="status{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="status{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -393,11 +391,11 @@
           <div class="p-form-check-line">
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="resetBlock" formControlName="resetBlock" ></p-checkbox>
-              <label class="ml-2 mb-0" for="resetBlock">{{'reset_password' | translate}}</label>
+              <label class="ms-2 mb-0" for="resetBlock">{{'reset_password' | translate}}</label>
             </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="resetPwdFailTimes" formControlName="resetPwdFailTimes" ></p-checkbox>
-              <label class="ml-2 mb-0" for="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}</label>
+              <label class="ms-2 mb-0" for="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}</label>
             </div>
           </div>
           <!-- <div class="form-check">
@@ -418,7 +416,7 @@
         <div class="col-12">
           <label id="newRoleIDList_label" for="newRoleIDList" class="required control-label">{{'role_list' |
             translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="ml-1 tpi-primary"
+          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
             (click)="queryRoleMappingList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="newRoleAliasList.length > 0" class="ui-chips ui-widget" id="newRoleIDList">
@@ -441,10 +439,10 @@
       </div>
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="form.invalid || newRoleAliasList.length == 0"
             (click)="updateUser();">{{'button.update'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-primary float-left"
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
             (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
         </div>
       </div>

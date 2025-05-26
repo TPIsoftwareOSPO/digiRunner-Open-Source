@@ -24,10 +24,15 @@ public class DPB0124Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrESService dgrESService;
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
+
+	@Autowired
+	public DPB0124Service(DgrESService dgrESService, BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.dgrESService = dgrESService;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0124Resp updateIndexOpenOrClose(TsmpAuthorization auth, DPB0124Req req, ReqHeader reqHeader) {
 		String locale = ServiceUtil.getLocale(reqHeader.getLocale());

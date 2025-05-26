@@ -140,16 +140,6 @@ body {
   zoom: 1;
 }
 
-// .btn.mr-5 {
-//   margin-right: 5px !important;
-// }
-
-// .btn.mr-10 {
-//   margin-right: 10px;
-// }
-
-
-
 .swal2-container {
   z-index: 10001!important;
 }
@@ -181,6 +171,13 @@ body {
   box-shadow: none;
 } */
 
+.btn:focus-visible {
+  color: white;
+  background-color: var(--tpi-primary);
+  border-color: var(--tpi-primary);
+  outline: 0;
+  box-shadow: 0 0 3px 3px #b0600078;
+}
 
 .list-group-item.active {
   background-color: #d98600 !important;
@@ -338,61 +335,8 @@ b, strong {
 }
 
 
-/* 客製API列表查詢畫面下，JWT設定(req/resp)dropdown Style */
 
-/* .jwt-req-dropdown .ui-dropdown .ui-dropdown-label {
-  background-color: #ffa5009e !important;
-} */
-.jwt-req-dropdown .p-dropdown {
-  background-color: #FFF0D1 !important;
-  border: 1px solid #FFAC00;
-}
 
-.jwt-req-dropdown .p-dropdown .p-dropdown-label{
-  color: #FFAC00;
-}
-
-/* .jwt-req-dropdown .p-dropdown-panel .P-dropdown-items {
-  background-color: #ffa5009e !important;
-} */
-
-.jwt-req-dropdown .p-dropdown-panel .p-dropdown-items:not(.p-dropdown-virtualscroll) {
-  background-color: #FFF0D1;
-}
-
-.jwt-req-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item{
-  color: #FFAC00;
-}
-
-.jwt-req-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
-  color: #fff;
-  background-color: orange !important;
-}
-
-/* .jwt-req-dropdown .p-dropdown .p-dropdown-trigger {
-  background-color: unset !important;
-} */
-
-.jwt-resp-dropdown .p-dropdown  {
-  background-color: #D4E0F3 !important;
-  border: 1px solid #6096E7;
-}
-
-.jwt-resp-dropdown .p-dropdown .p-dropdown-label{
-  color: #6096E7;
-}
-
-.jwt-resp-dropdown .p-dropdown-panel .p-dropdown-items:not(.p-dropdown-virtualscroll) {
-  background-color: #007ad97a !important;
-}
-
-.jwt-resp-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item{
-  color: #434343;
-}
-
-/* .jwt-resp-dropdown .p-dropdown .p-dropdown-trigger {
-  background-color: unset !important;
-} */
 /* ul.dd-list{
   background: #fafafa;
 } */
@@ -1482,15 +1426,6 @@ p-inputswitch{
   text-align: center!important;
 }
 
-
-
-
-
-
-.p-dropdown{
-  border: 1px solid #ced4da;
-}
-
 .pre-code-style {
   width: 100%;
   white-space: pre-wrap;
@@ -1568,4 +1503,25 @@ p-inputswitch{
 }
 .item-panel .p-dropdown-panel{
   left: 0!important;
+}
+
+.form-text {
+  color: inherit;
+}
+
+textarea[readonly] {
+  background-color: #e9ecef;
+}
+textarea[readonly]:focus {
+  background-color: #e9ecef;
+}
+
+input[readonly] {
+  background-color: #e9ecef;
+  opacity: 1;
+}
+
+input[readonly]:focus {
+  background-color: #e9ecef;
+  opacity: 1;
 }

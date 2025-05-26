@@ -29,7 +29,6 @@ import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
 import { TranslateService } from '@ngx-translate/core';
 // import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
 import * as bcrypt from 'bcryptjs';
-import { G } from 'chart.js/dist/chunks/helpers.core';
 import { Router } from '@angular/router';
 import { Menu } from 'src/app/models/menu.model';
 // import { AA0101func } from 'src/app/models/api/FuncService/aa0101.interface';
@@ -276,7 +275,7 @@ export class ToolService {
     sessionStorage.setItem('AcConf', acConf);
   }
 
-  getAcConf(): AA0510Resp {
+  getAcConf() {
     // console.log(sessionStorage.getItem("AcConf"))
     // return sessionStorage.getItem("AcConf") ? JSON.parse(sessionStorage.getItem("AcConf")!) as AA0510Resp : '';
     return sessionStorage.getItem('AcConf')
@@ -660,6 +659,7 @@ export class ToolService {
     return url;
   }
 
+  /** 千分位補點 */
   numberComma(num) {
     let comma = /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g;
     return num.toString().replace(comma, ',');
@@ -846,6 +846,24 @@ export class ToolService {
     } catch {
       return false; // 無效的 URL
     }
+  }
+
+  generate_uuid() {
+    var d = Date.now();
+    if (
+      typeof performance !== 'undefined' &&
+      typeof performance.now === 'function'
+    ) {
+      d += performance.now(); //use high-precision timer if available
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+      /[xy]/g,
+      function (c) {
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+      }
+    );
   }
 
 }

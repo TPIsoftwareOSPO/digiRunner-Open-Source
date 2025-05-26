@@ -50,27 +50,28 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0065Service {
 
-	@Autowired
 	private DpReqServiceFactory dpReqServiceFactory;
-
-	@Autowired
 	private JobHelper jobHelper;
-	
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private ApplicationContext ctx;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-	
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
 	
+	@Autowired
+	public DPB0065Service(DpReqServiceFactory dpReqServiceFactory, JobHelper jobHelper, TsmpDpFileDao tsmpDpFileDao,
+			ApplicationContext ctx, BcryptParamHelper bcryptParamHelper, DgrAcIdpUserDao dgrAcIdpUserDao,
+			TsmpUserDao tsmpUserDao) {
+		super();
+		this.dpReqServiceFactory = dpReqServiceFactory;
+		this.jobHelper = jobHelper;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.ctx = ctx;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.tsmpUserDao = tsmpUserDao;
+	}
+
 	public DPB0065Resp createReq(TsmpAuthorization authorization, DPB0065Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		Map<String, Object> map = createReq2(authorization, req, reqHeader, iip);
 		return (DPB0065Resp) map.get("Resp");
@@ -107,6 +108,10 @@ public class DPB0065Service {
 			// 初始化回傳參數
 			resp.setClientReg(new DPB0065RespClientReg());
 			
+			/*
+			 * 2025/4/24-因 SornarQube 掃描到(Change this code to not construct the path from user-controlled data.) 
+			 * 先註解呼叫建立用戶註冊"簽核流程 D3 的 method doSaveD3Draft(), 因為是不再使用的功能
+			 */
 			doSaveD3Draft(dpReqSerivce, authorization, req, resp, local, iip);
 		}
 		
@@ -337,8 +342,7 @@ public class DPB0065Service {
 	}
 	
 	protected DeleteExpiredMailJob getDeleteExpiredMailJob() {
-		DeleteExpiredMailJob job = (DeleteExpiredMailJob) getCtx().getBean("deleteExpiredMailJob");
-		return job;
+		return (DeleteExpiredMailJob) getCtx().getBean("deleteExpiredMailJob");
 	}
 
 	protected DpReqServiceFactory getDpReqServiceFactory() {

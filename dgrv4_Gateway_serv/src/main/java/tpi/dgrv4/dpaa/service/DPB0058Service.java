@@ -38,19 +38,22 @@ public class DPB0058Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0058Service(TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ApptJobDispatcher apptJobDispatcher, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0058Resp queryJobLikeList(TsmpAuthorization auth, DPB0058Req req, ReqHeader reqHeader) {
 		// 檢查必要參數

@@ -25,9 +25,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0039Controller {
 
-	@Autowired
 	private DPB0039Service dpb0039Service;
 	
+	@Autowired
+	public DPB0039Controller(DPB0039Service dpb0039Service) {
+		super();
+		this.dpb0039Service = dpb0039Service;
+	}
+
 	/**
 	 * Tsmp管理者Like查詢<br/>
 	 * 分頁查詢TsmpUser,<br/>

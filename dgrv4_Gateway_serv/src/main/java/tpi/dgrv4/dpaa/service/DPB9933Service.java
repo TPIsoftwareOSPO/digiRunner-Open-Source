@@ -36,8 +36,14 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB9933Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+	
 	private TsmpClientCertDao tsmpClientCertDao;
+
+	@Autowired
+	public DPB9933Service(TsmpClientCertDao tsmpClientCertDao) {
+		super();
+		this.tsmpClientCertDao = tsmpClientCertDao;
+	}
 
 	public DPB9933Resp exportJwe(TsmpAuthorization tsmpAuthorization, DPB9933Req req, HttpServletResponse response) {
 		try {

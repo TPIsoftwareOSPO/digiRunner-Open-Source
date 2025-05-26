@@ -38,23 +38,26 @@ public class DPB0104Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
-
-	@Autowired
 	private TsmpDpApptRjobDDao tsmpDpApptRjobDDao;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
 	
+	@Autowired
+	public DPB0104Service(TsmpDpApptRjobDao tsmpDpApptRjobDao, TsmpDpApptRjobDDao tsmpDpApptRjobDDao,
+			TsmpDpApptJobDao tsmpDpApptJobDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
+			ServiceConfig serviceConfig) {
+		super();
+		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
+		this.tsmpDpApptRjobDDao = tsmpDpApptRjobDDao;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+	}
+
 	public DPB0104Resp queryRjobHistory(TsmpAuthorization auth, DPB0104Req req, ReqHeader reqHeader) {
 		
 		String apptRjobId = req.getApptRjobId();

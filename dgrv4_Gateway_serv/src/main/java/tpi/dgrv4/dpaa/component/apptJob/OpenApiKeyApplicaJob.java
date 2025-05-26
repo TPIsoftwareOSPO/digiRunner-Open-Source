@@ -17,12 +17,14 @@ import tpi.dgrv4.entity.entity.TsmpOpenApiKeyMap;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd5;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderd5d;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
+import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5Dao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5dDao;
 import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
 import tpi.dgrv4.entity.repository.TsmpOpenApiKeyDao;
 import tpi.dgrv4.entity.repository.TsmpOpenApiKeyMapDao;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
+import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
@@ -38,26 +40,25 @@ public class OpenApiKeyApplicaJob extends ApptJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private SendOpenApiKeyMailService sendOpenApiKeyMailService;
-	
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrderd5dDao tsmpDpReqOrderd5dDao;
-	
-	@Autowired
 	private TsmpDpReqOrderd5Dao tsmpDpReqOrderd5Dao;
-
-	@Autowired
 	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-	
-	@Autowired
 	private TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao;
 
-	public OpenApiKeyApplicaJob(TsmpDpApptJob tsmpDpApptJob) {
-		super(tsmpDpApptJob, TPILogger.tl);
+	@Autowired
+	public OpenApiKeyApplicaJob(TsmpDpApptJob tsmpDpApptJob, SendOpenApiKeyMailService sendOpenApiKeyMailService,
+			TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrderd5dDao tsmpDpReqOrderd5dDao,
+			TsmpDpReqOrderd5Dao tsmpDpReqOrderd5Dao, TsmpOpenApiKeyDao tsmpOpenApiKeyDao,
+			TsmpOpenApiKeyMapDao tsmpOpenApiKeyMapDao, ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
+		this.sendOpenApiKeyMailService = sendOpenApiKeyMailService;
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrderd5dDao = tsmpDpReqOrderd5dDao;
+		this.tsmpDpReqOrderd5Dao = tsmpDpReqOrderd5Dao;
+		this.tsmpOpenApiKeyDao = tsmpOpenApiKeyDao;
+		this.tsmpOpenApiKeyMapDao = tsmpOpenApiKeyMapDao;
 	}
 
 	@Override

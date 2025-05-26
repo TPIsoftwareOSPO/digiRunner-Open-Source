@@ -36,7 +36,7 @@
                   <ng-container *ngFor="let stat of orgFlagType">
                     <div class="p-form-check">
                       <p-radioButton formControlName="orgFlag" value={{stat.value}}  inputId="orgFlag{{stat.value}}"></p-radioButton>
-                      <label for="orgFlag{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                      <label for="orgFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                     </div>
                   </ng-container>
                 </div>
@@ -62,7 +62,7 @@
         [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
             <div *ngIf="canSetting" class="ui-helper-clearfix">
-                <button *ngFor="let authority of apiAuthorities" type="button" class="btn tpi-btn tpi-primary float-left mr-2"
+                <button *ngFor="let authority of apiAuthorities" type="button" class="btn tpi-btn tpi-primary float-start me-2"
                     (click)="settingPublicStatus(authority.value);">
                     {{authority.label}}
                 </button>
@@ -105,9 +105,6 @@
             <tr *ngIf="rowcount">
                 <td [attr.colspan]="canSetting == true ? columns.length+1 : columns.length" style="color: #b7b7b7;">
                     <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                    <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                        (click)="moreData();">{{'button.more'|translate}}</button> -->
-
                         <!-- 查詢更多 -->
                         <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
                         <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>

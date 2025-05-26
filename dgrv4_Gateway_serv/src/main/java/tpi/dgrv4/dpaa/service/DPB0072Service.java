@@ -53,34 +53,34 @@ public class DPB0072Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
 	private TsmpApiDao tsmpApiDao;
-
-	@Autowired
 	private TsmpApiExtDao tsmpApiExtDao;
-
-	@Autowired
 	private TsmpDpApiThemeDao tsmpDpApiThemeDao;
-
-	@Autowired
 	private TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao;
-
-	@Autowired
 	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
-	
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
 
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0072Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao, TsmpApiExtDao tsmpApiExtDao,
+			TsmpDpApiThemeDao tsmpDpApiThemeDao, TsmpDpThemeCategoryDao tsmpDpThemeCategoryDao,
+			TsmpDpFileDao tsmpDpFileDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ServiceConfig serviceConfig,
+			BcryptParamHelper bcryptParamHelper) {
+		super();
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiExtDao = tsmpApiExtDao;
+		this.tsmpDpApiThemeDao = tsmpDpApiThemeDao;
+		this.tsmpDpThemeCategoryDao = tsmpDpThemeCategoryDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+		this.bcryptParamHelper = bcryptParamHelper;
+	}
 
 	public DPB0072Resp queryApiDpStatusLikeList(TsmpAuthorization auth, DPB0072Req req, ReqHeader reqHeader) {
 

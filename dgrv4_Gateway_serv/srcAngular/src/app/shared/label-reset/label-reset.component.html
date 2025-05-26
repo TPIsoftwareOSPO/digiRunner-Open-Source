@@ -8,7 +8,7 @@
   <form [formGroup]="form">
     <div class="form-group row">
       <div class="col-12">
-        <label class="control-label">{{ "label_tag" | translate }}</label><i class="far fa-question-circle ml-2 " pTooltip="{{'label_reset_tip'|translate}}" [escape]="false"></i>
+        <label class="control-label">{{ "label_tag" | translate }}</label><i class="far fa-question-circle ms-2 " pTooltip="{{'label_reset_tip'|translate}}" [escape]="false"></i>
         <div>
           <p-chips id="labelList" formControlName="labelList" [max]="5" [allowDuplicate]="false"
             (onAdd)="checkChips($event)" [placeholder]="'label_tag_max'|translate:{value:5}"></p-chips>
@@ -22,7 +22,7 @@
   <br />
 
   <div class="text-center">
-    <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="chooseRole()">
+    <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="chooseRole()">
       {{ "button.confirm" | translate }}
     </button>
     <button type="button" class="btn tpi-btn tpi-cancel" (click)="cancelRole()">

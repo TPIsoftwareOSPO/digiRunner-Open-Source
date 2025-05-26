@@ -21,14 +21,18 @@ public class NotifyLandingService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private OAuthTokenService oAuthTokenService;
-
-	@Autowired
 	private CApiKeyService cApiKeyService;
+	private ObjectMapper objectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	public NotifyLandingService(OAuthTokenService oAuthTokenService, CApiKeyService cApiKeyService,
+			ObjectMapper objectMapper) {
+		super();
+		this.oAuthTokenService = oAuthTokenService;
+		this.cApiKeyService = cApiKeyService;
+		this.objectMapper = objectMapper;
+	}
 
 	public NotifyLandingResp confirmAPI(NotifyLandingReq req, ReqHeader reqHeader, HttpHeaders headers) {
 

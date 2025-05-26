@@ -1,5 +1,5 @@
-<div class="form-group row" [formGroup]="form">
-  <div class="col-12 pl-0" style="align-items: center;display: flex;">
+<div class="form-group" [formGroup]="form">
+  <div class="col-12 ps-0" style="align-items: center;display: flex;">
     <div class="col">
       <label class="form-label control-label required">Source IP</label>
 
@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <button type="button" class="btn tpi-primary ml-1" (click)="deleteItem()" style="border-radius: 50%"
+    <button type="button" class="btn tpi-primary ms-1" (click)="deleteItem()" style="border-radius: 50%"
       [disabled]="disabled">
       <i class="fa fa-minus"></i>
     </button>

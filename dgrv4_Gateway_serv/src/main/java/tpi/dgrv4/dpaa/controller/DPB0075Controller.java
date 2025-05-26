@@ -26,9 +26,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0075Controller {
 	
-	@Autowired
 	private DPB0075Service service;
 	
+	@Autowired
+	public DPB0075Controller(DPB0075Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * Keyword Search API (API系列 /主題分類系列 /所屬單位) (分為已上架/未上架)				
 	 * 提供後台開窗查詢, 需要分頁				

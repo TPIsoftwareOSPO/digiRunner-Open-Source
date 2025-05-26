@@ -26,8 +26,13 @@ public class AA0101Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpFuncDao tsmpFuncDao;
+
+	@Autowired
+	public AA0101Service(TsmpFuncDao tsmpFuncDao) {
+		super();
+		this.tsmpFuncDao = tsmpFuncDao;
+	}
 
 	public AA0101Resp queryAllFunc(TsmpAuthorization auth, AA0101Req req, ReqHeader reqHeader) {
 		AA0101Resp resp = new AA0101Resp();

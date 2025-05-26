@@ -1,10 +1,5 @@
 package tpi.dgrv4.dpaa.component.job;
 
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.TsmpSettingService;
 import tpi.dgrv4.gateway.component.FileHelper;
@@ -24,13 +19,16 @@ public class DeleteExpiredTempFileJob extends DeferrableJob {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private Long expMs;
+
+	public DeleteExpiredTempFileJob(FileHelper fileHelper, TsmpSettingService tsmpSettingService) {
+		super();
+		this.fileHelper = fileHelper;
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	@Override
 	public void runJob(JobHelperImpl jobHelper, JobManager jobManager) {

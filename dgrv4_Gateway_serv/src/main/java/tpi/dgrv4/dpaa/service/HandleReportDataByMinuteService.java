@@ -34,25 +34,28 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Service
 public class HandleReportDataByMinuteService {
-
-
-	@Autowired
 	private TsmpReqLogDao tsmpReqLogDao;
-	@Autowired
 	private TsmpResLogDao tsmpResLogDao;
-	@Autowired
 	private TsmpReportDataDao tsmpReportDataDao;
-	@Autowired
 	private TsmpSettingDao tsmpSettingDao;
-
-	@Autowired
 	private HandleApiDataAndLogService handleApiDataAndLogService;
-	
-	@Autowired
 	private HandleDashboardLogDataService handleDashboardLogDataService;
-	
-	@Autowired
     private TsmpDpApptJobDao tsmpDpApptJobDao;
+
+    @Autowired
+	public HandleReportDataByMinuteService(TsmpReqLogDao tsmpReqLogDao, TsmpResLogDao tsmpResLogDao,
+			TsmpReportDataDao tsmpReportDataDao, TsmpSettingDao tsmpSettingDao,
+			HandleApiDataAndLogService handleApiDataAndLogService,
+			HandleDashboardLogDataService handleDashboardLogDataService, TsmpDpApptJobDao tsmpDpApptJobDao) {
+		super();
+		this.tsmpReqLogDao = tsmpReqLogDao;
+		this.tsmpResLogDao = tsmpResLogDao;
+		this.tsmpReportDataDao = tsmpReportDataDao;
+		this.tsmpSettingDao = tsmpSettingDao;
+		this.handleApiDataAndLogService = handleApiDataAndLogService;
+		this.handleDashboardLogDataService = handleDashboardLogDataService;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
+	}
 
 	@Transactional()
 	public void exec(Date execDate, String createUser, Long jobId) throws Exception {

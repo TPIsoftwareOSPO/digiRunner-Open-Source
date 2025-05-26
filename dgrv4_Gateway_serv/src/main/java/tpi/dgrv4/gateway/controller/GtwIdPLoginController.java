@@ -24,9 +24,14 @@ import tpi.dgrv4.gateway.service.GtwIdPLoginService;
 @RestController
 public class GtwIdPLoginController {
 	
-	@Autowired
 	GtwIdPLoginService service;
 	
+	@Autowired
+	public GtwIdPLoginController(GtwIdPLoginService service) {
+		super();
+		this.service = service;
+	}
+
 	// 前端使用
 	@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/gtwlogin",
 			produces = MediaType.APPLICATION_JSON_VALUE)

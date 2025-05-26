@@ -28,11 +28,16 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0431Service {
 	private TPILogger logger = TPILogger.tl;
-	@Autowired
+
 	private TsmpApiDao tsmpApiDao;
+	private TsmpApiRegDao tsmpApiRegDao;
 
 	@Autowired
-	private TsmpApiRegDao tsmpApiRegDao;
+	public AA0431Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao) {
+		super();
+		this.tsmpApiDao = tsmpApiDao;
+		this.tsmpApiRegDao = tsmpApiRegDao;
+	}
 
 	@Transactional
 	public AA0431Resp batchLabelReset(TsmpAuthorization authorization, AA0431Req req) {

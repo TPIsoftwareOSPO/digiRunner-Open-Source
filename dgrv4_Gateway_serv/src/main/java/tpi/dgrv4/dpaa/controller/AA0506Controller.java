@@ -7,6 +7,7 @@ import static tpi.dgrv4.gateway.controller.DgrCusController.KEY_OF_RID_COOKIE;
 import static tpi.dgrv4.gateway.controller.DgrCusController.KEY_OF_TOKEN_COOKIE;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -38,10 +39,16 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
  */
 @RestController
 public class AA0506Controller {
+	@Value("${digi.cookie.samesite.value:Lax}")
+	private String samesiteValue;
+	
+	private AA0506Service service;
 
 	@Autowired
-	private AA0506Service service;
-	
+	public AA0506Controller(AA0506Service service) {
+		super();
+		this.service = service;
+	}
 
 	@PostMapping(value = "/dgrv4/11/AA0506", params = {"before"}, //
 		consumes = MediaType.APPLICATION_JSON_VALUE, //
@@ -111,7 +118,7 @@ public class AA0506Controller {
 			.path(rootPath)
 			.httpOnly(true) // 禁止 JavaScript 存取 cookie, 防止 XSS Attack (Cross-Site Scripting，跨站腳本攻擊)
 			.secure(true) // 讓 cookie 只能透過 https 傳遞, 即只有 HTTPS 才能讀與寫
-			.sameSite("Strict") // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
+			.sameSite(samesiteValue) // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
 			.build();
 		return cookie.toString();
 	}
@@ -123,7 +130,7 @@ public class AA0506Controller {
 			.path(rootPath)
 			.httpOnly(true) // 禁止 JavaScript 存取 cookie, 防止 XSS Attack (Cross-Site Scripting，跨站腳本攻擊)
 			.secure(true) // 讓 cookie 只能透過 https 傳遞, 即只有 HTTPS 才能讀與寫
-			.sameSite("Strict") // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
+			.sameSite(samesiteValue) // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
 			.build();
 		return cookie.toString();
 	}

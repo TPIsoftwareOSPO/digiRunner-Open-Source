@@ -21,7 +21,7 @@
               <div class="p-form-check">
                 <p-radioButton formControlName="apiStatus" value={{stat.value}}
                   inputId="apiModStatus_{{stat.value}}"></p-radioButton>
-                <label for="apiModStatus_{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="apiModStatus_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
           </div>
@@ -37,7 +37,7 @@
               <div class="p-form-check form-group">
                 <p-radioButton formControlName="revokeFlag" value={{stat.value}}
                   inputId="revokeFlag_{{stat.value}}"></p-radioButton>
-                <label for="revokeFlag_{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                <label for="revokeFlag_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
 
@@ -46,7 +46,7 @@
     </div>
   </form>
   <div class="text-center">
-    <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="confirm()">
+    <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="confirm()">
       {{ "button.confirm" | translate }}
     </button>
     <button type="button" class="btn tpi-btn tpi-cancel" (click)="cancel()">

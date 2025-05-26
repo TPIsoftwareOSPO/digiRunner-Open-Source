@@ -16,8 +16,13 @@ import tpi.dgrv4.gateway.service.AcIdPService;
 @RestController
 public class AcIdPController {
 
-	@Autowired
 	private AcIdPService service;
+
+	@Autowired
+	public AcIdPController(AcIdPService service) {
+		super();
+		this.service = service;
+	}
 
 	@GetMapping(value = "/dgrv4/ssotoken/acidp/oauth/token")
 	public Callable getAcToken(@RequestHeader HttpHeaders httpHeaders, HttpServletRequest httpReq,

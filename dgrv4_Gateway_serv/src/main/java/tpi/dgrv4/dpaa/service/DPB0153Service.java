@@ -41,27 +41,29 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 @Service
 public class DPB0153Service {
 
-	@Autowired
 	private DgrWebsiteDao dgrWebsiteDao;
-
-	@Autowired
 	private DgrWebsiteDetailDao dgrWebsiteDetailDao;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private BcryptParamHelper bcryptParamHelper;
-
-	@Autowired
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0153Service(DgrWebsiteDao dgrWebsiteDao, DgrWebsiteDetailDao dgrWebsiteDetailDao,
+			TsmpSettingService tsmpSettingService, BcryptParamHelper bcryptParamHelper,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, ServiceConfig serviceConfig) {
+		super();
+		this.dgrWebsiteDao = dgrWebsiteDao;
+		this.dgrWebsiteDetailDao = dgrWebsiteDetailDao;
+		this.tsmpSettingService = tsmpSettingService;
+		this.bcryptParamHelper = bcryptParamHelper;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0153Resp queryWebsite(TsmpAuthorization auth, DPB0153Req req, ReqHeader header) {
 

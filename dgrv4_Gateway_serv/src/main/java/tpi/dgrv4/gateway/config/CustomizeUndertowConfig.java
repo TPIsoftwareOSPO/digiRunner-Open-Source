@@ -12,10 +12,15 @@ import tpi.dgrv4.dpaa.vo.UndertowConfigInfo;
 @Component
 public class CustomizeUndertowConfig implements WebServerFactoryCustomizer<UndertowServletWebServerFactory> {
 
-    @Autowired
     private Environment env;
     
-    @Override
+    @Autowired
+    public CustomizeUndertowConfig(Environment env) {
+		super();
+		this.env = env;
+	}
+
+	@Override
     public void customize(UndertowServletWebServerFactory factory) {
         factory.addBuilderCustomizers(builder -> {
             // 是否啟用 HTTP/2 協議。如果啟用,Server將支援 HTTP/2,提供更好的性能。

@@ -13,11 +13,32 @@
   justify-content: space-between;
   align-items: center;
   padding: 5px;
-  .img-header-logo {
-    // width: 14.5vw;
-    // min-width: 160px !important;
-    // max-height: 48px;
-    height: calc(var(--header-h) - 10px);
+  --edition-text-size: 9px;
+  .logo-panel{
+    position: relative;
+    // display: flex;
+    // flex-direction: column;
+    // align-items: flex-end;
+    padding-bottom: var(--edition-text-size);
+    padding-left: 16px;
+    svg {
+      // width: 14.5vw;
+      // min-width: 160px !important;
+      // max-height: 48px;
+      height: calc(var(--header-h) - 10px - var(--edition-text-size));
+      width: 100%;
+    }
+    .edition{
+      position: absolute;
+      right: 3px;
+      bottom: 4px;
+      font-size: var(--edition-text-size);
+      font-weight: 600;
+      color: var(--tpi-primary);
+      display: inline-block;
+      text-decoration: none;
+      line-height: 1;
+    }
   }
   .header-last-panel {
     display: flex;

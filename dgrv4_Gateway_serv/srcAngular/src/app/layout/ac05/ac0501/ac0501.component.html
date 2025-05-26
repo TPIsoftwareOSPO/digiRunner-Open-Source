@@ -2,7 +2,7 @@
   <!-- <div [hidden]="pageNum != 1"> -->
   <!-- <div class="m-2">
       <div class="ui-helper-clearfix">
-        <button type="button" class="btn tpi-btn tpi-primary float-left" style="height:35px;" (click)="changePage('refresh')"
+        <button type="button" class="btn tpi-btn tpi-primary float-start" style="height:35px;" (click)="changePage('refresh')"
           [disabled]="canRefresh == false">
           {{'clear_db_cache'|translate}}
         </button>
@@ -42,7 +42,7 @@
                 background: #ffffff;
                 border: 2px solid #DEDEDE;
                 color: #434343;">
-    <label class="mb-0 pl-3" style="font-size:1.3rem">Update Time: {{ reqTime}}</label>
+    <label class="mb-0 ps-3" style="font-size:1.3rem">Update Time: {{ reqTime}}</label>
   </div> -->
 
   <div class="row">
@@ -199,7 +199,7 @@
         background: #ffffff;
         border: 2px solid #D4E0F3;
         color: #6096E7;">
-    <label class="mb-0 pl-3" style="font-size:1rem">Running Node:</label>
+    <label class="mb-0 ps-3" style="font-size:1rem">Running Node:</label>
   </div>
   <div class="row mt-2">
     <p-card *ngFor="let item of liveNodeList" class="col-4 mb-2 tpi-card-content runningnode">
@@ -308,7 +308,7 @@
         background: #ffffff;
         border: 2px solid #D4E0F3;
         color: #6096E7;">
-    <label class="mb-0 pl-3" style="font-size:1rem">Running Composer:</label>
+    <label class="mb-0 ps-3" style="font-size:1rem">Running Composer:</label>
   </div>
   <div class="row mt-2">
     <p-card *ngFor="let item of composerNodeList" class="col-4 mb-2 tpi-card-content runningnode">
@@ -369,7 +369,7 @@
   background: #ffffff;
   border: 2px solid #FCD8CA;
   color: #EA7448;">
-    <label class="mb-0 pl-3" style="font-size:1rem">Lost Record:</label>
+    <label class="mb-0 ps-3" style="font-size:1rem">Lost Record:</label>
   </div>
 
   <div class="row mt-2">
@@ -407,64 +407,5 @@
       </div>
     </p-card>
   </div>
-  <!-- </div> -->
-  <!-- <div *ngIf="pageNum == 2">
-    <form [formGroup]="form">
-      <div class="form-group row">
-        <div class="col-6 col-lg-6">
-          <div class="form-check-inline">
-            <label class="form-check-label">
-              <input type="radio" class="form-check-input" value='0' formControlName="taskType">
-              <span class="control-label">
-                {{'all'|translate}}
-              </span>
-            </label>
-          </div>
-        </div>
-      </div>
-      <div class="form-group row">
-        <div class="col-6 col-lg-6">
-          <div class="form-check-inline">
-            <label class="form-check-label">
-              <input type="radio" class="form-check-input" value='1' formControlName="taskType">
-              <span id="cacheName_label" class="control-label">
-                {{'cache_name_label'|translate}}
-              </span>
-            </label>
-          </div>
-          <p-dropdown [options]="dbCacheNameOpt" [style]="{'width':'100%'}" [filter]="true" formControlName="cacheName"
-            placeholder="{{'plz_chs' | translate}}">
-          </p-dropdown>
-          <div *ngIf="cacheName.invalid && (cacheName.dirty || cacheName.touched)" class="text-danger">
-            <small class="form-text">{{cacheName.errors.required | translate}}</small>
-          </div>
-        </div>
-      </div>
-      <div class="form-group row">
-        <div class="col-6 col-lg-6">
-          <div class="form-check-inline">
-            <label class="form-check-label">
-              <input type="radio" class="form-check-input" value='2' formControlName="taskType">
-              <span id="tableNames_label" class="control-label">
-                {{'table_name_label'|translate}}
-              </span>
-            </label>
-          </div>
-          <input type="text" class="form-control" placeholder="TSMP_API,TSMP_API_REG" formControlName="tableNames">
-          <div *ngIf="tableNames.invalid && (tableNames.dirty || tableNames.touched)" class="text-danger">
-            <small class="form-text">{{tableNames.errors.required | translate}}</small>
-          </div>
-        </div>
-      </div>
-      <div class="form-group row">
-        <div class="col-12 col-lg-12">
-          <button type="button" class="btn btn-warning float-left mr-3" [disabled]="form.invalid"
-            (click)="refresh();">{{'button.confirm'|translate}}</button>
-          <button type="button" class="btn btn-warning float-left"
-            (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
-        </div>
-      </div>
-    </form>
-  </div> -->
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

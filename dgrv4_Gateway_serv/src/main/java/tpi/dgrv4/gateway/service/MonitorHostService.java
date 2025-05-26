@@ -31,6 +31,7 @@ import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.DpaaSystemInfoHelper;
+import tpi.dgrv4.dpaa.es.ESLogBuffer;
 import tpi.dgrv4.dpaa.vo.DpaaSystemInfo;
 import tpi.dgrv4.entity.exceptions.DgrException;
 import tpi.dgrv4.gateway.component.job.JobHelper;
@@ -41,22 +42,14 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
 @Service
 public class MonitorHostService {
-
-	private final static String ES_URL = "ES_URL";
-
-	private final static  String ES_HEADER = "ES_HEADER";
 	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
 	private JobHelper jobHelper;
+	private ConfigurableApplicationContext applicationContext;
+	
+	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
 	
 	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers"))
 	ThreadPoolTaskExecutor asyncWorkerPool;
@@ -65,14 +58,21 @@ public class MonitorHostService {
 	@Qualifier("async-workers-highway")
 	ThreadPoolTaskExecutor asyncWorkerHighwayPool;
 	
-	private DpaaSystemInfoHelper dpaaSystemInfoHelper = new DpaaSystemInfoHelper();
-	
+	private final static String ES_URL = "ES_URL";
+	private final static  String ES_HEADER = "ES_HEADER";
 	private long times = 0;
-	
 	private StringBuilder sb = new StringBuilder();
 	
 	@Autowired
-	private ConfigurableApplicationContext applicationContext;
+	public MonitorHostService(TsmpSettingService tsmpSettingService, CommForwardProcService commForwardProcService,
+			ObjectMapper objectMapper, JobHelper jobHelper, ConfigurableApplicationContext applicationContext) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+		this.commForwardProcService = commForwardProcService;
+		this.objectMapper = objectMapper;
+		this.jobHelper = jobHelper;
+		this.applicationContext = applicationContext;
+	}
 	
 	public void execMonitor() {
 		try {
@@ -81,6 +81,7 @@ public class MonitorHostService {
 			getDpaaSystemInfoHelper().setCpuUsedRateAndMem(infoVo);
 			getDpaaSystemInfoHelper().setDiskInfo(infoVo);
 			getDpaaSystemInfoHelper().setRuntimeInfo(infoVo);
+			getDpaaSystemInfoHelper().setDiskInfo(infoVo);		
 			
 			// 每 60*3 秒 印一次 memory...etc 狀態
 			if (times % 180 == 0) {
@@ -117,9 +118,27 @@ public class MonitorHostService {
 						", active=" + poolMXBean.getActiveConnections() + 
 						", idle=" + poolMXBean.getIdleConnections() + 
 						", waiting=" + poolMXBean.getThreadsAwaitingConnection() + ") ..... db status \n\t");
-				
 				//HikariPool-1 - Before cleanup stats (total=5, active=0, idle=5, waiting=0)
+				sb.append("......................................................\n\t");
+				
+				sb.append("JobManager\t\t=" + jobHelper.getJobQueueSize(1) + jobHelper.getQueueStatus(1) + "\n");
+				sb.append("\tDeferrableJobManager\t=" + jobHelper.getJobQueueSize(2) + jobHelper.getQueueStatus(2) + "\n");
+				sb.append("\tRefreshCacheJobManager\t=" + jobHelper.getJobQueueSize(3) + jobHelper.getQueueStatus(3) +"\n");
+//				sb.append("\tJob-2nd-runner.buff2ndWaitCount\t=" + DeferrableJobManager.buff2ndWaitCount.get() +"\n");
+				sb.append("\t......................................................\n\t");
+				sb.append("Disk = (" + String.format("%,d %s", (infoVo.getDtotal() / 1024 / 1024 /1024), "GB") + ", %=" + infoVo.getDusage() + ")\n"); 
+				try {
+					ESLogBuffer.getInstance().diskFree = infoVo.getDusage();
+				} catch (IllegalStateException e) {
+					if (!"LogBuffer not initialized. Call getInstance(httpClient) first".equals(e.getMessage())) {
+						TPILogger.tl.error(StackTraceUtil.logTpiShortStackTrace(e));
+					}
+				} catch (Exception e) {
+					TPILogger.tl.error(StackTraceUtil.logTpiShortStackTrace(e));
+				}
+				
 				TPILogger.tl.info(sb.toString());
+				
 			}
 			times ++;
 			
@@ -338,7 +357,4 @@ public class MonitorHostService {
 	public ObjectMapper getObjectMapper() {
 		return objectMapper;
 	}
-	
-	
-
 }

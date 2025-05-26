@@ -90,69 +90,63 @@ import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 @Service
 public class OAuthTokenService {
 
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
 	private AuthoritiesDao authoritiesDao;
-
-	@Autowired
 	private OauthClientDetailsDao oauthClientDetailsDao;
-
-	@Autowired
 	private UsersDao usersDao;
-
-	@Autowired
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-	
-	@Autowired
 	private DgrOauthApprovalsDao dgrOauthApprovalsDao;
-
-	@Autowired
 	private TokenHelper tokenHelper;
-
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-
-	@Autowired
 	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
 	private DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao;
-
-	@Autowired
 	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
-
-	@Autowired
 	private DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao;
-
-	@Autowired
 	private DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
-
-	@Autowired
 	private TsmpClientGroupDao tsmpClientGroupDao;
-
-	@Autowired
 	private TsmpGroupDao tsmpGroupDao;
-
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-
-	@Autowired
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
-
-	@Autowired
 	private AsyncSendNotifyLandingRequestToDgrService asyncSendNotifyLandingRequestToDgrService;
 
 	private AdaptiveThreadPoolExecutor executor = new AdaptiveThreadPoolExecutor();
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	@Autowired
+	public OAuthTokenService(TsmpUserDao tsmpUserDao, AuthoritiesDao authoritiesDao,
+			OauthClientDetailsDao oauthClientDetailsDao, UsersDao usersDao,
+			TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, DgrOauthApprovalsDao dgrOauthApprovalsDao,
+			TokenHelper tokenHelper, TsmpSettingService tsmpSettingService, TsmpTokenHistoryDao tsmpTokenHistoryDao,
+			TsmpClientDao tsmpClientDao, DgrAcIdpUserDao dgrAcIdpUserDao, DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao,
+			DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao, DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao,
+			DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao, TsmpClientGroupDao tsmpClientGroupDao, TsmpGroupDao tsmpGroupDao,
+			CommForwardProcService commForwardProcService, DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties,
+			AsyncSendNotifyLandingRequestToDgrService asyncSendNotifyLandingRequestToDgrService) {
+		super();
+		this.tsmpUserDao = tsmpUserDao;
+		this.authoritiesDao = authoritiesDao;
+		this.oauthClientDetailsDao = oauthClientDetailsDao;
+		this.usersDao = usersDao;
+		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
+		this.dgrOauthApprovalsDao = dgrOauthApprovalsDao;
+		this.tokenHelper = tokenHelper;
+		this.tsmpSettingService = tsmpSettingService;
+		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.dgrAcIdpAuthCodeDao = dgrAcIdpAuthCodeDao;
+		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
+		this.dgrGtwIdpAuthDDao = dgrGtwIdpAuthDDao;
+		this.dgrGtwIdpAuthCodeDao = dgrGtwIdpAuthCodeDao;
+		this.tsmpClientGroupDao = tsmpClientGroupDao;
+		this.tsmpGroupDao = tsmpGroupDao;
+		this.commForwardProcService = commForwardProcService;
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+		this.asyncSendNotifyLandingRequestToDgrService = asyncSendNotifyLandingRequestToDgrService;
+	}
 
 	public static class OAuthTokenData {
 		// for grant_type = "delegate_auth" 或 "authorization_code" 或 "cookie_token"
@@ -337,12 +331,12 @@ public class OAuthTokenService {
 			} else {
 				// 沒有 Basic Authorization 或 格式不正確
 				BasicAuthClientData basicAuthClientData = getTokenHelper().getAuthClientDataForBasic(authorization, reqUri);
-				errRespEntity = basicAuthClientData.errRespEntity;
+				errRespEntity = basicAuthClientData.getErrRespEntity();
 				
 				if (errRespEntity != null) {
 					return errRespEntity;
 				} else {
-					String[] cliendData = basicAuthClientData.cliendData;
+					String[] cliendData = basicAuthClientData.getCliendData();
 					clientId = cliendData[0];
 					clientPw = cliendData[1];
 				}

@@ -71,6 +71,7 @@ import {
   AA0319Req,
   AA0319ReqItem,
 } from 'src/app/models/api/ApiService/aa0319.interface';
+import { JwtSettingComponent } from './jwt-setting/jwt-setting.component';
 
 @Component({
   selector: 'app-ac0301',
@@ -171,6 +172,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       'updateDate',
     ],
   };
+
+  reloadFlag:boolean = false;
 
   constructor(
     route: ActivatedRoute,
@@ -564,7 +567,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.queryAllLabel();
   }
 
-  queryAllLabel() {
+  queryAllLabel() {    
     //標籤資料清單
     this.apiService.queryAllLabel_ignore1298().subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
@@ -572,6 +575,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           return { label: item, value: item };
         });
       }
+      else this.lblList = [];
     });
   }
 
@@ -1022,7 +1026,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 severity: 'success',
                 summary: `${dict['message.delete']} API`,
                 detail: `${dict['message.delete']} ${dict['message.success']}`,
-              });
+              });   
+              this.queryAllLabel();     
               this.searchByLabel
                 ? this.queryAPIListByLabel(this.selLabelList)
                 : this.submitForm();
@@ -1224,6 +1229,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           summary: `${dict['message.delete']} API`,
           detail: `${dict['message.delete']} ${dict['message.success']}`,
         });
+        this.queryAllLabel();
         this.searchByLabel
           ? this.queryAPIListByLabel(this.selLabelList)
           : this.submitForm();
@@ -2187,7 +2193,6 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         this.import_apiList = [];
         this.currentTitle = `${this.title} > ${dict['upload_reg_comp_api_file']}`;
         this.pageNum = 5;
-
         break;
     }
   }
@@ -2206,6 +2211,13 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   headerReturn() {
+    if(this.reloadFlag){
+      this.reloadFlag = false;
+      this.queryAllLabel();
+      this.searchByLabel
+      ? this.queryAPIListByLabel(this.selLabelList)
+      : this.submitForm();
+    }
     this.changePage('query');
   }
 
@@ -2322,10 +2334,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   tabChange(evt) {
     if (evt.index == 0) {
       this.submitForm();
-    } else {
+    } else {      
       this.selected = [];
       this.dataList = [];
       this.selLabelList = [];
+      this.queryAllLabel();
     }
   }
 
@@ -2444,7 +2457,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         header: dict['unchecked_api'],
         message: dict['cfm_import'],
         key: 'cd',
-        accept: () => {
+        accept: () => {          
           this.confirmImport();
         },
       });
@@ -2500,7 +2513,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               summary: `${dict['button.import']} ${dict['message.fail']}`,
             });
           }
-          this.import_selected = [];
+          this.import_selected = [];          
+          this.reloadFlag = true;
         }
       });
     }
@@ -2544,7 +2558,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 if (res.RespBody.apiList[i].desc) {
                   item['memo'] = res.RespBody.apiList[i].desc;
                 }
-              }
+              }              
             }
           });
         }
@@ -2560,6 +2574,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           });
         }
         this.import_selected = [];
+        this.reloadFlag = true;
       }
     });
   }
@@ -2605,6 +2620,29 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
   updateMenuItems(mode:number) {
     this.ModeItems.forEach((x,i) => x.styleClass =mode===i ? "active":"")
+  }
+
+  async updateJwtSetting(){
+    const code = [
+      'jwt_setting',      
+    ];
+    const dict = await this.tool.getDict(code);
+    const ref = this.dialogService.open(JwtSettingComponent, {
+      // styleClass: 'cHeader cContent cIcon',
+      header: dict['jwt_setting'],        
+      width: '400px',
+      // height: '30vh',
+      data: {
+        updateJwtSettingFlags: this.updateJwtSettingFlags
+      },
+    });
+    ref.onClose.subscribe((res) => {
+      if (res) {        
+        this.q_jweFlag!.setValue(res.jweFlag);
+        this.q_jweFlagResp!.setValue(res.jweFlagResp);
+        this.jwtSettingChange();
+      }
+    });
   }
 
   public get q_jwtSetting() {

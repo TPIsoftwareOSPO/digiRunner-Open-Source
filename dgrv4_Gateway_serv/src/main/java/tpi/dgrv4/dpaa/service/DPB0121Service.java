@@ -15,8 +15,13 @@ public class DPB0121Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public DPB0121Service(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public DPB0121Resp queryRefreshMemListUrls(String scheme) {
 		DPB0121Resp resp = new DPB0121Resp();

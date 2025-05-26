@@ -33,7 +33,7 @@
                       [formGroupName]="j">
                       <p-checkbox formControlName="selected" [value]="item.get('value').value"
                         inputId="apiSrc_{{j}}"></p-checkbox>
-                      <label class="ml-2 mb-0" for="apiSrc_{{j}}">{{item.get("name").value}}</label>
+                      <label class="ms-2 mb-0" for="apiSrc_{{j}}">{{item.get("name").value}}</label>
                     </div>
                   </div>
                 </div>
@@ -45,7 +45,7 @@
                     <div class="p-form-check">
                       <p-radioButton formControlName="apiStatus" value={{stat.value}}
                         inputId="apiStatus{{stat.value}}"></p-radioButton>
-                      <label for="apiStatus{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                      <label for="apiStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                     </div>
                   </ng-container>
                 </div>
@@ -57,7 +57,7 @@
                     <div class="p-form-check">
                       <p-radioButton formControlName="publicFlag" value={{stat.value}}
                         inputId="publicFlag{{stat.value}}"></p-radioButton>
-                      <label for="publicFlag{{stat.value}}" class="ml-2 mb-0">{{stat.label}}</label>
+                      <label for="publicFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                     </div>
                   </ng-container>
                 </div>
@@ -73,7 +73,7 @@
                 justify-content: center;
                 width: 100%;
               ">
-                  <button type="submit" class="btn tpi-btn tpi-primary text-center mr-2">
+                  <button type="submit" class="btn tpi-btn tpi-primary text-center me-2">
                     {{ "button.search" | translate }}
                   </button>
                 </div>
@@ -183,9 +183,13 @@
               {{ "button.delete" | translate }}
             </button>
             <button type="button" *ngIf="canSetting" class="btn tpi-primary tpi-btn"
+              (click)="updateJwtSetting()" [disabled]="selected.length == 0">
+              {{ "jwt_setting" | translate }}
+            </button>            
+            <!-- <button type="button" class="btn tpi-primary tpi-btn"
               (click)="jwtSettingPanel.toggle($event)" [disabled]="selected.length == 0">
               {{ "jwt_setting" | translate }}
-            </button>
+            </button> -->
             <button type="button" *ngIf="canImport" title="{{ 'button.export_apiList_tooltip' | translate }}"
               class="btn tpi-primary tpi-btn" (click)="updateApiStatus('4')"
               [disabled]="selected.length == 0">
@@ -200,7 +204,7 @@
         <div class="field-flex-center">
 
           <button type="button" *ngIf="canImport" title="{{ 'upload_reg_comp_api_file' | translate }}"
-          class="btn tpi-primary tpi-btn mr-1" (click)="changePage('import')">
+          class="btn tpi-primary tpi-btn me-1" (click)="changePage('import')">
           {{ "upload_reg_comp_api_file" | translate }}
         </button>
         <p-menu styleClass="view-mode-menu" #menu [popup]="true" appendTo="body" [model]="ModeItems"></p-menu>
@@ -221,7 +225,7 @@
                 <path d="M17.3863 10.6265L15.3933 9.83318C14.9815 9.66918 14.5144 9.87061 14.3504 10.2824C14.1864 10.6942 14.3879 11.1613 14.7997 11.3253L16.7909 12.1186C17.3025 12.3218 17.6323 12.8102 17.6323 13.3611V18.7108C17.6323 18.882 17.5432 18.9925 17.4897 19.0442C17.4362 19.0959 17.3186 19.1815 17.151 19.1725L13.2274 19.0264L12.935 18.0352L14.7694 18.1867C14.8121 18.1903 14.8531 18.1921 14.8959 18.1921C15.6785 18.1921 16.3488 17.5896 16.4165 16.7963L16.6358 14.2524C16.6732 13.8103 16.347 13.4217 15.9049 13.3842C15.4593 13.345 15.0742 13.673 15.0368 14.1151L14.8246 16.5823L12.7853 16.4148L13.9529 14.4931C14.1829 14.1151 14.0634 13.6213 13.6837 13.3914C13.3058 13.1614 12.812 13.2808 12.582 13.6606L11.951 14.6999L11.5927 13.4841C11.491 13.1436 11.1791 12.9083 10.8225 12.9083H8.53004L8.63165 12.6391C8.73683 12.361 8.94184 12.1399 9.21102 12.0152L9.99183 11.6533C10.3929 11.4661 10.5676 10.9901 10.3822 10.5872C10.195 10.1861 9.71908 10.0114 9.3162 10.1968L8.53539 10.5587C7.88293 10.8618 7.38379 11.3984 7.12887 12.0722L6.81334 12.9065H5.55656C5.30342 12.9065 5.06633 13.0259 4.9148 13.2292C4.76327 13.4324 4.71692 13.6944 4.78823 13.9369L5.97548 17.9568C5.92735 17.9746 5.881 17.9924 5.83465 18.0156C4.78823 18.5326 4.44952 19.9106 5.06276 21.1531C5.33729 21.7111 5.77226 22.1567 6.28567 22.4099C6.58872 22.5596 6.90603 22.6345 7.21622 22.6345C7.49788 22.6345 7.77241 22.5721 8.02377 22.4491C8.29295 22.3154 8.52291 22.1157 8.6994 21.8697H12.9956C13.2488 21.8697 13.4858 21.7503 13.6374 21.5471C13.7889 21.3438 13.8352 21.0818 13.7639 20.8393L13.7087 20.6486L17.0922 20.7752C17.1189 20.7752 17.1457 20.7752 17.1724 20.7752C17.709 20.7752 18.2153 20.5719 18.6039 20.1958C19.0121 19.8018 19.2367 19.2742 19.2367 18.7073V13.3575C19.2367 12.1453 18.5094 11.0739 17.3845 10.6247L17.3863 10.6265ZM7.44975 20.8126C7.4444 20.8286 7.44083 20.8447 7.43727 20.8607C7.41231 20.9196 7.37309 20.9802 7.31427 21.0087C7.20552 21.0622 7.05756 20.9998 6.99695 20.9713C6.80086 20.875 6.62081 20.6825 6.50315 20.4418C6.27319 19.9747 6.37658 19.5362 6.54594 19.4524C6.57624 19.4382 6.61011 19.431 6.64398 19.431C6.67607 19.431 6.70638 19.4364 6.73668 19.4435C6.75094 19.4489 6.7652 19.456 6.77947 19.4613C6.83651 19.4809 6.89177 19.5077 6.94525 19.5416C6.94525 19.5416 6.94704 19.5416 6.94882 19.5433C6.98625 19.5665 7.02369 19.5968 7.05756 19.6271C7.07717 19.6432 7.095 19.6592 7.11282 19.6788C7.12887 19.6949 7.14313 19.7109 7.15917 19.727C7.19126 19.7626 7.22157 19.7983 7.24831 19.8393C7.25544 19.85 7.26257 19.8607 7.2697 19.8714C7.3 19.9177 7.32853 19.9658 7.35527 20.0158C7.35527 20.0158 7.35527 20.0193 7.35705 20.0193C7.35705 20.0193 7.35705 20.0193 7.35705 20.0211C7.38201 20.0728 7.4034 20.1263 7.42122 20.1798C7.42479 20.1922 7.43014 20.2029 7.4337 20.2154C7.44796 20.26 7.45866 20.3063 7.46757 20.3509C7.47292 20.3759 7.47649 20.399 7.48005 20.424C7.48184 20.4418 7.48362 20.4579 7.48362 20.4739C7.49253 20.5951 7.48362 20.711 7.44796 20.8126H7.44975ZM9.07732 20.2635C9.06841 20.1833 9.05593 20.1031 9.03988 20.0229C9.03988 20.0229 9.03988 20.0211 9.03988 20.0193C9.02562 19.9462 9.0078 19.8731 8.9864 19.8018C8.98284 19.7929 8.98106 19.7822 8.97927 19.7733C8.95966 19.7091 8.93827 19.6432 8.91331 19.579C8.90797 19.5647 8.9044 19.5505 8.89727 19.5362C8.86696 19.4613 8.83488 19.3865 8.79922 19.3134C8.79922 19.3134 8.79922 19.3116 8.79922 19.3098C8.79922 19.3098 8.79922 19.308 8.79744 19.3062C8.76535 19.2421 8.73148 19.1779 8.69405 19.1173C8.67622 19.087 8.65483 19.0567 8.637 19.0264C8.61739 18.9961 8.59957 18.9658 8.57996 18.9372C8.55143 18.8962 8.52291 18.857 8.49261 18.8196C8.48013 18.8035 8.46943 18.7875 8.45695 18.7714C8.41952 18.7251 8.3803 18.6805 8.34108 18.6377C8.33573 18.6324 8.33038 18.6253 8.32504 18.6199C8.14142 18.4203 7.93107 18.2527 7.70467 18.1226L6.63864 14.5109H10.2307L11.9278 20.2635H9.08267H9.07732Z" fill="currentColor"/>
                </svg>
            </span>
-           <span class="ml-2">
+           <span class="ms-2">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M1.46967 3.96967C1.76256 3.67678 2.23744 3.67678 2.53033 3.96967L7 8.43934L11.4697 3.96967C11.7626 3.67678 12.2374 3.67678 12.5303 3.96967C12.8232 4.26256 12.8232 4.73744 12.5303 5.03033L7.53033 10.0303C7.23744 10.3232 6.76256 10.3232 6.46967 10.0303L1.46967 5.03033C1.17678 4.73744 1.17678 4.26256 1.46967 3.96967Z" fill="currentColor"/>
               </svg>
@@ -304,7 +308,7 @@
               <label class="moreless" *ngIf="rowData['apiDesc']?.ori" (click)="switchOri(rowData['apiDesc'])">
                 {{rowData['apiDesc'].t ? ("show_more" | translate): '' }}
                 <i class="fas"
-                  [ngClass]="[rowData['apiDesc'].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData['apiDesc'].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData['apiDesc'].t ? '' : ("show_less" | translate) }}
               </label>
             </span>
@@ -315,7 +319,7 @@
               <label class="moreless" *ngIf="rowData['moduleName'].ori" (click)="switchOri(rowData['moduleName'])">
                 {{rowData['moduleName'].t ? ("show_more" | translate): '' }}
                 <i class="fas"
-                  [ngClass]="[rowData['moduleName'].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData['moduleName'].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData['moduleName'].t ? '' : ("show_less" | translate) }}
               </label>
             </span>
@@ -386,7 +390,7 @@
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate): '' }}
                 <i class="fas"
-                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
             </span>
@@ -395,7 +399,7 @@
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate): '' }}
                 <i class="fas"
-                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
             </span>
@@ -457,8 +461,8 @@
       <ng-template pTemplate="footer" let-columns>
         <tr *ngIf="dataList.length > 0">
           <td [attr.colspan]="viewModeList[viewMode].length+5" style="color: #b7b7b7;">
-            {{ "row_count" | translate }}: {{ dataList.length }}
-            <!-- <button type="button" class="btn btn-warning pull-right ml-3" (click)="moreApiListData()">
+            <span style="vertical-align: middle;">{{ "row_count" | translate }}: {{ dataList.length }}</span>
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3" (click)="moreApiListData()">
               {{ "button.more" | translate }}</button> -->
 
             <!-- 查詢更多 -->
@@ -484,7 +488,7 @@
       [detailCols]="detailCols" (getApiGroupListEvt)="getApiGroupListEvt($event)"></app-api-detail>
     <div class="form-group row">
       <div class="col-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+        <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
           {{ "button.return_to_list" | translate }}
         </button>
       </div>
@@ -505,7 +509,7 @@
             <label class="moreless" *ngIf="apiDetail.moduleName.o" (click)="switchOri(apiDetail.moduleName)">
               {{apiDetail.moduleName.t ? ("show_more" | translate): '' }}
               <i class="fas"
-                [ngClass]="[apiDetail.moduleName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                [ngClass]="[apiDetail.moduleName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
               {{apiDetail.moduleName.t ? '' : ("show_less" | translate) }}
             </label>
           </label>
@@ -525,7 +529,7 @@
             <label class="moreless" *ngIf="apiDetail.apiKey.o" (click)="switchOri(apiDetail.apiKey)">
               {{apiDetail.apiKey.t ? ("show_more" | translate): '' }}
               <i class="fas"
-                [ngClass]="[apiDetail.apiKey.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                [ngClass]="[apiDetail.apiKey.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
               {{apiDetail.apiKey.t ? '' : ("show_less" | translate) }}
             </label>
           </label>
@@ -552,7 +556,7 @@
         <!-- 固定快取時間 -->
         <div class="col-sm-2">
           <label id="fixedCacheTime_label" class="control-label required">{{"fixed_cache_time" | translate}}({{
-            'minute'|translate }})</label><i class="far fa-question-circle ml-2 "
+            'minute'|translate }})</label><i class="far fa-question-circle ms-2 "
             pTooltip="{{'fixed_cache_time_tip'|translate}}" [escape]="false"></i>
           <input id="fixedCacheTime" type="number" min="0" class="form-control" formControlName="fixedCacheTime"
             placeholder="{{ 'fixed_cache_time' | translate }}" />
@@ -630,20 +634,21 @@
           </div>
         </div>
         <div class="col-sm-4">
-          <div>
-            <label class="w-100" style="
+          <label class="control-label">{{ "data_format" | translate }}</label>
+            <!-- class="w-100" style="
                 font-weight: bolder;
                 font-family: PingFangSC-Regular, sans-serif;
                 font-size: 16px;
                 color: #5a5541;
-              ">{{ "data_format" | translate }}</label>
+              " -->
+            
             <!-- <label id="reghostId_label" class="w-50" style="
                 font-weight: bolder;
                 font-family: PingFangSC-Regular, sans-serif;
                 font-size: 16px;
                 color: #5a5541;
               ">{{ "reg_host" | translate }}</label> -->
-          </div>
+          
           <div>
             <p-dropdown [showClear]="false" [options]="dataFormats" formControlName="dataFormat"
               placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }">
@@ -684,33 +689,35 @@
 
       <div *ngIf="apiDetail.apiSrc.v == 'R' || apiDetail.apiSrc.v == 'C'" class="form-group row">
         <div class="col-12">
-          <div class="row col-12 pr-0" style="justify-content: space-between;">
-
+          <div class="d-flex col-12 pe-0 justify-content-between align-items-center">
             <div class="col-4 px-0">
-              <label id="srcUrl_label " class="control-label required" style="padding-left: 1px">{{ "tar_url" |
-                translate}}</label>
+              <label id="srcUrl_label" class="control-label required fw-bold" style="padding-left: 1px">
+                {{ "tar_url" | translate }}
+              </label>
             </div>
 
-
-            <div class="col-8 row pr-0" style="justify-content: end;">
-              <div class="mr-3">
-                <!-- <input type="checkbox" formControlName="urlRID" [hidden]="apiDetail.pathType =='dgrc'" id="urlRID"
-                  class="mr-1" /> -->
-                <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID"
-                  [hidden]="apiDetail.pathType =='dgrc'"> </p-checkbox>
-                <label class="mb-0 ml-1" for="urlRID">{{apiDetail.pathType =='dgrc'? '': "path_param" | translate
-                  }}</label>
+            <div class="col-8 d-flex justify-content-end pe-0">
+              <div class="d-flex align-items-center me-3">
+                <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID" [hidden]="apiDetail.pathType =='dgrc'">
+                </p-checkbox>
+                <label class="mb-0 ms-1" for="urlRID">
+                  {{ apiDetail.pathType =='dgrc' ? '' : "path_param" | translate }}
+                </label>
               </div>
-              <div>
-                <!-- <input type="checkbox" formControlName="noOAuth" id="noOAuth" /> -->
-                <p-checkbox [binary]="true" inputId="noOAuth" formControlName="noOAuth"> </p-checkbox>
-                <label class="mb-0 ml-1" for="noOAuth">{{"no_auth" | translate}}</label>
+
+              <div class="d-flex align-items-center">
+                <p-checkbox [binary]="true" inputId="noOAuth" formControlName="noOAuth">
+                </p-checkbox>
+                <label class="mb-0 ms-1" for="noOAuth">
+                  {{"no_auth" | translate}}
+                </label>
               </div>
             </div>
           </div>
+
           <div class="form-group" *ngIf="apiDetail.apiSrc.v =='R' && apiDetail.type == '1'">
             <p-checkbox [binary]="true" inputId="redirectByIp" formControlName="redirectByIp"> </p-checkbox>
-            <label class="mb-0 ml-1" for="redirectByIp">{{'diversionSrcIP'|translate}}</label>
+            <label class="mb-0 ms-1" for="redirectByIp">{{'diversionSrcIP'|translate}}</label>
           </div>
 
           <div [hidden]="redirectByIp.value">
@@ -753,14 +760,14 @@
           <div class="col-12 form-group ">
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="headerMaskPolicy" value="0" inputId="headerMaskPolicy0"></p-radioButton>
-              <label for="headerMaskPolicy0" class="ml-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
+              <label for="headerMaskPolicy0" class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
               <!-- <input type="radio" id="headerMaskPolicy0" class="form-check-input" value="0"
                 formControlName="headerMaskPolicy" />
               <label class="form-check-label" for="headerMaskPolicy0">Policy 0: {{'mask.none'|translate}}</label> -->
             </div>
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="headerMaskPolicy" value="1" inputId="headerMaskPolicy1"></p-radioButton>
-              <label for="headerMaskPolicy1" class="ml-2 mb-0">Policy 1: {{
+              <label for="headerMaskPolicy1" class="ms-2 mb-0">Policy 1: {{
                 'mask.before_after'|translate:{num:(headerMaskPolicyNum.value?headerMaskPolicyNum.value:'1'),
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') }
                 }}</label>
@@ -773,7 +780,7 @@
             </div>
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="headerMaskPolicy" value="2" inputId="headerMaskPolicy2"></p-radioButton>
-              <label for="headerMaskPolicy2" class="ml-2 mb-0">Policy 2: {{
+              <label for="headerMaskPolicy2" class="ms-2 mb-0">Policy 2: {{
                 'mask.before'|translate:{num:(headerMaskPolicyNum.value?headerMaskPolicyNum.value:'1'),
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') } }}</label>
               <!-- <input type="radio" id="headerMaskPolicy2" class="form-check-input" value="2"
@@ -784,7 +791,7 @@
             </div>
             <div class="p-form-check">
               <p-radioButton formControlName="headerMaskPolicy" value="3" inputId="headerMaskPolicy3"></p-radioButton>
-              <label for="headerMaskPolicy3" class="ml-2 mb-0">Policy 3: {{
+              <label for="headerMaskPolicy3" class="ms-2 mb-0">Policy 3: {{
                 'mask.after'|translate:{num:(headerMaskPolicyNum.value?headerMaskPolicyNum.value:'1'),
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') } }}</label>
               <!-- <input type="radio" id="headerMaskPolicy3" class="form-check-input" value="3"
@@ -795,10 +802,10 @@
             </div>
             <div class="mt-1"
               *ngIf="headerMaskPolicy.value == '1'||headerMaskPolicy.value == '2'||headerMaskPolicy.value == '3'">
-              <label class="control-label required mr-1" style="font-weight: 400;">{{ 'mask.word'|translate}}</label>
-              <input type="number" [min]="1" [max]="9999" class="form-control mr-2"
+              <label class="control-label required me-1" style="font-weight: 400;">{{ 'mask.word'|translate}}</label>
+              <input type="number" [min]="1" [max]="9999" class="form-control me-2"
                 formControlName="headerMaskPolicyNum" style="display: inline;width: 75px;" />
-              <label class="control-label required mr-1">{{ 'mask.mask'|translate}}</label> <input type="text"
+              <label class="control-label required me-1">{{ 'mask.mask'|translate}}</label> <input type="text"
                 class="form-control" formControlName="headerMaskPolicySymbol" style="display: inline;width: 100px;"
                 [maxlength]="10" [minlength]="1" (focusout)="checkheaderMaskPolicySymbol()" />
             </div>
@@ -821,14 +828,14 @@
           <div class="col-12 form-group ">
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="bodyMaskPolicy" value="0" inputId="bodyMaskPolicy0"></p-radioButton>
-              <label for="bodyMaskPolicy0" class="ml-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
+              <label for="bodyMaskPolicy0" class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
               <!-- <input type="radio" id="bodyMaskPolicy0" class="form-check-input" value="0"
                 formControlName="bodyMaskPolicy" />
               <label class="form-check-label" for="bodyMaskPolicy0">Policy 0: {{'mask.none'|translate}}</label> -->
             </div>
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="bodyMaskPolicy" value="1" inputId="bodyMaskPolicy1"></p-radioButton>
-              <label for="bodyMaskPolicy1" class="ml-2 mb-0">Policy 1: {{
+              <label for="bodyMaskPolicy1" class="ms-2 mb-0">Policy 1: {{
                 'mask.body_before_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
               <!-- <input type="radio" id="bodyMaskPolicy1" class="form-check-input" value="1"
@@ -839,7 +846,7 @@
             </div>
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="bodyMaskPolicy" value="2" inputId="bodyMaskPolicy2"></p-radioButton>
-              <label for="bodyMaskPolicy2" class="ml-2 mb-0">Policy 2: {{
+              <label for="bodyMaskPolicy2" class="ms-2 mb-0">Policy 2: {{
                 'mask.body_before'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
               <!-- <input type="radio" id="bodyMaskPolicy2" class="form-check-input" value="2"
@@ -850,7 +857,7 @@
             </div>
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="bodyMaskPolicy" value="3" inputId="bodyMaskPolicy3"></p-radioButton>
-              <label for="bodyMaskPolicy3" class="ml-2 mb-0">Policy 3: {{
+              <label for="bodyMaskPolicy3" class="ms-2 mb-0">Policy 3: {{
                 'mask.body_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
               <!-- <input type="radio" id="bodyMaskPolicy3" class="form-check-input" value="3"
@@ -861,7 +868,7 @@
             </div>
             <div class="p-form-check">
               <p-radioButton formControlName="bodyMaskPolicy" value="4" inputId="bodyMaskPolicy4"></p-radioButton>
-              <label for="bodyMaskPolicy4" class="ml-2 mb-0">Policy 4: {{
+              <label for="bodyMaskPolicy4" class="ms-2 mb-0">Policy 4: {{
                 'mask.body_after_regex'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
               <!-- <input type="radio" id="bodyMaskPolicy4" class="form-check-input" value="4"
@@ -872,18 +879,18 @@
             </div>
             <div class="mt-1"
               *ngIf="bodyMaskPolicy.value=='1'||bodyMaskPolicy.value=='2'||bodyMaskPolicy.value=='3'||bodyMaskPolicy.value=='4'">
-              <label class="control-label required mr-1" style="font-weight: 400;">{{'mask.word'|translate}}</label>
-              <input type="number" [min]="1" [max]="9999" class="form-control mr-2" formControlName="bodyMaskPolicyNum"
+              <label class="control-label required me-1" style="font-weight: 400;">{{'mask.word'|translate}}</label>
+              <input type="number" [min]="1" [max]="9999" class="form-control me-2" formControlName="bodyMaskPolicyNum"
                 style="display: inline;width: 75px;" />
-              <label class="control-label required mr-1">{{ 'mask.mask'|translate}}</label> <input type="text"
+              <label class="control-label required me-1">{{ 'mask.mask'|translate}}</label> <input type="text"
                 class="form-control" formControlName="bodyMaskPolicySymbol" style="display: inline;width: 100px;"
                 [minlength]="1" [maxlength]="10" (focusout)="checkbodyMaskPolicySymbol()" />
             </div>
           </div>
-          <div class="col-12 pr-0"
+          <div class="col-12 pe-0"
             *ngIf="bodyMaskPolicy.value=='1'||bodyMaskPolicy.value=='2'||bodyMaskPolicy.value=='3'||bodyMaskPolicy.value=='4'">
             <div class="col-12 px-0 form-group" style="align-items: center;display: flex;">
-              <label class="control-label required mr-1" style="white-space: nowrap;">{{ bodyMaskPolicy.value=='4'?
+              <label class="control-label required me-1" style="white-space: nowrap;">{{ bodyMaskPolicy.value=='4'?
                 'Regular expression':'keyword'|translate }}</label>
               <input type="text" class="form-control" formControlName="bodyMaskKeyword"
                 [placeholder]="bodyMaskPolicy.value=='4'?'':('input_example.text' | translate)">
@@ -904,7 +911,7 @@
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="failDiscoveryPolicy" value="0"
                 inputId="failDiscoveryPolicy"></p-radioButton>
-              <label for="failDiscoveryPolicy" class="ml-2 mb-0">Policy 0:
+              <label for="failDiscoveryPolicy" class="ms-2 mb-0">Policy 0:
                 {{'fail_discovery_policy.policy_0'|translate}}</label>
               <!-- <input type="radio" class="form-check-input" value="0" formControlName="failDiscoveryPolicy"/>
               <label class="form-check-label">Policy 0: {{'fail_discovery_policy.policy_0'|translate}}</label> -->
@@ -918,14 +925,14 @@
           <div class="col-12 form-group ">
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="failHandlePolicy" value="0" inputId="failHandlePolicy0"></p-radioButton>
-              <label for="failHandlePolicy0" class="ml-2 mb-0">Policy 0:
+              <label for="failHandlePolicy0" class="ms-2 mb-0">Policy 0:
                 {{'fail_handle_policy.policy_0'|translate}}</label>
               <!-- <input id="failHandlePolicy0" type="radio" class="form-check-input" value="0" formControlName="failHandlePolicy"/>
               <label for="failHandlePolicy0" class="form-check-label">Policy 0: {{'fail_handle_policy.policy_0'|translate}}</label> -->
             </div>
             <div class="p-form-check mb-2">
               <p-radioButton formControlName="failHandlePolicy" value="1" inputId="failHandlePolicy1"></p-radioButton>
-              <label for="failHandlePolicy1" class="ml-2 mb-0">Policy 1:
+              <label for="failHandlePolicy1" class="ms-2 mb-0">Policy 1:
                 {{'fail_handle_policy.policy_1'|translate}}</label>
               <!-- <input id="failHandlePolicy1" type="radio" class="form-check-input" value="1" formControlName="failHandlePolicy"/>
               <label for="failHandlePolicy1" class="form-check-label">Policy 1: {{'fail_handle_policy.policy_1'|translate}}</label> -->
@@ -990,11 +997,11 @@
 
       <div class="form-group row ">
         <div class="col-12">
-          <button type="button" class="btn tpi-btn tpi-primary mr-3" (click)="updateApi()"
+          <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="updateApi()"
             [disabled]="updateForm.invalid">
             {{ "button.update" | translate }}
           </button>
-          <button *ngIf="apiDetail.apiSrc.v == 'C'" type="button" class="btn tpi-btn tpi-primary mr-3"
+          <button *ngIf="apiDetail.apiSrc.v == 'C'" type="button" class="btn tpi-btn tpi-primary me-3"
             (click)="openComposer()">
             {{ "open_editor" | translate }}
           </button>
@@ -1009,7 +1016,7 @@
     <app-api-test [data]="initData"></app-api-test>
     <div class="form-group row mt-2">
       <div class="col-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="changePage('query')">
+        <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
           {{ "button.return_to_list" | translate }}
         </button>
       </div>
@@ -1025,12 +1032,12 @@
               style="display: none;">
             <input type="text" class="form-control" formControlName="fileName"
               placeholder="{{'chs_json_file' | translate}}">
-            <button pButton type="button" icon="pi pi-file" class="ml-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
               (click)="openFileBrowser();"></button>
           </div>
         </div>
         <div class="col-6">
-          <button type="button" class="btn tpi-btn tpi-primary float-left" (click)="uploadFile()"
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="uploadFile()"
             [disabled]="!file.value">
             {{'button.upload'|translate}}
           </button>
@@ -1050,7 +1057,7 @@
       <ng-template pTemplate="caption">
         <div class="ui-helper-clearfix">
           <button [disabled]="!import_apiList || import_selected.length == 0" type="button"
-            class="btn tpi-btn tpi-primary float-left mr-1" (click)="import()">
+            class="btn tpi-btn tpi-primary float-start me-1" (click)="import()">
             {{ 'button.import' | translate }}
           </button>
 
@@ -1098,7 +1105,7 @@
             <label class="moreless" *ngIf="rowData.apiKey.ori" (click)="switchOri(rowData.apiKey)">
               {{rowData.apiKey.t ? ("show_more" | translate) :'' }}
               <i class="fas"
-                [ngClass]="[rowData.apiKey.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                [ngClass]="[rowData.apiKey.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
               {{rowData.apiKey.t ? '' : ("show_less" | translate) }}
             </label>
 
@@ -1134,7 +1141,7 @@
             <label class="moreless" *ngIf="rowData.apiName.ori" (click)="switchOri(rowData.apiName)">
               {{rowData.apiName.t ? ("show_more" | translate) :'' }}
               <i class="fas"
-                [ngClass]="[rowData.apiName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                [ngClass]="[rowData.apiName.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
               {{rowData.apiName.t ? '' : ("show_less" | translate) }}
             </label>
           </td>
@@ -1144,7 +1151,7 @@
             <label class="moreless" *ngIf="rowData.memo.ori" (click)="switchOri(rowData.memo)">
               {{rowData.memo.t ? ("show_more" | translate) :'' }}
               <i class="fas"
-                [ngClass]="[rowData.memo.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 mr-1']"></i>
+                [ngClass]="[rowData.memo.t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
               {{rowData.memo.t ? '' : ("show_less" | translate) }}
             </label>
           </td>
@@ -1217,7 +1224,7 @@
           <div class="flex-row col-12 text-center">
 
 
-                  <button type="button" pButton (click)="active()" label="{{'button.confirm'|translate}}" class="p-button-success mr-3"></button>
+                  <button type="button" pButton (click)="active()" label="{{'button.confirm'|translate}}" class="p-button-success me-3"></button>
 
                   <button type="button" pButton (click)="onReject()" label="{{'button.cancel'|translate}}" class="p-button-secondary"></button>
 

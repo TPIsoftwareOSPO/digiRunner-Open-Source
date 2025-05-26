@@ -46,34 +46,35 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class DGRCServiceDelete implements IApiCacheService{
 	
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-	
-	@Autowired
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
-	
-	@Autowired
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
-	
-	@Autowired
 	private DgrcRoutingHelper dgrcRoutingHelper;
-	
-	@Autowired
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
-	
-	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
 	
 	private  Map<String, String> maskInfo ;
 	
 	private static final String LOGUUID = "【LOGUUID】";
 	private static final String END_DGRC = "【END_DGRC】";
+
+	@Autowired
+	public DGRCServiceDelete(CommForwardProcService commForwardProcService, TsmpApiCacheProxy tsmpApiCacheProxy,
+			ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy, DgrcRoutingHelper dgrcRoutingHelper,
+			TsmpApiRegCacheProxy tsmpApiRegCacheProxy, TsmpSettingService tsmpSettingService, ObjectMapper objectMapper,
+			MockApiTestService mockApiTestService) {
+		super();
+		this.commForwardProcService = commForwardProcService;
+		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
+		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
+		this.dgrcRoutingHelper = dgrcRoutingHelper;
+		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
+		this.objectMapper = objectMapper;
+		this.mockApiTestService = mockApiTestService;
+	}
 
 	@Async("async-workers-highway")
 	public CompletableFuture<ResponseEntity<?>> forwardToDeleteAsyncFast(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes,
@@ -90,7 +91,6 @@ public class DGRCServiceDelete implements IApiCacheService{
 	private CompletableFuture<ResponseEntity<?>> dgrcService(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, String payload) throws Exception {
 		var response = forwardToDelete(httpHeaders, httpReq, httpRes, payload);
-		GatewayFilter.fetchUriHistoryAfter(httpReq);
 		return CompletableFuture.completedFuture(response);
 	}
 
@@ -106,12 +106,12 @@ public class DGRCServiceDelete implements IApiCacheService{
 			
 			TsmpApiReg apiReg = null;
 
-			if (null == httpReq.getAttribute(GatewayFilter.moduleName)) {
+			if (null == httpReq.getAttribute(GatewayFilter.MODULE_NAME)) {
 				throw new Exception("TSMP_API_REG module_name is null");
 			}
 
-			String dgrcDelModuleName = httpReq.getAttribute(GatewayFilter.moduleName).toString();
-			String apiId = httpReq.getAttribute(GatewayFilter.apiId).toString();
+			String dgrcDelModuleName = httpReq.getAttribute(GatewayFilter.MODULE_NAME).toString();
+			String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
 			TsmpApiRegId tsmpApiRegId = new TsmpApiRegId(apiId, dgrcDelModuleName);
 			Optional<TsmpApiReg> optTsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId);		
 			if (optTsmpApiReg.isPresent()) {
@@ -145,7 +145,7 @@ public class DGRCServiceDelete implements IApiCacheService{
 			StringBuffer reqLog = getLogReq(httpReq, httpHeaders);
 			TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】【Start DGRC】--\n" + reqLog.toString());
 			
-			// 檢查資料
+			// 檢查授權
 			ResponseEntity<?> errRespEntity = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders, apiReg, payload, false);
 			
 			// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
@@ -153,9 +153,10 @@ public class DGRCServiceDelete implements IApiCacheService{
 			// 第一組 RDB Req
 			TsmpApiLogReq dgrcDelDgrReqVoRdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq, payload, "dgrc", aType);
 						
-			// JWT 資料驗證有錯誤
+			// 授權錯誤,則回覆錯誤訊息
 			if(errRespEntity != null) {
-				TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】" + END_DGRC + "--\n" + getCommForwardProcService().getLogResp(errRespEntity, maskInfo).toString());
+				TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】" + END_DGRC + "--\n" 
+						+ getCommForwardProcService().getLogResp(errRespEntity, maskInfo, httpReq).toString());
 				//第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, dgrcDelDgrReqVo, respMbody);
@@ -167,7 +168,8 @@ public class DGRCServiceDelete implements IApiCacheService{
 			JwtPayloadData jwtPayloadData = getCommForwardProcService().convertRequestBody(httpRes, httpReq, payload, false);
 			errRespEntity = jwtPayloadData.errRespEntity;
 			if(errRespEntity != null) {//資料有錯誤	
-				TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】" + END_DGRC + "--\n" + getCommForwardProcService().getLogResp(errRespEntity, maskInfo).toString());
+				TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】" + END_DGRC + "--\n" 
+						+ getCommForwardProcService().getLogResp(errRespEntity, maskInfo, httpReq).toString());
 				//第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, dgrcDelDgrReqVo, respMbody);
@@ -182,7 +184,7 @@ public class DGRCServiceDelete implements IApiCacheService{
 				ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
 				
 				TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】" + END_DGRC + "--\n"
-						+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo).toString());
+						+ getCommForwardProcService().getLogResp(srcUrlListErrResp, maskInfo, httpReq).toString());
 				// 第一組ES RESP
 				String respMbody = getObjectMapper().writeValueAsString(srcUrlListErrResp.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(srcUrlListErrResp, dgrcDelDgrReqVo, respMbody);
@@ -205,6 +207,12 @@ public class DGRCServiceDelete implements IApiCacheService{
 			// 調用目標URL
 			Map<String, Object> convertResponseBodyMap = forwardToByPolicy(httpHeaders, httpReq, httpRes, apiReg, uuid,
 					tokenPayload, cApiKeySwitch, dgrcDelDgrReqVo, srcUrlList, payload);
+			
+			if (convertResponseBodyMap == null) {
+				// Response alread commited HTTP code : 503 --> null
+				// 不寫 ES , 不輸出 online console
+				return null;
+			}
 
 			byte[] httpArray = null;
 			String httpRespStr = null;
@@ -227,7 +235,7 @@ public class DGRCServiceDelete implements IApiCacheService{
 			
 			// 印出第四道log
 			StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, contentLength,
-					maskInfo);
+					maskInfo, httpReq);
 			TPILogger.tl.debug("\n--" + LOGUUID + "【" + uuid + "】" + END_DGRC + "--\n" + resLog.toString());
 
 			// 第一組ES RESP
@@ -279,7 +287,7 @@ public class DGRCServiceDelete implements IApiCacheService{
 					dgrcDelDgrReqVo, cApiKeySwitch, null);
 		}
 
-		return convertResponseBodyMap;
+		return convertResponseBodyMap; //Response alread commited HTTP code : 503 --> null
 	}
 	
 	protected Map<String, Object> forwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
@@ -287,8 +295,8 @@ public class DGRCServiceDelete implements IApiCacheService{
 			TsmpApiLogReq dgrcDelDgrReqVo, Boolean cApiKeySwitch, String tryNumWord)
 			throws Exception {
 
-		// 2. tsmpc req header / body
-		// 3. tsmpc resp header / body / code
+		// 2. dgrc req header / body
+		// 3. dgrc resp header / body / code
 		
 		// http header
 		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders,

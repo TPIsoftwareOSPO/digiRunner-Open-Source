@@ -18,7 +18,6 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
-import { C, t } from 'chart.js/dist/chunks/helpers.core';
 
 @Component({
   selector: 'app-ac0016',

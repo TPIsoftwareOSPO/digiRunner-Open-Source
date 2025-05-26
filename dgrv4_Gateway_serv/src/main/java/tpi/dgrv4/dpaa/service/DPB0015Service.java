@@ -31,17 +31,20 @@ public class DPB0015Service {
 
 	private TPILogger logger = TPILogger.tl;;
 
-	@Autowired
 	private TsmpDpAppDao tsmpDpAppDao;
-	
-	@Autowired
 	private FileHelper fileHelper;
-
-	@Autowired
 	private TsmpDpApiAppDao tsmpDpApiAppDao;
+	private TsmpDpFileDao tsmpDpFileDao;
 
 	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
+	public DPB0015Service(TsmpDpAppDao tsmpDpAppDao, FileHelper fileHelper, TsmpDpApiAppDao tsmpDpApiAppDao,
+			TsmpDpFileDao tsmpDpFileDao) {
+		super();
+		this.tsmpDpAppDao = tsmpDpAppDao;
+		this.fileHelper = fileHelper;
+		this.tsmpDpApiAppDao = tsmpDpApiAppDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+	}
 
 	@Transactional
 	public DPB0015Resp updateAppById(TsmpAuthorization authorization, DPB0015Req req) {

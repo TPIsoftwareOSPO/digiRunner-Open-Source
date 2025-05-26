@@ -18,10 +18,15 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0177Service {
 
-	@Autowired
 	private DgrWebSocketMappingDao dgrWebSocketMappingDao;
 
 	private TPILogger logger = TPILogger.tl;
+
+	@Autowired
+	public DPB0177Service(DgrWebSocketMappingDao dgrWebSocketMappingDao) {
+		super();
+		this.dgrWebSocketMappingDao = dgrWebSocketMappingDao;
+	}
 
 	public DPB0177Resp updateWs(TsmpAuthorization auth, DPB0177Req req) {
 		DPB0177Resp resp = new DPB0177Resp();

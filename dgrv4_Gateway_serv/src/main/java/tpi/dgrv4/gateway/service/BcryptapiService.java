@@ -23,8 +23,13 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
  */
 @Service
 public class BcryptapiService {
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
+
+	@Autowired
+	public BcryptapiService(TsmpSettingService tsmpSettingService) {
+		super();
+		this.tsmpSettingService = tsmpSettingService;
+	}
 
 	public ResponseEntity<?> bcryptapi(HttpServletRequest req) {
 		String respText = null;

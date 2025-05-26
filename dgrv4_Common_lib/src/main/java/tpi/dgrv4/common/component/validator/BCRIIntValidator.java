@@ -27,7 +27,7 @@ public class BCRIIntValidator extends BCRIValidator<Integer> {
 
 	private void checkIsRequired(BeforeControllerRespItem item, Integer fieldValue) {
 		Boolean isRequired = getRespValue(item.getIsRequired());
-		if (!Objects.isNull(isRequired) && isRequired && Objects.isNull(fieldValue)) {
+		if (isRequired != null && isRequired && Objects.isNull(fieldValue)) {
 			throw TsmpDpAaRtnCode._1350.throwing(getWrappedFieldName());
 		}
 	}

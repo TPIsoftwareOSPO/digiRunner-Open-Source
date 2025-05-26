@@ -36,15 +36,21 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class TSMPCServicePatch {
 
-	@Autowired
 	private CommForwardProcService commForwardProcService;
-
-	@Autowired
 	private MockApiTestService mockApiTestService;
+	private ObjectMapper objectMapper;
+	
+	private HashMap<String, String> maskInfo ;
 	
 	@Autowired
-	private ObjectMapper objectMapper;
-	private HashMap<String, String> maskInfo ;
+	public TSMPCServicePatch(CommForwardProcService commForwardProcService, MockApiTestService mockApiTestService,
+			ObjectMapper objectMapper) {
+		super();
+		this.commForwardProcService = commForwardProcService;
+		this.mockApiTestService = mockApiTestService;
+		this.objectMapper = objectMapper;
+	}
+
 	public ResponseEntity<?> forwardToPatch(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes,
 			String payload) throws Exception {
 		
@@ -54,8 +60,8 @@ public class TSMPCServicePatch {
 		
 		String reqUrl = httpReq.getRequestURI();
 
-		String apiId = httpReq.getAttribute(GatewayFilter.apiId).toString();
-		String tsmpcPatch_moduleName = httpReq.getAttribute(GatewayFilter.moduleName).toString();
+		String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
+		String tsmpcPatch_moduleName = httpReq.getAttribute(GatewayFilter.MODULE_NAME).toString();
 		
 		// 1. req header / body
 		// print log
@@ -93,7 +99,7 @@ public class TSMPCServicePatch {
 					
 		// JWT 資料驗證有錯誤
 		if(errRespEntity != null) {
-			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + getCommForwardProcService().getLogResp(errRespEntity, maskInfo).toString());
+			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + getCommForwardProcService().getLogResp(errRespEntity, maskInfo, httpReq).toString());
 			//第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, tsmpcPatchDgrReqVo, respMbody);
@@ -105,7 +111,7 @@ public class TSMPCServicePatch {
 		JwtPayloadData jwtPayloadData = getCommForwardProcService().convertRequestBody(httpRes, httpReq, payload, false);
 		errRespEntity = jwtPayloadData.errRespEntity;
 		if(errRespEntity != null) {//資料有錯誤	
-			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + getCommForwardProcService().getLogResp(errRespEntity, maskInfo).toString());
+			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + getCommForwardProcService().getLogResp(errRespEntity, maskInfo, httpReq).toString());
 			//第一組ES RESP
 			String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 			getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, tsmpcPatchDgrReqVo, respMbody);
@@ -184,7 +190,7 @@ public class TSMPCServicePatch {
 //		String httpRespStr = new String(httpArray , StandardCharsets.UTF_8);
 		int contentLength = (httpArray == null) ? 0 : httpArray.length;
 		// print
-		StringBuffer resLog = getLogResp(httpRes, httpRespStr, contentLength);
+		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, contentLength, new HashMap<>(), httpReq);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
 		
 		return null;

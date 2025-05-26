@@ -19,10 +19,7 @@ public class SendOpenApiKeyMailJob extends Job {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private SendOpenApiKeyMailService sendOpenApiKeyMailService;
-
-	@Autowired
 	private PrepareMailService prepareMailService;
 
 	private final TsmpAuthorization auth;
@@ -31,13 +28,17 @@ public class SendOpenApiKeyMailJob extends Job {
 	private final String openApiKeyType;
 	private final String reqOrderNo;
 
-	public SendOpenApiKeyMailJob(TsmpAuthorization auth, String sendTime, Long openApiKeyId, 
-			String openApiKeyType, String reqOrderNo) {
+	@Autowired
+	public SendOpenApiKeyMailJob(TsmpAuthorization auth, String sendTime, Long openApiKeyId, String openApiKeyType,
+			String reqOrderNo, SendOpenApiKeyMailService sendOpenApiKeyMailService,
+			PrepareMailService prepareMailService) {
 		this.auth = auth;
 		this.sendTime = sendTime;
 		this.openApiKeyId = openApiKeyId;
 		this.openApiKeyType = openApiKeyType;
 		this.reqOrderNo = reqOrderNo;
+		this.sendOpenApiKeyMailService = sendOpenApiKeyMailService;
+		this.prepareMailService = prepareMailService;
 	}
 
 	@Override
@@ -45,10 +46,12 @@ public class SendOpenApiKeyMailJob extends Job {
 		try {
 			this.logger.debug("--- Begin SendOpenApiKeyMailJob ---");
 			if (this.auth == null) {
-				throw new Exception("未傳入授權資訊, 無法寄出通知信");
+				// 未傳入授權資訊, 無法寄出通知信
+				throw new Exception("Authorization information was not passed in, so the notification email cannot be sent.");
 			}
 			if (this.openApiKeyId == null) {
-				throw new Exception("未指定Open Api Key ID, 無法寄出通知信");
+				// 未指定Open Api Key ID, 無法寄出通知信
+				throw new Exception("Open Api Key ID not specified, unable to send notification email");
 			}
 			
 			//identif 可寫入識別資料，ex: userName=mini 或 userName=mini,　reqOrdermId=17002	若有多個資料則以逗號和全型空白分隔
@@ -61,7 +64,8 @@ public class SendOpenApiKeyMailJob extends Job {
 			// Open API Key 建立/異動/撤銷 成功的mail通知內容
 			List<TsmpMailEvent> mailEvents = getSendOpenApiKeyMailService().getTsmpMailEvents(this.auth, this.openApiKeyId, this.openApiKeyType);
 			if (mailEvents == null || mailEvents.isEmpty()) {
-				throw new Exception("取得信件參數失敗, 無法寄出通知信");
+				// 取得信件參數失敗, 無法寄出通知信
+				throw new Exception("Failed to obtain the letter parameters, unable to send the notification letter");
 			}
 			
 			/* 寫入 APPT_JOB Table & 建立 Mail 檔案, 由排程來寄信 */

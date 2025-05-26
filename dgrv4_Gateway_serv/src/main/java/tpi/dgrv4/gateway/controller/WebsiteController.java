@@ -12,8 +12,13 @@ import tpi.dgrv4.gateway.service.WebsiteService;
 @RestController
 public class WebsiteController {
 
-	@Autowired
 	private WebsiteService service;
+
+	@Autowired
+	public WebsiteController(WebsiteService service) {
+		super();
+		this.service = service;
+	}
 
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = "/website/{websiteName}/**")

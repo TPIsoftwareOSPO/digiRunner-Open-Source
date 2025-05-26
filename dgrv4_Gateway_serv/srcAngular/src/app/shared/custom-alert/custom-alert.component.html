@@ -1,0 +1,24 @@
+<div class="custom-dialog container-fluid ">
+  <div class="d-flex justify-content-center py-2">
+    <i *ngIf="config.data.type == 'info'" class="fas fa-info-circle text-info icon-large"></i>
+    <i *ngIf="config.data.type == 'warning'" class="fas fa-exclamation-circle text-warning icon-large"></i>
+    <i *ngIf="config.data.type == 'error'" class="fas fa-times-circle text-danger icon-large"></i>
+    <i *ngIf="config.data.type == 'success'" class="far fa-check-circle text-success icon-large"></i>
+  </div>
+
+  <div class="text-center">
+    <span class="fw-bold fs-4">{{ config.data.title }}</span>
+  </div>
+
+  <div class="text-center">
+    <span class="d-block text-wrap">{{ config.data.text }}</span>
+  </div>
+
+  <div class="text-center overflow-hidden w-100">
+    <span class="d-block text-wrap" [innerHTML]="config.data.html"></span>
+  </div>
+</div>
+
+<div class="text-center mt-3">
+  <button autofocus  type="button" (click)="onAccept()" class="btn tpi-btn tpi-primary me-2 focus-ring">OK</button>
+</div>

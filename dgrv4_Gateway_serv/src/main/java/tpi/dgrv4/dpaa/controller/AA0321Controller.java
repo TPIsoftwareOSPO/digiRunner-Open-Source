@@ -28,9 +28,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class AA0321Controller {
 	
-	@Autowired
 	private AA0321Service service;
 	
+	@Autowired
+	public AA0321Controller(AA0321Service service) {
+		super();
+		this.service = service;
+	}
+
 	/**
 	 * Keyword Search API (API系列 /所屬單位) 			
 	 * 提供後台開窗查詢, 需要分頁				

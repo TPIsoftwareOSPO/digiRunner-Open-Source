@@ -26,13 +26,17 @@ public class DPB0083Service {
 
 	private TPILogger logger = TPILogger.tl;
 	
-	@Autowired
 	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
 	private ServiceConfig serviceConfig;
 	
 	private Integer pageSize;
+
+	@Autowired
+	public DPB0083Service(TsmpClientDao tsmpClientDao, ServiceConfig serviceConfig) {
+		super();
+		this.tsmpClientDao = tsmpClientDao;
+		this.serviceConfig = serviceConfig;
+	}
 
 	public DPB0083Resp queryClientListByLike(TsmpAuthorization tsmpAuthorization, DPB0083Req req) {
 		DPB0083Resp resp = new DPB0083Resp();

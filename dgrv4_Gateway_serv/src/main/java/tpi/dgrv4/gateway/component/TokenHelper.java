@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +26,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.HexStringUtils;
 import tpi.dgrv4.codec.utils.JWEcodec;
@@ -84,68 +87,39 @@ import tpi.dgrv4.gateway.util.JsonNodeUtil;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class TokenHelper {
-
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
-	private TsmpClientCacheProxy tsmpClientCacheProxy;
-
-	@Autowired
-	private TsmpClientHostCacheProxy tsmpClientHostCacheProxy;
-
-	@Autowired
-	private OauthClientDetailsCacheProxy oauthClientDetailsCacheProxy;
-
-	@Autowired
-	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-
-	@Autowired
-	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-
-	@Autowired
-	private TsmpTokenHistoryCacheProxy tsmpTokenHistoryCacheProxy;
-
-	@Autowired
-	private SeqStoreService seqStoreService;
-
-	@Autowired
-	private TsmpUserCacheProxy tsmpUserCacheProxy;
-
-	@Autowired
-	private UsersCacheProxy usersCacheProxy;
-
-	@Autowired
-	private TsmpGroupApiCacheProxy tsmpGroupApiCacheProxy;
-
-	@Autowired
-	private TsmpClientGroupCacheProxy tsmpClientGroupCacheProxy;
-
-	@Autowired
-	private TsmpGroupCacheProxy tsmpGroupCacheProxy;
-
-	@Autowired
-	private TsmpOpenApiKeyMapCacheProxy tsmpOpenApiKeyMapCacheProxy;
-
-	@Autowired
-	private TsmpApiCacheProxy tsmpApiCacheProxy;
-
-	@Autowired
-	private TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
-
-	@Autowired
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-
-	@Autowired
-	private DgrXApiKeyCacheProxy dgrXApiKeyCacheProxy;
-
-	@Autowired
-	private DgrXApiKeyMapCacheProxy dgrXApiKeyMapCacheProxy;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
+	
+	// Double-Checked Locking mode has been implemented, but SonarQube may not fully understand the context and issue a warning, so annotate
+	// 已經實作雙重檢查鎖定(Double-Checked Locking)模式,但SonarQube可能無法完全理解上下文發出警告,故加註解
+	@SuppressWarnings("java:S3077")
+	private static volatile TokenHelper instance;
+	
+	private final TsmpClientDao tsmpClientDao;
+	private final TsmpClientCacheProxy tsmpClientCacheProxy;
+	private final TsmpClientHostCacheProxy tsmpClientHostCacheProxy;
+	private final OauthClientDetailsCacheProxy oauthClientDetailsCacheProxy;
+	private final TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private final TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	private final TsmpTokenHistoryCacheProxy tsmpTokenHistoryCacheProxy;
+	private final SeqStoreService seqStoreService;
+	private final TsmpUserCacheProxy tsmpUserCacheProxy;
+	private final UsersCacheProxy usersCacheProxy;
+	private final TsmpGroupApiCacheProxy tsmpGroupApiCacheProxy;
+	private final TsmpClientGroupCacheProxy tsmpClientGroupCacheProxy;
+	private final TsmpGroupCacheProxy tsmpGroupCacheProxy;
+	private final TsmpOpenApiKeyMapCacheProxy tsmpOpenApiKeyMapCacheProxy;
+	private final TsmpApiCacheProxy tsmpApiCacheProxy;
+	private final TsmpOpenApiKeyDao tsmpOpenApiKeyDao;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final DgrXApiKeyCacheProxy dgrXApiKeyCacheProxy;
+	private final DgrXApiKeyMapCacheProxy dgrXApiKeyMapCacheProxy;
+	private final ServiceConfig serviceConfig;
+	
+	@Value("${digi.cookie.samesite.value:Lax}")
+	public String samesiteValue;
 
 	@Value("${digiRunner.gtw.deploy.role}")
 	private String deployRole;
@@ -185,6 +159,32 @@ public class TokenHelper {
 	public static final String THE_PROFILE_IS_MISSING_PARAMETERS = "The profile is missing parameters: ";
 	// 缺少必需的參數
 	public static final String MISSING_REQUIRED_PARAMETER = "Missing required parameter: ";
+	
+	/**
+	 * 這是一個假的 getInstance(),
+	 * 實際上不會有機會建立一個空的 TokenHelper(),
+	 * 因為在啟動 Spring boot 時, 早就被 @Component 載入,
+	 * 寫這段是為了配合 init() 將物件指向一個 volatile instance,
+	 * 方便在其它的 class 中直接使用此 sigaletone object
+	 */
+	// Double-Checked Locking mode
+	// 雙重檢查鎖定(Double-Checked Locking)模式
+    public static TokenHelper getInstance() {
+        if (instance == null) {
+            synchronized (TokenHelper.class) {
+				if (instance == null) {
+					instance = new TokenHelper(null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null);
+				}
+            }
+        }
+        return instance;
+    }
+    
+    @PostConstruct
+    public void init() {
+    	instance = this;
+    }
 
 	public static class JwtPayloadData {
 		public ResponseEntity<?> errRespEntity;
@@ -193,13 +193,39 @@ public class TokenHelper {
 	}
 
 	public static class BasicAuthClientData {
-		public ResponseEntity<?> errRespEntity;
-		public String[] cliendData = null;
+		private ResponseEntity<?> errRespEntity;
+		private String[] cliendData = null;
+		
+		public ResponseEntity<?> getErrRespEntity() {
+			return errRespEntity;
+		}
+		public void setErrRespEntity(ResponseEntity<?> errRespEntity) {
+			this.errRespEntity = errRespEntity;
+		}
+		public String[] getCliendData() {
+			return cliendData;
+		}
+		public void setCliendData(String[] cliendData) {
+			this.cliendData = cliendData;
+		}
 	}
 
 	public static class DgrkAuthData {
-		public ResponseEntity<?> errRespEntity;
-		public String[] authData = null;
+		private ResponseEntity<?> errRespEntity;
+		private String[] authData = null;
+		
+		public ResponseEntity<?> getErrRespEntity() {
+			return errRespEntity;
+		}
+		public void setErrRespEntity(ResponseEntity<?> errRespEntity) {
+			this.errRespEntity = errRespEntity;
+		}
+		public String[] getAuthData() {
+			return authData;
+		}
+		public void setAuthData(String[] authData) {
+			this.authData = authData;
+		}
 	}
 
 	/**
@@ -224,11 +250,7 @@ public class TokenHelper {
 			return false;
 		}
 
-		int flag = authorization.toLowerCase().indexOf(keyword.toLowerCase());// 轉小寫,再比較(忽略大小寫)
-		if (flag == -1) {
-			return false;
-		}
-		return true;
+		return authorization.toLowerCase().contains(keyword.toLowerCase());// 轉小寫,再比較(忽略大小寫)
 	}
 
 	/**
@@ -369,8 +391,7 @@ public class TokenHelper {
 		// 因為最終要用findFirstByClientId的cache機制,所以沒用findById
 		TsmpClient client = getTsmpClientCacheProxy().findFirstByClientId(clientId);
 		if (client == null) {
-			ResponseEntity<?> errRespEntity = getFindTsmpClientError(clientId, reqUri);
-			return errRespEntity;
+			return getFindTsmpClientError(clientId, reqUri);
 		}
 
 		// client 狀態為2(停用)或3(鎖定)
@@ -461,7 +482,7 @@ public class TokenHelper {
 				client.setPwdFailTimes(pwdFailTimes + 1);
 			}
 
-			client = getTsmpClientDao().save(client);
+			getTsmpClientDao().save(client);
 		}
 	}
 
@@ -647,12 +668,14 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同
+	 * [ZH] 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
+	 * [EN] Check if the redirectUri passed in is the same as the one registered in the client system <br>
 	 */
 	public ResponseEntity<?> checkRedirectUri(String clientId, String redirectUri, String apiUrl) {
 		String errMsg = null;
 
 		// 沒有 redirect_uri
+		// No redirect_uri
 		if (!StringUtils.hasLength(redirectUri)) {
 			errMsg = MISSING_REQUIRED_PARAMETER + "redirect_uri";
 			TPILogger.tl.debug(errMsg);
@@ -661,16 +684,21 @@ public class TokenHelper {
 		}
 
 		// 取得 OAUTH_CLIENT_DETAILS 的 web_server_redirect_uri
+		// Get the web_server_redirect_uri of OAUTH_CLIENT_DETAILS
 		Optional<OauthClientDetails> opt_authClientDetails = getOauthClientDetailsCacheProxy().findById(clientId);
 		if (!opt_authClientDetails.isPresent()) {
 			return getFindOauthClientDetailsError(clientId, apiUrl);
 		}
 
 		OauthClientDetails authClientDetails = opt_authClientDetails.get();
+		
+		// 取得 client 在 digiRunner 設定的重新導向URI資料
+		// Get the redirect URI data set by the client in digiRunner
 		List<String> webServerRedirectUriList = getWebServerRedirectUriList(authClientDetails);
 		String webServerRedirectUriMsg = getMsgForWebServerRedirectUri(webServerRedirectUriList);
 
 		// redirect_uri 不正確
+		// The redirect_uri is incorrect
 		if (!isMatchRedirectUri(webServerRedirectUriList, redirectUri)) {
 			errMsg = String.format("The redirect_uri mismatch. \n" //
 					+ "client_id: %s, \n" //
@@ -691,12 +719,17 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
+	 * [ZH] 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
 	 * 若 redirectUri 為 https 或 https, 則網址必須完全相同才是符合 <br>
 	 * 否則, redirectUri 只要和註冊的 * 號前後相同即符合 <br>
+	 * [EN]Check if the redirectUri passed in is the same as the client registered in the system <br>
+	 * If redirectUri is https or https, the URL must be exactly the same to comply with <br>
+	 * Otherwise, redirectUri will be in compliance as long as it is the same as the registered * before and after <br>
 	 * 
-	 * @param webServerRedirectUriList client 註冊在系統中的
-	 * @param reqRedirectUri           傳入的 redirectUri
+	 * @param webServerRedirectUriList [ZH] client 註冊在 dgR 中的 [EN] The client is
+	 *                                 registered in dgR
+	 * @param reqRedirectUri           [ZH] 傳入的 redirectUri [EN] The redirectUri
+	 *                                 passed in
 	 */
 	private boolean isMatchRedirectUri(List<String> webServerRedirectUriList, String reqRedirectUri) {
 		if (isHttpsOrHttp(reqRedirectUri)) {// https or http
@@ -722,9 +755,9 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 網址是否為 "https://" 或 "http://" 開頭
-	 * 
-	 * @return true: 是; false: 不是
+	 * [ZH] 網址是否為 "https://" 或 "http://" 開頭 <br>
+	 * [EN] Whether the URL starts with "https://" or "http://" <br>
+	 * @return true: yes; false: not
 	 */
 	private boolean isHttpsOrHttp(String uri) {
 		if (uri == null) {
@@ -747,7 +780,8 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 檢查 user 狀態, 2張表 Users 和 TSMP_USER
+	 * [ZH] 檢查 user 狀態, 2張表 Users 和 TSMP_USER <br>
+	 * [EN] Check user status, 2 tables Users and TSMP_USER <br>
 	 */
 	public ResponseEntity<?> checkUserStatus(String userName, String apiUrl) {
 		if (!StringUtils.hasLength(userName)) {
@@ -1446,8 +1480,8 @@ public class TokenHelper {
 	 */
 	public ResponseEntity<?> verifyApiForXApiKey(String xApiKey, HttpServletRequest httpReq) throws Exception {
 		String reqUri = httpReq.getRequestURI();
-		String moduleName = httpReq.getAttribute(GatewayFilter.moduleName).toString();
-		String apiId = httpReq.getAttribute(GatewayFilter.apiId).toString();
+		String moduleName = httpReq.getAttribute(GatewayFilter.MODULE_NAME).toString();
+		String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
 
 		// 1.找不到符合的 X-Api-Key
 		String xApiKeyEn = getXApiKeyEn(xApiKey);// 取得 X-Api-Key 經過 SHA256 的值
@@ -1572,8 +1606,8 @@ public class TokenHelper {
 	 */
 	public ResponseEntity<?> verifyApiForAuth(String authorization, HttpServletRequest httpReq, String payload) {
 		String reqUri = httpReq.getRequestURI();
-		String moduleName = httpReq.getAttribute(GatewayFilter.moduleName).toString();
-		String apiId = httpReq.getAttribute(GatewayFilter.apiId).toString();
+		String moduleName = httpReq.getAttribute(GatewayFilter.MODULE_NAME).toString();
+		String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
 
 		// 1.是否有 authorization
 		ResponseEntity<?> respEntity = checkHasAuthorization(authorization, reqUri);
@@ -2510,7 +2544,7 @@ public class TokenHelper {
 				.maxAge(maxAge) // 以秒為單位
 				.path("/").httpOnly(true) // 禁止 JavaScript 存取 cookie, 防止 XSS Attack (Cross-Site Scripting，跨站腳本攻擊)
 				.secure(true) // 讓 cookie 只能透過 https 傳遞, 即只有 HTTPS 才能讀與寫
-				.sameSite("Strict") // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
+				.sameSite(TokenHelper.getInstance().samesiteValue) // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
 				.build();
 
 		return cookie;
@@ -2550,89 +2584,5 @@ public class TokenHelper {
 		MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
 		header.put("Content-Type", Arrays.asList(MediaType.APPLICATION_JSON.toString()));
 		return header;
-	}
-
-	protected String getDeployRole() {
-		return deployRole;
-	}
-
-	protected OauthClientDetailsCacheProxy getOauthClientDetailsCacheProxy() {
-		return oauthClientDetailsCacheProxy;
-	}
-
-	protected TsmpClientDao getTsmpClientDao() {
-		return tsmpClientDao;
-	}
-
-	protected TsmpClientCacheProxy getTsmpClientCacheProxy() {
-		return tsmpClientCacheProxy;
-	}
-
-	protected TsmpCoreTokenEntityHelper getTsmpCoreTokenHelper() {
-		return tsmpCoreTokenHelper;
-	}
-
-	protected TsmpTokenHistoryDao getTsmpTokenHistoryDao() {
-		return tsmpTokenHistoryDao;
-	}
-
-	protected TsmpTokenHistoryCacheProxy getTsmpTokenHistoryCacheProxy() {
-		return tsmpTokenHistoryCacheProxy;
-	}
-
-	protected SeqStoreService getSeqStoreService() {
-		return this.seqStoreService;
-	}
-
-	protected TsmpUserCacheProxy getTsmpUserCacheProxy() {
-		return tsmpUserCacheProxy;
-	}
-
-	protected UsersCacheProxy getUsersCacheProxy() {
-		return usersCacheProxy;
-	}
-
-	protected TsmpGroupApiCacheProxy getTsmpGroupApiCacheProxy() {
-		return tsmpGroupApiCacheProxy;
-	}
-
-	protected TsmpClientGroupCacheProxy getTsmpClientGroupCacheProxy() {
-		return tsmpClientGroupCacheProxy;
-	}
-
-	protected TsmpGroupCacheProxy getTsmpGroupCacheProxy() {
-		return tsmpGroupCacheProxy;
-	}
-
-	protected TsmpOpenApiKeyMapCacheProxy getTsmpOpenApiKeyMapCacheProxy() {
-		return tsmpOpenApiKeyMapCacheProxy;
-	}
-
-	protected TsmpApiCacheProxy getTsmpApiCacheProxy() {
-		return tsmpApiCacheProxy;
-	}
-
-	protected TsmpOpenApiKeyDao getTsmpOpenApiKeyDao() {
-		return tsmpOpenApiKeyDao;
-	}
-
-	protected ServiceConfig getServiceConfig() {
-		return serviceConfig;
-	}
-
-	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
-		return dgrAcIdpUserDao;
-	}
-
-	protected TsmpClientHostCacheProxy getTsmpClientHostCacheProxy() {
-		return tsmpClientHostCacheProxy;
-	}
-
-	protected DgrXApiKeyCacheProxy getDgrXApiKeyCacheProxy() {
-		return dgrXApiKeyCacheProxy;
-	}
-
-	protected DgrXApiKeyMapCacheProxy getDgrXApiKeyMapCacheProxy() {
-		return dgrXApiKeyMapCacheProxy;
 	}
 }

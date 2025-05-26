@@ -1,10 +1,10 @@
 <div class="form-group " [formGroup]="form">
   <div class="col-12 px-0" [style]="{display: 'flex',width: '100%','align-items': 'center'}">
-    <label class="pr-1 control-label" [ngClass]="{'required':required}">Key</label>
+    <label class="pe-1 control-label" [ngClass]="{'required':required}">Key</label>
     <input type="text" class="form-control" formControlName="key">
-    <label class="pl-2 pr-1 control-label" [ngClass]="{'required':required}">Value</label>
+    <label class="ps-2 pe-1 control-label" [ngClass]="{'required':required}">Value</label>
     <input type="text" class="form-control" formControlName="value">
-    <button type="button" class="btn tpi-primary ml-1" (click)="deleteItem()" style="border-radius: 50%"
+    <button type="button" class="btn tpi-primary ms-1" (click)="deleteItem()" style="border-radius: 50%"
       [hidden]="_disabled">
       <i class="fa fa-minus"></i>
     </button>

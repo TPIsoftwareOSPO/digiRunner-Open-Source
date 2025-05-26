@@ -20,11 +20,17 @@ import tpi.dgrv4.gateway.util.ControllerUtil;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 
+@SuppressWarnings("java:S3649")  // 停用 SQL 注入檢查, 因為此入口必需通過 capikey 的檢查, 此技術只適用在 container 內部互相傳送使用
 @RestController
 public class DPB0189Controller {
-	@Autowired
 	private DPB0189Service service;
 	
+	@Autowired
+	public DPB0189Controller(DPB0189Service service) {
+		super();
+		this.service = service;
+	}
+
 
 	@PostMapping(value = "/dgrv4/11/DPB0189", //
 			consumes = MediaType.APPLICATION_JSON_VALUE, //

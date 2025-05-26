@@ -9,6 +9,7 @@ import java.util.concurrent.CancellationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
@@ -24,6 +25,7 @@ import tpi.dgrv4.gateway.component.job.DeferrableJob;
 import tpi.dgrv4.gateway.component.job.JobHelperImpl;
 import tpi.dgrv4.gateway.component.job.JobManager;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.util.LimitLogger;
 
 /**
  * 因排程工作是由 DeferrableJob 實作
@@ -35,23 +37,22 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 
 	public final static Integer MAX_STACK_TRACE_LENGTH = 1000;
 
-	@Autowired
 	private TPILogger logger;
 
 	private TsmpDpApptJob tsmpDpApptJob;
-
-	@Autowired
 	private ApptJobDispatcher apptJobDispatcher;
-
-	@Autowired
 	private TsmpDpApptJobDao tsmpDpApptJobDao;
 
 	// 此處的 TsmpDpApptJob, 是  deep clone 而來的
-	public ApptJob(TsmpDpApptJob tsmpDpApptJob, TPILogger logger) {
+	@Autowired
+	public ApptJob(TsmpDpApptJob tsmpDpApptJob, TPILogger logger, ApptJobDispatcher apptJobDispatcher,
+			TsmpDpApptJobDao tsmpDpApptJobDao) {
 		// 以 apptJobId 作為 groupId, 會使得重複的工作被丟棄
 		super(String.valueOf(tsmpDpApptJob.getApptJobId()));
 		this.tsmpDpApptJob = tsmpDpApptJob;
 		this.logger = logger;
+		this.apptJobDispatcher = apptJobDispatcher;
+		this.tsmpDpApptJobDao = tsmpDpApptJobDao;
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 		runJobBody();
 	}
 	
-	private DpaaSystemInfoHelper dpaaSystemInfoHelper = new DpaaSystemInfoHelper();
+	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
 	
 	protected DpaaSystemInfoHelper getDpaaSystemInfoHelper() {
 		return dpaaSystemInfoHelper;
@@ -88,7 +89,23 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 			return ;
 		} 
 		
-		TPILogger.tl.info(" ... " + cpuLoad + "%... CPU Load" + "\n");
+		if (TPILogger.lc != null) {
+			// 限流 1 sec 輸出 ApptJob 本體類別 
+			LimitLogger.logWithThrottle(String.format("""
+				... nodeName = %s
+				... %.2f %%... CPU Load
+				... getClass().getName()=%s
+				... Stacktrace ...
+				%s
+				""", 
+				TPILogger.lc.userName, 
+				infoVo.getCpu() * 100, 
+				this.getClass().getName(), 
+				StackTraceUtil.getStackTraceAsString()), 
+					this.getClass().getName(), 
+					1);
+		}
+
 		try {
 			// 週期排程的流程中, 只要有"暫停"、"作廢"...等操作, 都會刪除 ApptJob 的資料, 所以才會需要在執行前判斷資料是否還在
 			Boolean isExists = getTsmpDpApptJobDao().existsById(this.tsmpDpApptJob.getApptJobId());
@@ -164,10 +181,17 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 	 * 工作執行失敗時需Update status = Error， 並發出告警，最後Refresh MemList
 	 * @param e
 	 */
-	private void jobError(Exception e) {
-		final String stackTrace = ServiceUtil.truncateExceptionMessage(e, MAX_STACK_TRACE_LENGTH);
+	private void jobError(Exception exception) {
+		final String stackTrace = ServiceUtil.truncateExceptionMessage(exception, MAX_STACK_TRACE_LENGTH);
 		this.tsmpDpApptJob.setStackTrace(stackTrace);
-		updateStatus(TsmpDpApptJobStatus.ERROR);
+		try {
+			updateStatus(TsmpDpApptJobStatus.ERROR); // database read only
+		} catch (JpaSystemException e) {
+			String msg = StackTraceUtil.logTpiShortStackTrace(e);
+			if (msg.indexOf("The database is read only") == -1) {
+				throw e;
+			}
+		}
 	}
 
 	private void jobCancel() {

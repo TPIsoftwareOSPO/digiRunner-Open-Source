@@ -277,6 +277,9 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String REQUEST_URI_ENABLED = "REQUEST_URI_ENABLED";
 		
 		public static final String HIGHWAY_THRESHOLD = "HIGHWAY_THRESHOLD";
+
+		public static final String ES_LOGFILE_FAIL_RETRY = "ES_LOGFILE_FAIL_RETRY";
+		public static final String ES_CHECK_CONNECTION = "ES_CHECK_CONNECTION";
 	}
 
 	public List<TsmpSetting> findByIdLike(String id);

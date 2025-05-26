@@ -9,11 +9,11 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="Y"  inputId="statusY"></p-radioButton>
-                <label for="statusY" class="ml-2 mb-0">Y</label>
+                <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="N"  inputId="statusN"></p-radioButton>
-                <label for="statusN" class="ml-2 mb-0">N</label>
+                <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
           </div>
@@ -26,7 +26,7 @@
       <div class="form-group row">
         <div class="col-12">
           <label id="status_label" class="control-label">Allow List</label><i
-          class="far fa-question-circle ml-2"
+          class="far fa-question-circle ms-2"
           pTooltip="{{ 'allowlist_rule_tip' | translate }}" [escape]="false"></i>
           <app-white-list-form formControlName="dataList"></app-white-list-form>
         </div>
@@ -34,7 +34,7 @@
 
       <div class="form-group row">
         <div class="col-12">
-          <button type="button" class="btn tpi-btn tpi-primary float-left mr-2"
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-2"
             [disabled]="!form.valid" (click)="update();">{{'button.update'|translate}}</button>
         </div>
       </div>

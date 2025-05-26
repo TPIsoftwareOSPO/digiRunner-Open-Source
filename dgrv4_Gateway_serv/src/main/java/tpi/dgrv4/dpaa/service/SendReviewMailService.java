@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -24,35 +25,34 @@ public class SendReviewMailService {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private ApplicationContext ctx;
-	
-	@Autowired
 	private JobHelper jobHelper;
-
-	@Autowired
 	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
-	private ServiceConfig serviceConfig;
-
-	@Autowired
 	private DpReqQueryFactory dpReqQueryFactory;
-	
-	@Autowired
 	private TsmpSettingService tsmpSettingService;
 	
 	private String sendTime;
  
+	@Autowired
+	public SendReviewMailService(ApplicationContext ctx, JobHelper jobHelper, TsmpUserDao tsmpUserDao,
+			@Lazy DpReqQueryFactory dpReqQueryFactory, TsmpSettingService tsmpSettingService) {
+		super();
+		this.ctx = ctx;
+		this.jobHelper = jobHelper;
+		this.tsmpUserDao = tsmpUserDao;
+		this.dpReqQueryFactory = dpReqQueryFactory;
+		this.tsmpSettingService = tsmpSettingService;
+	}
+
 	@PostConstruct
 	public void init() {
 	}
 	
-	public SendReviewMailJob sendEmail(TsmpAuthorization authorization, String reviewType, Long reqOrdermId, //
+	public SendReviewMailJob sendEmail(TsmpAuthorization authorization, String reviewType, Long reqOrdermId,
 			String reqOrderNo, String locale) {
-		//使用 Job 寫入 APPT_JOB Table & 建立 Mail 檔案, 由排程來寄信
-		SendReviewMailJob job = (SendReviewMailJob) getCtx().getBean("sendReviewMailJob", authorization
-				, reqOrdermId, reviewType, getSendTime(), reqOrderNo, locale);
+		// 使用 Job 寫入 APPT_JOB Table & 建立 Mail 檔案, 由排程來寄信
+		SendReviewMailJob job = (SendReviewMailJob) getCtx().getBean("sendReviewMailJob", authorization, reqOrdermId,
+				reviewType, getSendTime(), reqOrderNo, locale);
 		getJobHelper().add(job);
 		return job;
 	}

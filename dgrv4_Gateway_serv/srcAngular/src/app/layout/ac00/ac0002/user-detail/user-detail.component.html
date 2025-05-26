@@ -1,0 +1,60 @@
+<div class="py-1" [ngClass]="{'container':center}" *ngIf="data">
+    <div class="row">
+        <div [ngClass]="{'mx-auto':center,'col-md-10':center,'col-md-12':!center}">
+            <form>
+                <div class="form-group row">
+                    <div class="col-sm-4">
+                        <label>{{'user_id' | translate}}</label>
+                        <label class="form-control border-line">{{data.userID}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label>{{'user_name' | translate}}</label>
+                        <label class="form-control border-line">{{data.userName}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="userAlias">{{'user_alias' | translate}}</label>
+                        <label class="form-control border-line">{{data.userAlias}}</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-6">
+                        <label>{{'org_name' | translate}}</label>
+                        <label class="form-control border-line">{{data.orgName}}</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <label>{{'role_list' | translate}}</label>
+                        <label class="form-control border-line">{{data.roleAlias}}</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <label>{{'user_email' | translate}}</label>
+                        <label class="form-control border-line">{{data.userMail}}</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <label for="inputContactNumber">{{'logon_date' | translate}}</label>
+                        <label class="form-control border-line">{{data.logonDate}}</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <label for="inputContactNumber">{{'create_date' | translate}}</label>
+                        <label class="form-control border-line">{{data.createDate}}</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-6">
+                        <label>{{'status' | translate}}</label>
+                        <label class="form-control border-line">{{data.statusName}}</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <label>{{'pwd_fail_times' | translate}}</label>
+                        <label class="form-control border-line">{{data.pwdFailTimes}}</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

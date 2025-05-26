@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>digiRunner v4</title>
 <link rel="icon" type="image/x-icon" href="/dgrv4/ac4/favicon.ico">
@@ -134,7 +134,8 @@ p {
 
 #showAllThreadStatusDiv td {
 	padding: 0 1rem;
-	white-space: pre-wrap;
+	white-space: pre;
+	vertical-align: top;  /* 添加這一行 */
 }
 
 #showAllUrlStatusDiv {  
@@ -144,7 +145,8 @@ p {
 
 #showAllUrlStatusDiv td {
 	padding: 0 1rem;
-	white-space: pre-wrap;
+	white-space: pre;
+	vertical-align: top;  /* 添加這一行 */
 }
 
 /* 美化 scrollbar */
@@ -440,8 +442,8 @@ p {
 
 							str = str + '<li><b>' + 'esQueue: ' + d.esQueue + ',&emsp;';
 							str = str + '' + 'rdbQueue: ' + d.rdbQueue + '</b></li>';
-											
-							str = str + '<li>' + 'CPU: <b><u>' + d.cpu + '</u></b>, &emsp; Mem: <u>' + d.mem + '</u></li>';	
+
+							str = str + '<li>' + 'CPU: <b><u>' + d.cpu + '</u></b>, &emsp; Mem: <u>' + d.mem + '</u>, &emsp; MetaSpace: <u>' + d.metaSpace + '</u>  </li>';								
 							str = str + '<li>' + 'H_used: <u>' + d.h_used + '</u>, &emsp; H_free: <b><u>' + d.h_free + '</u></b>, &emsp; H_total: <u>' + d.h_total + '</u></li>';
 						str = str + '</ul>';
 						str = str + '</li>';				
@@ -471,7 +473,7 @@ p {
 							str = str + '<li><b>' + 'esQueue: ' + d.esQueue + ',&emsp;';
 							str = str + '' + 'rdbQueue: ' + d.rdbQueue + '</b></li>';
 											
-							str = str + '<li>' + 'CPU: <b><u>' + d.cpu + '</u></b>, &emsp; Mem: <u>' + d.mem + '</u></li>';	
+							str = str + '<li>' + 'CPU: <b><u>' + d.cpu + '</u></b>, &emsp; Mem: <u>' + d.mem + '</u>, &emsp; MetaSpace: <u>' + d.metaSpace + '</u>  </li>';	
 							str = str + '<li>' + 'H_used: <u>' + d.h_used + '</u>, &emsp; H_free: <b><u>' + d.h_free + '</u></b>, &emsp; H_total: <u>' + d.h_total + '</u></li>';
 							
 							str = str + '<li><b>' + ' main: ' + d.main + ',&emsp;';	
@@ -584,7 +586,7 @@ p {
 
 
 <div id="container">
-  <input type="checkbox" name="checkbox" id="checkbox_auto" value="value" onclick="autoPage()">
+  <input type="checkbox" name="checkbox" id="checkbox_auto" value="value" onclick="autoPage()" onKeyPress="autoPage()">
   <label for="checkbox_auto">auto scroll</label>
   <button onclick="cleanTextarea()">clear</button>
   <button onclick="apiOpen()" id="btn_apiOpen">connect</button>

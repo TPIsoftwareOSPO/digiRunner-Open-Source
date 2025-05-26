@@ -40,29 +40,30 @@ public abstract class DpReqQueryAbstract<T> implements DpReqQueryIfs<T> {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpDpReqOrdermDao tsmpDpReqOrdermDao;
-
-	@Autowired
 	private TsmpDpReqOrdersDao tsmpDpReqOrdersDao;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private TsmpOrganizationDao tsmpOrganizationDao;
+	private TsmpUserDao tsmpUserDao;
+	private TsmpClientDao tsmpClientDao;
+	private TsmpDpFileDao tsmpDpFileDao;
+	private DpReqServiceFactory dpReqServiceFactory;
 	
 	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-
-	@Autowired
-	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
-	private TsmpUserDao tsmpUserDao;
-
-	@Autowired
-	private TsmpClientDao tsmpClientDao;
-
-	@Autowired
-	private TsmpDpFileDao tsmpDpFileDao;
-
-	@Autowired
-	private DpReqServiceFactory dpReqServiceFactory;
+	protected DpReqQueryAbstract(TsmpDpReqOrdermDao tsmpDpReqOrdermDao, TsmpDpReqOrdersDao tsmpDpReqOrdersDao,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpOrganizationDao tsmpOrganizationDao,
+			TsmpUserDao tsmpUserDao, TsmpClientDao tsmpClientDao, TsmpDpFileDao tsmpDpFileDao,
+			DpReqServiceFactory dpReqServiceFactory) {
+		super();
+		this.tsmpDpReqOrdermDao = tsmpDpReqOrdermDao;
+		this.tsmpDpReqOrdersDao = tsmpDpReqOrdersDao;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpOrganizationDao = tsmpOrganizationDao;
+		this.tsmpUserDao = tsmpUserDao;
+		this.tsmpClientDao = tsmpClientDao;
+		this.tsmpDpFileDao = tsmpDpFileDao;
+		this.dpReqServiceFactory = dpReqServiceFactory;
+	}
 
 	@Override
 	public DpReqQueryResp<T> doQuery(Long reqOrdermId, String locale) {

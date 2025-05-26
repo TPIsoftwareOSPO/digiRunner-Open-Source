@@ -1,7 +1,6 @@
 package tpi.dgrv4.common.component.validator;
 
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.util.CollectionUtils;
 
@@ -32,7 +31,7 @@ public class BCRIMapValidator extends BCRIValidator<Map<?, ?>> {
 
 	private void checkIsRequired(BeforeControllerRespItem item, Map<?, ?> fieldValue) {
 		Boolean isRequired = getRespValue(item.getIsRequired());
-		if (!Objects.isNull(isRequired) && isRequired && CollectionUtils.isEmpty(fieldValue)) {
+		if (isRequired != null && isRequired && CollectionUtils.isEmpty(fieldValue)) {
 			throw TsmpDpAaRtnCode._1350.throwing(getWrappedFieldName());
 		}
 	}

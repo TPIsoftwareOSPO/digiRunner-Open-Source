@@ -11,7 +11,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-3 col-xl-3 col-lg-3">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-left mr-3">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
                 </div>
             </div>
         </form>
@@ -42,7 +42,7 @@
                     </td>
                     <td style="text-align:center;width: 80px">
                         <!-- <div class="btn-group">
-                            <button type="button" class="btn btn-deta mr-5"
+                            <button type="button" class="btn btn-deta me-5"
                                 (click)="showDialog(rowData,formOperate.detail)">
                                 <span
                                     class="fa fa-search">{{'button.detail'|translate}}</span>
@@ -58,8 +58,6 @@
                 <tr *ngIf="rowcount">
                     <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
                         <span style="vertical-align:middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-                        <!-- <button type="button" class="btn btn-warning pull-right ml-3"
-                            (click)="moreData();">{{'button.more'|translate}}</button> -->
                             <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
                               <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
                               </button>
@@ -78,19 +76,19 @@
 
     <ng-container *ngIf="pageNum === emPageBlock.CLIENT_DETAIL">
         <app-client-ca *ngIf="clientData" [data]="clientData" [isCusEnable]="isCusEnable" (rowDataHandler)="rowDataHandler($event)"></app-client-ca>
-        <div class="text-left">
+        <div class="text-start">
             <button type="button" class="btn tpi-btn tpi-primary" (click)="redirectList($event)">{{'button.return_to_list'|translate}}</button>
         </div>
     </ng-container>
 
-    
+
     <ng-container *ngIf="pageNum === emPageBlock.CA_DETAIL">
         <app-ca-detail *ngIf="caData" [data]="caData" [center]="false"></app-ca-detail>
-        <div class="text-left">
+        <div class="text-start">
             <button type="button" class="btn tpi-btn tpi-primary" (click)="redirectPrev($event)">{{'button.return'|translate}}</button>
         </div>
     </ng-container>
- 
+
 </app-container>
 
 

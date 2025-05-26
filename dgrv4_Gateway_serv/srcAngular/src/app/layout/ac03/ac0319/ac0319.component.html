@@ -2,7 +2,7 @@
   <div [hidden]="pageNum != 1">
     <div class="form-group row">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary mr-2"
+        <button type="button" class="btn tpi-btn tpi-primary me-2"
           (click)="queryLabelList()">{{'label_search'|translate}}</button>
         <button type="button" class="btn tpi-btn tpi-primary"
           (click)="queryAllTargetSitList()">{{'target_site_search'|translate}}</button>
@@ -14,31 +14,31 @@
       <!-- 表單工具列 -->
       <ng-template pTemplate="caption">
         <div class="ui-helper-clearfix">
-          <button type="button" class="btn tpi-primary tpi-btn float-left mr-1" [disabled]="selected.length == 0"
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
             (click)="updateAPIStatus('enable')">
             {{ "button.enable" | translate }}
           </button>
-          <button type="button" class="btn tpi-primary tpi-btn float-left mr-1" [disabled]="selected.length == 0"
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
             (click)="updateAPIStatus('disable')">
             {{ "button.disable" | translate }}
           </button>
-          <button type="button" class="btn tpi-primary tpi-btn float-left mr-1" [disabled]="selected.length == 0"
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
             (click)="batchNoOauthModify(true)">
             {{"noauth.active"|translate}}
           </button>
-          <button type="button" class="btn tpi-primary tpi-btn float-left mr-1" [disabled]="selected.length == 0"
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
             (click)="batchNoOauthModify(false)">
             {{"noauth.inactive"|translate}}
           </button>
-          <button type="button" class="btn tpi-primary tpi-btn float-left mr-1" [disabled]="selected.length == 0"
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
             (click)="labelReset()">
             {{ "button.label_reset" | translate }}
           </button>
-          <button type="button" class="btn tpi-btn tpi-primary float-right" [disabled]="selected.length == 0"
+          <button type="button" class="btn tpi-btn tpi-primary float-end" [disabled]="selected.length == 0"
             (click)="changePage('api_url_setting')">{{'api_url_setting'|translate}}</button>
 
             <button type="button" title="{{ 'fail_handle_policy.reset' | translate }}"
-            class="btn tpi-primary tpi-btn float-left mr-1" (click)="resetHandlePolicyProc()"
+            class="btn tpi-primary tpi-btn float-start me-1" (click)="resetHandlePolicyProc()"
             [disabled]="selected.length == 0">
             {{ "fail_handle_policy.reset" | translate }}
           </button>
@@ -79,7 +79,7 @@
             <div *ngFor="let srcUrl of rowData.srcUrlList">
               <span *ngIf="srcUrl.ip!=''">[{{srcUrl.ip}}]</span>
               <div *ngFor="let srcUrlAndPercentageList of srcUrl.srcUrlAndPercentageList">
-                <span [ngClass]="{'ml-4':srcUrl.ip!=''}">[{{srcUrlAndPercentageList.percentage}}]
+                <span [ngClass]="{'ms-4':srcUrl.ip!=''}">[{{srcUrlAndPercentageList.percentage}}]
                   {{srcUrlAndPercentageList.srcUrl}}</span>
               </div>
             </div>
@@ -220,7 +220,7 @@
     </div>
     <div class="form-group row">
       <div class="col-12">
-        <button type="button" class="btn tpi-btn tpi-second mr-2"
+        <button type="button" class="btn tpi-btn tpi-second me-2"
           (click)="batchModify()">{{'button.confirm'|translate}}</button>
         <button type="button" class="btn tpi-btn tpi-primary"
           (click)="changePage('query')">{{'button.cancel'|translate}}</button>

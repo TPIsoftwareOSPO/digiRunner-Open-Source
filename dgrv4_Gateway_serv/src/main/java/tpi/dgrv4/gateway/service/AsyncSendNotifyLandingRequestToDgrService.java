@@ -25,7 +25,6 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 @Service
 public class AsyncSendNotifyLandingRequestToDgrService {
 
-	@Autowired
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
 
 	private List<String> urls;
@@ -33,6 +32,12 @@ public class AsyncSendNotifyLandingRequestToDgrService {
 	// 為了單元測試而加入的暫時儲存變數
 	private NotifyLandingReq reqForTest;
 	private Map<String, String> reqHeaderForTest;
+
+	@Autowired
+	public AsyncSendNotifyLandingRequestToDgrService(DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties) {
+		super();
+		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+	}
 
 	/**
 	 * 建立一個 Runnable 任務，用於發送登陸通知請求。

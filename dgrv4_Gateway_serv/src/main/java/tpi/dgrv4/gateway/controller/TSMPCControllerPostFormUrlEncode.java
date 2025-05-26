@@ -18,8 +18,14 @@ import tpi.dgrv4.gateway.service.TSMPCServicePostFormUrlEncoded;
 @RestController
 public class TSMPCControllerPostFormUrlEncode {
 	
-	@Autowired
 	private TSMPCServicePostFormUrlEncoded service;
+	
+	@Autowired
+	public TSMPCControllerPostFormUrlEncode(TSMPCServicePostFormUrlEncoded service) {
+		super();
+		this.service = service;
+	}
+
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@RequestMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"}, 
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, // 使用 Form Data 格式

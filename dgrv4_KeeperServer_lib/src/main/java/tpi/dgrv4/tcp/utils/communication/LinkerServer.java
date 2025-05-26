@@ -63,7 +63,8 @@ public class LinkerServer implements Runnable {
 //	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //            out = new Output(baos);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
+			//e.printStackTrace();
 		}
 
 		// send object packet
@@ -536,7 +537,7 @@ public class LinkerServer implements Runnable {
 //			out.close();
 			socket.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 	}
 
@@ -547,7 +548,8 @@ public class LinkerServer implements Runnable {
 			snd.put(ex);
 			socket.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -555,9 +557,10 @@ public class LinkerServer implements Runnable {
 		try {
 			snd.put(o);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
 			doExitThread();
 			CommunicationServer.cs.doDisconnectProc(this);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -595,9 +598,10 @@ public class LinkerServer implements Runnable {
 			baos_sendObj.reset();
 		} catch (Exception e) {
 			this.isExitThread = true;
-			e.printStackTrace();
+			logger.error("", e);
 			close();
 			CommunicationServer.cs.doDisconnectProc(this);
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -620,6 +624,7 @@ public class LinkerServer implements Runnable {
 			logger.error(logTpiShortStackTrace(e));
 			close();
 			CommunicationServer.cs.doDisconnectProc(this);
+			Thread.currentThread().interrupt();
 		}
 	}
 

@@ -24,8 +24,13 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class DPB0206Service {
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;
+
+	@Autowired
+	public DPB0206Service(DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao) {
+		super();
+		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
+	}
 
 	public DPB0206Resp deleteGtwIdPInfo_jdbc(TsmpAuthorization authorization, DPB0206Req req) {
 		DPB0206Resp resp = new DPB0206Resp();

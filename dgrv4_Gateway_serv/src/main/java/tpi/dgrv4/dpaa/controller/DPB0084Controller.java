@@ -22,9 +22,14 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 @RestController
 public class DPB0084Controller {
 	
-	@Autowired
 	private DPB0084Service service;
 	
+	@Autowired
+	public DPB0084Controller(DPB0084Service service) {
+		super();
+		this.service = service;
+	}
+
 	/** 
 	 *1. 以CLIENT _ID 作為搜尋條件查找TSMP_CLIENT_CERT, TSMP_DP_FILE, TSMP_DP_FILE_CATEGORY
 	 *2. 列出CLIENT持有憑證

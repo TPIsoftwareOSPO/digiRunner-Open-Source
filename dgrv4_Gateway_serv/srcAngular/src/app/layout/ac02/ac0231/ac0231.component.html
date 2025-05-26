@@ -1,13 +1,12 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
 
   <div [hidden]="pageNum != 1">
-    <form [formGroup]="form" (ngSubmit)="queryClientList()">
+    <form [formGroup]="form">
       <div class="form-group row col-12">
-        <span class="p-input-icon-right" style="width:40vw">
-          <i class="pi pi-search tpi-i-search" (click)="queryClientList();"></i>
-          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword"
-            placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}">
-        </span>
+        <app-search-input
+        placeholder="{{'client_id'|translate}}、{{'client_name'|translate}}、{{'client_alias'|translate}}"
+        [control]="form.get('keyword')" [searchFn]="queryClientList.bind(this)"
+        class="col-9 col-lg0-6 col-sm-6"></app-search-input>
       </div>
     </form>
     <hr>
@@ -82,20 +81,20 @@
             placeholder="pageTitle、cusUserDataURL、cusLoginURL">
         </div>
         <div class="col-4">
-          <label id="status_label" class="control-label">Enable</label>
+          <label id="status_client_label" class="control-label">Enable</label>
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="status_client" value="Y" inputId="status_clientY"></p-radioButton>
-                <label for="status_clientY" class="ml-2 mb-0">{{'button.enable'|translate}}</label>
+                <label for="status_clientY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status_client" value="N" inputId="status_clientN"></p-radioButton>
-                <label for="status_clientN" class="ml-2 mb-0">{{'button.disable'|translate}}</label>
+                <label for="status_clientN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status_client" value="A" inputId="status_clientA"></p-radioButton>
-                <label for="status_clientA" class="ml-2 mb-0">{{'all'|translate}}</label>
+                <label for="status_clientA" class="ms-2 mb-0">{{'all'|translate}}</label>
               </div>
             </ng-container>
           </div>
@@ -105,7 +104,7 @@
         <div class="col-12">
           <button type="button" class="btn tpi-btn tpi-primary"
             (click)="queryGtwIdPInfoByClientId_cus()">{{'button.query'|translate}}</button>
-          <button type="button" class="btn tpi-btn tpi-second float-right"
+          <button type="button" class="btn tpi-btn tpi-second float-end"
             (click)="changePage('create')">{{'button.create'|translate}}</button>
         </div>
       </div>
@@ -185,7 +184,7 @@
 
     <div class="form-group row mt-3">
       <div class="col-12 col-xl-12 col-lg-12">
-        <button type="button" class="btn tpi-btn tpi-primary float-left mr-3"
+        <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
           (click)="changePage('queryClientList');">{{'button.return_to_list'|translate}}</button>
       </div>
     </div>
@@ -216,11 +215,11 @@
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="Y" inputId="statusY"></p-radioButton>
-                <label for="statusY" class="ml-2 mb-0">{{'button.enable'|translate}}</label>
+                <label for="statusY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="status" value="N" inputId="statusN"></p-radioButton>
-                <label for="statusN" class="ml-2 mb-0">{{'button.disable'|translate}}</label>
+                <label for="statusN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
             </ng-container>
           </div>
@@ -259,7 +258,7 @@
       <!-- <div class="form-group row"> -->
         <div class="col-12" (mouseenter)="(currentAction=='detail') && focusStep('step02')" (mouseleave)="(currentAction=='detail') && defaultColor()">
           <label id="cusLoginUrl_label" for="pageTitle" class="control-label">cusLoginURL</label><i
-          class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+          class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
           pTooltip="{{ 'cusUrlExp' | translate }}" [escape]="false"></i>
           <input type="text" class="form-control" id="cusLoginUrl" formControlName="cusLoginUrl" (focus)="focusStep('step02')" (focusout)="defaultColor()">
           <div *ngIf="cusLoginUrl?.invalid && (cusLoginUrl?.dirty || cusLoginUrl?.touched)" class="text-danger">
@@ -269,7 +268,7 @@
         </div>
         <div class="col-12" (mouseenter)="(currentAction=='detail') && focusStep('step04')" (mouseleave)="(currentAction=='detail') && defaultColor()">
           <label id="cusUserDataUrl_label" for="pageTitle" class="control-label">cusUserDataURL</label><i
-          class="far fa-question-circle ml-2" tooltipStyleClass='tooltip-custom-w'
+          class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
           pTooltip="{{ 'cusUrlExp' | translate }}" [escape]="false"></i>
           <input type="text" class="form-control" id="cusUserDataUrl" formControlName="cusUserDataUrl" (focus)="focusStep('step04')" (focusout)="defaultColor()">
           <div *ngIf="cusUserDataUrl?.invalid && (cusUserDataUrl?.dirty || cusUserDataUrl?.touched)"

@@ -19,8 +19,7 @@ public class GenericCache implements IGenericCache<String, Object> {
 
 	private static final Long DEFAULT_CACHE_TIMEOUT = 120000L;	// 120sec
 
-	@Autowired
-	private TPILogger logger;
+	private TPILogger logger = TPILogger.tl;
 
 	protected Map<String, CacheValue> cacheMap;
 
@@ -45,16 +44,13 @@ public class GenericCache implements IGenericCache<String, Object> {
 		};
 	}
 
+	@Autowired
 	public GenericCache() {
-		this(DEFAULT_CACHE_TIMEOUT, null);
+		this(DEFAULT_CACHE_TIMEOUT);
 	}
 
-	public GenericCache(Long cacheTimeout, TPILogger logger) {
+	public GenericCache(Long cacheTimeout) {
 		this.cacheTimeout = cacheTimeout;
-		if(logger != null) {
-			//junit用到
-			this.logger = logger;
-		}
 		this.clear();
 	}
 
@@ -87,13 +83,9 @@ public class GenericCache implements IGenericCache<String, Object> {
 		//StringBuffer msg = new StringBuffer(); // 不要在 loop 中 logger, 使用 StringBuffer 收集完成後再 logger out.
 		for (String key : this.getExpiredKeys()) {
 			this.remove(key);
-			this.logger.trace("remove cache key: " + key );
+			this.logger.info("remove cache key: " + key );
 			//msg.append("remove cache key: " + key + "\n");
 		}
-		
-		//if (StringUtils.hasText(msg)) { // 有文字才印出
-		//	this.logger.debugDelay2sec(msg.toString());
-		//}
 	}
 
 	protected Set<String> getExpiredKeys() {
@@ -107,6 +99,7 @@ public class GenericCache implements IGenericCache<String, Object> {
 		}
 		LocalDateTime expirationDateTime = cv.getCreatedAt().plus(//
 			this.cacheTimeout, ChronoUnit.MILLIS);
+		//System.err.println("isExpired():: key=" + key + ", 到期時間::" + expirationDateTime);
 		return LocalDateTime.now().isAfter(expirationDateTime);
 	}
 
@@ -122,7 +115,10 @@ public class GenericCache implements IGenericCache<String, Object> {
 
 	@Override
 	public Optional<Object> get(String key, CacheValueAdapter adapter) {
-		this.clean();
+		
+		// 不要每次都執行 , 以排程來做, 目前排程在 'RefreshCacheJob.java' 執行
+		// this.clean();//只清除到期資料 
+		
 		// 取出反序列化後再回傳
 		Optional<byte[]> opt = Optional.ofNullable(this.cacheMap.get(key)).map(CacheValue::getValue);
 		if (opt.isPresent()) {

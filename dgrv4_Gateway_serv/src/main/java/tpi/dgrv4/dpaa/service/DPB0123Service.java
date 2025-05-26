@@ -31,14 +31,18 @@ public class DPB0123Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	@Autowired
 	private TsmpInvokeHelper tsmpInvokeHelper;
+	private TsmpInvokeCommonService tsmpInvokeCommonService;
+	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 
 	@Autowired
-	private TsmpInvokeCommonService tsmpInvokeCommonService;
-	
-	@Autowired
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	public DPB0123Service(TsmpInvokeHelper tsmpInvokeHelper, TsmpInvokeCommonService tsmpInvokeCommonService,
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+		super();
+		this.tsmpInvokeHelper = tsmpInvokeHelper;
+		this.tsmpInvokeCommonService = tsmpInvokeCommonService;
+		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+	}
 
 	/**
 	 * for mockId = "DPB0123"
