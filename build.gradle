@@ -74,7 +74,7 @@ subprojects {
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
 		}
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.35'
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.40'
 		// 修正上方排除的 ch.qos.logback:logback-classic
 		implementation 'ch.qos.logback:logback-classic:1.5.13'
 		// 修正上方排除的 ch.qos.logback:logback-core
