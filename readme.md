@@ -188,7 +188,7 @@ spec:
 
 ### Pre-requisites
 
-- OpenJDK 17+
+- OpenJDK 21
 
 ---
 
