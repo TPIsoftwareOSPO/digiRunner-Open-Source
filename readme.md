@@ -14,7 +14,7 @@
 Welcome to digiRunner, the mission-critical, open-source API management platform purpose-built to help developers tame complexity, enforce security, and streamline API operations—without the bloat or barriers.
 Whether you're launching your first microservice or governing dozens of API endpoints in a production-critical environment, digiRunner makes modern API management simple, scalable, and reliable where it matters most.
 
-## What Makes digiRunner Different?:
+## What Makes digiRunner Different?
 
 Managing APIs across services, teams, and environments can be messy—especially when uptime, performance, and security are non-negotiable. digiRunner fixes that with a streamlined control plane and tools that just make sense.
 With digiRunner, you can:
@@ -29,7 +29,7 @@ With digiRunner, you can:
 
 All with a clean UI, strong defaults, and smart documentation that scales with your mission-critical systems.
 
-## Solving Real API Challenges:
+## Solving Real API Challenges
 
 | **Challenge**                             | **digiRunner Solution**                                                                  |
 |-------------------------------------------|------------------------------------------------------------------------------------------|
@@ -37,13 +37,13 @@ All with a clean UI, strong defaults, and smart documentation that scales with y
 | Disorganized microservice endpoints       | Unified API Gateway with intelligent routing                                             |
 | High learning curve for devs & ops        | UI-driven config + AI-powered documentation                                              |
 | Siloed logs and monitoring gaps           | Built-in dashboards and real-time analytics                                              |
-| Adapting data for multiple clients        | On-the-fly transformation of response formats (JSON ↔ XML, filtering, etc.)              |
+| Slow APIs dragging down overall system performance.        | Intelligent traffic shaping with "Fast Lanes" prioritizes fast APIs, preventing system bottlenecks.              |
 | Limited visibility into performance       | Track API performance and catch anomalies before users do                                |
 | Lack of scalability and governance        | Build API-first apps with policy-based traffic control and enterprise-grade security     |
 
 
 
-## Key Features:
+## Key Features
 
 - Smart Routing Engine – Route API traffic based on URL paths, headers, query parameters, and other request metadata. Supports dynamic and conditional routing logic for microservices, legacy systems, and multi-version APIs.
 
@@ -59,7 +59,7 @@ All with a clean UI, strong defaults, and smart documentation that scales with y
 
 - Easy Setup – Deploy digiRunner anywhere—locally for development, in Docker containers for portability, or on cloud platforms for production-scale infrastructure. Configuration is UI-driven with CLI support.
 
-## Where digiRunner Fits: Real-World Scenarios:
+## Where digiRunner Fits: Real-World Scenarios
 
 digiRunner empowers teams across industries to implement mission-critical API management use cases with ease:
 
