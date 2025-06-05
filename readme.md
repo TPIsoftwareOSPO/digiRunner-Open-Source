@@ -87,6 +87,12 @@ OpenDGR-->Backend-B;
 
 ## Quick Start
 
+> Before installing digiRunner, make sure your machine meets the following minimum system requirements:
+>
+> * CPU >= 2 Core
+>
+> * RAM >= 4 GiB
+
 ### 1. Using Container
 
 choose one of the following options to launch service by container
