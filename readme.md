@@ -99,6 +99,8 @@ docker run -it -d -p 31080:18080 tpisoftwareopensource/digirunner-open-source
 
 #### Option 2: Docker-Compose
 
+> Based on the content of [deploys/docker-compose/docker-compose.yml](deploys/docker-compose/docker-compose.yml)
+
 ```yml
 name: digirunner-open-source
 services:
@@ -114,6 +116,9 @@ services:
 - run `docker-compose -f opendgr-compose.yml up -d` at the same directory with `opendgr-compose.yml`
 
 #### Option 3: Kubernetes
+
+> Based on the content of [deploys/kubernetes/digirunner-open-source.yml](deploys/kubernetes/digirunner-open-source.yml)
+
 
 ```yml
 apiVersion: v1
@@ -176,6 +181,14 @@ spec:
 
 - save above configuration to `digirunner-open-source.yml`
 - run `kubectl apply -f digirunner-open-source.yml`
+
+#### Option 4: Helm
+
+> Based on the content of [deploys/helm](deploys/helm)
+
+```shell
+helm install digirunner oci://registry-1.docker.io/tpisoftwareopensource/digirunner-open-source-helm
+```
 
 #### Connect to service
 
