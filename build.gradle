@@ -74,7 +74,7 @@ subprojects {
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
 		}
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.40'
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.7'
 		// 修正上方排除的 ch.qos.logback:logback-classic
 		implementation 'ch.qos.logback:logback-classic:1.5.13'
 		// 修正上方排除的 ch.qos.logback:logback-core
@@ -204,7 +204,12 @@ project(':dgrv4_Gateway_serv'){
 		// 修正上方排除的
 		compileOnly 'com.google.protobuf:protobuf-java:3.25.5'
 		
-		 implementation 'org.owasp.esapi:esapi:2.6.0.0'
+		implementation ('org.owasp.esapi:esapi:2.6.0.0'){
+			exclude group:'commons-beanutils', module:'commons-beanutils'
+		}
+		
+		// 修正上方排除的 commons-beanutils:commons-beanutils
+		implementation 'commons-beanutils:commons-beanutils:1.11.0'
 
 	}
 
