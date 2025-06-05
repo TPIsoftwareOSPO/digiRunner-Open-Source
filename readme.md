@@ -1,5 +1,5 @@
 [![][tpi-logo]][tpi-url]
-# digiRunner – Mission-Critical Open Source API Management for Real-World Developers
+# digiRunner: Mission-Critical API Gateway & Management for Microservices
 [TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog)
 ## Table of contents
 - [Overview](#overview)
