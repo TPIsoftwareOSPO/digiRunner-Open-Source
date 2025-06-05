@@ -77,6 +77,9 @@ subprojects {
 			exclude group:'org.springframework', module:'spring-context'
 		}
 		
+		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
+		implementation 'org.springframework:spring-context:6.2.7'
+		
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
 		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.7'
 		// 修正上方排除的 ch.qos.logback:logback-classic
