@@ -68,11 +68,15 @@ subprojects {
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 			exclude group: 'ch.qos.logback', module: 'logback-classic'
 			exclude group: 'ch.qos.logback', module: 'logback-core'
+			exclude group:'org.springframework', module:'spring-context'
 		}
+		
 		implementation ('org.springframework.boot:spring-boot-starter-web'){
 			exclude group:'org.springframework.boot', module:'spring-boot-starter-tomcat'
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
+			exclude group:'org.springframework', module:'spring-context'
 		}
+		
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
 		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.7'
 		// 修正上方排除的 ch.qos.logback:logback-classic
@@ -182,7 +186,14 @@ project(':dgrv4_Gateway_serv'){
 		implementation 'com.esotericsoftware:kryo:5.4.0'
 
 		// websocket
-		implementation 'org.springframework.boot:spring-boot-starter-websocket'
+		implementation ('org.springframework.boot:spring-boot-starter-websocket'){
+			exclude group:'org.springframework', module:'spring-context'
+		}
+		
+		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
+		implementation 'org.springframework:spring-context:6.2.7'
+		
+		
 		implementation 'io.undertow:undertow-core:2.3.17.Final'
 		implementation 'io.undertow:undertow-websockets-jsr:2.3.17.Final'
 
