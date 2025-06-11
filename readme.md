@@ -122,17 +122,9 @@ services:
 
 ```yml
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: digirunner-open-source-ns
-
----
-
-apiVersion: v1
 kind: Service
 metadata:
   name: digirunner-open-source-svc
-  namespace: digirunner-open-source-ns
 spec:
   ports:
     - name: tcp
@@ -153,7 +145,6 @@ metadata:
   labels:
     app: digirunner
   name: digirunner-open-source-deploy
-  namespace: digirunner-open-source-ns
 spec:
   replicas: 1
   selector:
@@ -184,11 +175,12 @@ spec:
 
 #### Option 4: Helm
 
-> Based on the content of [deploys/helm](deploys/helm)
+Contributions:
 
-```shell
-helm install digirunner oci://registry-1.docker.io/tpisoftwareopensource/digirunner-open-source-helm
-```
+- **[how-to-package-digirunner-using-helm](https://github.com/vulcanshen-tpi/how-to-package-digirunner-using-helm)**
+  - Step-by-step guide on how to package the digirunner open source project using Helm.
+  - Quickly install the example
+  - maintainer: @vulcanshen-tpi
 
 #### Connect to service
 
