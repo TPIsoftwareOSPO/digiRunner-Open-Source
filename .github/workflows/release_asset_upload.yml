@@ -36,7 +36,7 @@ jobs:
 
       - name: Zip release assets
         run: |
-          zip -r release_artifacts/h2-${{ github.event.release.tag_name }}.zip release_artifacts/
+          zip -r release_artifacts/${{ github.event.release.tag_name }}-h2.zip release_artifacts/
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1.0.2
@@ -44,6 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: release_artifacts/h2-${{ github.event.release.tag_name }}.zip
-          asset_name: h2-${{ github.event.release.tag_name }}.zip
+          asset_path: release_artifacts/${{ github.event.release.tag_name }}-h2.zip
+          asset_name: ${{ github.event.release.tag_name }}-h2.zip
           asset_content_type: application/zip
