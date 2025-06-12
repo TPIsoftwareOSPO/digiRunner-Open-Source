@@ -22,15 +22,14 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          bash ./devops/tasks/task_gateway_project_build.sh
+          chmod +x ./gradlew
+          ./gradlew :dgrv4_Gateway_serv:clean :dgrv4_Gateway_serv:bootJar
 
       - name: Create release directory
         run: mkdir release_artifacts
 
       - name: Copy JAR and other assets
         run: |
-          chmod +x ./gradlew
-          ./gradlew :dgrv4_Gateway_serv:clean :dgrv4_Gateway_serv:bootJar
           mv dgrv4_Gateway_serv/build/libs release_artifacts/
 
       - name: Zip release assets
