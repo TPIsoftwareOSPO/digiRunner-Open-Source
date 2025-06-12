@@ -28,17 +28,17 @@ jobs:
           ./gradlew :dgrv4_Gateway_serv:clean :dgrv4_Gateway_serv:bootJar
 
       - name: Create release directory
-        run: mkdir -p ${{ github.event.release.tag_name }}/keys
+        run: mkdir -p ${{ github.event.release.tag_name }}-build/keys
 
       - name: Copy JAR and other assets
         run: |
-          mv dgrv4_Gateway_serv/build/libs/* ${{ github.event.release.tag_name }}/
-          mv dgrv4_Gateway_serv/keys/* ${{ github.event.release.tag_name }}/keys/
-          mv ${{ github.event.release.tag_name }}/*.jar ${{ github.event.release.tag_name }}/digirunner.jar
+          mv dgrv4_Gateway_serv/build/libs/* ${{ github.event.release.tag_name }}-build/
+          mv dgrv4_Gateway_serv/keys/* ${{ github.event.release.tag_name }}-build/keys/
+          mv ${{ github.event.release.tag_name }}-build/*.jar ${{ github.event.release.tag_name }}-build/digirunner.jar
 
       - name: Zip release assets
         run: |
-          zip -r ${{ github.event.release.tag_name }}.zip ${{ github.event.release.tag_name }}/
+          zip -r ${{ github.event.release.tag_name }}-build.zip ${{ github.event.release.tag_name }}-build/
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1.0.2
@@ -46,6 +46,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ github.event.release.tag_name }}.zip
-          asset_name: ${{ github.event.release.tag_name }}.zip
+          asset_path: ${{ github.event.release.tag_name }}-build.zip
+          asset_name: ${{ github.event.release.tag_name }}-build.zip
           asset_content_type: application/zip
