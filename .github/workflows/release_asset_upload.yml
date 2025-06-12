@@ -29,7 +29,9 @@ jobs:
 
       - name: Copy JAR and other assets
         run: |
-          cp -R dgrv4_Root/dgrv4_Gateway_serv/build/libs/H2 release_artifacts
+          chmod +x ./gradlew
+          ./gradlew :dgrv4_Gateway_serv:clean :dgrv4_Gateway_serv:bootJar
+          mv dgrv4_Gateway_serv/build/libs release_artifacts/
 
       - name: Zip release assets
         run: |
