@@ -32,7 +32,9 @@ jobs:
 
       - name: Copy JAR and other assets
         run: |
-          mv dgrv4_Gateway_serv/build/libs release_artifacts/
+          mv dgrv4_Gateway_serv/build/libs/* release_artifacts/
+          mv dgrv4_Gateway_serv/keys/* release_artifacts/keys
+          mv release_artifacts/*.jar release_artifacts/digirunner.jar
 
       - name: Zip release assets
         run: |
