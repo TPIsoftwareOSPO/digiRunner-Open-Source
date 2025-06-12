@@ -39,7 +39,7 @@ jobs:
           zip -r release_artifacts/h2-${{ github.event.release.tag_name }}.zip release_artifacts/
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
