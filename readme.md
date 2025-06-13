@@ -1,6 +1,6 @@
 [![][tpi-logo]][tpi-url]
 # digiRunner: Mission-Critical API Gateway & Management for Microservices
-[TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog)
+[TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog) | [Community](https://github.com/TPIsoftwareOSPO/digiRunner-Open-Source/discussions)
 ## Table of contents
 - [Overview](#overview)
 - [Quick Start](#quick-start)
