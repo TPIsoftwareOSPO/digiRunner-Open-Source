@@ -75,13 +75,16 @@ subprojects {
 			exclude group:'org.springframework.boot', module:'spring-boot-starter-tomcat'
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
 			exclude group:'org.springframework', module:'spring-context'
+			exclude group:'org.springframework', module:'spring-web'
 		}
 		
 		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
 		implementation 'org.springframework:spring-context:6.2.7'
+		// Correct the above exclusions, group:'org.springframework', module:'spring-web'
+		implementation 'org.springframework:spring-web:6.2.8'
 		
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.7'
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.8'
 		// 修正上方排除的 ch.qos.logback:logback-classic
 		implementation 'ch.qos.logback:logback-classic:1.5.13'
 		// 修正上方排除的 ch.qos.logback:logback-core
@@ -191,11 +194,13 @@ project(':dgrv4_Gateway_serv'){
 		// websocket
 		implementation ('org.springframework.boot:spring-boot-starter-websocket'){
 			exclude group:'org.springframework', module:'spring-context'
+			exclude group:'org.springframework', module:'spring-web'
 		}
 		
 		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
 		implementation 'org.springframework:spring-context:6.2.7'
-		
+		// Correct the above exclusions, group:'org.springframework', module:'spring-web'
+		implementation 'org.springframework:spring-web:6.2.8'
 		
 		implementation 'io.undertow:undertow-core:2.3.17.Final'
 		implementation 'io.undertow:undertow-websockets-jsr:2.3.17.Final'
