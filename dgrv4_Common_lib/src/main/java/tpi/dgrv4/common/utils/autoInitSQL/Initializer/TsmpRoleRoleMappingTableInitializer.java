@@ -19,6 +19,7 @@ public class TsmpRoleRoleMappingTableInitializer {
 			String roleName;
 			String roleNameMapping;
 			createTsmpRoleRoleMapping((roleRoleId = 1L), (roleName = "ADMIN"), (roleNameMapping = "ADMIN"));
+			createTsmpRoleRoleMapping((roleRoleId = 2L), (roleName = "ADMIN"), (roleNameMapping = "FrontPageDashboard"));
 
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);

@@ -16,7 +16,7 @@ export class TransformMenuNamePipe implements PipeTransform {
       return input;
     }
 
-    const result = this.toolService.getFuncList().find(r => r.funcCode === input);
+    const result = this.toolService.getFuncList()?.find(r => r.funcCode === input);
     return result ? result.funcName : input;
   }
 }

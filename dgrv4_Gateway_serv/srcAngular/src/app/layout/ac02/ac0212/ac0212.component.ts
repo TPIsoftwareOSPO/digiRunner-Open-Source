@@ -116,7 +116,7 @@ export class Ac0212Component extends BaseComponent implements OnInit {
         private datetime_format: DatetimeFormatPipe,
     ) {
         super(route, tr);
-        this.messageService.clear();
+        // this.messageService.clear();
 
         this.form = this.fb.group({
           groupkeyword: new FormControl(''),

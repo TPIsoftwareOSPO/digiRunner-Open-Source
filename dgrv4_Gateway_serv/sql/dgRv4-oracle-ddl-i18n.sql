@@ -44,8 +44,8 @@ INCREMENT BY 1
 START WITH 2000000000
 
 NOCYCLE;
-CREATE SEQUENCE SEQ_TSMP_DC_PK 
-INCREMENT BY 1 
+CREATE SEQUENCE SEQ_TSMP_DC_PK
+INCREMENT BY 1
 START WITH 2000000000
 NOCYCLE;
 CREATE SEQUENCE SEQ_TSMP_EVENTS_PK
@@ -122,7 +122,7 @@ CREATE SEQUENCE SEQ_TSMP_VGROUP_PK
 INCREMENT BY 1
 START WITH 2000000000
 NOCYCLE;
-CREATE TABLE AUTHORITIES 
+CREATE TABLE AUTHORITIES
 (
   USERNAME    NVARCHAR2(400) NOT NULL,
   AUTHORITY   NVARCHAR2(50) NOT NULL,
@@ -156,7 +156,7 @@ CREATE TABLE dgr_ac_idp_auth_code
    auth_code            varchar(50)     NOT NULL,
    expire_date_time     NUMBER(19)         NOT NULL,
    status               varchar(1)      DEFAULT ('0') NOT NULL,
-   idp_type             varchar(50),        
+   idp_type             varchar(50),
    user_name            nvarchar2(400)   NOT NULL,
    create_date_time     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
    create_user          NVARCHAR2(1000)    DEFAULT ('SYSTEM'),
@@ -206,7 +206,7 @@ CREATE TABLE dgr_ac_idp_info
 
      CONSTRAINT dgr_ac_idp_info_uq UNIQUE (idp_type, client_id)
 
-  ); 
+  );
 CREATE TABLE dgr_ac_idp_info_ldap
 (
    ac_idp_info_ldap_id   NUMBER(19)      NOT NULL,
@@ -241,20 +241,20 @@ CREATE TABLE dgr_ac_idp_info_mldap_d
            CONSTRAINT dgr_ac_idp_info_mldap_d_PK PRIMARY KEY (ac_idp_info_mldap_d_id)
 );
 CREATE TABLE dgr_ac_idp_info_mldap_m (
-  ac_idp_info_mldap_m_id NUMBER(19) NOT NULL, 
-  ldap_timeout int NOT NULL, 
-  status varchar(1) DEFAULT ('Y') NOT NULL, 
-  policy varchar(1) DEFAULT ('S') NOT NULL, 
-  approval_result_mail varchar(4000) NOT NULL, 
-  icon_file varchar(4000), 
-  page_title nvarchar2(400) NOT NULL, 
-  create_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-  create_user NVARCHAR2(1000) DEFAULT ('SYSTEM'), 
-  update_date_time TIMESTAMP, 
-  update_user NVARCHAR2(1000), 
+  ac_idp_info_mldap_m_id NUMBER(19) NOT NULL,
+  ldap_timeout int NOT NULL,
+  status varchar(1) DEFAULT ('Y') NOT NULL,
+  policy varchar(1) DEFAULT ('S') NOT NULL,
+  approval_result_mail varchar(4000) NOT NULL,
+  icon_file varchar(4000),
+  page_title nvarchar2(400) NOT NULL,
+  create_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  create_user NVARCHAR2(1000) DEFAULT ('SYSTEM'),
+  update_date_time TIMESTAMP,
+  update_user NVARCHAR2(1000),
   version int DEFAULT (
     (1)
-  ), 
+  ),
   CONSTRAINT dgr_ac_idp_info_mldap_m_PK PRIMARY KEY (ac_idp_info_mldap_m_id)
 );
 CREATE TABLE dgr_ac_idp_user
@@ -278,7 +278,7 @@ CREATE TABLE dgr_ac_idp_user
      version              INT DEFAULT ((1)),
      CONSTRAINT dgr_ac_idp_user_pk PRIMARY KEY (ac_idp_user_id),
      CONSTRAINT dgr_ac_idp_user_uq UNIQUE (user_name, idp_type)
-  ); 
+  );
 CREATE TABLE DGR_AUDIT_LOGM
 (
    AUDIT_LONG_ID     NUMBER(19)      NOT NULL,
@@ -378,7 +378,7 @@ CREATE TABLE dgr_dashboard_last_data
      num4           NUMBER(19),
      sort_num       INT DEFAULT ((1)),
      CONSTRAINT dgr_dashboard_last_data_pk PRIMARY KEY (dashboard_id)
-  ); 
+  );
 CREATE TABLE dgr_gtw_idp_auth_code
 (
    gtw_idp_auth_code_id  NUMBER(19)       NOT NULL,
@@ -402,9 +402,9 @@ CREATE TABLE dgr_gtw_idp_auth_code
    version               int DEFAULT (1),
    API_RESP              NVARCHAR2(2000),
    PRIMARY KEY (gtw_idp_auth_code_id),
-   UNIQUE (auth_code)   
+   UNIQUE (auth_code)
 );
- 
+
 CREATE TABLE dgr_gtw_idp_auth_d
 (
    gtw_idp_auth_d_id      NUMBER(19)     NOT NULL,
@@ -610,7 +610,7 @@ CREATE TABLE dgr_web_socket_mapping
    CONSTRAINT PK_DGR_WEB_SOCKET_MAPPING PRIMARY KEY (ws_mapping_id),
    CONSTRAINT UK_DGR_WEB_SOCKET_MAPPING UNIQUE (site_name)
 );
-CREATE TABLE DGR_WEBSITE 
+CREATE TABLE DGR_WEBSITE
 (
   DGR_WEBSITE_ID     NUMBER(19) NOT NULL,
   WEBSITE_NAME       NVARCHAR2(50) NOT NULL,
@@ -659,7 +659,7 @@ CREATE TABLE dp_app (
         application_name NVARCHAR2(50) NOT NULL,               -- Application名稱
         application_desc NVARCHAR2(500),                       -- Application說明
         client_id VARCHAR(40) NOT NULL,                      -- CLIENT_ID
-        open_apikey_id NUMBER(19),                                 -- 
+        open_apikey_id NUMBER(19),                                 --
         user_name NVARCHAR2(400) NOT NULL,                         -- 使用者名稱(視IdP類型決定)
         id_token_jwtstr CLOB NOT NULL,                             -- IdP ID Token 的 JWT
         create_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,      -- 建立日期
@@ -826,7 +826,7 @@ CREATE TABLE  TSMP_ALERT_LOG
    UPDATE_DATE_TIME TIMESTAMP,
    UPDATE_USER      NVARCHAR2(1000),
    VERSION          INT DEFAULT 1
-); 
+);
 CREATE TABLE TSMP_API
 
 (
@@ -1141,7 +1141,7 @@ CREATE TABLE TSMP_DC_NODE
    NODE_TASK_ID  NUMBER(19),
    CONSTRAINT TSMP_DC_NODE_PK PRIMARY KEY (NODE, DC_ID)
 );
-CREATE TABLE TSMP_DP_ABOUT 
+CREATE TABLE TSMP_DP_ABOUT
 (
   SEQ_ID          NUMBER(19) NOT NULL,
   ABOUT_SUBJECT   NVARCHAR2(100) NOT NULL,
@@ -1186,7 +1186,7 @@ CREATE TABLE TSMP_DP_API_THEME
    CREATE_USER       NVARCHAR2(1000)  DEFAULT 'SYSTEM',
    CONSTRAINT TSMP_DP_API_THEME_PK PRIMARY KEY (REF_API_THEME_ID, REF_API_UID)
 );
-CREATE TABLE TSMP_DP_API_VIEW_LOG 
+CREATE TABLE TSMP_DP_API_VIEW_LOG
 (
   SEQ_ID        NUMBER(19) NOT NULL,
   API_ID        VARCHAR2(36) NOT NULL,
@@ -1196,7 +1196,7 @@ CREATE TABLE TSMP_DP_API_VIEW_LOG
   CREATE_USER   NVARCHAR2(1000) DEFAULT 'SYSTEM',
   CONSTRAINT TSMP_DP_API_VIEW_LOG_PK PRIMARY KEY (SEQ_ID)
 );
-CREATE TABLE TSMP_DP_APP 
+CREATE TABLE TSMP_DP_APP
 (
   APP_ID            NUMBER(19) NOT NULL,
   REF_APP_CATE_ID   NUMBER(19) NOT NULL,
@@ -1213,7 +1213,7 @@ CREATE TABLE TSMP_DP_APP
   KEYWORD_SEARCH    NVARCHAR2(100),
   CONSTRAINT TSMP_DP_APP_PK PRIMARY KEY (APP_ID)
 );
-CREATE TABLE TSMP_DP_APP_CATEGORY 
+CREATE TABLE TSMP_DP_APP_CATEGORY
 (
   APP_CATE_ID      NUMBER(19) NOT NULL,
   APP_CATE_NAME    NVARCHAR2(100) NOT NULL,
@@ -1541,7 +1541,7 @@ CREATE TABLE tsmp_dp_news
      version             INT DEFAULT 1,
      keyword_search      NVARCHAR2(2000),
      CONSTRAINT tsmp_dp_news_pk PRIMARY KEY (news_id)
-  ); 
+  );
 CREATE TABLE  TSMP_DP_REQ_ORDERD1
 (
    REQ_ORDERD1_ID    NUMBER(19) PRIMARY KEY NOT NULL,
@@ -1883,7 +1883,7 @@ CREATE TABLE TSMP_OPEN_APIKEY_MAP
    OPEN_APIKEY_MAP_ID  NUMBER(19)         NOT NULL,
    REF_OPEN_APIKEY_ID  NUMBER(19)         NOT NULL,
    REF_API_UID         varchar(36)    NOT NULL,
-   CREATE_DATE_TIME    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,        
+   CREATE_DATE_TIME    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
    CREATE_USER         NVARCHAR2(1000)   DEFAULT 'SYSTEM',
    UPDATE_DATE_TIME    TIMESTAMP,
    UPDATE_USER         NVARCHAR2(1000),
@@ -1970,7 +1970,7 @@ CREATE TABLE TSMP_REPORT_DATA (
     VERSION INT DEFAULT 1,
     CONSTRAINT TSMP_REPORT_DATA_PK PRIMARY KEY (ID)
 );
-CREATE TABLE TSMP_REPORT_URL 
+CREATE TABLE TSMP_REPORT_URL
 (
   REPORT_ID    NVARCHAR2(8) NOT NULL,
   TIME_RANGE   CHAR(1) NOT NULL,
@@ -2078,7 +2078,7 @@ CREATE TABLE TSMP_ROLE
    CONSTRAINT TSMP_ROLE_PK PRIMARY KEY (ROLE_ID)
 );
 CREATE TABLE TSMP_ROLE_ALERT
-( 
+(
    ROLE_ID   NVARCHAR2(10)   NOT NULL,
    ALERT_ID  INT DEFAULT -1 NOT NULL,
     CONSTRAINT TSMP_ROLE_ALERT_PK PRIMARY KEY (ROLE_ID, ALERT_ID)
@@ -2415,30 +2415,30 @@ DROP TABLE TSMP_REQ_LOG_HISTORY;
 DROP TABLE TSMP_RES_LOG_HISTORY;
 
 -- 20230912, Gateway IdP資料 (API), Mini Lee
-CREATE TABLE dgr_gtw_idp_info_a (  
-	gtw_idp_info_a_id 	NUMBER(19) NOT NULL, 					-- ID, 使用 RandomSeqLongUtil 機制產生 
-	client_id 			VARCHAR(40) NOT NULL, 				-- 在 digiRunner 註冊的 client_id 
-	status 				VARCHAR(1) DEFAULT ('Y') NOT NULL , 	-- 狀態 
-	remark 				NVARCHAR2(200), 						-- 說明 
-	api_method 			VARCHAR(10) NOT NULL, 				-- 登入的 API HTTP method 
+CREATE TABLE dgr_gtw_idp_info_a (
+	gtw_idp_info_a_id 	NUMBER(19) NOT NULL, 					-- ID, 使用 RandomSeqLongUtil 機制產生
+	client_id 			VARCHAR(40) NOT NULL, 				-- 在 digiRunner 註冊的 client_id
+	status 				VARCHAR(1) DEFAULT ('Y') NOT NULL , 	-- 狀態
+	remark 				NVARCHAR2(200), 						-- 說明
+	api_method 			VARCHAR(10) NOT NULL, 				-- 登入的 API HTTP method
 	api_url 			NVARCHAR2(2000) NOT NULL, 			-- 登入的 API URL
-	req_header 			NVARCHAR2(2000), 						-- 調用 API 的 Request Header 內容 
-	req_body_type 		VARCHAR(1) DEFAULT ('N') NOT NULL , 	-- 調用 API 的 Request Body 類型 
-	req_body 			NVARCHAR2(2000), 						-- 調用 API 的 Request Body 內容 
-	suc_by_type 		VARCHAR(1) DEFAULT ('H') NOT NULL , 	-- 判定登入成功的類型 
-	suc_by_field 		VARCHAR(200), 						-- 當 suc_by_type 為 "R",判定登入成功的 Response JSON 欄位 
+	req_header 			NVARCHAR2(2000), 						-- 調用 API 的 Request Header 內容
+	req_body_type 		VARCHAR(1) DEFAULT ('N') NOT NULL , 	-- 調用 API 的 Request Body 類型
+	req_body 			NVARCHAR2(2000), 						-- 調用 API 的 Request Body 內容
+	suc_by_type 		VARCHAR(1) DEFAULT ('H') NOT NULL , 	-- 判定登入成功的類型
+	suc_by_field 		VARCHAR(200), 						-- 當 suc_by_type 為 "R",判定登入成功的 Response JSON 欄位
 	suc_by_value 		NVARCHAR2(200), 						-- 當 suc_by_type 為 "R",判定登入成功的 Response JSON 值
-	idt_name 			VARCHAR(200), 						-- ID token 的 name 值,來源 Response JSON 欄位 
-	idt_email 			VARCHAR(200), 						-- ID token 的 email 值,來源 Response JSON 欄位 
+	idt_name 			VARCHAR(200), 						-- ID token 的 name 值,來源 Response JSON 欄位
+	idt_email 			VARCHAR(200), 						-- ID token 的 email 值,來源 Response JSON 欄位
 	idt_picture 		VARCHAR(200), 						-- ID token 的 picture 值,來源 Response JSON 欄位
-	icon_file 			VARCHAR(4000), 						-- 登入頁圖示檔案 
-	page_title 			NVARCHAR2(400) NOT NULL, 				-- 登入頁標題 
-	create_date_time 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人, 日期時間 
-	create_user 		NVARCHAR2(1000) DEFAULT 'SYSTEM', 		-- 建立人員 
-	update_date_time 	TIMESTAMP, 							-- 更新日期 表示最後Update的人, 日期時間, Null 表示是新建資料 
-	update_user 		NVARCHAR2(1000), 						-- 更新人員 
-	version 			INT DEFAULT 1, 						-- 版號 C/U時, 增量+1  
-	PRIMARY KEY (gtw_idp_info_a_id)   
+	icon_file 			VARCHAR(4000), 						-- 登入頁圖示檔案
+	page_title 			NVARCHAR2(400) NOT NULL, 				-- 登入頁標題
+	create_date_time 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人, 日期時間
+	create_user 		NVARCHAR2(1000) DEFAULT 'SYSTEM', 		-- 建立人員
+	update_date_time 	TIMESTAMP, 							-- 更新日期 表示最後Update的人, 日期時間, Null 表示是新建資料
+	update_user 		NVARCHAR2(1000), 						-- 更新人員
+	version 			INT DEFAULT 1, 						-- 版號 C/U時, 增量+1
+	PRIMARY KEY (gtw_idp_info_a_id)
 );
 
 -- 20230912, Gateway IdP授權碼記錄檔, 增加欄位, Mini Lee
@@ -2454,10 +2454,10 @@ DROP TABLE dp_file;
 DROP TABLE dp_api_version;
 
 -- 20230918, Gateway IdP Auth記錄檔主檔, 增加欄位, Mini Lee
-ALTER TABLE dgr_gtw_idp_auth_m ADD redirect_uri NVARCHAR2(400); 
+ALTER TABLE dgr_gtw_idp_auth_m ADD redirect_uri NVARCHAR2(400);
 
 -- 20230918, TSMP用戶端OAuth2驗證資料(Spring), 增加欄位, Mini Lee
-ALTER TABLE oauth_client_details ADD web_server_redirect_uri1 NVARCHAR2(255); 
+ALTER TABLE oauth_client_details ADD web_server_redirect_uri1 NVARCHAR2(255);
 ALTER TABLE oauth_client_details ADD web_server_redirect_uri2 NVARCHAR2(255);
 ALTER TABLE oauth_client_details ADD web_server_redirect_uri3 NVARCHAR2(255);
 ALTER TABLE oauth_client_details ADD web_server_redirect_uri4 NVARCHAR2(255);
@@ -2475,7 +2475,7 @@ ALTER TABLE tsmp_api_imp ADD mock_status_code CHAR(3);
 ALTER TABLE tsmp_api_imp ADD mock_headers VARCHAR2(2000);
 ALTER TABLE tsmp_api_imp ADD mock_body NVARCHAR2(2000);
 
--- 20231003 , zoe lee 增加 dgr_ac_idp_info_api 
+-- 20231003 , zoe lee 增加 dgr_ac_idp_info_api
 CREATE TABLE dgr_ac_idp_info_api (
     ac_idp_info_api_id    NUMBER(19) NOT NULL,    -- ID
     status    VARCHAR2(1) DEFAULT 'Y' NOT NULL,    -- 狀態
@@ -2592,7 +2592,7 @@ ALTER TABLE tsmp_api_imp ADD body_mask_policy_symbol varchar(10) NULL;
 -- 20231110, Gateway IdP Auth記錄檔主檔	, 增加欄位, Mini Lee
 ALTER TABLE DGR_GTW_IDP_AUTH_M ADD CODE_CHALLENGE NVARCHAR2(1000);
 ALTER TABLE DGR_GTW_IDP_AUTH_M ADD CODE_CHALLENGE_METHOD VARCHAR(10);
- 
+
 -- 20231110, Gateway IdP授權碼記錄檔, 增加欄位, Mini Lee
 ALTER TABLE DGR_GTW_IDP_AUTH_CODE ADD STATE VARCHAR(1000);
 
@@ -2600,28 +2600,28 @@ ALTER TABLE DGR_GTW_IDP_AUTH_CODE ADD STATE VARCHAR(1000);
 DROP TABLE dgr_gtw_idp_info_j;
 
 -- 20231117, Gateway IdP資料 (JDBC), Mini Lee
-CREATE TABLE dgr_gtw_idp_info_jdbc (  
-	GTW_IDP_INFO_JDBC_ID NUMBER(19) NOT NULL, 		-- ID 
-	CLIENT_ID 			VARCHAR(40) NOT NULL, 	-- digiRunner 的 client_id 
-	STATUS 				VARCHAR(1) DEFAULT 'Y' NOT NULL , -- 狀態 
-	REMARK 				NVARCHAR2(200), 			-- 說明 
-	CONNECTION_NAME 	NVARCHAR2(50) NOT NULL, 	-- RDB連線資訊的名稱 
-	SQL_PTMT 			NVARCHAR2(1000) NOT NULL, -- 查詢RDB的SQL(Prepare Statement) 
-	SQL_PARAMS	 		NVARCHAR2(1000) NOT NULL, -- 查詢RDB的SQL參數 
-	USER_MIMA_ALG 		VARCHAR(40) NOT NULL, 	-- RDB存放密碼所使用的演算法 
-	USER_MIMA_COL_NAME 	VARCHAR(200) NOT NULL, 	-- RDB的密碼欄位名稱 
-	IDT_SUB 			VARCHAR(200) NOT NULL, 	-- ID token 的 sub(唯一值) 值,對應RDB的欄位 
-	IDT_NAME 			VARCHAR(200), 			-- ID token 的 name 值,對應RDB的欄位 
-	IDT_EMAIL 			VARCHAR(200), 			-- ID token 的 email 值,對應RDB的欄位 
-	IDT_PICTURE 		VARCHAR(200), 			-- ID token 的 picture 值,對應RDB的欄位 
-	ICON_FILE 			VARCHAR(4000), 			-- 登入頁圖示檔案 
+CREATE TABLE dgr_gtw_idp_info_jdbc (
+	GTW_IDP_INFO_JDBC_ID NUMBER(19) NOT NULL, 		-- ID
+	CLIENT_ID 			VARCHAR(40) NOT NULL, 	-- digiRunner 的 client_id
+	STATUS 				VARCHAR(1) DEFAULT 'Y' NOT NULL , -- 狀態
+	REMARK 				NVARCHAR2(200), 			-- 說明
+	CONNECTION_NAME 	NVARCHAR2(50) NOT NULL, 	-- RDB連線資訊的名稱
+	SQL_PTMT 			NVARCHAR2(1000) NOT NULL, -- 查詢RDB的SQL(Prepare Statement)
+	SQL_PARAMS	 		NVARCHAR2(1000) NOT NULL, -- 查詢RDB的SQL參數
+	USER_MIMA_ALG 		VARCHAR(40) NOT NULL, 	-- RDB存放密碼所使用的演算法
+	USER_MIMA_COL_NAME 	VARCHAR(200) NOT NULL, 	-- RDB的密碼欄位名稱
+	IDT_SUB 			VARCHAR(200) NOT NULL, 	-- ID token 的 sub(唯一值) 值,對應RDB的欄位
+	IDT_NAME 			VARCHAR(200), 			-- ID token 的 name 值,對應RDB的欄位
+	IDT_EMAIL 			VARCHAR(200), 			-- ID token 的 email 值,對應RDB的欄位
+	IDT_PICTURE 		VARCHAR(200), 			-- ID token 的 picture 值,對應RDB的欄位
+	ICON_FILE 			VARCHAR(4000), 			-- 登入頁圖示檔案
 	PAGE_TITLE 			NVARCHAR2(400) NOT NULL, -- 登入頁標題
 	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人
-	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員 
+	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
 	UPDATE_DATE_TIME 	TIMESTAMP, 				-- 更新日期 表示最後Update的人
-	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員 
-	VERSION 			   NUMBER(10) DEFAULT 1,  		-- 版號 C/U時, 增量+1 
-	PRIMARY KEY (GTW_IDP_INFO_JDBC_ID)    
+	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員
+	VERSION 			   NUMBER(10) DEFAULT 1,  		-- 版號 C/U時, 增量+1
+	PRIMARY KEY (GTW_IDP_INFO_JDBC_ID)
 );
 
 -- 20231121, 檢查Oracle DDL資料型態與長度, min
@@ -2653,34 +2653,34 @@ ALTER TABLE tsmp_api_imp ADD api_cache_flag CHAR(1) DEFAULT '1' NOT NULL;
 ALTER TABLE tsmp_api_imp ADD fixed_cache_time NUMBER(10) DEFAULT 0 NOT NULL;
 
 -- 20231207, X-Api-Key資料, Mini Lee
-CREATE TABLE DGR_X_API_KEY (  
-	API_KEY_ID 			NUMBER(19) NOT NULL, 		-- ID 
-	CLIENT_ID 			VARCHAR(40) NOT NULL, 	-- digiRunner 的 client_id 
-	API_KEY_ALIAS 		NVARCHAR2(100) NOT NULL, -- X-Api-Key 別名 
-	EFFECTIVE_AT 		NUMBER(19) NOT NULL, 		-- 生效日期 
-	EXPIRED_AT 			NUMBER(19) NOT NULL, 		-- 到期日期 
-	API_KEY 			VARCHAR(100), 			-- X-Api-Key 的值 	
-	API_KEY_MASK 		VARCHAR(100) NOT NULL, 	-- X-Api-Key 經過遮罩的值 
-	API_KEY_EN 			VARCHAR(100) NOT NULL, 	-- X-Api-Key 經過SHA256 的值 
-	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人, 日期時間 
-	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員 
+CREATE TABLE DGR_X_API_KEY (
+	API_KEY_ID 			NUMBER(19) NOT NULL, 		-- ID
+	CLIENT_ID 			VARCHAR(40) NOT NULL, 	-- digiRunner 的 client_id
+	API_KEY_ALIAS 		NVARCHAR2(100) NOT NULL, -- X-Api-Key 別名
+	EFFECTIVE_AT 		NUMBER(19) NOT NULL, 		-- 生效日期
+	EXPIRED_AT 			NUMBER(19) NOT NULL, 		-- 到期日期
+	API_KEY 			VARCHAR(100), 			-- X-Api-Key 的值
+	API_KEY_MASK 		VARCHAR(100) NOT NULL, 	-- X-Api-Key 經過遮罩的值
+	API_KEY_EN 			VARCHAR(100) NOT NULL, 	-- X-Api-Key 經過SHA256 的值
+	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人, 日期時間
+	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
 	UPDATE_DATE_TIME 	TIMESTAMP, 				-- 更新日期 表示最後Update的人, 日期時間
-	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員 
-	VERSION 			NUMBER(10) DEFAULT 1, 			-- 版號 C/U時, 增量+1  
-	PRIMARY KEY (API_KEY_ID)    
-);  
+	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員
+	VERSION 			NUMBER(10) DEFAULT 1, 			-- 版號 C/U時, 增量+1
+	PRIMARY KEY (API_KEY_ID)
+);
 
 -- 20231207, X-Api-Key與群組關係, Mini Lee
-CREATE TABLE DGR_X_API_KEY_MAP (  
-	API_KEY_MAP_ID 		NUMBER(19) NOT NULL, 		-- ID 
-	REF_API_KEY_ID 		NUMBER(19) NOT NULL, 		-- Master PK 
-	GROUP_ID 			NVARCHAR2(10) NOT NULL, 	-- 群組 ID 
-	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 
-	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員 
-	UPDATE_DATE_TIME 	TIMESTAMP, 				-- 更新日期 
-	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員 
+CREATE TABLE DGR_X_API_KEY_MAP (
+	API_KEY_MAP_ID 		NUMBER(19) NOT NULL, 		-- ID
+	REF_API_KEY_ID 		NUMBER(19) NOT NULL, 		-- Master PK
+	GROUP_ID 			NVARCHAR2(10) NOT NULL, 	-- 群組 ID
+	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期
+	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
+	UPDATE_DATE_TIME 	TIMESTAMP, 				-- 更新日期
+	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員
 	VERSION 			NUMBER(10) DEFAULT 1, 			-- 版號
-	PRIMARY KEY (API_KEY_MAP_ID)  
+	PRIMARY KEY (API_KEY_MAP_ID)
 );
 
 -- 20231212, 增加欄位 DP_CLIENT_SECRET, Kevin Cheng
@@ -2705,17 +2705,17 @@ ALTER TABLE tsmp_api_imp ADD fail_handle_policy VARCHAR(1) DEFAULT '0';
 ALTER TABLE TSMP_FUNC ADD FUNC_TYPE char(1) DEFAULT '1' ;
 
 -- 20240306, 用戶端匯出/入, Tom
-CREATE TABLE DGR_IMPORT_CLIENT_RELATED_TEMP (  
-	TEMP_ID 		NUMBER(19) NOT NULL, 		-- ID 
+CREATE TABLE DGR_IMPORT_CLIENT_RELATED_TEMP (
+	TEMP_ID 		NUMBER(19) NOT NULL, 		-- ID
 	IMPORT_CLIENT_RELATED 	BLOB NOT NULL, 	-- 匯入的資料
 	ANALYZE_CLIENT_RELATED 	BLOB NOT NULL, 	-- 分析的資料
-	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人, 日期時間 
-	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員 
+	CREATE_DATE_TIME 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 建立日期 資料初始建立的人, 日期時間
+	CREATE_USER 		NVARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
 	UPDATE_DATE_TIME 	TIMESTAMP, 				-- 更新日期 表示最後Update的人, 日期時間
-	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員 
-	VERSION 			INT DEFAULT 1, 			-- 版號 C/U時, 增量+1  
-	CONSTRAINT DGR_IMPORT_CLIENT_RELATED_TEMP_PK PRIMARY KEY (TEMP_ID)  
-); 
+	UPDATE_USER 		NVARCHAR2(1000), 		-- 更新人員
+	VERSION 			INT DEFAULT 1, 			-- 版號 C/U時, 增量+1
+	CONSTRAINT DGR_IMPORT_CLIENT_RELATED_TEMP_PK PRIMARY KEY (TEMP_ID)
+);
 
 -- 20240402, 增加api狀態, Tom
 ALTER TABLE tsmp_api_imp ADD api_status CHAR(1) DEFAULT '2' NOT NULL;
@@ -2749,7 +2749,7 @@ CREATE TABLE dp_app (
 	application_name NVARCHAR2(50) NOT NULL,                     -- Application名稱
 	application_desc NVARCHAR2(500),                             -- Application說明
 	client_id VARCHAR2(40) NOT NULL,                            -- CLIENT_ID
-	open_apikey_id NUMBER(19),                                     -- 
+	open_apikey_id NUMBER(19),                                     --
 	open_apikey_status VARCHAR2(1),                             -- DGRK狀態
 	user_name NVARCHAR2(400) NOT NULL,                          -- 使用者名稱(視IdP類型決定)
 	id_token_jwtstr NVARCHAR2(2000) NOT NULL,                    -- IdP ID Token 的 JWT
@@ -2782,7 +2782,7 @@ ALTER TABLE dp_app DROP COLUMN open_apikey_id;
 -- 20240718 , 第三方 AC IDP INFO , Kevin Cheng
 CREATE TABLE dgr_ac_idp_info_cus (
     ac_idp_info_cus_id     NUMBER(19)          NOT NULL,                -- ID
-    ac_idp_info_cus_name   NVARCHAR2(200),                           -- 第三方可識別名稱  
+    ac_idp_info_cus_name   NVARCHAR2(200),                           -- 第三方可識別名稱
     cus_status             VARCHAR(1)      DEFAULT ('Y') NOT NULL,    -- Cus 狀態
     cus_login_url          VARCHAR(4000)   NOT NULL,                -- 第三方前端頁面 URL
     cus_backend_login_url  VARCHAR(4000)   NOT NULL,                -- 第三方後端 URL
@@ -2920,3 +2920,93 @@ CREATE INDEX idx_tsmp_req_res_log_history ON tsmp_req_res_log_history(rtime);
 
 -- 20250213, 增加欄位長度, Zoe Lee
 ALTER TABLE dgr_rdb_connection MODIFY mima VARCHAR2(2000) NOT NULL;
+
+-- 20250227, DGR_WEBHOOK_NOTIFY , Webber Luo
+CREATE TABLE dgr_webhook_notify
+(
+    webhook_notify_id NUMBER(19, 0) NOT NULL,          -- ID
+    notify_name       VARCHAR2(100) NOT NULL,          -- 通知名稱
+    notify_type       VARCHAR2(100) NOT NULL,          -- 通知種類
+    enable            VARCHAR2(1)   NOT NULL,          -- 啟用=Y / 停用=N
+    message           VARCHAR2(2000),                  -- 發送內容
+    payload_flag      VARCHAR2(1)    DEFAULT '0',      --
+    create_date_time  DATE           DEFAULT SYSDATE,  -- 建立日期
+    create_user       VARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
+    update_date_time  DATE,                            -- 更新日期
+    update_user       VARCHAR2(1000),                  -- 更新人員
+    version           NUMBER(10, 0)  DEFAULT 1,        -- 版號
+    CONSTRAINT pk_webhook_notify PRIMARY KEY (webhook_notify_id)
+);
+
+-- 20250227, DGR_WEBHOOK_NOTIFY_FIELD , Webber Luo
+CREATE TABLE dgr_webhook_notify_field
+(
+    webhook_notify_field_id NUMBER(19, 0)  NOT NULL,         -- ID
+    webhook_notify_id       NUMBER(19, 0)  NOT NULL,         -- 通知ID
+    field_key               VARCHAR2(100)  NOT NULL,         -- KEY
+    field_value             VARCHAR2(2000) NOT NULL,         -- VALUE
+    field_type              VARCHAR2(1)    DEFAULT '0',      -- TYPE
+    mapping_url             VARCHAR2(2000),                  -- URL
+    create_date_time        DATE           DEFAULT SYSDATE,  -- 建立日期
+    create_user             VARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
+    update_date_time        DATE,                            -- 更新日期
+    update_user             VARCHAR2(1000),                  -- 更新人員
+    version                 NUMBER(10, 0)  DEFAULT 1,        -- 版號
+    CONSTRAINT pk_webhook_notify_field PRIMARY KEY (webhook_notify_field_id)
+);
+
+-- 20250227, DGR_WEBHOOK_NOTIFY_LOG , Webber Luo
+CREATE TABLE DGR_WEBHOOK_NOTIFY_LOG
+(
+    webhook_notify_log_id NUMBER(19, 0) NOT NULL,          -- ID
+    webhook_notify_id     NUMBER(19, 0) NOT NULL,          -- WEBHOOK_NOTIFY_ID
+    client_id             VARCHAR2(40)  NOT NULL,          -- 用戶端
+    content               VARCHAR2(2000),                  -- 發送內容
+    remark                VARCHAR2(2000),                  -- 備註
+    create_date_time      DATE           DEFAULT SYSDATE,  -- 建立日期
+    create_user           VARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
+    update_date_time      DATE,                            -- 更新日期
+    update_user           VARCHAR2(1000),                  -- 更新人員
+    version               NUMBER(10, 0)  DEFAULT 1,        -- 版號
+    CONSTRAINT pk_webhook_notify_log PRIMARY KEY (webhook_notify_log_id)
+);
+
+-- 20250227, DGR_WEBHOOK_API_MAP , Webber Luo
+CREATE TABLE dgr_webhook_api_map
+(
+    webhook_api_map_id NUMBER(19, 0) NOT NULL,          -- ID
+    api_key            VARCHAR2(255) NOT NULL,          -- API代碼
+    module_name        VARCHAR2(150) NOT NULL,          -- API_MODULE
+    webhook_notify_id  NUMBER(19, 0) NOT NULL,          -- WEBHOOK_NOTIFY_I
+    create_date_time   DATE           DEFAULT SYSDATE,  -- 建立日期
+    create_user        VARCHAR2(1000) DEFAULT 'SYSTEM', -- 建立人員
+    update_date_time   DATE,                            -- 更新日期
+    update_user        VARCHAR2(1000),                  -- 更新人員
+    version            NUMBER(10, 0)  DEFAULT 1,        -- 版號
+    CONSTRAINT pk_webhook_api_map PRIMARY KEY (webhook_api_map_id)
+);
+
+-- 20250331, DGR_GRPCPROXY_MAP, Alvin Chiu
+CREATE TABLE dgr_grpcproxy_map
+(
+    grpcproxy_map_id          NUMBER(19, 0) NOT NULL,               -- ID
+    service_name              VARCHAR2(255) NOT NULL,               -- 目標服務名稱
+    proxy_hostname            VARCHAR2(255) NOT NULL,               -- 轉發位置
+    target_hostname           VARCHAR2(255) NOT NULL,               -- 目標服務位置
+    target_port               NUMBER(10, 0) NOT NULL,               -- 目標服務PORT
+    connect_timeout_ms        NUMBER(10, 0) DEFAULT 5000,  -- 連線超時毫秒
+    send_timeout_ms           NUMBER(10, 0) DEFAULT 10000, -- 發送超時毫秒
+    read_timeout_ms           NUMBER(10, 0) DEFAULT 30000, -- 讀取超時毫秒
+    secure_mode               VARCHAR2(10)   DEFAULT 'AUTO',        -- TLS安全模式 (AUTO, SECURE, PLAINTEXT)
+    server_cert_content       CLOB,                                 -- X509憑證內容 (PEM格式)
+    server_key_content        CLOB,                                 -- 私鑰內容 (PEM格式)
+    auto_trust_upstream_certs VARCHAR2(1)    DEFAULT 'N',           -- 是否自動信任上游憑證
+    trusted_certs_content     CLOB,                                 -- 受信任的CA憑證內容 (PEM格式)
+    enable                    VARCHAR2(1)    DEFAULT 'N',           -- 啟用/停用
+    create_date_time          DATE           DEFAULT SYSDATE,       -- 建立日期
+    create_user               VARCHAR2(1000) DEFAULT 'SYSTEM',      -- 建立人員
+    update_date_time          DATE,                                 -- 更新日期
+    update_user               VARCHAR2(1000),                       -- 更新人員
+    version                   NUMBER(10, 0)  DEFAULT 1,             -- 版號
+    CONSTRAINT pk_grpcproxy_map PRIMARY KEY (grpcproxy_map_id)
+);

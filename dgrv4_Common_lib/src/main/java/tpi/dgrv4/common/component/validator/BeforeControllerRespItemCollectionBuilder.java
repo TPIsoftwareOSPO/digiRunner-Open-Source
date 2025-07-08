@@ -61,7 +61,7 @@ public class BeforeControllerRespItemCollectionBuilder extends //
 		BeforeControllerRespValue<Long> min = buildValue(this.min);
 		BeforeControllerRespValue<Long> max = buildValue(this.max);
 		
-		BeforeControllerRespItem item = new BeforeControllerRespItem(
+		return new BeforeControllerRespItem(
 			getField(),
 			getType(),
 			getIsRequired(),
@@ -71,7 +71,6 @@ public class BeforeControllerRespItemCollectionBuilder extends //
 			min,
 			max
 		);
-		return item;
 	}
 
 	/**

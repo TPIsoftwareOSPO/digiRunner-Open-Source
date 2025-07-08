@@ -57,9 +57,6 @@ public class AA1212Service {
 	private int noKeeperServerNumber = 0;
 	private final DgrAuditLogMDao dgrAuditLogMDao;
 	private long startTime = System.currentTimeMillis();
-	
-	//reference GatewayFilter.fetchUriHistoryList StringBuilder init
-	private String urlStatusInitVal = GatewayFilter.getFetchUriHistoryListInitValue().toString();
 
 	public AA1212Resp queryRealtimeDashboardData(TsmpAuthorization authorization) {
 		
@@ -76,6 +73,10 @@ public class AA1212Service {
 				return log;
 			}).collect(Collectors.toList());		
 			resp.setLastLoginLogList(lastLoginLogList);
+			
+			if(!authorization.getAuthorities().contains("1000") && !authorization.getAuthorities().contains("1001")) {
+				return resp;
+			}
 			
 			if (TPILogger.lc != null) {
 				//init
@@ -102,10 +103,10 @@ public class AA1212Service {
 				
 				resp.setDataList(dataList);
 			}else {
-				//It is printed every 60 times it is called, otherwise the keeperServer does not need to be opened.
-				//每被呼叫60次才印,要不然keeperServer是可以不開的
-				if(noKeeperServerNumber < Integer.MAX_VALUE && ++noKeeperServerNumber % 60 == 0) {
-					TPILogger.tl.error("<Keeper Server> Lost Connection");
+				//It is printed every 30 times it is called, otherwise the keeperServer does not need to be opened.
+				//每被呼叫30次才印,要不然keeperServer是可以不開的
+				if(noKeeperServerNumber < Integer.MAX_VALUE && ++noKeeperServerNumber % 30 == 0) {
+					TPILogger.tl.error("queryRealtimeDashboardData <Keeper Server> Lost Connection");
 				}
 			}
 			return resp;
@@ -159,7 +160,7 @@ public class AA1212Service {
 			queueResp.setRdb(clientVo.getRdbQueue());
 			itemVo.setQueue(queueResp);
 			//ip
-			itemVo.setIp(clientVo.getWebLocalIP());
+			itemVo.setIp(clientVo.getIp() + ":" + clientVo.getServerPort());
 			//keeperServer
 			if(clientVo.getWebLocalIP().equals(clientVo.getKeeperServerIp())) {
 				itemVo.setKeeperServer("Y");
@@ -274,36 +275,38 @@ public class AA1212Service {
 						String strApiLog = null;
 						try {
 							strApiLog = arrApiLog[i];
+							//first row
 							if(i == 0) {
-								//Filter useless information
-								//過濾無用資訊
-								//reference GatewayFilter.fetchUriHistoryList StringBuilder init
-								strApiLog = arrApiLog[i].replace(urlStatusInitVal, "");
-							}
-							
-							//Representative has call API information
-							//代表有呼叫API資料
-							if(!strApiLog.isBlank()) {
-								String[] arrApiLogRow = strApiLog.split(",");
-								if(arrApiLogRow.length == 3) {
-									String strUri = arrApiLogRow[0].strip();
-									Integer statusCode = Integer.valueOf(arrApiLogRow[1].strip());
-									Integer elapsedTime = Integer.valueOf(arrApiLogRow[2].strip());
-									UrlStatusRecord urlStatusRecord = new UrlStatusRecord(strUri, statusCode, elapsedTime);
-									urlStatusRecordList.add(urlStatusRecord);
-									allNodeVo.getUrlStatusRecordList().add(urlStatusRecord);
-									
-									//400 above list
-									if(statusCode >= 400 || statusCode < 100) {
-										UrlStatusRecord above400StatusRecord = new UrlStatusRecord(strUri, statusCode, null);
-										above400StatusList.add(above400StatusRecord);
-										allNodeVo.getAbove400StatusSet().add(above400StatusRecord);
-									}						        
+								//Filter useless information EX:----------------
+								//過濾無用資訊 EX:--------------
+								int startIndex = strApiLog.indexOf("[");
+								if(startIndex > -1) {
+									strApiLog = strApiLog.substring(startIndex);
 								}else {
-									TPILogger.tl.info("arrApiLogRow.length=" + arrApiLogRow.length);
-									TPILogger.tl.info("strApiLogRow=" + String.join(",", arrApiLogRow));
+									continue;
 								}
 							}
+
+							String[] arrApiLogRow = strApiLog.split(",");
+							if(arrApiLogRow.length == 3) {
+								String strUri = arrApiLogRow[0].strip();
+								Integer statusCode = Integer.valueOf(arrApiLogRow[1].strip());
+								Integer elapsedTime = Integer.valueOf(arrApiLogRow[2].strip());
+								UrlStatusRecord urlStatusRecord = new UrlStatusRecord(strUri, statusCode, elapsedTime);
+								urlStatusRecordList.add(urlStatusRecord);
+								allNodeVo.getUrlStatusRecordList().add(urlStatusRecord);
+								
+								//400 above list
+								if(statusCode >= 400 || statusCode < 100) {
+									UrlStatusRecord above400StatusRecord = new UrlStatusRecord(strUri, statusCode, null);
+									above400StatusList.add(above400StatusRecord);
+									allNodeVo.getAbove400StatusSet().add(above400StatusRecord);
+								}						        
+							}else {
+								TPILogger.tl.info("arrApiLogRow.length=" + arrApiLogRow.length);
+								TPILogger.tl.info("strApiLogRow=" + String.join(",", arrApiLogRow));
+							}
+							
 						} catch (Exception e) {
 							TPILogger.tl.error("strApiLog="+strApiLog);
 							TPILogger.tl.error(StackTraceUtil.logStackTrace(e));

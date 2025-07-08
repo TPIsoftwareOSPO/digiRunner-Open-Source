@@ -1,17 +1,19 @@
 package tpi.dgrv4.dpaa.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import jakarta.transaction.Transactional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import jakarta.transaction.Transactional;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -28,6 +30,9 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 public class AA1003Service {
 
 	private TPILogger logger = TPILogger.tl;
+	
+	// 定義常數來解決重複字串問題
+	private static final String MESSAGE_KEY = "message";
 	
 	private TsmpOrganizationDao tsmpOrganizationDao;
 
@@ -310,6 +315,9 @@ public class AA1003Service {
 			if(!"100000".equals(orgId)) {
 				originalOrgPath = tsmpOrganization.getOrgPath();
 				
+				// 【修正】在更新父節點之前，先取得所有需要更新的子孫節點清單
+				List<TsmpOrganization> childOrgList = getTsmpOrganizationDao().queryOrgDescendingByOrgId_rtn_entity(orgId, Integer.MAX_VALUE);
+				
 				tsmpOrganization.setContactMail(ServiceUtil.nvl(req.getNewContactMail()));
 				tsmpOrganization.setContactName(ServiceUtil.nvl(req.getNewContactName()));
 				tsmpOrganization.setContactTel(ServiceUtil.nvl(req.getNewContactTel()));
@@ -326,8 +334,8 @@ public class AA1003Service {
 				
 				getTsmpOrganizationDao().saveAndFlush(tsmpOrganization);
 				
-				// 也要更新子節點的PARENT_ID 和 ORG_PATH
-				setChildParentIDAndOrgPath(auth, req, orgPath, originalOrgPath);
+				// 【修正】使用預先取得的子孫節點清單來更新
+				setChildParentIDAndOrgPath(auth, req, orgPath, originalOrgPath, childOrgList);
 			}else {
 				tsmpOrganization.setOrgName(ServiceUtil.nvl(req.getNewOrgName()));
 				tsmpOrganization.setUpdateTime(updateTime);
@@ -352,12 +360,13 @@ public class AA1003Service {
 			if(!"".equals(parentpath)) {
 				orgPath = parentpath + "::" + orgId;
 			}else {
-				logger.debug("getOrgPath parentId = "+ parentId + " orgPath is empty !");
+				logger.debug(String.format("getOrgPath - ParentId %s (%s) has empty orgPath", 
+						parentId, optParentOrg.get().getOrgName()));
 				throw TsmpDpAaRtnCode._1297.throwing();
 			}
 			
 		}else {
-			logger.debug("getOrgPath parentId = "+ parentId + "  is empty !");
+			logger.debug(String.format("getOrgPath - ParentId %s not found", parentId));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 		
@@ -365,18 +374,28 @@ public class AA1003Service {
 	}
 	
 	
-	private void setChildParentIDAndOrgPath(TsmpAuthorization auth, AA1003Req req, String newParentOrgPath, String originaParentOrgPath) {
+	private void setChildParentIDAndOrgPath(TsmpAuthorization auth, AA1003Req req, String newParentOrgPath, String originaParentOrgPath, List<TsmpOrganization> childOrgList) {
 		// 1.UPDATE_USER、2.UPDATE_TIME、3.TSMP_ORGANIZATION.PARENT_ID、4.TSMP_ORGANIZATION.ORG_PATH(找到該組織及其下的所有子節點, 並更新其父orgid)
 		// 找出包含此 orgId 及其向下的所有組織 
 		String orgId = req.getOrgId();
 		
-		List<TsmpOrganization> orgList = getTsmpOrganizationDao().queryOrgDescendingByOrgId_rtn_entity(orgId, Integer.MAX_VALUE);	
-		orgList.forEach((org) -> {
+		childOrgList.forEach((org) -> {
+
 			String childOrgId = org.getOrgId();
 			if(!orgId.equals(childOrgId)) {
-				// 子節點的parentId 不會異動 但是org_path會異動
-				String bb = newParentOrgPath.substring(0, newParentOrgPath.indexOf(orgId)+orgId.length());
-				String newChildOrgPath = bb+"::"+childOrgId;
+				// 【修正】使用相對路徑計算正確的新路徑
+				String currentOrgPath = org.getOrgPath();
+				
+				// 計算子節點相對於移動節點的相對路徑
+				// 例如：originalParentOrgPath = "100000::2000000041::2000000042::2000000043"
+				//      currentOrgPath = "100000::2000000041::2000000042::2000000043::2000000044::2000000045"
+				//      relativePath = "::2000000044::2000000045"
+				String relativePath = currentOrgPath.substring(originaParentOrgPath.length());
+				
+				// 新路徑 = 移動節點的新路徑 + 相對路徑
+				// 例如：newParentOrgPath = "100000::2000000043"
+				//      newChildOrgPath = "100000::2000000043::2000000044::2000000045"
+				String newChildOrgPath = newParentOrgPath + relativePath;
 				
 				org.setOrgPath(newChildOrgPath);
 				org.setUpdateUser(auth.getUserName());
@@ -391,6 +410,328 @@ public class AA1003Service {
 	
 	protected TsmpOrganizationDao getTsmpOrganizationDao() {
 		return this.tsmpOrganizationDao;
+	}
+	
+	/**
+	 * 檢測並修復所有組織節點的路徑錯誤
+	 * 
+	 * @param userName 執行修復的使用者名稱
+	 * @return 修復結果統計
+	 */
+	public Map<String, Object> repairAllOrgPaths(String userName) {
+		Map<String, Object> result = new HashMap<>();
+		int totalCount = 0;
+		int errorCount = 0;
+		int fixedCount = 0;
+		int skippedCount = 0;
+		
+		try {
+			// 1. 取得所有組織節點
+			List<TsmpOrganization> allOrgs = getTsmpOrganizationDao().findAll();
+			totalCount = allOrgs.size();
+			
+			// 2. 建立 orgId -> TsmpOrganization 的對應表
+			Map<String, TsmpOrganization> orgMap = new HashMap<>();
+			for (TsmpOrganization org : allOrgs) {
+				orgMap.put(org.getOrgId(), org);
+			}
+			
+			// 3. 檢查每個節點的路徑是否正確
+			List<TsmpOrganization> errorOrgs = new ArrayList<>();
+			for (TsmpOrganization org : allOrgs) {
+				// 先檢查是否有循環引用
+				List<String> circularPath = new ArrayList<>();
+				if (hasCircularReference(org.getOrgId(), orgMap, new HashSet<>(), circularPath)) {
+					skippedCount++;
+					String pathDescription = buildCircularPathDescription(circularPath, orgMap);
+					TPILogger.tl.warn(String.format("Skipping repair for circular reference - OrgId: %s (%s), Path: %s", 
+							org.getOrgId(), org.getOrgName(), pathDescription));
+					continue;
+				}
+				
+				String correctPath = calculateCorrectOrgPath(org.getOrgId(), orgMap);
+				if (correctPath != null && !correctPath.equals(org.getOrgPath())) {
+					errorOrgs.add(org);
+					errorCount++;
+					String currentPathFormatted = formatOrgPathWithNames(org.getOrgPath(), orgMap);
+					String correctPathFormatted = formatOrgPathWithNames(correctPath, orgMap);
+					TPILogger.tl.warn(String.format("Path error found - OrgId: %s (%s), Current: %s, Correct: %s", 
+							org.getOrgId(), org.getOrgName(), currentPathFormatted, correctPathFormatted));
+				}
+			}
+			
+			// 4. 修復錯誤的路徑
+			Date updateTime = DateTimeUtil.now();
+			for (TsmpOrganization org : errorOrgs) {
+				String correctPath = calculateCorrectOrgPath(org.getOrgId(), orgMap);
+				org.setOrgPath(correctPath);
+				org.setUpdateTime(updateTime);
+				org.setUpdateUser(userName);
+				getTsmpOrganizationDao().saveAndFlush(org);
+				fixedCount++;
+				String correctPathFormatted = formatOrgPathWithNames(correctPath, orgMap);
+				TPILogger.tl.info(String.format("Path repaired - OrgId: %s (%s), New path: %s", 
+						org.getOrgId(), org.getOrgName(), correctPathFormatted));
+			}
+			
+			result.put("totalCount", totalCount);
+			result.put("errorCount", errorCount);
+			result.put("fixedCount", fixedCount);
+			result.put("skippedCount", skippedCount);
+			result.put("success", true);
+			result.put(MESSAGE_KEY, String.format("Checked %d nodes, found %d errors, successfully repaired %d nodes, skipped %d circular reference nodes", 
+					totalCount, errorCount, fixedCount, skippedCount));
+			
+		} catch (Exception e) {
+			TPILogger.tl.error(String.format("Organization path repair failed: %s", StackTraceUtil.logStackTrace(e)));
+			result.put("success", false);
+			result.put(MESSAGE_KEY, "Repair process error: " + e.getMessage());
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 計算組織節點的正確路徑
+	 * 
+	 * @param orgId 組織ID
+	 * @param orgMap 所有組織節點的對應表
+	 * @return 正確的組織路徑
+	 */
+	private String calculateCorrectOrgPath(String orgId, Map<String, TsmpOrganization> orgMap) {
+		return calculateCorrectOrgPath(orgId, orgMap, new HashSet<>());
+	}
+	
+	/**
+	 * 計算組織節點的正確路徑（內部方法，帶循環引用檢測）
+	 * 
+	 * @param orgId 組織ID
+	 * @param orgMap 所有組織節點的對應表
+	 * @param visited 已訪問的節點集合，用於檢測循環引用
+	 * @return 正確的組織路徑，如果有循環引用則返回null
+	 */
+	private String calculateCorrectOrgPath(String orgId, Map<String, TsmpOrganization> orgMap, Set<String> visited) {
+		TsmpOrganization org = orgMap.get(orgId);
+		if (org == null) {
+			return null;
+		}
+		
+		// 檢測循環引用
+		if (visited.contains(orgId)) {
+			TPILogger.tl.warn(String.format("Circular reference detected for OrgId: %s (%s)", 
+					orgId, org.getOrgName()));
+			return null; // 發現循環引用，返回null
+		}
+		
+		// 如果是根節點（沒有父節點或父節點為空）
+		String parentId = org.getParentId();
+		if (parentId == null || parentId.trim().isEmpty()) {
+			return orgId;
+		}
+		
+		// 將當前節點加入已訪問集合
+		visited.add(orgId);
+		
+		// 遞迴計算父節點路徑
+		String parentPath = calculateCorrectOrgPath(parentId, orgMap, visited);
+		
+		// 從已訪問集合中移除當前節點（回溯）
+		visited.remove(orgId);
+		
+		if (parentPath == null) {
+			TPILogger.tl.warn(String.format("Parent node not found or circular reference - OrgId: %s (%s), ParentId: %s", 
+					orgId, org.getOrgName(), parentId));
+			return orgId; // 如果找不到父節點或有循環引用，將此節點設為根節點
+		}
+		
+		return parentPath + "::" + orgId;
+	}
+	
+	/**
+	 * 驗證組織樹狀結構的一致性
+	 * 
+	 * @return 驗證結果
+	 */
+	public Map<String, Object> validateOrgTreeConsistency() {
+		Map<String, Object> result = new HashMap<>();
+		List<String> errors = new ArrayList<>();
+		
+		try {
+			List<TsmpOrganization> allOrgs = getTsmpOrganizationDao().findAll();
+			Map<String, TsmpOrganization> orgMap = new HashMap<>();
+			
+			for (TsmpOrganization org : allOrgs) {
+				orgMap.put(org.getOrgId(), org);
+			}
+			
+			for (TsmpOrganization org : allOrgs) {
+				validateOrgNode(org, orgMap, errors);
+			}
+			
+			result.put("isValid", errors.isEmpty());
+			result.put("errorCount", errors.size());
+			result.put("errors", errors);
+			
+		} catch (Exception e) {
+			TPILogger.tl.error(String.format("Organization tree validation failed: %s", StackTraceUtil.logStackTrace(e)));
+			result.put("isValid", false);
+			result.put(MESSAGE_KEY, "Validation process error: " + e.getMessage());
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 驗證單一組織節點
+	 * 
+	 * @param org 組織節點
+	 * @param orgMap 所有組織節點的對應表
+	 * @param errors 錯誤列表
+	 */
+	private void validateOrgNode(TsmpOrganization org, Map<String, TsmpOrganization> orgMap, List<String> errors) {
+		// 檢查1: 父節點是否存在
+		validateParentNodeExists(org, orgMap, errors);
+		
+		// 檢查2: 路徑是否與父子關係一致
+		validateOrgPath(org, orgMap, errors);
+		
+		// 檢查3: 是否有循環引用
+		validateCircularReference(org, orgMap, errors);
+	}
+	
+	/**
+	 * 驗證父節點是否存在
+	 */
+	private void validateParentNodeExists(TsmpOrganization org, Map<String, TsmpOrganization> orgMap, List<String> errors) {
+		String parentId = org.getParentId();
+		if (parentId != null && !parentId.trim().isEmpty() && !orgMap.containsKey(parentId)) {
+			errors.add(String.format("Node %s (%s) has non-existent parent node %s", 
+					org.getOrgId(), org.getOrgName(), parentId));
+		}
+	}
+	
+	/**
+	 * 驗證組織路徑是否正確
+	 */
+	private void validateOrgPath(TsmpOrganization org, Map<String, TsmpOrganization> orgMap, List<String> errors) {
+		// 先檢查是否有循環引用，如果有則跳過路徑驗證
+		List<String> circularPath = new ArrayList<>();
+		if (hasCircularReference(org.getOrgId(), orgMap, new HashSet<>(), circularPath)) {
+			// 循環引用的錯誤會在 validateCircularReference 中處理，這裡跳過路徑驗證
+			return;
+		}
+		
+		String correctPath = calculateCorrectOrgPath(org.getOrgId(), orgMap);
+		if (correctPath != null && !correctPath.equals(org.getOrgPath())) {
+			String parentId = org.getParentId();
+			
+			// 格式化路徑以顯示節點名稱
+			String currentPathFormatted = formatOrgPathWithNames(org.getOrgPath(), orgMap);
+			String correctPathFormatted = formatOrgPathWithNames(correctPath, orgMap);
+			
+			// 取得父節點名稱用於更詳細的錯誤訊息
+			String parentInfo = getParentInfo(parentId, orgMap);
+			
+			errors.add(String.format("Node %s (%s) has incorrect path - Current: %s, Should be: %s%s", 
+					org.getOrgId(), org.getOrgName(), currentPathFormatted, correctPathFormatted, parentInfo));
+		}
+	}
+	
+	/**
+	 * 取得父節點資訊
+	 */
+	private String getParentInfo(String parentId, Map<String, TsmpOrganization> orgMap) {
+		if (parentId != null && !parentId.trim().isEmpty() && orgMap.containsKey(parentId)) {
+			TsmpOrganization parentOrg = orgMap.get(parentId);
+			return String.format(", Parent: %s (%s)", parentId, parentOrg.getOrgName());
+		}
+		return "";
+	}
+	
+	/**
+	 * 驗證是否有循環引用
+	 */
+	private void validateCircularReference(TsmpOrganization org, Map<String, TsmpOrganization> orgMap, List<String> errors) {
+		List<String> circularPath = new ArrayList<>();
+		if (hasCircularReference(org.getOrgId(), orgMap, new HashSet<>(), circularPath)) {
+			// 建構循環路徑的詳細描述
+			String pathDescription = buildCircularPathDescription(circularPath, orgMap);
+			
+			errors.add(String.format("Node %s (%s) has circular reference - Path: %s", 
+					org.getOrgId(), org.getOrgName(), pathDescription));
+		}
+	}
+	
+	/**
+	 * 建構循環路徑描述
+	 */
+	private String buildCircularPathDescription(List<String> circularPath, Map<String, TsmpOrganization> orgMap) {
+		StringBuilder pathBuilder = new StringBuilder();
+		for (int i = 0; i < circularPath.size(); i++) {
+			String nodeId = circularPath.get(i);
+			TsmpOrganization pathOrg = orgMap.get(nodeId);
+			String nodeName = pathOrg != null ? pathOrg.getOrgName() : "unknown";
+			pathBuilder.append(String.format("%s (%s)", nodeId, nodeName));
+			if (i < circularPath.size() - 1) {
+				pathBuilder.append(" -> ");
+			}
+		}
+		return pathBuilder.toString();
+	}
+	
+	/**
+	 * 檢查是否有循環引用
+	 * 
+	 * @param orgId 當前節點ID
+	 * @param orgMap 組織對應表
+	 * @param visited 已訪問的節點集合
+	 * @param path 循環路徑追蹤
+	 * @return 是否有循環引用
+	 */
+	private boolean hasCircularReference(String orgId, Map<String, TsmpOrganization> orgMap, Set<String> visited, List<String> path) {
+		path.add(orgId);
+		
+		if (visited.contains(orgId)) {
+			return true; // 發現循環引用
+		}
+		
+		TsmpOrganization org = orgMap.get(orgId);
+		if (org == null || org.getParentId() == null || org.getParentId().trim().isEmpty()) {
+			return false; // 到達根節點或找不到節點
+		}
+		
+		visited.add(orgId);
+		return hasCircularReference(org.getParentId(), orgMap, visited, path);
+	}
+	
+	/**
+	 * 格式化組織路徑，將每個節點 ID 加上對應的名稱
+	 * 
+	 * @param orgPath 組織路徑
+	 * @param orgMap 組織對應表
+	 * @return 格式化後的路徑，格式為 "ID (名稱)"
+	 */
+	private String formatOrgPathWithNames(String orgPath, Map<String, TsmpOrganization> orgMap) {
+		if (orgPath == null || orgPath.trim().isEmpty()) {
+			return orgPath;
+		}
+		
+		String[] nodeIds = orgPath.split("::");
+		StringBuilder formattedPath = new StringBuilder();
+		
+		for (int i = 0; i < nodeIds.length; i++) {
+			String nodeId = nodeIds[i].trim();
+			TsmpOrganization org = orgMap.get(nodeId);
+			String nodeName = org != null ? org.getOrgName() : "unknown";
+			
+			formattedPath.append(String.format("%s (%s)", nodeId, nodeName));
+			
+			if (i < nodeIds.length - 1) {
+				formattedPath.append("::");
+			}
+		}
+		
+		return formattedPath.toString();
 	}
 
 }

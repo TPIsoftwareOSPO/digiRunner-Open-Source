@@ -7,22 +7,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import tpi.dgrv4.common.utils.DateTimeUtil;
-import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.common.vo.ReqHeader;
-import tpi.dgrv4.dpaa.component.UrlCodecHelper;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpDataStatus;
 import tpi.dgrv4.common.exceptions.BcryptParamDecodeException;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
+import tpi.dgrv4.common.utils.DateTimeUtil;
+import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.common.vo.ReqHeader;
+import tpi.dgrv4.dpaa.component.UrlCodecHelper;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0044NewsItem;
 import tpi.dgrv4.dpaa.vo.DPB0044Req;
@@ -39,28 +39,17 @@ import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class DPB0044Service {
-	private TPILogger logger = TPILogger.tl;
-
-	private TsmpDpNewsDao tsmpDpNewsDao;
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	private ServiceConfig serviceConfig;
-	private BcryptParamHelper helper;
+	private final TsmpDpNewsDao tsmpDpNewsDao;
+	private final TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final ServiceConfig serviceConfig;
+	private final BcryptParamHelper helper;
 
 	private Integer pageSize;
-	
-	@Autowired
-	public DPB0044Service(TsmpDpNewsDao tsmpDpNewsDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
-			TsmpOrganizationDao tsmpOrganizationDao, ServiceConfig serviceConfig, BcryptParamHelper helper) {
-		super();
-		this.tsmpDpNewsDao = tsmpDpNewsDao;
-		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
-		this.tsmpOrganizationDao = tsmpOrganizationDao;
-		this.serviceConfig = serviceConfig;
-		this.helper = helper;
-	}
 	
 	public DPB0044Resp queryNewsLike_v3_4(TsmpAuthorization tsmpAuthorization, DPB0044Req req, ReqHeader reqHeader) {
 		DPB0044Resp resp = new DPB0044Resp();
@@ -103,7 +92,7 @@ public class DPB0044Service {
 				endDate = plusDay(endDate, 1);//加一天
 			}
 			
-			this.logger.debug(String.format("DPB0044Service: %s ~ %s", debugDate(dpb0044_startDate), debugDate(endDate)));
+			TPILogger.tl.debug(String.format("DPB0044Service: %s ~ %s", debugDate(dpb0044_startDate), debugDate(endDate)));
 			
 //			String nowDateStr = DateTimeUtil.dateTimeToString(DateTimeUtil.now(), DateTimeFormatEnum.西元年月日_2);
 //
@@ -132,7 +121,7 @@ public class DPB0044Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 		return resp;

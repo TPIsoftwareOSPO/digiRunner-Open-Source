@@ -129,7 +129,7 @@ public class BeforeControllerRespItemStringBuilder extends //
 		BeforeControllerRespValue<Integer> minLength = buildValue(this.minLength);
 		BeforeControllerRespValue<String> pattern = buildValue(this.pattern);
 		
-		BeforeControllerRespItem item = new BeforeControllerRespItem(
+		return new BeforeControllerRespItem(
 			getField(),
 			getType(),
 			getIsRequired(),
@@ -139,7 +139,6 @@ public class BeforeControllerRespItemStringBuilder extends //
 			null,
 			null
 		);
-		return item;
 	}
 
 }

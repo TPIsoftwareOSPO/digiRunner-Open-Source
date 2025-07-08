@@ -4,10 +4,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TsmpCoreTokenBase {
-	public String encrypt(String originalString) throws Exception {
+	public String encrypt(String originalString) {
 		return originalString;
 	}
-	public String decrypt(String encodedString) throws Exception {
+	public String decrypt(String encodedString) {
 		return encodedString;
 	}
 }

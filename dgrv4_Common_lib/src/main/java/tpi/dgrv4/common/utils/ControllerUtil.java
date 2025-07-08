@@ -57,7 +57,7 @@ public class ControllerUtil {
 		return locale;
 	}
 	
-	public final static String buildContent(String template, Map<String, String> params) {
+	public static final String buildContent(String template, Map<String, String> params) {
 		String value;
 		for(String key : params.keySet()) {
 			value = "";

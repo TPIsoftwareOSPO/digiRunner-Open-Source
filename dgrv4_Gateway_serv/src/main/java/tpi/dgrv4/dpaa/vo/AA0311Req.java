@@ -86,6 +86,9 @@ public class AA0311Req extends ReqValidator {
 	
 	/** 失敗處置策略 */	
 	private String failHandlePolicy;
+	
+	/** webhook notify list */
+	private List<String> notifyNameList;
 
 	private List<String> labelList;
 	
@@ -343,6 +346,14 @@ public class AA0311Req extends ReqValidator {
 
 	public void setFailHandlePolicy(String failHandlePolicy) {
 		this.failHandlePolicy = failHandlePolicy;
+	}
+
+	public List<String> getNotifyNameList() {
+		return notifyNameList;
+	}
+
+	public void setNotifyNameList(List<String> notifyNameList) {
+		this.notifyNameList = notifyNameList;
 	}
 
 	@Override

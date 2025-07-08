@@ -91,6 +91,9 @@ public class AA0313Req extends ReqValidator {
 	private List<String> labelList;
 	private Integer fixedCacheTime;
 	
+	/** webhook notify list */
+	private List<String> notifyNameList;
+	
 	public void setApiKey(String apiKey) {
 		this.apiKey = apiKey;
 	}
@@ -413,5 +416,13 @@ public class AA0313Req extends ReqValidator {
 
 	public void setFixedCacheTime(Integer fixedCacheTime) {
 		this.fixedCacheTime = fixedCacheTime;
+	}
+
+	public List<String> getNotifyNameList() {
+		return notifyNameList;
+	}
+
+	public void setNotifyNameList(List<String> notifyNameList) {
+		this.notifyNameList = notifyNameList;
 	}
 }

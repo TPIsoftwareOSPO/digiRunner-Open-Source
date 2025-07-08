@@ -116,6 +116,9 @@ public class AA0302Resp {
 
 	/** 失敗處置策略 */
 	private String failHandlePolicy;
+	
+	/** webhook notify list */
+	private List<String> notifyNameList;
 
 	private List<String> labelList;
 	private List<AA0302RedirectByIpData> redirectByIpDataList;
@@ -552,6 +555,14 @@ public class AA0302Resp {
 
 	public void setDisableScheduledDate(long disableScheduledDate) {
 		this.disableScheduledDate = disableScheduledDate;
+	}
+
+	public List<String> getNotifyNameList() {
+		return notifyNameList;
+	}
+
+	public void setNotifyNameList(List<String> notifyNameList) {
+		this.notifyNameList = notifyNameList;
 	}
 
 	public String getCreateDate() {

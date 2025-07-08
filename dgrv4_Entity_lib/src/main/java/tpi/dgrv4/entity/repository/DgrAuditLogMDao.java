@@ -49,4 +49,6 @@ public interface DgrAuditLogMDao extends JpaRepository<DgrAuditLogM, DgrAuditLog
 	public List<DgrAuditLogM> findByUserNameAndEventNoOrderByCreateDateTimeDesc(String userName, String eventNo);
 	
 	public List<DgrAuditLogM> findTop3ByUserNameAndEventNoOrderByCreateDateTimeDesc(String userName, String eventNo);
+
+	public List<DgrAuditLogM> findByCreateDateTimeBefore(Date expDate);
 }

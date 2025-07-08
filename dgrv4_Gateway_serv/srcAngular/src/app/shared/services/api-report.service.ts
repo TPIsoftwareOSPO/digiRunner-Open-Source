@@ -185,4 +185,13 @@ export class ReportService {
     const path = `${this.basePath}/AA1213`;
     return this.api.npPost<ResAA1213>(path, body);
   }
+
+    queryApiAbnormal_ignore1298(ReqBody: AA1213Req): Observable<ResAA1213> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.queryApiAbnormal),
+      ReqBody: ReqBody,
+    } as ReqAA1213;
+    const path = `${this.basePath}/AA1213`;
+    return this.api.excuteNpPost_ignore1298<ResAA1213>(path, body);
+  }
 }

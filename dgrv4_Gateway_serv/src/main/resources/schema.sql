@@ -755,15 +755,6 @@ CREATE TABLE IF NOT EXISTS DGR_OAUTH_APPROVALS (
     VERSION             INT DEFAULT 1,	
     CONSTRAINT PK_dgr_oauth_approvals PRIMARY KEY (OAUTH_APPROVALS_ID)
 );
- 
--- 20220427, 檢查器的設定, tom
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_XSS_ENABLE', 'true', '"XSS Checker" enablement (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_XXE_ENABLE', 'true', '"XXE Checker" enablement (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_SQL_INJECTION_ENABLE', 'true', '"SQL Injection Checker" enablement (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_IGNORE_API_PATH_ENABLE', 'true', '"API Path IGNORE Checker" enablement (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_API_STATUS_ENABLE', 'true', '"API Switch" enablement (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_TRAFFIC_ENABLE', 'true', '"Traffic Checker" enablement (true/false)');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('IGNORE_API_PATH', '/,/tptoken/oauth/token,/ssotoken/**,/v3/**,/shutdown/**,/version/**,/onlineconsole1/**,/onlineConsole/**,/udpssotoken/**,/cus/**', 'Specify the API path to skip all checker settings (multiple items separated by commas (,))');
 
 -- 20220606, ES的設定, tom chu
 INSERT INTO TSMP_SETTING (ID,VALUE,MEMO) VALUES ('ES_URL','https://10.20.30.88:19200/','The URL of ES, there must be a / line at the end, multiple groups are separated by commas (,), EX: https://10.20.30.88:19200/, https://10.20.30.88:29200/');
@@ -934,7 +925,7 @@ INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('FILE_TEMP_EXP_TIME', '360000
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('AUTH_CODE_EXP_TIME', '600000', '"Auth code Expired Time" setting(ms)');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('QUERY_DURATION', '30', 'ES query date interval upper limit');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('SHUTDOWN_ENDPOINT_ALLOWED_IPS', '127.0.0.1,0:0:0:0:0:0:0:1', 'List of IP hosts allowed to access the shutdown endpoint, separated by commas (,), if the setting empty, no one allow to call');
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_SEND_TIME', '3600000', 'How long does it take to send the mail (ms) after writing the mail into the schedule');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('MAIL_SEND_TIME', '600000', 'How long does it take to send the mail (ms) after writing the mail into the schedule');
 
 --20221020, v4 sequence Kevin K
 create sequence  SEQ_TSMP_USER_PK increment by 1 start with 2000000000;
@@ -1716,7 +1707,8 @@ CREATE TABLE IF NOT EXISTS DGR_IMPORT_CLIENT_RELATED_TEMP (
 ); 
 
 -- 20240306, 為了controllerMockTest不用每次改TsmpSettingTableInitializer而建立的, Tom
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_JTI_ENABLE', 'false', 'When the request includes Authorization, it will check if the jti is expired in the database. If this HTTP header is not included, no check will be performed. By default, the check function is enabled (true), and it will be disabled (false) otherwise.');
+-- 不能寫此行, 這會造成 open source 及 memory 版都預設不檢查 token, Mini
+-- INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CHECK_JTI_ENABLE', 'false', 'When the request includes Authorization, it will check if the jti is expired in the database. If this HTTP header is not included, no check will be performed. By default, the check function is enabled (true), and it will be disabled (false) otherwise.');
 
 -- 20240401, API匯出入沒有PUBLIC_FLAG和API_RELEASE_TIME, Webber Luo
 ALTER TABLE TSMP_API_IMP ADD PUBLIC_FLAG VARCHAR2(1) NULL;
@@ -2116,3 +2108,86 @@ CREATE INDEX idx_tsmp_req_res_log_history ON tsmp_req_res_log_history(rtime);
 
 -- 20250213, 增加欄位長度, Zoe Lee
 ALTER TABLE dgr_rdb_connection ALTER COLUMN mima VARCHAR(2000) NOT NULL;
+
+-- 20250227, DGR_WEBHOOK_NOTIFY , Webber Luo
+CREATE TABLE IF NOT EXISTS dgr_webhook_notify (
+    webhook_notify_id    BIGINT 				NOT NULL,    -- ID
+    notify_name    		VARCHAR(100) 			NOT NULL,    -- 通知名稱
+    notify_type    		VARCHAR(100) 			NOT NULL,    -- 通知種類
+    enable    			VARCHAR(1) 				NOT NULL,    -- 啟用=Y / 停用=N
+    message    			VARCHAR(2000),    					 -- 發送內容
+    payload_flag    		VARCHAR(1) 				DEFAULT '0', -- 
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,  -- 建立日期
+    create_user                 VARCHAR(1000)   DEFAULT 'SYSTEM',           -- 建立人員
+    update_date_time            DATETIME,                                   -- 更新日期
+    update_user                 VARCHAR(1000),                              -- 更新人員
+    version                     INT             DEFAULT '1',                -- 版號
+    PRIMARY KEY(webhook_notify_id)
+);
+-- 20250227, DGR_WEBHOOK_NOTIFY_FIELD , Webber Luo
+CREATE TABLE IF NOT EXISTS dgr_webhook_notify_field (
+    webhook_notify_field_id    	BIGINT 			NOT NULL,    -- ID
+    webhook_notify_id    		BIGINT 			NOT NULL,    -- 通知ID
+    field_key    				VARCHAR(100) 	NOT NULL,    -- KEY
+    field_value    				VARCHAR(2000) 	NOT NULL,    -- VALUE
+    field_type    				VARCHAR(1) 		NOT NULL DEFAULT '0',    -- TYPE
+    mapping_url    				VARCHAR(2000), 	    		 -- URL
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,  -- 建立日期
+    create_user                 VARCHAR(1000)   DEFAULT 'SYSTEM',           -- 建立人員
+    update_date_time            DATETIME,                                   -- 更新日期
+    update_user                 VARCHAR(1000),                              -- 更新人員
+    version                     INT             DEFAULT '1',                -- 版號
+    PRIMARY KEY(webhook_notify_field_id)
+);
+-- 20250227, DGR_WEBHOOK_NOTIFY_LOG , Webber Luo
+CREATE TABLE IF NOT EXISTS DGR_WEBHOOK_NOTIFY_LOG (
+    webhook_notify_log_id    	BIGINT 			NOT NULL,    -- ID
+    webhook_notify_id    		BIGINT 			NOT NULL,    -- WEBHOOK_NOTIFY_ID
+    client_id    				VARCHAR(40) 	NOT NULL,    -- 用戶端
+    content    					VARCHAR(2000),    			 -- 發送內容
+    remark    					VARCHAR(2000),    		 	 -- 備註
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,  -- 建立日期
+    create_user                 VARCHAR(1000)   DEFAULT 'SYSTEM',           -- 建立人員
+    update_date_time            DATETIME,                                   -- 更新日期
+    update_user                 VARCHAR(1000),                              -- 更新人員
+    version                     INT             DEFAULT '1',                -- 版號
+    PRIMARY KEY(webhook_notify_log_id)
+);
+
+-- 20250227, DGR_WEBHOOK_API_MAP , Webber Luo
+CREATE TABLE IF NOT EXISTS dgr_webhook_api_map (
+    webhook_api_map_id    		BIGINT 			NOT NULL,    -- ID
+    api_key    					VARCHAR(255) 	NOT NULL,	 -- API代碼
+    module_name    				VARCHAR(150) 	NOT NULL,  	 -- API_MODULE
+    webhook_notify_id    		BIGINT 			NOT NULL,    -- WEBHOOK_NOTIFY_I
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,  -- 建立日期
+    create_user                 VARCHAR(1000)   DEFAULT 'SYSTEM',           -- 建立人員
+    update_date_time            DATETIME,                                   -- 更新日期
+    update_user                 VARCHAR(1000),                              -- 更新人員
+    version                     INT             DEFAULT '1',                -- 版號
+    PRIMARY KEY(webhook_api_map_id)
+);
+
+-- 20250331, DGR_GRPCPROXY_MAP, Alvin Chiu
+CREATE TABLE IF NOT EXISTS dgr_grpcproxy_map (
+    grpcproxy_map_id       BIGINT NOT NULL,                           -- ID
+    service_name           VARCHAR(255) NOT NULL,                     -- 目標服務名稱
+    proxy_hostname         VARCHAR(255) NOT NULL,                     -- 轉發位置
+    target_hostname        VARCHAR(255) NOT NULL,                     -- 目標服務位置
+    target_port            INT NOT NULL,                              -- 目標服務PORT
+    connect_timeout_ms     INT NOT NULL    DEFAULT 5000,              -- 連線超時毫秒
+    send_timeout_ms        INT NOT NULL    DEFAULT 10000,             -- 發送超時毫秒
+    read_timeout_ms        INT NOT NULL    DEFAULT 30000,             -- 讀取超時毫秒
+    secure_mode            VARCHAR(10)     DEFAULT 'AUTO',            -- TLS安全模式 (AUTO, SECURE, PLAINTEXT)
+    server_cert_content    TEXT,                                      -- X509憑證內容 (PEM格式)
+    server_key_content     TEXT,                                      -- 私鑰內容 (PEM格式)
+    auto_trust_upstream_certs VARCHAR(1)   DEFAULT 'N',             -- 是否自動信任上游憑證
+    trusted_certs_content  TEXT,                                      -- 受信任的CA憑證內容 (PEM格式)
+    enable                 VARCHAR(1)      DEFAULT 'N',               -- 啟用/停用
+    create_date_time       DATETIME        DEFAULT CURRENT_TIMESTAMP, -- 建立日期
+    create_user            NVARCHAR(1000)  DEFAULT 'SYSTEM',          -- 建立人員
+    update_date_time       DATETIME,                                  -- 更新日期
+    update_user            NVARCHAR(1000),                            -- 更新人員
+    version                INT             DEFAULT 1,                 -- 版號
+    PRIMARY KEY(grpcproxy_map_id)
+    );

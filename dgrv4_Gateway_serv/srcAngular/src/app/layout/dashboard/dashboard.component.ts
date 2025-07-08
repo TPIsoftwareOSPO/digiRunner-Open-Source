@@ -47,6 +47,7 @@ import {
 import { BadAttemptListComponent } from './bad-attempt-list/bad-attempt-list.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -107,7 +108,8 @@ export class DashboardComponent implements OnInit {
     private serverService: ServerService,
     private ngxService: NgxUiLoaderService,
     private dialogService: DialogService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router,
   ) {}
 
   // resizeReport() {
@@ -896,7 +898,7 @@ export class DashboardComponent implements OnInit {
     //             }));
     //           }
     //         });
-            
+
     //         return cleanedItem;
     //       });
     //     }
@@ -931,7 +933,7 @@ export class DashboardComponent implements OnInit {
                 'exclundeFailFastList',
                 'exclundeFailSlowList',
               ];
-  
+
               urlContainingLists.forEach((listName) => {
                 if (
                   cleanedItem[listName] &&
@@ -943,7 +945,7 @@ export class DashboardComponent implements OnInit {
                   }));
                 }
               });
-              
+
               return cleanedItem;
             });
           }
@@ -1087,5 +1089,10 @@ export class DashboardComponent implements OnInit {
       // 備援處理
       console.warn('This browser does not support the Clipboard API');
     }
+  }
+
+  // api異常報表
+  navigateReport(){
+    this.router.navigate(['/ac05/ac0503']);
   }
 }

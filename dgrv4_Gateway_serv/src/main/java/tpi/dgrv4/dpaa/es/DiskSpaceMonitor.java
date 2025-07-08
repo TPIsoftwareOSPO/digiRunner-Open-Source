@@ -18,7 +18,7 @@ public class DiskSpaceMonitor {
 	private static final Path LOG_DIR = Paths.get("apilogs");
 	private static final long DEFAULT_MAX_DIR_SIZE_BYTES = 10_000_000_000L; // 10GB 默認值
 	private static final int DEFAULT_MAX_FILES = 10000; // 默認最大文件數
-	private static final long CHECK_INTERVAL_MS = 30000; // 每分鐘檢查一次
+	private static final long CHECK_INTERVAL_MS = 60000; // 每分鐘檢查一次
 
 	private long maxDirSizeBytes;
 	private int maxFiles;

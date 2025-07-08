@@ -1,0 +1,70 @@
+<div>
+  <form [formGroup]="form">
+    <div class="form-group row">
+      <div class="col-6">
+        <label class="control-label">{{ "keyword_search" | translate }}</label>
+        <span class="p-input-icon-right" style="width: 100%;">
+          <i class="pi pi-search tpi-i-search" (click)="queryWebhookNotify();"></i>
+          <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder=""
+            (keydown.enter)="queryWebhookNotify()">
+        </span>
+      </div>
+    </div>
+  </form>
+  <div class="form-group">
+    <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll"
+    [(selection)]="selectedItems">
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th style="width: 2.25em" scope="col">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+
+          <th>Notify Name</th>
+          <th style="width:150px;">Notify type</th>
+          <th style="width:100px;">{{'create_by'|translate}}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <td>
+            <p-tableCheckbox
+              [value]="rowData"
+            ></p-tableCheckbox>
+          </td>
+
+          <td>{{rowData.notifyName}}</td>
+          <td>{{rowData.notifyType}}</td>
+          <td>{{rowData.createUser}}</td>
+        </tr>
+      </ng-template>
+      <!-- <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length>0">
+          <td [attr.colspan]="5" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+            <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button>
+
+          </td>
+        </tr>
+      </ng-template> -->
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="5">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="text-center">
+    <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="confirm()"
+      [disabled]="selectedItems.length == 0">
+      {{ "button.confirm" | translate }}
+    </button>
+    <button type="button" class="btn tpi-btn tpi-cancel" (click)="cancel()">
+      {{ "button.cancel" | translate }}
+    </button>
+  </div>
+</div>

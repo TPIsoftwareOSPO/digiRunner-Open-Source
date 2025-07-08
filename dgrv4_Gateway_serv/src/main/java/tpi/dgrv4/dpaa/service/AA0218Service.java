@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.BcryptFieldValueEnum;
@@ -36,6 +37,10 @@ public class AA0218Service {
 	private OauthClientDetailsDao oauthClientDetailsDao;
 	private BcryptParamHelper bcryptParamHelper;
 	private DgrAuditLogService dgrAuditLogService;
+	
+	private static final String REDIRECT_URI_IS_INCOMPLETE = "Redirect URI (%s) is incomplete, value \'%s\'";
+	private static final String REDIRECT_URI_IS_INCORRECT_CANNOT_HAVE_STAR_SIGN = "Redirect URI (%s) is incorrect, cannot have * sign, value \'%s\'";
+	private static final String REDIRECT_URI_IS_INCORRECT_MUST_HAVE_STAR_SIGN = "Redirect URI (%s)) is incorrect, must have * sign, value \'%s\'";
 	
 	@Autowired
 	public AA0218Service(TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao,
@@ -206,41 +211,56 @@ public class AA0218Service {
 	}
 	
 	/**
-	 * 檢查輸入的網址 Default Redirect URI 和 Extends Redirect URI 1 ~ 5, <br>
+	 * [ZH] 檢查輸入的網址 Default Redirect URI 和 Extends Redirect URI 1 ~ 5, <br>
 	 * 若為 https 或 https, 則網址不能有 * 號 <br>
 	 * 否則, 則網址要有 * 號 <br>
+	 * [EN] Check the entered URL Default Redirect URI and Extends Redirect URI 1 ~ 5, <br>
+	 * If it is https or https, the URL cannot have an * <br>
+	 * Otherwise, the URL must have an * <br>
 	 */
 	private void checkRedirectUri(String uri, String index) {
-		if (uri == null) {
+		if (uri == null || !StringUtils.hasLength(uri)) {
 			return;
+		}
+		
+		if (index == null || !StringUtils.hasLength(index)) {
+			index = "Default";
 		}
  
 		String errMsg = null;
 		if (!uri.contains("://")) {
-			errMsg = "Redirect URI " + index + " is incomplete: " + uri;
-			// Redirect URI 不完整: uri
+			// [ZH] Redirect URI (index) 不完整, 值 'uri'
+			// [EN] Redirect URI (index) is incomplete, value 'uri'
+			errMsg = String.format(REDIRECT_URI_IS_INCOMPLETE, index, uri);
 			this.logger.debug(errMsg);
 			throw TsmpDpAaRtnCode._1559.throwing(errMsg);
 		}
 		
-		if (isHttpsOrHttp(uri)) {// https 或 https
+		if (isHttpsOrHttp(uri)) {// https or https
 			if (uri.toLowerCase().equals("https://") || uri.toLowerCase().equals("http://")) {
-				errMsg = "Redirect URI " + index + " is incomplete: " + uri;
-				// Redirect URI 不完整: uri
+				// [ZH] Redirect URI (index) 不完整, 值 'uri'
+				// [EN] Redirect URI (index) is incomplete, value 'uri'
+				errMsg = String.format(REDIRECT_URI_IS_INCOMPLETE, index, uri);
 				this.logger.debug(errMsg);
 				throw TsmpDpAaRtnCode._1559.throwing(errMsg);
 			}
 			
-			if (uri.contains("*")) {// 網址不能有 * 號
-				errMsg = "Redirect URI " + index + " is incorrect, cannot have * sign: " + uri;
-				// Redirect URI 錯誤,不能有 * 號: uri
+			if (uri.contains("*")) {
+				// [ZH] Redirect URI (index) 錯誤, 不能有 * 號, 值 'uri'
+				// [EN] Redirect URI (index) error, cannot contain *, value 'uri'
+				errMsg = String.format(REDIRECT_URI_IS_INCORRECT_CANNOT_HAVE_STAR_SIGN, index, uri);
 				this.logger.debug(errMsg);
 				throw TsmpDpAaRtnCode._1559.throwing(errMsg);
 			}
-		} else {// 不是 https 或 https, 則網址必須有 * 號
+			
+		} else {
+			// [ZH] 不是 https 或 https, 則網址必須有 * 號 
+			// [EN] If it is not http or https, the URL must have a *
+			
 			if (!uri.contains("*")) {
-				errMsg = "Redirect URI " + index + " is incorrect, must have * sign: " + uri;
-				// Redirect URI 錯誤,必須有 * 號: uri
+				// [ZH] Redirect URI 錯誤,必須有 * 號, 值 'uri'
+				// [EN] Redirect URI error, must contain *, value 'uri'
+				errMsg = String.format(REDIRECT_URI_IS_INCORRECT_MUST_HAVE_STAR_SIGN, index, uri);
 				this.logger.debug(errMsg);
 				throw TsmpDpAaRtnCode._1559.throwing(errMsg);
 			}
@@ -248,9 +268,9 @@ public class AA0218Service {
 	}
  
 	/**
-	 * 網址是否為 "https://" 或 "http://" 開頭
-	 * 
-	 * @return true: 是; false: 不是
+	 * [ZH] 網址是否為 "https://" 或 "http://" 開頭
+	 * [EN] Whether the URL starts with "https://" or "http://"
+	 * @return true: yes; false: no
 	 */
 	private boolean isHttpsOrHttp(String uri) {
 		if (uri == null) {

@@ -29,3 +29,11 @@ table>tbody>tr:nth-child(even) {
   background-color: #F9F9F9;
 }
 
+.border-bottom-line{
+  border: 0;
+  border-bottom:1px solid #ddd;
+}
+
+.border-bottom-line + label {
+  border: 0;
+}

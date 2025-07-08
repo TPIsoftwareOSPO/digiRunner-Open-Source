@@ -32,6 +32,8 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.*;
 
@@ -111,15 +113,22 @@ public class DPB0101Service {
 		if (StringUtils.isEmpty(dtStr)) {
 			return null;
 		}
+
 		Date dt = getDate(dtStr, new TsmpDpAaException(TsmpDpAaRtnCode._1295));
 		if (dt == null) {
 			return null;
 		}
-		if (dt.compareTo(DateTimeUtil.now()) < 0) {
-			throw TsmpDpAaRtnCode._1227.throwing();
+
+		LocalDate inputDate = dt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate nowDate = DateTimeUtil.now().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+		if (inputDate.isBefore(nowDate)) {
+			throw TsmpDpAaRtnCode._1227.throwing(); // 日期早於今天
 		}
+
 		return dt.getTime();
 	}
+
 
 	private Date getDate(String dtStr, TsmpDpAaException exception) {
 		Optional<Date> opt = DateTimeUtil.stringToDateTime(dtStr, DateTimeFormatEnum.西元年月日時分秒_2);

@@ -2,20 +2,12 @@ package tpi.dgrv4.common.utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -33,6 +25,7 @@ import tpi.dgrv4.common.keeper.ITPILogger;
 public class ServiceUtil {
 
 	private static ITPILogger logger;
+
 
 	public static String buildContent(String template, Map<String, String> params) {
 		String value;
@@ -392,8 +385,7 @@ public class ServiceUtil {
         }
         String regex = "(.{" + String.valueOf(front) + "})(.+)(.{" + String.valueOf(end) + "})";
         String replacement = "$1" + asteriskStr + "$3";
-        String mark = str.replaceAll(regex, replacement);
-        return mark;
+        return str.replaceAll(regex, replacement);
 	}
 
 	// https://blog.csdn.net/qq_35387940/article/details/84391784

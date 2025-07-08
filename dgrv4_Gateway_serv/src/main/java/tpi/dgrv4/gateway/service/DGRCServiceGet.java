@@ -376,7 +376,9 @@ public class DGRCServiceGet implements IApiCacheService{
 			TsmpApiLogReq dgrcGetBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
 
 			HttpRespData respObj = getHttpRespData(vo.getHeader(), vo.getSrcUrl(), null);
-			respObj.fetchByte(maskInfo); // because Enable inputStream
+			boolean isSse = vo.getHeader().keySet().stream()
+					.anyMatch(key -> key.equalsIgnoreCase("isSse"));
+			respObj.fetchByte(maskInfo,isSse); // because Enable inputStream
 			sb.append(respObj.getLogStr());
 			TPILogger.tl.debug(sb.toString());
 	
@@ -417,7 +419,10 @@ public class DGRCServiceGet implements IApiCacheService{
 		TsmpApiLogReq dgrcGetBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header, srcUrl,
 				"");
 		HttpRespData respObj = getHttpRespData(header, srcUrl,httpRes.getOutputStream());
-		respObj.fetchByte(maskInfo); // because Enable inputStream
+		boolean isSse = header.keySet().stream()
+				.anyMatch(key -> key.equalsIgnoreCase("isSse"));
+
+		respObj.fetchByte(maskInfo ,isSse); // because Enable inputStream
 		dgrcGet_sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(dgrcGet_sb.toString());
 

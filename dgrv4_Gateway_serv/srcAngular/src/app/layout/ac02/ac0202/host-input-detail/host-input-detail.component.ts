@@ -50,8 +50,8 @@ export class HostInputDetailComponent implements OnInit, AfterViewInit {
     // this.hostIP?.updateValueAndValidity();
     this.host = {} as AA0201HostReqAddNo;
     this.form.valueChanges.subscribe((res: AA0201HostReq) => {
-      console.log(this.hostIP?.value)
-      this.change.emit({ hostIP: res.hostIP, hostName: res.hostName, no: this.no } as AA0201HostReqAddNo);
+      // console.log(this.hostIP?.value)
+      this.change.emit({ hostIP: res.hostIP.trim(), hostName: res.hostName.trim(), no: this.no } as AA0201HostReqAddNo);
     });
   }
 

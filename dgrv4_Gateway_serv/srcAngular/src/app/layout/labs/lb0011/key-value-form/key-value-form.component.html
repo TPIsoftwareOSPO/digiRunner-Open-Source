@@ -1,0 +1,49 @@
+<div class="form-group row">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <div class="col-8">
+        <label id="url_label" class="control-label">URL</label>
+        <input type="text" class="form-control" id="url" formControlName="url">
+        <div *ngIf="url?.invalid && (url?.dirty || url?.touched)" class="text-danger">
+          <small class="form-text">{{url?.errors.required | translate}}</small>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="col-12">
+    <label id="Header_label" class="control-label fw-bold " [hidden]="webhookType!=='HTTP'">Header</label>
+    <ng-template #headerValue></ng-template>
+    <div>
+      <button type="button" class="btn tpi-second" (click)="addHeaderValue()" [hidden]="disabled"
+        style="border-radius: 50%;">
+        <i class="fa fa-plus"></i>
+      </button>
+    </div>
+    <div class="col-12" *ngIf="headerValueList.length ==0 && disabled" class="form-control border-line" style="background: #f6f6f6;">
+      <span > {{'no_data_result'|translate}}</span>
+    </div>
+  </div>
+  <div class="col-12">
+    <label id="Field_label" class="control-label fw-bold" [hidden]="webhookType!=='HTTP'">Body</label>
+    <ng-template #fieldValue></ng-template>
+    <div>
+      <button type="button" class="btn tpi-second" (click)="addFieldValue()" [hidden]="disabled"
+        style="border-radius: 50%;">
+        <i class="fa fa-plus"></i>
+      </button>
+    </div>
+
+    <div class="col-12" *ngIf="fieldValueList.length ==0 && disabled" class="form-control border-line" style="background: #f6f6f6;">
+      <span > {{'no_data_result'|translate}}</span>
+    </div>
+  </div>
+  <!-- <div class="col-12">
+    <label id="Field_label" class="control-label" [hidden]="webhookType!=='HTTP'">Field</label>
+    <ng-template #keyValue></ng-template>
+    <span *ngIf="keyValueList.length==0 && disabled"> {{'no_rec' | translate}}</span>
+    <button type="button" class="btn tpi-second" (click)="addKeyValue()" [hidden]="disabled"
+      style="border-radius: 50%;">
+      <i class="fa fa-plus"></i>
+    </button>
+  </div> -->
+</div>

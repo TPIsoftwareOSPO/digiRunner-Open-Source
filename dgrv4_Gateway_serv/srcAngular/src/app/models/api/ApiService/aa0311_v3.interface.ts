@@ -42,6 +42,8 @@ export interface AA0311Req {
   labelList?: Array<string>;
   failDiscoveryPolicy?: string;
   failHandlePolicy?: string;
+  apiType?:string;
+  notifyNameList?:Array<string>;
 }
 export interface AA0311Func {
   tokenPayload: Boolean;

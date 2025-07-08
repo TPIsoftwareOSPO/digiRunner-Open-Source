@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.codec.utils.CipherInstanceUtil;
+import tpi.dgrv4.codec.utils.PEMUtil;
 import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.entity.component.IFileHelper;
 import tpi.dgrv4.entity.component.IFileHelperCacheProxy;
@@ -27,7 +28,9 @@ import tpi.dgrv4.entity.ifs.IEntityTPILogger;
 
 
 /**
- * 利用 digiRunner 底層核發 Token 所使用的密碼金鑰對 (KeyPair) 實現加、解密
+ * [ZH] 利用 digiRunner 底層核發 Token 所使用的密碼金鑰對 (KeyPair) 實現加、解密 <br>
+ * [EN] Encryption and decryption using the cryptographic key pair (KeyPair)
+ * used by the underlying token issuance of digiRunner <br>
  * 
  * @author Kim
  */
@@ -170,16 +173,15 @@ public class TsmpCoreTokenEntityHelper {
 
 	private byte[] getKeyPairContent() {
 		TsmpDpFileType keyPairFileType = TsmpCoreTokenInitializer.KEY_PAIR_FILE_TYPE;
-		Long keyPairRefId = TsmpCoreTokenInitializer.KEY_PAIR_REF_ID;
-		String keyPairFileName = TsmpCoreTokenInitializer.KEY_PAIR_FILE_NAME;
+		Long keyPairRefId = TsmpCoreTokenInitializer.KEY_PAIR_REF_ID; // ex: 0
+		String keyPairFileName = TsmpCoreTokenInitializer.KEY_PAIR_FILE_NAME; // ex: express-dgr-token.jks or tsmp-core-token.jks
 		
 		if (!StringUtils.hasText(keyPairFileName)) {
 			IEntityTPILogger.getInstance().error("File name of KeyPair is empty! Was TsmpCoreTokenInitializer initialized successfully?");
 			return null;
 		}
 		
-		String tsmpDpFilePath = IFileHelper.getTsmpDpFilePath(keyPairFileType, keyPairRefId);
-
+		String tsmpDpFilePath = IFileHelper.getTsmpDpFilePath(keyPairFileType, keyPairRefId); // ex: KEY_PAIR\0\
 		//if (this.loggerFlag == true) {
 			// 為了不要 RunLoopJob / ES 每 call 一次要解密時就 debugDelay2sec 一次, 導致整個畫面都是 "...Downloading KeyPair"
 			//this.logger.debugDelay2sec("Downloading KeyPair from: " + tsmpDpFilePath + keyPairFileName);
@@ -222,6 +224,16 @@ public class TsmpCoreTokenEntityHelper {
 		}
 		
 		return getTsmpCoreTokenHelperCacheProxy().deserializeKeyPair(content);
+	}
+	
+	/**
+	 * [ZH] 取得 dgR 核發 Token & ENC 加密, 所使用的金鑰對的公鑰憑證內容 <br>
+	 * [EN] Get the public key certificate content of the key pair used for dgR
+	 * issued Token & ENC encryption <br>
+	 */
+	public String getPublicKeyPem() {
+		PublicKey publicKey = getKeyPair().getPublic();
+		return PEMUtil.converKeyByteToPem(publicKey.getEncoded(), "PUBLIC KEY");
 	}
 	
 	protected IFileHelperCacheProxy getFileHelperCacheProxy() {

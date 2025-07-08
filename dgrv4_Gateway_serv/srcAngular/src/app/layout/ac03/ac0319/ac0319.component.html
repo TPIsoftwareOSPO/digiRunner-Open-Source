@@ -35,13 +35,14 @@
             {{ "button.label_reset" | translate }}
           </button>
           <button type="button" class="btn tpi-btn tpi-primary float-end" [disabled]="selected.length == 0"
-            (click)="changePage('api_url_setting')">{{'api_url_setting'|translate}}</button>
+          (click)="changePage('api_url_setting')">{{'api_url_setting'|translate}}</button>
 
-            <button type="button" title="{{ 'fail_handle_policy.reset' | translate }}"
-            class="btn tpi-primary tpi-btn float-start me-1" (click)="resetHandlePolicyProc()"
-            [disabled]="selected.length == 0">
-            {{ "fail_handle_policy.reset" | translate }}
-          </button>
+          <button type="button" title="{{ 'fail_handle_policy.reset' | translate }}"
+          class="btn tpi-primary tpi-btn float-start me-1" (click)="resetHandlePolicyProc()"
+          [disabled]="selected.length == 0">
+          {{ "fail_handle_policy.reset" | translate }}
+        </button>
+
         </div>
       </ng-template>
       <!-- Table 表頭 -->

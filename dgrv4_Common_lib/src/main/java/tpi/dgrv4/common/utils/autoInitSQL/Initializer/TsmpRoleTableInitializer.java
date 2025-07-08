@@ -20,6 +20,7 @@ public class TsmpRoleTableInitializer {
 			String roleAlias;
 			String createUser;
 			createTsmpRole((roleId = "1000"), (roleName = "ADMIN"), (roleAlias = "Administrator"), (createUser = "manager"));
+			createTsmpRole((roleId = "1001"), (roleName = "FrontPageDashboard"), (roleAlias = "FrontPageDashboard"), (createUser = "manager"));
 			
 
 		} catch (Exception e) {

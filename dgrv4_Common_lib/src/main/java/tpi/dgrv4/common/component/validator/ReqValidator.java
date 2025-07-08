@@ -22,7 +22,7 @@ public abstract class ReqValidator {
 
 	private ReqConstraintsCache constraintsCache;
 
-	public ReqValidator() {
+	protected ReqValidator() {
 		this.constraintsCache = new ReqConstraintsCache(logger);
 	}
 
@@ -76,7 +76,7 @@ public abstract class ReqValidator {
 			for (BeforeControllerRespItem c : constraints) {
 				field = c.getField();
 				if (fields.contains(field)) {
-					this.logger.debug("重複的Field名稱: " + field);
+					ITPILogger.tl.debug("重複的Field名稱: " + field);
 					throw TsmpDpAaRtnCode._1297.throwing();
 				}
 				fields.add(field);

@@ -18,7 +18,7 @@ public abstract class BCRIVFactory implements BCRIVFactoryIfs {
 
 	private final BeforeControllerRespItem item;
 
-	public BCRIVFactory(BeforeControllerRespItem item) {
+	protected BCRIVFactory(BeforeControllerRespItem item) {
 		this.item = item;
 	}
 

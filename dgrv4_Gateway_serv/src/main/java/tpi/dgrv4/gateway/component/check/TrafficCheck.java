@@ -3,10 +3,12 @@ package tpi.dgrv4.gateway.component.check;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpRtnCode;
 import tpi.dgrv4.entity.exceptions.DgrException;
@@ -18,24 +20,15 @@ import tpi.dgrv4.gateway.service.TsmpRtnCodeService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.vo.TpsVo;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class TrafficCheck implements ICheck{
 	public Map<String, TpsVo> map = new HashMap<>();
 
-	private TPILogger logger = TPILogger.tl;
-	
-	private TsmpSettingService tsmpSettingService;
-	private TsmpClientCacheProxy tsmpClientCacheProxy;
-	private TsmpRtnCodeService tsmpRtnCodeService;
-
-	@Autowired
-	public TrafficCheck(TsmpSettingService tsmpSettingService, TsmpClientCacheProxy tsmpClientCacheProxy,
-			TsmpRtnCodeService tsmpRtnCodeService) {
-		super();
-		this.tsmpSettingService = tsmpSettingService;
-		this.tsmpClientCacheProxy = tsmpClientCacheProxy;
-		this.tsmpRtnCodeService = tsmpRtnCodeService;
-	}
+	private final TsmpSettingService tsmpSettingService;
+	private final TsmpClientCacheProxy tsmpClientCacheProxy;
+	private final TsmpRtnCodeService tsmpRtnCodeService;
 
 	public boolean check(String clientId) {
 		boolean isEnabled = getTsmpSettingService().getVal_CHECK_TRAFFIC_ENABLE();
@@ -54,6 +47,12 @@ public class TrafficCheck implements ICheck{
 				}
 			}
 			
+			if (tpsVo.getLimit() == 0) {
+				// [ZH] 0 為不限制次數,故不用檢查
+				// [EN] 0 means unlimited times, so no need to check
+				return false;
+			}
+			
 			if(tpsVo.getNumber() > tpsVo.getLimit()) {
 				return true;
 			}
@@ -67,7 +66,7 @@ public class TrafficCheck implements ICheck{
 		tpsVo.setNumber(1);
 		TsmpClient tsmpClient = getTsmpClientCacheProxy().findById(clientId).orElse(null);
 		if(tsmpClient == null) {
-			logger.debug("not found clientId is " + clientId);
+			TPILogger.tl.debug("not found clientId is " + clientId);
 			throw new DgrException(HttpStatus.UNAUTHORIZED.value(), new ICheck() {
 				@Override
 				public String getMessage(String locale) {

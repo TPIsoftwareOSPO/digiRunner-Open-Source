@@ -68,6 +68,7 @@ export interface AA0302Resp {
   createUser: string;
   updateDate?: string;
   updateUser?: string;
+  notifyNameList?: Array<string>;
 }
 export interface AA0302RedirectByIpData {
   ipForRedirect: string;

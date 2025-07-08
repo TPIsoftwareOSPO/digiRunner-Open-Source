@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,7 +74,10 @@ import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.es.DiskSpaceMonitor;
+import tpi.dgrv4.dpaa.component.DgrProtocol;
 import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
+import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
+import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -82,6 +86,7 @@ import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientCert;
 import tpi.dgrv4.entity.entity.jpql.TsmpReqLog;
 import tpi.dgrv4.entity.entity.jpql.TsmpResLog;
+import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
 import tpi.dgrv4.entity.repository.TsmpReqLogDao;
 import tpi.dgrv4.entity.repository.TsmpResLogDao;
 import tpi.dgrv4.escape.CheckmarxUtils;
@@ -94,6 +99,8 @@ import tpi.dgrv4.gateway.component.cache.proxy.TsmpClientCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpClientCertCacheProxy;
 import tpi.dgrv4.gateway.component.check.TokenCheck;
 import tpi.dgrv4.gateway.component.job.JobHelper;
+import tpi.dgrv4.gateway.constant.ApiTypeEnum;
+import tpi.dgrv4.gateway.constant.DgrHeader;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
@@ -122,10 +129,35 @@ public class CommForwardProcService {
 	private String corsAllowHeaders;
 
 	public static Map<String, FixedCacheVo> fixedCacheMap = new HashMap<>();
+	
+	@Value("${server.ssl.enabled:false}")
+	private boolean sslEnabled;
+
+	@Value("${server.port:8080}")
+	private int serverPort;
+
+	private final Supplier<String> protocol = () -> sslEnabled ? "https" : "http";
+
+	public String parseUrl(String targetUrl) {
+
+		var dgrProto = DgrProtocol.parse(targetUrl);
+
+		if (dgrProto.valid()) {
+			return protocol.get() + "://localhost:" + serverPort + "/" + dgrProto.path();
+		}
+
+		return targetUrl;
+	}
+	
 	public static final String AUTHORIZATION = "authorization";
 	public static final String TOKENPAYLOAD = "tokenpayload";
 	public static final String BACKAUTH = "backauth";
+	
+	public static final String API_TYPE = "apiType";
+	
+	public static final String NOTIFY = "notify";
 	private static final String MODULE_NAME = "moduleName";
+
 	private static final List<String> MASK_TOKEN_LIST = new ArrayList<>();
 
 	static {
@@ -154,6 +186,8 @@ public class CommForwardProcService {
 	private TsmpResLogDao tsmpResLogDao;
 	private TsmpClientCacheProxy tsmpClientCacheProxy;
 	private TsmpClientCertCacheProxy tsmpClientCertCacheProxy;
+	private TsmpTAEASKHelper tsmpTAEASKHelper;
+	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
 
 	public static class ClientPublicKeyData {
 		private ResponseEntity<?> errRespEntity;
@@ -171,7 +205,7 @@ public class CommForwardProcService {
 			this.clientPublicKey = clientPublicKey;
 		}
 	}
- 
+
 	@Autowired
 	public void setCommForwardProcService(@Nullable TraceCodeUtilIfs traceCodeUtil, DgrcRoutingHelper dgrcRoutingHelper,
 			OAuthTokenService oAuthTokenService, TokenHelper tokenHelper, TsmpApiCacheProxy tsmpApiCacheProxy,
@@ -179,7 +213,7 @@ public class CommForwardProcService {
 			TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, ObjectMapper objectMapper,
 			TsmpSettingService tsmpSettingService, TokenCheck tokenCheck, TsmpReqLogDao tsmpReqLogDao,
 			TsmpResLogDao tsmpResLogDao, TsmpClientCacheProxy tsmpClientCacheProxy,
-			TsmpClientCertCacheProxy tsmpClientCertCacheProxy) {
+			TsmpClientCertCacheProxy tsmpClientCertCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper, DgrWebhookApiMapDao dgrWebhookApiMapDao) {
 		this.executor = Executors.newCachedThreadPool(new CustomizableThreadFactory("CommForwardProcService"));
 		this.traceCodeUtil = traceCodeUtil;
 
@@ -195,6 +229,8 @@ public class CommForwardProcService {
 		this.tsmpResLogDao = tsmpResLogDao;
 		this.tsmpClientCacheProxy = tsmpClientCacheProxy;
 		this.tsmpClientCertCacheProxy = tsmpClientCertCacheProxy;
+		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
+		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
 
 		// Because using constructor injection will cause a circular dependency, use
 		// method injection instead
@@ -481,6 +517,10 @@ public class CommForwardProcService {
 		String noAuth = apiReg.getNoOauth();
 		httpReq.setAttribute(TokenHelper.CLIENT_ID, "");
 		httpReq.setAttribute(TokenHelper.NO_AUTH, noAuth);
+		//設定extension所需資料 1:AI Gateway 2:Webhook
+		// Set the required data for the extension: 1: AI Gateway, 2: Webhook
+		if (!"Y".equals(apiReg.getRedirectByIp()))
+			setApiTypeAttribute(httpReq, apiReg);
 
 		if ("1".equals(noAuth)) {
 			// 不用驗證打 API 的 authorization
@@ -533,6 +573,30 @@ public class CommForwardProcService {
 
 		takeTurnsSleeping(clientId, priority); // 依照 JobQueueSize 與 priority 的數值，決定是否暫停。
 		return null;
+	}
+	private void setApiTypeAttribute(HttpServletRequest httpReq, TsmpApiReg apiReg) {
+
+		var dgrProto = DgrProtocol.parse(apiReg.getSrcUrl());
+
+		if (dgrProto.valid()) {
+			var extensions = dgrProto.extensions();
+
+			if (extensions.contains(ApiTypeEnum.AI_GATEWAY.getDgrProtocolExtensionId())) {
+				httpReq.setAttribute(API_TYPE, ApiTypeEnum.AI_GATEWAY.name());
+			}
+
+			if (extensions.contains(ApiTypeEnum.WEBHOOK.getDgrProtocolExtensionId())) {
+				httpReq.setAttribute(API_TYPE, ApiTypeEnum.WEBHOOK.name());
+				List<DgrWebhookApiMap> webhookList = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(apiReg.getApiKey(), apiReg.getModuleName());
+				StringBuffer notifyStr = new StringBuffer();
+				Optional.ofNullable(webhookList).ifPresent(lst -> {
+					for (DgrWebhookApiMap m : lst) {			    	
+				    	notifyStr.append(m.getWebhookNotifyId()+";");
+				    }
+				});
+				httpReq.setAttribute(NOTIFY, notifyStr.toString());
+			}
+		}
 	}
 
 	public void takeTurnsSleeping(String clientid, Integer priority) throws InterruptedException {
@@ -606,7 +670,6 @@ public class CommForwardProcService {
 
 	/**
 	 * 處理 tokenpayload & backAuth 機制
-	 * @throws Exception 
 	 */
 	public Map<String, List<String>> getConvertHeader(HttpServletRequest httpReq, HttpHeaders httpHeaders,
 			int tokenPayloadFlag, Boolean cApiKeySwitch, String uuid, boolean expireCApiKeySwitch) throws Exception {
@@ -616,13 +679,13 @@ public class CommForwardProcService {
 		boolean isIdToken = false;
 		boolean isBackAuth = false;
 		boolean isOrigAuth = false;
-		List<String> idTokenValueList = new ArrayList<String>();
-		List<String> backAuthValueList = new ArrayList<String>();
-		List<String> origAuthValueList = new ArrayList<String>();
+		List<String> idTokenValueList = new ArrayList<>();
+		List<String> backAuthValueList = new ArrayList<>();
+		List<String> origAuthValueList = new ArrayList<>(); // 原始的 "authorization" 值
 		Enumeration<String> httpHeaderKeys = httpReq.getHeaderNames();
 		Map<String, List<String>> headers = new HashMap<>();
 
-		// 1.取得原本 header 的值
+		// 1.取得原本 header 的值 (由 client 送到 dgR 的值)
 		while (httpHeaderKeys.hasMoreElements()) {
 			String key = httpHeaderKeys.nextElement();
 
@@ -642,10 +705,8 @@ public class CommForwardProcService {
 				backAuthValueList = headerValueList;
 
 			} else if (AUTHORIZATION.equalsIgnoreCase(key)) {
-				if ("1".equals(noAuth)) {// 有勾選 No Auth
-					isOrigAuth = true;
-					origAuthValueList = headerValueList;
-				}
+				isOrigAuth = true;
+				origAuthValueList = headerValueList;
 
 				if (tokenPayloadFlag == 1 && !headerValueList.isEmpty()) {// 有勾選 Token Payload
 					String authorization = headerValueList.get(0);
@@ -660,9 +721,9 @@ public class CommForwardProcService {
 			}
 		}
 
-		// 2."authorization"的值,依 No Auth 是否勾選來自以下順序:
+		// 2.dgR 要轉發出去的 "authorization"的值, 依 No Auth 是否勾選來自以下順序:
 		// 有勾選時,優先順序(大到小): "backAuth" -> "authorization"
-		// 沒有勾選時,優先順序(大到小): "id-token" -> "backAuth"
+		// 沒有勾選時,優先順序(大到小): "id-token" -> "backAuth" -> (當"backAuth"="true"時) "authorization"
 		if ("1".equals(noAuth)) {// 有勾選 No Auth
 			// 若 header 中有 "authorization", 將值放入或取代
 			if (isOrigAuth) {
@@ -677,7 +738,12 @@ public class CommForwardProcService {
 		} else {// 沒有勾選 No Auth
 			// 若 header 中有 "backAuth", 將值放入或取代
 			if (isBackAuth) {
-				headers.put(AUTHORIZATION, backAuthValueList);
+				if ("true".equalsIgnoreCase(backAuthValueList.get(0)) && isOrigAuth) {
+					// 若 "backAuth" 的值為 "true", 原來的 "authorization" 會往後帶			
+					headers.put(AUTHORIZATION, origAuthValueList);
+				} else {
+					headers.put(AUTHORIZATION, backAuthValueList);
+				}
 			}
 
 			// 若 header 中有 "id-token", 將值放入或取代
@@ -701,6 +767,29 @@ public class CommForwardProcService {
 			// 產生 capi-key string
 			String jws = ExpireKeyUtil.getExpireKey_60sec();
 			headers.put("capi-key", Arrays.asList(jws));
+		}
+		//處理 API extension的header
+		// Process the API extension header
+		String apiType = (String) httpReq.getAttribute(API_TYPE);
+
+		var apiTypeEnum = ApiTypeEnum.search(apiType);
+
+		if (apiTypeEnum.isPresent()) {
+			Optional.ofNullable(httpReq.getAttribute(TokenHelper.CLIENT_ID)).ifPresent(id -> {
+				String encClientId = getTsmpTAEASKHelper().encrypt(id.toString());
+				headers.put(DgrHeader.CLIENT_ID, List.of(encClientId));
+			});
+			switch (apiTypeEnum.get()) {
+				case ApiTypeEnum.WEBHOOK ->
+						Optional.ofNullable(httpReq.getAttribute(NOTIFY)).ifPresent(notify -> {
+							headers.put(DgrHeader.NOTIFY, List.of(notify.toString()));
+						});
+				case ApiTypeEnum.AI_GATEWAY ->
+						Optional.ofNullable(httpReq.getAttribute(TokenHelper.USER_NAME)).ifPresent(username -> {
+							var encUserName = getTsmpTAEASKHelper().encrypt(username.toString());
+							headers.put(DgrHeader.USER_NAME, List.of(encUserName));
+						});
+			}
 		}
 
 		return headers;
@@ -1620,7 +1709,7 @@ public class CommForwardProcService {
 		});
 
 		// 因為驗証錯誤不遮罩,所以contentLength給0
-		this.addEsTsmpApiLogResp1(headerMap, reqVo, mbody, verifyResp.getStatusCodeValue(), 0);
+		this.addEsTsmpApiLogResp1(headerMap, reqVo, mbody, verifyResp.getStatusCode().value(), 0);
 	}
 
 	public void addEsTsmpApiLogResp1(HttpServletResponse httpResp, TsmpApiLogReq reqVo, String mbody, int contentLength)
@@ -2283,7 +2372,7 @@ public class CommForwardProcService {
 		String clientId = (String) httpReq.getAttribute(TokenHelper.CLIENT_ID);
 		String noAuth = (String) httpReq.getAttribute(TokenHelper.NO_AUTH);
 
-		Map<String, Object> convertResponseBodyMap = new HashMap<String, Object>();
+		Map<String, Object> convertResponseBodyMap = new HashMap<>();
 
 		if(httpRes == null) {
 			return null;
@@ -2485,7 +2574,7 @@ public class CommForwardProcService {
 		TWReqRespJwsSignatures twReqRespJwsSignatures = new TWReqRespJwsSignatures();
 		twReqRespJwsSignatures.setProtectedData(jwsHeaderBase64UrlEnc);
 		twReqRespJwsSignatures.setSignature(jwsSignatureBase64UrlEnc);
-		List<TWReqRespJwsSignatures> signaturesList = new ArrayList<TWReqRespJwsSignatures>();
+		List<TWReqRespJwsSignatures> signaturesList = new ArrayList<>();
 		signaturesList.add(twReqRespJwsSignatures);
 
 		TWReqRespJws twReqRespJws = new TWReqRespJws();
@@ -2513,14 +2602,14 @@ public class CommForwardProcService {
 		JsonNode jsonNode = getObjectMapper().readTree(protectedHeader);
 		String alg = JsonNodeUtil.getNodeAsText(jsonNode, "alg");
 
-		Map<String, String> algMap = new HashMap<String, String>();
+		Map<String, String> algMap = new HashMap<>();
 		algMap.put("alg", alg);
 
 		TWReqRespJweRecipients twReqRespJweRecipients = new TWReqRespJweRecipients();
 		twReqRespJweRecipients.setHeader(algMap);// ex. {"alg":"RSA-OAEP"}
 		twReqRespJweRecipients.setEncryptedKey(jweEncryptedKeyBase64UrlEnc);
 
-		List<TWReqRespJweRecipients> twReqRespJweRecipientsList = new ArrayList<TWReqRespJweRecipients>();
+		List<TWReqRespJweRecipients> twReqRespJweRecipientsList = new ArrayList<>();
 		twReqRespJweRecipientsList.add(twReqRespJweRecipients);
 
 		TWReqRespJwe twReqRespJwe = new TWReqRespJwe();
@@ -2536,7 +2625,7 @@ public class CommForwardProcService {
 
 	public void handleErrorHttpResp(HttpServletResponse httpRes, ResponseEntity<?> errRespEntity) throws IOException {
 		// set HTTP code to RESP
-		httpRes.setStatus(errRespEntity.getStatusCodeValue());
+		httpRes.setStatus(errRespEntity.getStatusCode().value());
 
 		// set HTTP Header
 		httpRes.addHeader("javaObject", getClass().getName());
@@ -2708,7 +2797,7 @@ public class CommForwardProcService {
 		});
 
 		// 因為驗証錯誤不遮罩,所以contentLength給0
-		this.addRdbTsmpApiLogResp1(headerMap, reqVo, mbody, verifyResp.getStatusCodeValue(), 0);
+		this.addRdbTsmpApiLogResp1(headerMap, reqVo, mbody, verifyResp.getStatusCode().value(), 0);
 	}
 
 	public void addRdbTsmpApiLogResp1(HttpServletResponse httpResp, TsmpApiLogReq reqVo, String mbody,

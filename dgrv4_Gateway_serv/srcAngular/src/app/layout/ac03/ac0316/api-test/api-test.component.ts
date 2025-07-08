@@ -18,12 +18,15 @@ import { TokenService } from 'src/app/shared/services/api-token.service';
 import { KeyValueComponent } from 'src/app/shared/key-value/key-value.module';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, NgZone, OnInit, ViewChild } from '@angular/core';
 import * as shajs from 'sha.js'
 import { CommonAPI } from 'src/app/shared/register-api/common-api.class';
 import * as base64 from 'js-base64'
 // const crypto = require('libp2p-crypto');
 import CryptoJS from 'crypto-js';
+import { environment } from 'src/environments/environment';
+import { StreamApiService, StreamResponse } from './steam-api.service';
+
 
 @Component({
   selector: 'app-api-test',
@@ -54,6 +57,7 @@ export class ApiTestComponent implements OnInit {
   _fileName:string = '';
 
 
+
   constructor(
     private fb: FormBuilder,
     private tokenService: TokenService,
@@ -66,7 +70,8 @@ export class ApiTestComponent implements OnInit {
     private alert: AlertService,
     private tool: ToolService,
     private dc: DCService,
-    public config: DynamicDialogConfig
+    public config: DynamicDialogConfig,
+    private streamApi: StreamApiService
   ) {
     this.acConf = this.tool.getAcConf();
 
@@ -279,7 +284,8 @@ export class ApiTestComponent implements OnInit {
     }
 
 
-    return `${this.protocol}//${location.hostname}${location.port ? ':' + location.port : ''}/${url}`
+    // return `${this.protocol}//${location.hostname}${location.port ? ':' + location.port : ''}/${url}`
+    return `${environment.apiUrl}/${url}`
   }
 
   public add(componentName: string): void {
@@ -287,7 +293,7 @@ export class ApiTestComponent implements OnInit {
   }
 
   startTimestamp:any;
-  async send(isMockTest:boolean=false): Promise<void> {
+  async send(testType:String = ''): Promise<void> {
     const codes = ['dialog.warn', 'client_id_required', 'client_pwd_required', 'user_name_required', 'password_required',
     'digirunner_required', "header_key_required","apikey_required","secretkey_required"];
     const dict = await this.toolService.getDict(codes);
@@ -356,7 +362,7 @@ export class ApiTestComponent implements OnInit {
     let path = this.form.get('testUrl')!.value;
     headerList = new Array<HttpHeader>();
     headerList = headerList.concat(this.keyvalueConvetToList(this.form.get("keyValueRequest")!.value));
-    if(isMockTest) headerList.push({name:'dgr-mock-test', value:'true'})
+    if(testType == 'mock') headerList.push({name:'dgr-mock-test', value:'true'})
     let body = this.reqBodyHandler();
 
     if (this.authType.value == 'cc' || this.authType.value == 'pwd') {
@@ -376,22 +382,14 @@ export class ApiTestComponent implements OnInit {
       this.ngxService.start();
       this.startTimestamp = new Date().getTime();
       this.tokenService.authBytestApi(clientId, clientmima, userName, passwd, grant_type).subscribe(
-        // (r: ResToken) => {
-        // this.signBlockService.getTestSignBlock(r.access_token).subscribe(res => {
-        //   let signBlock = res.Res_getSignBlock.signBlock;
-        //   let token = r.access_token;
-        //   let header = this.createHeader(token, signBlock, headerList, body);
-        //   this.startTimestamp = new Date().getTime();
-        //   this.httpClientHandle(path, header, body);
-        // });}
-        {
+      {
             next: (r: ResToken) => {
               this.signBlockService.getTestSignBlock(r.access_token).subscribe(res => {
                   let signBlock = res.Res_getSignBlock.signBlock;
                   let token = r.access_token;
                   let header = this.createHeader(token, signBlock, headerList, body);
                   this.startTimestamp = new Date().getTime();
-                  this.httpClientHandle(path, header, body);
+                   this.httpClientHandle(path, header, body, testType);
                 });
             },
             error: (e) => this.bindErrResult(e),
@@ -433,7 +431,7 @@ export class ApiTestComponent implements OnInit {
         }
       });
       this.startTimestamp = new Date().getTime();
-      this.httpClientHandle(path, header, body);
+       this.httpClientHandle(path, header, body, testType);
     }
     // Authorization DGRK **
     else if(this.authType.value == 'dgrk'){
@@ -502,11 +500,11 @@ export class ApiTestComponent implements OnInit {
       });
       this.startTimestamp = new Date().getTime();
 
-      this.httpClientHandle(path, header, body);
+       this.httpClientHandle(path, header, body, testType);
 
 
     }
-    else
+    else //no auth
     {
       let ContentType: string = this.form.get("ContentType")!.value;
       let header = new HttpHeaders({
@@ -522,7 +520,7 @@ export class ApiTestComponent implements OnInit {
         }
       });
       this.startTimestamp = new Date().getTime();
-      this.httpClientHandle(path, header, body);
+      this.httpClientHandle(path, header, body, testType);
     }
   }
 
@@ -581,45 +579,127 @@ export class ApiTestComponent implements OnInit {
     return body;
   }
 
-  private httpClientHandle(path: string, header: HttpHeaders, body?: any) {
+  private httpClientHandle(path: string, header: HttpHeaders, body?: any , _testType: String = '') {
+
+    const headerObj = header.keys().reduce((acc: any, key) => {
+      acc[key] = header.get(key)!;
+      return acc;
+    }, {});
 
     switch (this.form.get("method")!.value.toUpperCase()) {
       case "GET":
-        this.httpClient.get(`${path}`, { headers: header, observe: 'response', responseType: 'text' }).subscribe(
-          // (res: HttpResponse<any>) => {
-          //   //處理結果
-          //   this.bindResResult(res);
-          // }
-          {
-            next: (v) => this.bindResResult(v),
-            error: (e) => this.bindErrResult(e),
-            complete: () => this.ngxService.stop()
-          }
-        );
+        if (_testType == 'sse') {
+
+          this.streamApi
+            .postStream(
+              this.form.get('method')!.value.toUpperCase(),
+              path,
+              body,
+              {
+                'Content-Type': 'application/json',
+                isSse: 'true',
+                ...headerObj,
+              }
+            )
+            .subscribe({
+              next: (res: StreamResponse) => {
+                // console.log('狀態:', res.status, res.statusText);
+                // console.log('Headers:', res.headers);
+                // console.log('Chunk:', res.chunk);
+                let _resBody = this.form.get('resBody')!.value;
+                this.form.get('resBody')!.setValue(_resBody + res.chunk);
+                this.form.get('resStatus')!.setValue(res.status);
+                this.form
+                  .get('headerList')!
+                  .setValue(JSON.stringify(res.headers));
+              },
+              complete: () => {
+                this.calResponseTime();
+              },
+              error: (err) => {
+                // console.error(err);
+                const bodymsg =
+                  typeof err == 'object' ? JSON.stringify(err) : err;
+                this.form.get('resBody')!.setValue(bodymsg);
+              },
+            });
+        } else {
+          this.httpClient
+            .get(`${path}`, {
+              headers: header,
+              observe: 'response',
+              responseType: 'text',
+            })
+            .subscribe(
+              // (res: HttpResponse<any>) => {
+              //   //處理結果
+              //   this.bindResResult(res);
+              // }
+              {
+                next: (v) => this.bindResResult(v),
+                error: (e) => this.bindErrResult(e),
+                complete: () => this.ngxService.stop(),
+              }
+            );
+        }
         break;
-      // case "HEAD":
-      //   this.httpClient.head(`${path}`, { headers: header, observe: 'response', responseType: 'text' }).subscribe(
-      //     // (res: HttpResponse<any>) => {
-      //     // //處理結果
-      //     // this.bindResResult(res);}
-      //     {
-      //       next: (v) => this.bindResResult(v),
-      //       error: (e) => this.bindErrResult(e),
-      //       complete: () => this.ngxService.stop()
-      //     }
-      //     );
-      //   break;
       case "POST":
-        this.httpClient.post(`${path}`, body, { headers: header, observe: 'response', responseType: 'text' }).subscribe(
-          // res => {
-          // //處理結果
-          // this.bindResResult(res);}
-          {
-            next: (v) => this.bindResResult(v),
-            error: (e) => this.bindErrResult(e),
-            complete: () => this.ngxService.stop()
-          }
-        );
+        if (_testType == 'sse') {
+          this.streamApi
+            .postStream(this.form.get("method")!.value.toUpperCase(),path, body, {
+              'Content-Type': 'application/json',
+              'isSse': 'true',
+              ...headerObj,
+            })
+            .subscribe({
+              next: (res: StreamResponse) => {
+                // console.log('狀態:', res.status, res.statusText);
+                // console.log('Headers:', res.headers);
+                // console.log('Chunk:', res.chunk);
+                  let _resBody = this.form.get("resBody")!.value;
+                  this.form.get("resBody")!.setValue(_resBody + res.chunk);
+                  this.form.get("resStatus")!.setValue(res.status);
+                  this.form.get("headerList")!.setValue(JSON.stringify(res.headers));
+              },
+              complete: () => {
+                 this.calResponseTime();
+              },
+              error: (err) => {
+                // console.error(err);
+                const bodymsg = (typeof err == 'object') ? JSON.stringify(err) : err;
+                this.form.get("resBody")!.setValue(bodymsg);
+              },
+            });
+          // fetch(path, {
+          //   method: 'POST',
+          //   body: body,
+          //   headers: { 'Content-Type': 'application/json','isSse':'true', ... header, },
+          // }).then((response) => {
+          //   const reader = response.body?.getReader();
+          //   if (!reader) return;
+
+          //   reader.read().then(function process({ done, value }) {
+          //     if (done) return;
+          //     console.log(new TextDecoder().decode(value));
+          //     return reader.read().then(process);
+          //   });
+          // });
+
+        } else {
+          this.httpClient
+            .post(`${path}`, body, {
+              headers: header,
+              observe: 'response',
+              responseType: 'text',
+            })
+            .subscribe({
+              next: (v) => this.bindResResult(v),
+              error: (e) => this.bindErrResult(e),
+              complete: () => this.ngxService.stop(),
+            });
+        }
+
+
         break;
       case "PUT":
         this.httpClient.put(`${path}`, body, { headers: header, observe: 'response', responseType: 'text' }).subscribe(
@@ -673,7 +753,7 @@ export class ApiTestComponent implements OnInit {
     }
   }
 
-  private bindResResult(data: { headers: HttpHeaders; body: any; status: number }): void {
+  private bindResResult(data: { headers: HttpHeaders; body: any; status: number,[key: string]: any; }): void {
     if (!data || !data.headers || typeof data.status !== 'number') {
       console.error('Invalid response data');
       return;
@@ -705,7 +785,7 @@ export class ApiTestComponent implements OnInit {
     //處理回應時間
     this.calResponseTime();
 
-    const mainHeaders: Record<string, string | null> = {};    
+    const mainHeaders: Record<string, string | null> = {};
     data.headers.keys().forEach((key) => {
       const value = data.headers.get(key);
       if (value !== null) { // 確保 value 不為 null

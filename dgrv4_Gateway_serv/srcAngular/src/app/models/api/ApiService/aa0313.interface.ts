@@ -38,6 +38,7 @@ export interface AA0313Req {
   fixedCacheTime?:number;
   failDiscoveryPolicy?: string;
   failHandlePolicy?: string;
+  notifyNameList?: Array<string>;
 }
 // 要改為 extends AA0316Func
 export interface AA0313Func {

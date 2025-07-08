@@ -1,13 +1,7 @@
 package tpi.dgrv4.dpaa.component.rjob;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.vo.ReqHeader;
 import tpi.dgrv4.dpaa.service.DPB0101Service;
@@ -20,6 +14,11 @@ import tpi.dgrv4.entity.entity.TsmpDpApptRjob;
 import tpi.dgrv4.entity.repository.TsmpDpApptRjobDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <h2>系統預設的週期排程設定器</h2><br>
@@ -42,6 +41,12 @@ public class SystemDefaultRjobInitializer {
 	private TsmpDpApptRjobDao tsmpDpApptRjobDao;
 
 	private List<DPB0101Req> defaultRjobList;
+	
+	public static final String OPEN_API_KEY_EXP_CHECKING = "Open API Key Exp Checking"; // Open API Key 快到期檢查
+	public static final String JWE_TLS_CERT_EXP = "JWE/TLS Cert Exp"; // JWE/TLS憑證到期提醒
+	public static final String HOUSEKEEPING_SCHEDULE = "Housekeeping Schedule"; // Housekeeping排程
+	public static final String API_AUTO_LISTING_SCHEDULE = "API auto listing schedule"; // 自動上下架排程
+	public static final String API_AUTO_ENABLES_SCHEDULE = "API auto enables schedule"; // 自動上下架排程
 
 	/**
 	 * 把要註冊的 Rjob 加入 defaultRjobList
@@ -68,7 +73,7 @@ public class SystemDefaultRjobInitializer {
 
 		// [Open API Key 快到期檢查]: 預設每一天的12點1分執行一次
 		register( //
-				"Open API Key 快到期檢查", "預設Open API Key 快到期檢查", //
+				OPEN_API_KEY_EXP_CHECKING, "Default Open API Key Exp Checking", //
 				new DPB0101CronBuilder() //
 						.frequency(0) // 每一天
 						.hour(12) //
@@ -81,7 +86,7 @@ public class SystemDefaultRjobInitializer {
 
 		// [JWE/TLS憑證到期提醒]: 預設每一天的09點00分執行一次
 		register( //
-				"JWE/TLS Cert Exp", "預設JWE/TLS憑證到期提醒", //
+				JWE_TLS_CERT_EXP, "Default JWE/TLS Cert Exp", //
 				new DPB0101CronBuilder() //
 						.frequency(0) // 每一天
 						.hour(9) //
@@ -100,7 +105,7 @@ public class SystemDefaultRjobInitializer {
 
 		// [Housekeeping排程]: 預設每一天的2點0分執行一次
 		register( //
-				"Housekeeping排程", "預設Housekeeping排程", //
+				HOUSEKEEPING_SCHEDULE, "Default Housekeeping Schedule", //
 				new DPB0101CronBuilder() //
 						.frequency(0) // 每一天
 						.hour(2) //
@@ -113,7 +118,7 @@ public class SystemDefaultRjobInitializer {
 
 		// [自動上下架排程]: 預設每一天的1點0分執行一次
 		register( //
-				"API 自動上架下架排程", "預設 API 自動上架下架排程", //
+				API_AUTO_LISTING_SCHEDULE, "Default API auto listing schedule", //
 				new DPB0101CronBuilder() //
 						.frequency(0) // 每一天
 						.hour(1) //
@@ -132,7 +137,7 @@ public class SystemDefaultRjobInitializer {
 
 		// [自動上下架排程]: 預設每一天的1點0分執行一次
 		register( //
-				"API 自動啟用停用排程", "預設 API 自動啟用停用排程", //
+				API_AUTO_ENABLES_SCHEDULE, "Default API auto enables schedule", //
 				new DPB0101CronBuilder() //
 						.frequency(0) // 每一天
 						.hour(1) //

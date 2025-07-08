@@ -5,22 +5,22 @@ import java.util.Optional;
 /** 簽核類別代碼 (tsmp_dp_items.item_no = 'REVIEW_TYPE') */
 public class TsmpDpReqReviewType {
 
-	public final static String ITEM_NO = "REVIEW_TYPE";
+	public static final String ITEM_NO = "REVIEW_TYPE";
 	
-	public final static ItemContainer API_APPLICATION = //
+	public static final ItemContainer API_APPLICATION = //
 			new ItemContainer("API_APPLICATION", "用戶API申請", 60, new String[]{"AP", null, null, null, null});
 	
-	public final static ApiOnOff API_ON_OFF = //
+	public static final ApiOnOff API_ON_OFF = //
 			new ApiOnOff("API_ON_OFF", "API上下架管理", 61, null);
 
-	public final static ItemContainer CLIENT_REG = //
+	public static final ItemContainer CLIENT_REG = //
 			new ItemContainer("CLIENT_REG", "用戶註冊", 65, new String[]{"CR", null, null, null, null});
 	
 	// 此為開發範例，非正式簽核類別
-	public final static ItemContainer THINKPOWER_ARTICLE = //
+	public static final ItemContainer THINKPOWER_ARTICLE = //
 			new ItemContainer("THINKPOWER_ARTICLE", "昕力大學文章", 65, new String[]{"TA", null, null, null, null});
 	
-	public final static OpenApiKey OPEN_API_KEY = //
+	public static final OpenApiKey OPEN_API_KEY = //
 			new OpenApiKey("OPEN_API_KEY", "Open API Key 管理", 67, null);
 
 	/** 簽核子類別代碼 (tsmp_dp_items.item_no = 'API_ON_OFF') */

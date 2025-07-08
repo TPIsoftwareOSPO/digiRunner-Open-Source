@@ -55,6 +55,7 @@ public class DGRCServicePostRaw implements IApiCacheService{
 	private DgrcRoutingHelper dgrcRoutingHelper;
 
 	public  Map<String, String> maskInfo ;
+	private static final String IS_SSE = "isSse";
 
 	@Autowired
 	public DGRCServicePostRaw(CommForwardProcService commForwardProcService, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
@@ -197,7 +198,6 @@ public class DGRCServicePostRaw implements IApiCacheService{
 			// 調用目標URL
 			Map<String, Object> convertResponseBodyMap = forwardToByPolicy(httpHeaders, httpReq, httpRes, apiReg, uuid,
 					tokenPayload, cApiKeySwitch, dgrcPostRawDgrReqVo, dgrcPostRawDgrReqVo_rdb, srcUrlList, payload);
-
 			if (convertResponseBodyMap == null) {
 				// Response alread commited HTTP code : 503 --> null
 				// 不寫 ES , 不輸出 online console
@@ -380,7 +380,9 @@ public class DGRCServicePostRaw implements IApiCacheService{
 			TsmpApiLogReq dgrcPostRawBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
 
 			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody(), null);
-			respObj.fetchByte(maskInfo); // because Enable inputStream
+			boolean isSse = vo.getHeader().keySet().stream()
+					.anyMatch(key -> key.equalsIgnoreCase(IS_SSE));
+			respObj.fetchByte(maskInfo,isSse); // because Enable inputStream
 			//下載檔案的處理
 			if(respObj.respHeader != null && respObj.respHeader.get("Content-Disposition") != null) {
 				if(respObj.respHeader.get("Content-Disposition").toString().indexOf("filename") > -1) {
@@ -408,7 +410,7 @@ public class DGRCServicePostRaw implements IApiCacheService{
 	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, String srcUrl, TsmpApiLogReq dgrReqVo, String payload, String uuid,
 			boolean isFixedCache, String tryNumWord) throws Exception {
-		
+		var targetUrl = getCommForwardProcService().parseUrl(srcUrl);
 		String tryNumLog = "";// 當失敗處置策略有設定失敗時重試API時,印出這是第幾次嘗試打API;否則,空白
 		if (StringUtils.hasLength(tryNumWord)) {
 			tryNumLog = "【" + tryNumWord + "】";
@@ -427,12 +429,14 @@ public class DGRCServicePostRaw implements IApiCacheService{
 		
 		// 第二組ES REQ
 		TsmpApiLogReq dgrcPostRawBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header,
-				srcUrl, payload);
-		if(header.get("isSse")!=null){
+				targetUrl, payload);
+		if(header.get(IS_SSE)!=null){
 			httpRes.setHeader("Content-Type", "text/event-stream");
 		}
-		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, payload,httpRes.getOutputStream());
-		respObj.fetchByte(maskInfo); // because Enable inputStream
+		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, targetUrl, payload,httpRes.getOutputStream());
+		boolean isSse = header.keySet().stream()
+				.anyMatch(key -> key.equalsIgnoreCase(IS_SSE));
+		respObj.fetchByte(maskInfo, isSse); // because Enable inputStream
 		//若respObj.respStr為null帶表有檔案則寫入檔案sha256
 //		if (!StringUtils.hasLength(respObj.respStr)){
 //		respObj.respStr = getRespFileLog(respObj);

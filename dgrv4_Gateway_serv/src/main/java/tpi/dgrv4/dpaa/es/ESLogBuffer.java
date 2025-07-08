@@ -117,7 +117,7 @@ public class ESLogBuffer {
     // [新增 2] 批次間隔時間（毫秒）
     private static final int BATCH_INTERVAL = 100;
     // [新增 3] CPU 負載閾值，超過此值則暫停處理
-    private static final double CPU_THRESHOLD = 0.95; // 95%
+    private static final double CPU_THRESHOLD = 2.95; // 95%
     
     // [新增 4] 檢查系統 CPU 負載的方法
     private boolean isSystemBusy() {

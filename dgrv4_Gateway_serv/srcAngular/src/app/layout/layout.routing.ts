@@ -53,6 +53,7 @@ const routes: Routes = [
       { path: 'ac03/ac0316', loadChildren: () => import('./ac03/ac0316/ac0316.module').then(m => m.Ac0316Module), data: { id: 'ac0316' } },
       { path: 'ac03/ac0318', loadChildren: () => import('./ac03/ac0318/ac0318.module').then(m => m.Ac0318Module), data: { id: 'ac0318' } },
       { path: 'ac03/ac0319', loadChildren: () => import('./ac03/ac0319/ac0319.module').then(m => m.Ac0319Module), data: { id: 'ac0319' } },
+      { path: 'ac03/ac0320', loadChildren: () => import('./ac03/ac0320/ac0320.module').then(m => m.Ac0320Module), data: { id: 'ac0320' } },
 
       // { path: 'ac04/ac0402', loadChildren: () => import('./ac04/ac0402/ac0402.module').then(m => m.Ac0402Module), data: { id: 'ac0402' } },
       // { path: 'ac04/ac0412', loadChildren: () => import('./ac04/ac0412/ac0412.module').then(m => m.Ac0412Module), data: { id: 'ac0412' } },
@@ -142,6 +143,8 @@ const routes: Routes = [
       { path: 'lb00/lb0008', loadChildren: () => import('./labs/rdb-connection/rdb-connection.module').then(m => m.RdbConnectionModule), data: { id: 'lb0008' } },
       { path: 'lb00/lb0009', loadChildren: () => import('./labs/mail-template-io/mail-template-io.module').then(m => m.MailTemplateIoModule), data: { id: 'lb0009' } },
       { path: 'lb00/lb0010', loadChildren: () => import('./labs/lb0010/lb0010.module').then(m => m.Lb0010Module), data: { id: 'lb0010' } }, //Bot Detection
+      { path: 'lb00/lb0011', loadChildren: () => import('./labs/lb0011/lb0011.module').then(m => m.Lb0011Module), data: { id: 'lb0011' } }, //webhook
+      { path: 'lb00/lb0012', loadChildren: () => import('./labs/lb0012/lb0012.module').then(m => m.Lb0012Module), data: { id: 'lb0012' } }, //webhook logs
 
       //註冊自定義報表容器
       { path: 'ac09/:cusfunc', loadChildren: () => import('./ac09/ac0900/ac0900.module').then(m => m.Ac0900Module) },

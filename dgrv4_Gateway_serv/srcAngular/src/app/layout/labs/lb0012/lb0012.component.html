@@ -1,0 +1,149 @@
+<app-container [title]="currentTitle">
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group row">
+        <div class="col-4">
+          <label class="control-label">{{ "keyword_search" | translate }}</label>
+          <app-search-input placeholder="{{'keyword_search'|translate}}" [control]="form.get('keyword')"
+            [searchFn]="queryWebhookLogs.bind(this)" class="col-9 col-lg-4 col-sm-6"></app-search-input>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-8 ">
+          <label id="startDate_label" class="control-label">{{'date_range'|translate}}</label>
+          <div class="d-flex ">
+            <div>
+              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true">
+              </p-calendar>
+              <div *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)" class="text-danger">
+                <small class="form-text">{{startDate.errors.isRequired}}</small>
+                <small class="form-text">{{startDate.errors.pattern}}</small>
+              </div>
+            </div>
+            <div class="text-center">
+              <label style="padding: 5px 10px;">～</label>
+            </div>
+            <div>
+              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                formControlName="endDate" dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true">
+              </p-calendar>
+              <div *ngIf="endDate?.invalid && (endDate?.dirty || endDate?.touched)" class="text-danger">
+                <small class="form-text">{{endDate.errors.isRequired}}</small>
+                <small class="form-text">{{endDate.errors.pattern}}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+
+    </form>
+    <hr>
+    <div class="col-12">
+      <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll"
+        [style]="{'word-wrap':'break-word'}">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th style="width:50px;">{{"status"|translate}}</th>
+            <th style="width:15%;">Webhook Name</th>
+            <th style="width:5%;">Notify type</th>
+            <th>Client Id</th>
+            <th>Remark</th>
+            <th style="width:10%;">{{'create_time'|translate}}</th>
+            <th style="width:90px;" scope="col">{{'action'|translate}}
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData>
+          <tr>
+            <td style="text-align: center">
+              <img [alt]="rowData.enable" style="width: 20px; height: 20px"
+                [src]="rowData.result ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+            </td>
+            <td>{{rowData.notifyName}}</td>
+            <td>{{rowData.notifyType}}</td>
+            <td>{{rowData.clientId}}</td>
+            <td>{{rowData.remark}}</td>
+            <td>{{rowData.createDateTime}}</td>
+            <td style="text-align:center;width: 90px">
+              <!-- 詳細資料 -->
+              <button pButton pRipple type="button" icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-plain" (click)="changePage('detail', rowData)"
+                [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+              <!-- resend -->
+              <button pButton pRipple type="button" icon="fa fa-paper-plane"
+                class="p-button-rounded p-button-text p-button-plain" (click)="resend(rowData)"
+                [pTooltip]="'button.resend' | translate" tooltipPosition="top"></button>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer" let-columns>
+          <tr *ngIf="tableData.length>0">
+            <td [attr.colspan]="7" style="color: #b7b7b7;">
+              <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+              <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+                <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+              </button>
+
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage" let-columns>
+          <tr>
+            <td [attr.colspan]="7">
+              {{'no_rec' | translate}}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+  <div [hidden]="pageNum != 2">
+    <div class="form-group row">
+      <div class="form-group row">
+        <div class="col-sm-4">
+          <label>Webhook Name</label>
+          <label class="form-control border-line">{{selectedItem?.notifyName}}</label>
+        </div>
+        <div class="col-sm-4">
+          <label>Notify Type</label>
+          <label class="form-control border-line">{{selectedItem?.notifyType}}</label>
+        </div>
+        <div class="col-sm-4">
+          <label>Client Id</label>
+          <label class="form-control border-line">{{selectedItem?.clientId}}</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Content</label>
+        <div style="display:block">
+          <textarea rows="5" style="width:100%" class="form-control" [readOnly]="true" pInputTextarea
+            [value]="selectedItem?.content"></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Remark</label>
+        <div style="display:block">
+          <textarea rows="2" style="width:100%" class="form-control" [readOnly]="true" pInputTextarea
+            [value]="selectedItem?.remark"></textarea>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-12">
+        <button type="button" class="btn tpi-btn tpi-primary float-start"
+          (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+      </div>
+    </div>
+  </div>
+</app-container>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="row" style="justify-content: center;">
+      <button type="button" pButton icon="pi pi-check"
+        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
+        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>

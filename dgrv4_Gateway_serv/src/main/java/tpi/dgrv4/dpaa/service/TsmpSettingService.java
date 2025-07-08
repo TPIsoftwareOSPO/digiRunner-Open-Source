@@ -204,6 +204,16 @@ public class TsmpSettingService {
 	// ==================== CUSTOM METHODS =====================
 	// =========================================================
 
+
+	public String getKey_AUDIT_LOG_RETENTION_DAYS() {
+		return TsmpSettingDao.Key.AUDIT_LOG_RETENTION_DAYS;
+	}
+
+	public int getVal_AUDIT_LOG_RETENTION_DAYS() {
+		String key = getKey_AUDIT_LOG_RETENTION_DAYS();
+		return getIntegerVal(key, 0);
+	}
+
 	public String getKey_TSMP_EDITION() {
 		return TsmpSettingDao.Key.TSMP_EDITION;
 	}

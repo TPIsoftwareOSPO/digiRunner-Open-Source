@@ -248,6 +248,17 @@
     </div>
 
   </div>
+  <div class="form-group row" *ngIf="isWebhook">
+    <div class="col-12">
+      
+
+        <label id="headerMask_label" class="control-label border-bottom-line col-3">Notify Name List</label>
+      
+      <label class="form-control ">
+        {{ apiDetail?.notifyNameList ?? "-" }}
+      </label>
+    </div> 
+  </div>
 
   <div class="form-group row" *ngIf="apiDetail?.apiSrc.v !=='C' ">
     <div class="col-6">

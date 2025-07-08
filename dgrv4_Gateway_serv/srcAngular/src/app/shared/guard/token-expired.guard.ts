@@ -43,12 +43,14 @@ export class TokenExpiredGuard implements CanActivate {
   // }
 
   handleError(err: HttpErrorResponse): Observable<never> {
-    if (err.status == 401) {
-              setTimeout(() => this.logoutService.logout());
-              // throwError('token expired,redirect to login page');
-              return throwError(() => err);
-    }
+    // console.log(err.error)
+    // if (err.status == 401) {
+    //           setTimeout(() => this.logoutService.logout());
+    //           // throwError('token expired,redirect to login page');
+    //           return throwError(() => err);
+    // }
     setTimeout(() => this.logoutService.logout());
+
     return throwError(() => err);
   }
 

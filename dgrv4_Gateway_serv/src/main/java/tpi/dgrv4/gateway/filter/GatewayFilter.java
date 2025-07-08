@@ -73,6 +73,9 @@ public class GatewayFilter extends OncePerRequestFilter {
 	@Value("${cors.allow.headers}")
 	private String corsAllowHeaders;
 	
+    @Value("${async.highway-pool-size-rate:0.1}")
+    private Float highwayPoolSizeRate;
+	
 	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers"))
 	ThreadPoolTaskExecutor asyncWorkerPool;
 
@@ -416,12 +419,10 @@ public class GatewayFilter extends OncePerRequestFilter {
 		
 		// [ZH]CORS改從Setting取值
 		// [EN]CORS changes the value to be obtained from Setting
-		responseWrapper.setHeaderByForce("Access-Control-Allow-Origin", getTsmpSettingService().getVal_DGR_CORS_VAL());
+		responseWrapper.setHeaderByForce("Access-Control-Allow-Origin", getTsmpSettingService().getVal_DGR_CORS_VAL()); // CORS
 		
-		// [ZH]responseWrapper.setHeaderByForce("Access-Control-Allow-Headers",
-		// [EN]"Content-Type, Authorization, SignCode, Language"); // CORS
-		responseWrapper.setHeaderByForce("Access-Control-Allow-Headers", corsAllowHeaders); // "2. corsAllowHeaders = "
-																							// + corsAllowHeaders
+		// responseWrapper.setHeaderByForce("Access-Control-Allow-Headers", "Content-Type, Authorization, SignCode, Language"); // CORS
+		responseWrapper.setHeaderByForce("Access-Control-Allow-Headers", corsAllowHeaders); // "2. corsAllowHeaders = " + corsAllowHeaders
 		responseWrapper.setHeaderByForce("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,PATCH,DELETE"); // CORS
 
 		responseWrapper.setHeaderByForce("X-Frame-Options", "sameorigin");
@@ -644,7 +645,8 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * [EN]High concurrent network traffic fast clearance dispatching device (output unit) <br>
 	 */
 	public static String fetchUriHistoryList() {
-		StringBuilder sb = getFetchUriHistoryListInitValue();
+		StringBuilder sb = sbBuilderHolder.get();
+		sb.append(String.format("%60s", "").replace(' ', '-')+"\n");
 		
 		apiRespTimeMap.forEach((key, value) -> {
 			if(key.length() > 40) {
@@ -673,13 +675,6 @@ public class GatewayFilter extends OncePerRequestFilter {
 		sb.setLength(0); // 清空
 
 		return result;
-	}
-	
-	public static StringBuilder getFetchUriHistoryListInitValue() {
-		StringBuilder sb = sbBuilderHolder.get();
-		sb.append(String.format("%60s", "").replace(' ', '-')+"\n");
-		
-		return sb;
 	}
 	
 	public void unload() {
@@ -712,13 +707,18 @@ public class GatewayFilter extends OncePerRequestFilter {
 		
 		long lastTime = fetchUriHistoryElapsed(request);
 		Long httpCode = fetchUriHistoryHttpCode(request);
-	
+		
 		// [ZH]Policy-1. <測速分流>  執行較快的: 走快車道
 		// [EN]Policy-1. <Speed Test Distribution> Faster execution: Use the fast lane
-		if (lastTime < tsmpSettingService.getVal_HIGHWAY_THRESHOLD()) { 
+		boolean isAlwaysSlow = false; 
+		if (highwayPoolSizeRate == 0) { 
+			// [ZH]當 highway-pool-size-rate=0 時, 表示沒有快車道(預設僅1個), 一律走慢車道
+			// [EN]When highway-pool-size-rate=0, it means there is no fast lane (only 1 by default), all vehicles must use the slow lane
+			isAlwaysSlow = true;
+		} else if (lastTime < tsmpSettingService.getVal_HIGHWAY_THRESHOLD()) {
 			request.setAttribute(GatewayFilter.SETWORK_THREAD, GatewayFilter.FAST);
 			return;
-		} 
+		}
 		
 		// [ZH]Policy-3. <事前預防> 執行較久的: 走慢車道 or 熔斷 or 換快車道
 		// [EN]Policy-3. <Preventive Measure> Longer execution: Use slow lane OR circuit break OR switch to fast lane
@@ -728,11 +728,6 @@ public class GatewayFilter extends OncePerRequestFilter {
 		int activeCount = asyncWorkerPool.getActiveCount();
 		int maxPoolSize = asyncWorkerPool.getMaxPoolSize();
 		
-		// [ZH]快車道現況
-		// [EN]Current status of fast lane
-		int activeCountHighway = asyncWorkerHighwayPool.getActiveCount();
-		int maxPoolSizeHighway = asyncWorkerHighwayPool.getMaxPoolSize();
-		
 		// [ZH]若慢車道的使用量尖峰, 判斷是否熔斷
 		// [EN]Check if circuit breaking is needed when slow lane usage reaches peak
 		boolean isCircuitBreaker = isCircuitBreaker(activeCount, maxPoolSize, lastTime, httpCode);
@@ -740,6 +735,18 @@ public class GatewayFilter extends OncePerRequestFilter {
 			request.setAttribute(GatewayFilter.SET_CIRCUIT_BREAKER, GatewayFilter.CIRCUIT_BREAKER_STATUS);
 			return;
 		}
+		
+		if(isAlwaysSlow) { 
+			// [ZH]沒有快車道, 走慢車道, 不須考慮換快車道
+			// [EN]There is no fast lane, take the slow lane, don't consider changing to the fast lane
+			request.setAttribute(GatewayFilter.SETWORK_THREAD, GatewayFilter.SLOW);
+			return;
+		}
+		
+		// [ZH]快車道現況
+		// [EN]Current status of fast lane
+		int activeCountHighway = asyncWorkerHighwayPool.getActiveCount();
+		int maxPoolSizeHighway = asyncWorkerHighwayPool.getMaxPoolSize();
 		
 		// [ZH]Policy-2. <物盡其用> 如果慢車道的使用量已滿,且快車道為離峰,可走快車道; 否則維持慢車道
 		// [EN]Policy-2. <Resource Optimization> If slow lane usage is full and fast lane is off-peak, can use fast lane; otherwise maintain slow lane
@@ -995,7 +1002,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * [EN]output the content
 	 */
 	private void responseFlush(HttpServletResponse httpResponse, ResponseEntity<?> respEntity) throws Exception {
-		Integer httpStatus = respEntity.getStatusCodeValue();
+		Integer httpStatus = respEntity.getStatusCode().value();
 		String errorRespStr = null;
 		ObjectMapper mapper = new ObjectMapper();
 		Object bodyObj = respEntity.getBody();
@@ -1257,7 +1264,9 @@ public class GatewayFilter extends OncePerRequestFilter {
 				// 否則, 檢查
 				String cID = getCID(request); // 取得 client ID
 				if (StringUtils.hasText(cID) && trafficCheck.check(cID)) {
-					return getCheckErrorResp("tps", "Client requests exceeds TPS limit", request.getRequestURI(),
+					String message = "Client requests exceeds TPS limit. client:" + cID;
+					TPILogger.tl.warn(message + ", path:" + request.getRequestURI());
+					return getCheckErrorResp("tps", message, request.getRequestURI(),
 							HttpStatus.TOO_MANY_REQUESTS.value());
 				}
 			}
@@ -1316,7 +1325,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 	}
 
 	private String getQueryStringAndFormData(HttpServletRequest request) {
-		Enumeration keys = request.getParameterNames();
+		Enumeration<String> keys = request.getParameterNames();
 		StringBuffer strBuf = new StringBuffer();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();

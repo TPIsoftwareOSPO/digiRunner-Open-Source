@@ -98,6 +98,8 @@ import tpi.dgrv4.entity.daoService.SeqStoreService;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpEvents;
 import tpi.dgrv4.entity.repository.DgrAcIdpAuthCodeDao;
+import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
+import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
 import tpi.dgrv4.entity.repository.DgrImportClientRelatedTempDao;
 import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
 import tpi.dgrv4.entity.repository.SeqStoreDao;
@@ -235,6 +237,8 @@ public class DpaaJobConfig {
 	private final HandleESApiDataService handleESApiDataService;
 	private final HandleESExpiredDataService handleESExpiredDataService;
 	private final tpi.dgrv4.gateway.service.TsmpSettingService getwayTsmpSettingService;
+    private final DgrAuditLogMDao dgrAuditLogMDao;
+    private final DgrAuditLogDDao dgrAuditLogDDao;
 	
 	@Autowired
 	private void setSendOpenApiKeyExpiringMailService() {
@@ -507,7 +511,7 @@ public class DpaaJobConfig {
 				this.tsmpDpItemsCacheProxy, this.dpReqServiceFactory, this.tsmpDpReqOrdermDao, this.tsmpNoticeLogDao,
 				this.tsmpDpFileDao, this.tsmpSettingDao, this.tsmpClientDao, this.tsmpTokenHistoryDao,
 				this.dgrAcIdpAuthCodeDao, this.dgrImportClientRelatedTempDao, this.trafficCheck, this.websiteService,
-				this.dgrWebsiteCacheProxy, this.tsmpSettingService, this.apptJobDispatcher);
+				this.dgrWebsiteCacheProxy, this.tsmpSettingService, this.apptJobDispatcher,this.dgrAuditLogMDao,this.dgrAuditLogDDao);
 	}
 	
 	@Bean

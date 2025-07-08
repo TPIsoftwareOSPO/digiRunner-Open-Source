@@ -2920,3 +2920,89 @@ CREATE INDEX idx_tsmp_req_res_log_history ON tsmp_req_res_log_history(rtime);
 
 -- 20250213, 增加欄位長度, Zoe Lee
 ALTER TABLE dgr_rdb_connection MODIFY mima VARCHAR2(2000);
+
+-- 20250227, DGR_WEBHOOK_NOTIFY , Webber Luo
+CREATE TABLE dgr_webhook_notify (
+    webhook_notify_id    NUMBER(19,0)         NOT NULL,    -- ID
+    notify_name          VARCHAR2(100)        NOT NULL,    -- 通知名稱
+    notify_type          VARCHAR2(100)        NOT NULL,    -- 通知種類
+    enable               VARCHAR2(1)          NOT NULL,    -- 啟用=Y / 停用=N
+    message              VARCHAR2(2000),                   -- 發送內容
+    payload_flag         VARCHAR2(1)          DEFAULT '0', --
+    create_date_time     DATE                 DEFAULT SYSDATE,        -- 建立日期
+    create_user          VARCHAR2(1000)       DEFAULT 'SYSTEM',      -- 建立人員
+    update_date_time     DATE,                                       -- 更新日期
+    update_user          VARCHAR2(1000),                             -- 更新人員
+    version              NUMBER(10,0)         DEFAULT 1,             -- 版號
+    CONSTRAINT pk_webhook_notify PRIMARY KEY(webhook_notify_id)
+);
+
+-- 20250227, DGR_WEBHOOK_NOTIFY_FIELD , Webber Luo
+CREATE TABLE dgr_webhook_notify_field (
+    webhook_notify_field_id  NUMBER(19,0)     NOT NULL,    -- ID
+    webhook_notify_id        NUMBER(19,0)     NOT NULL,    -- 通知ID
+    field_key                VARCHAR2(100)    NOT NULL,    -- KEY
+    field_value              VARCHAR2(2000)   NOT NULL,    -- VALUE
+    field_type               VARCHAR2(1)      DEFAULT '0',    -- TYPE
+    mapping_url              VARCHAR2(2000),                          -- URL
+    create_date_time         DATE             DEFAULT SYSDATE,        -- 建立日期
+    create_user              VARCHAR2(1000)   DEFAULT 'SYSTEM',      -- 建立人員
+    update_date_time         DATE,                                   -- 更新日期
+    update_user              VARCHAR2(1000),                         -- 更新人員
+    version                  NUMBER(10,0)     DEFAULT 1,             -- 版號
+    CONSTRAINT pk_webhook_notify_field PRIMARY KEY(webhook_notify_field_id)
+);
+
+-- 20250227, DGR_WEBHOOK_NOTIFY_LOG , Webber Luo
+CREATE TABLE DGR_WEBHOOK_NOTIFY_LOG (
+    webhook_notify_log_id    NUMBER(19,0)     NOT NULL,    -- ID
+    webhook_notify_id        NUMBER(19,0)     NOT NULL,    -- WEBHOOK_NOTIFY_ID
+    client_id                VARCHAR2(40)     NOT NULL,    -- 用戶端
+    content                  VARCHAR2(2000),               -- 發送內容
+    remark                   VARCHAR2(2000),               -- 備註
+    create_date_time         DATE             DEFAULT SYSDATE,        -- 建立日期
+    create_user              VARCHAR2(1000)   DEFAULT 'SYSTEM',      -- 建立人員
+    update_date_time         DATE,                                   -- 更新日期
+    update_user              VARCHAR2(1000),                         -- 更新人員
+    version                  NUMBER(10,0)     DEFAULT 1,             -- 版號
+    CONSTRAINT pk_webhook_notify_log PRIMARY KEY(webhook_notify_log_id)
+);
+
+-- 20250227, DGR_WEBHOOK_API_MAP , Webber Luo
+CREATE TABLE dgr_webhook_api_map (
+    webhook_api_map_id       NUMBER(19,0)     NOT NULL,    -- ID
+    api_key                  VARCHAR2(255)    NOT NULL,    -- API代碼
+    module_name              VARCHAR2(150)    NOT NULL,    -- API_MODULE
+    webhook_notify_id        NUMBER(19,0)     NOT NULL,    -- WEBHOOK_NOTIFY_I
+    create_date_time         DATE             DEFAULT SYSDATE,        -- 建立日期
+    create_user              VARCHAR2(1000)   DEFAULT 'SYSTEM',      -- 建立人員
+    update_date_time         DATE,                                   -- 更新日期
+    update_user              VARCHAR2(1000),                         -- 更新人員
+    version                  NUMBER(10,0)     DEFAULT 1,             -- 版號
+    CONSTRAINT pk_webhook_api_map PRIMARY KEY(webhook_api_map_id)
+);
+
+-- 20250331, DGR_GRPCPROXY_MAP, Alvin Chiu
+CREATE TABLE dgr_grpcproxy_map
+(
+    grpcproxy_map_id          NUMBER(19, 0) NOT NULL,               -- ID
+    service_name              VARCHAR2(255) NOT NULL,               -- 目標服務名稱
+    proxy_hostname            VARCHAR2(255) NOT NULL,               -- 轉發位置
+    target_hostname           VARCHAR2(255) NOT NULL,               -- 目標服務位置
+    target_port               NUMBER(10, 0) NOT NULL,               -- 目標服務PORT
+    connect_timeout_ms        NUMBER(10, 0) DEFAULT 5000,  -- 連線超時毫秒
+    send_timeout_ms           NUMBER(10, 0) DEFAULT 10000, -- 發送超時毫秒
+    read_timeout_ms           NUMBER(10, 0) DEFAULT 30000, -- 讀取超時毫秒
+    secure_mode               VARCHAR2(10)   DEFAULT 'AUTO',        -- TLS安全模式 (AUTO, SECURE, PLAINTEXT)
+    server_cert_content       CLOB,                                 -- X509憑證內容 (PEM格式)
+    server_key_content        CLOB,                                 -- 私鑰內容 (PEM格式)
+    auto_trust_upstream_certs VARCHAR2(1)    DEFAULT 'N',           -- 是否自動信任上游憑證
+    trusted_certs_content     CLOB,                                 -- 受信任的CA憑證內容 (PEM格式)
+    enable                    VARCHAR2(1)    DEFAULT 'N',           -- 啟用/停用
+    create_date_time          DATE           DEFAULT SYSDATE,       -- 建立日期
+    create_user               VARCHAR2(1000) DEFAULT 'SYSTEM',      -- 建立人員
+    update_date_time          DATE,                                 -- 更新日期
+    update_user               VARCHAR2(1000),                       -- 更新人員
+    version                   NUMBER(10, 0)  DEFAULT 1,             -- 版號
+    CONSTRAINT pk_grpcproxy_map PRIMARY KEY (grpcproxy_map_id)
+);

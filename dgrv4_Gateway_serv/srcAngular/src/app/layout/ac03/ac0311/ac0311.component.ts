@@ -26,6 +26,8 @@ import { AA0312Req, AA0312Resp } from 'src/app/models/api/ApiService/aa0312_v3.i
 import * as ValidatorFns from '../../../shared/validator-functions';
 import { Subscription } from 'rxjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
+import { DialogService } from 'primeng/dynamicdialog';
+import { NotifyListComponent } from 'src/app/shared/notify-list/notify-list.component';
 
 @Component({
   selector: 'app-ac0311',
@@ -81,6 +83,21 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     "Accept-encoding":"hzip, deflate,br"
 }`;
 
+  apiTypeList: { label: string; value: string }[] = [
+    {
+      label: 'Http API',
+      value: 'HTTP_API'
+    },
+    {
+      label: 'AI Gateway',
+      value: 'AI_GATEWAY'
+    },
+    {
+      label: 'Webhook',
+      value: 'WEBHOOK'
+    },
+  ];
+
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
@@ -94,7 +111,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     private ngxService: NgxUiLoaderService,
     private serverService: ServerService,
     private confirmationService: ConfirmationService,
-    private alertService: AlertService
+    private alertService: AlertService,
+      private dialogService: DialogService,
   ) {
     super(route, tr);
     this.oasForm = this.fb.group({
@@ -151,7 +169,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       bodyMaskKeyword: new FormControl(''),//;  XXXX,XXXXXX,XXXX
       labelList: new FormControl([]),
       failDiscoveryPolicy: new FormControl('0'),
-      failHandlePolicy: new FormControl('0')
+      failHandlePolicy: new FormControl('0'),
+      apiType: new FormControl('HTTP_API'),
+      notifyNameList: new FormControl([]),
     });
     this.testForm = this.fb.group({
       method: new FormControl('POST'),
@@ -370,6 +390,14 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           break;
         default:
           break;
+      }
+    })
+
+    this.c_apiType.valueChanges.subscribe(res=> {
+      this.clearCustomizePageData(false);
+      if(res=='WEBHOOK'){
+        this.srcUrl?.setValue('dgr+webhook##dgrv4/webhook')
+        this.srcUrl?.disable();
       }
     })
 
@@ -1125,7 +1153,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   async registerCustomApi() {
 
     // this.ngxService.start();
-    let ReqBody = {
+    let reqBody = {
       apiSrc: 'R',
       protocol: this.protocol!.value,
       srcUrl: this.srcUrl!.value,
@@ -1142,27 +1170,30 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       jweFlag: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_jweFlag!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.c_jweFlag!.value),
       jweFlagResp: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_jweFlagResp!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.c_jweFlagResp!.value),
       apiDesc: this.c_apiDesc!.value,
-      type: this.c_type.value
+      type: this.c_type.value,          
     } as AA0311Req;
+    
+
 
     if (this.c_type?.value == '1') {
-      ReqBody.apiName = this.c_apiName.value;
-      ReqBody.failDiscoveryPolicy = this.failDiscoveryPolicy.value;
-      ReqBody.failHandlePolicy = this.failHandlePolicy.value;
+      reqBody.apiName = this.c_apiName.value;
+      reqBody.failDiscoveryPolicy = this.failDiscoveryPolicy.value;
+      reqBody.failHandlePolicy = this.failHandlePolicy.value;
+      reqBody.notifyNameList = this.c_notifyNameList.value
     }
 
     if (this.apiDetail && JSON.stringify(this.apiDetail) != '{}') {
-      ReqBody.consumes = this.apiDetail.consumesOfJson!.t ? JSON.parse(this.apiDetail.consumesOfJson?.o ?? '') : JSON.parse(this.apiDetail.consumesOfJson!.v);
-      ReqBody.produces = this.apiDetail.producesOfJson!.t ? JSON.parse(this.apiDetail.producesOfJson?.o ?? '') : JSON.parse(this.apiDetail.producesOfJson!.v);
-      ReqBody.headers = this.apiDetail.headersOfJson!.t ? JSON.parse(this.apiDetail.headersOfJson?.o ?? '') : JSON.parse(this.apiDetail.headersOfJson!.v);
-      ReqBody.params = this.apiDetail.paramsOfJson!.t ? JSON.parse(this.apiDetail.paramsOfJson?.o ?? '') : JSON.parse(this.apiDetail.paramsOfJson!.v);
+      reqBody.consumes = this.apiDetail.consumesOfJson!.t ? JSON.parse(this.apiDetail.consumesOfJson?.o ?? '') : JSON.parse(this.apiDetail.consumesOfJson!.v);
+      reqBody.produces = this.apiDetail.producesOfJson!.t ? JSON.parse(this.apiDetail.producesOfJson?.o ?? '') : JSON.parse(this.apiDetail.producesOfJson!.v);
+      reqBody.headers = this.apiDetail.headersOfJson!.t ? JSON.parse(this.apiDetail.headersOfJson?.o ?? '') : JSON.parse(this.apiDetail.headersOfJson!.v);
+      reqBody.params = this.apiDetail.paramsOfJson!.t ? JSON.parse(this.apiDetail.paramsOfJson?.o ?? '') : JSON.parse(this.apiDetail.paramsOfJson!.v);
     }
     // console.log('AA0311 Req :', ReqBody)
 
     //SourceIp分流 20231103
     // console.log(this.redirectByIp.value)
-    ReqBody.redirectByIp = this.redirectByIp.value;
-    if (ReqBody.redirectByIp) {
+    reqBody.redirectByIp = this.redirectByIp.value;
+    if (reqBody.redirectByIp) {
 
       //檢核***
       this.redirectByIpDataList.value.forEach(async item => {
@@ -1178,13 +1209,13 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           return;
         }
       })
-      ReqBody.redirectByIpDataList = this.redirectByIpDataList.value;
+      reqBody.redirectByIpDataList = this.redirectByIpDataList.value;
     }
 
-    ReqBody.headerMaskPolicy = this.headerMaskPolicy.value;
-    if (ReqBody.headerMaskPolicy != '0') {
-      ReqBody.headerMaskPolicyNum = this.headerMaskPolicyNum.value;
-      ReqBody.headerMaskPolicySymbol = this.headerMaskPolicySymbol.value;
+    reqBody.headerMaskPolicy = this.headerMaskPolicy.value;
+    if (reqBody.headerMaskPolicy != '0') {
+      reqBody.headerMaskPolicyNum = this.headerMaskPolicyNum.value;
+      reqBody.headerMaskPolicySymbol = this.headerMaskPolicySymbol.value;
 
 
       if (this.headerMaskKey.value.length == 0) {
@@ -1206,15 +1237,15 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       // }
 
 
-      ReqBody.headerMaskKey = this.headerMaskKey.value;//.join(',');
+      reqBody.headerMaskKey = this.headerMaskKey.value;//.join(',');
 
     }
 
 
-    ReqBody.bodyMaskPolicy = this.bodyMaskPolicy.value;
-    if (ReqBody.bodyMaskPolicy != '0') {
-      ReqBody.bodyMaskPolicyNum = this.bodyMaskPolicyNum.value;
-      ReqBody.bodyMaskPolicySymbol = this.bodyMaskPolicySymbol.value;
+    reqBody.bodyMaskPolicy = this.bodyMaskPolicy.value;
+    if (reqBody.bodyMaskPolicy != '0') {
+      reqBody.bodyMaskPolicyNum = this.bodyMaskPolicyNum.value;
+      reqBody.bodyMaskPolicySymbol = this.bodyMaskPolicySymbol.value;
 
       if (this.bodyMaskKeyword.value.trim() == '') {
         const code = ['mask.body_key_required'];
@@ -1222,14 +1253,15 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.alertService.ok(dict['mask.body_key_required'], '');
         return;
       }
-      ReqBody.bodyMaskKeyword = this.bodyMaskKeyword.value;
+      reqBody.bodyMaskKeyword = this.bodyMaskKeyword.value;
     }
 
-    ReqBody.labelList = this.labelList.value;
-    // console.log(ReqBody);
-    // return;
+    reqBody.labelList = this.labelList.value;
 
-    this.apiService.registerAPI_v3(ReqBody).subscribe(async res => {
+    console.log(reqBody);
+    
+
+    this.apiService.registerAPI_v3(reqBody).subscribe(async res => {
       this.ngxService.stop();
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         const codes = ['message.reg_api', 'message.register', 'message.success'];
@@ -1302,11 +1334,12 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     }
   }
   c_type_sub?: Subscription;
-  clearCustomizePageData() {
+  clearCustomizePageData(resetAll:boolean = true) {
     // console.log('clear customize')
 
     let tmpType = this.c_type.value;
-    this.customForm.reset(); //清除所有資料
+    if(resetAll) this.customForm.reset(); //清除所有資料
+
 
     this.redirectByIp.setValue(false);
 
@@ -1314,6 +1347,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
     this.protocol!.setValue('https');
     this.srcUrl!.setValue('');
+    this.srcUrl!.enable();
     this.c_moduleName!.setValue('');
     this.c_apiId!.setValue('');
     this.c_urlRID!.setValue(false);
@@ -1342,6 +1376,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
     this.failDiscoveryPolicy.setValue('0');
     this.failHandlePolicy.setValue('0');
+    this.labelList.setValue([]);
+
+    if(resetAll) this.c_apiType.setValue('HTTP_API');
 
     if (!this.c_type_sub) {
       this.c_type_sub = this.c_type.valueChanges.subscribe(res => {
@@ -1569,6 +1606,17 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
   }
 
+  queryNotifyNameList() {
+          const ref = this.dialogService.open(NotifyListComponent, {
+            header: 'Notify Name',
+            width: '700px',
+          });
+
+          ref.onClose.subscribe((res) => {
+            this.c_notifyNameList.setValue(res);
+          });
+  }
+
   public get uploadDoc() { return this.oasForm.get('uploadDoc'); }
   public get filename() { return this.oasForm.get('filename'); }
   public get docUrl() { return this.oasForm.get('docUrl'); }
@@ -1632,6 +1680,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
   public get failDiscoveryPolicy() { return this.customForm.get('failDiscoveryPolicy')!; };
   public get failHandlePolicy() { return this.customForm.get('failHandlePolicy')!; };
+  public get c_apiType() { return this.customForm.get('apiType')!; };
+  public get c_notifyNameList() { return this.customForm.get('notifyNameList')!; };
 
 
   public get hostUrl() { return this.oasForm.get('hostUrl'); };

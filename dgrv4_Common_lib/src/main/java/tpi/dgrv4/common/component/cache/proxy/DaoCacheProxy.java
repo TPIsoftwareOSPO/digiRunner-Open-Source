@@ -35,7 +35,7 @@ public abstract class DaoCacheProxy {
 	private final CacheValueAdapter adapter;
 	
 	@Autowired
-	public DaoCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache) {
+	protected DaoCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache) {
 		super();
 		this.adapter = new CacheValueKryoAdapter(getClass().getName(), this::kryoRegistration);
 		this.objectMapper = objectMapper;

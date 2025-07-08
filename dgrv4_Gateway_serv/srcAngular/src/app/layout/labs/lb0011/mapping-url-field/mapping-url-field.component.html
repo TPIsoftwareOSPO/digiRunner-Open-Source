@@ -1,0 +1,53 @@
+<div class="p-2 mb-2" [formGroup]="form" style="background: #eaeaea; border-radius: 10px;">
+  <div class="col-12" style="align-items: center;display: flex;">
+
+    <div class="col">
+      <div class="form-group">
+        <label class="form-label control-label required">URL</label>
+        <div class="d-flex align-items-center">
+          <input type="number" class="form-control" formControlName="percent" min="0" max="100"
+            onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)" pattern="[0-9]"
+            style="width:80px">
+          <label class="me-1">%</label>
+          <input type="text" class="form-control" formControlName="url">
+        </div>
+      </div>
+      <div class="form-group pe-2">
+        <label class="form-label control-label">Header</label>
+        <ng-template #headerValue></ng-template>
+        <div>
+          <button type="button" class="btn tpi-second" (click)="addHeaderValue()" [hidden]="disabled"
+            style="border-radius: 50%;">
+            <i class="fa fa-plus"></i>
+          </button>
+        </div>
+        <div class="col-12" *ngIf="headerValueList.length ==0 && disabled" class="form-control border-line"
+          style="background: inherit;">
+          <span> {{'no_data_result'|translate}}</span>
+        </div>
+      </div>
+      <div class="col-12">
+        <label id="Field_label" class="control-label fw-bold" >Body</label>
+        <ng-template #fieldValue></ng-template>
+        <div>
+          <button type="button" class="btn tpi-second" (click)="addFieldValue()" [hidden]="disabled"
+            style="border-radius: 50%;">
+            <i class="fa fa-plus"></i>
+          </button>
+        </div>
+
+        <div class="col-12" *ngIf="fieldValueList.length ==0 && disabled" class="form-control border-line"
+          style="background: inherit;">
+          <span> {{'no_data_result'|translate}}</span>
+        </div>
+      </div>
+    </div>
+
+
+
+    <button type="button" class="btn tpi-primary ms-1" (click)="deleteItem()" style="border-radius: 50%"
+      [hidden]="disabled" >
+      <i class="fa fa-minus"></i>
+    </button>
+  </div>
+</div>

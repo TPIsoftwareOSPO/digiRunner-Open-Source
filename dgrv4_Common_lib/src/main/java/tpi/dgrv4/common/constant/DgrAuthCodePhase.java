@@ -5,7 +5,7 @@ package tpi.dgrv4.common.constant;
  */
 public class DgrAuthCodePhase {
 	
-	public final static String STATE = "STATE";
+	public static final String STATE = "STATE";
 	
-	public final static String AUTH_CODE = "AUTH CODE";
+	public static final String AUTH_CODE = "AUTH CODE";
 }

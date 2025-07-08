@@ -25,4 +25,6 @@ public interface DgrAuditLogDDao extends JpaRepository<DgrAuditLogD, Long> {
 	
 	public Long deleteByTxnUid(String txnUid);
 
+	public List<DgrAuditLogD> findByCreateDateTimeBefore(Date expDate);
+
 }

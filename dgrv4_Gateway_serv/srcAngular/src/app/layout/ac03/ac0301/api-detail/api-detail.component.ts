@@ -10,6 +10,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import * as base64 from 'js-base64';
 import { AA0320Item } from 'src/app/models/api/ApiService/aa0320.interface';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ToolServiceWebhoook } from 'src/app/shared/services/tool-webhook.service';
 
 @Component({
   selector: 'app-api-detail',
@@ -31,8 +32,10 @@ export class ApiDetailComponent implements OnInit {
 
   detailForm: FormGroup;
 
+  isWebhook: boolean = false;
+
   constructor(
-    private toolService: ToolService,
+    private toolServiceW: ToolServiceWebhoook,
     private translateService: TranslateService,
     private messageService: MessageService,
     private fb: FormBuilder
@@ -42,7 +45,18 @@ export class ApiDetailComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log(this.apiDetail);
+    if (this.apiDetail.srcUrl) {
+      const dgrProtocol_match = this.toolServiceW.dgrProtocol_match(
+        this.apiDetail.srcUrl.o ? this.apiDetail.srcUrl.o: this.apiDetail.srcUrl.v
+      );
+      
+      if (dgrProtocol_match.length > 0) {
+        this.isWebhook = dgrProtocol_match.some((item) => item.includes('webhook'));
+      }
+    }
+  }
 
   switchOri(item: any) {
     item.t = !item.t;

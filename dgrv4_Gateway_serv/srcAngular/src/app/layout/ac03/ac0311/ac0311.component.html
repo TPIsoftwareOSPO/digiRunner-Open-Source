@@ -425,9 +425,9 @@
                     <!-- 模式是只有當呼叫 /17/DPB9901, req.id=DGR_PATHS_COMPATIBILITY, resp.value=2時才出現,0:tsmpc,1:dgrc -->
                     <div class="form-group row ms-1" [hidden]="pathType!='2'">
 
-                      <div class="col-12 px-2">
+                      <div class="col-12 px-0">
                         <!-- <label class="control-label me-3">{{'api_reg_mode' | translate}}</label> -->
-                        <div class="p-form-check-line form-group">
+                        <div class="p-form-check-line form-group align-items-center">
                           <ng-container>
                             <div class="p-form-check">
                               <p-radioButton formControlName="type" value="0" inputId="type0"></p-radioButton>
@@ -438,13 +438,14 @@
                               <label for="type1" class="ms-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
                             </div>
                           </ng-container>
+                          <p-dropdown *ngIf="c_type.value==='1'" [options]="apiTypeList" formControlName="apiType" [style]="{'width':'100%'}" ></p-dropdown>
                         </div>
                       </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-12">
                             <label id="srcUrl_label" class="control-label required">{{'tar_url'|translate}}</label>
-                            <div  class="form-group" *ngIf="c_type.value =='1'">
+                            <div  class="form-group" *ngIf="c_type.value =='1' && c_apiType.value!=='WEBHOOK'">
                               <!--  formControlName="byHosturl" trueValue="Y" falseValue="N" -->
                               <p-checkbox [binary]="true" inputId="redirectByIp" formControlName="redirectByIp"> </p-checkbox>
                               <label class="mb-0 ms-2" for="redirectByIp" >{{'diversionSrcIP'|translate}}</label>
@@ -478,7 +479,16 @@
                             </button>
                         </div> -->
                     </div>
-
+                    <div class="form-group row" *ngIf="c_apiType.value=='WEBHOOK'">
+                      <div class="col-6">
+                        <label id="headerMask_label" class="control-label">Webhook Notify Name</label>
+                        <div class="ui-inputgroup">
+                          <input type="text" class="form-control" formControlName="notifyNameList" readonly>
+                          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
+                            (click)="queryNotifyNameList();"></button>
+                        </div>
+                      </div>
+                    </div>
                     <div class="form-group row">
                       <div class="col-12">
                         <label id="headerMask_label" class="control-label">API Log Header Mask</label>

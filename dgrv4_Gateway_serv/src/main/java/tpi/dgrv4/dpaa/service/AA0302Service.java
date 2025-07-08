@@ -19,6 +19,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -34,6 +37,8 @@ import tpi.dgrv4.dpaa.vo.AA0302Req;
 import tpi.dgrv4.dpaa.vo.AA0302Resp;
 import tpi.dgrv4.dpaa.vo.AA0302Trunc;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
+import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
+import tpi.dgrv4.entity.entity.DgrWebhookNotify;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -46,6 +51,8 @@ import tpi.dgrv4.entity.entity.jpql.TsmpRegHost;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
 import tpi.dgrv4.entity.entity.jpql.TsmpnApiDetail;
 import tpi.dgrv4.entity.entity.jpql.TsmpnApiModule;
+import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
+import tpi.dgrv4.entity.repository.DgrWebhookNotifyDao;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiDetailDao;
 import tpi.dgrv4.entity.repository.TsmpApiModuleDao;
@@ -84,13 +91,21 @@ public class AA0302Service {
 	private ObjectMapper objectMapper;
 	private TsmpRegHostDao tsmpRegHostDao;
 
-	@Autowired
+	@Setter(onMethod_ = @Autowired)
+	@Getter(AccessLevel.PROTECTED)
+	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
+	
+	@Setter(onMethod_ = @Autowired)
+	@Getter(AccessLevel.PROTECTED)
+	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
+
 	public AA0302Service(TsmpApiDao tsmpApiDao, TsmpnApiModuleDao tsmpnApiModuleDao, TsmpApiModuleDao tsmpApiModuleDao,
 			TsmpnSiteModuleDao tsmpnSiteModuleDao, TsmpnSiteDao tsmpnSiteDao, TsmpnApiDetailDao tsmpnApiDetailDao,
 			TsmpApiDetailDao tsmpApiDetailDao, TsmpDcDao tsmpDcDao, TsmpApiRegDao tsmpApiRegDao,
 			TsmpRegModuleDao tsmpRegModuleDao, TsmpOrganizationDao tsmpOrganizationDao,
 			TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
-			ObjectMapper objectMapper, TsmpRegHostDao tsmpRegHostDao) {
+			ObjectMapper objectMapper, TsmpRegHostDao tsmpRegHostDao,
+			DgrWebhookApiMapDao dgrWebhookApiMapDao, DgrWebhookNotifyDao dgrWebhookNotifyDao) {
 		super();
 		this.tsmpApiDao = tsmpApiDao;
 		this.tsmpnApiModuleDao = tsmpnApiModuleDao;
@@ -107,6 +122,8 @@ public class AA0302Service {
 		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
 		this.objectMapper = objectMapper;
 		this.tsmpRegHostDao = tsmpRegHostDao;
+		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
+		this.dgrWebhookNotifyDao = dgrWebhookNotifyDao;
 	}
 
 	public AA0302Resp queryAPIDetail(TsmpAuthorization authorization, AA0302Req req, ReqHeader reqHeader) {
@@ -929,6 +946,15 @@ public class AA0302Service {
 
 		resp.setFailDiscoveryPolicy(nvl(detail.getFailDiscoveryPolicy(), "0"));// 失敗判定策略
 		resp.setFailHandlePolicy(nvl(detail.getFailHandlePolicy(), "0"));// 失敗處置策略
+		
+		List<String> notifyNameList = new ArrayList<>();		
+		List<DgrWebhookApiMap> mList = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(apiKey, moduleName);
+		Optional.ofNullable(mList).ifPresent(lst -> {
+		    for (DgrWebhookApiMap m : lst) {		    	
+		    	notifyNameList.add(m.getDgrWebhookNotify().getNotifyName());		    	
+		    }
+		});
+		resp.setNotifyNameList(notifyNameList);
 
 		return resp;
 	}
@@ -1071,7 +1097,7 @@ public class AA0302Service {
 	/**
 	 * 由 orgId ,使用快取取得getTsmpOrganization
 	 * 
-	 * @param authoritiesId
+	 * @param orgId
 	 * @return
 	 */
 	private TsmpOrganization getOrganization(String orgId) {
@@ -1146,5 +1172,4 @@ public class AA0302Service {
 	protected TsmpRegHostDao getTsmpRegHostDao() {
 		return this.tsmpRegHostDao;
 	}
-
 }

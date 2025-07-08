@@ -262,8 +262,12 @@
           {{ "test" | translate }}
         </button>
 
-        <button type="button" class="btn tpi-btn tpi-night me-2 " (click)="send(true)">
+        <button type="button" class="btn tpi-btn tpi-night me-2 " (click)="send('mock')">
           Mock {{ "test" | translate }}
+        </button>
+
+        <button type="button" class="btn tpi-btn tpi-night me-2 " (click)="send('sse')">
+          Steam Mode
         </button>
       </div>
     </div>

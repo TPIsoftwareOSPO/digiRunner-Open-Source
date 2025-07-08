@@ -87,6 +87,7 @@ import tpi.dgrv4.gateway.service.MonitorHostService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.service.WebsiteService;
 import tpi.dgrv4.gateway.vo.ClientKeeper;
+import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.tcp.utils.communication.ClinetNotifier;
 import tpi.dgrv4.tcp.utils.communication.LinkerClient;
 import tpi.dgrv4.tcp.utils.communication.Role;
@@ -240,6 +241,11 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	
 	@Value(value = "${tomcat.Graceful}")
 	private Boolean tomcatGraceful;
+	
+	@Value("${check.sensitive.info.enable:false}")
+	public boolean sensitiveEnable;
+	@Value("${check.sensitive.info.keyword:pwd,password,mima}")
+	public String sensitiveKeyword;
 	
 	
 //	@Autowired(required = false)
@@ -773,6 +779,15 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		}
 
 		updateESLogFlag();
+		
+		initHttpUtil();
+	}
+	
+	public void initHttpUtil() {
+		if (TPILogger.isFirstConnection) {
+			HttpUtil.SENSITIVE_ENABLE = this.sensitiveEnable;
+			HttpUtil.SENSITIVE_KEYWORD = this.sensitiveKeyword;
+		}
 	}
 	
 	public void updateESLogFlag() {

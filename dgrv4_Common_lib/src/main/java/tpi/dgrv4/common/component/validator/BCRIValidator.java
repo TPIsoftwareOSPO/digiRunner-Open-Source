@@ -16,7 +16,7 @@ public abstract class BCRIValidator<V> implements BCRIValidatorIfs {
 	
 	protected static ITPILogger logger;
 
-	public BCRIValidator(BeforeControllerRespItem item, V fieldValue) {
+	protected BCRIValidator(BeforeControllerRespItem item, V fieldValue) {
 		this.item = item;
 		this.fieldValue = fieldValue;
 	}

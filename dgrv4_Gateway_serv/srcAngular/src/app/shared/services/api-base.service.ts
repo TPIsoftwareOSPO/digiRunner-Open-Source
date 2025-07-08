@@ -300,6 +300,7 @@ export class ApiBaseService {
     });
   }
 
+  // 1297 1298 1100
   excuteNpPost_ignoreAll<T extends BaseRes>(path: string, body?: any, rtnCodes?: string[]): Observable<T> {
     return new Observable(obser => {
       let token = this.toolService.getToken();

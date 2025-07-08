@@ -53,7 +53,7 @@ public class AsyncConfig {
         executor.setQueueCapacity(0);
         // 設置拒絕策略
         executor.setRejectedExecutionHandler((r, exe) -> {
-        	TPILogger.tl.warn("Task rejected due to thread pool exhaustion");
+        	TPILogger.tl.warn("[country-road] Task rejected due to thread pool exhaustion");
             throw new RejectedExecutionException("[country-road] Task rejected");
         });
         executor.setThreadNamePrefix(threadNamePrefix + "country-road-");
@@ -73,7 +73,7 @@ public class AsyncConfig {
 //        executor.setKeepAliveSeconds(60);
         // 設置拒絕策略
         executor.setRejectedExecutionHandler((r, exe) -> {
-        	TPILogger.tl.warn("Task rejected due to thread pool exhaustion");
+        	TPILogger.tl.warn("[highway] Task rejected due to thread pool exhaustion");
             throw new RejectedExecutionException("[highway] Task rejected");
         });
         executor.setThreadNamePrefix(threadNamePrefix + "highway-");

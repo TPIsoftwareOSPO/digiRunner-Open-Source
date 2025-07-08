@@ -181,7 +181,7 @@ public class DateTimeUtil {
 	 * 
 	 * @return
 	 */
-	public final static Date now() {
+	public static final Date now() {
 		final ZonedDateTime zdt = ZonedDateTime.now().withNano(0);
 		return Date.from(zdt.toInstant());
 	}
@@ -193,7 +193,7 @@ public class DateTimeUtil {
 	 * @param seconds
 	 * @return
 	 */
-	public final static String secondsToDaysHoursMinutesSeconds(long seconds) {
+	public static final String secondsToDaysHoursMinutesSeconds(long seconds) {
 		seconds = seconds / 1000;
 
 		int day = (int) TimeUnit.SECONDS.toDays(seconds);
@@ -223,7 +223,7 @@ public class DateTimeUtil {
 	 * @param dateTime the initial date
 	 * @return the date one year from the initial date as a Long value
 	 */
-	public final static Long getOneYearLater(LocalDateTime dateTime) {
+	public static final Long getOneYearLater(LocalDateTime dateTime) {
 		return dateTime.plusYears(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
@@ -241,7 +241,7 @@ public class DateTimeUtil {
 	 *                  Unix epoch
 	 * @return the corresponding date as a string in the format "yyyy-MM-dd"
 	 */
-	public final static String convertLongToDateStr(Long timestamp) {
+	public static final String convertLongToDateStr(Long timestamp) {
 
 		if (timestamp == null) {
 			timestamp = 0L;

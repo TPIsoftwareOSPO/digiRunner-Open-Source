@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +33,7 @@ import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.common.vo.ReqHeader;
+import tpi.dgrv4.dpaa.component.DgrProtocol;
 import tpi.dgrv4.dpaa.component.job.NoticeClearCacheEventsJob;
 import tpi.dgrv4.dpaa.constant.TsmpApiSrc;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
@@ -40,6 +44,8 @@ import tpi.dgrv4.dpaa.vo.AA0313Req;
 import tpi.dgrv4.dpaa.vo.AA0313Resp;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.entity.DgrAcIdpUser;
+import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
+import tpi.dgrv4.entity.entity.DgrWebhookNotify;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -47,6 +53,8 @@ import tpi.dgrv4.entity.entity.TsmpApiRegId;
 import tpi.dgrv4.entity.entity.TsmpUser;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
 import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
+import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
+import tpi.dgrv4.entity.repository.DgrWebhookNotifyDao;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiRegDao;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
@@ -77,13 +85,21 @@ public class AA0313Service {
 	private CommForwardProcService commForwardProcService;
 	private DaoGenericCacheService daoGenericCacheService;
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	
+	@Setter(onMethod_ = @Autowired)
+	@Getter(AccessLevel.PROTECTED)
+	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
+	
+	@Setter(onMethod_ = @Autowired)
+	@Getter(AccessLevel.PROTECTED)
+	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
 
-	@Autowired
 	public AA0313Service(TsmpUserDao tsmpUserDao, TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao,
 			TsmpApiRegDao tsmpApiRegDao, TsmpRegModuleDao tsmpRegModuleDao, BcryptParamHelper bcryptParamHelper,
 			ApplicationContext ctx, JobHelper jobHelper, ObjectMapper objectMapper,
 			DgrAuditLogService dgrAuditLogService, CommForwardProcService commForwardProcService,
-			DaoGenericCacheService daoGenericCacheService, DgrAcIdpUserDao dgrAcIdpUserDao) {
+			DaoGenericCacheService daoGenericCacheService, DgrAcIdpUserDao dgrAcIdpUserDao, 
+			DgrWebhookApiMapDao dgrWebhookApiMapDao, DgrWebhookNotifyDao dgrWebhookNotifyDao) {
 		super();
 		this.tsmpUserDao = tsmpUserDao;
 		this.tsmpOrganizationDao = tsmpOrganizationDao;
@@ -98,6 +114,8 @@ public class AA0313Service {
 		this.commForwardProcService = commForwardProcService;
 		this.daoGenericCacheService = daoGenericCacheService;
 		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
+		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
+		this.dgrWebhookNotifyDao = dgrWebhookNotifyDao;
 	}
 
 	@Transactional
@@ -594,7 +612,8 @@ public class AA0313Service {
 						// 若srcUrl值不是"b64.", 也不是"http"開頭, 才需要加協定
 						int index = srcUrl.indexOf("b64.");
 						int index2 = srcUrl.indexOf("http");
-						if (index != 0 && index2 != 0) {// 不是"b64.", 也不是"http"開頭
+						var dgrProto = DgrProtocol.parse(srcUrl);
+						if (index != 0 && index2 != 0 && !dgrProto.valid()) {// 不是"b64.", 也不是"http"開頭
 							srcUrl = String.format("%s://%s", protocol, srcUrl);
 						}
 					}
@@ -681,7 +700,6 @@ public class AA0313Service {
 			tsmpApiReg.setBodyMaskPolicy(req.getBodyMaskPolicy());
 			tsmpApiReg.setBodyMaskPolicyNum(req.getBodyMaskPolicyNum());
 			tsmpApiReg.setBodyMaskPolicySymbol(req.getBodyMaskPolicySymbol());
-			
 		} else {
 			tsmpApiReg.setRedirectByIp("N");
 			tsmpApiReg.setHeaderMaskPolicy("0");
@@ -695,6 +713,26 @@ public class AA0313Service {
 		tsmpApiReg.setFailHandlePolicy(nvl(failHandlePolicy, "0"));
 		
 		tsmpApiReg = getTsmpApiRegDao().saveAndFlush(tsmpApiReg);
+		
+		// 處理API webhook通知Map
+		// Process API webhook notification mapping
+		List<DgrWebhookApiMap> oldMap = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(req.getApiKey(), req.getModuleName());
+		getDgrWebhookApiMapDao().deleteAll(oldMap);		
+		
+		Optional.ofNullable(req.getNotifyNameList()).ifPresent(lst -> {
+		    for (String notifyName : lst) {
+		    	Optional<DgrWebhookNotify> n = getDgrWebhookNotifyDao().findFirstByNotifyName(notifyName);
+		    	if(n.isPresent()) {
+		    		DgrWebhookApiMap m = new DgrWebhookApiMap();
+			    	m.setApiKey(req.getApiKey());
+			    	m.setModuleName(req.getModuleName());
+			    	m.setWebhookNotifyId(n.get().getWebhookNotifyId());
+			    	m.setCreateDateTime(DateTimeUtil.now());
+			    	m.setCreateUser(userName);
+			    	getDgrWebhookApiMapDao().save(m);
+		    	}
+		    }
+		});
 		
 		if (TsmpApiSrc.COMPOSED.value().equals(tsmpApi.getApiSrc()) 
 				|| TsmpApiSrc.REGISTERED.value().equals(tsmpApi.getApiSrc())) {
@@ -772,5 +810,4 @@ public class AA0313Service {
 	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
 		return dgrAcIdpUserDao;
 	}
-
 }

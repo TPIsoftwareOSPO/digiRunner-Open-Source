@@ -25,6 +25,8 @@ import {
 import { AA0303Req } from 'src/app/models/api/ApiService/aa0303.interface';
 import { TranslateService } from '@ngx-translate/core';
 import { FailHandlePolicyComponent } from './fail-handle-policy/fail-handle-policy.component';
+import { TOrgService } from 'src/app/shared/services/org.service';
+
 
 @Component({
   selector: 'app-ac0319',
@@ -61,7 +63,8 @@ export class Ac0319Component extends BaseComponent implements OnInit {
     private apiServer: ApiService,
     private dialogService: DialogService,
     private apiService: ApiService,
-    private translate: TranslateService
+    private translate: TranslateService,
+
   ) {
     super(route, tr);
   }
@@ -352,7 +355,11 @@ export class Ac0319Component extends BaseComponent implements OnInit {
   }
 
   async resetHandlePolicyProc() {
-    const code = ['fail_handle_policy.reset', 'message.success', 'fail_handle_policy.cfm_reset'];
+    const code = [
+      'fail_handle_policy.reset',
+      'message.success',
+      'fail_handle_policy.cfm_reset',
+    ];
     const dict = await this.toolService.getDict(code);
     const ref = this.dialogService.open(FailHandlePolicyComponent, {
       header: dict['fail_handle_policy.reset'],
@@ -379,4 +386,6 @@ export class Ac0319Component extends BaseComponent implements OnInit {
       }
     });
   }
+
+
 }

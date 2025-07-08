@@ -38,9 +38,6 @@ import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
 public class AA1213Service {
 	private final TsmpApiCacheProxy tsmpApiCacheProxy;
 	private final DgrcRoutingHelper dgrcRoutingHelper;
-	
-	//reference GatewayFilter.fetchUriHistoryList StringBuilder init
-	private String urlStatusInitVal = GatewayFilter.getFetchUriHistoryListInitValue().toString();
 
 	public AA1213Resp queryApiAbnormal(TsmpAuthorization authorization, AA1213Req req) {
 		
@@ -149,7 +146,7 @@ public class AA1213Service {
 			isAbnormalData = true;
 		}else {
 			//http status normal, but elapsed time over setting value
-			if(req.getAbnormalElapsedTime().intValue() > -1) {
+			if(req.getQueryItem().intValue() == 1) {
 				if(elapsedTime.intValue() > req.getAbnormalElapsedTime().intValue()) {
 					isAbnormalData = true;
 				}

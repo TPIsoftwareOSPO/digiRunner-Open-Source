@@ -17,7 +17,7 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 
 	private static final Long DEFAULT_CACHE_TIMEOUT = 120000L; // 預設快取存活時間 120sec
 
-	public final static long BUFFER_INTERVAL = 6000L; // 預設快取緩衝時間 6sec
+	public static final long BUFFER_INTERVAL = 6000L; // 預設快取緩衝時間 6sec
 
 	protected Long cacheTimeout;
 
@@ -190,9 +190,7 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 		}
 		long expirationTimestampMillis = cv.getCreatedAt() + this.cacheTimeout;
 		long currentTimestampMillis = System.currentTimeMillis();
-		boolean isExpired = currentTimestampMillis > expirationTimestampMillis;
-		
-		return isExpired;
+		return currentTimestampMillis > expirationTimestampMillis;
 	}
 
 	@Override

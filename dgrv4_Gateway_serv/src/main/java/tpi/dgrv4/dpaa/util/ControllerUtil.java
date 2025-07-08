@@ -2,6 +2,7 @@ package tpi.dgrv4.dpaa.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
@@ -30,6 +31,16 @@ import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
 public class ControllerUtil {
 
 	private static TPILogger logger = TPILogger.tl;
+
+
+	public static boolean isLocalRoute(String ip) {
+		var localIps = Set.of(
+				"127.0.0.1",
+				"localhost",
+				"0:0:0:0:0:0:0:1"
+		);
+		return localIps.contains(ip);
+	}
 //	
 //	private static final ObjectMapper om = new ObjectMapper();
 

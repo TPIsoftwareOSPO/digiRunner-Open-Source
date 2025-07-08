@@ -36,15 +36,56 @@ export class Ac0503Component extends BaseComponent implements OnInit {
   ) {
     super(router, tr);
     this.form = this.fb.group({
+      rptMode: new FormControl('group'),
       abnormalElapsedTime: new FormControl(30000),
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.reportService
+      .queryApiAbnormal_ignore1298({
+        queryItem: this.rptMode.value === 'all' ? 2 : 1,
+        abnormalElapsedTime: this.abnormalElapsedTime.value,
+      })
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.tableData = res.RespBody.dataList;
+          if (this.tableData.length > 0) {
+            this.tableData = this.tableData.map((item) => {
+              const cleanedItem = { ...item };
+              if (cleanedItem.uri)
+                cleanedItem.uri = cleanedItem.uri.replace(/\n/g, '');
+              return cleanedItem;
+            });
+          }
+        }
+      });
+
+    this.form.get('abnormalElapsedTime')!.valueChanges.subscribe((value) => {
+      const min = -864000000;
+      const max = 864000000;
+
+      if (value != null) {
+        let fixedValue = value;
+
+        if (value < min) fixedValue = min;
+        if (value > max) fixedValue = max;
+
+        if (fixedValue !== value) {
+          this.form
+            .get('abnormalElapsedTime')!
+            .setValue(fixedValue, { emitEvent: false });
+        }
+      }
+    });
+  }
 
   queryApiAbnormal() {
     this.reportService
-      .queryApiAbnormal({ abnormalElapsedTime: this.abnormalElapsedTime.value })
+      .queryApiAbnormal({
+        queryItem: this.rptMode.value === 'all' ? 2 : 1,
+        abnormalElapsedTime: this.abnormalElapsedTime.value,
+      })
       .subscribe((res) => {
         if (this.toolService.checkDpSuccess(res.ResHeader)) {
           this.tableData = res.RespBody.dataList;
@@ -64,7 +105,18 @@ export class Ac0503Component extends BaseComponent implements OnInit {
     return tar ? this.toolService.numberComma(tar) : tar;
   }
 
+  onInputChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = Number(input.value);
+    if (value > 864000000) input.value = '864000000';
+    if (value < -864000000) input.value = '-864000000';
+  }
+
   public get abnormalElapsedTime() {
     return this.form.get('abnormalElapsedTime')!;
+  }
+
+  public get rptMode() {
+    return this.form.get('rptMode')!;
   }
 }

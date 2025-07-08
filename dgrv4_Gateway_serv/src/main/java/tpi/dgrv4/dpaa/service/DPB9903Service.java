@@ -2,16 +2,23 @@ package tpi.dgrv4.dpaa.service;
 
 import static tpi.dgrv4.dpaa.util.ServiceUtil.isValueTooLargeException;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.TableAct;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.ifs.TsmpCoreTokenBase;
+import tpi.dgrv4.common.utils.LicenseUtilBase;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.config.UrlMappingRefresher;
 import tpi.dgrv4.dpaa.es.ESLogBuffer;
@@ -30,40 +37,37 @@ import tpi.dgrv4.gateway.service.IKibanaService2;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class DPB9903Service {
 	public enum EncrptionType {
 		ENC, TAEASK, NONE
 	}
 
-	private TPILogger logger = TPILogger.tl;
-
-//	@Autowired(required = false)
+	// @Autowired(required = false)
 	private TsmpCoreTokenBase tsmpCoreTokenBase;
-
+	// @Autowired(required = false)
 	private IKibanaService2 kibanaService2;
-	private TsmpSettingDao tsmpSettingDao;
-	private DgrAuditLogService dgrAuditLogService;
-	private TsmpTAEASKHelper tsmpTAEASKHelper;
-	private DaoGenericCacheService daoGenericCacheService;
-	private ComposerWebSocketClientConn composerWebSocketClientConn;
-	private UrlMappingRefresher urlMappingRefresher;
-
+	
+	private LicenseUtilBase licenseUtilBase;
+	
+	private final TsmpSettingDao tsmpSettingDao;
+	private final DgrAuditLogService dgrAuditLogService;
+	private final TsmpTAEASKHelper tsmpTAEASKHelper;
+	private final DaoGenericCacheService daoGenericCacheService;
+	private final ComposerWebSocketClientConn composerWebSocketClientConn;
+	private final UrlMappingRefresher urlMappingRefresher;
+	
 	@Autowired
-	public DPB9903Service(@Nullable TsmpCoreTokenBase tsmpCoreTokenBase, TsmpSettingDao tsmpSettingDao,
-			DgrAuditLogService dgrAuditLogService, TsmpTAEASKHelper tsmpTAEASKHelper,
-			DaoGenericCacheService daoGenericCacheService, ComposerWebSocketClientConn composerWebSocketClientConn,
-			UrlMappingRefresher urlMappingRefresher, 
+	public void setDpb9903Service(ApplicationContext applicationContext, @Nullable TsmpCoreTokenBase tsmpCoreTokenBase,
 			@Nullable IKibanaService2 kibanaService2) {
-		super();
 		this.tsmpCoreTokenBase = tsmpCoreTokenBase;
-		this.tsmpSettingDao = tsmpSettingDao;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
-		this.daoGenericCacheService = daoGenericCacheService;
-		this.composerWebSocketClientConn = composerWebSocketClientConn;
-		this.urlMappingRefresher = urlMappingRefresher;
 		this.kibanaService2 = kibanaService2;
+
+		if (applicationContext != null) {
+			this.licenseUtilBase = applicationContext.getBean(LicenseUtilBase.class); // non-Singleton
+		}
 	}
 
 	public DPB9903Resp updateTsmpSetting(TsmpAuthorization auth, DPB9903Req req, InnerInvokeParam iip) {
@@ -80,6 +84,7 @@ public class DPB9903Service {
 				throw TsmpDpAaRtnCode._1298.throwing();
 			}
 
+			checkInput(req);
 			TsmpSetting newSetting = updateOldSetting(oldSetting, req, iip);
 
 			/**
@@ -110,22 +115,20 @@ public class DPB9903Service {
 
 			// in-memory, 用列舉的值傳入值
 			TPILogger.updateTime4InMemory(DgrDataType.SETTING.value());
-			
-			
+
 			if (kibanaService2 != null) {
 				kibanaService2.clearCacheMap();
-				this.logger.info("Clear Kibana cache");
+				TPILogger.tl.info("Clear Kibana cache");
 			}
 
-
-			//When updating, it should also be logged as info.
+			// When updating, it should also be logged as info.
 			logSomeInfo(id);
 
 			return new DPB9903Resp();
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			if (isValueTooLargeException(e)) {
 				throw TsmpDpAaRtnCode._1220.throwing();
 			}
@@ -133,22 +136,45 @@ public class DPB9903Service {
 		}
 	}
 
+	private void checkInput(DPB9903Req req) {
+
+		String id = req.getId();
+
+		if (TsmpSettingDao.Key.TSMP_EDITION.equals(id)) {
+
+			String key = req.getNewVal();
+
+			try {
+				if (licenseUtilBase != null) { // for Enterprise
+					licenseUtilBase.initLicenseUtil(key, new ArrayList<>());
+					licenseUtilBase.getExpiryDate(key);
+				}
+			} catch (Exception e) {
+				TPILogger.tl.error(
+						"Invalid license, id=" + id + ", newVal=" + req.getNewVal() + ", error: " + e.getMessage());
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+				throw TsmpDpAaRtnCode._1559.throwing("Invalid license key, please verify license.key");
+			}
+		}
+	}
+
 	private void logSomeInfo(String id) {
-		// Bulk 寫入 Elastic fail 時 retry 3 次, 與寫入 Bulk file 前做 url detection 異動時印出  
+		// Bulk 寫入 Elastic fail 時 retry 3 次, 與寫入 Bulk file 前做 url detection 異動時印出
 		if (id.equals(TsmpSettingDao.Key.ES_CHECK_CONNECTION) || id.equals(TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY)) {
-			DgrApiLog2ESQueue.esUrlCheckConnection = getTsmpSettingDao().findById(TsmpSettingDao.Key.ES_CHECK_CONNECTION)
+			DgrApiLog2ESQueue.esUrlCheckConnection = getTsmpSettingDao()
+					.findById(TsmpSettingDao.Key.ES_CHECK_CONNECTION)
 					.map(TsmpSetting::getValue)
-					.map(Boolean::parseBoolean)  // String 轉換為 boolean
-					.orElse(false);  // 如果沒有找到值，默認為 false
-			
+					.map(Boolean::parseBoolean) // String 轉換為 boolean
+					.orElse(false); // 如果沒有找到值，默認為 false
+
 			ESLogBuffer.enableRetry = getTsmpSettingDao().findById(TsmpSettingDao.Key.ES_LOGFILE_FAIL_RETRY)
 					.map(TsmpSetting::getValue)
-					.map(Boolean::parseBoolean)  // String 轉換為 boolean
-					.orElse(false);  // 如果沒有找到值，默認為 false
-			
-			TPILogger.tl.info(String.format("\n...ES_CHECK_CONNECTION=[%b] ,ES_LOGFILE_FAIL_RETRY=[%b]", 
-					DgrApiLog2ESQueue.esUrlCheckConnection, 
-					ESLogBuffer.enableRetry ));
+					.map(Boolean::parseBoolean) // String 轉換為 boolean
+					.orElse(false); // 如果沒有找到值，默認為 false
+
+			TPILogger.tl.info(String.format("\n...ES_CHECK_CONNECTION=[%b] ,ES_LOGFILE_FAIL_RETRY=[%b]",
+					DgrApiLog2ESQueue.esUrlCheckConnection,
+					ESLogBuffer.enableRetry));
 		}
 
 	}
@@ -207,7 +233,7 @@ public class DPB9903Service {
 			setting.setValue(newVal);
 		}
 
-//		setting.setValue(newVal);
+		// setting.setValue(newVal);
 		setting.setMemo(memo);
 		setting = getTsmpSettingDao().saveAndFlush(setting);
 
@@ -222,14 +248,14 @@ public class DPB9903Service {
 	protected String getENCEncode(String value) throws Exception {
 		String encoded = getTsmpCoreTokenBase().encrypt(value);
 		encoded = String.format("ENC(%s)", encoded);
-		logger.debug("ENC encode  " + encoded);
+		TPILogger.tl.debug("ENC encode  " + encoded);
 		return encoded;
 	}
 
 	protected String getTAEASKEncode(String value) {
 		String encoded = null;
 		encoded = getTsmpTAEASKHelper().encrypt(value);
-		logger.debug("TAEASK encode   " + encoded);
+		TPILogger.tl.debug("TAEASK encode   " + encoded);
 		return encoded;
 	}
 
@@ -239,29 +265,4 @@ public class DPB9903Service {
 		 */
 		getDaoGenericCacheService().clearAndNotify();
 	}
-
-	protected TsmpSettingDao getTsmpSettingDao() {
-		return this.tsmpSettingDao;
-	}
-
-	protected DgrAuditLogService getDgrAuditLogService() {
-		return dgrAuditLogService;
-	}
-
-	protected TsmpCoreTokenBase getTsmpCoreTokenBase() {
-		return this.tsmpCoreTokenBase;
-	}
-
-	protected TsmpTAEASKHelper getTsmpTAEASKHelper() {
-		return this.tsmpTAEASKHelper;
-	}
-
-	protected ComposerWebSocketClientConn getComposerWebSocketClientConn() {
-		return composerWebSocketClientConn;
-	}
-
-	protected DaoGenericCacheService getDaoGenericCacheService() {
-		return daoGenericCacheService;
-	}
-
 }

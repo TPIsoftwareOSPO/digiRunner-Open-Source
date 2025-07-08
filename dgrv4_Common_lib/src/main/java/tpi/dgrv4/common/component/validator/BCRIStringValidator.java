@@ -1,12 +1,12 @@
 package tpi.dgrv4.common.component.validator;
 
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
+import tpi.dgrv4.common.keeper.ITPILogger;
 import tpi.dgrv4.common.vo.BeforeControllerRespItem;
 
 
@@ -37,20 +37,16 @@ public class BCRIStringValidator extends BCRIValidator<String> {
 
 	private void checkIsRequired(BeforeControllerRespItem item, String fieldValue) {
 		Boolean isRequired = getRespValue(item.getIsRequired());
-		if (!Objects.isNull(isRequired)) {
-			if (isRequired && StringUtils.isEmpty(fieldValue)) {
-				throw TsmpDpAaRtnCode._1350.throwing(getWrappedFieldName());
-			}
+		if (isRequired != null && isRequired && !StringUtils.hasLength(fieldValue)) {
+			throw TsmpDpAaRtnCode._1350.throwing(getWrappedFieldName());
 		}
 	}
 
 	private void checkMaxLength(BeforeControllerRespItem item, String fieldValue) {
 		Integer maxLength = getRespValue(item.getMaxLength());
-		if (maxLength != null) {
-			if (fieldValue != null && fieldValue.length() > maxLength) {
-				throw TsmpDpAaRtnCode._1351.throwing(getWrappedFieldName(), //
+		if (maxLength != null && fieldValue != null && fieldValue.length() > maxLength) {
+			throw TsmpDpAaRtnCode._1351.throwing(getWrappedFieldName(), //
 					String.valueOf(maxLength), String.valueOf(fieldValue.length()));
-			}
 		}
 	}
 
@@ -76,7 +72,7 @@ public class BCRIStringValidator extends BCRIValidator<String> {
 			try {
 				p = Pattern.compile(regex);
 			} catch (Exception e) {
-				this.logger.debug("轉換正則表達式失敗: " + regex);
+				ITPILogger.tl.debug("轉換正則表達式失敗: " + regex);
 				throw TsmpDpAaRtnCode._1297.throwing();
 			}
 			

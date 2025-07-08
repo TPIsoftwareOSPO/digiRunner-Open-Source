@@ -53,6 +53,10 @@ public class AA0301Item {
 	private String updateUser;
 
 	private List<String> labelList;
+	
+	private AA0301Pair apiCacheFlag;
+	private String methodOfJson;
+	private String noAuth;
 
 	public AA0301Trunc getModuleName() {
 		return moduleName;
@@ -190,14 +194,41 @@ public class AA0301Item {
 		this.updateUser = updateUser;
 	}
 
+	public AA0301Pair getApiCacheFlag() {
+		return apiCacheFlag;
+	}
+
+	public void setApiCacheFlag(AA0301Pair apiCacheFlag) {
+		this.apiCacheFlag = apiCacheFlag;
+	}
+
+	public String getMethodOfJson() {
+		return methodOfJson;
+	}
+
+	public void setMethodOfJson(String methodOfJson) {
+		this.methodOfJson = methodOfJson;
+	}
+
+	public String getNoAuth() {
+		return noAuth;
+	}
+
+	public void setNoAuth(String noAuth) {
+		this.noAuth = noAuth;
+	}
+
 	@Override
 	public String toString() {
 		return "AA0301Item [moduleName=" + moduleName + ", apiKey=" + apiKey + ", apiStatus=" + apiStatus + ", apiSrc="
 				+ apiSrc + ", apiName=" + apiName + ", apiDesc=" + apiDesc + ", jweFlag=" + jweFlag + ", jweFlagResp="
 				+ jweFlagResp + ", updateTime=" + updateTime + ", org=" + org + ", enableScheduledDate="
-				+ enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate + ", createDate=" 
-				+ createDate + ", createUser=" + createUser + ", updateDate=" + updateDate + ", updateUser=" 
-				+ updateUser + "]";
+				+ enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate + ", createDate=" + createDate
+				+ ", createUser=" + createUser + ", updateDate=" + updateDate + ", updateUser=" + updateUser
+				+ ", labelList=" + labelList + ", apiCacheFlag=" + apiCacheFlag + ", methodOfJson=" + methodOfJson
+				+ ", noAuth=" + noAuth + "]";
 	}
+
+	
 
 }

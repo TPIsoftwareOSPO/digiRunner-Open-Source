@@ -1087,7 +1087,7 @@
     "title": "License",
     "title1": "digiRunner \"{{edition}}\" license key is about to expire on \"{{expiryDate}}\". Please extend it immediately!",
     "title2": "digiRunner \"{{edition}}\" is not authorized or has expired. Please apply for or extend the product key immediately!",
-	  "desc1": "Please contact the TPIsoftware team or your account manager at <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a>",
+    "desc1": "Please contact the TPIsoftware team or your account manager at <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a>",
     "desc2": "Once Express users complete the download, the system will automatically send the key via email. Please check your inbox to activate digiRunner.<br>For extensions and other inquiries, please contact the TPIsoftware team or your account manager at <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a>."
   },
   "role": {
@@ -1163,7 +1163,7 @@
   "fixed_cache_time": "Fixed Cache Time",
   "fixed_cache_time_tip": "If the set value is 0, the value of FIXED_CACHE_TIME in Setting will be used",
   "x_api_key": {
-   "setting": "X-Api-Key Settings",
+    "setting": "X-Api-Key Settings",
     "add": "Add X-Api-Key",
     "add_tip": "Enter an alias, and we will generate a unique X-Api-Key and notify the client via email.",
     "alias": "Alias",
@@ -1264,11 +1264,11 @@
   "sub_func": "Submenu",
   "create_type": "Creation type",
   "main_func_tip": {
-     "1": "Confirm that the language is configured in the main menu",
+    "1": "Confirm that the language is configured in the main menu",
     "2": "Kibana reports are set under the Reports section"
   },
   "embedded_url_tip": {
-   "1": "Three Feature Types",
+    "1": "Three Feature Types",
     "2": "The content of the Kibana Report starts after the ip:port or domain, and the reports are always located under the Reports section in the main menu",
     "3": "The URL of the Embedded Page contains '/dgrv4/cus/', and the location is determined by the main menu",
     "4": "The URL of the External Page does not contain '/dgrv4/cus/', and the location is determined by the main menu",
@@ -1286,7 +1286,7 @@
   "include_locale_sub_func": "Include Other Languages and Submenus",
   "use_in_multi_language": "For Multilingual Support",
   "url_contains_keyword": "URL contains keywords ({{key}}) for embedded pages",
- "url_dont_contains_keyword": "URL does not contain keywords ({{key}}) to open a new page",
+  "url_dont_contains_keyword": "URL does not contain keywords ({{key}}) to open a new page",
   "masterFuncCode": "Main menu",
   "noCusInfo": "No available CUS information has been set",
   "cusId": "Third-Party ID",
@@ -1294,7 +1294,7 @@
   "cusName_tip": "Create a CUS login button on the DGR AC login screen. This field sets the button name, with the default value as 'CUS'",
   "cusStatus": "Cus Status",
   "cusLoginUrl": "CUS Login Page URL",
-  "cusLoginUrl_tip":"The destination to redirect to when clicking the CUS login button on the DGR AC login screen. The URL of the CUS login page should be entered in this field.",
+  "cusLoginUrl_tip": "The destination to redirect to when clicking the CUS login button on the DGR AC login screen. The URL of the CUS login page should be entered in this field.",
   "cusBackendLoginUrl": "CUS Login API URL",
   "cusBackendLoginUrl_tip": "URL to trigger CUS login. The URL used for CUS login should be entered here.",
   "cusUserDataUrl": "CUS User Info API URL",
@@ -1307,20 +1307,36 @@
   "xapikey_search": "X-API-Key search",
   "xapikey_name": "X-API-Key name",
   "auth_client": "Authorized client",
-  "redirectURItip":"Please abide by the following rules when entering the URI:\n\n1. The URI must start with a protocol\n2. If it starts with `http://` or `https://`, it must be a legal and complete URL format and cannot contain * \n e.g. https://www.example.com\n3. If it starts with other protocols, it must include *\n e.g. myapp://example/*\n\n## Error example: \n- www.example. com (missing protocol)\n- https://www.example.com/* (* not allowed)\n- https:// (incomplete)\n- myapp://example/ (missing *)",
-  "rule":"Rule",
+  "redirectURItip": "Please abide by the following rules when entering the URI:\n\n1. The URI must start with a protocol\n2. If it starts with `http://` or `https://`, it must be a legal and complete URL format and cannot contain * \n e.g. https://www.example.com\n3. If it starts with other protocols, it must include *\n e.g. myapp://example/*\n\n## Error example: \n- www.example. com (missing protocol)\n- https://www.example.com/* (* not allowed)\n- https:// (incomplete)\n- myapp://example/ (missing *)",
+  "rule": "Rule",
   "allowlist_rule_tip": "Enter regular expressions and the User-Agent header will be checked",
   "api_count": "API Count",
   "view_mode": {
-    "0":"Manage View",
-    "1":"Audit review"
+    "0": "Manage View",
+    "1": "Audit review",
+    "2": "API Properties View"
   },
-  "abnormal_elapsed_time": "Abnormal Elapsed Time",
-  "abnormal_elapsed_time_tip" : "HTTP status code success (less than 400) but \"Elapsed Time\" greater than \"Abnormal Elapsed Time\" is considered abnormal API. Less than 0 means ignoring this condition and only searching for HTTP status code failure (greater than or equal to 400)\nFor example, there are 4 records:\n        The first status code is 400 and the Elapsed Time is 800ms.\n        The second status code is 500 and the Elapsed Time is 1800ms.\n        The third status code is 200 and the Elapsed Time is 1200ms.\n        The fourth status code is 200 and the Elapsed Time is 31000ms.\nIf the Abnormal Elapsed Time is 30000ms, the first, second and fourth records will be searched out.\nIf the Abnormal Elapsed Time is -1ms, search for the first and second records.",
+  "notify": {
+    "name": "Notify Name",
+    "type": "Notify Type"
+  },
   "status_code": "Status Code",
   "elapsed_time": "Elapsed Time",
   "date_duration": "Duration",
   "date_duration_tip": "When the start time is empty, it means to start immediately. When the end time is empty, it means to never end.",
   "date_duration_start": "When the start time is empty, it means to start immediately.",
-  "date_duration_end": "When the end time is empty, it means to never end."
+  "date_duration_end": "When the end time is empty, it means to never end.",
+  "api_abnormal_report": "API Abnormal Report",
+  "abnormal_condition_setting": "Abnormal condition setting",
+  "rpt_s_time": "Report start time",
+  "srv_s_time": "Service start time",
+  "api_abnormal_greater_than": "Response failed or elapsed time is greater than",
+  "api_abnormal_failures": "Only respond to failures (HTTP status code >= 400)",
+  "grpc": {
+    "tar_serv": "Target Service Name",
+    "tar_host": "Target Host",
+    "tar_port": "Port Number",
+    "proxy_host": "Proxy Address"
+  },
+  "org_reset": "Configure Organization "
 }

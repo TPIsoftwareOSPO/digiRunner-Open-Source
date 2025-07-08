@@ -5,7 +5,7 @@
             <ng-template #hostInput></ng-template>
         </div>
         <!-- <button type="button" class="btn btn-warning" (click)="addHostInput()">{{'button.new' | translate}}</button> -->
-        <button type="button" class="btn tpi-second" (click)="addHostInput()"
+        <button type="button" class="btn tpi-second" (click)="addHostInput()" [disabled]="disabled"
             style="border-radius: 50%;">
         <i class="fa fa-plus"></i>
     </button>

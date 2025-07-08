@@ -752,7 +752,7 @@ public abstract class DpReqServiceAbstract implements DpReqServiceIfs {
 		List<Integer> layers = getTsmpDpChkLayerDao().queryForCreateReqOrders(reviewType);
 		if (layers == null || layers.isEmpty()) {
 			this.logger.error("查無簽核關卡設定: reviewType=" + reviewType);
-			throw TsmpDpAaRtnCode._1297.throwing();
+			throw TsmpDpAaRtnCode._1565.throwing();
 		}
 
 		List<TsmpDpReqOrders> ordersList = new ArrayList<>();

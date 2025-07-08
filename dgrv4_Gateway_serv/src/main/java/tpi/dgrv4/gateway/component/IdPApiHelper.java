@@ -200,37 +200,43 @@ public class IdPApiHelper {
 		String idtRoleName = null;
 
 		boolean isAc = true;
-		if (infoData instanceof DgrGtwIdpInfoA) {
+		String idPApiLoginApiFailed = null;
+		if (infoData instanceof DgrGtwIdpInfoA gtwIdpInfoA) { // GTW
 			isAc = false;
-			clientId = ((DgrGtwIdpInfoA) infoData).getClientId();
-			loginUrl = ((DgrGtwIdpInfoA) infoData).getApiUrl();
-			apiMethod = ((DgrGtwIdpInfoA) infoData).getApiMethod();
-			reqHeader = ((DgrGtwIdpInfoA) infoData).getReqHeader();
-			reqBodyType = ((DgrGtwIdpInfoA) infoData).getReqBodyType();
-			reqBody = ((DgrGtwIdpInfoA) infoData).getReqBody();
-			sucByType = ((DgrGtwIdpInfoA) infoData).getSucByType();
-			sucByField = ((DgrGtwIdpInfoA) infoData).getSucByField();
-			sucByValue = ((DgrGtwIdpInfoA) infoData).getSucByValue();
+			idPApiLoginApiFailed = GTW_IdP_API_login_API_failed;
+			
+			clientId = gtwIdpInfoA.getClientId();
+			loginUrl = gtwIdpInfoA.getApiUrl();
+			apiMethod = gtwIdpInfoA.getApiMethod();
+			reqHeader = gtwIdpInfoA.getReqHeader();
+			reqBodyType = gtwIdpInfoA.getReqBodyType();
+			reqBody = gtwIdpInfoA.getReqBody();
+			sucByType = gtwIdpInfoA.getSucByType();
+			sucByField = gtwIdpInfoA.getSucByField();
+			sucByValue = gtwIdpInfoA.getSucByValue();
 
-			idtName = ((DgrGtwIdpInfoA) infoData).getIdtName();
-			idtEmail = ((DgrGtwIdpInfoA) infoData).getIdtEmail();
-			idtPicture = ((DgrGtwIdpInfoA) infoData).getIdtPicture();
-			idtLightId = ((DgrGtwIdpInfoA) infoData).getIdtLightId();
-			idtRoleName = ((DgrGtwIdpInfoA) infoData).getIdtRoleName();
-		}else if (infoData instanceof DgrAcIdpInfoApi) {
-			loginUrl = ((DgrAcIdpInfoApi) infoData).getApiUrl();
-			apiMethod = ((DgrAcIdpInfoApi) infoData).getApiMethod();
-			reqHeader = ((DgrAcIdpInfoApi) infoData).getReqHeader();
-			reqBodyType = ((DgrAcIdpInfoApi) infoData).getReqBodyType();
-			reqBody = ((DgrAcIdpInfoApi) infoData).getReqBody();
-			sucByType = ((DgrAcIdpInfoApi) infoData).getSucByType();
-			sucByField = ((DgrAcIdpInfoApi) infoData).getSucByField();
-			sucByValue = ((DgrAcIdpInfoApi) infoData).getSucByValue();
+			idtName = gtwIdpInfoA.getIdtName();
+			idtEmail = gtwIdpInfoA.getIdtEmail();
+			idtPicture = gtwIdpInfoA.getIdtPicture();
+			idtLightId = gtwIdpInfoA.getIdtLightId();
+			idtRoleName = gtwIdpInfoA.getIdtRoleName();
+			
+		}else if (infoData instanceof DgrAcIdpInfoApi acIdpInfoApi) { // AC
+			isAc = true;
+			idPApiLoginApiFailed = AC_IdP_API_login_API_failed;
+			
+			loginUrl = acIdpInfoApi.getApiUrl();
+			apiMethod = acIdpInfoApi.getApiMethod();
+			reqHeader = acIdpInfoApi.getReqHeader();
+			reqBodyType = acIdpInfoApi.getReqBodyType();
+			reqBody = acIdpInfoApi.getReqBody();
+			sucByType = acIdpInfoApi.getSucByType();
+			sucByField = acIdpInfoApi.getSucByField();
+			sucByValue = acIdpInfoApi.getSucByValue();
 
-			idtName = ((DgrAcIdpInfoApi) infoData).getIdtName();
-			idtEmail = ((DgrAcIdpInfoApi) infoData).getIdtEmail();
-			idtPicture = ((DgrAcIdpInfoApi) infoData).getIdtPicture();
-
+			idtName = acIdpInfoApi.getIdtName();
+			idtEmail = acIdpInfoApi.getIdtEmail();
+			idtPicture = acIdpInfoApi.getIdtPicture();
 		}
 		
 		ApiUserInfoData apiUserInfoData = new ApiUserInfoData();
@@ -271,12 +277,12 @@ public class IdPApiHelper {
 					String errMsg = "";
 					if (isAc) {
 						errMsg = String.format("%s. DGR_AC_IDP_INFO_A.req_body_type: %s", 
-								AC_IdP_API_login_API_failed,
+								idPApiLoginApiFailed,
 								reqBodyType);
 					} else {
 						 errMsg = String.format("%s. DGR_GTW_IDP_INFO_A.req_body_type: %s, client_id: %s",
-									GTW_IdP_API_login_API_failed,
-									reqBodyType, clientId);
+								idPApiLoginApiFailed,
+								reqBodyType, clientId);
 					}
 					
 					TPILogger.tl.debug(errMsg);
@@ -293,12 +299,12 @@ public class IdPApiHelper {
 
 				if (isAc) {
 					errMsg = String.format("%s. DGR_AC_IDP_INFO_A.api_method: %s", 
-							AC_IdP_API_login_API_failed,
+							idPApiLoginApiFailed,
 							apiMethod);
 				} else {
 
 					errMsg = String.format("%s. DGR_GTW_IDP_INFO_A.api_method: %s, client_id: %s",
-						GTW_IdP_API_login_API_failed,
+						idPApiLoginApiFailed,
 						apiMethod, 
 						clientId);
 				}
@@ -311,17 +317,10 @@ public class IdPApiHelper {
 			TPILogger.tl.debug("HTTP status code: " + statusCode);
 			if (statusCode >= 300) {
 				String errMsg = "";
-				if (isAc) {
-					errMsg = String.format("%s. URL: %s, HTTP Status Code '%s' : %s", 
-							AC_IdP_API_login_API_failed,
-							loginUrl,
-							statusCode + "", respData.respStr);
-				} else {
-					errMsg = String.format("%s. URL: %s, HTTP Status Code '%s' : %s",
-						GTW_IdP_API_login_API_failed,
+				errMsg = String.format("%s. URL: %s, HTTP Status Code '%s' : %s", 
+						idPApiLoginApiFailed,
 						loginUrl,
 						statusCode + "", respData.respStr);
-				}
 				
 				TPILogger.tl.debug(errMsg);
 				
@@ -337,6 +336,20 @@ public class IdPApiHelper {
 			// Response JSON
 			String respJson = respData.respStr;
 			apiUserInfoData.apiResp = respJson;
+			
+			// [ZH] response 錯誤, 沒有值 
+			// [EN] response is wrong, no value
+			if (!StringUtils.hasLength(respJson)) { 
+				String errMsg = String.format("%s. URL: %s, HTTP Status Code '%s' : %s. The API response is wrong, no value.", 
+						idPApiLoginApiFailed,
+						loginUrl,
+						statusCode + "", 
+						respData.respStr);
+
+				TPILogger.tl.debug(errMsg);
+				apiUserInfoData.errMsg = errMsg;
+				return apiUserInfoData;
+			}			
 			
 			if ("R".equals(sucByType)) {// 判定登入成功的類型為 Http status + return code
 				boolean isSuccess = false;
@@ -359,7 +372,7 @@ public class IdPApiHelper {
 						errMsg = String.format("%s. Response field value '%s' mismatch '%s'. "
 								+ " suc_by_field: %s"
 								+ ", suc_by_value: %s",
-								AC_IdP_API_login_API_failed,
+								idPApiLoginApiFailed,
 								respJsonValue,
 								sucByValue,
 								sucByField,
@@ -370,7 +383,7 @@ public class IdPApiHelper {
 								+ "client_id: %s"
 								+ ", suc_by_field: %s"
 								+ ", suc_by_value: %s",
-								GTW_IdP_API_login_API_failed,
+								idPApiLoginApiFailed,
 								respJsonValue,
 								sucByValue,
 								clientId,
@@ -391,16 +404,9 @@ public class IdPApiHelper {
 			apiUserInfoData.idtRoleName = IdPApiHelper.getJsonValueByParam(respJson, idtRoleName);
 		} catch (Exception e) {
 			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
-			String errMsg = "";
-			if (isAc) {
-				errMsg = String.format("%s. URL: %s", 
-						AC_IdP_API_login_API_failed,
-						loginUrl);
-			} else {
-				errMsg = String.format("%s. URL: %s", 
-						GTW_IdP_API_login_API_failed,
-						loginUrl);
-			}
+			String errMsg = String.format("%s. URL: %s", 
+					idPApiLoginApiFailed,
+					loginUrl);
 			
 			TPILogger.tl.debug(errMsg);
 			apiUserInfoData.errMsg = errMsg;

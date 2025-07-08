@@ -15,8 +15,12 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DPB9938Service {
@@ -93,7 +97,15 @@ public class DPB9938Service {
         if (!StringUtils.hasText(esUrl)) {
             throw TsmpDpAaRtnCode._1474.throwing(TsmpSettingDao.Key.ES_URL);
         }
+
         String[] arrEsUrl = esUrl.split(",");
+        List<String> invalidPaths = Stream.of(arrEsUrl)
+                .filter(url -> !url.endsWith("/"))
+                .collect(Collectors.toList());
+        if (!invalidPaths.isEmpty()){
+            throw TsmpDpAaRtnCode._1352.throwing(invalidPaths.stream().collect(Collectors.joining(",")));
+        }
+
         return arrEsUrl;
 
     }

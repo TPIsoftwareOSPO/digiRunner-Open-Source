@@ -12,8 +12,10 @@
 
     <div [hidden]="!aliveSec || aliveSec == 0">
       <label class="expired-time" style="white-space: nowrap">
-        <i class="fas fa-stopwatch"></i> {{ this.minStr }} :
-        {{ this.secStr }}</label
+        <i class="fas fa-stopwatch"></i>
+         <!-- {{ this.minStr }} : {{ this.secStr }} -->
+         {{aliveStr}}
+        </label
       >
     </div>
     <div class="user-info">

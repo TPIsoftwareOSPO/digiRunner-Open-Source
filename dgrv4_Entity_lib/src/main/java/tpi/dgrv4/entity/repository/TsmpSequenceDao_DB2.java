@@ -26,9 +26,7 @@ public class TsmpSequenceDao_DB2 implements TsmpSequenceDao{
 
 		Query query = getEm().createNativeQuery(sb.toString());
 		Object seq = query.getSingleResult();
-		Long result = ServiceUtil.parseSequenceToLong(seq);
-
-		return result;
+		return ServiceUtil.parseSequenceToLong(seq);
 	}
 
 	@Override

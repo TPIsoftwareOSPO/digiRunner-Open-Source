@@ -240,7 +240,8 @@ public class TsmpApiImp {
 				+ ", label3=" + label3 + ", label4=" + label4 + ", label5=" + label5 + ", apiCacheFlag=" + apiCacheFlag + ", fixedCacheTime="
 				+ fixedCacheTime + ", failDiscoveryPolicy=" + failDiscoveryPolicy + ", failHandlePolicy=" + failHandlePolicy + ", apiStatus="
 				+ apiStatus + ", publicFlag=" + publicFlag + ", apiReleaseTime=" + apiReleaseTime + ", scheduledLaunchDate=" + scheduledLaunchDate
-				+ ", scheduledRemovalDate=" + scheduledRemovalDate + ", enableScheduledDate=" + enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate + "]";
+				+ ", scheduledRemovalDate=" + scheduledRemovalDate + ", enableScheduledDate=" + enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate
+				+ "]";
 	}
 
 

@@ -15,11 +15,18 @@ import tpi.dgrv4.dpaa.constant.RegexpConstant;
 @Getter
 @Setter
 public class AA1213Req extends ReqValidator{
+	private Integer queryItem;
 	private Integer abnormalElapsedTime;
+	
 	
 	@Override
 	protected List<BeforeControllerRespItem> provideConstraints(String locale) {
 		return Arrays.asList(new BeforeControllerRespItem[] {
+				new BeforeControllerRespItemBuilderSelector()
+					.buildInt(locale)
+					.field("queryItem")
+					.isRequired()
+					.build(),
 				new BeforeControllerRespItemBuilderSelector()
 					.buildInt(locale)
 					.field("abnormalElapsedTime")

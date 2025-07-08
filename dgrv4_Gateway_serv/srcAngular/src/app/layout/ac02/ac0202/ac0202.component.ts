@@ -512,8 +512,25 @@ export class Ac0202Component extends BaseComponent implements OnInit {
       return (tar===null||tar === undefined||tar === '')
     }
 
+    checkHostListValue(_hostList: AA0201HostReq[]){
+      let _resultHostList: AA0201HostReq[] = [];
+
+      _resultHostList = _hostList
+        .filter((item) => !(item['hostName'] == '' && item['hostIP'] == ''))
+        .map((item) => {
+          return {
+            hostName: item.hostName,
+            hostIP: item.hostIP,
+          } as AA0201HostReq;
+        });
+
+
+      return _resultHostList;
+    }
+
     // 建立用戶端
     async createClientData() {
+
         const dicts = await this.getDicts();
         let ReqBody = {
             clientID: this.clientID!.value != '' ? this.clientID!.value : this.toolService.Base64Encoder(this.clientName!.value),
@@ -525,7 +542,8 @@ export class Ac0202Component extends BaseComponent implements OnInit {
             tps: this.tps!.value ? this.tps!.value.toString() : '',
             encodeStatus: this.toolService.Base64Encoder(this.toolService.BcryptEncoder(this.createStatus!.value)) + ',' + this.convertEncodeStatusIndex(this.createStatus!.value, 'create'),
             publicFlag: this.toolService.Base64Encoder(this.toolService.BcryptEncoder(this.publicFlag!.value)) + ',' + this.publicFlag!.value,
-            hostList: isArray(this.hostList!.value) ? this.hostList!.value : [],
+            // hostList: isArray(this.hostList!.value) ? this.hostList!.value : [],
+            hostList: this.checkHostListValue(this.hostList!.value),
             // clientSD: isDate(this.clientSD!.value) ? dayjs(this.clientSD!.value).format('YYYY-MM-DD') : '',
             // clientED: isDate(this.clientED!.value) ? dayjs(this.clientED!.value).format('YYYY-MM-DD') : '',
             apiQuota: this.apiQuota!.value ? this.apiQuota!.value.toString() : '',
@@ -606,7 +624,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
         // else {
         //     // ReqBody.svcET = '';
         // }
-        this.adjHostList(ReqBody.hostList!);
+        // this.adjHostList(ReqBody.hostList!);
         // 檢查服務時間
         // if (!isNull(ReqBody.svcST)) {
         //     if (((isNaN(parseInt(this.svcST.value.hour)) && !isNaN(parseInt(this.svcST.value.minute))) || (!isNaN(parseInt(this.svcST.value.hour)) && isNaN(parseInt(this.svcST.value.minute))))) {
@@ -656,7 +674,8 @@ export class Ac0202Component extends BaseComponent implements OnInit {
             signupNum: this.clientDetail!.signupNum,
             newSignupNum: this.newSignupNum!.value,
             hostList: this.clientDetail!.hostList,
-            newHostList: isArray(this.newHostList!.value) ? this.newHostList!.value : [],
+            // newHostList: isArray(this.newHostList!.value) ? this.newHostList!.value : [],
+            newHostList: this.checkHostListValue(this.newHostList!.value),
             // clientSD: this.clientDetail!.clientSD,
             // newClientSD: isDate(this.newClientSD!.value) ? dayjs(this.newClientSD!.value).format('YYYY-MM-DD') : '',
             // clientED: this.clientDetail!.clientED,
@@ -1426,9 +1445,9 @@ export class Ac0202Component extends BaseComponent implements OnInit {
                         this.tps!.setValue(10);
                         this.cPriority!.setValue(5);
                         this.publicFlag!.setValue('2');
-
                         this.owner?.setValue('Default');
-                        this.createStatus?.setValue('1')
+                        this.createStatus?.setValue('1');
+                        this.hostList?.setValue([]);
                     }
                 });
                 break;
@@ -1684,9 +1703,6 @@ export class Ac0202Component extends BaseComponent implements OnInit {
               this.form.get('confirmNewClientBlock')?.setValidators([ValidatorFns.confirmPasswordValidator(this.form, 'newClientBlock', 'confirmNewClientBlock'), ValidatorFns.maxLengthValidator(this.newClientBlockLimitChar.value)]);
             }
         });
-        // console.log('add password validate');
-
-
     }
 
     timezoneOffsetFormat(timezone:string)

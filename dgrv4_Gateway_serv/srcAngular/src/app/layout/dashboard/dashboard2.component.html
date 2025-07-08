@@ -60,7 +60,7 @@
       'first-card': i === 0
     }">
     <div class="dashboard-card-title sticky-title">
-      <h5 >{{ item.nodeName }}</h5>
+      <h5>{{ item.nodeName }}</h5>
       <div class="card-title-info">
         <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;">
           <label class="dashboard-label">IP Address</label>
@@ -202,7 +202,11 @@
 <ng-template #top5FastList let-item>
   <div class="top5-list">
     <div class="card-title">
-      <label class="dashboard-label d-flex">Top5 Fast Ranking</label>
+      <label class="dashboard-label d-flex">Top5 Fast Ranking
+        <div class="align-item-center">
+          <i class="fas fa-link ms-2 navicon" [pTooltip]="'api_abnormal_report' | translate" (click)="navigateReport()"></i>
+        </div>
+      </label>
       <!-- <div class="include-fail-btn">
         <span class="ex">Ex</span>
         <span class="sub">clude Fail</span>
@@ -270,7 +274,11 @@
 <ng-template #top5SlowList let-item>
   <div class="top5-list">
     <div class="card-title">
-      <label class="dashboard-label">Top5 Slow Ranking</label>
+      <label class="dashboard-label d-flex">Top5 Slow Ranking
+        <div class="align-item-center">
+          <i class="fas fa-link ms-2 navicon" [pTooltip]="'api_abnormal_report' | translate" (click)="navigateReport()"></i>
+        </div>
+      </label>
       <!-- <div class="include-fail-btn">
         <span class="ex">Ex</span>
         <span class="sub">clude Fail</span>
@@ -311,10 +319,10 @@
       </div>
     </div> -->
     <div class="info-row">
-        <div class="include-fail-btn">
-          <!-- <span class="in">In</span> -->
-          <span class="sub">Include Fail</span>
-        </div>
+      <div class="include-fail-btn">
+        <!-- <span class="in">In</span> -->
+        <span class="sub">Include Fail</span>
+      </div>
       <div class="list-row" *ngFor="let row of item.inclundeFailSlowList">
         <span class="code-text" [ngClass]="{
             red: row?.statusCode?.toString().charAt(0) === '4',

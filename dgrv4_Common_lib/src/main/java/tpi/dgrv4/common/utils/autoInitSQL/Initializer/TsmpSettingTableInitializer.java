@@ -72,10 +72,10 @@ public class TsmpSettingTableInitializer {
 			createTsmpSetting("LDAP_DN","uid={{0}},dc=tstpi,dc=com","ldap login user DN");
 			createTsmpSetting("LDAP_TIMEOUT","3000","Connection timeout for ldap login, in milliseconds(ms)");
 			createTsmpSetting("LDAP_CHECK_ACCT_ENABLE","false","LDAP check account function enablement - true/false");
-			///* 交給 resetAdminConsoleData() 建立了
+
 			createTsmpSetting("TSMP_AC_CLIENT_ID","YWRtaW5Db25zb2xl","Login AC account (do not modify)");
 			createTsmpSetting("TSMP_AC_CLIENT_PW","dHNtcDEyMw==","AC login password (do not modify)");
-			// */
+
 			createTsmpSetting("TSMP_FAIL_THRESHOLD","6","Allowed \"User password\" fail THRESHOLD");
 			createTsmpSetting("SSO_PKCE","true","PKCE Level AuthCode verification enablement - true/false");
 			createTsmpSetting("SSO_DOUBLE_CHECK","true","Enablement of Double-check verification - true/false");
@@ -113,9 +113,9 @@ public class TsmpSettingTableInitializer {
 			createTsmpSetting((id = "LOGGER_LEVEL"), (value = "INFO"), (memo = "Logger log output level setting"));
 
 //	      -- 20220427, 檢查器的設定, tom
-			createTsmpSetting((id = "CHECK_XSS_ENABLE"), (value = "true"), (memo = "\"XSS Checker\" enablement (true/false )"));
-			createTsmpSetting((id = "CHECK_XXE_ENABLE"), (value = "true"), (memo = "\"XXE Checker\" enablement (true/false )"));
-			createTsmpSetting((id = "CHECK_SQL_INJECTION_ENABLE"), (value = "true"), (memo = "\"SQL Injection Checker\" enablement (true/false )"));
+			createTsmpSetting((id = "CHECK_XSS_ENABLE"), (value = "false"), (memo = "\"XSS Checker\" enablement (true/false )"));
+			createTsmpSetting((id = "CHECK_XXE_ENABLE"), (value = "false"), (memo = "\"XXE Checker\" enablement (true/false )"));
+			createTsmpSetting((id = "CHECK_SQL_INJECTION_ENABLE"), (value = "false"), (memo = "\"SQL Injection Checker\" enablement (true/false )"));
 			createTsmpSetting((id = "CHECK_IGNORE_API_PATH_ENABLE"), (value = "true"), (memo = "\"API Path IGNORE Checker\" enablement (true/false )"));
 			createTsmpSetting((id = "CHECK_API_STATUS_ENABLE"), (value = "true"), (memo = "\"API Switch\" enablement (true/false )"));
 			createTsmpSetting((id = "CHECK_TRAFFIC_ENABLE"), (value = "true"), (memo = "\"Traffic Checker\" enablement (true/false )"));
@@ -301,6 +301,10 @@ public class TsmpSettingTableInitializer {
 
 //			-- 2025/03/25 ES log file write disk, Zoe Lee
 			createTsmpSetting((id = "ES_CHECK_CONNECTION"), (value = "false"), (memo = "Whether to detect the ES connection when deciding whether to write the file to the disk."));
+
+//			-- 2025/06/10 Audit log retention days, Kevin Cheng
+			createTsmpSetting((id = "AUDIT_LOG_RETENTION_DAYS"), (value = "0"), (memo = "Audit log retention days, default: 0, setting to 0 means using gov_long time setting"));
+
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

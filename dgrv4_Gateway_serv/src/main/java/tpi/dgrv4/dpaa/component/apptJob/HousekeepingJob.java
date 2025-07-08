@@ -35,6 +35,8 @@ import tpi.dgrv4.dpaa.component.req.DpReqServiceIfs;
 import tpi.dgrv4.dpaa.service.TsmpSettingService;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.DgrAcIdpAuthCode;
+import tpi.dgrv4.entity.entity.DgrAuditLogD;
+import tpi.dgrv4.entity.entity.DgrAuditLogM;
 import tpi.dgrv4.entity.entity.DgrImportClientRelatedTemp;
 import tpi.dgrv4.entity.entity.DgrWebsite;
 import tpi.dgrv4.entity.entity.TsmpClient;
@@ -48,6 +50,8 @@ import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.entity.jpql.TsmpEvents;
 import tpi.dgrv4.entity.entity.jpql.TsmpNoticeLog;
 import tpi.dgrv4.entity.repository.DgrAcIdpAuthCodeDao;
+import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
+import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
 import tpi.dgrv4.entity.repository.DgrImportClientRelatedTempDao;
 import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpClientLogDao;
@@ -91,6 +95,8 @@ public class HousekeepingJob extends ApptJob {
     private WebsiteService websiteService;
     private DgrWebsiteCacheProxy dgrWebsiteCacheProxy;
     private TsmpSettingService tsmpSettingService;
+    private DgrAuditLogMDao dgrAuditLogMDao;
+    private DgrAuditLogDDao dgrAuditLogDDao;
 
     @Autowired
 	public HousekeepingJob(TsmpDpApptJob tsmpDpApptJob, TsmpEventsDao tsmpEventsDao, TsmpClientLogDao tsmpClientLogDao,
@@ -100,7 +106,7 @@ public class HousekeepingJob extends ApptJob {
 			TsmpClientDao tsmpClientDao, TsmpTokenHistoryDao tsmpTokenHistoryDao,
 			DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao, DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao,
 			TrafficCheck trafficCheck, WebsiteService websiteService, DgrWebsiteCacheProxy dgrWebsiteCacheProxy,
-			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher) {
+			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher,DgrAuditLogMDao dgrAuditLogMDao ,DgrAuditLogDDao dgrAuditLogDDao) {
 		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
 		this.tsmpEventsDao = tsmpEventsDao;
 		this.tsmpClientLogDao = tsmpClientLogDao;
@@ -119,6 +125,8 @@ public class HousekeepingJob extends ApptJob {
 		this.websiteService = websiteService;
 		this.dgrWebsiteCacheProxy = dgrWebsiteCacheProxy;
 		this.tsmpSettingService = tsmpSettingService;
+		this.dgrAuditLogMDao = dgrAuditLogMDao;
+		this.dgrAuditLogDDao = dgrAuditLogDDao;
 	}
 
     @Override
@@ -206,8 +214,51 @@ public class HousekeepingJob extends ApptJob {
          */
         deleteLogFile();
 
+        /**
+         * 第15部分: 刪除過期安全稽核日誌
+         */
+        deleteExpiredAuditLog();
+
         return "SUCCESS";
 
+    }
+
+    public void deleteExpiredAuditLog() {
+
+        int auditLogRetentionDays = getTsmpSettingService().getVal_AUDIT_LOG_RETENTION_DAYS();
+
+        Date expDate = getExpDate("signOff", "gov_long");
+
+        if (auditLogRetentionDays != 0) {
+            expDate = new Date(System.currentTimeMillis() - auditLogRetentionDays * 24L * 60L * 60L * 1000L);
+        }
+
+        List<DgrAuditLogM> dgrAuditLogMList = dgrAuditLogMDao.findByCreateDateTimeBefore(expDate);
+        List<DgrAuditLogD> dgrAuditLogDList = dgrAuditLogDDao.findByCreateDateTimeBefore(expDate);
+
+        // 計算總數量
+        int totalCount = dgrAuditLogMList.size() + dgrAuditLogDList.size();
+        
+        if (totalCount == 0) {
+            step("15. 0/0");
+            return;
+        }
+
+        int currentIndex = 0;
+
+        // 先刪除詳細資料 (DgrAuditLogD)
+        for (DgrAuditLogD auditLogD : dgrAuditLogDList) {
+            currentIndex++;
+            step(String.format("15. %d/%d", currentIndex, totalCount));
+            dgrAuditLogDDao.delete(auditLogD);
+        }
+
+        // 再刪除主資料 (DgrAuditLogM)
+        for (DgrAuditLogM auditLogM : dgrAuditLogMList) {
+            currentIndex++;
+            step(String.format("15. %d/%d", currentIndex, totalCount));
+            dgrAuditLogMDao.delete(auditLogM);
+        }
     }
 
     public void deleteLogFile() {

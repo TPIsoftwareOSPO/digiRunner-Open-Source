@@ -103,6 +103,9 @@ public class TsmpDpMailTpltTableInitializer {
 	        createTsmpDpMailTplt((mailtpltId = 20000025L), (code = "body.dp.applyApp"), (templateTxt = "<p>Thank you for using digiRunner DP to apply for an Application. The following is the relevant information of your Application.<br /></p><p>Application Name: {{applicationName}}</p><p>client id: {{clientId}}</p><p>client secret: {{clientPw}}</p><p>DGRK API Key: {{apiKey}}</p><p>DGRK Secret Key: {{secretKey}}</p><p>X-API-KEY:</p><p>[[$D, xApiKeyMap, '']]</p>"), (remark = "ApplicationApply"), (keywordSearch = "body.dp.applyApp|<p>Thank you for using digiRunner DP to apply for an Application. The following is the relevant information of your Application.<br /></p><p>Application Name: {{applicationName}}</p><p>client id: {{clientId}}</p><p>client secret: {{clientPw}}</p><p>DGRK API Key: {{apiKey}}</p><p>DGRK Secret Key: {{secretKey}}</p><p>X-API-KEY:</p><p>[[$D, xApiKeyMap, '']]</p>"));
 	        createTsmpDpMailTplt((mailtpltId = 20000026L), (code = "body.dp.applyApp.D"), (templateTxt = "<p>&nbsp; &nbsp;API KEY ALIAS：{{apiKeyAlias}} <br />&nbsp; &nbsp;API KEY：{{xApiKey}}</p>"), (remark = ""), (keywordSearch = "body.dp.applyApp.D|<p>&nbsp; &nbsp;API KEY ALIAS：{{apiKeyAlias}} <br />&nbsp; &nbsp;API KEY：{{xApiKey}}</p>"));
 	        
+	        // webhook
+	        createTsmpDpMailTplt((mailtpltId = 20000027L), (code = "body.webhook"), (templateTxt = "<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"), (remark = ""), (keywordSearch = "body.webhook|<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"));
+	        
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;
@@ -199,6 +202,9 @@ public class TsmpDpMailTpltTableInitializer {
 		        createTsmpDpMailTplt((mailtpltId = 20000024L), (code = "subject.dp.applyApp"), (templateTxt = "【digiRunner DP】 Application Apply information"), (remark = "ApplicationApply"), (keywordSearch = "subject.dp.applyApp|【digiRunner DP】 Application Apply information|ApplicationApply"));
 		        createTsmpDpMailTplt((mailtpltId = 20000025L), (code = "body.dp.applyApp"), (templateTxt = "<p>感謝您使用 digiRunner DP 申請 Application，以下為您的 Application 的相關資訊</p><p>Application Name: {{applicationName}}</p><p>client id: {{clientId}}</p><p>client secret: {{clientPw}}</p><p>DGRK API Key: {{apiKey}}</p><p>DGRK Secret Key: {{secretKey}}</p><p>X-API-KEY:</p><p>[[$D, xApiKeyMap, '']]</p>"), (remark = "ApplicationApply"), (keywordSearch = "body.dp.applyApp|<p>感謝您使用 digiRunner DP 申請 Application，以下為您的 Application 的相關資訊</p><p>Application Name: {{applicationName}}</p><p>client id: {{clientId}}</p><p>client secret: {{clientPw}}</p><p>DGRK API Key: {{apiKey}}</p><p>DGRK Secret Key: {{secretKey}}</p><p>X-API-KEY:</p><p>[[$D, xApiKeyMap, '']]</p>|ApplicationApply"));
 		        createTsmpDpMailTplt((mailtpltId = 20000026L), (code = "body.dp.applyApp.D"), (templateTxt = "<p>&nbsp; &nbsp;API KEY ALIAS：{{apiKeyAlias}} <br />&nbsp; &nbsp;API KEY：{{xApiKey}}</p>"), (remark = ""), (keywordSearch = "body.dp.applyApp.D|<p>&nbsp; &nbsp;API KEY ALIAS：{{apiKeyAlias}} <br />&nbsp; &nbsp;API KEY：{{xApiKey}}</p>"));
+		        
+		        // Webhook
+		        createTsmpDpMailTplt((mailtpltId = 20000027L), (code = "body.webhook"), (templateTxt = "<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"), (remark = ""), (keywordSearch = "body.webhook|<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"));
 		        
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);

@@ -1,19 +1,6 @@
 package tpi.dgrv4.gateway.component.job.appt;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -22,8 +9,6 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import jakarta.annotation.PostConstruct;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpApptJobStatus;
@@ -31,11 +16,7 @@ import tpi.dgrv4.common.constant.TsmpDpRjobStatus;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
-import tpi.dgrv4.entity.entity.TsmpDpApptJob;
-import tpi.dgrv4.entity.entity.TsmpDpApptRjob;
-import tpi.dgrv4.entity.entity.TsmpDpApptRjobD;
-import tpi.dgrv4.entity.entity.TsmpDpItems;
-import tpi.dgrv4.entity.entity.TsmpDpItemsId;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.exceptions.DgrException;
 import tpi.dgrv4.entity.exceptions.DgrRtnCode;
 import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
@@ -44,6 +25,17 @@ import tpi.dgrv4.entity.repository.TsmpDpApptRjobDao;
 import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Component
 public class ApptRjobDispatcher implements Runnable {
@@ -723,8 +715,10 @@ public class ApptRjobDispatcher implements Runnable {
 	protected Date checkPastDate(Long dt, String fieldName) {
 		if (dt == null) return null;
 		Date datetime = new Date(dt);
-		if (datetime.compareTo(DateTimeUtil.now()) < 0) {
-			TPILogger.tl.debug(fieldName + "不得小於現在");
+		LocalDate inputDate = datetime.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate nowDate = DateTimeUtil.now().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		if (inputDate.isBefore(nowDate)) {
+			TPILogger.tl.debug(fieldName + "不得小於今日");
 			throw DgrRtnCode._1227.throwing();
 		}
 		return datetime;

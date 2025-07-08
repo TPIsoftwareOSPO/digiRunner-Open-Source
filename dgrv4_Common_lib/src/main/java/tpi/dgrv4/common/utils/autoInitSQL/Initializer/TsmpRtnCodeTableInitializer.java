@@ -1048,6 +1048,15 @@ public class TsmpRtnCodeTableInitializer {
 			
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1562"), (locale = "zh-TW"), (tsmpRtnMsg = "對稱式解密失敗：{{0}}"), (tsmpRtnDesc = ""));
 		    createTsmpRtnCode((tsmpRtnCodeColumn = "1562"), (locale = "en-US"), (tsmpRtnMsg = "Symmetric decryption error: {{0}}"), (tsmpRtnDesc = ""));
+		
+			// 20250701, 查無簽核關卡設定訊息, Kevin Cheng
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1565"), (locale = "zh-TW"), (tsmpRtnMsg = "查無簽核關卡設定，應設定簽核關卡"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1565"), (locale = "en-US"), (tsmpRtnMsg = "No approval setting found, should set approval setting"), (tsmpRtnDesc = ""));
+		
+		
+		
+		
+		
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

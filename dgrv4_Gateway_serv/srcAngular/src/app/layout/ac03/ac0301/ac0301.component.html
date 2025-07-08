@@ -178,60 +178,98 @@
               [disabled]="selected.length == 0 || canStatusUpdate == false">
               {{ "button.disable" | translate }}
             </button>
-            <button type="button" *ngIf="canDelete" class="btn tpi-primary tpi-btn"
-              (click)="updateApiStatus('0')" [disabled]="selected.length == 0">
+            <button type="button" *ngIf="canDelete" class="btn tpi-primary tpi-btn" (click)="updateApiStatus('0')"
+              [disabled]="selected.length == 0">
               {{ "button.delete" | translate }}
             </button>
-            <button type="button" *ngIf="canSetting" class="btn tpi-primary tpi-btn"
-              (click)="updateJwtSetting()" [disabled]="selected.length == 0">
+            <button type="button" *ngIf="canSetting" class="btn tpi-primary tpi-btn" (click)="updateJwtSetting()"
+              [disabled]="selected.length == 0">
               {{ "jwt_setting" | translate }}
-            </button>            
+            </button>
             <!-- <button type="button" class="btn tpi-primary tpi-btn"
               (click)="jwtSettingPanel.toggle($event)" [disabled]="selected.length == 0">
               {{ "jwt_setting" | translate }}
             </button> -->
             <button type="button" *ngIf="canImport" title="{{ 'button.export_apiList_tooltip' | translate }}"
-              class="btn tpi-primary tpi-btn" (click)="updateApiStatus('4')"
-              [disabled]="selected.length == 0">
+              class="btn tpi-primary tpi-btn" (click)="updateApiStatus('4')" [disabled]="selected.length == 0">
               {{ "button.export_reg_comp_api" | translate }}
             </button>
             <button type="button" *ngIf="canImport" title="{{ 'button.export_apiList_tooltip' | translate }}"
-            class="btn tpi-primary tpi-btn" (click)="updateApiStatus('c')"
-            [disabled]="selected.length == 0">
-            {{ "apiStatus.cancelScheduledDate" | translate }}
-          </button>
+              class="btn tpi-primary tpi-btn" (click)="updateApiStatus('c')" [disabled]="selected.length == 0">
+              {{ "apiStatus.cancelScheduledDate" | translate }}
+            </button>
+            <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
+              (click)="orgReset()">
+              {{ "org_reset" | translate }}
+            </button>
           </div>
-        <div class="field-flex-center">
+          <div class="field-flex-center">
 
-          <button type="button" *ngIf="canImport" title="{{ 'upload_reg_comp_api_file' | translate }}"
-          class="btn tpi-primary tpi-btn me-1" (click)="changePage('import')">
-          {{ "upload_reg_comp_api_file" | translate }}
-        </button>
-        <p-menu styleClass="view-mode-menu" #menu [popup]="true" appendTo="body" [model]="ModeItems"></p-menu>
-        <button type="button" class="tpi-btn btn tpi-primary" (click)="menu.toggle($event)">
-          <!-- <button type="button" class="btn tpi-primary btn-icon" (click)="updateViewMode()"> -->
-          <!-- {{ "view_mode" | translate }} {{viewMode+1}} -->
-          <!-- 管理模式 -->
-           <span *ngIf="viewMode=== 0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <button type="button" *ngIf="canImport" title="{{ 'upload_reg_comp_api_file' | translate }}"
+              class="btn tpi-primary tpi-btn me-1" (click)="changePage('import')">
+              {{ "upload_reg_comp_api_file" | translate }}
+            </button>
+            <p-menu styleClass="view-mode-menu" #menu [popup]="true" appendTo="body" [model]="ModeItems"></p-menu>
+            <button type="button" class="tpi-btn btn tpi-primary" (click)="menu.toggle($event)">
+              <!-- <button type="button" class="btn tpi-primary btn-icon" (click)="updateViewMode()"> -->
+              <!-- {{ "view_mode" | translate }} {{viewMode+1}} -->
+              <!-- 管理模式 -->
+              <span *ngIf="viewMode=== 0">
+                <!-- <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.1378 11.6515C9.277 11.6515 11.0169 9.91161 11.0169 7.77241C11.0169 5.63322 9.277 3.89334 7.1378 3.89334C4.99861 3.89334 3.25873 5.63322 3.25873 7.77241C3.25873 9.91161 4.99861 11.6515 7.1378 11.6515ZM7.1378 5.49952C8.39102 5.49952 9.41248 6.5192 9.41248 7.7742C9.41248 9.02919 8.3928 10.0489 7.1378 10.0489C5.88281 10.0489 4.86313 9.02919 4.86313 7.7742C4.86313 6.5192 5.88281 5.49952 7.1378 5.49952Z" fill="currentColor"/>
                 <path d="M20.6522 15.076C21.0497 15.076 21.3866 14.7854 21.4455 14.3932L22.647 6.41224C22.6808 6.18049 22.6149 5.94697 22.4616 5.7687C22.3083 5.59222 22.0872 5.4906 21.8537 5.4906H13.2006C12.8031 5.4906 12.4662 5.78118 12.4073 6.17336L11.2058 14.1544C11.172 14.3861 11.2379 14.6196 11.3912 14.7979C11.5445 14.9744 11.7656 15.076 11.9991 15.076H15.8586V19.4578H14.8015C14.8122 19.4043 14.8175 19.3508 14.8175 19.2938V18.4399C14.8175 18.4399 14.8175 18.4274 14.8175 18.422C14.7712 16.4255 12.796 16.4504 11.6212 16.4647C11.0329 16.4718 10.4268 16.4789 10.0346 16.3399C9.75831 16.2418 9.46417 15.716 9.17895 15.2079C8.52827 14.0456 7.54424 12.2879 4.96829 12.2558C4.9576 12.2558 4.94868 12.2558 4.93799 12.2558C3.55999 12.2558 2.54565 13.4787 2.1499 14.6981C1.4921 16.7232 1.25857 19.0799 1.24966 19.1779C1.20687 19.6182 1.52954 20.0104 1.96985 20.0532C2.4173 20.0978 2.80236 19.7733 2.84514 19.333C2.84692 19.3098 3.07154 17.0494 3.67408 15.1936C3.888 14.5358 4.41745 13.8602 4.93799 13.8602C4.93977 13.8602 4.94334 13.8602 4.94512 13.8602C6.59408 13.8816 7.16988 14.9066 7.77777 15.9923C8.20739 16.7588 8.65128 17.5503 9.49269 17.8516C10.1558 18.0887 10.9099 18.078 11.639 18.0709C13.1828 18.0495 13.206 18.1939 13.2113 18.4524V19.2973C13.2113 19.3526 13.2167 19.4079 13.2274 19.4613H8.73685L6.50673 17.044C6.20546 16.7178 5.69919 16.6982 5.37296 16.9995C5.04673 17.3008 5.02712 17.807 5.32839 18.1333L7.72073 20.7252C7.86512 20.9303 8.104 21.0657 8.37496 21.0657H20.7431C21.187 21.0657 21.5453 20.7074 21.5453 20.2635C21.5453 19.8197 21.187 19.4613 20.7431 19.4613H17.4612V15.0796H20.6486L20.6522 15.076ZM13.8923 7.095H20.9214L19.9605 13.4716H12.9315L13.8923 7.095Z" fill="currentColor"/>
-               </svg>
-           </span>
-          <!-- 稽核模式 -->
-           <span *ngIf="viewMode=== 1">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12.0312 9.75296C14.3433 9.75296 16.2258 7.87225 16.2258 5.55835C16.2258 3.24445 14.3451 1.36374 12.0312 1.36374C9.71729 1.36374 7.83658 3.24445 7.83658 5.55835C7.83658 7.87225 9.71729 9.75296 12.0312 9.75296ZM12.0312 2.96992C13.4591 2.96992 14.6214 4.13222 14.6214 5.56013C14.6214 6.98804 13.4591 8.15034 12.0312 8.15034C10.6033 8.15034 9.44098 6.98804 9.44098 5.56013C9.44098 4.13222 10.6033 2.96992 12.0312 2.96992Z" fill="currentColor"/>
-                <path d="M17.3863 10.6265L15.3933 9.83318C14.9815 9.66918 14.5144 9.87061 14.3504 10.2824C14.1864 10.6942 14.3879 11.1613 14.7997 11.3253L16.7909 12.1186C17.3025 12.3218 17.6323 12.8102 17.6323 13.3611V18.7108C17.6323 18.882 17.5432 18.9925 17.4897 19.0442C17.4362 19.0959 17.3186 19.1815 17.151 19.1725L13.2274 19.0264L12.935 18.0352L14.7694 18.1867C14.8121 18.1903 14.8531 18.1921 14.8959 18.1921C15.6785 18.1921 16.3488 17.5896 16.4165 16.7963L16.6358 14.2524C16.6732 13.8103 16.347 13.4217 15.9049 13.3842C15.4593 13.345 15.0742 13.673 15.0368 14.1151L14.8246 16.5823L12.7853 16.4148L13.9529 14.4931C14.1829 14.1151 14.0634 13.6213 13.6837 13.3914C13.3058 13.1614 12.812 13.2808 12.582 13.6606L11.951 14.6999L11.5927 13.4841C11.491 13.1436 11.1791 12.9083 10.8225 12.9083H8.53004L8.63165 12.6391C8.73683 12.361 8.94184 12.1399 9.21102 12.0152L9.99183 11.6533C10.3929 11.4661 10.5676 10.9901 10.3822 10.5872C10.195 10.1861 9.71908 10.0114 9.3162 10.1968L8.53539 10.5587C7.88293 10.8618 7.38379 11.3984 7.12887 12.0722L6.81334 12.9065H5.55656C5.30342 12.9065 5.06633 13.0259 4.9148 13.2292C4.76327 13.4324 4.71692 13.6944 4.78823 13.9369L5.97548 17.9568C5.92735 17.9746 5.881 17.9924 5.83465 18.0156C4.78823 18.5326 4.44952 19.9106 5.06276 21.1531C5.33729 21.7111 5.77226 22.1567 6.28567 22.4099C6.58872 22.5596 6.90603 22.6345 7.21622 22.6345C7.49788 22.6345 7.77241 22.5721 8.02377 22.4491C8.29295 22.3154 8.52291 22.1157 8.6994 21.8697H12.9956C13.2488 21.8697 13.4858 21.7503 13.6374 21.5471C13.7889 21.3438 13.8352 21.0818 13.7639 20.8393L13.7087 20.6486L17.0922 20.7752C17.1189 20.7752 17.1457 20.7752 17.1724 20.7752C17.709 20.7752 18.2153 20.5719 18.6039 20.1958C19.0121 19.8018 19.2367 19.2742 19.2367 18.7073V13.3575C19.2367 12.1453 18.5094 11.0739 17.3845 10.6247L17.3863 10.6265ZM7.44975 20.8126C7.4444 20.8286 7.44083 20.8447 7.43727 20.8607C7.41231 20.9196 7.37309 20.9802 7.31427 21.0087C7.20552 21.0622 7.05756 20.9998 6.99695 20.9713C6.80086 20.875 6.62081 20.6825 6.50315 20.4418C6.27319 19.9747 6.37658 19.5362 6.54594 19.4524C6.57624 19.4382 6.61011 19.431 6.64398 19.431C6.67607 19.431 6.70638 19.4364 6.73668 19.4435C6.75094 19.4489 6.7652 19.456 6.77947 19.4613C6.83651 19.4809 6.89177 19.5077 6.94525 19.5416C6.94525 19.5416 6.94704 19.5416 6.94882 19.5433C6.98625 19.5665 7.02369 19.5968 7.05756 19.6271C7.07717 19.6432 7.095 19.6592 7.11282 19.6788C7.12887 19.6949 7.14313 19.7109 7.15917 19.727C7.19126 19.7626 7.22157 19.7983 7.24831 19.8393C7.25544 19.85 7.26257 19.8607 7.2697 19.8714C7.3 19.9177 7.32853 19.9658 7.35527 20.0158C7.35527 20.0158 7.35527 20.0193 7.35705 20.0193C7.35705 20.0193 7.35705 20.0193 7.35705 20.0211C7.38201 20.0728 7.4034 20.1263 7.42122 20.1798C7.42479 20.1922 7.43014 20.2029 7.4337 20.2154C7.44796 20.26 7.45866 20.3063 7.46757 20.3509C7.47292 20.3759 7.47649 20.399 7.48005 20.424C7.48184 20.4418 7.48362 20.4579 7.48362 20.4739C7.49253 20.5951 7.48362 20.711 7.44796 20.8126H7.44975ZM9.07732 20.2635C9.06841 20.1833 9.05593 20.1031 9.03988 20.0229C9.03988 20.0229 9.03988 20.0211 9.03988 20.0193C9.02562 19.9462 9.0078 19.8731 8.9864 19.8018C8.98284 19.7929 8.98106 19.7822 8.97927 19.7733C8.95966 19.7091 8.93827 19.6432 8.91331 19.579C8.90797 19.5647 8.9044 19.5505 8.89727 19.5362C8.86696 19.4613 8.83488 19.3865 8.79922 19.3134C8.79922 19.3134 8.79922 19.3116 8.79922 19.3098C8.79922 19.3098 8.79922 19.308 8.79744 19.3062C8.76535 19.2421 8.73148 19.1779 8.69405 19.1173C8.67622 19.087 8.65483 19.0567 8.637 19.0264C8.61739 18.9961 8.59957 18.9658 8.57996 18.9372C8.55143 18.8962 8.52291 18.857 8.49261 18.8196C8.48013 18.8035 8.46943 18.7875 8.45695 18.7714C8.41952 18.7251 8.3803 18.6805 8.34108 18.6377C8.33573 18.6324 8.33038 18.6253 8.32504 18.6199C8.14142 18.4203 7.93107 18.2527 7.70467 18.1226L6.63864 14.5109H10.2307L11.9278 20.2635H9.08267H9.07732Z" fill="currentColor"/>
-               </svg>
-           </span>
-           <span class="ms-2">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M1.46967 3.96967C1.76256 3.67678 2.23744 3.67678 2.53033 3.96967L7 8.43934L11.4697 3.96967C11.7626 3.67678 12.2374 3.67678 12.5303 3.96967C12.8232 4.26256 12.8232 4.73744 12.5303 5.03033L7.53033 10.0303C7.23744 10.3232 6.76256 10.3232 6.46967 10.0303L1.46967 5.03033C1.17678 4.73744 1.17678 4.26256 1.46967 3.96967Z" fill="currentColor"/>
-              </svg>
-           </span>
-        </button>
-        </div>
+               </svg> -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M7.1786 11.6526C5.05736 11.6526 3.33209 9.92738 3.33209 7.80614C3.33209 5.68491 5.05736 3.95964 7.1786 3.95964C9.29983 3.95964 11.0251 5.68491 11.0251 7.80614C11.0251 9.92738 9.29983 11.6526 7.1786 11.6526ZM7.1786 5.55233C5.93591 5.55233 4.92302 6.56345 4.92302 7.80791C4.92302 9.05237 5.93414 10.0635 7.1786 10.0635C8.42305 10.0635 9.43418 9.05237 9.43418 7.80791C9.43418 6.56345 8.42305 5.55233 7.1786 5.55233Z"
+                    fill="currentColor" />
+                  <path
+                    d="M14.7956 18.384C14.7956 18.384 14.7956 18.3717 14.7956 18.3664C14.7496 16.3865 12.791 16.4113 11.6261 16.4254C11.0445 16.4325 10.4418 16.4396 10.0529 16.3017C9.77888 16.2045 9.48721 15.683 9.20437 15.1792C8.55917 14.0267 7.5834 12.2837 5.02908 12.2519C5.01847 12.2519 5.00963 12.2519 4.99903 12.2519C3.6326 12.2519 2.62678 13.4645 2.23435 14.6736C1.58207 16.6817 1.3505 19.0186 1.34167 19.1159C1.29924 19.5525 1.61919 19.9414 2.05758 19.9838C2.49597 20.0245 2.8831 19.7063 2.92552 19.2679C2.92729 19.2449 3.14825 17.0088 3.7475 15.1633C3.95962 14.511 4.48463 13.8411 5.0008 13.8411C5.00256 13.8411 5.0061 13.8411 5.00787 13.8411C6.64298 13.8623 7.21395 14.8787 7.81673 15.9552C8.24275 16.7153 8.6829 17.5002 9.51726 17.7989C10.1748 18.034 10.9226 18.0234 11.6456 18.0164C13.1764 17.9951 13.1994 18.1383 13.2047 18.3946V19.2325C13.2047 19.2873 13.21 19.3421 13.2206 19.3952H8.76775L6.55637 16.9982C6.25763 16.6747 5.75383 16.6552 5.43211 16.954C5.10862 17.2527 5.08918 17.7547 5.38792 18.0782L7.7584 20.6467C7.90158 20.8517 8.14022 20.9861 8.40891 20.9861H14.7956V18.3858V18.384Z"
+                    fill="currentColor" />
+                  <path
+                    d="M12.9236 13.4575L13.8764 7.13442H20.8464L20.3214 10.615C20.2984 10.7617 20.4133 10.8943 20.5618 10.8943H21.6772C21.7974 10.8943 21.9 10.8059 21.9176 10.6875L22.554 6.45739C22.6017 6.1339 22.4497 5.80334 22.1421 5.63718C22.0202 5.57 21.8805 5.54349 21.7409 5.54349H13.187C12.7928 5.54349 12.4587 5.83162 12.4004 6.22052L11.2089 14.1345C11.1612 14.458 11.3132 14.7885 11.6208 14.9547C11.7428 15.0219 11.8824 15.0484 12.0221 15.0484H14.5481C14.6825 15.0484 14.7921 14.9388 14.7921 14.8044V13.7014C14.7921 13.5671 14.6825 13.4575 14.5481 13.4575H12.9201H12.9236Z"
+                    fill="currentColor" />
+                  <path
+                    d="M17.753 20.5442L18.7959 15.6123C18.8454 15.379 18.6669 15.1615 18.43 15.1615H17.1573C16.9186 15.1615 16.7418 14.9423 16.7913 14.709L16.931 14.062C16.9646 13.9029 17.0989 13.7827 17.2598 13.7686C17.4949 13.7491 17.7194 13.7191 17.935 13.6784C18.2302 13.6219 18.5042 13.5282 18.757 13.3956C19.0098 13.263 19.2414 13.0845 19.4517 12.8618C19.6214 12.6814 19.7752 12.4605 19.9149 12.1953C19.9785 12.0751 20.1058 12.0009 20.2436 12.0009H21.0409C21.2778 12.0009 21.4563 12.2201 21.4068 12.4516L19.6638 20.6997C19.6267 20.8729 19.4747 20.9967 19.2979 20.9967H18.1224C17.8855 20.9967 17.707 20.7775 17.7565 20.5459L17.753 20.5442Z"
+                    fill="currentColor" />
+                </svg>
+              </span>
+              <span *ngIf="viewMode=== 2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M7.1786 12.3844C5.05736 12.3844 3.33209 10.6591 3.33209 8.53791C3.33209 6.41667 5.05736 4.6914 7.1786 4.6914C9.29983 4.6914 11.0251 6.41667 11.0251 8.53791C11.0251 10.6591 9.29983 12.3844 7.1786 12.3844ZM7.1786 6.28409C5.93591 6.28409 4.92302 7.29522 4.92302 8.53968C4.92302 9.78413 5.93414 10.7953 7.1786 10.7953C8.42305 10.7953 9.43418 9.78413 9.43418 8.53968C9.43418 7.29522 8.42305 6.28409 7.1786 6.28409Z"
+                    fill="currentColor" />
+                  <path
+                    d="M14.7956 19.114C14.7956 19.114 14.7956 19.1017 14.7956 19.0964C14.7496 17.1165 12.791 17.1413 11.6261 17.1554C11.0445 17.1625 10.4418 17.1696 10.0529 17.0317C9.77888 16.9345 9.48721 16.413 9.20437 15.9092C8.55917 14.7567 7.5834 13.0137 5.02908 12.9819C5.01847 12.9819 5.00963 12.9819 4.99903 12.9819C3.6326 12.9819 2.62678 14.1945 2.23435 15.4036C1.58207 17.4117 1.3505 19.7486 1.34167 19.8459C1.29924 20.2825 1.61919 20.6714 2.05758 20.7138C2.49597 20.7544 2.8831 20.4363 2.92552 19.9979C2.92729 19.9749 3.14825 17.7388 3.7475 15.8933C3.95962 15.241 4.48463 14.5711 5.0008 14.5711C5.00256 14.5711 5.0061 14.5711 5.00787 14.5711C6.64298 14.5923 7.21395 15.6087 7.81673 16.6852C8.24275 17.4453 8.6829 18.2302 9.51726 18.5289C10.1748 18.764 10.9226 18.7534 11.6456 18.7463C13.1764 18.7251 13.1994 18.8683 13.2047 19.1246V19.9625C13.2047 20.0173 13.21 20.0721 13.2206 20.1252H8.76775L6.55637 17.7282C6.25763 17.4047 5.75383 17.3852 5.43211 17.684C5.10862 17.9827 5.08918 18.4847 5.38792 18.8082L7.7584 21.3767C7.90158 21.5817 8.14022 21.7161 8.40891 21.7161H14.7956V19.1158V19.114Z"
+                    fill="currentColor" />
+                  <path
+                    d="M12.9236 14.1892L13.8764 7.86618H20.8464L20.3214 11.3468C20.2984 11.4935 20.4133 11.6261 20.5618 11.6261H21.6772C21.7974 11.6261 21.9 11.5377 21.9176 11.4192L22.554 7.18916C22.6017 6.86567 22.4497 6.53511 22.1421 6.36894C22.0202 6.30177 21.8805 6.27526 21.7409 6.27526H13.187C12.7928 6.27526 12.4587 6.56339 12.4004 6.95228L11.2089 14.8663C11.1612 15.1897 11.3132 15.5203 11.6208 15.6865C11.7428 15.7536 11.8824 15.7802 12.0221 15.7802H14.5481C14.6825 15.7802 14.7921 15.6706 14.7921 15.5362V14.4332C14.7921 14.2988 14.6825 14.1892 14.5481 14.1892H12.9201H12.9236Z"
+                    fill="currentColor" />
+                  <path
+                    d="M17.6964 13.6731C18.3098 13.1039 19.1123 12.8193 20.1022 12.8193C20.4947 12.8193 20.8623 12.8705 21.207 12.9731C21.55 13.0756 21.854 13.2329 22.1156 13.445C22.3772 13.6572 22.5841 13.9276 22.7361 14.2546C22.8881 14.5817 22.9624 14.967 22.9624 15.4089C22.9624 15.8261 22.8722 16.2009 22.6919 16.5314C22.5116 16.862 22.2783 17.1607 21.9919 17.4276C21.7055 17.6946 21.3803 17.9367 21.0161 18.1577C20.652 18.3787 20.2896 18.5943 19.9308 18.8029C19.5701 19.0115 19.2272 19.2183 18.9002 19.4234C18.8967 19.4251 18.8931 19.4269 18.8896 19.4287C18.5891 19.6178 18.7287 20.0845 19.084 20.0845H21.8628C22.0926 20.0845 22.2623 20.2984 22.2111 20.5211L22.0308 21.3042C21.9937 21.4668 21.8487 21.5817 21.6825 21.5817H16.0082C15.7855 21.5817 15.6211 21.3802 15.6565 21.161C15.7148 20.8022 15.8173 20.4805 15.9658 20.1941C16.1709 19.8017 16.4325 19.4552 16.7507 19.1565C17.0706 18.8577 17.4295 18.5908 17.8307 18.3522C18.232 18.1153 18.6403 17.8855 19.0575 17.6645C19.2696 17.5425 19.5012 17.4153 19.7505 17.2845C19.9997 17.1537 20.233 17.0034 20.4505 16.8372C20.6679 16.6693 20.85 16.4784 20.9967 16.2663C21.1434 16.0541 21.2176 15.8031 21.2176 15.5168C21.2176 15.0837 21.0886 14.7743 20.8305 14.5905C20.5724 14.4067 20.2595 14.3147 19.8919 14.3147C19.655 14.3147 19.4393 14.3625 19.2467 14.4562C19.054 14.5498 18.8914 14.6789 18.7552 14.8433C18.6209 15.0077 18.5131 15.195 18.4353 15.4072C18.3893 15.5309 18.3557 15.66 18.3345 15.7925C18.3062 15.9622 18.156 16.0824 17.9845 16.0824H17.0512C16.8338 16.0824 16.6641 15.8898 16.6976 15.6759C16.8302 14.8309 17.1625 14.1627 17.6929 13.6713L17.6964 13.6731Z"
+                    fill="currentColor" />
+                </svg>
+              </span>
+              <!-- 稽核模式 -->
+              <span *ngIf="viewMode=== 1">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M12.0312 9.75296C14.3433 9.75296 16.2258 7.87225 16.2258 5.55835C16.2258 3.24445 14.3451 1.36374 12.0312 1.36374C9.71729 1.36374 7.83658 3.24445 7.83658 5.55835C7.83658 7.87225 9.71729 9.75296 12.0312 9.75296ZM12.0312 2.96992C13.4591 2.96992 14.6214 4.13222 14.6214 5.56013C14.6214 6.98804 13.4591 8.15034 12.0312 8.15034C10.6033 8.15034 9.44098 6.98804 9.44098 5.56013C9.44098 4.13222 10.6033 2.96992 12.0312 2.96992Z"
+                    fill="currentColor" />
+                  <path
+                    d="M17.3863 10.6265L15.3933 9.83318C14.9815 9.66918 14.5144 9.87061 14.3504 10.2824C14.1864 10.6942 14.3879 11.1613 14.7997 11.3253L16.7909 12.1186C17.3025 12.3218 17.6323 12.8102 17.6323 13.3611V18.7108C17.6323 18.882 17.5432 18.9925 17.4897 19.0442C17.4362 19.0959 17.3186 19.1815 17.151 19.1725L13.2274 19.0264L12.935 18.0352L14.7694 18.1867C14.8121 18.1903 14.8531 18.1921 14.8959 18.1921C15.6785 18.1921 16.3488 17.5896 16.4165 16.7963L16.6358 14.2524C16.6732 13.8103 16.347 13.4217 15.9049 13.3842C15.4593 13.345 15.0742 13.673 15.0368 14.1151L14.8246 16.5823L12.7853 16.4148L13.9529 14.4931C14.1829 14.1151 14.0634 13.6213 13.6837 13.3914C13.3058 13.1614 12.812 13.2808 12.582 13.6606L11.951 14.6999L11.5927 13.4841C11.491 13.1436 11.1791 12.9083 10.8225 12.9083H8.53004L8.63165 12.6391C8.73683 12.361 8.94184 12.1399 9.21102 12.0152L9.99183 11.6533C10.3929 11.4661 10.5676 10.9901 10.3822 10.5872C10.195 10.1861 9.71908 10.0114 9.3162 10.1968L8.53539 10.5587C7.88293 10.8618 7.38379 11.3984 7.12887 12.0722L6.81334 12.9065H5.55656C5.30342 12.9065 5.06633 13.0259 4.9148 13.2292C4.76327 13.4324 4.71692 13.6944 4.78823 13.9369L5.97548 17.9568C5.92735 17.9746 5.881 17.9924 5.83465 18.0156C4.78823 18.5326 4.44952 19.9106 5.06276 21.1531C5.33729 21.7111 5.77226 22.1567 6.28567 22.4099C6.58872 22.5596 6.90603 22.6345 7.21622 22.6345C7.49788 22.6345 7.77241 22.5721 8.02377 22.4491C8.29295 22.3154 8.52291 22.1157 8.6994 21.8697H12.9956C13.2488 21.8697 13.4858 21.7503 13.6374 21.5471C13.7889 21.3438 13.8352 21.0818 13.7639 20.8393L13.7087 20.6486L17.0922 20.7752C17.1189 20.7752 17.1457 20.7752 17.1724 20.7752C17.709 20.7752 18.2153 20.5719 18.6039 20.1958C19.0121 19.8018 19.2367 19.2742 19.2367 18.7073V13.3575C19.2367 12.1453 18.5094 11.0739 17.3845 10.6247L17.3863 10.6265ZM7.44975 20.8126C7.4444 20.8286 7.44083 20.8447 7.43727 20.8607C7.41231 20.9196 7.37309 20.9802 7.31427 21.0087C7.20552 21.0622 7.05756 20.9998 6.99695 20.9713C6.80086 20.875 6.62081 20.6825 6.50315 20.4418C6.27319 19.9747 6.37658 19.5362 6.54594 19.4524C6.57624 19.4382 6.61011 19.431 6.64398 19.431C6.67607 19.431 6.70638 19.4364 6.73668 19.4435C6.75094 19.4489 6.7652 19.456 6.77947 19.4613C6.83651 19.4809 6.89177 19.5077 6.94525 19.5416C6.94525 19.5416 6.94704 19.5416 6.94882 19.5433C6.98625 19.5665 7.02369 19.5968 7.05756 19.6271C7.07717 19.6432 7.095 19.6592 7.11282 19.6788C7.12887 19.6949 7.14313 19.7109 7.15917 19.727C7.19126 19.7626 7.22157 19.7983 7.24831 19.8393C7.25544 19.85 7.26257 19.8607 7.2697 19.8714C7.3 19.9177 7.32853 19.9658 7.35527 20.0158C7.35527 20.0158 7.35527 20.0193 7.35705 20.0193C7.35705 20.0193 7.35705 20.0193 7.35705 20.0211C7.38201 20.0728 7.4034 20.1263 7.42122 20.1798C7.42479 20.1922 7.43014 20.2029 7.4337 20.2154C7.44796 20.26 7.45866 20.3063 7.46757 20.3509C7.47292 20.3759 7.47649 20.399 7.48005 20.424C7.48184 20.4418 7.48362 20.4579 7.48362 20.4739C7.49253 20.5951 7.48362 20.711 7.44796 20.8126H7.44975ZM9.07732 20.2635C9.06841 20.1833 9.05593 20.1031 9.03988 20.0229C9.03988 20.0229 9.03988 20.0211 9.03988 20.0193C9.02562 19.9462 9.0078 19.8731 8.9864 19.8018C8.98284 19.7929 8.98106 19.7822 8.97927 19.7733C8.95966 19.7091 8.93827 19.6432 8.91331 19.579C8.90797 19.5647 8.9044 19.5505 8.89727 19.5362C8.86696 19.4613 8.83488 19.3865 8.79922 19.3134C8.79922 19.3134 8.79922 19.3116 8.79922 19.3098C8.79922 19.3098 8.79922 19.308 8.79744 19.3062C8.76535 19.2421 8.73148 19.1779 8.69405 19.1173C8.67622 19.087 8.65483 19.0567 8.637 19.0264C8.61739 18.9961 8.59957 18.9658 8.57996 18.9372C8.55143 18.8962 8.52291 18.857 8.49261 18.8196C8.48013 18.8035 8.46943 18.7875 8.45695 18.7714C8.41952 18.7251 8.3803 18.6805 8.34108 18.6377C8.33573 18.6324 8.33038 18.6253 8.32504 18.6199C8.14142 18.4203 7.93107 18.2527 7.70467 18.1226L6.63864 14.5109H10.2307L11.9278 20.2635H9.08267H9.07732Z"
+                    fill="currentColor" />
+                </svg>
+              </span>
+              <span class="ms-2">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M1.46967 3.96967C1.76256 3.67678 2.23744 3.67678 2.53033 3.96967L7 8.43934L11.4697 3.96967C11.7626 3.67678 12.2374 3.67678 12.5303 3.96967C12.8232 4.26256 12.8232 4.73744 12.5303 5.03033L7.53033 10.0303C7.23744 10.3232 6.76256 10.3232 6.46967 10.0303L1.46967 5.03033C1.17678 4.73744 1.17678 4.26256 1.46967 3.96967Z"
+                    fill="currentColor" />
+                </svg>
+              </span>
+            </button>
+          </div>
         </div>
       </ng-template>
       <!-- <ng-template pTemplate="colgroup" let-columns>
@@ -257,19 +295,28 @@
           <th scope="col" (click)="changeSort('apiName')" pSortableColumn="apiName">{{'api_name'|translate}}<p-sortIcon
               field="apiKey"></p-sortIcon></th>
           <th *ngIf="viewModeList[viewMode].includes('apiDesc')" scope="col">{{'api_desc'|translate}}</th>
-          <th *ngIf="viewModeList[viewMode].includes('moduleName')" scope="col" (click)="changeSort('moduleName')" pSortableColumn="moduleName">
+          <th *ngIf="viewModeList[viewMode].includes('moduleName')" scope="col" (click)="changeSort('moduleName')"
+            pSortableColumn="moduleName">
             {{'moduleName'|translate}}<p-sortIcon field="moduleName"></p-sortIcon></th>
-          <th *ngIf="viewModeList[viewMode].includes('apiKey')" scope="col" (click)="changeSort('apiKey')" pSortableColumn="apiKey">{{'api_key'|translate}}<p-sortIcon
-              field="apiKey"></p-sortIcon></th>
-          <th *ngIf="viewModeList[viewMode].includes('apiSrc')" scope="col" (click)="changeSort('apiSrc')" pSortableColumn="apiSrc">{{'api_src'|translate}}<p-sortIcon
-              field="apiSrc"></p-sortIcon></th>
-          <th *ngIf="viewModeList[viewMode].includes('JWTnLabel')" scope="col">{{'jwt_setting'|translate}}/{{'label_tag'|translate}}</th>
-          <th *ngIf="viewModeList[viewMode].includes('enableScheduledDate')" scope="col">{{'apiStatus.scheduledLaunchDate'|translate}}</th>
-          <th *ngIf="viewModeList[viewMode].includes('disableScheduledDate')" scope="col"> {{'apiStatus.scheduledDiscontinuationDate'|translate}}</th>
+          <th *ngIf="viewModeList[viewMode].includes('apiKey')" scope="col" (click)="changeSort('apiKey')"
+            pSortableColumn="apiKey">{{'api_key'|translate}}<p-sortIcon field="apiKey"></p-sortIcon></th>
+          <th *ngIf="viewModeList[viewMode].includes('apiSrc')" scope="col" (click)="changeSort('apiSrc')"
+            pSortableColumn="apiSrc">{{'api_src'|translate}}<p-sortIcon field="apiSrc"></p-sortIcon></th>
+          <th *ngIf="viewModeList[viewMode].includes('JWTnLabel')" scope="col">
+            {{'jwt_setting'|translate}}/{{'label_tag'|translate}}</th>
+          <th *ngIf="viewModeList[viewMode].includes('enableScheduledDate')" scope="col">
+            {{'apiStatus.scheduledLaunchDate'|translate}}</th>
+          <th *ngIf="viewModeList[viewMode].includes('disableScheduledDate')" scope="col">
+            {{'apiStatus.scheduledDiscontinuationDate'|translate}}</th>
           <th *ngIf="viewModeList[viewMode].includes('org')" scope="col">{{'org_name'|translate}}</th>
           <th *ngIf="viewModeList[viewMode].includes('createUser')" scope="col">{{'create_user'|translate}}</th>
           <th *ngIf="viewModeList[viewMode].includes('createDate')" scope="col">{{'create_time'|translate}}</th>
-          <th *ngIf="viewModeList[viewMode].includes('updateUser')" scope="col" (click)="changeSort(col)">{{'update_user'|translate}}</th>
+          <th *ngIf="viewModeList[viewMode].includes('updateUser')" scope="col" (click)="changeSort(col)">
+            {{'update_user'|translate}}</th>
+
+          <th *ngIf="viewModeList[viewMode].includes('apiCacheFlag')" scope="col">API Cache</th>
+          <th *ngIf="viewModeList[viewMode].includes('methodOfJson')" scope="col">Http Methods</th>
+          <th *ngIf="viewModeList[viewMode].includes('noAuth')" scope="col">No Auth</th>
           <th scope="col" (click)="changeSort(col)">{{'update_time'|translate}}</th>
           <!-- <th *ngFor="let col of columns" scope="col" [pSortableColumn]="col.field" [ngStyle]="{
               width: col.field === 'apiStatus' ? '70px' : 'inherit',
@@ -313,7 +360,7 @@
               </label>
             </span>
           </td>
-          <td *ngIf="viewModeList[viewMode].includes('moduleName')" >
+          <td *ngIf="viewModeList[viewMode].includes('moduleName')">
             <span>
               {{ originStringTable(rowData['moduleName']) }}
               <label class="moreless" *ngIf="rowData['moduleName'].ori" (click)="switchOri(rowData['moduleName'])">
@@ -365,8 +412,17 @@
           <td *ngIf="viewModeList[viewMode].includes('createDate')">
             {{rowData?.createDate}}
           </td>
-          <td *ngIf="viewModeList[viewMode].includes('updateUser')" >
+          <td *ngIf="viewModeList[viewMode].includes('updateUser')">
             {{rowData?.updateUser}}
+          </td>
+          <td *ngIf="viewModeList[viewMode].includes('apiCacheFlag')">
+            {{rowData?.apiCacheFlag.n}}
+          </td>
+          <td *ngIf="viewModeList[viewMode].includes('methodOfJson')">
+            {{rowData?.methodOfJson}}
+          </td>
+          <td *ngIf="viewModeList[viewMode].includes('noAuth')">
+            {{rowData?.noAuth == '0' ? 'N': rowData?.noAuth == '1'? 'Y' : rowData?.noAuth}}
           </td>
           <td>
             {{rowData?.updateDate}}
@@ -484,8 +540,9 @@
   </div>
   <!-- API詳細資料 -->
   <div *ngIf="pageNum==2">
-    <app-api-detail [apiDetail]="apiDetail" [srcUrlPool]="srcUrlPool" [ipSrcUrl]="ipSrcUrl" [apiGroupList]="apiGroupList"
-      [detailCols]="detailCols" (getApiGroupListEvt)="getApiGroupListEvt($event)"></app-api-detail>
+    <app-api-detail [apiDetail]="apiDetail" [srcUrlPool]="srcUrlPool" [ipSrcUrl]="ipSrcUrl"
+      [apiGroupList]="apiGroupList" [detailCols]="detailCols"
+      (getApiGroupListEvt)="getApiGroupListEvt($event)"></app-api-detail>
     <div class="form-group row">
       <div class="col-12">
         <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
@@ -635,20 +692,20 @@
         </div>
         <div class="col-sm-4">
           <label class="control-label">{{ "data_format" | translate }}</label>
-            <!-- class="w-100" style="
+          <!-- class="w-100" style="
                 font-weight: bolder;
                 font-family: PingFangSC-Regular, sans-serif;
                 font-size: 16px;
                 color: #5a5541;
               " -->
-            
-            <!-- <label id="reghostId_label" class="w-50" style="
+
+          <!-- <label id="reghostId_label" class="w-50" style="
                 font-weight: bolder;
                 font-family: PingFangSC-Regular, sans-serif;
                 font-size: 16px;
                 color: #5a5541;
               ">{{ "reg_host" | translate }}</label> -->
-          
+
           <div>
             <p-dropdown [showClear]="false" [options]="dataFormats" formControlName="dataFormat"
               placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }">
@@ -698,7 +755,8 @@
 
             <div class="col-8 d-flex justify-content-end pe-0">
               <div class="d-flex align-items-center me-3">
-                <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID" [hidden]="apiDetail.pathType =='dgrc'">
+                <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID"
+                  [hidden]="apiDetail.pathType =='dgrc'">
                 </p-checkbox>
                 <label class="mb-0 ms-1" for="urlRID">
                   {{ apiDetail.pathType =='dgrc' ? '' : "path_param" | translate }}
@@ -715,13 +773,14 @@
             </div>
           </div>
 
-          <div class="form-group" *ngIf="apiDetail.apiSrc.v =='R' && apiDetail.type == '1'">
+          <div class="form-group" *ngIf="apiDetail.apiSrc.v =='R' && apiDetail.type == '1' && !isWebhook">
             <p-checkbox [binary]="true" inputId="redirectByIp" formControlName="redirectByIp"> </p-checkbox>
             <label class="mb-0 ms-1" for="redirectByIp">{{'diversionSrcIP'|translate}}</label>
           </div>
 
           <div [hidden]="redirectByIp.value">
-            <app-src-url-input formControlName="srcUrl" [_disabled]="apiDetail.apiSrc.v == 'C'"></app-src-url-input>
+            <app-src-url-input formControlName="srcUrl"
+              [_disabled]="apiDetail.apiSrc.v == 'C' || isWebhook"></app-src-url-input>
           </div>
           <div [hidden]="!redirectByIp.value">
             <!-- <app-source-ip-config></app-source-ip-config> -->
@@ -752,7 +811,16 @@
           </div>
         </div>
       </div>
-
+      <div class="form-group row" *ngIf="apiDetail.apiSrc.v !='C' && isWebhook">
+        <div class="col-6">
+          <label id="headerMask_label" class="control-label">Webhook Notify Name</label>
+          <div class="ui-inputgroup">
+            <input type="text" class="form-control" formControlName="notifyNameList" readonly>
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
+              (click)="queryNotifyNameList();"></button>
+          </div>
+        </div>
+      </div>
       <div class="form-group row" *ngIf="apiDetail.apiSrc.v !='C'">
         <div class="col-12">
           <label id="headerMask_label" class="control-label">API Log Header Mask</label>

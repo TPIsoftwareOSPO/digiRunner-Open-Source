@@ -322,7 +322,9 @@
             id="apiQuota" formControlName="apiQuota">
         </div>
         <div class="col-lg-4">
-          <label for="tps">{{'tps_default' | translate}}</label>
+          <label for="tps">{{'tps_default' | translate}}
+             <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i>
+          </label>
           <input type="number" min="0" onkeyup="this.value=this.value.replace(/[^\d]/,'')" class="form-control" id="tps"
             formControlName="tps" placeholder="{{'tps_default' | translate}}">
         </div>
@@ -501,7 +503,7 @@
             id="newApiQuota" formControlName="newApiQuota">
         </div>
         <div class="col-lg-4">
-          <label for="newTps">{{'tps_default' | translate}}</label>
+          <label for="newTps">{{'tps_default' | translate}} <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i></label>
           <input type="number" min="0" onkeyup="this.value=this.value.replace(/[^\d]/,'')" class="form-control"
             id="newTps" formControlName="newTps" placeholder="{{'tps_default' | translate}}">
         </div>
@@ -1430,7 +1432,7 @@
       </div>
       <div class="form-group row">
         <div class="col-sm-3">
-          <label>{{'tps_default'|translate}}</label>
+          <label>{{'tps_default'|translate}} <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i></label>
           <label class="form-control border-line">{{clientDetail.tps}}</label>
         </div>
         <div class="col-sm-3">

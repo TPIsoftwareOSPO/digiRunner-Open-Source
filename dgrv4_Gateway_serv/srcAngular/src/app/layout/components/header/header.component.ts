@@ -31,6 +31,8 @@ export class HeaderComponent implements OnInit {
   secStr: string = '';
   timeInterval: any;
 
+  aliveStr: string = '';
+
   lastTimestamp: Date = new Date();
 
   userImg: string = 'assets/images/user.png';
@@ -57,13 +59,14 @@ export class HeaderComponent implements OnInit {
     this.acConf = this.toolService.getAcConf();
     if (this.acConf && this.acConf.edition) {
       const editionMap: { [key: string]: string } = {
-        'Express': 'Community',
-        'Alpha': 'Alpha',
-        'Enterprise': '',
-        'Enterprise_Lite': 'Enterprise Lite'
+        Express: 'Community',
+        Alpha: 'Alpha',
+        Enterprise: '',
+        Enterprise_Lite: 'Enterprise Lite',
       };
 
-      this.acConf.edition = editionMap[this.acConf.edition] ?? this.acConf.edition;
+      this.acConf.edition =
+        editionMap[this.acConf.edition] ?? this.acConf.edition;
     }
     this.aliveSec = sessionStorage.getItem('expires_in')
       ? Number(sessionStorage.getItem('expires_in'))
@@ -71,7 +74,6 @@ export class HeaderComponent implements OnInit {
   }
 
   async ngOnInit() {
-
     this.translate.get(['profile', 'about', 'logout']).subscribe((dict) => {
       this.items = [
         {
@@ -99,16 +101,16 @@ export class HeaderComponent implements OnInit {
     });
 
     this.envList = this.toolService.getEnvListData();
-    if(this.envList.length>0){
-      this.envList.forEach(item=> {
+    if (this.envList.length > 0) {
+      this.envList.forEach((item) => {
         this.items.push({
           label: item.envName,
           icon: 'pi pi-sitemap',
           command: () => {
             this.redirect(item.envUrl);
           },
-        })
-      })
+        });
+      });
     }
     this.userAlias = this.toolService.getUserAlias();
     // this.username = this.toolService.getUserName();
@@ -187,7 +189,25 @@ export class HeaderComponent implements OnInit {
         -2
       );
       this.secStr = ('0' + (this.aliveSec! % 60).toString()).slice(-2);
+
+      // console.log(this.aliveSec)
+      this.aliveStr = this.formatTime(this.aliveSec)
     }, 1000);
+  }
+
+  formatTime(seconds) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    // 補零函式
+    const pad = (num) => String(num).padStart(2, '0');
+
+    if (hrs > 0) {
+      return `${pad(hrs)} : ${pad(mins)} : ${pad(secs)}`;
+    } else {
+      return `${pad(mins)} : ${pad(secs)}`;
+    }
   }
 
   isToggled(): boolean {

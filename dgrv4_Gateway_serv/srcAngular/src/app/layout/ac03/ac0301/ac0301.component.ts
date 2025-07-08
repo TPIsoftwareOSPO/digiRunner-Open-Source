@@ -10,7 +10,13 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 // import { ApiService } from 'src/app/shared/services/api-api.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
@@ -71,7 +77,12 @@ import {
   AA0319Req,
   AA0319ReqItem,
 } from 'src/app/models/api/ApiService/aa0319.interface';
+import { ToolServiceWebhoook } from 'src/app/shared/services/tool-webhook.service';
+import { NotifyListComponent } from 'src/app/shared/notify-list/notify-list.component';
 import { JwtSettingComponent } from './jwt-setting/jwt-setting.component';
+import { AA0434DTO } from 'src/app/models/api/ApiService/aa0434.interfcae';
+import { TOrgService } from 'src/app/shared/services/org.service';
+import { OrganizationComponent } from 'src/app/shared/organization/organization.component';
 
 @Component({
   selector: 'app-ac0301',
@@ -152,7 +163,6 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   import_selected: Array<AA0318Item> = [];
   fileBatchNo: number = 0;
 
-
   viewModeList: { [key: number]: Array<string> } = {
     0: [
       'apiDesc',
@@ -171,10 +181,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       'updateUser',
       'updateDate',
     ],
+    2: ['apiKey', 'apiCacheFlag', 'methodOfJson', 'noAuth'],
   };
 
-  reloadFlag:boolean = false;
-
+  // dgrProtocol:Array<string> = [];
+  isWebhook: boolean = false;
+  reloadFlag: boolean = false;
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
@@ -194,7 +206,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private dialogService: DialogService, // private utilService: UtilService
     private fileService: FileService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private toolServiceW: ToolServiceWebhoook,
+    private orgService: TOrgService
   ) {
     super(route, tr);
 
@@ -256,6 +270,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       fixedCacheTime: new FormControl(0),
       failDiscoveryPolicy: new FormControl(''),
       failHandlePolicy: new FormControl(''),
+      notifyNameList: new FormControl(),
     });
 
     //取得acConf
@@ -567,15 +582,14 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.queryAllLabel();
   }
 
-  queryAllLabel() {    
+  queryAllLabel() {
     //標籤資料清單
     this.apiService.queryAllLabel_ignore1298().subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.lblList = res.RespBody.labelList.map((item) => {
           return { label: item, value: item };
         });
-      }
-      else this.lblList = [];
+      } else this.lblList = [];
     });
   }
 
@@ -1026,8 +1040,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 severity: 'success',
                 summary: `${dict['message.delete']} API`,
                 detail: `${dict['message.delete']} ${dict['message.success']}`,
-              });   
-              this.queryAllLabel();     
+              });
+              this.queryAllLabel();
               this.searchByLabel
                 ? this.queryAPIListByLabel(this.selLabelList)
                 : this.submitForm();
@@ -1672,6 +1686,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
         updateRCapiReqBody.failDiscoveryPolicy = this.failDiscoveryPolicy.value;
         updateRCapiReqBody.failHandlePolicy = this.failHandlePolicy.value;
+        updateRCapiReqBody.notifyNameList = this.notifyNameList.value;
 
         this.apiService
           .updateRegCompAPI(updateRCapiReqBody)
@@ -1932,6 +1947,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       case 'update':
         if (!rowData) return;
         this.resetFormValidator(this.updateForm);
+        this.updateForm.enable();
+        this.isWebhook = false;
         // 註冊主機
         // this.regService
         //   .queryRegHostList_1_ignore1298({ paging: 'false' } as AA0806Req)
@@ -2150,6 +2167,25 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 this.apiDetail.failDiscoveryPolicy
               );
               this.failHandlePolicy.setValue(this.apiDetail.failHandlePolicy);
+              this.notifyNameList.setValue(this.apiDetail.notifyNameList);
+
+              const dgrProtocol_match = this.toolServiceW.dgrProtocol_match(
+                this.apiDetail?.srcUrl?.o
+                  ? this.apiDetail.srcUrl.o
+                  : this.apiDetail?.srcUrl!.v
+              );
+
+              if (dgrProtocol_match.length > 0) {
+                this.isWebhook = dgrProtocol_match.some((item) =>
+                  item.includes('webhook')
+                );
+
+                if (this.isWebhook) {
+                  this.u_srcUrl?.disable();
+                } else {
+                  this.u_srcUrl?.enable();
+                }
+              }
             }
           });
         break;
@@ -2193,6 +2229,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         this.import_apiList = [];
         this.currentTitle = `${this.title} > ${dict['upload_reg_comp_api_file']}`;
         this.pageNum = 5;
+
         break;
     }
   }
@@ -2211,12 +2248,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   headerReturn() {
-    if(this.reloadFlag){
+    if (this.reloadFlag) {
       this.reloadFlag = false;
       this.queryAllLabel();
       this.searchByLabel
-      ? this.queryAPIListByLabel(this.selLabelList)
-      : this.submitForm();
+        ? this.queryAPIListByLabel(this.selLabelList)
+        : this.submitForm();
     }
     this.changePage('query');
   }
@@ -2334,7 +2371,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   tabChange(evt) {
     if (evt.index == 0) {
       this.submitForm();
-    } else {      
+    } else {
       this.selected = [];
       this.dataList = [];
       this.selLabelList = [];
@@ -2457,7 +2494,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         header: dict['unchecked_api'],
         message: dict['cfm_import'],
         key: 'cd',
-        accept: () => {          
+        accept: () => {
           this.confirmImport();
         },
       });
@@ -2513,7 +2550,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               summary: `${dict['button.import']} ${dict['message.fail']}`,
             });
           }
-          this.import_selected = [];          
+          this.import_selected = [];
           this.reloadFlag = true;
         }
       });
@@ -2558,7 +2595,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 if (res.RespBody.apiList[i].desc) {
                   item['memo'] = res.RespBody.apiList[i].desc;
                 }
-              }              
+              }
             }
           });
         }
@@ -2598,19 +2635,28 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     // },
   ];
   loadMenu() {
-    this.translate.get(['view_mode.0', 'view_mode.1']).subscribe(translations => {
-      this.ModeItems = [
-        {
-          label: translations['view_mode.0'],
-          command: () => this.setViewMode(0),
-          styleClass:'active',
-        },
-        {
-          label: translations['view_mode.1'],
-          command: () => this.setViewMode(1),
-        },
-      ];
-    });
+    this.translate
+      .get(['view_mode.0', 'view_mode.1', 'view_mode.2'])
+      .subscribe((translations) => {
+        this.ModeItems = [
+          {
+            label: `${translations['view_mode.0']}`,
+            id: '0',
+            command: () => this.setViewMode(0),
+            styleClass: 'active',
+          },
+          {
+            label: `${translations['view_mode.2']}`,
+            id: '2',
+            command: () => this.setViewMode(2),
+          },
+          {
+            label: translations['view_mode.1'],
+            id: '1',
+            command: () => this.setViewMode(1),
+          },
+        ];
+      });
   }
   setViewMode(mode: number) {
     this.viewMode = mode;
@@ -2618,26 +2664,26 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.updateMenuItems(mode);
   }
 
-  updateMenuItems(mode:number) {
-    this.ModeItems.forEach((x,i) => x.styleClass =mode===i ? "active":"")
+  updateMenuItems(mode: number) {
+    this.ModeItems.forEach(
+      (x, i) => (x.styleClass = String(mode) === x.id ? 'active' : '')
+    );
   }
 
-  async updateJwtSetting(){
-    const code = [
-      'jwt_setting',      
-    ];
+  async updateJwtSetting() {
+    const code = ['jwt_setting'];
     const dict = await this.tool.getDict(code);
     const ref = this.dialogService.open(JwtSettingComponent, {
       // styleClass: 'cHeader cContent cIcon',
-      header: dict['jwt_setting'],        
+      header: dict['jwt_setting'],
       width: '400px',
       // height: '30vh',
       data: {
-        updateJwtSettingFlags: this.updateJwtSettingFlags
+        updateJwtSettingFlags: this.updateJwtSettingFlags,
       },
     });
     ref.onClose.subscribe((res) => {
-      if (res) {        
+      if (res) {
         this.q_jweFlag!.setValue(res.jweFlag);
         this.q_jweFlagResp!.setValue(res.jweFlagResp);
         this.jwtSettingChange();
@@ -2645,6 +2691,73 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     });
   }
 
+  queryNotifyNameList() {
+    const ref = this.dialogService.open(NotifyListComponent, {
+      header: 'Notify Name',
+      width: '700px',
+    });
+
+    ref.onClose.subscribe((res) => {
+      this.notifyNameList.setValue(res);
+    });
+  }
+
+  orgReset() {
+    this.orgService
+      .queryOrgList({ orgID: undefined })
+      .subscribe(async (res) => {
+        if (this.tool.checkDpSuccess(res.ResHeader)) {
+          const _orgList = res.RespBody.orgList;
+
+          const codes = ['org_chart'];
+          const dict = await this.tool.getDict(codes);
+
+          const refDialog = this.dialogService.open(OrganizationComponent, {
+            header: dict['org_chart'],
+            modal: true,
+            data: {
+              orgList: _orgList,
+              showFooterBtn: true,
+            },
+            width: '90vw',
+            height: '100vh',
+          });
+
+          refDialog.onClose.subscribe((res) => {
+            if (res) {
+              const reqArr = this.selected.map((rowData) => {
+                return {
+                  apiKey: rowData.apiKey?.ori
+                    ? rowData.apiKey.ori
+                    : rowData.apiKey.val,
+                  moduleName: rowData.moduleName?.ori
+                    ? rowData.moduleName.ori
+                    : rowData.moduleName.val,
+                  orgID: res.data.orgID,
+                } as AA0434DTO;
+              });
+
+              this.orgService.batchApiOrg(reqArr).subscribe(async (res) => {
+                if (this.tool.checkDpSuccess(res.ResHeader)) {
+                  const code = ['message.success', 'org_reset'];
+                  const dict = await this.tool.getDict(code);
+                  this.messageService.add({
+                    severity: 'success',
+                    summary: `${dict['org_reset']}`,
+                    detail: `${dict['org_reset']} ${dict['message.success']}`,
+                  });
+
+                  // 取回資料
+                  this.searchByLabel
+                    ? this.queryAPIListByLabel(this.selLabelList)
+                    : this.submitForm();
+                }
+              });
+            }
+          });
+        }
+      });
+  }
   public get q_jwtSetting() {
     return this.queryForm.get('jwtSetting');
   }
@@ -2782,6 +2895,10 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
   public get failHandlePolicy() {
     return this.updateForm.get('failHandlePolicy')!;
+  }
+
+  public get notifyNameList() {
+    return this.updateForm.get('notifyNameList')!;
   }
 
   public get file() {

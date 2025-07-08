@@ -13,21 +13,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import tpi.dgrv4.common.utils.DateTimeUtil;
-import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.common.vo.ReqHeader;
-import tpi.dgrv4.dpaa.component.cache.proxy.TsmpOrganizationCacheProxy;
 import tpi.dgrv4.common.constant.BcryptFieldValueEnum;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.BcryptParamDecodeException;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
+import tpi.dgrv4.common.utils.DateTimeUtil;
+import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.common.vo.ReqHeader;
+import tpi.dgrv4.dpaa.component.cache.proxy.TsmpOrganizationCacheProxy;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.AA0301Item;
 import tpi.dgrv4.dpaa.vo.AA0301Pair;
@@ -38,9 +36,12 @@ import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
+import tpi.dgrv4.entity.entity.TsmpApiReg;
+import tpi.dgrv4.entity.entity.TsmpApiRegId;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
 import tpi.dgrv4.entity.entity.TsmpOrganization;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
+import tpi.dgrv4.entity.repository.TsmpApiRegDao;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
 import tpi.dgrv4.entity.vo.AA0301SearchCriteria;
 import tpi.dgrv4.gateway.component.ServiceConfig;
@@ -55,6 +56,7 @@ public class AA0301Service {
 	private Integer pageSize;
 
 	private TsmpApiDao tsmpApiDao;
+	private TsmpApiRegDao tsmpApiRegDao;
 	private ServiceConfig serviceConfig;
 	private BcryptParamHelper bcryptParamHelper;
 	private TsmpOrganizationDao tsmpOrganizationDao;
@@ -67,7 +69,7 @@ public class AA0301Service {
 	@Autowired
 	public AA0301Service(TsmpApiDao tsmpApiDao, ServiceConfig serviceConfig, BcryptParamHelper bcryptParamHelper,
 			TsmpOrganizationDao tsmpOrganizationDao, TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy,
-			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy) {
+			TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,TsmpApiRegDao tsmpApiRegDao) {
 		super();
 		this.tsmpApiDao = tsmpApiDao;
 		this.serviceConfig = serviceConfig;
@@ -75,6 +77,7 @@ public class AA0301Service {
 		this.tsmpOrganizationDao = tsmpOrganizationDao;
 		this.tsmpOrganizationCacheProxy = tsmpOrganizationCacheProxy;
 		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
+		this.tsmpApiRegDao = tsmpApiRegDao;
 	}
 
 	public AA0301Resp queryAPIList(TsmpAuthorization authorization, AA0301Req req, ReqHeader reqHeader) {
@@ -404,7 +407,36 @@ public class AA0301Service {
 			}
 			item.setUpdateDate(updateDateStr);
 			item.setUpdateUser(StringUtils.hasText(api.getUpdateUser()) ? api.getUpdateUser() : "");
+			
+			//apiCacheFlag
+			String apiCacheFlag = api.getApiCacheFlag();
+			if (!StringUtils.hasText(apiCacheFlag)) {
+				apiCacheFlag = "";
+				String subitemName = "";
+				AA0301Pair pair = setPair(apiCacheFlag, subitemName);
+				item.setApiCacheFlag(pair);
+			} else {
+				String subitemName = apiCacheFlag;
+				dpItem = getTsmpDpItemsCacheProxy().findByItemNoAndSubitemNoAndLocale("API_CACHE_FLAG",
+						apiCacheFlag, locale);
+				if (dpItem != null) {
+					subitemName = dpItem.getSubitemName();
+				}
+				AA0301Pair pair = setPair(apiCacheFlag, subitemName);
+				item.setApiCacheFlag(pair);
+			}
 
+			//method, no auth
+			TsmpApiRegId regId = new TsmpApiRegId(api.getApiKey(), api.getModuleName());
+			TsmpApiReg tsmpApiRegVo = getTsmpApiRegDao().findById(regId).orElse(null);
+			if(tsmpApiRegVo != null) {
+				item.setMethodOfJson(tsmpApiRegVo.getMethodOfJson().replace("[", "").replace("]", "").replace("\"", ""));
+				item.setNoAuth(tsmpApiRegVo.getNoOauth());
+			}else {
+				item.setMethodOfJson("");
+				item.setNoAuth("0");
+			}
+			
 			dataList.add(item);
 		});
 		return dataList;
@@ -481,4 +513,10 @@ public class AA0301Service {
 	protected TsmpDpItemsCacheProxy getTsmpDpItemsCacheProxy() {
 		return this.tsmpDpItemsCacheProxy;
 	}
+
+	protected TsmpApiRegDao getTsmpApiRegDao() {
+		return tsmpApiRegDao;
+	}
+	
+	
 }

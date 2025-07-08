@@ -73,7 +73,7 @@ import { CustomAlertComponent } from './custom-alert/custom-alert.component';
 import { ClientCAComponent } from './../layout/np02/np0202/client-ca/client-ca.component';
 import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-detail.component';
 import { SearchInputComponent } from '../layout/components/search-input/search-input.component';
-
+import { NotifyListComponent } from './notify-list/notify-list.component';
 
 @NgModule({
   imports: [
@@ -144,6 +144,7 @@ import { SearchInputComponent } from '../layout/components/search-input/search-i
     ClientCAComponent,
     UserDetailComponent,
     SearchInputComponent,
+    NotifyListComponent,
   ],
   declarations: [
     ContainerComponent,
@@ -198,7 +199,8 @@ import { SearchInputComponent } from '../layout/components/search-input/search-i
     CustomAlertComponent,
     ClientCAComponent,
     UserDetailComponent,
-    SearchInputComponent
+    SearchInputComponent,
+    NotifyListComponent
   ],
   providers: [ApiBaseService, MessageService],
 })

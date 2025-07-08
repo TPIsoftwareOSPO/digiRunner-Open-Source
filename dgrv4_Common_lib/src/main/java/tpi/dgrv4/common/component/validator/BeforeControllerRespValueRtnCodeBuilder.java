@@ -33,7 +33,7 @@ public class BeforeControllerRespValueRtnCodeBuilder<V> extends //
 
 	private String[] params;
 
-	public final static void setTsmpRtnCodeDao(ITsmpRtnCodeDao tsmpRtnCodeDao) {
+	public static final void setTsmpRtnCodeDao(ITsmpRtnCodeDao tsmpRtnCodeDao) {
 		dao = tsmpRtnCodeDao;
 	}
 	
@@ -52,8 +52,6 @@ public class BeforeControllerRespValueRtnCodeBuilder<V> extends //
 	}
 
 	private String composeMsg() {
-		String rtnMsg = new String();
-
 		ITsmpRtnCode tsmpRtnCode = getTsmpRtnCodeById(this.rtnCode, this.locale);
 		if (tsmpRtnCode == null) {
 			TsmpDpAaRtnCode._1289.throwing(this.locale, this.rtnCode);
@@ -71,8 +69,7 @@ public class BeforeControllerRespValueRtnCodeBuilder<V> extends //
 		}
 		
 		String msgTemplate = tsmpRtnCode.getTsmpRtnMsg();	
-		rtnMsg = ControllerUtil.buildContent(msgTemplate, templateParams);
-		return rtnMsg;
+		return ControllerUtil.buildContent(msgTemplate, templateParams);
 	}
 	
 	@Override
@@ -88,10 +85,6 @@ public class BeforeControllerRespValueRtnCodeBuilder<V> extends //
 	}
 
 	private ITsmpRtnCode getTsmpRtnCodeById(String rtnCode, String locale) {
-//		TsmpRtnCodeId id = new TsmpRtnCodeId(rtnCode, locale);
-//		Optional<TsmpRtnCode> opt = dao.findById(id);
-//		return opt.orElse(null);
-		
 		Optional<ITsmpRtnCode> opt = dao.findByTsmpRtnCodeAndLocale(rtnCode, locale);
 		if(!opt.isPresent() && !LocaleType.EN_US.equals(locale)) {
 			opt = dao.findByTsmpRtnCodeAndLocale(rtnCode, LocaleType.EN_US);

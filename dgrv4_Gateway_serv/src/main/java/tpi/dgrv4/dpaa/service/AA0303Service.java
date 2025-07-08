@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +37,7 @@ import tpi.dgrv4.dpaa.vo.AA0303Req;
 import tpi.dgrv4.dpaa.vo.AA0303Resp;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpRtnCodeCacheProxy;
 import tpi.dgrv4.entity.entity.DgrAcIdpUser;
+import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
 import tpi.dgrv4.entity.entity.ITsmpRtnCode;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
@@ -51,6 +55,7 @@ import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
 import tpi.dgrv4.entity.entity.jpql.TsmpnApiDetail;
 import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
 import tpi.dgrv4.entity.repository.DgrComposerFlowDao;
+import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiDetailDao;
 import tpi.dgrv4.entity.repository.TsmpApiExtDao;
@@ -103,7 +108,11 @@ public class AA0303Service {
 	private EnableDisableProcessingFlow enableDisableProcessingFlow;
 	private List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers;
 
-	@Autowired
+
+	@Setter(onMethod_ = @Autowired)
+	@Getter(AccessLevel.PROTECTED)
+	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
+
 	public AA0303Service(TsmpUserDao tsmpUserDao, TsmpApiDao tsmpApiDao, TsmpOrganizationDao tsmpOrganizationDao,
 			TsmpApiRegDao tsmpApiRegDao, TsmpApiDetailDao tsmpApiDetailDao, TsmpnApiDetailDao tsmpnApiDetailDao,
 			TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy, TsmpApiExtDao tsmpApiExtDao, ApplicationContext ctx,
@@ -113,7 +122,7 @@ public class AA0303Service {
 			DgrAuditLogService dgrAuditLogService, DgrComposerFlowDao dgrComposerFlowDao,
 			DaoGenericCacheService daoGenericCacheService, DgrAcIdpUserDao dgrAcIdpUserDao,
 			TsmpRtnCodeDao tsmpRtnCodeDao, EnableDisableProcessingFlow enableDisableProcessingFlow,
-			List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers) {
+			List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers, DgrWebhookApiMapDao dgrWebhookApiMapDao) {
 		super();
 		this.tsmpUserDao = tsmpUserDao;
 		this.tsmpApiDao = tsmpApiDao;
@@ -139,6 +148,7 @@ public class AA0303Service {
 		this.tsmpRtnCodeDao = tsmpRtnCodeDao;
 		this.enableDisableProcessingFlow = enableDisableProcessingFlow;
 		this.apiPublicFlagHandlers = apiPublicFlagHandlers;
+		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
 	}
 
 	@Transactional
@@ -549,6 +559,8 @@ public class AA0303Service {
 
 			// 因為建立虛擬群組時，一支 API 就會建立一個 TSMP_GROUP，因此刪除 API 時，就要連帶刪除與此 TSMP_GROUP 相關的資料
 			cascadeDeleteGroups(gList);
+						
+			cascadeDeleteWebhookNotify(apiKey, moduleName);
 		}
 	}
 
@@ -692,6 +704,11 @@ public class AA0303Service {
 			// TSMP_GROUP (雙欄位更新)
 			getTsmpGroupDao().deleteByGroupIdAndGroupName(groupId, g.getGroupName());
 		}
+	}
+	
+	private void cascadeDeleteWebhookNotify(String apiKey, String moduleName) {
+		List<DgrWebhookApiMap> mList = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(apiKey, moduleName);
+		getDgrWebhookApiMapDao().deleteAll(mList);
 	}
 
 	private String getErrMsg(TsmpDpAaRtnCode tsmpDpAaRtnCode, String locale) {

@@ -4,24 +4,34 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.component.IVersionService;
 import tpi.dgrv4.entity.vo.VersionInfo;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.ClientKeeper;
 
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class VersionService implements IVersionService{
-	// 是否為 Open Source 使用, 預設 'false' 
-	// Whether it is Open Source, the default value is 'false'
-	protected static boolean isOpenSource = true;
+//	@Autowired(required = false)
+	private ISysInfoService sysInfoService;
+	
+	@Autowired
+	public VersionService(@Nullable ISysInfoService sysInfoService) {
+		this.sysInfoService = sysInfoService;
+	}
 
 	/**
-	 * 需要存取外界, 不加入 UT
+	 * [ZH] 需要存取外界, 不加入 UT
+	 * [EN] Need to access the outside world, do not join UT
 	 */
 	protected String getAllClientList() {
 		if (TPILogger.lc == null) return null;
@@ -48,7 +58,8 @@ public class VersionService implements IVersionService{
 	}
 	
 	/**
-	 * 讀取 .txt 的內容版本
+	 * [ZH] 讀取 .txt 的內容版本
+	 * [EN] Read the content version of .txt
 	 */
 	protected String getTxtVersion() {
 		String version = null;
@@ -67,10 +78,11 @@ public class VersionService implements IVersionService{
 	
 	public VersionInfo getVersion() {
 		VersionInfo v = new VersionInfo();
-		if (isOpenSource) {
-			v = getVersionForOpenSource();
-		} else {
+		
+		if (sysInfoService != null) {
 			v = getVersionForEnterprise();
+		} else { // for Open Source
+			v = getVersionForOpenSource();
 		}
 
 		return v;
@@ -114,8 +126,8 @@ public class VersionService implements IVersionService{
  
 	/**
 	 * for Open Source <br>
-	 * 此方法為讀取 open-source-version.txt 為顯示版本 <br>
-	 * This method reads open-source-version.txt to display the version <br>
+	 * [ZH] 此方法為讀取 open-source-version.txt 為顯示版本 <br>
+	 * [EN] This method reads open-source-version.txt to display the version <br>
 	 */
 	public VersionInfo getVersionForOpenSource() {
 		// POJO Data

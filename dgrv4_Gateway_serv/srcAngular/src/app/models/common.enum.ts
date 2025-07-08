@@ -418,8 +418,22 @@ export enum TxID {
   createAndUpdateBotDetectionList = 'DPB0233',
   testEsConnection = 'DPB9938',
   testKibanaConnection = 'DPB9939',
+  queryWebhookNotify = 'DPB0280',
+  createWebhookNotify = 'DPB0281',
+  getWebhookNotify = 'DPB0282',
+  updateWebhookNotify = 'DPB0283',
+  deleteWebhookNotify = 'DPB0284',
+  queryWebhookLogs = 'DPB0285',
+  resendWebhookNotify = 'DPB0286',
   queryRealtimeDashboardData = 'AA1212',
   queryApiAbnormal = 'AA1213',
+  queryGrpcService = 'DPB0294',
+  batchUpdateProxyStatus = 'DPB0291',
+  updateGrpcService = 'DPB0292',
+  deleteGrpcService = 'DPB0293',
+  createGrpcService = 'DPB0290',
+  queryOrgList = 'AA0433',
+  batchApiOrg = 'AA0434',
 }
 
 export enum GrantType {

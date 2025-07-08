@@ -4,6 +4,7 @@ export interface ReqAA1213 extends BaseReq {
   ReqBody: AA1213Req;
 }
 export interface AA1213Req {
+  queryItem:number;
   abnormalElapsedTime: number;
 }
 

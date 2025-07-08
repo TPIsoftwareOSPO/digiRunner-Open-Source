@@ -1,0 +1,127 @@
+
+<form [formGroup]="form">
+  <div class="form-group" *ngIf="webhookType=='DISCORD'">
+    <div class="form-group row">
+      <div class="col-8">
+        <label id="url_label" class="control-label fw-bold required">Url</label>
+        <input type="text" class="form-control" id="url" formControlName="url">
+        <div *ngIf="url?.invalid && (url?.dirty || url?.touched)" class="text-danger">
+          <small class="form-text">{{url?.errors.required | translate}}</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-4">
+        <label id="username_label" class="control-label fw-bold required">User Name</label>
+        <input type="text" class="form-control" id="username" formControlName="username">
+        <div *ngIf="username?.invalid && (username?.dirty || username?.touched)" class="text-danger">
+          <small class="form-text">{{username?.errors.required | translate}}</small>
+        </div>
+      </div>
+      <div class="col-4">
+        <label id="avatar_url_label" class="control-label fw-bold">Avatar url</label>
+        <input type="text" class="form-control" id="avatar_url" formControlName="avatar_url">
+        <div *ngIf="avatar_url?.invalid && (avatar_url?.dirty || avatar_url?.touched)" class="text-danger">
+          <small class="form-text">{{avatar_url?.errors.required | translate}}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group" *ngIf="webhookType=='SLACK'">
+    <div class="form-group row">
+      <div class="col-12">
+        <label id="url_label" class="control-label fw-bold required">Url</label>
+        <input type="text" class="form-control" id="url" formControlName="url">
+        <div *ngIf="url?.invalid && (url?.dirty || url?.touched)" class="text-danger">
+          <small class="form-text">{{url?.errors.required | translate}}</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-4">
+        <label id="username_label" class="control-label fw-bold required">User Name</label>
+        <input type="text" class="form-control" id="username" formControlName="username">
+        <div *ngIf="username?.invalid && (username?.dirty || username?.touched)" class="text-danger">
+          <small class="form-text">{{username?.errors.required | translate}}</small>
+        </div>
+      </div>
+      <div class="col-4">
+        <label id="icon_emoji_label" class="control-label fw-bold">Icon emoji</label>
+        <input type="text" class="form-control" id="icon_emoji" formControlName="icon_emoji">
+        <div *ngIf="icon_emoji?.invalid && (icon_emoji?.dirty || icon_emoji?.touched)" class="text-danger">
+          <small class="form-text">{{icon_emoji?.errors.required | translate}}</small>
+        </div>
+      </div>
+      <div class="col-4">
+        <label id="channel_label" class="control-label fw-bold">Channel</label>
+        <input type="text" class="form-control" id="channel" formControlName="channel">
+        <div *ngIf="channel?.invalid && (channel?.dirty || channel?.touched)" class="text-danger">
+          <small class="form-text">{{channel?.errors.required | translate}}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group row" *ngIf="webhookType=='EMAIL'">
+    <div class="col-4">
+      <label id="subject_label" class="control-label fw-bold required">Subject</label>
+      <input type="text" class="form-control" id="subject" formControlName="subject">
+      <div *ngIf="subject?.invalid && (subject?.dirty || subject?.touched)" class="text-danger">
+        <small class="form-text">{{subject?.errors.required | translate}}</small>
+      </div>
+    </div>
+    <div class="col-4">
+      <label id="recipients_label" class="control-label fw-bold">Recipients</label>
+      <input type="text" class="form-control" id="recipients" formControlName="recipients">
+      <div *ngIf="recipients?.invalid && (recipients?.dirty || recipients?.touched)" class="text-danger">
+        <small class="form-text">{{recipients?.errors.required | translate}}</small>
+      </div>
+    </div>
+  </div>
+  <div class="form-group row" *ngIf="webhookType=='LINE'">
+    <div class="col-4">
+      <label id="authorization_label" class="control-label fw-bold required">Authorization</label>
+      <input type="text" class="form-control" id="authorization" formControlName="authorization">
+      <div *ngIf="authorization?.invalid && (authorization?.dirty || authorization?.touched)" class="text-danger">
+        <small class="form-text">{{authorization?.errors.required | translate}}</small>
+      </div>
+    </div>
+    <div class="col-4">
+      <label id="to_label" class="control-label fw-bold">To</label>
+      <input type="text" class="form-control" id="to" formControlName="to">
+      <div *ngIf="to?.invalid && (to?.dirty || to?.touched)" class="text-danger">
+        <small class="form-text">{{to?.errors.required | translate}}</small>
+      </div>
+    </div>
+    <div class="col-4">
+      <label id="notificationDisabled_label" class="control-label fw-bold">NotificationDisabled</label>
+      <div class="p-form-check-line">
+        <ng-container>
+          <div class="p-form-check">
+            <p-radioButton formControlName="notificationDisabled" value="Y"
+              inputId="notificationDisabledY"></p-radioButton>
+            <label for="notificationDisabledY" class="ms-2 mb-0">Y</label>
+          </div>
+          <div class="p-form-check">
+            <p-radioButton formControlName="notificationDisabled" value="N"
+              inputId="notificationDisabledN"></p-radioButton>
+            <label for="notificationDisabledN" class="ms-2 mb-0">N</label>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</form>
+<div [hidden]="webhookType!='HTTP'">
+  <div class="row col">
+    <ng-template #mappingUrlField></ng-template>
+    <div style="color:red" [hidden]="_equal100">
+      <small>{{'equal100'| translate}}</small>
+    </div>
+  </div>
+  <div class="field-flex-start" [hidden]="disabled">
+    <button type="button" class="btn tpi-second" (click)="addMappingUrlData()" style="border-radius: 50%;">
+      <!-- [hidden]="disabled || isAllowAll" -->
+      <i class="fa fa-plus"></i>
+    </button>
+  </div>
+</div>

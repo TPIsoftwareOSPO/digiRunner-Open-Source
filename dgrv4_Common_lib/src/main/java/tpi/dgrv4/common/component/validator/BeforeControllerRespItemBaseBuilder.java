@@ -24,7 +24,7 @@ public abstract class BeforeControllerRespItemBaseBuilder<T extends BeforeContro
 
 	private BeforeControllerRespValueBuilderIfs<Boolean> isRequired;
 	
-	public BeforeControllerRespItemBaseBuilder(String locale, String type) {
+	protected BeforeControllerRespItemBaseBuilder(String locale, String type) {
 		this.locale = locale;
 		this.type = type;
 	}

@@ -1,0 +1,210 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <p-table [value]="tableData" [(selection)]="selected" styleClass="p-datatable-striped"
+      [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
+      <ng-template pTemplate="caption">
+        <div class="ui-helper-clearfix">
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
+            (click)="updateStatus('Y')">
+            {{ "button.enable" | translate }}
+          </button>
+          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
+            (click)="updateStatus('N')">
+            {{ "button.disable" | translate }}
+          </button>
+          <button type="button" class="btn tpi-btn tpi-second float-end"
+            (click)="changePage('create')">{{'button.create'|translate}}</button>
+        </div>
+      </ng-template>
+      <!-- Table 表頭 -->
+      <ng-template pTemplate="header" selectionMode="multiple">
+        <tr style="text-align: center">
+          <th style="width: 2.25em">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th style="width: 70px;white-space: nowrap;">{{'status'|translate}}</th>
+          <th>{{"grpc.tar_serv"|translate}}</th>
+          <th>{{"grpc.proxy_host"|translate}}</th>
+          <th>{{"grpc.tar_host"|translate}}</th>
+          <th>{{"grpc.tar_port"|translate}}</th>
+          <th style="width:120px">{{'action'|translate}}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+          </td>
+          <td style="text-align: center;">
+            <img [alt]="rowData.enable" style="width: 20px; height: 20px"
+              [src]="rowData.enable ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+          </td>
+          <td>{{rowData.serviceName}}</td>
+          <td>{{rowData.proxyHostName}}</td>
+          <td>{{rowData.targetHostName}}</td>
+          <td>{{rowData.targetPort}}</td>
+          <td style="text-align: center;">
+
+            <!-- <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              [pTooltip]="'button.detail' | translate" tooltipPosition="top"
+              (click)="changePage('detail', rowData)"></button> -->
+
+            <button pButton pRipple type="button" icon="fa fa-edit"
+              class="p-button-rounded p-button-text p-button-plain" [pTooltip]="'button.update' | translate"
+              tooltipPosition="top" (click)="changePage('update', rowData)"></button>
+
+            <button pButton pRipple type="button" icon="fa fa-trash-alt"
+              class="p-button-rounded p-button-text p-button-plain" [pTooltip]="'button.delete' | translate"
+              tooltipPosition="top" (click)="changePage('delete', rowData)"></button>
+
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="7">
+            {{ "no_rec" | translate }}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <!-- 建立/更新 -->
+  <div [hidden]="pageNum != 2">
+    <form [formGroup]="formEdit">
+      <div class="form-group row" *ngIf="currentAction=='update'">
+        <div class="col-6">
+          <label id="gRPCProxyMapId_label" class="control-label">gRPC Proxy Id</label>
+          <input type="text" class="form-control" id="gRPCProxyMapId" formControlName="gRPCProxyMapId" readonly>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-6">
+          <label id="serviceName_label" class="control-label">{{'grpc.tar_serv'|translate}}</label>
+          <input type="text" class="form-control" id="serviceName" formControlName="serviceName" >
+          <div *ngIf="serviceName?.invalid && (serviceName?.dirty || serviceName?.touched)" class="text-danger">
+            <small class="form-text">{{serviceName?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <label id="enable_label" class="control-label">Enable</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="enable" value="Y" inputId="enableY"></p-radioButton>
+                <label for="enableY" class="ms-2 mb-0">Y</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="enable" value="N" inputId="enableN"></p-radioButton>
+                <label for="enableN" class="ms-2 mb-0">N</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-6">
+          <label id="targetHostName_label" class="control-label">{{'grpc.tar_host'|translate}}</label>
+          <input type="text" class="form-control" id="targetHostName" formControlName="targetHostName" placeholder="IP address or Hostname">
+          <div *ngIf="targetHostName?.invalid && (targetHostName?.dirty || targetHostName?.touched)"
+            class="text-danger">
+            <small class="form-text">{{targetHostName?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <label id="targetPort_label" class="control-label">{{'grpc.tar_port'|translate}}</label>
+          <input type="text" class="form-control" id="targetPort" formControlName="targetPort">
+          <div *ngIf="targetPort?.invalid && (targetPort?.dirty || targetPort?.touched)" class="text-danger">
+            <small class="form-text">{{targetPort?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12">
+          <label id="targetHostName_label" class="control-label">{{'grpc.tar_host'|translate}} TLS</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="secureMode" value="SECURE" inputId="secureModeY"></p-radioButton>
+                <label for="secureModeY" class="ms-2 mb-0">Y</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="secureMode" value="PLAINTEXT" inputId="secureModeN"></p-radioButton>
+                <label for="secureModeN" class="ms-2 mb-0">N</label>
+              </div>
+            </ng-container>
+          </div>
+          <div style="display:block" *ngIf="secureMode.value ==='SECURE'">
+            <label id="targetHostName_label" class="control-label fw-bold">{{"certificate_authority"|translate  }}( X.509 )</label>
+            <textarea rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent" pInputTextarea></textarea>
+          </div>
+          <div *ngIf="trustedCertsContent?.invalid && (trustedCertsContent?.dirty || trustedCertsContent?.touched)" class="text-danger">
+            <small class="form-text">{{trustedCertsContent?.errors.required | translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12">
+          <label id="proxyHostName_label" class="control-label">Proxy hostname/domain name</label>
+          <input type="text" class="form-control" id="proxyHostName" formControlName="proxyHostName" placeholder="Hostname or Domain name">
+          <div *ngIf="proxyHostName?.invalid && (proxyHostName?.dirty || proxyHostName?.touched)" class="text-danger">
+            <small class="form-text">{{proxyHostName?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-4">
+          <label id="connectTimeoutMs_label" class="control-label">Connect timeout</label>
+          <div class="d-flex align-items-center">
+            <input type="number" class="form-control" id="connectTimeoutMs" formControlName="connectTimeoutMs">
+            <small class="ms-1">ms</small>
+          </div>
+          <div *ngIf="connectTimeoutMs?.invalid && (connectTimeoutMs?.dirty || connectTimeoutMs?.touched)"
+            class="text-danger">
+            <small class="form-text">{{connectTimeoutMs?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <label id="sendTimeoutMs_label" class="control-label">Send timeout</label>
+          <div class="d-flex align-items-center">
+            <input type="number" class="form-control" id="sendTimeoutMs" formControlName="sendTimeoutMs">
+            <small class="ms-1">ms</small>
+          </div>
+          <div *ngIf="sendTimeoutMs?.invalid && (sendTimeoutMs?.dirty || sendTimeoutMs?.touched)" class="text-danger">
+            <small class="form-text">{{sendTimeoutMs?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <label id="readTimeoutMs_label" class="control-label">Read timeout</label>
+          <div class="d-flex align-items-center">
+            <input type="number" class="form-control" id="readTimeoutMs" formControlName="readTimeoutMs">
+            <small class="ms-1">ms</small>
+          </div>
+          <div *ngIf="readTimeoutMs?.invalid && (readTimeoutMs?.dirty || readTimeoutMs?.touched)" class="text-danger">
+            <small class="form-text">{{readTimeoutMs?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row mt-3">
+        <div class="col-12 col-xl-12 col-lg-12">
+          <button *ngIf="currentAction=='create'" type="button" class="btn tpi-btn tpi-second float-start me-3"
+            [disabled]="formEdit.invalid" (click)="create()">{{'button.create'|translate}}</button>
+          <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
+            [disabled]="formEdit.invalid" (click)="update()">{{'button.update'|translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
+            (click)="changePage('query')">{{'button.return_to_list'|translate}}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</app-container>
+<p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon" >
+  <ng-template pTemplate="footer">
+    <div class="row" style="justify-content: center;">
+      <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>

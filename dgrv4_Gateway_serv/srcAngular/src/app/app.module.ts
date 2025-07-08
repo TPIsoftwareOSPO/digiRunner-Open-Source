@@ -45,7 +45,7 @@ import { JwtModule } from '@auth0/angular-jwt';
     JwtModule.forRoot({
       config: {
         tokenGetter: jwtTokenGetter,
-        allowedDomains: ['localhost:4200' , 'localhost:8080'],
+        allowedDomains: ['localhost:4500' , 'localhost:8080'],
         disallowedRoutes: ['/oauth/token'],
         // whitelistedDomains: ['localhost:4200']
         headerName:"TPI"

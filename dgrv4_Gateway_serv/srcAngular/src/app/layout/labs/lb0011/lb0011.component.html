@@ -1,0 +1,192 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group row">
+        <div class="col-6">
+          <label class="control-label">{{ "keyword_search" | translate }}</label>
+          <span class="p-input-icon-right" style="width: 100%;">
+            <i class="pi pi-search tpi-i-search" (click)="queryWebhookNotify();"></i>
+            <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder=""
+              (keydown.enter)="queryWebhookNotify()">
+          </span>
+        </div>
+        <div class="col-4">
+          <label class="control-label">{{ "status" | translate }}</label>
+          <div class="p-form-check-line form-group">
+            <ng-container *ngFor="let stat of statusList">
+              <div class="p-form-check">
+                <p-radioButton formControlName="enable" value={{stat.value}}
+                  inputId="enable{{stat.value}}"></p-radioButton>
+                <label for="enable{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+        <div class="col">
+          <button type="button" class="btn tpi-btn tpi-second float-end"
+            (click)="changePage('create');">{{'button.create'|translate}}</button>
+        </div>
+      </div>
+    </form>
+    <hr>
+    <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll">
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <!-- <th>id</th> -->
+          <th style="width:50px;">{{"status"|translate}}</th>
+          <th>{{"notify.name"|translate}}</th>
+          <th style="width:150px;">{{"notify.type"|translate}}</th>
+          <th style="width:100px;">{{'create_by'|translate}}</th>
+          <th style="width:150px;" scope="col">{{'action'|translate}}
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <!-- <td>{{rowData.webhookNotifyId}}</td> -->
+          <td style="text-align: center">
+            <img [alt]="rowData.enable" style="width: 20px; height: 20px"
+              [src]="rowData.enable ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+          </td>
+          <td>{{rowData.notifyName}}</td>
+          <td>{{rowData.notifyType}}</td>
+          <td>{{rowData.createUser}}</td>
+          <td style="text-align:center;width: 150px">
+            <div>
+              <!-- 詳細資料 -->
+              <button pButton pRipple type="button" icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-plain" (click)="changePage('detail', rowData)"
+                [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+
+              <!-- 更新 -->
+              <button pButton pRipple type="button" icon="fa fa-edit"
+                class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
+                [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
+
+              <!-- 刪除 -->
+              <button pButton pRipple type="button" icon="fa fa-trash-alt"
+                class="p-button-rounded p-button-text p-button-plain" (click)="changePage('delete',rowData)"
+                [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length>0">
+          <td [attr.colspan]="5" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+            <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button>
+
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="5">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <!-- Create/ Update/ Detail -->
+  <div [hidden]="pageNum != 2">
+    <form [formGroup]="formE">
+      <div class="form-group row">
+        <div class="col-4">
+          <label id="notifyName_label" for="notifyName" class="control-label">{{ "notify.name" | translate }}</label>
+          <input type="text" class="form-control" id="notifyName" formControlName="notifyName">
+          <div *ngIf="notifyNameE.invalid && (notifyNameE.dirty || notifyNameE.touched)" class="text-danger">
+            <small class="form-text">{{notifyNameE?.errors.isRequired}}</small>
+            <small class="form-text">{{notifyNameE?.errors.maxlength | translate}}</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <label id="notifyType_label" for="notifyType" class="control-label">{{ "notify.type" | translate }}</label>
+          <p-dropdown [options]="notifyTypeList" placeholder="{{'plz_chs' | translate}}" formControlName="notifyType"
+            [style]="{'width':'100%'}">
+          </p-dropdown>
+          <div *ngIf="notifyTypeE?.invalid && (notifyTypeE?.dirty || notifyTypeE?.touched)" class="text-danger">
+            <small class="form-text">{{notifyType?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <label id="enableE_label" class="control-label">Enable</label>
+          <div class="p-form-check-line form-group">
+            <ng-container *ngFor="let stat of statusListIgnoreAll">
+              <div class="p-form-check">
+                <p-radioButton formControlName="enable" value={{stat.value}}
+                  inputId="enableE{{stat.value}}"></p-radioButton>
+                <label for="enableE{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
+              </div>
+            </ng-container>
+          </div>
+          <div *ngIf="enableE?.invalid && (enableE?.dirty || enableE?.touched)" class="text-danger">
+            <small class="form-text">{{enableE?.errors.pattern | translate}}</small>
+            <small class="form-text">{{enableE?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row" [hidden]="notifyTypeE.value!='HTTP'">
+        <div class="col-lg-6 col-md-12">
+          <label id="payloadFlag_label" class="control-label required">Mode</label>
+          <div class="p-form-check-line">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="payloadFlag" value="0" inputId="payloadFlag0"></p-radioButton>
+                <label for="payloadFlag0" class="ms-2 mb-0">form-data</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="payloadFlag" value="1" inputId="payloadFlag1"></p-radioButton>
+                <label for="payloadFlag1" class="ms-2 mb-0">raw</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="payloadFlag" value="2" inputId="payloadFlag2"></p-radioButton>
+                <label for="payloadFlag2" class="ms-2 mb-0">x-www-form-urlencoded</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12">
+          <app-mapping-url-form formControlName="fieldList" [webhookType]="notifyTypeE.value"
+            (percentValid)="set_formValid($event)"></app-mapping-url-form>
+        </div>
+      </div>
+      <div class="form-group row" [hidden]="notifyTypeE.value== 'HTTP'">
+        <div class="col-6">
+          <div class="d-flex">
+            <label id="message_label" class="control-label fw-bold">Message</label>
+          </div>
+          <div style="display:block">
+            <textarea rows="2" style="width:100%" id="message" formControlName="message" pInputTextarea></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12 col-lg-12">
+          <button type="button" class="btn tpi-btn float-start me-3" [hidden]="currentAction=='detail'"
+            [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']"
+            [disabled]="!formE.valid || !_formValid" (click)="procData();">{{btnName}}</button>
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
+            (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</app-container>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="row" style="justify-content: center;">
+      <button type="button" pButton icon="pi pi-check"
+        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
+        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>
