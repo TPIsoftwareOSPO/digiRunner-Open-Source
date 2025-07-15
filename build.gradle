@@ -164,7 +164,7 @@ project(':dgrv4_Gateway_serv'){
 		//implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.12'
 
 		// https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
-		implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
+		implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
 
 		// https://mvnrepository.com/artifact/commons-lang/commons-lang
 		implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
