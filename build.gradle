@@ -225,17 +225,25 @@ project(':dgrv4_Gateway_serv'){
 		
 		implementation ('org.owasp.esapi:esapi:2.6.0.0'){
 			exclude group:'commons-beanutils', module:'commons-beanutils'
+			exclude group:'commons-fileupload', module:'commons-fileupload'
 		}
 		
-		// 修正上方排除的 commons-beanutils:commons-beanutils
-		implementation 'commons-beanutils:commons-beanutils:1.11.0'
+		// Correct the above exclusions, group:'commons-beanutils', module:'commons-beanutils'
+		implementation 'commons-beanutils:commons-beanutils:1.11.0'		
+		// Correct the above exclusions, group:'commons-fileupload', module:'commons-fileupload'
+		implementation 'commons-fileupload:commons-fileupload:1.6.0'
 		
 		// gRPC Proxy
 		implementation 'net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE'
 		implementation 'io.grpc:grpc-netty-shaded:1.61.0'
-		implementation 'io.grpc:grpc-protobuf:1.61.0'
+		implementation ('io.grpc:grpc-protobuf:1.61.0'){
+			exclude group:'com.google.protobuf', module:'protobuf-java'
+		}
 		implementation 'io.grpc:grpc-stub:1.61.0'
 		implementation 'org.yaml:snakeyaml:2.2'
+		
+		// Correct the above exclusions, group:'com.google.protobuf', module:'protobuf-java'
+		implementation 'com.google.protobuf:protobuf-java:3.25.5'
 
 		// 添加對 Netty 的非遮蔽(non-shaded)依賴，以便 TLS 相關功能
 		implementation 'io.grpc:grpc-netty:1.61.0'
