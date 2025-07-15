@@ -179,14 +179,20 @@ project(':dgrv4_Gateway_serv'){
 
 		// for tsmpdpaa
 		implementation 'com.sun.mail:javax.mail:1.6.2'
-		implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
+       	implementation ('org.springdoc:springdoc-openapi-ui:1.6.14'){
+			exclude group: 'org.apache.commons', module: 'commons-lang3'
+		}
 		implementation 'org.yaml:snakeyaml:2.2'
 
 		implementation ('org.apache.poi:poi-ooxml:5.4.0'){
+			exclude group: 'org.apache.commons', module: 'commons-lang3'
 			// 'Avoid CVE-2024-26308'
 			// exclude group: 'org.apache.commons', module: 'commons-compress'
 		}
 		// implementation 'org.apache.commons:commons-compress:1.27.0'
+		
+		// Correct the above exclusions, group: 'org.apache.commons', module: 'commons-lang3'
+		implementation 'org.apache.commons:commons-lang3:3.18.0'
 
 		// Kryo Serialization
 		implementation 'com.esotericsoftware:kryo:5.4.0'
@@ -341,7 +347,7 @@ project(':dgrv4_Entity_lib'){
 	// 引用其它 project
 	dependencies{
 		implementation project(':dgrv4_Common_lib')
-		compileOnly 'org.apache.commons:commons-lang3:3.12.0'
+		compileOnly 'org.apache.commons:commons-lang3:3.18.0'
 		
 		// Kryo Serialization
 		compileOnly 'com.esotericsoftware:kryo:5.4.0'
