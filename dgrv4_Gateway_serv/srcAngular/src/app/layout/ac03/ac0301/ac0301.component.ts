@@ -83,6 +83,7 @@ import { JwtSettingComponent } from './jwt-setting/jwt-setting.component';
 import { AA0434DTO } from 'src/app/models/api/ApiService/aa0434.interfcae';
 import { TOrgService } from 'src/app/shared/services/org.service';
 import { OrganizationComponent } from 'src/app/shared/organization/organization.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-ac0301',
@@ -187,6 +188,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   // dgrProtocol:Array<string> = [];
   isWebhook: boolean = false;
   reloadFlag: boolean = false;
+
+  jwtSettingSub?:Subscription;
+
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
@@ -1546,6 +1550,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   async updateApi() {
+    // console.log(this.u_apiStatus?.value)
+    // return;
     switch (this.apiDetail!.apiSrc.v) {
       case 'R':
       case 'C':
@@ -1870,6 +1876,10 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     const code = ['button.detail', 'button.update', 'upload_reg_comp_api_file'];
     const dict = await this.tool.getDict(code);
     this.resetFormValidator(this.detailForm);
+    if(this.jwtSettingSub) {
+      this.jwtSettingSub.unsubscribe();
+      this.jwtSettingSub = undefined;
+    }
     switch (action) {
       case 'query':
         this.currentTitle = this.title;
@@ -2035,6 +2045,23 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               } else {
                 this.u_jweFlagResp!.enable();
               }
+              this.jwtSettingSub = this.u_jwtSetting?.valueChanges.subscribe(
+                (states) => {
+                  // console.log(states);
+                  if (states) {
+                    this.u_jweFlag!.enable();
+                    this.u_jweFlag!.setValue('0');
+                    this.u_jweFlagResp!.enable();
+                    this.u_jweFlagResp!.setValue('1');
+                  } else {
+                    this.u_jweFlag!.setValue('0');
+                    this.u_jweFlag!.disable();
+                    this.u_jweFlagResp!.setValue('0');
+                    this.u_jweFlagResp!.disable();
+                  }
+                }
+              );
+
               if (
                 this.apiDetail.apiSrc.v == 'R' ||
                 this.apiDetail.apiSrc.v == 'C'

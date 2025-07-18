@@ -54,6 +54,7 @@ const routes: Routes = [
       { path: 'ac03/ac0318', loadChildren: () => import('./ac03/ac0318/ac0318.module').then(m => m.Ac0318Module), data: { id: 'ac0318' } },
       { path: 'ac03/ac0319', loadChildren: () => import('./ac03/ac0319/ac0319.module').then(m => m.Ac0319Module), data: { id: 'ac0319' } },
       { path: 'ac03/ac0320', loadChildren: () => import('./ac03/ac0320/ac0320.module').then(m => m.Ac0320Module), data: { id: 'ac0320' } },
+      { path: 'ac03/ac0322', loadChildren: () => import('./ac03/ac0322/ac0322.module').then(m => m.Ac0322Module), data: { id: 'ac0322' } },
 
       // { path: 'ac04/ac0402', loadChildren: () => import('./ac04/ac0402/ac0402.module').then(m => m.Ac0402Module), data: { id: 'ac0402' } },
       // { path: 'ac04/ac0412', loadChildren: () => import('./ac04/ac0412/ac0412.module').then(m => m.Ac0412Module), data: { id: 'ac0412' } },

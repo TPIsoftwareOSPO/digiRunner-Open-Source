@@ -542,6 +542,10 @@ import { DPB0284Req, ReqDPB0284, RespDPB0284 } from 'src/app/models/api/ServerSe
 import { DPB0285Req, ReqDPB0285, RespDPB0285 } from 'src/app/models/api/ServerService/dpb0285.interface';
 import { DPB0286Req, ReqDPB0286, RespDPB0286 } from 'src/app/models/api/ServerService/dpb0286.interface';
 import { AA1212Req, ReqAA1212, ResAA1212 } from 'src/app/models/api/ReportService/aa1212.interface';
+import { AA0435Req, ReqAA0435, RespAA0435 } from 'src/app/models/api/ApiService/aa0435.interfcae';
+import { ReqDPB0295, RespDPB0295 } from 'src/app/models/api/ServerService/dpb0295.interface';
+import { RespDPB0296 } from 'src/app/models/api/ServerService/dpb0296.interface';
+import { DgrGrpcProxyMapDto, ReqDPB0297, RespDPB0297 } from 'src/app/models/api/ServerService/dpb0297.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -1622,6 +1626,15 @@ export class ServerService {
     return this.api.npPost<RespDPB0190>(path, body);
   }
 
+  queryRdbConnectionInfoList_ignore1298(): Observable<RespDPB0190> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.queryRdbConnectionInfoList),
+      ReqBody: {},
+    } as ReqDPB0190;
+    const path = `${this.indexPath}/DPB0190`;
+    return this.api.excuteNpPost_ignore1298<RespDPB0190>(path, body);
+  }
+
   queryRdbConnectionInfoDetail(ReqBody: DPB0191Req): Observable<RespDPB0191> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.queryRdbConnectionInfoDetail),
@@ -2252,5 +2265,38 @@ export class ServerService {
     const path = `${this.indexPath}/DPB0286`;
     return this.api.npPost<RespDPB0286>(path, body);
   }
+
+  apiListExport(ReqBody: AA0435Req): Observable<Blob> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.apiListExport),
+      ReqBody: ReqBody,
+    } as ReqAA0435;
+    const path = `${this.indexPath}/AA0435`;
+    return this.api.excutePostGetFile(path, body);
+  }
+
+  exportGrpcSetting(ReqBody: string[]): Observable<RespDPB0295> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.exportGrpcSetting),
+      ReqBody: ReqBody,
+    } as ReqDPB0295;
+    const path = `${this.indexPath}/DPB0295`;
+    return this.api.npPost<RespDPB0295>(path, body);
+  }
+
+  parseGrpcSetting(req: any, file: File): Observable<RespDPB0296> {
+    const path = `${this.indexPath}/DPB0296`;
+    return this.api.excuteTsmpSetting<RespDPB0296>(path, file, req);
+  }
+
+  importGrpcSetting(ReqBody: Array<DgrGrpcProxyMapDto>): Observable<RespDPB0297> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.importGrpcSetting),
+      ReqBody: ReqBody,
+    } as ReqDPB0297;
+    const path = `${this.indexPath}/DPB0297`;
+    return this.api.npPost<RespDPB0297>(path, body);
+  }
+
 
 }

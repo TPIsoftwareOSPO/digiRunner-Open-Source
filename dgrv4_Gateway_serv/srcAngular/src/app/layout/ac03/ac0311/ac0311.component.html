@@ -18,12 +18,12 @@
                             <div class="p-form-check-line form-group">
                               <ng-container>
                                 <div class="p-form-check">
-                                  <p-radioButton formControlName="type" value="0" inputId="type_0"></p-radioButton>
-                                  <label for="type_0" class="ms-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
-                                </div>
-                                <div class="p-form-check">
                                   <p-radioButton formControlName="type" value="1" inputId="type_1"></p-radioButton>
                                   <label for="type_1" class="ms-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
+                                </div>
+                                <div class="p-form-check">
+                                  <p-radioButton formControlName="type" value="0" inputId="type_0"></p-radioButton>
+                                  <label for="type_0" class="ms-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
                                 </div>
                               </ng-container>
                             </div>
@@ -215,30 +215,55 @@
                                                     <input type="text" class="form-control" formControlName="apiId_{{i}}" *ngIf="o_type.value=='0'">
                                                     <input type="text" class="form-control" formControlName="summary_{{i}}" *ngIf="o_type.value=='1'">
                                                 </div>
-                                                <div class="col-4">
-                                                    <div class="row">
+                                                <div class="col-4 row">
+                                                    <div class="col-12">
                                                         <div class="col-2">
-                                                            <label class="control-label">
+                                                            <label class="control-label fw-bold">
                                                                 {{'jwt_setting'|translate}}
                                                             </label>
                                                         </div>
-                                                        <div class="col-2">
-                                                            <p-inputSwitch formControlName="jwtSetting_{{i}}"
+                                                        <div class="col-10">
+                                                            <!-- <p-inputSwitch formControlName="jwtSetting_{{i}}"
                                                                 (onChange)="jwtSettingOnChange($event, i);">
-                                                            </p-inputSwitch>
+                                                            </p-inputSwitch> -->
+                                                            <div class="d-flex flex-row align-items-center">
+                                                              <div class="col-12 p-form-check-line form-group d-flex flex-row align-items-center">
+                                                                <!-- <label class="control-label" style="white-space: nowrap;">{{ "body_encode" | translate }}</label> -->
+                                                                <ng-container>
+                                                                  <div class="p-form-check">
+                                                                    <p-radioButton formControlName="jwtSetting_{{i}}" [value]="true" inputId="jwtSetting_{{i}}_Y"
+                                                                    (onClick)="jwtSettingClick($event, i);"
+                                                                    ></p-radioButton>
+                                                                    <label for="jwtSetting_{{i}}_Y" class="ms-2 mb-0"
+                                                                      style="white-space: nowrap;">{{'button.enable'|translate}}</label>
+                                                                  </div>
+                                                                  <div class="p-form-check">
+                                                                    <p-radioButton formControlName="jwtSetting_{{i}}" [value]="false" inputId="jwtSetting_{{i}}_N"
+                                                                    (onClick)="jwtSettingClick($event, i);"></p-radioButton>
+                                                                    <label for="jwtSetting_{{i}}_N" class="ms-2 mb-0"
+                                                                      style="white-space: nowrap;">{{'button.disable'|translate}}</label>
+                                                                  </div>
+
+
+                                                                </ng-container>
+                                                              </div>
+
+                                                          </div>
                                                         </div>
-                                                        <div class="col-4">
+                                                    </div>
+                                                    <div class="col-12 row">
+                                                        <div class="col-6">
                                                             <label class="control-label">Request：</label>
                                                             <p-dropdown [options]="jwtSettingFlags"
-                                                                formControlName="jweFlag_{{i}}"
+                                                                formControlName="jweFlag_{{i}}" class="jwt-req-dropdown"
                                                                 (onChange)="jweFlagOnChange($event, i);"
                                                                 [style]="{'width':'100%'}">
                                                             </p-dropdown>
                                                         </div>
-                                                        <div class="col-4">
+                                                        <div class="col-6">
                                                             <label class="control-label">Response：</label>
                                                             <p-dropdown [options]="jwtSettingFlags"
-                                                                formControlName="jweFlagResp_{{i}}"
+                                                                formControlName="jweFlagResp_{{i}}" class="jwt-resp-dropdown"
                                                                 (onChange)="jweFlagRespOnChange($event, i);"
                                                                 [style]="{'width':'100%'}">
                                                             </p-dropdown>
@@ -429,16 +454,18 @@
                         <!-- <label class="control-label me-3">{{'api_reg_mode' | translate}}</label> -->
                         <div class="p-form-check-line form-group align-items-center">
                           <ng-container>
+                             <div class="p-form-check align-items-center">
+                              <p-radioButton formControlName="type" value="1" inputId="type1"></p-radioButton>
+                              <label for="type1" class="ms-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
+                              <p-dropdown class="ms-2" *ngIf="c_type.value==='1'" [options]="apiTypeList" formControlName="apiType" [style]="{'width':'100%'}" ></p-dropdown>
+                            </div>
                             <div class="p-form-check">
                               <p-radioButton formControlName="type" value="0" inputId="type0"></p-radioButton>
                               <label for="type0" class="ms-2 mb-0">{{'api_reg_v3'|translate}}(tsmpc)</label>
                             </div>
-                            <div class="p-form-check">
-                              <p-radioButton formControlName="type" value="1" inputId="type1"></p-radioButton>
-                              <label for="type1" class="ms-2 mb-0">{{'api_reg_new'|translate}}(dgrc)</label>
-                            </div>
+
                           </ng-container>
-                          <p-dropdown *ngIf="c_type.value==='1'" [options]="apiTypeList" formControlName="apiType" [style]="{'width':'100%'}" ></p-dropdown>
+
                         </div>
                       </div>
                     </div>
@@ -686,11 +713,51 @@
                                 </p-dropdown>
                             </div>
                         </div>
-                        <div class="col-1">
+                         <div class="col-2">
+                              <label class=" control-label">{{'jwt_setting'|translate}}</label>
+                              <div class="d-flex flex-row align-items-center">
+                                <div class="col-12 p-form-check-line form-group d-flex flex-row align-items-center">
+                                  <!-- <label class="control-label" style="white-space: nowrap;">{{ "body_encode" | translate }}</label> -->
+                                  <ng-container>
+                                    <div class="p-form-check">
+                                      <p-radioButton formControlName="jwtSetting" [value]="true" inputId="jwtSettingY"></p-radioButton>
+                                      <label for="jwtSettingY" class="ms-2 mb-0"
+                                        style="white-space: nowrap;">{{'button.enable'|translate}}</label>
+                                    </div>
+                                    <div class="p-form-check">
+                                      <p-radioButton formControlName="jwtSetting" [value]="false" inputId="jwtSettingN"></p-radioButton>
+                                      <label for="jwtSettingN" class="ms-2 mb-0"
+                                        style="white-space: nowrap;">{{'button.disable'|translate}}</label>
+                                    </div>
+                                  </ng-container>
+
+
+                                </div>
+
+                              </div>
+
+                         </div>
+                         <div class="col-2">
+                                    <label class="control-label">Request：</label>
+                                    <div style="display:block">
+                                        <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlag" class="jwt-req-dropdown"
+                                            (onChange)="jweFlagOnChange($event);" [style]="{'width':'100%'}">
+                                        </p-dropdown>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <label class="control-label">Response：</label>
+                                    <div style="display:block">
+                                        <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlagResp" class="jwt-resp-dropdown"
+                                            (onChange)="jweFlagRespOnChange($event);" [style]="{'width':'100%'}">
+                                        </p-dropdown>
+                                    </div>
+                                </div>
+                        <!-- <div class="col-1">
                             <label class="col-xl-12 control-label">{{'jwt_setting'|translate}}</label>
                             <label class="col-xl-12 control-label">{{'body_encode'|translate}}</label>
-                        </div>
-                        <div class="col-7">
+                        </div> -->
+                        <!-- <div class="col-7">
                             <div class="row">
                                 <div class="col-1">
                                     <label class="control-label" style="width: 100%;">&nbsp;</label>
@@ -715,7 +782,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- <div class="col-2">
                             <label id="regHostId_label" class="control-label">{{'reg_host'|translate}}</label>
                             <p-dropdown formControlName="regHostId" [options]="regHostIdList" [style]="{'width':'100%'}"

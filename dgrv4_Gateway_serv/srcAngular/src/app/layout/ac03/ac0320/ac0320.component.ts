@@ -13,6 +13,8 @@ import { DPB0290Req } from 'src/app/models/api/ServerService/dpb0290.interface';
 import { DPB0292Req } from 'src/app/models/api/ServerService/dpb0292.interface';
 import * as ValidatorFns from '../../../shared/validator-functions';
 import { Subscription } from 'rxjs';
+import { saveAs } from 'file-saver';
+import { DgrGrpcProxyMapDto } from 'src/app/models/api/ServerService/dpb0296.interface';
 
 @Component({
   selector: 'app-ac0320',
@@ -27,12 +29,14 @@ export class Ac0320Component extends BaseComponent implements OnInit {
   tableData: Array<DPB0294RespItem> = [];
   selected: Array<DPB0294RespItem> = [];
   formEdit!: FormGroup;
+  formFile!: FormGroup;
   currentAction: string = '';
 
   selectedItem?: DPB0294RespItem;
-  secureModeSub?:Subscription;
+  secureModeSub?: Subscription;
+  importSelected: DgrGrpcProxyMapDto[] = [];
 
-  
+  checkImportStatus: boolean = false;
 
   constructor(
     route: ActivatedRoute,
@@ -57,16 +61,20 @@ export class Ac0320Component extends BaseComponent implements OnInit {
       connectTimeoutMs: new FormControl('5000'),
       sendTimeoutMs: new FormControl('10000'),
       readTimeoutMs: new FormControl('30000'),
-      secureMode: new FormControl('SECURE'),      
+      secureMode: new FormControl('SECURE'),
       trustedCertsContent: new FormControl(''),
       enable: new FormControl(''),
+    });
+
+    this.formFile = this.fb.group({
+      file: new FormControl(),
+      fileName: new FormControl({ value: '', disabled: true }),
     });
 
     this.serverService.queryGrpcService_ignore1298({}).subscribe((res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.tableData = res.RespBody.infoList;
-      }
-      else this.tableData = [];
+      } else this.tableData = [];
     });
   }
 
@@ -75,8 +83,7 @@ export class Ac0320Component extends BaseComponent implements OnInit {
     this.serverService.queryGrpcService({}).subscribe((res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.tableData = res.RespBody.infoList;
-      }
-      else this.tableData = [];
+      } else this.tableData = [];
     });
   }
 
@@ -115,23 +122,25 @@ export class Ac0320Component extends BaseComponent implements OnInit {
             this.connectTimeoutMs?.setValue('5000');
             this.sendTimeoutMs?.setValue('10000');
             this.readTimeoutMs?.setValue('30000');
-            this.secureMode.setValue("PLAINTEXT");
-            this.secureModeSub = this.secureMode.valueChanges.subscribe(res=>{
-              if(res === 'SECURE'){
-                this.trustedCertsContent.addValidators([ValidatorFns.requiredValidator()])
-                this.trustedCertsContent.updateValueAndValidity();
-                this.trustedCertsContent.markAsTouched();
+            this.secureMode.setValue('PLAINTEXT');
+            this.secureModeSub = this.secureMode.valueChanges.subscribe(
+              (res) => {
+                if (res === 'SECURE') {
+                  this.trustedCertsContent.addValidators([
+                    ValidatorFns.requiredValidator(),
+                  ]);
+                  this.trustedCertsContent.updateValueAndValidity();
+                  this.trustedCertsContent.markAsTouched();
+                } else {
+                  this.trustedCertsContent.clearValidators();
+                  this.trustedCertsContent.clearAsyncValidators();
+                  this.trustedCertsContent.setValue('');
+                  this.formEdit.updateValueAndValidity();
+                  this.trustedCertsContent.markAsUntouched();
+                  this.trustedCertsContent.markAsPristine();
+                }
               }
-              else{               
-                this.trustedCertsContent.clearValidators();
-                this.trustedCertsContent.clearAsyncValidators();
-                this.trustedCertsContent.setValue('');
-                this.formEdit.updateValueAndValidity();
-                this.trustedCertsContent.markAsUntouched();
-                this.trustedCertsContent.markAsPristine(); 
-              }
-            })
-            
+            );
           }
         });
         break;
@@ -153,28 +162,33 @@ export class Ac0320Component extends BaseComponent implements OnInit {
 
             this.secureMode.setValue(rowData?.secureMode);
             this.trustedCertsContent.setValue(rowData?.trustedCertsContent);
-            
+
             this.selectedItem = rowData;
-            if(this.secureMode.value == 'SECURE'){
-              this.trustedCertsContent.addValidators([ValidatorFns.requiredValidator()])
+            if (this.secureMode.value == 'SECURE') {
+              this.trustedCertsContent.addValidators([
+                ValidatorFns.requiredValidator(),
+              ]);
               this.trustedCertsContent.updateValueAndValidity();
             }
 
-           this.secureModeSub = this.secureMode.valueChanges.subscribe(res=>{
-              if(res === 'SECURE'){
-                this.trustedCertsContent.addValidators([ValidatorFns.requiredValidator()])
-                this.trustedCertsContent.updateValueAndValidity();
-                this.trustedCertsContent.markAsTouched();
+            this.secureModeSub = this.secureMode.valueChanges.subscribe(
+              (res) => {
+                if (res === 'SECURE') {
+                  this.trustedCertsContent.addValidators([
+                    ValidatorFns.requiredValidator(),
+                  ]);
+                  this.trustedCertsContent.updateValueAndValidity();
+                  this.trustedCertsContent.markAsTouched();
+                } else {
+                  this.trustedCertsContent.clearValidators();
+                  this.trustedCertsContent.clearAsyncValidators();
+                  this.trustedCertsContent.setValue('');
+                  this.formEdit.updateValueAndValidity();
+                  this.trustedCertsContent.markAsUntouched();
+                  this.trustedCertsContent.markAsPristine();
+                }
               }
-              else{               
-                this.trustedCertsContent.clearValidators();
-                this.trustedCertsContent.clearAsyncValidators();
-                this.trustedCertsContent.setValue('');
-                this.formEdit.updateValueAndValidity();
-                this.trustedCertsContent.markAsUntouched();
-                this.trustedCertsContent.markAsPristine(); 
-              }
-            })
+            );
 
             this.pageNum = 2;
           }
@@ -222,10 +236,11 @@ export class Ac0320Component extends BaseComponent implements OnInit {
       sendTimeoutMs: this.sendTimeoutMs?.value,
       readTimeoutMs: this.readTimeoutMs?.value,
       enable: this.enable?.value,
-      secureMode: this.secureMode.value,      
-      autoTrustUpstreamCerts: 'Y'
+      secureMode: this.secureMode.value,
+      autoTrustUpstreamCerts: 'Y',
     } as DPB0290Req;
-    if(req.secureMode === 'SECURE') req.trustedCertsContent = this.trustedCertsContent.value;
+    if (req.secureMode === 'SECURE')
+      req.trustedCertsContent = this.trustedCertsContent.value;
     this.serverService.createGrpcService(req).subscribe(async (res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         const code = ['message.create', 'message.success'];
@@ -252,10 +267,11 @@ export class Ac0320Component extends BaseComponent implements OnInit {
       sendTimeoutMs: String(this.sendTimeoutMs?.value),
       readTimeoutMs: String(this.readTimeoutMs?.value),
       enable: this.enable?.value,
-      secureMode: this.secureMode.value,      
-      autoTrustUpstreamCerts: 'Y'
+      secureMode: this.secureMode.value,
+      autoTrustUpstreamCerts: 'Y',
     } as DPB0292Req;
-    if(req.secureMode === 'SECURE') req.trustedCertsContent = this.trustedCertsContent.value;
+    if (req.secureMode === 'SECURE')
+      req.trustedCertsContent = this.trustedCertsContent.value;
     this.serverService.updateGrpcService(req).subscribe(async (res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         const code = ['message.update', 'message.success'];
@@ -272,11 +288,10 @@ export class Ac0320Component extends BaseComponent implements OnInit {
   }
 
   updateStatus(status: string = 'N') {
-
     this.serverService
       .batchUpdateProxyStatus({
         enable: status,
-        proxyIds: this.selected.map((rowData) => rowData.gRPCProxyMapId)
+        proxyIds: this.selected.map((rowData) => rowData.gRPCProxyMapId),
       })
       .subscribe(async (res) => {
         if (this.toolService.checkDpSuccess(res.ResHeader)) {
@@ -289,6 +304,118 @@ export class Ac0320Component extends BaseComponent implements OnInit {
           });
           this.queryGrpcService();
           this.changePage('query');
+        }
+      });
+  }
+
+  export() {
+    let ids = this.selected.map((rowData) => rowData.gRPCProxyMapId);
+
+    this.ngxService.start();
+    this.serverService.exportGrpcSetting(ids).subscribe((res) => {
+      this.ngxService.stop();
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        const blob = new Blob([JSON.stringify(res.RespBody.data, null, 2)], {
+          type: 'application/json',
+        });
+        saveAs(blob, res.RespBody.fileName || 'grpc_export_file.json');
+      }
+    });
+  }
+
+  importFile?: File;
+  importList: DgrGrpcProxyMapDto[] = [];
+  async changePageImport() {
+    const code = ['button.import'];
+    const dict = await this.toolService.getDict(code);
+    this.currentTitle = `${this.title} > ${dict['button.import']}`;
+    this.resetFile();
+
+    this.pageNum = 3;
+  }
+
+  uploadFile() {
+    this.checkImportStatus = false;
+    let fileReader = new FileReader();
+    fileReader.onloadend = () => {
+      this.serverService
+        .parseGrpcSetting(null, this.importFile!)
+        .subscribe(async (res) => {
+          if (this.toolService.checkDpSuccess(res.ResHeader)) {
+            this.importSelected = [];
+            this.importList = res.RespBody;
+            const code = ['uploading', 'upload_result', 'message.success'];
+            const dict = await this.toolService.getDict(code);
+            this.messageService.add({
+              severity: 'success',
+              summary: dict['upload_result'],
+              detail: `${dict['message.success']}!`,
+            });
+          }
+        });
+    };
+    fileReader.readAsText(this.importFile!);
+  }
+
+  changeFile(event) {
+    this.importList = [];
+    this.importSelected = [];
+    this.checkImportStatus = false;
+    if (event.target.files.length != 0) {
+      this.importFile = event.target.files[0];
+      this.fileName.setValue(event.target.files[0].name);
+    } else {
+      this.resetFile();
+    }
+  }
+
+  resetFile(){
+    this.importFile = undefined;
+    this.importList = [];
+    this.file.reset();
+    this.fileName.setValue('');
+    $('#file').val('');
+  }
+
+  openFileBrowser() {
+    $('#file').click();
+  }
+
+  import() {
+    this.serverService
+      .importGrpcSetting(this.importSelected)
+      .subscribe(async (res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.checkImportStatus = true;
+          // this.importList = res.RespBody;
+          this.importList.forEach(item=> {
+            res.RespBody.forEach(changeItem=>{
+              if(item.uuid == changeItem.uuid){
+                item.success = changeItem.success;
+                item.errorMessage = changeItem.errorMessage;
+              }
+            })
+          })
+          this.importSelected = [];
+          const code = [
+            'button.import',
+            'message.success',
+            'message.fail',
+          ];
+          const dict = await this.toolService.getDict(code);
+           if (res.RespBody.every((item) => item.success )) {
+             this.messageService.add({
+               severity: 'success',
+               summary: `${dict['button.import']} ${dict['message.success']}`,
+             });
+           }
+           else{
+             this.messageService.add({
+              severity: 'error',
+              summary: `${dict['button.import']} ${dict['message.fail']}`,
+            });
+           }
+           this.queryGrpcService();
         }
       });
   }
@@ -325,5 +452,11 @@ export class Ac0320Component extends BaseComponent implements OnInit {
   }
   public get trustedCertsContent() {
     return this.formEdit.get('trustedCertsContent')!;
+  }
+  public get file() {
+    return this.formFile.get('file')!;
+  }
+  public get fileName() {
+    return this.formFile.get('fileName')!;
   }
 }

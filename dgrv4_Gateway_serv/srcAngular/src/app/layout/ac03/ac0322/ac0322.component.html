@@ -1,0 +1,30 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <div class="form-group row">
+      <div class="col-2">
+        <label class="control-label">{{ "data_format" | translate }} </label>
+        <div class="form-control border-line" style="background: #f6f6f6">
+          <span class="px-2">EXCEL </span>
+          <button type="button" class="btn tpi-btn tpi-primary" (click)="apiListExport()">
+            {{ "button.export" | translate }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</app-container>
+<p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{ width: '50vw' }" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="row" style="justify-content: center">
+      <button type="button" pButton icon="pi pi-check" [ngStyle]="{
+          backgroundColor: 'var(--red-300)',
+          'border-color': 'var(--red-300)'
+        }" label="{{ 'button.confirm' | translate }}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{ 'button.cancel' | translate }}" (click)="cd.reject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>

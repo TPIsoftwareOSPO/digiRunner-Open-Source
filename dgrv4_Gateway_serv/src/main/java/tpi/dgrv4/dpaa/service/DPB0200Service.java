@@ -64,6 +64,9 @@ public class DPB0200Service {
 			config.setJdbcUrl(jdbcUrl);
 			config.setUsername(username);
 			config.setPassword(getTsmpSettingService().getENCPlainVal(mima));
+//			//設定測試多次
+//			config.setInitializationFailTimeout(1);
+//			config.setMaximumPoolSize(2);
 		}
 
 		try {
@@ -87,7 +90,7 @@ public class DPB0200Service {
 					success = false;
 				}
 			} catch (SQLException e) {
-				msg = FAIL;;
+				msg = e.getMessage();
 				success = false;
 				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			} finally {
@@ -96,7 +99,7 @@ public class DPB0200Service {
 				}
 			}
 		} catch (Exception e) {
-			msg = FAIL;
+			msg = e.getMessage();
 			success = false;
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 		}

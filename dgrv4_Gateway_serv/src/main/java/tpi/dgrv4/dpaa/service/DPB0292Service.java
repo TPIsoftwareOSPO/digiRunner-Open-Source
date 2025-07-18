@@ -3,6 +3,7 @@ package tpi.dgrv4.dpaa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import tpi.dgrv4.codec.utils.RandomSeqLongUtil;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
@@ -46,6 +47,40 @@ public class DPB0292Service {
      * @param req 請求對象
      * @return 響應對象
      */
+    @Transactional
+    public DgrGrpcProxyMap updateGrpcProxyWithImport(TsmpAuthorization authorization, DPB0292Req req) {
+        try {
+            // 檢查參數
+            checkParam(req);
+
+            // 驗證 TLS 憑證（如果有提供）
+            validateTlsCertificates(req);
+
+            // 更新映射
+            DgrGrpcProxyMap dgrGrpcProxyMap = updateGrpcProxyMap(authorization.getUserName(), req);
+
+            // 註冊到動態代理管理器
+            // 這將發布事件，觸發 GrpcProxyServer 重啟
+            dynamicGrpcProxyManager.updateProxyMapping(dgrGrpcProxyMap);
+
+            return dgrGrpcProxyMap;
+        } catch (TsmpDpAaException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error(StackTraceUtil.logStackTrace(e));
+            throw TsmpDpAaRtnCode._1297.throwing();
+        }
+    }
+
+
+    /**
+     * 更新 gRPC 代理映射
+     *
+     * @param authorization 授權資訊
+     * @param req 請求對象
+     * @return 響應對象
+     */
+    @Transactional
     public DPB0292Resp updateGrpcProxy(TsmpAuthorization authorization, DPB0292Req req) {
         try {
             // 檢查參數
@@ -76,7 +111,7 @@ public class DPB0292Service {
      * @param req 請求對象
      * @throws TsmpDpAaException 如果證書無效或缺少必需的配置
      */
-    private void validateTlsCertificates(DPB0292Req req) {
+    protected void validateTlsCertificates(DPB0292Req req) {
         // 檢查如果有提供服務器證書，那麼必須同時提供私鑰
         if ((req.getServerCertContent() != null && !req.getServerCertContent().isEmpty()) &&
                 (req.getServerKeyContent() == null || req.getServerKeyContent().isEmpty())) {

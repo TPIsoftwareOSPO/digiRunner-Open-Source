@@ -162,7 +162,7 @@ export class Np0514Component extends BaseComponent implements OnInit {
     }
 
     async init() {
-        const code = ['task', 'status', 'repeating_time', 'next_execute_time', 'date_duration', 'memo', 'add_job_id', 'item_no', 'subitem_no', 'schedule_sort', 'schedule_next_time', 'update_time', 'status', 'exec_result', 'week_option.sunday', 'week_option.monday', 'week_option.tuesday', 'week_option.wednesday', 'week_option.thursday', 'week_option.friday', 'week_option.saturday'];
+        const code = ['task_name', 'status', 'repeating_time', 'next_execute_time', 'date_duration', 'memo', 'add_job_id', 'item_no', 'subitem_no', 'schedule_sort', 'schedule_next_time', 'update_time', 'status', 'exec_result', 'week_option.sunday', 'week_option.monday', 'week_option.tuesday', 'week_option.wednesday', 'week_option.thursday', 'week_option.friday', 'week_option.saturday'];
         const dict = await this.tool.getDict(code);
         for (let i = 1; i < 32; i++) {
             this.dayRangeOption.push({ label: i.toString(), value: i });
@@ -189,7 +189,7 @@ export class Np0514Component extends BaseComponent implements OnInit {
             { label: dict['week_option.saturday'], value: 6 }
         ];
         this.scheduleCols = [
-            { field: 'rjobName', header: dict['task'] },
+            { field: 'rjobName', header: dict['task_name'] },
             { field: 'statusName', header: dict['status'] },
             { field: 'cronDesc', header: dict['repeating_time'] },
             { field: 'nextDateTime', header: dict['next_execute_time'] },

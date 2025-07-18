@@ -26,6 +26,7 @@ export class LdapDataListDetailComponent implements OnInit {
   @Output() change: EventEmitter<_ldapDataListDetail> = new EventEmitter;
   @Output() remove: EventEmitter<number> = new EventEmitter;
 
+  // ldapPattern: string = '^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]';
   ldapPattern: string = '^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]';
 
   form!: FormGroup;
@@ -49,7 +50,7 @@ export class LdapDataListDetailComponent implements OnInit {
     const code = ['validation.format'];
     const dict = await this.toolService.getDict(code);
 
-    this.ldapUrl?.setValidators([ValidatorFns.requiredValidator(),ValidatorFns.patternValidator(this.ldapPattern, dict['validation.format'])]);
+    this.ldapUrl?.setValidators([ValidatorFns.requiredValidator(),ValidatorFns.patternValidator(this.ldapPattern, 'String pattern is not matched : [^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]]')]);
     if(this._disabled) this.form.disable();
     this.form.valueChanges.subscribe((res: DPB0181LdapDataItem) => {
       let changeItem = {

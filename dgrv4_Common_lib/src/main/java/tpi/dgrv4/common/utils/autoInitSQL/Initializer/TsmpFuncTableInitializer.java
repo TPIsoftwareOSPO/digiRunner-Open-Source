@@ -26,7 +26,7 @@ public class TsmpFuncTableInitializer {
 			//用戶端管理
 			"AC02","AC0202","AC0212","AC0222","AC1107","AC1116","AC0226","AC0227","AC0228","AC0229","AC0230","AC0231",
 			//API管理
-			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320",
+			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理(AC0706為無建立功能的告警頁面)
 			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0702","AC0706",
 			//報表管理(Kibana)
@@ -53,7 +53,7 @@ public class TsmpFuncTableInitializer {
 			//用戶端管理
 			"AC02","AC0202","AC0212","AC0222","AC1107","AC1116","AC0226","AC0227","AC0228","AC0229","AC0230","AC0231",
 			//API管理
-			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320",
+			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理
 			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0702",
 			//報表管理(Kibana)
@@ -75,7 +75,7 @@ public class TsmpFuncTableInitializer {
 			//用戶端管理
 			"AC02","AC0202","AC0212","AC0222","AC1107","AC1116","AC0226","AC0227","AC0228","AC0229","AC0230","AC0231",
 			//API管理
-			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320",
+			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理(AC0706為無建立功能的告警頁面)
 			"AC05","AC0501","AC0503","AC0509","AC0706",
 			//報表管理(JS)
@@ -98,7 +98,7 @@ public class TsmpFuncTableInitializer {
 			//用戶端管理
 			"AC02","AC0202","AC0212","AC0222","AC1107","AC1116","AC0226","AC0227","AC0228","AC0229","AC0230","AC0231",
 			//API管理
-			"AC03","AC0301","AC0311","AC0316","AC0318","AC0319","AC0320",
+			"AC03","AC0301","AC0311","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理
 			"AC05","AC0501","AC0503","AC0509","AC0706",
 			//報表管理(JS)
@@ -335,6 +335,8 @@ public class TsmpFuncTableInitializer {
 			createTsmpFunc("LB0012","Webhook Logs","Webhook Logs","Real time event notification logs","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("LB0012","Webhook Logs","Webhook Logs","即時事件通知推送紀錄","","zh-TW","manager",DateTimeUtil.now());
 
+			createTsmpFunc("AC0322","API List Export","API List Export","apiListExport","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AC0322","API列表匯出","API List Export","apiListExport","","zh-TW","manager",DateTimeUtil.now());
 			//取得版本tsmpFunc清單
 	    	setVersionTsmpFunc(licenseEdition);
 	    	List<TsmpFuncVo> tsmpFuncVos = new LinkedList<TsmpFuncVo>();	    	

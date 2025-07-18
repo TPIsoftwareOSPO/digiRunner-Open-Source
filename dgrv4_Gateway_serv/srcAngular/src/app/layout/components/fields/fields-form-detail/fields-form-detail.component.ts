@@ -39,7 +39,6 @@ export class FieldsFormDetailComponent implements OnInit {
 
     // console.log(this.headerPolicy)
     this.fieldExp = (this.headerPolicy=='0' || this.form.get("field")?.value=='') ? '' : `${this.form.get("field")?.value}: [${this.toolService.maskStringByPolicy(this.form.get("field")?.value,this.headerPolicy,this.headerPolicyNum,this.headerPolicyMask)}]`;
-
     this.form.valueChanges.subscribe((res: { field: string, no: number }) => {
       this.fieldExp = `${res.field}: [${this.toolService.maskStringByPolicy(res.field,this.headerPolicy,this.headerPolicyNum,this.headerPolicyMask)}]`;
       this.change.emit({ field: res.field, no: this.no! });

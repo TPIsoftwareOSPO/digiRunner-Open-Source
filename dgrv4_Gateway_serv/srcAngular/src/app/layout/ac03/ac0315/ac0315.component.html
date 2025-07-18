@@ -43,7 +43,7 @@
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-8 col-xl-8 col-lg-8">
+        <div class="col-12 col-xl-8 col-lg-8">
           <div class="d-flex col-12 pe-0" style="justify-content: space-between;">
             <div class="col-4 ">
               <label for="tsmpUrl" class="fw-bold" >{{'tar_url'|translate}}</label>
@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <div class="col-4 col-xl-4 col-lg-4">
+        <div class="col-6 col-md-4">
           <label for="httpMethod" class="col-auto col-xl-12 required control-label">{{'methods'|translate}}</label>
           <div class="col-auto col-xl-12">
             <!-- <p-multiSelect [options]="httpmethods" defaultLabel="{{'chs_methods'|translate}}" formControlName="methods"
@@ -84,7 +84,7 @@
         </div>
       </div>
       <div class="form-group row g-3">
-        <div class="col-4">
+        <div class="col-6 col-md-2">
           <label class="col-auto col-xl-12 control-label">{{'data_format'|translate}}</label>
           <div class="col-xl-12">
             <p-dropdown [options]="dataFormats" formControlName="dataFormat" placeholder="{{'plz_chs'|translate}}"
@@ -92,33 +92,40 @@
             </p-dropdown>
           </div>
         </div>
-        <div class="col-1">
+        <div class="col-12 col-md-2">
           <label class="col-auto col-xl-12 control-label">{{'jwt_setting'|translate}}</label>
-          <label class="control-label col-xl-12">{{'body_encode'|translate}}</label>
+          <div class="d-flex flex-row align-items-center">
+            <div class="col-12 p-form-check-line form-group d-flex flex-row align-items-center">
+              <ng-container>
+                <div class="p-form-check">
+                  <p-radioButton formControlName="jwtSetting" [value]="true" inputId="jwtSettingY"></p-radioButton>
+                  <label for="jwtSettingY" class="ms-2 mb-0"
+                    style="white-space: nowrap;">{{'button.enable'|translate}}</label>
+                </div>
+                <div class="p-form-check">
+                  <p-radioButton formControlName="jwtSetting" [value]="false" inputId="jwtSettingN"></p-radioButton>
+                  <label for="jwtSettingN" class="ms-2 mb-0"
+                    style="white-space: nowrap;">{{'button.disable'|translate}}</label>
+                </div>
+              </ng-container>
+            </div>
+          </div>
         </div>
-        <div class="col-7 col-xl-7 col-lg-7">
-          <div class="d-flex">
-            <div class="col-1">
-              <label class="col-xl-12 control-label"></label>
-              <p-inputSwitch formControlName="jwtSetting">
-              </p-inputSwitch>
-            </div>
-            <div class="col-3">
-              <label class="col-xl-2 control-label">Request：</label>
-              <div class="col-xl-12">
-                <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlag" (onChange)="jweFlagOnChange($event);"
-                  [style]="{'width':'100%'}">
-                </p-dropdown>
-              </div>
-            </div>
-            <div class="col-3">
-              <label class="control-label">Response：</label>
-              <div class="col-xl-12">
-                <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlagResp"
-                  (onChange)="jweFlagRespOnChange($event);" [style]="{'width':'100%'}">
-                </p-dropdown>
-              </div>
-            </div>
+
+        <div class="col-12 col-md-2">
+          <label class="col-xl-2 control-label">Request：</label>
+          <div class="col-xl-12">
+            <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlag" (onChange)="jweFlagOnChange($event);"
+              class="jwt-req-dropdown" [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+        </div>
+        <div class="col-12 col-md-2">
+          <label class="control-label">Response：</label>
+          <div class="col-xl-12">
+            <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlagResp" class="jwt-resp-dropdown"
+              (onChange)="jweFlagRespOnChange($event);" [style]="{'width':'100%'}">
+            </p-dropdown>
           </div>
         </div>
       </div>
@@ -127,7 +134,6 @@
         <div class="col-12">
           <textarea class="form-control" rows="5" style="resize: none;" formControlName="apiDesc"></textarea>
         </div>
-
       </div>
 
       <div class="form-group row">

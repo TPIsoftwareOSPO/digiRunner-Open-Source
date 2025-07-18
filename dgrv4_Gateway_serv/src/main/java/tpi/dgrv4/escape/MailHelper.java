@@ -126,7 +126,8 @@ public class MailHelper {
 			// replaceAll() 方法的第一個參數是作為正則表達式處理的，如果 key 變數包含正則表達式的特殊字符，
 			// 可能會導致意外行為或安全問題。
 			// 對於 replaceAll() 方法，正確的修正方式是使用 Pattern.quote() 包裝正則表達式部分
-			template = template.replaceAll("\\{\\{" +  Pattern.quote(key) + "\\}\\}", value);
+			//特殊符號例如$會被視為群組參照，導致錯誤或非預期的結果，所以使用 Matcher.quoteReplacement(value)
+			template = template.replaceAll("\\{\\{" +  Pattern.quote(key) + "\\}\\}", value == null ? "" : Matcher.quoteReplacement(value));
 		}
 		return template;
 	}

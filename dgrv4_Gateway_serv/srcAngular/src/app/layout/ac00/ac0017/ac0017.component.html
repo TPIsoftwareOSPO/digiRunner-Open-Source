@@ -13,8 +13,8 @@
         <tr>
           <th rowspan="2" style="width: 4%;" scope="col">Enable</th>
           <th rowspan="2" style="width: 10%;" scope="col">ID</th>
+          <th rowspan="2" style="width: 10%;" scope="col">IdP Client Name</th>
           <th rowspan="1" style="width: 10%;" scope="col">IdP Client ID</th>
-          <th rowspan="1" style="width: 10%;" scope="col">IdP Client Name</th>
 
           <th rowspan="1" style="width: 16%;" scope="col">IdP Well Known URL</th>
           <th rowspan="1" style="width: 10%;" scope="col">Create User</th>
@@ -25,7 +25,7 @@
         </tr>
         <tr>
           <th rowspan="1" scope="col">Type</th>
-          <th rowspan="1" scope="col">IdP Client Secret</th>
+          <!-- <th rowspan="1" scope="col">IdP Client Secret</th> -->
           <th rowspan="1" scope="col">dgR Callback URL</th>
           <th rowspan="1" scope="col">Update User</th>
           <th rowspan="1" scope="col">Update Time</th>
@@ -36,12 +36,12 @@
         <!-- [pSelectableRow]="rowData" 控制高亮 -->
         <tr>
           <td rowspan="2" class="text-center">
-              <img [alt]="rowData.clientStatus" style="width: 20px; height: 20px"
-                [src]="rowData.clientStatus ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+            <img [alt]="rowData.clientStatus" style="width: 20px; height: 20px"
+              [src]="rowData.clientStatus ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
           </td>
           <td rowspan="2">{{rowData.id}}</td>
+          <td rowspan="2">{{rowData.clientName}}</td>
           <td rowspan="1">{{rowData.clientId}}</td>
-          <td rowspan="1">{{rowData.clientName}}</td>
           <td rowspan="1">{{rowData.idpWellKnownUrl}}</td>
           <td rowspan="1">{{rowData.createUser}}</td>
           <td rowspan="1">{{formateDate(rowData.createDateTime)}}</td>
@@ -66,7 +66,7 @@
         </tr>
         <tr>
           <td rowspan="1">{{rowData.idpType}}</td>
-          <td rowspan="1">{{rowData.clientMima}}</td>
+          <!-- <td rowspan="1">{{maskAllWithDots(rowData.clientMima,6)}}</td> -->
 
           <td rowspan="1">{{rowData.callbackUrl}}</td>
           <td rowspan="1">{{rowData.updateUser}}</td>
@@ -116,7 +116,14 @@
         </div>
         <div class="col-6">
           <label for="">IdP Client Secret</label>
-          <input type="text" class="form-control" [value]="userDetail.clientMima" readonly>
+          <div class="ui-inputgroup">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+              [value]="userDetail.clientMima" readonly>
+            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="togglePassword()"></button>
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+              (click)="copyToClipboard(userDetail.clientMima);" [pTooltip]="'copy' | translate"></button>
+          </div>
         </div>
       </div>
       <div class="form-group row">
@@ -228,7 +235,14 @@
         </div>
         <div class="col-6">
           <label for="clientMima" class="required control-label">IdP Client Secret</label>
-          <input type="text" class="form-control" id="clientMima" formControlName="clientMima" placeholder="">
+          <div class="ui-inputgroup">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="clientMima"
+              formControlName="clientMima" placeholder="">
+            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="togglePassword()"></button>
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+              (click)="copyToClipboard(clientMima!.value);" [pTooltip]="'copy' | translate"></button>
+          </div>
           <div *ngIf="clientMima?.invalid && (clientMima?.dirty || clientMima?.touched)" class="text-danger">
             <small class="form-text">{{clientMima?.errors.maxlength | translate }}</small>
             <small class="form-text">{{clientMima?.errors.pattern | translate}}</small>
@@ -241,8 +255,8 @@
           <!-- <label id="idpType" for="idpType" class="control-label">{{'user_alias' | translate}}</label> -->
           <label for="idpType" class="required control-label">Type</label>
           <!-- <input type="text" class="form-control" id="idpType" formControlName="idpType" placeholder=""> -->
-          <p-dropdown [options]="idpTypeList"
-            placeholder="{{'plz_chs' | translate}}" formControlName="idpType" [style]="{'width':'100%'}">
+          <p-dropdown [options]="idpTypeList" placeholder="{{'plz_chs' | translate}}" formControlName="idpType"
+            [style]="{'width':'100%'}">
           </p-dropdown>
           <div *ngIf="idpType?.invalid && (idpType?.dirty || idpType?.touched)" class="text-danger">
             <small class="form-text">{{idpType?.errors.maxlength | translate }}</small>
@@ -256,11 +270,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="clientStatus" value="Y"  inputId="statusY"></p-radioButton>
+                <p-radioButton formControlName="clientStatus" value="Y" inputId="statusY"></p-radioButton>
                 <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="clientStatus" value="N"  inputId="statusN"></p-radioButton>
+                <p-radioButton formControlName="clientStatus" value="N" inputId="statusN"></p-radioButton>
                 <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>

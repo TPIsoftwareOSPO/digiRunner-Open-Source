@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
+@SuppressWarnings("java:S5998")
 @Builder
 public record DgrProtocol(
         Boolean valid,
@@ -21,8 +21,8 @@ public record DgrProtocol(
         boolean mtls
 ) {
 
-    private final static String rex = "^dgr(\\+[-a-zA-Z]+)+##(.+)";
-    private final static Pattern pattern = Pattern.compile(rex);
+	private static final String rex = "^dgr(\\+[-a-zA-Z]+)+##(.+)";
+    private static final Pattern pattern = Pattern.compile(rex);
 
     public static DgrProtocol parse(String url) {
         var validation = validation(url);

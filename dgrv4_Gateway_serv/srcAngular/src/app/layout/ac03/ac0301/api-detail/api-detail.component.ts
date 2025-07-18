@@ -46,12 +46,11 @@ export class ApiDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.apiDetail);
     if (this.apiDetail.srcUrl) {
       const dgrProtocol_match = this.toolServiceW.dgrProtocol_match(
         this.apiDetail.srcUrl.o ? this.apiDetail.srcUrl.o: this.apiDetail.srcUrl.v
       );
-      
+
       if (dgrProtocol_match.length > 0) {
         this.isWebhook = dgrProtocol_match.some((item) => item.includes('webhook'));
       }

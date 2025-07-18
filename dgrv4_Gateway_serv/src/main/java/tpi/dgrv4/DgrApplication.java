@@ -21,7 +21,8 @@ public class DgrApplication extends SpringBootServletInitializer {
 			SpringApplication.run(DgrApplication.class, args);
 		}catch(Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-			throw e;
+			System.exit(1);
+//			throw e;
 		}
 	}
 

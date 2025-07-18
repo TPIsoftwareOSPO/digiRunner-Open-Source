@@ -211,7 +211,13 @@
       </div>
       <div class="col-6">
         <label class="control-label">IdP Client Secret</label>
-        <label class="form-control border-line">{{gtwIdPInfo?.idpClientMima}}</label>
+        <div class="ui-inputgroup">
+          <label class="form-control border-line">{{showPassword?gtwIdPInfo?.idpClientMima: maskAllWithDots(gtwIdPInfo?.idpClientMima) }}</label>
+           <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="togglePassword()"></button>
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+              (click)="copyToClipboard(gtwIdPInfo?.idpClientMima);" [pTooltip]="'copy' | translate"></button>
+        </div>
       </div>
     </div>
 
@@ -363,7 +369,14 @@
         </div>
         <div class="col-6">
           <label id="idpClientMima_label" for="idpClientMima" class="control-label">IdP Client Secret</label>
-          <input type="text" class="form-control" id="idpClientMima" formControlName="idpClientMima">
+          <div class="ui-inputgroup">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+              id="idpClientMima" formControlName="idpClientMima">
+            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="togglePassword()"></button>
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+              (click)="copyToClipboard(idpClientMima!.value);" [pTooltip]="'copy' | translate"></button>
+          </div>
           <div *ngIf="idpClientMima?.invalid && (idpClientMima?.dirty || idpClientMima?.touched)" class="text-danger">
             <small class="form-text">{{idpClientMima?.errors.isRequired | translate}}</small>
           </div>

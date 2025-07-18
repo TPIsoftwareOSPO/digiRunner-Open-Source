@@ -26,6 +26,9 @@ public class H2DatabaseaServerConfig {
 	
 	@Value("${digi.h2.port:9090}")
 	private String h2Port ;
+	
+	@Value("${digi.h2.server.enable:true}")
+	private boolean h2serverEnable ;
 
 //	@Autowired(required = false)
 	private IDgrv4H2Config dgrv4H2Config;
@@ -45,12 +48,21 @@ public class H2DatabaseaServerConfig {
 		Object h2Server = null;
 		int port = Integer.parseInt(h2Port);
 		String portStr = String.valueOf(port);
-		if (isPortAvailable(port) && dgrv4H2Config!=null) {
+		if (h2serverEnable==false) {
+			buf.append("\n ... * H2 server enable = [" + h2serverEnable + "] * ...\n");
+		} else if (isPortAvailable(port) && dgrv4H2Config!=null) {
 			h2Server = dgrv4H2Config.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", portStr, TPILogger.tl);
 			buf.append("\n ... * H2 server Start Complete on Port [" + portStr + "] * ...\n");
 		} else {
 			buf.append("\n ... * Port" + portStr + " is already in use OR IoC FAILED. H2 server will not be started. * ...\n");
 		}
+		
+//		if (isPortAvailable(port) && dgrv4H2Config!=null) {
+//			h2Server = dgrv4H2Config.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", portStr, TPILogger.tl);
+//			buf.append("\n ... * H2 server Start Complete on Port [" + portStr + "] * ...\n");
+//		} else {
+//			buf.append("\n ... * Port" + portStr + " is already in use OR IoC FAILED. H2 server will not be started. * ...\n");
+//		}
 		buf.append("\n======================== [H2 Config END] ============================\n");
 		TPILogger.tl.info(buf.toString());
 		return h2Server;

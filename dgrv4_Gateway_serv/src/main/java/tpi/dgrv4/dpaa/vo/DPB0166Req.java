@@ -103,7 +103,6 @@ public class DPB0166Req extends ReqValidator {
 	
 	@Override
 	protected List<BeforeControllerRespItem> provideConstraints(String locale) {
-		String URIRegex = "^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		return Arrays.asList(new BeforeControllerRespItem[] {
 				new BeforeControllerRespItemBuilderSelector()
 					.buildString(locale)
@@ -120,7 +119,7 @@ public class DPB0166Req extends ReqValidator {
 					.buildString(locale)
 					.field("ldapUrl")
 					.isRequired()
-					.pattern(URIRegex, TsmpDpAaRtnCode._1352.getCode(), null)
+					.pattern(DPB0160Req.LDAP_URI_REGEX, TsmpDpAaRtnCode._1352.getCode(), null)
 					.build(),
 				new BeforeControllerRespItemBuilderSelector()
 					.buildString(locale)

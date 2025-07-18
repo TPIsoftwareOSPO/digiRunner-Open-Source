@@ -29,6 +29,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { NotifyListComponent } from 'src/app/shared/notify-list/notify-list.component';
 
+
 @Component({
   selector: 'app-ac0311',
   templateUrl: './ac0311.component.html',
@@ -97,6 +98,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       value: 'WEBHOOK'
     },
   ];
+
+  jwtSettingSub?:Subscription;
 
   constructor(
     route: ActivatedRoute,
@@ -740,6 +743,21 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     document.getElementById(`expanded_${idx}`)!.style.display = 'none';
   }
 
+  jwtSettingClick(evt,idx:number){
+    if (this.oasForm.get(`jwtSetting_${idx}`)!.value) {
+          this.oasForm.get(`jweFlag_${idx}`)!.enable();
+          this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
+          this.oasForm.get(`jweFlagResp_${idx}`)!.enable();
+          this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('1');
+    }
+    else {
+      this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
+      this.oasForm.get(`jweFlag_${idx}`)!.disable();
+      this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('0');
+      this.oasForm.get(`jweFlagResp_${idx}`)!.disable();
+    }
+  }
+
   // 控制rowData的jwe setting
   jwtSettingOnChange(evn, idx?: number) {
     switch (this.currentTabIdx) {
@@ -773,6 +791,23 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         break;
     }
   }
+
+  // this.jwtSettingSub = this.u_jwtSetting?.valueChanges.subscribe(
+  //               (states) => {
+  //                 // console.log(states);
+  //                 if (states) {
+  //                   this.u_jweFlag!.enable();
+  //                   this.u_jweFlag!.setValue('0');
+  //                   this.u_jweFlagResp!.enable();
+  //                   this.u_jweFlagResp!.setValue('1');
+  //                 } else {
+  //                   this.u_jweFlag!.setValue('0');
+  //                   this.u_jweFlag!.disable();
+  //                   this.u_jweFlagResp!.setValue('0');
+  //                   this.u_jweFlagResp!.disable();
+  //                 }
+  //               }
+  //             );
 
   jweFlagOnChange(evn, idx?: number) {
     switch (this.currentTabIdx) {
@@ -1170,9 +1205,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       jweFlag: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_jweFlag!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.c_jweFlag!.value),
       jweFlagResp: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_jweFlagResp!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.c_jweFlagResp!.value),
       apiDesc: this.c_apiDesc!.value,
-      type: this.c_type.value,          
+      type: this.c_type.value,
     } as AA0311Req;
-    
+
 
 
     if (this.c_type?.value == '1') {
@@ -1258,8 +1293,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
     reqBody.labelList = this.labelList.value;
 
-    console.log(reqBody);
-    
+    // console.log(reqBody);
+
 
     this.apiService.registerAPI_v3(reqBody).subscribe(async res => {
       this.ngxService.stop();
@@ -1340,6 +1375,11 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let tmpType = this.c_type.value;
     if(resetAll) this.customForm.reset(); //清除所有資料
 
+    if(this.jwtSettingSub) {
+      this.jwtSettingSub.unsubscribe();
+      this.jwtSettingSub = undefined;
+    }
+
 
     this.redirectByIp.setValue(false);
 
@@ -1387,6 +1427,21 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         }
       })
     }
+    this.jwtSettingSub = this.c_jwtSetting?.valueChanges.subscribe((states) => {
+      // console.log(states);
+      if (states) {
+        this.c_jweFlag!.enable();
+        this.c_jweFlag!.setValue('0');
+        this.c_jweFlagResp!.enable();
+        this.c_jweFlagResp!.setValue('1');
+      } else {
+        this.c_jweFlag!.setValue('0');
+        this.c_jweFlag!.disable();
+        this.c_jweFlagResp!.setValue('0');
+        this.c_jweFlagResp!.disable();
+      }
+    });
+
 
   }
 

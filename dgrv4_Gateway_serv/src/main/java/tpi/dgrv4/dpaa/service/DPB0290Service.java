@@ -2,6 +2,7 @@ package tpi.dgrv4.dpaa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -20,6 +21,8 @@ public class DPB0290Service {
     private final DgrGrpcProxyMapDao dgrGrpcProxyMapDao;
     private final DynamicGrpcProxyManager dynamicGrpcProxyManager;
     private final TlsCertificateManager tlsCertificateManager;
+    
+    private static final String TARGET_PORT = "targetPort";
 
     @Autowired
     public DPB0290Service(DgrGrpcProxyMapDao dgrGrpcProxyMapDao,
@@ -31,6 +34,31 @@ public class DPB0290Service {
         this.tlsCertificateManager = tlsCertificateManager;
     }
 
+    @Transactional
+    public DgrGrpcProxyMap createGrpcProxyWithImport(TsmpAuthorization authorization, DPB0290Req req) {
+        try {
+            // 檢查基本參數
+            checkParam(req);
+
+            // 驗證 TLS 證書（如果有提供）
+            validateTlsCertificates(req);
+
+            // 創建代理映射並儲存到資料庫
+            DgrGrpcProxyMap dgrGrpcProxyMap = createGrpcProxyMap(authorization.getUserName(), req);
+
+            // 註冊到動態代理管理器
+            // 這將發布事件，觸發 GrpcProxyServer 重啟
+            dynamicGrpcProxyManager.addProxyMapping(dgrGrpcProxyMap);
+
+            return dgrGrpcProxyMap;
+        } catch (TsmpDpAaException e) {
+            throw e;
+        } catch (Exception e) {
+            TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+            throw TsmpDpAaRtnCode._1297.throwing();
+        }
+    }
+
     /**
      * 創建新的 gRPC 代理映射
      *
@@ -38,6 +66,7 @@ public class DPB0290Service {
      * @param req 請求對象
      * @return 響應對象
      */
+    @Transactional
     public DPB0290Resp createGrpcProxy(TsmpAuthorization authorization, DPB0290Req req) {
         try {
             // 檢查基本參數
@@ -68,24 +97,24 @@ public class DPB0290Service {
      * @param req 請求對象
      * @throws TsmpDpAaException 如果證書無效或缺少必需的配置
      */
-    private void validateTlsCertificates(DPB0290Req req) {
+    protected void validateTlsCertificates(DPB0290Req req) {
         // 檢查如果有提供服務器證書，那麼必須同時提供私鑰
         if ((req.getServerCertContent() != null && !req.getServerCertContent().isEmpty()) &&
                 (req.getServerKeyContent() == null || req.getServerKeyContent().isEmpty())) {
-            throw TsmpDpAaRtnCode._1297.throwing("提供了服務器證書但缺少私鑰");
+            throw TsmpDpAaRtnCode._1559.throwing("Server private key is required when server certificate is provided");
         }
 
         // 檢查如果有提供私鑰，那麼必須同時提供服務器證書
         if ((req.getServerKeyContent() != null && !req.getServerKeyContent().isEmpty()) &&
                 (req.getServerCertContent() == null || req.getServerCertContent().isEmpty())) {
-            throw TsmpDpAaRtnCode._1297.throwing("提供了私鑰但缺少服務器證書");
+            throw TsmpDpAaRtnCode._1559.throwing("Server certificate is required when server private key is provided");
         }
 
         // 如果有提供服務器證書，驗證其有效性
         if (req.getServerCertContent() != null && !req.getServerCertContent().isEmpty()) {
             boolean isValid = tlsCertificateManager.validateCertificate(req.getServerCertContent());
             if (!isValid) {
-                throw TsmpDpAaRtnCode._1297.throwing("服務器證書無效");
+                throw TsmpDpAaRtnCode._1352.throwing("Server certificate");
             }
         }
 
@@ -93,7 +122,7 @@ public class DPB0290Service {
         if (req.getTrustedCertsContent() != null && !req.getTrustedCertsContent().isEmpty()) {
             boolean isValid = tlsCertificateManager.validateCertificate(req.getTrustedCertsContent());
             if (!isValid) {
-                throw TsmpDpAaRtnCode._1297.throwing("信任的 CA 證書無效");
+                throw TsmpDpAaRtnCode._1352.throwing("Trusted CA certificate");
             }
         }
 
@@ -101,13 +130,13 @@ public class DPB0290Service {
         String secureMode = req.getSecureMode();
         if (secureMode != null && !secureMode.isEmpty() &&
                 !secureMode.equals("AUTO") && !secureMode.equals("SECURE") && !secureMode.equals("PLAINTEXT")) {
-            throw TsmpDpAaRtnCode._1297.throwing("安全模式無效，必須是 AUTO、SECURE 或 PLAINTEXT");
+            throw TsmpDpAaRtnCode._1559.throwing("Invalid secure mode. Must be AUTO, SECURE or PLAINTEXT");
         }
 
         // 安全模式啟用時檢查證書是否存在
         String trustedCertsContent = req.getTrustedCertsContent();
-        if("SECURE".equals(secureMode) && trustedCertsContent.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing("trustedCertsContent");
+        if("SECURE".equals(secureMode) && (trustedCertsContent == null || trustedCertsContent.isEmpty())) {
+            throw TsmpDpAaRtnCode._1350.throwing("trustedCertsContent");
         }
     }
 
@@ -128,67 +157,70 @@ public class DPB0290Service {
         String enable = req.getEnable();
 
         if (serviceName == null || serviceName.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("serviceName");
         }
 
         if (proxyHostName == null || proxyHostName.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("proxyHostName");
         }
 
         if (targetHostName == null || targetHostName.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("targetHostName");
         }
 
         if (targetPort == null || targetPort.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing(TARGET_PORT);
         }
 
         if (connectTimeout == null || connectTimeout.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("connectTimeoutMs");
         }
 
         if (readTimeout == null || readTimeout.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("readTimeoutMs");
         }
 
         if (sendTimeout == null || sendTimeout.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("sendTimeoutMs");
         }
 
         if (enable == null || enable.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing();
+            throw TsmpDpAaRtnCode._1350.throwing("enable");
         }
 
         // 檢查數值型參數是否有效
         try {
             int portNum = Integer.parseInt(targetPort);
-            if (portNum <= 0 || portNum > 65535) {
-                throw TsmpDpAaRtnCode._1297.throwing();
+            if (portNum <= 0) {
+                throw TsmpDpAaRtnCode._1355.throwing(TARGET_PORT, "1", String.valueOf(portNum));
+            }
+            if (portNum > 65535) {
+                throw TsmpDpAaRtnCode._1356.throwing(TARGET_PORT, "65535", String.valueOf(portNum));
             }
 
             int connectTimeoutMs = Integer.parseInt(connectTimeout);
             if (connectTimeoutMs <= 0) {
-                throw TsmpDpAaRtnCode._1297.throwing();
+                throw TsmpDpAaRtnCode._1355.throwing("connectTimeoutMs", "1", String.valueOf(connectTimeoutMs));
             }
 
             int readTimeoutMs = Integer.parseInt(readTimeout);
             if (readTimeoutMs <= 0) {
-                throw TsmpDpAaRtnCode._1297.throwing();
+                throw TsmpDpAaRtnCode._1355.throwing("readTimeoutMs", "1", String.valueOf(readTimeoutMs));
             }
 
             int sendTimeoutMs = Integer.parseInt(sendTimeout);
             if (sendTimeoutMs <= 0) {
-                throw TsmpDpAaRtnCode._1297.throwing();
+                throw TsmpDpAaRtnCode._1355.throwing("sendTimeoutMs", "1", String.valueOf(sendTimeoutMs));
             }
         } catch (NumberFormatException e) {
-            throw TsmpDpAaRtnCode._1297.throwing();
+            throw TsmpDpAaRtnCode._2021.throwing();
         }
 
         // 檢查是否已存在相同的映射
         DgrGrpcProxyMap dgrGrpcProxyMap = getDgrGrpcProxyMapDao().findByProxyHostNameAndTargetHostNameAndTargetPort(
                 proxyHostName, targetHostName, Integer.parseInt(targetPort));
         if (dgrGrpcProxyMap != null) {
-            throw TsmpDpAaRtnCode._1423.throwing(proxyHostName);
+            throw TsmpDpAaRtnCode._1559.throwing("Duplicate gRPC proxy mapping found for proxyHostName: " + proxyHostName);
         }
     }
 

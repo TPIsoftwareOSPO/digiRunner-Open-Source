@@ -66,7 +66,7 @@ import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
-public class AA0319Service {
+public class  AA0319Service {
 
 	private TPILogger logger = TPILogger.tl;
 

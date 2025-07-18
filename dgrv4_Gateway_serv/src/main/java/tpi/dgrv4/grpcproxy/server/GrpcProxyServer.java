@@ -6,6 +6,7 @@ import io.netty.handler.ssl.SslContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -32,13 +33,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class GrpcProxyServer {
     private final TPILogger logger = TPILogger.tl;
 
+    @Value("${grpc.proxy.enabled:true}")
+    private boolean grpcProxyEnabled;
+    
     private final GrpcProxyProperties proxyProperties;
     private final DynamicGrpcProxyManager proxyManager;
     private final SslContext sslContext;
@@ -85,6 +87,12 @@ public class GrpcProxyServer {
      */
     @PostConstruct
     public void start() throws IOException {
+    	if(!grpcProxyEnabled) {
+    		TPILogger.tl.info("grpc proxy enabled is false");
+    		return;
+    	}else {
+    		TPILogger.tl.info("grpc proxy enabled is true");
+    	}
         serverLock.lock();
         try {
             // 啟動配置信息將整合到最終的banner中
@@ -270,11 +278,7 @@ public class GrpcProxyServer {
                 }
                 banner.append("_____________________________________________\n");
                 
-                if (tlsResult.isSuccess()) {
-                    logger.debug(banner.toString());
-                } else {
-                    logger.debug(banner.toString());
-                }
+                logger.debug(banner.toString());
                 
                 return tlsResult;
             } else {
@@ -482,8 +486,8 @@ public class GrpcProxyServer {
         }
 
         banner.append(" ...Health check scheduler = ENABLED\n");
-        banner.append(" ...Health check interval = 5 seconds\n");
-        banner.append(" ...Statistics report interval = 20 seconds\n");
+        banner.append(" ...Health check interval = 30 seconds\n");
+        banner.append(" ...Statistics report interval = 5 Minutes\n");
         banner.append(" ...Scheduler thread pool = 2 threads\n");
         banner.append(" ...Services to monitor = ").append(upstreamStatusMap.size()).append("\n");
         
@@ -1247,55 +1251,43 @@ public class GrpcProxyServer {
         }
     }
 
-
-    
-
-    
-
-    
     /**
      * 創建ASCII art banner風格的日誌
      */
     private void logBannerStyle(String threadName, String version, Map<String, String> serverInfo) {
-        StringBuilder banner = new StringBuilder();
-        banner.append("---\n");
-        banner.append("    ").append(threadName).append("::\n");
-        banner.append("╔══════════════════════════════════════════════════════════════╗\n");
-        banner.append("║                                                              ║\n");
-        banner.append("║   ██████╗  ██████╗ ██████╗ ██╗   ██╗██╗  ██╗                ║\n");
-        banner.append("║   ██╔══██╗██╔════╝ ██╔══██╗██║   ██║██║  ██║                ║\n");
-        banner.append("║   ██║  ██║██║  ███╗██████╔╝██║   ██║███████║                ║\n");
-        banner.append("║   ██║  ██║██║   ██║██╔══██╗╚██╗ ██╔╝╚════██║                ║\n");
-        banner.append("║   ██████╔╝╚██████╔╝██║  ██║ ╚████╔╝      ██║                ║\n");
-        banner.append("║   ╚═════╝  ╚═════╝ ╚═╝  ╚═╝  ╚═══╝       ╚═╝                ║\n");
-        banner.append("║                                                              ║\n");
-        banner.append("║            ██████╗ ██████╗ ██████╗  ██████╗                 ║\n");
-        banner.append("║           ██╔════╝ ██╔══██╗██╔══██╗██╔════╝                 ║\n");
-        banner.append("║           ██║  ███╗██████╔╝██████╔╝██║                      ║\n");
-        banner.append("║           ██║   ██║██╔══██╗██╔═══╝ ██║                      ║\n");
-        banner.append("║           ╚██████╔╝██║  ██║██║     ╚██████╗                 ║\n");
-        banner.append("║            ╚═════╝ ╚═╝  ╚═╝╚═╝      ╚═════╝                 ║\n");
-        banner.append("║                                                              ║\n");
-        banner.append("║                    ██████╗ ██████╗  ██████╗ ██╗  ██╗██╗   ██╗║\n");
-        banner.append("║                    ██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝╚██╗ ██╔╝║\n");
-        banner.append("║                    ██████╔╝██████╔╝██║   ██║ ╚███╔╝  ╚████╔╝ ║\n");
-        banner.append("║                    ██╔═══╝ ██╔══██╗██║   ██║ ██╔██╗   ╚██╔╝  ║\n");
-        banner.append("║                    ██║     ██║  ██║╚██████╔╝██╔╝ ██╗   ██║   ║\n");
-        banner.append("║                    ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ║\n");
-        banner.append("║                                                              ║\n");
-        banner.append("╚══════════════════════════════════════════════════════════════╝\n");
-                banner.append("========== dgRv4 gRPC proxy server info ============\n");
-        banner.append(" ...dgR VERSION = ").append(version).append("\n");
+
+
+        String asciiArt = """
+
+        
+            ____   ____ ______     ___  _      ____ ____  ____   ____   ____  ____   _____  ___   __
+           |  _ \\ / ___|  _ \\ \\   / / || |    / ___|  _ \\|  _ \\ / ___| |  _ \\|  _ \\ / _ \\ \\/ | \\ / /
+           | | | | |  _| |_) \\ \\ / /| || |_  | |  _| |_) | |_) | |     | |_) | |_) | | | \\  / \\ V / 
+           | |_| | |_| |  _ < \\ V / |__   _| | |_| |  _ <|  __/| |___  |  __/|  _ <| |_| /  \\  | |  
+           |____/ \\____|_| \\_\\ \\_/     |_|    \\____|_| \\_\\_|    \\____| |_|   |_| \\_\\\\___/_/\\_\\ |_|  
+                                                                                                    
+          """;
+                  
+        String bannerText = """
+                %s
+                    %s::
+                
+                    :: gRPC Proxy Server :: (%s)
+                
+                ========== Server Information ============
+                """.formatted(asciiArt, threadName, version);
+        
+        StringBuilder banner = new StringBuilder(bannerText);
         
         for (Map.Entry<String, String> entry : serverInfo.entrySet()) {
-            banner.append(" ...").append(entry.getKey()).append(" = ").append(entry.getValue()).append("\n");
+            banner.append(String.format(" :: %-20s : %s%n", entry.getKey(), entry.getValue()));
         }
         
-        banner.append("_____________________________________________\n");
+        banner.append("==========================================\n");
         
         logger.info(banner.toString());
-    }
-    
+    }    
+
     /**
      * 創建服務器信息Map
      */

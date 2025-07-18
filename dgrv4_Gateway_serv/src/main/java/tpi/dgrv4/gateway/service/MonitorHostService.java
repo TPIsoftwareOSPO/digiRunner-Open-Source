@@ -127,7 +127,6 @@ public class MonitorHostService {
 //				sb.append("\tJob-2nd-runner.buff2ndWaitCount\t=" + DeferrableJobManager.buff2ndWaitCount.get() +"\n");
 				sb.append("\t......................................................\n\t");
 																												// (1,006 GB, Use%=0.1313, Free%=)
-				//sb.append("Disk = (" + String.format("%,d %s", (infoVo.getDtotal() / 1024 / 1024 /1024), "GB") + ", Use%=" + infoVo.getDusage() + ", Free%="+ (1 - infoVo.getDusage()) +")\n");
 				sb.append("Disk (Size=" + String.format("%,d %s", (infoVo.getDtotal() / 1024 / 1024 / 1024), "GB") + 
 				          ", Use=" + String.format("%.2f", infoVo.getDusage() * 100) + "%" + 
 				          ", Free=" + String.format("%.2f", (1 - infoVo.getDusage()) * 100) + "%" + ")");

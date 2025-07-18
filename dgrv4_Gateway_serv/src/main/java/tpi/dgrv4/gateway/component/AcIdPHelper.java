@@ -224,6 +224,11 @@ public class AcIdPHelper {
 		String lineNumber = null;
 		String userStatusEn = DgrAcIdpUserStatus.REQUEST.text();
 		
+		String userNameForDec = userName;		
+		if (DgrIdPType.CUS.equalsIgnoreCase(idPType)) {
+			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 才要做解碼
+		}
+		
 		if (isReviewAndCreate) { // 有 寄發審核信流程 及 自動建立 User
 			// 檢查 user name 是否重複
 			showMsg = checkUserDuplicate(userName, idPType);
@@ -231,8 +236,7 @@ public class AcIdPHelper {
 			if (showMsg != null) {
 				// 寫入 Audit Log M,登入失敗
 				lineNumber = StackTraceUtil.getLineNumber();
-				createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType,
-						ServiceUtil.decodeBase64URL(userName), userAlias);
+				createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec, userAlias);
 
 				// 重新導向到前端,顯示訊息
 				TPILogger.tl.debug(showMsg);
@@ -255,7 +259,7 @@ public class AcIdPHelper {
 			long acIdpUserId = dgrAcIdpUser.getAcIdpUserId();
 	    	
 	    	// b.寄信給審核者,以執行同意/拒絕動作
-	        sendApplyMail(httpReq, ServiceUtil.decodeBase64URL(userName), userEmail, acIdpUserId, idPType, reviewerEmails, code1, code2);
+	        sendApplyMail(httpReq, userNameForDec, userEmail, acIdpUserId, idPType, reviewerEmails, code1, code2);
 
 			// User狀態為 'Request' 無法登入,已寄信給審核者,經審核後,將寄發Email通知您
 			showMsg = String.format(MSG_WAITING_FOR_REVIEW_MSG, userStatusEn);
@@ -265,17 +269,17 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, ServiceUtil.decodeBase64URL(userName),
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
 					userAlias);
 
 		} else { // 沒有 寄發審核信流程 及 不會自動建立 User
 			// Delegate AC User '%s' 不存在,不能登入
-			showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN, ServiceUtil.decodeBase64URL(userName));
+			showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN, userNameForDec);
 			errMsg = showMsg;
 			
 			// 寫入 Audit Log M,登入失敗
 			lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, ServiceUtil.decodeBase64URL(userName),
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
 					userAlias);
 		}
 		
@@ -297,6 +301,11 @@ public class AcIdPHelper {
 		String userStatus = dgrAcIdpUser.getUserStatus();
 		Long acIdpUserId = dgrAcIdpUser.getAcIdpUserId();
 		
+		String userNameForDec = userName;
+		if (DgrIdPType.CUS.equalsIgnoreCase(idPType)) {
+			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 才要做解碼
+		}
+		
 		if (DgrAcIdpUserStatus.REQUEST.isValueEquals(userStatus)) {// User 狀態為 Request
 			String userStatusEn = DgrAcIdpUserStatus.REQUEST.text();
 
@@ -314,7 +323,7 @@ public class AcIdPHelper {
 				acIdpUserId = dgrAcIdpUser.getAcIdpUserId();
 
 				// b.寄信給審核者,以執行同意/拒絕動作
-				sendApplyMail(httpReq, ServiceUtil.decodeBase64URL(userName), userEmail, acIdpUserId, idPType, reviewerEmails, code1, code2);
+				sendApplyMail(httpReq, userNameForDec, userEmail, acIdpUserId, idPType, reviewerEmails, code1, code2);
 
 				showMsg = String.format(MSG_WAITING_FOR_REVIEW_MSG, userStatusEn);
 
@@ -327,7 +336,7 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			String lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, ServiceUtil.decodeBase64URL(userName),
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
 					userAlias);
 
 			// 重新導向到前端,顯示訊息
@@ -362,7 +371,7 @@ public class AcIdPHelper {
 
 			if (isReviewAndCreate) { // 有 寄發審核信流程 及 自動建立 User
 				// 寄信給 IdP User,以執行重新申請動作
-				sendDenyMail(httpReq, ServiceUtil.decodeBase64URL(userName), userEmail, acIdpUserId, idPType);
+				sendDenyMail(httpReq, userNameForDec, userEmail, acIdpUserId, idPType);
 				showMsg = String.format(MSG_EMAIL_WILL_BE_SENT_TO_NOTIFY_YOU, userStatusEn);
 
 			} else {// 沒有 寄發審核信流程 及 不會自動建立 User
@@ -374,7 +383,7 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			String lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, ServiceUtil.decodeBase64URL(userName),
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
 					userAlias);
 
 			// 重新導向到前端,顯示訊息
@@ -389,7 +398,7 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			String lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, ServiceUtil.decodeBase64URL(userName),
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
 					userAlias);
 
 			// 重新導向到前端,顯示訊息
@@ -404,13 +413,19 @@ public class AcIdPHelper {
 	 * 2.不同 IdP type 的 Delegate AC User <br>
 	 */
 	private String checkUserDuplicate(String userName, String newIdpType) {
+		String userNameForDec = userName;
+		if (DgrIdPType.CUS.equalsIgnoreCase(newIdpType)) {
+			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 才要做解碼
+		}
+		
 		String errMsg = null;
+		
 		// 1.檢查 userName 是否與使用者帳號重複
 		TsmpUser user = getTsmpUserDao().findFirstByUserName(userName);
 		if (user != null) {
 			// userName '%s'(IdP type '%s') 與使用者帳號重複,不能登入
 			errMsg = String.format(
-					"The Delegate AC User '%s' (IdP type '%s') duplicates with the %s User, cannot log in.", ServiceUtil.decodeBase64URL(userName),
+					"The Delegate AC User '%s' (IdP type '%s') duplicates with the %s User, cannot log in.", userNameForDec,
 					newIdpType, IdPHelper.DEFULT_PAGE_TITLE);
 			return errMsg;
 		}
@@ -424,7 +439,7 @@ public class AcIdPHelper {
 					// userName '%s'(IdP type '%s') 與 Delegate AC User(IdP type '%s') 重複,不能登入
 					errMsg = String.format(
 							"The user name '%s'(IdP type '%s') duplicates with the Delegate AC User(IdP type '%s'), cannot log in.",
-							ServiceUtil.decodeBase64URL(userName), newIdpType, existIdpType);
+							userNameForDec, newIdpType, existIdpType);
 					return errMsg;
 				}
 			}

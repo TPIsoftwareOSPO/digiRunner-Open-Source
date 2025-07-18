@@ -14,4 +14,6 @@ public interface DgrWebhookNotifyFieldDao extends JpaRepository<DgrWebhookNotify
 	List<DgrWebhookNotifyField> findByWebhookNotifyId(Long webhookNotifyId);
 	
 	List<DgrWebhookNotifyField> findByCreateUser(String createUser);
+
+	void deleteByWebhookNotifyIdIn(List<Long> notifyIds);
 }

@@ -39,7 +39,9 @@ jdbc:postgresql://{{hostname}}:{{port}}/{{databaseName}}
 Oracle:
 jdbc:oracle:thin:@{{hostname}}:{{port}}:{{databaseName}}
 SQL Server:
-jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServerCertificate=true`
+jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServerCertificate=true
+MariaDB:
+jdbc:mariadb://{{hostname}}/{{db}}`
 
   constructor(
     route: ActivatedRoute,
@@ -72,7 +74,11 @@ jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServe
       updateUser: new FormControl(''),
     });
 
-    this.axios_queryRdbConnectionInfoList();
+    this.serverService.queryRdbConnectionInfoList_ignore1298().subscribe(res => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        this.tableData = res.RespBody.infoList;
+      }
+    })
   }
 
   axios_queryRdbConnectionInfoList() {

@@ -4,6 +4,15 @@ server {
     ssl_certificate     ${sslCrtPath};
     ssl_certificate_key ${sslKeyPath};
     error_page 497  301 =307 https://$host:$server_port$request_uri;
+        <#if sslProtocols?? >
+        ssl_protocols ${sslProtocols};
+        </#if>
+        <#if sslPreferServerCiphers?? >
+        ssl_prefer_server_ciphers ${sslPreferServerCiphers};
+        </#if>
+        <#if sslCiphers?? >
+        ssl_ciphers ${sslCiphers};
+        </#if>
     </#if>
 
     client_max_body_size ${maxBodySize};

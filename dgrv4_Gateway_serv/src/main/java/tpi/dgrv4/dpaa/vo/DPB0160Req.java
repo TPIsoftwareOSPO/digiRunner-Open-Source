@@ -11,6 +11,8 @@ import tpi.dgrv4.dpaa.constant.RegexpConstant;
 
 public class DPB0160Req extends ReqValidator {
 	
+	public static final String LDAP_URI_REGEX = "^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+	
 	private String ldapUrl;
 	
 	private String ldapBaseDn;
@@ -93,13 +95,12 @@ public class DPB0160Req extends ReqValidator {
 
 	@Override
 	protected List<BeforeControllerRespItem> provideConstraints(String locale) {
-		String URIRegex = "^(ldap?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		return Arrays.asList(new BeforeControllerRespItem[] {
 					new BeforeControllerRespItemBuilderSelector()
 					.buildString(locale)
 					.field("ldapUrl")
 					.isRequired()
-					.pattern(URIRegex, TsmpDpAaRtnCode._1405.getCode(), null)
+					.pattern(LDAP_URI_REGEX, TsmpDpAaRtnCode._1352.getCode(), null)
 					.build(),
 					new BeforeControllerRespItemBuilderSelector()
 					.buildString(locale)

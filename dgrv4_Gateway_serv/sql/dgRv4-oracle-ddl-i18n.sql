@@ -2919,7 +2919,7 @@ CREATE INDEX idx_dgr_dashboard_es_log ON dgr_dashboard_es_log(rtime);
 CREATE INDEX idx_tsmp_req_res_log_history ON tsmp_req_res_log_history(rtime);
 
 -- 20250213, 增加欄位長度, Zoe Lee
-ALTER TABLE dgr_rdb_connection MODIFY mima VARCHAR2(2000) NOT NULL;
+ALTER TABLE dgr_rdb_connection MODIFY mima VARCHAR2(2000);
 
 -- 20250227, DGR_WEBHOOK_NOTIFY , Webber Luo
 CREATE TABLE dgr_webhook_notify

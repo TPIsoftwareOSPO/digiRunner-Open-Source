@@ -555,6 +555,32 @@
   <div *ngIf="pageNum == 3">
     <form [formGroup]="updateForm">
       <div class="form-group row">
+        <div class="col-sm-2">
+          <label id="apiStatus_label" class="control-label">{{"api_status" | translate}}</label>
+          <!-- <p-inputSwitch class="form-control border-line" formControlName="apiStatus"></p-inputSwitch> -->
+          <div class="p-form-check-line form-group">
+            <div class="p-form-check">
+              <p-radioButton formControlName="apiStatus" [value]="true" inputId="apiStatus_true"></p-radioButton>
+              <label for="apiStatus_true" class="ms-2 mb-0" style="white-space: nowrap;">{{'button.enable'|translate}}</label>
+            </div>
+            <div class="p-form-check">
+              <p-radioButton formControlName="apiStatus" [value]="false" inputId="apiStatus_false"></p-radioButton>
+              <label for="apiStatus_false" class="ms-2 mb-0" style="white-space: nowrap;">{{'button.disable'|translate}}</label>
+            </div>
+          </div>
+          <div *ngIf="
+              u_apiStatus.invalid && (u_apiStatus.dirty || u_apiStatus.touched)
+            " class="text-danger">
+            <small class="form-text">{{ u_apiStatus.errors.isRequired }}</small>
+            <small class="form-text">{{
+              u_apiStatus.errors.maxlength | translate
+              }}</small>
+            <small class="form-text">{{
+              u_apiStatus.errors.minlength | translate
+              }}</small>
+            <small class="form-text">{{ u_apiStatus.errors.pattern }}</small>
+          </div>
+        </div>
         <div class="col-sm-6">
           <label id="moduleName_label" class="control-label">[{{ "module_id" | translate }}]
             {{ "module_name" | translate }}</label>
@@ -571,10 +597,7 @@
             </label>
           </label>
         </div>
-        <div class="col-sm-2" *ngIf="apiDetail.apiSrc.v == 'R' || apiDetail.apiSrc.v == 'C'">
-          <label id="apiStatus_label" class="control-label"> API Cache </label>
-          <p-dropdown [options]="apiCacheFlags" formControlName="apiCacheFlag" [style]="{ width: '100%' }"></p-dropdown>
-        </div>
+
         <div class="col-sm-4">
           <label id="apiKey_label" class="control-label">{{
             "api_key" | translate
@@ -610,6 +633,11 @@
             <small class="form-text">{{ u_apiName.errors.pattern }}</small>
           </div>
         </div>
+        <!-- API Cache -->
+        <div class="col-sm-2" *ngIf="apiDetail.apiSrc.v == 'R' || apiDetail.apiSrc.v == 'C'">
+          <label id="apiStatus_label" class="control-label"> API Cache </label>
+          <p-dropdown [options]="apiCacheFlags" formControlName="apiCacheFlag" [style]="{ width: '100%' }"></p-dropdown>
+        </div>
         <!-- 固定快取時間 -->
         <div class="col-sm-2">
           <label id="fixedCacheTime_label" class="control-label required">{{"fixed_cache_time" | translate}}({{
@@ -623,126 +651,109 @@
         </div>
 
 
-        <div class="col-sm-4">
+
+      </div>
+      <div class="form-group row">
+        <div class="col-2">
           <label class="control-label">
             {{ "jwt_setting" | translate }}
           </label>
-          <p-inputSwitch formControlName="jwtSetting" (onChange)="jwtSettingOnChange($event)">
-          </p-inputSwitch>
-          <div class="row">
-            <div class="col-sm-12">
-              <label id="jweFlag_label" class="control-label">Request：</label>
-              <p-dropdown [options]="updateJwtSettingFlags" formControlName="jweFlag"
-                (onChange)="jweFlagOnChange($event)" [style]="{ width: '80%' }">
-              </p-dropdown>
-              <div *ngIf="
-                  u_jweFlag.invalid && (u_jweFlag.dirty || u_jweFlag.touched)
-                " class="text-danger">
-                <small class="form-text">{{
-                  u_jweFlag.errors.isRequired
-                  }}</small>
-                <small class="form-text">{{
-                  u_jweFlag.errors.maxlength | translate
-                  }}</small>
-                <small class="form-text">{{
-                  u_jweFlag.errors.minlength | translate
-                  }}</small>
-                <small class="form-text">{{ u_jweFlag.errors.pattern }}</small>
-              </div>
+          <div class="d-flex flex-row align-items-center">
+            <div class="col-12 p-form-check-line form-group d-flex flex-row align-items-center">
+              <!-- <label class="control-label" style="white-space: nowrap;">{{ "body_encode" | translate }}</label> -->
+              <ng-container>
+                <div class="p-form-check">
+                  <p-radioButton formControlName="jwtSetting" [value]="true" inputId="jwtSettingY"></p-radioButton>
+                  <label for="jwtSettingY" class="ms-2 mb-0"
+                    style="white-space: nowrap;">{{'button.enable'|translate}}</label>
+                </div>
+                <div class="p-form-check">
+                  <p-radioButton formControlName="jwtSetting" [value]="false" inputId="jwtSettingN"></p-radioButton>
+                  <label for="jwtSettingN" class="ms-2 mb-0"
+                    style="white-space: nowrap;">{{'button.disable'|translate}}</label>
+                </div>
+
+
+              </ng-container>
             </div>
-            <div class="col-sm-12">
-              <label id="jweFlagResp_label" class="control-label">Response：</label>
-              <p-dropdown [options]="updateJwtSettingFlags" formControlName="jweFlagResp"
-                (onChange)="jweFlagRespOnChange($event)" [style]="{ width: '80%' }">
-              </p-dropdown>
-              <div *ngIf="
-                  u_jweFlagResp.invalid &&
-                  (u_jweFlagResp.dirty || u_jweFlagResp.touched)
-                " class="text-danger">
-                <small class="form-text">{{
-                  u_jweFlagResp.errors.isRequired
-                  }}</small>
-                <small class="form-text">{{
-                  u_jweFlagResp.errors.maxlength | translate
-                  }}</small>
-                <small class="form-text">{{
-                  u_jweFlagResp.errors.minlength | translate
-                  }}</small>
-                <small class="form-text">{{
-                  u_jweFlagResp.errors.pattern
-                  }}</small>
-              </div>
-            </div>
+
           </div>
         </div>
-      </div>
-      <div *ngIf="apiDetail.apiSrc.v == 'R' || apiDetail.apiSrc.v == 'C'" class="form-group row">
-
         <div class="col-sm-2">
-          <label class="control-label required">{{ "http_method" | translate }}</label>
-          <div style="display: block">
-
-            <p-multiSelect [options]="methodOfJsons" formControlName="methodOfJson"
-              defaultLabel="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }"
-              [hidden]="apiDetail.apiSrc.v==='C'">
-            </p-multiSelect>
-            <p-dropdown [options]="methodOfJsons" formControlName="methodOfJson" [hidden]="apiDetail.apiSrc.v!=='C'"
-              defaultLabel="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }"></p-dropdown>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <label class="control-label">{{ "data_format" | translate }}</label>
-          <!-- class="w-100" style="
-                font-weight: bolder;
-                font-family: PingFangSC-Regular, sans-serif;
-                font-size: 16px;
-                color: #5a5541;
-              " -->
-
-          <!-- <label id="reghostId_label" class="w-50" style="
-                font-weight: bolder;
-                font-family: PingFangSC-Regular, sans-serif;
-                font-size: 16px;
-                color: #5a5541;
-              ">{{ "reg_host" | translate }}</label> -->
-
-          <div>
-            <p-dropdown [showClear]="false" [options]="dataFormats" formControlName="dataFormat"
-              placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }">
+          <label id="jweFlag_label" class="control-label">Request</label>
+          <div class="w-100">
+            <p-dropdown [options]="updateJwtSettingFlags" formControlName="jweFlag" class="jwt-req-dropdown"
+              (onChange)="jweFlagOnChange($event)" [style]="{ width: '100%'}">
             </p-dropdown>
-            <!-- <p-dropdown [showClear]="true" [options]="reghostIds" formControlName="reghostId"
-              placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '50%' }"></p-dropdown> -->
+            <div *ngIf="
+                                  u_jweFlag.invalid && (u_jweFlag.dirty || u_jweFlag.touched)
+                                " class="text-danger">
+              <small class="form-text">{{
+                u_jweFlag.errors.isRequired
+                }}</small>
+              <small class="form-text">{{
+                u_jweFlag.errors.maxlength | translate
+                }}</small>
+              <small class="form-text">{{
+                u_jweFlag.errors.minlength | translate
+                }}</small>
+              <small class="form-text">{{ u_jweFlag.errors.pattern }}</small>
+            </div>
           </div>
-          <!-- <div *ngIf="
-              u_regHostId.invalid && (u_regHostId.dirty || u_regHostId.touched)
-            " class="text-danger">
-            <small class="form-text">{{ u_regHostId.errors.isRequired }}</small>
-            <small class="form-text">{{
-              u_regHostId.errors.maxlength | translate
-              }}</small>
-            <small class="form-text">{{
-              u_regHostId.errors.minlength | translate
-              }}</small>
-            <small class="form-text">{{ u_regHostId.errors.pattern }}</small>
-          </div> -->
         </div>
         <div class="col-sm-2">
-          <label id="apiStatus_label" class="control-label">{{"api_status" | translate}}</label>
-          <p-inputSwitch class="form-control border-line" formControlName="apiStatus"></p-inputSwitch>
-          <div *ngIf="
-              u_apiStatus.invalid && (u_apiStatus.dirty || u_apiStatus.touched)
-            " class="text-danger">
-            <small class="form-text">{{ u_apiStatus.errors.isRequired }}</small>
-            <small class="form-text">{{
-              u_apiStatus.errors.maxlength | translate
-              }}</small>
-            <small class="form-text">{{
-              u_apiStatus.errors.minlength | translate
-              }}</small>
-            <small class="form-text">{{ u_apiStatus.errors.pattern }}</small>
+          <label id="jweFlagResp_label" class="control-label">Response</label>
+          <div class="w-100">
+            <p-dropdown [options]="updateJwtSettingFlags" formControlName="jweFlagResp" class="jwt-resp-dropdown"
+              (onChange)="jweFlagRespOnChange($event)" [style]="{ width: '100%'}">
+            </p-dropdown>
+            <div *ngIf="
+                                  u_jweFlagResp.invalid &&
+                                  (u_jweFlagResp.dirty || u_jweFlagResp.touched)
+                                " class="text-danger">
+              <small class="form-text">{{
+                u_jweFlagResp.errors.isRequired
+                }}</small>
+              <small class="form-text">{{
+                u_jweFlagResp.errors.maxlength | translate
+                }}</small>
+              <small class="form-text">{{
+                u_jweFlagResp.errors.minlength | translate
+                }}</small>
+              <small class="form-text">{{
+                u_jweFlagResp.errors.pattern
+                }}</small>
+            </div>
           </div>
         </div>
+
+        <div *ngIf="apiDetail.apiSrc.v == 'R' || apiDetail.apiSrc.v == 'C'" class="col-6 row">
+
+          <div class="col-sm-4">
+            <label class="control-label required">{{ "http_method" | translate }}</label>
+            <div style="display: block">
+
+              <p-multiSelect [options]="methodOfJsons" formControlName="methodOfJson"
+                defaultLabel="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }"
+                [hidden]="apiDetail.apiSrc.v==='C'">
+              </p-multiSelect>
+              <p-dropdown [options]="methodOfJsons" formControlName="methodOfJson" [hidden]="apiDetail.apiSrc.v!=='C'"
+                defaultLabel="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }"></p-dropdown>
+            </div>
+          </div>
+          <div class="col-sm-8">
+            <label class="control-label">{{ "data_format" | translate }}</label>
+            <div>
+              <p-dropdown [showClear]="false" [options]="dataFormats" formControlName="dataFormat"
+                placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }">
+              </p-dropdown>
+            </div>
+          </div>
+
+        </div>
       </div>
+
+
 
       <div *ngIf="apiDetail.apiSrc.v == 'R' || apiDetail.apiSrc.v == 'C'" class="form-group row">
         <div class="col-12">

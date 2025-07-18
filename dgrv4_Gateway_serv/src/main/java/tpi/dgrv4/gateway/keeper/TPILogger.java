@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import lombok.Setter;
 import org.apache.catalina.Context;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
@@ -224,7 +225,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	public String getDeployRole() {
 		return deployRole;
 	}
-
+	@Setter
 	public static Map<String, Object> dbInfoMap = new HashMap<>();
 	public static final String DBINFOMAP_TITLE = "dbInfoMap";
 	public static final String DBINFO = "dbInfo";
@@ -234,6 +235,9 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	private String maskKeys;
 	@Value(value = "${cus.ip.port}")
 	private String cusIpPort;
+	@Value(value = "${cus.scheme}")
+	private String cusScheme;
+	public static String cusSchemeForBroadcast;
 	public static String cusIpPortForBroadcast;
 	public static List<String> maskKeysArr;
 	private static long threadCreateTiem;
@@ -313,6 +317,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		this.serverConfigProperties = serverConfigProperties;
 	}
 
+
 	static {
 		tl = new TPILogger();
 		ITPILogger.tl = tl;
@@ -331,6 +336,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		initLoggerLevel(null);
 		maskKeysArr = Arrays.asList(maskKeys.split(","));
 		cusIpPortForBroadcast = cusIpPort;
+		cusSchemeForBroadcast = cusScheme;
 		PORT = serverConfigProperties.getPort();
 	}
 

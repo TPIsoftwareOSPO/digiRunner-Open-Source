@@ -3,17 +3,26 @@
     <p-table [value]="tableData" [(selection)]="selected" styleClass="p-datatable-striped"
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="caption">
-        <div class="ui-helper-clearfix">
-          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
-            (click)="updateStatus('Y')">
-            {{ "button.enable" | translate }}
-          </button>
-          <button type="button" class="btn tpi-primary tpi-btn float-start me-1" [disabled]="selected.length == 0"
-            (click)="updateStatus('N')">
-            {{ "button.disable" | translate }}
-          </button>
-          <button type="button" class="btn tpi-btn tpi-second float-end"
-            (click)="changePage('create')">{{'button.create'|translate}}</button>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex">
+            <button type="button" class="btn tpi-primary tpi-btn me-1" [disabled]="selected.length == 0"
+              (click)="updateStatus('Y')">
+              {{ "button.enable" | translate }}
+            </button>
+            <button type="button" class="btn tpi-primary tpi-btn me-1" [disabled]="selected.length == 0"
+              (click)="updateStatus('N')">
+              {{ "button.disable" | translate }}
+            </button>
+            <button type="button" class="btn tpi-primary tpi-btn" (click)="export()">
+              {{ "button.export" | translate }}
+            </button>
+          </div>
+          <div class="d-flex">
+            <button type="button" class="btn tpi-btn tpi-primary me-1"
+              (click)="changePageImport()">{{'button.import'|translate}}</button>
+            <button type="button" class="btn tpi-btn tpi-second"
+              (click)="changePage('create')">{{'button.create'|translate}}</button>
+          </div>
         </div>
       </ng-template>
       <!-- Table 表頭 -->
@@ -81,7 +90,7 @@
       <div class="form-group row">
         <div class="col-6">
           <label id="serviceName_label" class="control-label">{{'grpc.tar_serv'|translate}}</label>
-          <input type="text" class="form-control" id="serviceName" formControlName="serviceName" >
+          <input type="text" class="form-control" id="serviceName" formControlName="serviceName">
           <div *ngIf="serviceName?.invalid && (serviceName?.dirty || serviceName?.touched)" class="text-danger">
             <small class="form-text">{{serviceName?.errors.isRequired | translate}}</small>
           </div>
@@ -105,7 +114,8 @@
       <div class="form-group row">
         <div class="col-6">
           <label id="targetHostName_label" class="control-label">{{'grpc.tar_host'|translate}}</label>
-          <input type="text" class="form-control" id="targetHostName" formControlName="targetHostName" placeholder="IP address or Hostname">
+          <input type="text" class="form-control" id="targetHostName" formControlName="targetHostName"
+            placeholder="IP address or Hostname">
           <div *ngIf="targetHostName?.invalid && (targetHostName?.dirty || targetHostName?.touched)"
             class="text-danger">
             <small class="form-text">{{targetHostName?.errors.isRequired | translate}}</small>
@@ -135,10 +145,13 @@
             </ng-container>
           </div>
           <div style="display:block" *ngIf="secureMode.value ==='SECURE'">
-            <label id="targetHostName_label" class="control-label fw-bold">{{"certificate_authority"|translate  }}( X.509 )</label>
-            <textarea rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent" pInputTextarea></textarea>
+            <label id="targetHostName_label" class="control-label fw-bold">{{"certificate_authority"|translate }}( X.509
+              )</label>
+            <textarea rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent"
+              pInputTextarea></textarea>
           </div>
-          <div *ngIf="trustedCertsContent?.invalid && (trustedCertsContent?.dirty || trustedCertsContent?.touched)" class="text-danger">
+          <div *ngIf="trustedCertsContent?.invalid && (trustedCertsContent?.dirty || trustedCertsContent?.touched)"
+            class="text-danger">
             <small class="form-text">{{trustedCertsContent?.errors.required | translate}}</small>
           </div>
         </div>
@@ -146,7 +159,8 @@
       <div class="form-group row">
         <div class="col-12">
           <label id="proxyHostName_label" class="control-label">Proxy hostname/domain name</label>
-          <input type="text" class="form-control" id="proxyHostName" formControlName="proxyHostName" placeholder="Hostname or Domain name">
+          <input type="text" class="form-control" id="proxyHostName" formControlName="proxyHostName"
+            placeholder="Hostname or Domain name">
           <div *ngIf="proxyHostName?.invalid && (proxyHostName?.dirty || proxyHostName?.touched)" class="text-danger">
             <small class="form-text">{{proxyHostName?.errors.isRequired | translate}}</small>
           </div>
@@ -198,13 +212,111 @@
       </div>
     </form>
   </div>
+  <!-- 匯入 -->
+  <div [hidden]="pageNum != 3">
+    <form [formGroup]="formFile">
+      <div class="form-group row">
+        <div class="col-3">
+          <div class="ui-inputgroup">
+            <input type="file" id="file" accept=".json" (change)="changeFile($event)" formControlName="file"
+              style="display: none;">
+            <input type="text" class="form-control" formControlName="fileName"
+              placeholder="{{'chs_json_file' | translate}}">
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+              (click)="openFileBrowser();"></button>
+          </div>
+        </div>
+        <div class="col-1">
+          <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="uploadFile()"
+            [disabled]="!file.value">
+            {{'button.upload'|translate}}
+          </button>
+        </div>
+      </div>
+    </form>
+    <p-table [value]="importList" [(selection)]="importSelected" styleClass="p-datatable-striped"
+      [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      <ng-template pTemplate="caption">
+        <div class="ui-helper-clearfix">
+          <button [disabled]="!importList || importSelected.length == 0" type="button"
+            class="btn tpi-btn tpi-primary float-start me-1" (click)="import()">
+            {{ 'button.import' | translate }}
+          </button>
+
+        </div>
+      </ng-template>
+      <ng-template pTemplate="colgroup" let-columns>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns selectionMode="multiple">
+        <tr style="text-align: center">
+          <th rowspan="2" style="width: 2.25em" scope="col">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th rowspan="2" style="width: 70px;white-space: nowrap;">{{'status'|translate}}</th>
+          <th rowspan="2">{{"grpc.tar_serv"|translate}}</th>
+          <th rowspan="2">{{"grpc.proxy_host"|translate}}</th>
+          <th rowspan="2">{{"grpc.tar_host"|translate}}</th>
+          <th rowspan="2">{{"grpc.tar_port"|translate}}</th>
+          <th rowspan="1" scope="col">{{'check_action'|translate}}</th>
+          <th rowspan="1" scope="col">{{'import_result'|translate}}</th>
+        </tr>
+        <tr style="text-align: center">
+          <th rowspan="1" colspan="2" scope="col">{{'desc'|translate}}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr style="text-align: center">
+          <td rowspan="2" style="width: 2.25em">
+            <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+          </td>
+
+          <td rowspan="2" style="text-align: center;">
+            <img [alt]="rowData.enable" style="width: 20px; height: 20px"
+              [src]="rowData.enable ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+          </td>
+          <td rowspan="2">{{rowData.serviceName}}</td>
+          <td rowspan="2">{{rowData.proxyHostName}}</td>
+          <td rowspan="2">{{rowData.targetHostName}}</td>
+          <td rowspan="2">{{rowData.targetPort}}</td>
+          <td rowspan="1">{{rowData.create?('button.create'|translate):''}}
+            {{rowData.update?('button.update'|translate):''}}</td>
+          <td rowspan="1"
+            [ngStyle]="{'width': 'auto', 'background-color': (rowData.success ? '#FAEBD7' : '')}">
+            <ng-container *ngIf="checkImportStatus; else empty">
+              <ng-container *ngIf="rowData.success != null; else empty">
+                {{ rowData.success ? ('message.success' | translate) : ('message.fail' | translate) }}
+              </ng-container>
+            </ng-container>
+            <ng-template #empty>&nbsp;</ng-template>
+        </tr>
+        <tr>
+          <td rowspan="1" colspan="2">{{ rowData.errorMessage??'&nbsp;'}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="importList.length>0" style="color: #b7b7b7;">
+          <td [attr.colspan]="8">{{'row_count' | translate}}: {{importList.length}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="8">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon" >
+<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="row" style="justify-content: center;">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
-      <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+      <button type="button" pButton icon="pi pi-check"
+        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
+        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

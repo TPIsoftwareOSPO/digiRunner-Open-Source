@@ -7,6 +7,7 @@ import io.grpc.netty.NettyChannelBuilder;
 import io.netty.handler.ssl.SslContext;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import tpi.dgrv4.entity.entity.DgrGrpcProxyMap;
@@ -26,7 +27,6 @@ import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Dynamic gRPC proxy manager, responsible for managing proxy channels and their configurations.
@@ -35,6 +35,9 @@ import java.util.stream.Collectors;
 @Component
 public class DynamicGrpcProxyManager {
     private final TPILogger logger = TPILogger.tl;
+    
+    @Value("${grpc.proxy.enabled:true}")
+    private boolean grpcProxyEnabled;
 
     private final DgrGrpcProxyMapDao dgrGrpcProxyMapDao;
     private final GrpcProxyProperties proxyProperties;
@@ -65,6 +68,13 @@ public class DynamicGrpcProxyManager {
      */
     @PostConstruct
     public void initialize() {
+    	if(!grpcProxyEnabled) {
+    		TPILogger.tl.info("grpc proxy enabled is false");
+    		return;
+    	}else {
+    		TPILogger.tl.info("grpc proxy enabled is true");
+    	}
+    	
         logger.debug("Initializing dynamic gRPC proxy manager");
         try {
             refreshProxyMappings();

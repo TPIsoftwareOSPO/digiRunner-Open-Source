@@ -1,8 +1,26 @@
 export enum FormOperate {
-  create = 1, update = 2, delete = 3, detail = 4, switch = 5, test = 6, setting = 7, review = 8, traker = 9, settle = 10, resend = 11, run = 12, cancel = 13, redo = 14, revoke = 15
+  create = 1,
+  update = 2,
+  delete = 3,
+  detail = 4,
+  switch = 5,
+  test = 6,
+  setting = 7,
+  review = 8,
+  traker = 9,
+  settle = 10,
+  resend = 11,
+  run = 12,
+  cancel = 13,
+  redo = 14,
+  revoke = 15,
 }
 export enum AlertType {
-  warning = 'warning', error = 'error', success = 'success', info = 'info', question = 'question'
+  warning = 'warning',
+  error = 'error',
+  success = 'success',
+  info = 'info',
+  question = 'question',
 }
 
 export enum TxID {
@@ -90,15 +108,15 @@ export enum TxID {
   queryModuleVerList = 'AA0420',
   queryAPIByModVer = 'AA0421',
   queryDCList_2 = 'AA0422',
-  uploadNetModuleFile = "NAA0401",
-  queryNetModuleList = "NAA0402",
-  queryNetModuleDetail = "NAA0403",
-  bindModule = "NAA0404",
-  deleteNetModule = "NAA0405",
-  addSite = "NAA0411",
+  uploadNetModuleFile = 'NAA0401',
+  queryNetModuleList = 'NAA0402',
+  queryNetModuleDetail = 'NAA0403',
+  bindModule = 'NAA0404',
+  deleteNetModule = 'NAA0405',
+  addSite = 'NAA0411',
   // querySiteList = "NAA0412",
   // updateSite = "NAA0413",
-  startStopSite = "NAA0414",
+  startStopSite = 'NAA0414',
   // deleteSite = "NAA0415",
   queryNodeList = 'AA0501',
   queryTaskStatus = 'AA0505',
@@ -245,7 +263,7 @@ export enum TxID {
   queryQmInvokeCUS0004 = 'CUS0004?invoke',
   queryQmInvokeCUS0005 = 'CUS0005?invoke',
   queryQmInvokeCUS0006 = 'CUS0006?invoke',
-  queryQmInvokeCUS0007 = "CUS0007?invoke",
+  queryQmInvokeCUS0007 = 'CUS0007?invoke',
   queryQmLoopStatusCUS0003 = 'CUS0003?loopStatus',
   queryQmLoopStatusCUS0004 = 'CUS0004?loopStatus',
   queryQmLoopStatusCUS0005 = 'CUS0005?loopStatus',
@@ -259,50 +277,50 @@ export enum TxID {
   queryCusUrl = 'DPB0119?1',
   queryCusEnabl = 'DPB0120?1',
   // deleteClientCert = "CUS0008",
-  CUS0001 = "CUS0001",
-  CUS0002 = "CUS0002",
+  CUS0001 = 'CUS0001',
+  CUS0002 = 'CUS0002',
   queryCusEnable = 'DPB0120?1',
-  queryRefreshMemListUrls = "DPB0121",
-  queryTsmpSettingList = "DPB9900",
-  queryTsmpSettingDetail = "DPB9901",
-  addTsmpSetting = "DPB9902",
-  updateTsmpSetting = "DPB9903",
-  deleteTsmpSetting = "DPB9904",
-  queryTsmpDpItemsList = "DPB9905",
-  queryTsmpDpItemsDetail = "DPB9906",
-  queryItemNameList = "DPB9907",
-  updateItemNameList = "DPB9908",
-  updateTsmpDpItemsDetail = "DPB9909",
-  queryCusSettingList = "DPB9910",
-  queryCusSettingDetail = "DPB9911",
-  addCusSetting = "DPB9912",
-  updateCusSetting = "DPB9913",
-  deleteCusSetting = "DPB9914",
-  updateIndexOpenOrClose = "DPB0124",
-  getIndex = "DPB0125",
-  queryAllIndex = "DPB0126",
+  queryRefreshMemListUrls = 'DPB0121',
+  queryTsmpSettingList = 'DPB9900',
+  queryTsmpSettingDetail = 'DPB9901',
+  addTsmpSetting = 'DPB9902',
+  updateTsmpSetting = 'DPB9903',
+  deleteTsmpSetting = 'DPB9904',
+  queryTsmpDpItemsList = 'DPB9905',
+  queryTsmpDpItemsDetail = 'DPB9906',
+  queryItemNameList = 'DPB9907',
+  updateItemNameList = 'DPB9908',
+  updateTsmpDpItemsDetail = 'DPB9909',
+  queryCusSettingList = 'DPB9910',
+  queryCusSettingDetail = 'DPB9911',
+  addCusSetting = 'DPB9912',
+  updateCusSetting = 'DPB9913',
+  deleteCusSetting = 'DPB9914',
+  updateIndexOpenOrClose = 'DPB0124',
+  getIndex = 'DPB0125',
+  queryAllIndex = 'DPB0126',
   querySALMaster = 'DPB0127',
   querySALDetail = 'DPB0128',
   ldapLogin = 'ldapLogin',
   udpssotoken = 'udpssotoken',
   getUdpEnvData = 'udpEnvData',
   getACEntryTicket = 'DPB0142',
-  queryTsmpdpFileList = "DPB9915",
-  queryTsmpdpFileDetail = "DPB9916",
-  addTsmpdpFile = "DPB9917",
-  updateTsmpdpFile = "DPB9918",
-  reductionTsmpdpFile = "DPB9919",
-  deletePermanentlyTsmpdpFile = "DPB9920",
+  queryTsmpdpFileList = 'DPB9915',
+  queryTsmpdpFileDetail = 'DPB9916',
+  addTsmpdpFile = 'DPB9917',
+  updateTsmpdpFile = 'DPB9918',
+  reductionTsmpdpFile = 'DPB9919',
+  deletePermanentlyTsmpdpFile = 'DPB9920',
   tptoken = 'tptoken',
   queryMonitor = 'DPB0144',
   QueryALL = 'DPB0145',
   QueryDetail = 'DPB0146',
   UpdateOne_Role_Org = 'DPB0147',
   DeleteOne = 'DPB0148',
-  QueryDgrAcIdInfoAll = "DPB0149",
-  AddDgrAcIdInfo = "DPB0150",
-  updateDgrAcIdInfo = "DPB0151",
-  deleteDgrAcIdInfo = "DPB0152",
+  QueryDgrAcIdInfoAll = 'DPB0149',
+  AddDgrAcIdInfo = 'DPB0150',
+  updateDgrAcIdInfo = 'DPB0151',
+  deleteDgrAcIdInfo = 'DPB0152',
   exportTsmpSetting = 'DPB9921',
   importTsmpSetting = 'DPB9922',
   queryIdPInfoList_ldap = 'DPB0159',
@@ -311,10 +329,10 @@ export enum TxID {
   deleteIdPInfo_ldap = 'DPB0162',
   createIdPUser = 'DPB0163',
   queryWsList = 'DPB0174',
-  queryWsDetail ='DPB0175',
-  createWs ='DPB0176',
-  updateWs ='DPB0177',
-  deleteWs ='DPB0178',
+  queryWsDetail = 'DPB0175',
+  createWs = 'DPB0176',
+  updateWs = 'DPB0177',
+  deleteWs = 'DPB0178',
   queryGtwIdPInfoByClientId_ldap = 'DPB0164',
   queryIdPUserDetail_ldap = 'DPB0165',
   createGtwIdPInfo_ldap = 'DPB0166',
@@ -374,13 +392,13 @@ export enum TxID {
   batchModify = 'AA0426',
   batchFailHandlePolicy = 'AA0432',
   addReport = 'AA0106',
-  deleteReport= 'AA0107',
+  deleteReport = 'AA0107',
   exportClientRelated = 'AA1120',
   importClientRelated = 'AA1121',
   importClientRelatedAllCover = 'AA1128',
   importClientRelatedConfirm = 'AA1129',
   exportTsmpDpItems = 'DPB9923',
-  importTsmpDpItems	= 'DPB9924',
+  importTsmpDpItems = 'DPB9924',
   exportTsmpDpMailTplt = 'DPB9925',
   importTsmpDpMailTplt = 'DPB9926',
   exportWebsiteProxy = 'DPB9929',
@@ -434,42 +452,71 @@ export enum TxID {
   createGrpcService = 'DPB0290',
   queryOrgList = 'AA0433',
   batchApiOrg = 'AA0434',
+  apiListExport = 'AA0435',
+  exportGrpcSetting = 'DPB0295',
+  parseGrpcSetting = 'DPB0296',
+  importGrpcSetting = 'DPB0297',
 }
 
 export enum GrantType {
-  mima = 'password', refresh_token = 'refresh_token', client_credentials = 'client_credentials'
+  mima = 'password',
+  refresh_token = 'refresh_token',
+  client_credentials = 'client_credentials',
 }
 
 export enum MenuMappingIcon {
-  AC00 = 'm-5', AC01 = 'm-6', AC02 = 'm-2', AC03 = 'm-1', AC04 = 'm-7', AC05 = 'm-3', AC09 = 'm-4',
-  DP01 = 'm-8', DP02 = 'm-9', DP03 = 'm-10', DP04 = 'm-11', DP05 = 'm-12', DP06 = 'm-13', DP07 = 'm-7', Default = 'm-9'
+  AC00 = 'm-5',
+  AC01 = 'm-6',
+  AC02 = 'm-2',
+  AC03 = 'm-1',
+  AC04 = 'm-7',
+  AC05 = 'm-3',
+  AC09 = 'm-4',
+  DP01 = 'm-8',
+  DP02 = 'm-9',
+  DP03 = 'm-10',
+  DP04 = 'm-11',
+  DP05 = 'm-12',
+  DP06 = 'm-13',
+  DP07 = 'm-7',
+  Default = 'm-9',
 }
 export enum TimeRange {
-  Today = 'T', Week = 'W', Month = 'M'
+  Today = 'T',
+  Week = 'W',
+  Month = 'M',
 }
 export enum ApiSrc {
-  Java_Module = 'M', Net_Module = 'N', Registered = 'R', Composed = 'C'
+  Java_Module = 'M',
+  Net_Module = 'N',
+  Registered = 'R',
+  Composed = 'C',
 }
 /**
-*介接工作狀態
-*
-* @enum {number}
-*/
-export enum EmApptJobStatus{
-  等待 = 'W',執行中 = 'R',失敗='E',完成 = 'D',取消 = 'C'
+ *介接工作狀態
+ *
+ * @enum {number}
+ */
+export enum EmApptJobStatus {
+  等待 = 'W',
+  執行中 = 'R',
+  失敗 = 'E',
+  完成 = 'D',
+  取消 = 'C',
 }
 export namespace ApiSrc {
   export function keys() {
-      return Object.keys(ApiSrc).filter(
-          (type) => type !== 'keys'
-      );
+    return Object.keys(ApiSrc).filter((type) => type !== 'keys');
   }
 }
 
 export enum EmApptJobType {
-  UPLOAD = '上傳憑證', DELETE = '刪除憑證', DOWNLOAD = '下載憑證', SHOW = '憑證資料'
+  UPLOAD = '上傳憑證',
+  DELETE = '刪除憑證',
+  DOWNLOAD = '下載憑證',
+  SHOW = '憑證資料',
 }
 
 export enum EmInvokeCode {
-  成功 = '0'
+  成功 = '0',
 }

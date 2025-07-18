@@ -1,9 +1,15 @@
-<div class="mb-1 col-12 px-0" [formGroup]="form" style="align-items: center;display: flex;">
-  <label class="control-label required me-1">Field</label>
-  <input type="text" class="form-control col-6" name="field" formControlName="field">
-  <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)"
-          style="border-radius: 50%" [hidden]="disabled">
-    <i class="fa fa-minus"></i>
-  </button>
-  <label class="control-label ms-1 col">{{fieldExp}}</label>
+<div class="form-group">
+  <div class="row form-group">
+    <div class="col-12" [formGroup]="form" style="align-items: center;display: flex;">
+      <label class="control-label required me-1">Field</label>
+      <input type="text" class="form-control" name="field" formControlName="field">
+      <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)" style="border-radius: 50%"
+        [hidden]="disabled">
+        <i class="fa fa-minus"></i>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="fieldExp.length>0" style="align-items: center;display: flex;">
+    <label class="control-label me-1" style="font-weight: unset;">Example: {{fieldExp}}</label>
+  </div>
 </div>

@@ -827,7 +827,7 @@ export class ApiBaseService {
       // formData.append('txID', 'DPB9922');
       // formData.append('cID', sessionStorage.getItem('decode_token') ? JSON.parse(sessionStorage.getItem('decode_token')!)['client_id'] : '');
       formData.append('file', file);
-      formData.append('req', JSON.stringify(req));
+      if(req) formData.append('req', JSON.stringify(req));
 
       let token = this.toolService.getToken();
       // let signCode = this.cryptSignCode(body);

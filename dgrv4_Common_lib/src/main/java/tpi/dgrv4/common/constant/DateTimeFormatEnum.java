@@ -35,7 +35,8 @@ public enum DateTimeFormatEnum {
 	檔名後綴("yyyyMMddHHmmssSSS"),
 	西元年月日時分秒_5("yyMMddHHmmss"),
 	時分秒("HH:mm:ss"),
-	時分("HH:mm")
+	時分("HH:mm"),
+	匯出檔案格式("yyyyMMdd_HHmm")
 	;
 
 	private String value;

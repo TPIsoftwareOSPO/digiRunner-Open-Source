@@ -387,6 +387,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 		} catch (Throwable e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+			throw e;
 		}
 
 		// TPILogger.tl.debug("\n--【LOGUUID】【" + "No" + "】【before end】--\n");
