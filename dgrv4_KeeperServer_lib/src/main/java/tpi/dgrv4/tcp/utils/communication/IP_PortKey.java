@@ -1,7 +1,7 @@
 package tpi.dgrv4.tcp.utils.communication;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class IP_PortKey {
 	public String ip;

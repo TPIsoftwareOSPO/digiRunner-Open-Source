@@ -166,9 +166,6 @@ project(':dgrv4_Gateway_serv'){
 		// https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
 		implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
 
-		// https://mvnrepository.com/artifact/commons-lang/commons-lang
-		implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
-
 		// https://mvnrepository.com/artifact/org.codehaus.janino/janino
 		implementation 'org.codehaus.janino:janino:3.0.7'
 
@@ -232,6 +229,8 @@ project(':dgrv4_Gateway_serv'){
 		implementation ('org.owasp.esapi:esapi:2.6.0.0'){
 			exclude group:'commons-beanutils', module:'commons-beanutils'
 			exclude group:'commons-fileupload', module:'commons-fileupload'
+			exclude group:'commons-lang', module:'commons-lang'
+			exclude group:'commons-configuration', module:'commons-configuration'
 		}
 		
 		// Correct the above exclusions, group:'commons-beanutils', module:'commons-beanutils'
@@ -404,7 +403,7 @@ project(':dgrv4_KeeperServer_lib'){
 
 	// 引用其它 project 
 	dependencies{
-		compileOnly group: 'commons-lang', name: 'commons-lang', version: '2.6'
+		compileOnly 'org.apache.commons:commons-lang3:3.18.0'
 
 		// Kryo Serialization
 		implementation 'com.esotericsoftware:kryo:5.4.0'
