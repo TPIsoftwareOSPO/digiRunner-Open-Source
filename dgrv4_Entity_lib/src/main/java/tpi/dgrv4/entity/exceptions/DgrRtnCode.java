@@ -61,6 +61,10 @@ public enum DgrRtnCode implements DgrError<DgrException> {
 	_1515(DgrModule.DP5, "15", "單個用戶不能存在於多個群組中"),
 	_1516(DgrModule.DP5, "16", "使用者沒有任何群組"),
 	_1541(DgrModule.DP5, "41", "Token已失效"),
+	
+	_1566(DgrModule.DP5, "66", "結束日期不可小於開始日期"),
+
+	
 	_2000(DgrModule.DP10, "00", "必填"),
 	_2001(DgrModule.DP10, "01", "最大長度為 [{{0}}]"),
 	_2002(DgrModule.DP10, "02", "最小長度為 [{{0}}]"),

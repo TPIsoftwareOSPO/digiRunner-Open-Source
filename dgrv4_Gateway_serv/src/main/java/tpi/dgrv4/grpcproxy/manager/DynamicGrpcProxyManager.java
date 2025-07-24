@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class DynamicGrpcProxyManager {
     private final TPILogger logger = TPILogger.tl;
     
-    @Value("${grpc.proxy.enabled:true}")
+    @Value("${grpc.proxy.enabled:false}")
     private boolean grpcProxyEnabled;
 
     private final DgrGrpcProxyMapDao dgrGrpcProxyMapDao;

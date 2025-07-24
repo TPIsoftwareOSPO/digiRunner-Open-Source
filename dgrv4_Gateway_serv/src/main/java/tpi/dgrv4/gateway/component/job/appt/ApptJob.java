@@ -88,8 +88,11 @@ public abstract class ApptJob extends DeferrableJob implements TsmpDpApptJobSett
 			TPILogger.tl.warn("cpu load = " + cpuLoad + ", too heigh , abort ApptJob mission");
 			return ;
 		} 
+		//Because DpaaAlertDetectorJobSystemBasic and DpaaAlertDetectorJobKeyword will be printed every second, the anti-wash version will not be printed.
+		//因為DpaaAlertDetectorJobSystemBasic和DpaaAlertDetectorJobKeyword會每秒一直印, 防洗版所以就不印出來了
+		if (TPILogger.lc != null && !this.getClass().getName().contains("DpaaAlertDetectorJobSystemBasic")
+				&& !this.getClass().getName().contains("DpaaAlertDetectorJobKeyword")) {
 		
-		if (TPILogger.lc != null) {
 			// 限流 1 sec 輸出 ApptJob 本體類別 
 			LimitLogger.logWithThrottle(String.format("""
 				... nodeName = %s

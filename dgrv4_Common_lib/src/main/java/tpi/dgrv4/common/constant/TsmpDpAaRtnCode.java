@@ -430,6 +430,7 @@ public enum TsmpDpAaRtnCode implements ITsmpDpAaError<TsmpDpAaException> {
 	_1562(TsmpDpModule.DP5, "62", "對稱式解密失敗：{{0}}"),
 
 	_1565(TsmpDpModule.DP5, "65", "查無簽核關卡設定，應設定簽核關卡"),
+	_1566(TsmpDpModule.DP4, "66", "結束日期不可小於開始日期"),
 	
 	_2000(TsmpDpModule.DP10, "00", "必填"),
 	_2001(TsmpDpModule.DP10, "01", "最大長度為 [{{0}}]"),

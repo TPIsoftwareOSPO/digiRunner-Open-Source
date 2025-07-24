@@ -492,7 +492,8 @@
       <hr />
       <div class="form-group row">
         <div class="col-12 col-lg-12">
-          <button *ngIf="currentAction != 'detail'" type="button" class="btn tpi-btn tpi-second float-start me-3"
+          <button *ngIf="currentAction != 'detail'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
+            [ngClass]="{'tpi-primary':currentAction != 'create', 'tpi-second': currentAction == 'create'}"
             [disabled]="
               form.invalid || rjobItems.value.length == 0 || !isInvalid
             " (click)="saveScheduleSetting()">

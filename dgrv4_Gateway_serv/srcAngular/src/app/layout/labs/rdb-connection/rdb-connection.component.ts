@@ -32,16 +32,14 @@ export class RdbConnectionComponent extends BaseComponent implements OnInit {
   currentAction: string = '';
   tableData: Array<DPB0190RespItem> = [];
 
-  idbcTip: string = `MySQL:
-jdbc:mysql://{{hostname}}:{{port}}/{{databaseName}}
+  idbcTip: string = `MariaDB and MySQL:
+jdbc:mariadb://{{hostname}}:{{port}}/{{databaseName}}
 PostgreSQL:
 jdbc:postgresql://{{hostname}}:{{port}}/{{databaseName}}
 Oracle:
 jdbc:oracle:thin:@{{hostname}}:{{port}}:{{databaseName}}
 SQL Server:
-jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServerCertificate=true
-MariaDB:
-jdbc:mariadb://{{hostname}}/{{db}}`
+jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServerCertificate=true`
 
   constructor(
     route: ActivatedRoute,

@@ -160,7 +160,7 @@
         <div class="col-12">
           <label id="proxyHostName_label" class="control-label">Proxy hostname/domain name</label>
           <input type="text" class="form-control" id="proxyHostName" formControlName="proxyHostName"
-            placeholder="Hostname or Domain name">
+            placeholder="Hostname or Domain name" [readonly]="currentAction=='update'">
           <div *ngIf="proxyHostName?.invalid && (proxyHostName?.dirty || proxyHostName?.touched)" class="text-danger">
             <small class="form-text">{{proxyHostName?.errors.isRequired | translate}}</small>
           </div>
@@ -178,7 +178,7 @@
             <small class="form-text">{{connectTimeoutMs?.errors.isRequired | translate}}</small>
           </div>
         </div>
-        <div class="col-4">
+        <div class="col-4" hidden>
           <label id="sendTimeoutMs_label" class="control-label">Send timeout</label>
           <div class="d-flex align-items-center">
             <input type="number" class="form-control" id="sendTimeoutMs" formControlName="sendTimeoutMs">
@@ -188,7 +188,7 @@
             <small class="form-text">{{sendTimeoutMs?.errors.isRequired | translate}}</small>
           </div>
         </div>
-        <div class="col-4">
+        <div class="col-4" hidden>
           <label id="readTimeoutMs_label" class="control-label">Read timeout</label>
           <div class="d-flex align-items-center">
             <input type="number" class="form-control" id="readTimeoutMs" formControlName="readTimeoutMs">

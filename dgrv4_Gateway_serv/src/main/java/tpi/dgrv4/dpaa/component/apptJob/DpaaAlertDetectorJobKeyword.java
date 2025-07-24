@@ -44,6 +44,8 @@ public class DpaaAlertDetectorJobKeyword extends DpaaAlertDetectorJob<DpaaAlertD
 	
 	private TsmpSettingService tsmpSettingService;
 	
+	//Will be created through DpaaJobConfig, Autowired may not be used
+	//會經過DpaaJobConfig來建立,Autowired可能沒用
 	@Autowired
 	public DpaaAlertDetectorJobKeyword(TsmpDpApptJob tsmpDpApptJob, ObjectMapper objectMapper,
 			ApptJobDispatcher apptJobDispatcher, TsmpDpApptJobDao tsmpDpApptJobDao,

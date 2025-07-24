@@ -50,7 +50,8 @@ export class Ac0322Component extends BaseComponent implements OnInit {
     'ORG_ID',
     'SRC_URL',
     'API_DESC',
-    'JWT_LABEL',
+    'JWT',
+    'LABEL',
     'ENABLE_SCHEDULED_DATE',
     'DISABLE_SCHEDULED_DATE',
     'CREATE_USER',
@@ -83,29 +84,31 @@ export class Ac0322Component extends BaseComponent implements OnInit {
 
   apiListExport() {
     this.ngxService.start();
-    this.serverService.apiListExport({type:"EXCEL", field: this.field}).subscribe((res: any) => {
-      if (res.type === 'application/json') {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const jsonData = JSON.parse(reader.result as string);
-          this.alertService.ok(
-            jsonData.ResHeader.rtnMsg,
-            '',
-            AlertType.warning,
-            jsonData.ResHeader.txDate + '<br>' + jsonData.ResHeader.txID
-          );
-        };
-        reader.readAsText(res);
-      } else {
-        const data: Blob = new Blob([res], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
-        });
+    this.serverService
+      .apiListExport({ type: 'EXCEL', field: this.field })
+      .subscribe((res: any) => {
+        if (res.type === 'application/json') {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const jsonData = JSON.parse(reader.result as string);
+            this.alertService.ok(
+              jsonData.ResHeader.rtnMsg,
+              '',
+              AlertType.warning,
+              jsonData.ResHeader.txDate + '<br>' + jsonData.ResHeader.txID
+            );
+          };
+          reader.readAsText(res);
+        } else {
+          const data: Blob = new Blob([res], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+          });
 
-        const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
-        FileSaver.saveAs(data, `API_LIST_${date}.xlsx`);
-      }
-      this.ngxService.stop();
-    });
+          const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
+          FileSaver.saveAs(data, `API_LIST_${date}.xlsx`);
+        }
+        this.ngxService.stop();
+      });
   }
 
   openFileBrowser() {

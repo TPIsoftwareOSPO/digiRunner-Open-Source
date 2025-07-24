@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,10 @@ import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.HttpType;
 import tpi.dgrv4.dpaa.component.ApiHelper_TSMP;
 import tpi.dgrv4.dpaa.component.TsmpInvokeHelper;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertDispatcherJobHelper;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierCustom;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierLine;
+import tpi.dgrv4.dpaa.component.alert.DpaaAlertNotifierRoleEmail;
 import tpi.dgrv4.dpaa.component.apptJob.ApiApplicationJob;
 import tpi.dgrv4.dpaa.component.apptJob.ApiOffJob;
 import tpi.dgrv4.dpaa.component.apptJob.ApiOnJob;
@@ -74,6 +79,7 @@ import tpi.dgrv4.dpaa.component.nodeTask.CleanCacheByKeyNotifier;
 import tpi.dgrv4.dpaa.component.nodeTask.CleanCacheByTableNameNotifier;
 import tpi.dgrv4.dpaa.component.req.DpReqServiceFactory;
 import tpi.dgrv4.dpaa.component.rjob.ThinkpowerArticleJob;
+import tpi.dgrv4.dpaa.es.DgrESService;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.dpaa.service.HandleDashboardDataByYearService;
 import tpi.dgrv4.dpaa.service.HandleDashboardDataService;
@@ -239,6 +245,13 @@ public class DpaaJobConfig {
 	private final tpi.dgrv4.gateway.service.TsmpSettingService getwayTsmpSettingService;
     private final DgrAuditLogMDao dgrAuditLogMDao;
     private final DgrAuditLogDDao dgrAuditLogDDao;
+    private final DpaaAlertNotifierRoleEmail dpaaAlertNotifierRoleEmail;
+    private final DpaaAlertNotifierLine dpaaAlertNotifierLine;
+    private final DpaaAlertNotifierCustom dpaaAlertNotifierCustom;
+    private final DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper;
+    @Nullable
+    private final DgrESService dgrESService;
+
 	
 	@Autowired
 	private void setSendOpenApiKeyExpiringMailService() {
@@ -651,14 +664,16 @@ public class DpaaJobConfig {
 	@Scope("prototype")
 	public DpaaAlertDetectorJobKeyword apptJob_RUNLOOP_ALERT_KEYWORD(TsmpDpApptJob job) throws Exception {
 		ObjectMapper om = beanConfig.objectMapper();
-		return new DpaaAlertDetectorJobKeyword(job, om, this.apptJobDispatcher, this.tsmpDpApptJobDao, null, null, null, null, null, null, tsmpSettingService);
+		return new DpaaAlertDetectorJobKeyword(job, om, this.apptJobDispatcher, this.tsmpDpApptJobDao, dpaaAlertNotifierRoleEmail, dpaaAlertNotifierLine, dpaaAlertNotifierCustom,
+				dpaaAlertDispatcherJobHelper, tsmpAlertDao, dgrESService, tsmpSettingService);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public DpaaAlertDetectorJobSystemBasic apptJob_RUNLOOP_ALERT_SYSTEM_BASIC(TsmpDpApptJob job) throws Exception {
 		ObjectMapper om = beanConfig.objectMapper();
-		return new DpaaAlertDetectorJobSystemBasic(job, om, this.apptJobDispatcher, this.tsmpDpApptJobDao, null, null, null, null, null);
+		return new DpaaAlertDetectorJobSystemBasic(job, om, this.apptJobDispatcher, this.tsmpDpApptJobDao, dpaaAlertNotifierRoleEmail, dpaaAlertNotifierLine, dpaaAlertNotifierCustom,
+				dpaaAlertDispatcherJobHelper, tsmpAlertDao);
 	}
 
 	@Bean

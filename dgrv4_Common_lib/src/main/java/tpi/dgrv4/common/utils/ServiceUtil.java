@@ -369,7 +369,7 @@ public class ServiceUtil {
         }
         
         //需要擷取的長度,若大於資料,全取代為*
-        if ((front + end) > str.length()) {
+        if ((front + end) >= str.length()) {
         	StringBuffer strBuffer = new StringBuffer();
             for (int i = 0; i < str.length(); i++) {
             	strBuffer.append("*");

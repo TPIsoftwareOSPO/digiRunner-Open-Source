@@ -4,7 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.poi.ss.usermodel.CellType.BLANK;
 import static org.apache.poi.ss.usermodel.CellType.STRING;
 
 @Service
@@ -100,65 +105,81 @@ public class DPB0299Service {
     }
 
     private Map<String, Long> processNotifySheet(Sheet sheet, String username) {
+        // 用於暫存 Notify 數據
+        Map<DgrWebhookNotify, List<DgrWebhookApiMap>> notifyDataMap = new HashMap<>();
+        // 用於記錄合併區域
+        List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+        String currentMergedNotifyName = null;
+        DgrWebhookNotify currentNotify = null;
         Map<String, Long> notifyMap = new HashMap<>();
-        checkSheet1Header(sheet.getRow(0));
-        // Skip header row
+
+        // 1. 先收集所有數據到 Map 中
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
             if (row == null) continue;
 
+            // 檢查當前行是否在合併區域中
+            int rowIndex = i;
+            boolean isMerged = mergedRegions.stream()
+                    .anyMatch(region -> region.isInRange(rowIndex, 0));
+
             String notifyName = getStringValue(row.getCell(0));
-            if (!StringUtils.hasText(notifyName)) continue;
+            if (StringUtils.hasText(notifyName) || !isMerged) {
+                currentMergedNotifyName = StringUtils.hasText(notifyName) ? notifyName : null;
 
-            // Find or create notify
-            DgrWebhookNotify notify = getDgrWebhookNotifyDao().findFirstByNotifyName(notifyName)
-                    .orElseGet(DgrWebhookNotify::new);
-            // Update notify fields
-            notify.setNotifyName(notifyName);
-            notify.setNotifyType(getStringValue(row.getCell(1)));
-            notify.setEnable(getStringValue(row.getCell(2)));
-            notify.setMessage(getStringValue(row.getCell(3)));
-            notify.setPayloadFlag(getStringValue(row.getCell(4)));
+                if (currentMergedNotifyName != null) {
+                    currentNotify = getDgrWebhookNotifyDao()
+                            .findFirstByNotifyName(currentMergedNotifyName)
+                            .orElseGet(DgrWebhookNotify::new);
 
-            boolean isNew = notify.getWebhookNotifyId() == null;
-            if (isNew) {
-                notify.setCreateUser(username);
-                notify.setCreateDateTime(DateTimeUtil.now());
-            } else {
-                notify.setUpdateUser(username);
-                notify.setUpdateDateTime(DateTimeUtil.now());
+                    currentNotify.setNotifyName(currentMergedNotifyName);
+                    currentNotify.setNotifyType(getStringValue(row.getCell(1)));
+                    currentNotify.setEnable(getStringValue(row.getCell(2)));
+                    currentNotify.setMessage(getStringValue(row.getCell(3)));
+                    currentNotify.setPayloadFlag(getStringValue(row.getCell(4)));
+
+                    if (currentNotify.getWebhookNotifyId() == null) {
+                        currentNotify.setCreateUser(username);
+                        currentNotify.setCreateDateTime(DateTimeUtil.now());
+                    } else {
+                        currentNotify.setUpdateUser(username);
+                        currentNotify.setUpdateDateTime(DateTimeUtil.now());
+                    }
+
+                    notifyDataMap.putIfAbsent(currentNotify, new ArrayList<>());
+                }
             }
 
-            // Save notify
-            notify = getDgrWebhookNotifyDao().save(notify);
+            if (currentNotify != null && currentMergedNotifyName != null) {
+                String apiKey = getStringValue(row.getCell(5));
+                String moduleName = getStringValue(row.getCell(6));
 
-            Long notifyId = notify.getWebhookNotifyId();
-            notifyMap.put(notifyName, notifyId);
-
-            // Delete api mapping
-
-            getDgrWebhookApiMapDao().deleteByWebhookNotifyId(notifyId);
-            // Process API map
-            String apiKey = getStringValue(row.getCell(5));
-            String moduleName = getStringValue(row.getCell(6));
-
-            if (StringUtils.hasText(apiKey) || StringUtils.hasText(moduleName)) {
-                DgrWebhookApiMap apiMap = new DgrWebhookApiMap();
-                apiMap.setWebhookNotifyId(notifyId);
-                apiMap.setApiKey(apiKey);
-                apiMap.setModuleName(moduleName);
-//
-
-
-                if (isNew) {
+                if (StringUtils.hasText(apiKey) && StringUtils.hasText(moduleName)) {
+                    DgrWebhookApiMap apiMap = new DgrWebhookApiMap();
+                    apiMap.setApiKey(apiKey);
+                    apiMap.setModuleName(moduleName);
                     apiMap.setCreateUser(username);
                     apiMap.setCreateDateTime(DateTimeUtil.now());
 
-                } else {
-                    apiMap.setUpdateUser(username);
-                    apiMap.setUpdateDateTime(DateTimeUtil.now());
+                    // 添加 API 映射到對應的 Notify
+                    notifyDataMap.get(currentNotify).add(apiMap);
                 }
+            }
+        }
 
+        for (Map.Entry<DgrWebhookNotify, List<DgrWebhookApiMap>> entry : notifyDataMap.entrySet()) {
+            DgrWebhookNotify notify = entry.getKey();
+            List<DgrWebhookApiMap> apiMaps = entry.getValue();
+
+            DgrWebhookNotify savedNotify = getDgrWebhookNotifyDao().save(notify);
+            notifyMap.put(savedNotify.getNotifyName(), savedNotify.getWebhookNotifyId());
+
+            if (savedNotify.getWebhookNotifyId() != null) {
+                getDgrWebhookApiMapDao().deleteByWebhookNotifyId(savedNotify.getWebhookNotifyId());
+            }
+
+            for (DgrWebhookApiMap apiMap : apiMaps) {
+                apiMap.setWebhookNotifyId(savedNotify.getWebhookNotifyId());
                 getDgrWebhookApiMapDao().save(apiMap);
             }
         }
@@ -246,7 +267,7 @@ public class DPB0299Service {
     }
 
     private String getStringValue(Cell cell) {
-        if (cell == null) {
+        if (cell == null || cell.getCellType().equals(BLANK)) {
             return null;
         }
         if (cell.getCellType().equals(STRING))

@@ -136,7 +136,8 @@ public class DPB0292Service {
         if (req.getTrustedCertsContent() != null && !req.getTrustedCertsContent().isEmpty()) {
             boolean isValid = tlsCertificateManager.validateCertificate(req.getTrustedCertsContent());
             if (!isValid) {
-                throw TsmpDpAaRtnCode._1297.throwing("信任的 CA 證書無效");
+                //throw TsmpDpAaRtnCode._1297.throwing("信任的 CA 證書無效");
+            	throw TsmpDpAaRtnCode._1352.throwing("{{trustedCertsContent}}");
             }
         }
 

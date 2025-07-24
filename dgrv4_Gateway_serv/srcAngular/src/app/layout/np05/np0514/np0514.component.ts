@@ -262,8 +262,8 @@ export class Np0514Component extends BaseComponent implements OnInit {
                         hour: this.hour!.value,
                         minute: this.minute!.value
                     } as DPB0101Cron,
-                    effDateTime: this.effDateTime!.value != '' ? dayjs(this.transformTimeSecond(this.effDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : '',
-                    invDateTime: this.invDateTime!.value != '' ? dayjs(this.transformTimeSecond(this.invDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : ''
+                    effDateTime: (this.effDateTime!.value != null && this.effDateTime!.value != '') ? dayjs(this.transformTimeSecond(this.effDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : '',
+                    invDateTime: (this.invDateTime!.value != null && this.invDateTime!.value != '') ? dayjs(this.transformTimeSecond(this.invDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : ''
                 } as DPB0101Req;
                 if (this.frequency!.value == '1') {
                     createReqBody.cronJson.dayRange = this.dayRange!.value;
@@ -298,8 +298,8 @@ export class Np0514Component extends BaseComponent implements OnInit {
                         hour: this.hour!.value,
                         minute: this.minute!.value
                     } as DPB0105Cron,
-                    effDateTime: this.effDateTime!.value != '' ? dayjs(this.transformTimeSecond(this.effDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : '',
-                    invDateTime: this.invDateTime!.value != '' ? dayjs(this.transformTimeSecond(this.invDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : ''
+                    effDateTime: (this.effDateTime!.value!=null && this.effDateTime!.value != '') ? dayjs(this.transformTimeSecond(this.effDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : '',
+                    invDateTime: (this.invDateTime!.value!=null && this.invDateTime!.value != '') ? dayjs(this.transformTimeSecond(this.invDateTime!.value)).format('YYYY/MM/DD HH:mm:ss') : ''
                 } as DPB0105Req;
                 if (this.frequency!.value == '1') {
                     updateReqBody.cronJson.dayRange = this.dayRange!.value;
@@ -396,7 +396,7 @@ export class Np0514Component extends BaseComponent implements OnInit {
     }
 
     async changePage(action: string, rowData?: DPB0102Items) {
-        const code = ['button.create', 'button.detail', 'button.confirm', 'cfm_pause_schedule', 'button.tracker', 'cfm_active_schedule', 'cfm_skip_schedule', 'cfm_invalid_schedule', 'button.edit','system_alert'];
+        const code = ['button.create', 'button.detail', 'button.update', 'cfm_pause_schedule', 'button.tracker', 'cfm_active_schedule', 'cfm_skip_schedule', 'cfm_invalid_schedule', 'button.edit','system_alert'];
         const dict = await this.tool.getDict(code);
         this.currentAction = action;
         // console.log(action);
@@ -409,8 +409,8 @@ export class Np0514Component extends BaseComponent implements OnInit {
                     if (this.tool.checkDpSuccess(res.ResHeader)) {
                         this.currentTitle = `${this.title} > ${dict['button.detail']}`;
                         this.btnName = dict['button.detail'];
-                        this.pageNum = 2;
                         this.setScheduleValue(res.RespBody, true);
+                        this.pageNum = 2;
                     }
                 });
                 break;
@@ -459,8 +459,8 @@ export class Np0514Component extends BaseComponent implements OnInit {
                 this.scheduleService.queryRjobByPk(updateReqBody).subscribe(res => {
                     if (this.tool.checkDpSuccess(res.ResHeader)) {
                         this.currentTitle = `${this.title} > ${dict['button.edit']}`;
-                        this.btnName = dict['button.confirm'];
-                        this.pageNum = 2;
+                        this.btnName = dict['button.update'];
+
 
 
                         // 檢核欄位 任務名稱/備註
@@ -474,6 +474,7 @@ export class Np0514Component extends BaseComponent implements OnInit {
                         });
 
                         this.setScheduleValue(res.RespBody, false);
+                         this.pageNum = 2;
                     }
                 });
 

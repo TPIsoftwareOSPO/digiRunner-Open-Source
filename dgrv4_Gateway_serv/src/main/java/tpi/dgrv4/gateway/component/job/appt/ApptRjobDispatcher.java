@@ -687,7 +687,7 @@ public class ApptRjobDispatcher implements Runnable {
 		Date invDateTime = checkPastDate(rjob.getInvDateTime(), "結束時間");
 		if (effDateTime != null && invDateTime != null && invDateTime.compareTo(effDateTime) < 0) {
 			TPILogger.tl.debug("結束時間不得小於起始時間");
-			throw DgrRtnCode._1295.throwing();
+			throw DgrRtnCode._1566.throwing();
 		}
 		TsmpDpItems items = getItemsById("RJOB_STATUS", rjob.getStatus(), false, locale);
 		if (items == null) {

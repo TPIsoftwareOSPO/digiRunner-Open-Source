@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class GrpcProxyServer {
     private final TPILogger logger = TPILogger.tl;
 
-    @Value("${grpc.proxy.enabled:true}")
+    @Value("${grpc.proxy.enabled:false}")
     private boolean grpcProxyEnabled;
     
     private final GrpcProxyProperties proxyProperties;
