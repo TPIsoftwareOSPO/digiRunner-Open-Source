@@ -76,7 +76,12 @@ subprojects {
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
 			exclude group:'org.springframework', module:'spring-context'
 			exclude group:'org.springframework', module:'spring-web'
+			//CVE-2025-41242
+			exclude group:'org.springframework', module:'spring-webmvc'
 		}
+		
+		// Correct the above exclusions, CVE-2025-41242
+		implementation 'org.springframework:spring-webmvc:6.2.10'
 		
 		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
 		implementation 'org.springframework:spring-context:6.2.7'
@@ -100,7 +105,8 @@ subprojects {
 		compileOnly 'org.projectlombok:lombok:1.18.32'
 		annotationProcessor 'org.projectlombok:lombok:1.18.32'
 		implementation 'commons-io:commons-io:2.16.1'
-		implementation 'org.bouncycastle:bc-fips:2.0.0'
+		// CVE-2025-8885
+		implementation 'org.bouncycastle:bc-fips:2.1.1'
 	}
 
 	// clear lib
@@ -251,7 +257,15 @@ project(':dgrv4_Gateway_serv'){
 		implementation 'com.google.protobuf:protobuf-java:3.25.5'
 
 		// 添加對 Netty 的非遮蔽(non-shaded)依賴，以便 TLS 相關功能
-		implementation 'io.grpc:grpc-netty:1.61.0'
+		implementation ('io.grpc:grpc-netty:1.61.0'){
+		// CVE-2025-55163
+			exclude group:'io.netty', module:'netty-codec-http2'
+		}
+		// Correct the above exclusions, CVE-2025-55163
+		implementation 'io.netty:netty-codec-http2:4.1.124.Final'
+		
+		
+		
 		implementation 'io.netty:netty-tcnative-boringssl-static:2.0.61.Final'
 	}
 
