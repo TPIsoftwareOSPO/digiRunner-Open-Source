@@ -89,7 +89,7 @@ subprojects {
 		implementation 'org.springframework:spring-web:6.2.8'
 		
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.8'
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10'
 		// 修正上方排除的 ch.qos.logback:logback-classic
 		implementation 'ch.qos.logback:logback-classic:1.5.13'
 		// 修正上方排除的 ch.qos.logback:logback-core
