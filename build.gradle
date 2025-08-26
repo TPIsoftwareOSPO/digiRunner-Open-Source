@@ -205,7 +205,7 @@ project(':dgrv4_Gateway_serv'){
 		// 修正上方排除的
 		compileOnly 'com.google.protobuf:protobuf-java:3.25.5'
 		
-		implementation ('org.owasp.esapi:esapi:2.6.0.0'){
+		implementation ('org.owasp.esapi:esapi:2.7.0.0'){
 			exclude group:'commons-beanutils', module:'commons-beanutils'
 			exclude group:'commons-fileupload', module:'commons-fileupload'
 			exclude group:'commons-lang', module:'commons-lang'
