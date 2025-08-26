@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '3.4.5'
+	id 'org.springframework.boot' version '3.4.9'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'com.github.jk1.dependency-license-report' version '2.9'
 
@@ -66,34 +66,14 @@ subprojects {
 		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.16.3-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
-			exclude group: 'ch.qos.logback', module: 'logback-classic'
-			exclude group: 'ch.qos.logback', module: 'logback-core'
-			exclude group:'org.springframework', module:'spring-context'
 		}
 		
 		implementation ('org.springframework.boot:spring-boot-starter-web'){
-			exclude group:'org.springframework.boot', module:'spring-boot-starter-tomcat'
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
-			exclude group:'org.springframework', module:'spring-context'
-			exclude group:'org.springframework', module:'spring-web'
-			//CVE-2025-41242
-			exclude group:'org.springframework', module:'spring-webmvc'
 		}
-		
-		// Correct the above exclusions, CVE-2025-41242
-		implementation 'org.springframework:spring-webmvc:6.2.10'
-		
-		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
-		implementation 'org.springframework:spring-context:6.2.10'
-		// Correct the above exclusions, group:'org.springframework', module:'spring-web'
-		implementation 'org.springframework:spring-web:6.2.8'
 		
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
 		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10'
-		// 修正上方排除的 ch.qos.logback:logback-classic
-		implementation 'ch.qos.logback:logback-classic:1.5.13'
-		// 修正上方排除的 ch.qos.logback:logback-core
-		implementation 'ch.qos.logback:logback-core:1.5.13'
 
 		// 添加 Undertow (乾淨的 undertow) , 預計升級 springboot v3.4.0
     	implementation ('org.springframework.boot:spring-boot-starter-undertow'){}
@@ -202,14 +182,7 @@ project(':dgrv4_Gateway_serv'){
 
 		// websocket
 		implementation ('org.springframework.boot:spring-boot-starter-websocket'){
-			exclude group:'org.springframework', module:'spring-context'
-			exclude group:'org.springframework', module:'spring-web'
 		}
-		
-		// Correct the above exclusions, group:'org.springframework', module:'spring-context'
-		implementation 'org.springframework:spring-context:6.2.10'
-		// Correct the above exclusions, group:'org.springframework', module:'spring-web'
-		implementation 'org.springframework:spring-web:6.2.8'
 		
 		implementation 'io.undertow:undertow-core:2.3.17.Final'
 		implementation 'io.undertow:undertow-websockets-jsr:2.3.17.Final'
