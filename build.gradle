@@ -231,13 +231,22 @@ project(':dgrv4_Gateway_serv'){
 
 		// 添加對 Netty 的非遮蔽(non-shaded)依賴，以便 TLS 相關功能
 		implementation ('io.grpc:grpc-netty:1.61.0'){
-		// CVE-2025-55163
+			// CVE-2025-55163
 			exclude group:'io.netty', module:'netty-codec-http2'
+			//CVE-2025-58056
+			exclude group:'io.netty', module:'netty-codec-http'
+			//CVE-2025-58057
+			exclude group:'io.netty', module:'netty-codec'
 		}
 		// Correct the above exclusions, CVE-2025-55163
-		implementation 'io.netty:netty-codec-http2:4.1.124.Final'
-		
-		
+		implementation ('io.netty:netty-codec-http2:4.1.124.Final') {
+			//CVE-2025-58057
+			exclude group:'io.netty', module:'netty-codec'
+		}
+		// Correct the above exclusions, CVE-2025-58056
+		implementation 'io.netty:netty-codec-http:4.1.125.Final'
+		// Correct the above exclusions, CVE-2025-58057
+		implementation 'io.netty:netty-codec:4.1.125.Final'
 		
 		implementation 'io.netty:netty-tcnative-boringssl-static:2.0.61.Final'
 	}
