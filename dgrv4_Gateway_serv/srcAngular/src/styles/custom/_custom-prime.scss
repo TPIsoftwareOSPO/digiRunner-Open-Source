@@ -257,3 +257,10 @@
     }
   }
 }
+
+.p-datatable .p-sortable-column.p-highlight{
+    &:hover {
+        background-color: var(--tpi-orange);
+     }  
+  background-color: var(--tpi-primary);
+}

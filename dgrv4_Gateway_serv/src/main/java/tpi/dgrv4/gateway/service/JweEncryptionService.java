@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -29,7 +31,6 @@ import tpi.dgrv4.gateway.vo.JweEncryptionResp;
 @Service
 public class JweEncryptionService {
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
@@ -38,19 +39,47 @@ public class JweEncryptionService {
 		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
 	}
 
+	/**
+	 * version 1
+	 */
 	public JweEncryptionResp jweEncryption(HttpServletRequest httpReq, HttpServletResponse httResp,
 			JweEncryptionReq req) {
 		try {
 			Map<String, String> reqDataMap = req.getDataMap();
 			return jweEncryption(reqDataMap);
-
+			
 		} catch (Exception e) {
 			String ciphertext = "";
-			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			JweEncryptionResp resp = new JweEncryptionResp();
 			resp.setText(ciphertext);
 			return resp;
 		}
+	}
+
+	/**
+	 * version 2
+	 */
+	public ResponseEntity<JweEncryptionResp> jweEncryptionV2(HttpServletRequest httpReq) {
+		JweEncryptionResp jweEncryptionResp = new JweEncryptionResp();
+		try {
+			Map<String, String> parameterMap = new HashMap<>();
+			httpReq.getParameterMap().forEach((k, vs) -> {
+				if (vs.length != 0) {
+					parameterMap.put(k, vs[0]);
+				}
+			});
+
+			jweEncryptionResp = jweEncryption(parameterMap);
+
+		} catch (Exception e) {
+			String ciphertext = "";
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+
+			jweEncryptionResp.setText(ciphertext);
+		}
+
+		return new ResponseEntity<>(jweEncryptionResp, HttpStatus.OK);
 	}
 
 	/**

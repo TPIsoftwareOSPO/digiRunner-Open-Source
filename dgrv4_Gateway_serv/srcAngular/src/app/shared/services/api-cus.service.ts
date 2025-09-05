@@ -42,7 +42,7 @@ export class CusService {
     /**
      * 查詢設定資料
      * @param ReqBody CUS0001Req
-     * @returns 
+     * @returns
      */
     querySettings(ReqBody: CUS0001Req): Observable<ResCUS0001> {
         let body = {
@@ -68,7 +68,7 @@ export class CusService {
     /**
      * PEM檔-上傳/解析/save用戶憑證
      * @param ReqBody CUS0002Req
-     * @returns 
+     * @returns
      */
     uploadClientCert(ReqBody: CUS0002Req): Observable<ResCUS0002> {
         let body = {

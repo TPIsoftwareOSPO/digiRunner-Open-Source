@@ -72,13 +72,15 @@ public class DgrApiLog2ESQueue {
 	private static Float diskFreeThreshHold;
 	private static int deletePercent;
 	private static boolean allowWriteElastic;
+	private static boolean checkStatusFromFile;
     /**
      * 將日誌添加到隊列
      */
-    public static void put(DgrApiLog2ESQueue logObj, Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic) {
+    public static void put(DgrApiLog2ESQueue logObj, Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic, boolean checkStatusFromFile) {
     	DgrApiLog2ESQueue.diskFreeThreshHold = diskFreeThreshHold; 
     	DgrApiLog2ESQueue.deletePercent = deletePercent;
     	DgrApiLog2ESQueue.allowWriteElastic = allowWriteElastic;
+    	DgrApiLog2ESQueue.checkStatusFromFile = checkStatusFromFile;
         putByPoll(logObj);
         startProcessing();
     }
@@ -332,7 +334,7 @@ public class DgrApiLog2ESQueue {
 		header.put("Authorization", "Basic " + arrIdPwd[workIndex]);
 		
 		try {
-			int httpCode = httpClient.bulkWrite(esReqUrl, bulkBody, header, diskFreeThreshHold, deletePercent, allowWriteElastic);
+			int httpCode = httpClient.bulkWrite(esReqUrl, bulkBody, header, diskFreeThreshHold, deletePercent, allowWriteElastic, checkStatusFromFile);
 			
 //			System.out.println("...POST 2...");
 			// 告知寫入成功或失敗

@@ -69,7 +69,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
     this.serverService.queryIdPInfoList_mldap().subscribe(res => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.dataList = res.RespBody.idPInfoList;
-      }
+      } else this.dataList = [];
     })
   }
 

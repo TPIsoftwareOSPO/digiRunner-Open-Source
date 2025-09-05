@@ -329,7 +329,7 @@ public class GrpcImportExportService {
         List<String> ids = req.getBody();
 
         if (ids == null || ids.isEmpty()) {
-            return dgrGrpcProxyMapDao.findAll();
+            throw TsmpDpAaRtnCode._1559.throwing("Export must provide dgrcc id, you must select the dgrcc to export");
         }
 
         // Batch fetch: first convert all IDs, then query once.

@@ -561,11 +561,13 @@
           <div class="p-form-check-line form-group">
             <div class="p-form-check">
               <p-radioButton formControlName="apiStatus" [value]="true" inputId="apiStatus_true"></p-radioButton>
-              <label for="apiStatus_true" class="ms-2 mb-0" style="white-space: nowrap;">{{'button.enable'|translate}}</label>
+              <label for="apiStatus_true" class="ms-2 mb-0"
+                style="white-space: nowrap;">{{'button.enable'|translate}}</label>
             </div>
             <div class="p-form-check">
               <p-radioButton formControlName="apiStatus" [value]="false" inputId="apiStatus_false"></p-radioButton>
-              <label for="apiStatus_false" class="ms-2 mb-0" style="white-space: nowrap;">{{'button.disable'|translate}}</label>
+              <label for="apiStatus_false" class="ms-2 mb-0"
+                style="white-space: nowrap;">{{'button.disable'|translate}}</label>
             </div>
           </div>
           <div *ngIf="
@@ -760,7 +762,7 @@
           <div class="d-flex col-12 pe-0 justify-content-between align-items-center">
             <div class="col-4 px-0">
               <label id="srcUrl_label" class="control-label required fw-bold" style="padding-left: 1px">
-                {{ "tar_url" | translate }}
+                {{"tar_url"|translate}}
               </label>
             </div>
 
@@ -773,8 +775,8 @@
                   {{ apiDetail.pathType =='dgrc' ? '' : "path_param" | translate }}
                 </label>
               </div>
-
-              <div class="d-flex align-items-center">
+              <!-- ai gateway 沒有no auth-->
+              <div class="d-flex align-items-center" *ngIf="!isAiGateway">
                 <p-checkbox [binary]="true" inputId="noOAuth" formControlName="noOAuth">
                 </p-checkbox>
                 <label class="mb-0 ms-1" for="noOAuth">
@@ -784,14 +786,15 @@
             </div>
           </div>
 
-          <div class="form-group" *ngIf="apiDetail.apiSrc.v =='R' && apiDetail.type == '1' && !isWebhook">
+          <div class="form-group"
+            *ngIf="apiDetail.apiSrc.v =='R' && apiDetail.type == '1' && (!isWebhook && !isAiGateway) ">
             <p-checkbox [binary]="true" inputId="redirectByIp" formControlName="redirectByIp"> </p-checkbox>
             <label class="mb-0 ms-1" for="redirectByIp">{{'diversionSrcIP'|translate}}</label>
           </div>
 
           <div [hidden]="redirectByIp.value">
-            <app-src-url-input formControlName="srcUrl"
-              [_disabled]="apiDetail.apiSrc.v == 'C' || isWebhook"></app-src-url-input>
+            <app-src-url-input formControlName="srcUrl" [_disabled]="apiDetail.apiSrc.v == 'C' || isWebhook"
+              [isAiGateway]="isAiGateway" [pathType]="apiDetail.pathType"></app-src-url-input>
           </div>
           <div [hidden]="!redirectByIp.value">
             <!-- <app-source-ip-config></app-source-ip-config> -->
@@ -832,6 +835,7 @@
           </div>
         </div>
       </div>
+
       <div class="form-group row" *ngIf="apiDetail.apiSrc.v !='C'">
         <div class="col-12">
           <label id="headerMask_label" class="control-label">API Log Header Mask</label>
@@ -975,7 +979,8 @@
                 [placeholder]="bodyMaskPolicy.value=='4'?'':('input_example.text' | translate)">
             </div>
             <div class="col-12 px-0">
-              <label class="control-label">Example: {{ bodyMaskPolicy.value=='4'? ("mask.body_example_regex"|translate):
+              <label class="control-label">Example: {{ bodyMaskPolicy.value=='4'?
+                ("mask.body_example_regex"|translate):
                 ("mask.body_example"|translate) }}</label>
             </div>
           </div>
@@ -1026,7 +1031,69 @@
           <textarea class="form-control" rows="5" formControlName="apiDesc"></textarea>
         </div>
       </div>
+      <!-- CORS Header -->
+      <div class="form-group row">
+        <div class="col-12">
+          <label class="control-label">CORS Header</label>
+        </div>
+        <div class="col-12">
+          <div class="form-group d-flex align-items-center">
+            <p-checkbox [binary]="true" inputId="isCorsAllowOrigin" formControlName="isCorsAllowOrigin"
+              [trueValue]="'Y'" [falseValue]="'N'">
+            </p-checkbox>
+            <label class="mb-0 mx-2 text-nowrap col-3 control-label" for="isCorsAllowOrigin"
+              [ngClass]="{required: isCorsAllowOrigin.value =='Y'}">
+              Access-Control-Allow-Origin
+            </label>
+            <div class="col">
+              <input type="text" class="form-control col-auto" formControlName="corsAllowOrigin"
+                [readonly]="isCorsAllowOrigin.value!='Y'" placeholder="e.g., https://example.com or *" />
+              <div *ngIf="corsAllowOrigin?.invalid && (corsAllowOrigin?.dirty || corsAllowOrigin?.touched)"
+                class="text-danger">
+                <small class="form-text">{{corsAllowOrigin?.errors.required | translate}}</small>
+              </div>
+            </div>
+          </div>
 
+          <div class="form-group d-flex align-items-center">
+            <p-checkbox [binary]="true" inputId="isCorsAllowMethods" formControlName="isCorsAllowMethods"
+              [trueValue]="'Y'" [falseValue]="'N'">
+            </p-checkbox>
+            <label class="mb-0 mx-2 text-nowrap col-3 control-label" for="isCorsAllowMethods"
+              [ngClass]="{required: isCorsAllowMethods.value =='Y'}">
+              Access-Control-Allow-Methods
+            </label>
+            <div class="col">
+              <input type="text" class="form-control col" formControlName="corsAllowMethods"
+                [readonly]="isCorsAllowMethods.value!='Y'" placeholder="e.g., GET, POST, PUT, DELETE, OPTIONS" />
+              <div *ngIf="corsAllowMethods?.invalid && (corsAllowMethods?.dirty || corsAllowMethods?.touched)"
+                class="text-danger">
+                <small class="form-text">{{corsAllowMethods?.errors.required | translate}}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group d-flex align-items-center">
+            <p-checkbox [binary]="true" inputId="isCorsAllowHeaders" formControlName="isCorsAllowHeaders"
+              [trueValue]="'Y'" [falseValue]="'N'">
+            </p-checkbox>
+            <label class="mb-0 mx-2 text-nowrap col-3 control-label" for="isCorsAllowHeaders"
+              [ngClass]="{required: isCorsAllowHeaders.value =='Y'}">
+              Access-Control-Allow-Headers
+            </label>
+            <div class="col">
+              <input type="text" class="form-control col" formControlName="corsAllowHeaders"
+                [readonly]="isCorsAllowHeaders.value!='Y'"
+                placeholder="e.g., Content-Type, X-Requested-With, Your-Header" />
+              <div *ngIf="corsAllowHeaders?.invalid && (corsAllowHeaders?.dirty || corsAllowHeaders?.touched)"
+                class="text-danger">
+                <small class="form-text">{{corsAllowHeaders?.errors.required | translate}}</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
 
 
       <div class="form-group row">

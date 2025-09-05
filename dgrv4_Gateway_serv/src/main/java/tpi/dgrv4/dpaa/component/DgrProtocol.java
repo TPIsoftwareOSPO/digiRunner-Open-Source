@@ -21,14 +21,22 @@ public record DgrProtocol(
         boolean mtls
 ) {
 
-	private static final String rex = "^dgr(\\+[-a-zA-Z]+)+##(.+)";
+    private static final String rex = "^dgr(\\+[-a-zA-Z]+)+##(.+)";
     private static final Pattern pattern = Pattern.compile(rex);
+
+    public String getParsed(boolean serverSSLEnabled, int serverPort) {
+        if (this.valid()) {
+            return (serverSSLEnabled ? "https" : "http") + "://localhost:" + serverPort + "/" + this.path();
+        }
+
+        return this.origin();
+    }
 
     public static DgrProtocol parse(String url) {
         var validation = validation(url);
         var builder = DgrProtocol.builder()
                 .valid(validation.valid)
-                .origin(validation.origin)
+                .origin(url)
                 .mtls(false);
         if (validation.valid) {
             var path = validation.origin;

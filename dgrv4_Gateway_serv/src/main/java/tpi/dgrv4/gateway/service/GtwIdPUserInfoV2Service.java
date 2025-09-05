@@ -17,6 +17,7 @@ import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
+import tpi.dgrv4.model.Attempt;
 
 /**
  * 驗證收到的 Access token 是否合法，<br>
@@ -41,6 +42,15 @@ public class GtwIdPUserInfoV2Service {
 		this.tokenHelper = tokenHelper;
 		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
 		this.gtwIdPVerifyService = gtwIdPVerifyService;
+	}
+
+	public Attempt<ResponseEntity<?>> getUserInfoByAuthorization(String authorization, String reqUri) {
+		try {
+			var result = getIdTokenData(authorization, reqUri);
+			return Attempt.success(result);
+		} catch (Exception e) {
+			return Attempt.failure(e);
+		}
 	}
 
 	public ResponseEntity<?> getUserInfoV2(HttpServletRequest httpReq, HttpServletResponse httResp,

@@ -94,6 +94,43 @@ public class AA0313Req extends ReqValidator {
 	/** webhook notify list */
 	private List<String> notifyNameList;
 	
+	// CORS header
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Origin"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Origin"
+	 */
+	private String isCorsAllowOrigin;
+
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Methods"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Methods"
+	 */
+	private String isCorsAllowMethods;
+
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Headers"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Headers"
+	 */
+	private String isCorsAllowHeaders;
+
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Origin" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Origin" of the CORS Header
+	 */
+	private String corsAllowOrigin;
+	
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Methods" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Methods" of the CORS Header
+	 */
+	private String corsAllowMethods;
+
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Headers" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Headers" of the CORS Header
+	 */
+	private String corsAllowHeaders;
+	
 	public void setApiKey(String apiKey) {
 		this.apiKey = apiKey;
 	}
@@ -424,5 +461,53 @@ public class AA0313Req extends ReqValidator {
 
 	public void setNotifyNameList(List<String> notifyNameList) {
 		this.notifyNameList = notifyNameList;
+	}
+	
+	public String getIsCorsAllowOrigin() {
+		return isCorsAllowOrigin;
+	}
+
+	public void setIsCorsAllowOrigin(String isCorsAllowOrigin) {
+		this.isCorsAllowOrigin = isCorsAllowOrigin;
+	}
+
+	public String getIsCorsAllowMethods() {
+		return isCorsAllowMethods;
+	}
+
+	public void setIsCorsAllowMethods(String isCorsAllowMethods) {
+		this.isCorsAllowMethods = isCorsAllowMethods;
+	}
+
+	public String getIsCorsAllowHeaders() {
+		return isCorsAllowHeaders;
+	}
+
+	public void setIsCorsAllowHeaders(String isCorsAllowHeaders) {
+		this.isCorsAllowHeaders = isCorsAllowHeaders;
+	}
+
+	public String getCorsAllowOrigin() {
+		return corsAllowOrigin;
+	}
+
+	public void setCorsAllowOrigin(String corsAllowOrigin) {
+		this.corsAllowOrigin = corsAllowOrigin;
+	}
+
+	public String getCorsAllowMethods() {
+		return corsAllowMethods;
+	}
+
+	public void setCorsAllowMethods(String corsAllowMethods) {
+		this.corsAllowMethods = corsAllowMethods;
+	}
+
+	public String getCorsAllowHeaders() {
+		return corsAllowHeaders;
+	}
+
+	public void setCorsAllowHeaders(String corsAllowHeaders) {
+		this.corsAllowHeaders = corsAllowHeaders;
 	}
 }

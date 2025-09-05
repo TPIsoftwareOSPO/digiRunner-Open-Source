@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.DgrGrpcProxyMap;
 import tpi.dgrv4.entity.repository.DgrGrpcProxyMapDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
@@ -18,12 +20,18 @@ import tpi.dgrv4.grpcproxy.event.ProxyConfigChangedEvent;
 import tpi.dgrv4.grpcproxy.event.UpstreamHealthCheckEvent;
 import tpi.dgrv4.grpcproxy.handler.HostBasedHandlerRegistry;
 import tpi.dgrv4.grpcproxy.manager.DynamicGrpcProxyManager;
+import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
 
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.X509ExtendedTrustManager;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -36,14 +44,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class GrpcProxyServer {
-    private final TPILogger logger = TPILogger.tl;
 
     @Value("${grpc.proxy.enabled:false}")
     private boolean grpcProxyEnabled;
     
     private final GrpcProxyProperties proxyProperties;
     private final DynamicGrpcProxyManager proxyManager;
-    private final SslContext sslContext;
+    private final SslContext sslContext;//GrpcTlsConfig setting it
     private final DgrGrpcProxyMapDao dgrGrpcProxyMapDao;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -79,7 +86,7 @@ public class GrpcProxyServer {
         this.serverPort = proxyProperties.getServer().getPort();
 
         // 初始化日誌將在啟動時一起顯示，此處只記錄簡單信息
-        logger.debug("Constructing gRPC proxy server for port: " + serverPort);
+        TPILogger.tl.debug("Constructing gRPC proxy server for port: " + serverPort);
     }
 
     /**
@@ -97,27 +104,10 @@ public class GrpcProxyServer {
         try {
             // 啟動配置信息將整合到最終的banner中
 
-            ServerBuilder<?> serverBuilder;
+        	NettyServerBuilder serverBuilder = getBaseServerBuilder();
 
             if (sslContext != null && proxyProperties.getTls().isEnabled()) {
-                serverBuilder = NettyServerBuilder.forAddress(new InetSocketAddress("0.0.0.0", serverPort))
-                        .intercept(createLoggingInterceptor())
-                        .sslContext(sslContext)
-                        .directExecutor()
-                        .keepAliveTime(60, TimeUnit.SECONDS)
-                        .keepAliveTimeout(20, TimeUnit.SECONDS)
-                        .permitKeepAliveWithoutCalls(true)
-                        .permitKeepAliveTime(30, TimeUnit.SECONDS)
-                        .maxConnectionAge(300, TimeUnit.SECONDS)
-                        .maxConnectionAgeGrace(60, TimeUnit.SECONDS)
-                        .maxInboundMessageSize(20 * 1024 * 1024)
-                        .maxInboundMetadataSize(16 * 1024);
-            } else {
-                serverBuilder = ServerBuilder.forPort(serverPort)
-                        .intercept(createLoggingInterceptor())
-                        .directExecutor()
-                        .maxInboundMessageSize(20 * 1024 * 1024)
-                        .maxInboundMetadataSize(16 * 1024);
+                serverBuilder.sslContext(sslContext);
             }
 
             var registry = proxyManager.getHandlerRegistry();
@@ -139,9 +129,9 @@ public class GrpcProxyServer {
                     }
                 }
                 
-                if (!hostnames.isEmpty()) {
+                /*if (!hostnames.isEmpty()) {
                     scheduleHealthChecks();
-                }
+                }*/
             }
 
             serverBuilder.fallbackHandlerRegistry(registry);
@@ -160,13 +150,13 @@ public class GrpcProxyServer {
             // 添加伺服器操作配置信息
             serverInfo.put("Server Operation", "STARTING -> ACTIVE");
             serverInfo.put("HTTP/2 Settings", "Enhanced");
-            serverInfo.put("Message Limits", "Inbound: 20MB, Metadata: 16KB");
+            serverInfo.put("Message Limits", "Inbound: 20MB, Metadata: 8KB");
             
             boolean tlsEnabled = sslContext != null && proxyProperties.getTls().isEnabled();
             if (tlsEnabled) {
                 serverInfo.put("TLS Configuration", "Enabled with SSL context");
-                serverInfo.put("Keep-Alive Settings", "Time: 60s, Timeout: 20s");
-                serverInfo.put("Connection Age", "Max: 300s, Grace: 60s");
+                serverInfo.put("Keep-Alive Settings", "Time: 5m, Timeout: 50s");
+                //serverInfo.put("Connection Age", "Max: 300s, Grace: 60s");
             } else {
                 serverInfo.put("TLS Configuration", "Disabled");
                 String sslContextStatus = sslContext != null ? "provided but not used" : "not provided";
@@ -202,9 +192,7 @@ public class GrpcProxyServer {
                         
                         // 添加超時配置
                         String timeoutKey = "Service " + serviceCount + " Timeouts";
-                        String timeoutValue = "connect:" + mapping.getConnectTimeoutMs() + "ms, " +
-                                             "send:" + mapping.getSendTimeoutMs() + "ms, " +
-                                             "read:" + mapping.getReadTimeoutMs() + "ms";
+                        String timeoutValue = "connect:" + mapping.getConnectTimeoutMs() + "ms";
                         serverInfo.put(timeoutKey, timeoutValue);
                         serviceCount++;
                     }
@@ -226,15 +214,28 @@ public class GrpcProxyServer {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.debug("Shutting down gRPC server via shutdown hook");
+            TPILogger.tl.debug("Shutting down gRPC server via shutdown hook");
             try {
                 GrpcProxyServer.this.stop();
             } catch (Exception e) {
-                logger.debug("Error during server shutdown from hook: " + e.getMessage());
+                TPILogger.tl.debug("Error during server shutdown from hook: " + e.getMessage());
             }
         }));
     }
 
+    private NettyServerBuilder getBaseServerBuilder() {
+    	 return //NettyServerBuilder.forAddress(new InetSocketAddress("0.0.0.0", serverPort))
+    			 NettyServerBuilder.forPort(serverPort)
+                 .keepAliveTime(5, TimeUnit.MINUTES)
+                 .keepAliveTimeout(30, TimeUnit.SECONDS)
+                 .permitKeepAliveWithoutCalls(true)
+                 .permitKeepAliveTime(5, TimeUnit.MINUTES)
+                 .maxInboundMessageSize(20 * 1024 * 1024);
+    	 		//.maxConnectionAge(300, TimeUnit.SECONDS)
+         			//.maxConnectionAgeGrace(60, TimeUnit.SECONDS)
+    	 		//.intercept(createLoggingInterceptor()) //Replaced by ProxyServerCallHandler
+                 //.maxInboundMetadataSize(16 * 1024);// default 8k
+    }
 
 
     /**
@@ -278,14 +279,14 @@ public class GrpcProxyServer {
                 }
                 banner.append("_____________________________________________\n");
                 
-                logger.debug(banner.toString());
+                TPILogger.tl.debug(banner.toString());
                 
                 return tlsResult;
             } else {
                 banner.append(" ...TLS test = NOT REQUIRED\n");
                 banner.append(" ...Final result = CONNECTION SUCCESSFUL (PLAINTEXT)\n");
                 banner.append("_____________________________________________\n");
-                logger.debug(banner.toString());
+                TPILogger.tl.debug(banner.toString());
                 return new TestResult(true, "Connection successful (plaintext)");
             }
             
@@ -295,7 +296,7 @@ public class GrpcProxyServer {
             banner.append(" ...Error details = ").append(errorMsg).append("\n");
             banner.append(" ...Final result = CONNECTION FAILED\n");
             banner.append("_____________________________________________\n");
-            logger.debug(banner.toString());
+            TPILogger.tl.debug(banner.toString());
             return new TestResult(false, errorMsg);
         } catch (IOException e) {
             String errorMsg = "Connection failed: " + e.getMessage();
@@ -303,7 +304,7 @@ public class GrpcProxyServer {
             banner.append(" ...Error details = ").append(errorMsg).append("\n");
             banner.append(" ...Final result = CONNECTION FAILED\n");
             banner.append("_____________________________________________\n");
-            logger.debug(banner.toString());
+            TPILogger.tl.debug(banner.toString());
             return new TestResult(false, errorMsg);
         }
     }
@@ -336,23 +337,7 @@ public class GrpcProxyServer {
      */
     private TestResult testTlsConnectionWithAutoTrust(String hostname, int port, int connectTimeout) {
         try {
-            javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
-            sslContext.init(null, new javax.net.ssl.TrustManager[] {
-                    new javax.net.ssl.X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new java.security.cert.X509Certificate[0];
-                        }
-                        @SuppressWarnings("java:S4830")
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                            // Auto-trust mode: skipping client certificate validation
-                        }
-                        @SuppressWarnings("java:S4830")
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                            // Auto-trust mode: accepting server certificate
-                        }
-                    }
-            }, new java.security.SecureRandom());
-
+            javax.net.ssl.SSLContext sslContext = HttpsConnectionChecker.createTrustAllSSLContext();
             javax.net.ssl.SSLSocketFactory factory = sslContext.getSocketFactory();
             javax.net.ssl.SSLSocket socket = null;
 
@@ -378,7 +363,7 @@ public class GrpcProxyServer {
             String errorMsg = "TLS connection failed with upstream service (auto-trust): " +
                     hostname + ":" + port + ", error: " + e.getMessage();
             // TLS錯誤信息將在健康檢查報告中統一顯示，此處只記錄debug
-            logger.debug(errorMsg);
+            TPILogger.tl.debug(errorMsg);
             return new TestResult(false, errorMsg);
         }
     }
@@ -446,9 +431,9 @@ public class GrpcProxyServer {
                 socket = (javax.net.ssl.SSLSocket) factory.createSocket(
                         tempSocket, hostname, port, true);
                 socket.setSoTimeout(timeout);
+                
+                socket.startHandshake();
             }
-
-            socket.startHandshake();
 
             return new TestResult(true, "TLS connection successful with certificate validation");
         } catch (SSLHandshakeException e) {
@@ -470,7 +455,7 @@ public class GrpcProxyServer {
     /**
      * Schedule periodic health checks for all registered upstream services
      */
-    private void scheduleHealthChecks() {
+    /*private void scheduleHealthChecks() {
         StringBuilder banner = new StringBuilder();
         banner.append("---\n");
         banner.append("    ").append(Thread.currentThread().getName()).append("::\n");
@@ -481,12 +466,12 @@ public class GrpcProxyServer {
             banner.append(" ...Statistics scheduler = NOT STARTED\n");
             banner.append(" ...Reason = Health checks disabled in configuration\n");
             banner.append("_____________________________________________\n");
-            logger.warn(banner.toString());
+            TPILogger.tl.warn(banner.toString());
             return;
         }
 
         banner.append(" ...Health check scheduler = ENABLED\n");
-        banner.append(" ...Health check interval = 30 seconds\n");
+        banner.append(" ...Health check interval = 5 Minutes\n");
         banner.append(" ...Statistics report interval = 5 Minutes\n");
         banner.append(" ...Scheduler thread pool = 2 threads\n");
         banner.append(" ...Services to monitor = ").append(upstreamStatusMap.size()).append("\n");
@@ -495,22 +480,22 @@ public class GrpcProxyServer {
             try {
                 performHealthChecks();
             } catch (Exception e) {
-                logger.error("Critical error during scheduled health check: " + e.getMessage());
+            	TPILogger.tl.error("Critical error during scheduled health check: " + StackTraceUtil.logStackTrace(e));
             }
-        }, 30, 30, TimeUnit.SECONDS);
+        }, 1, 5, TimeUnit.MINUTES);
 
         healthCheckExecutor.scheduleAtFixedRate(() -> {
             try {
                 reportStatistics();
             } catch (Exception e) {
-                logger.error("Critical error during statistics reporting: " + e.getMessage());
+            	TPILogger.tl.error("Critical error during statistics reporting: " + StackTraceUtil.logStackTrace(e));
             }
         }, 5, 5, TimeUnit.MINUTES);
         
         banner.append(" ...Scheduler status = ACTIVE\n");
         banner.append("_____________________________________________\n");
-        logger.info(banner.toString());
-    }
+        TPILogger.tl.info(banner.toString());
+    }*/
 
     /**
      * Perform health checks on all registered upstream services
@@ -590,9 +575,9 @@ public class GrpcProxyServer {
 
         // 根據結果設置日誌級別
         if (unhealthyCount > 0 || statusChangedCount > 0) {
-            logger.warn(banner.toString());
+            TPILogger.tl.warn(banner.toString());
         } else {
-            logger.info(banner.toString());
+            TPILogger.tl.info(banner.toString());
         }
     }
 
@@ -638,7 +623,7 @@ public class GrpcProxyServer {
         if (minutes > 0 || hours > 0 || days > 0) uptimeStr.append(minutes).append("m ");
         uptimeStr.append(seconds).append("s");
         
-        banner.append(" ...Server uptime = ").append(uptimeStr.toString()).append("\n");
+        //banner.append(" ...Server uptime = ").append(uptimeStr.toString()).append("\n");
         
         // 上游服務健康狀況
         if (!upstreamStatusMap.isEmpty()) {
@@ -681,9 +666,9 @@ public class GrpcProxyServer {
         // 根據服務健康狀況決定日誌級別
         boolean hasUnhealthyServices = upstreamStatusMap.values().stream().anyMatch(s -> !s.isHealthy());
         if (hasUnhealthyServices || failedCallsCount.get() > 0) {
-            logger.warn(banner.toString());
+        	TPILogger.tl.warn(banner.toString());
         } else {
-            logger.info(banner.toString());
+            TPILogger.tl.info(banner.toString());
         }
     }
 
@@ -794,7 +779,7 @@ public class GrpcProxyServer {
     @EventListener
     public void handleUpstreamHealthCheckEvent(UpstreamHealthCheckEvent event) {
         // 健康檢查事件將在健康檢查報告和統計報告中統一顯示，此處只記錄debug信息
-        logger.debug("Upstream health check event: " + event.getProxyHostname() +
+        TPILogger.tl.debug("Upstream health check event: " + event.getProxyHostname() +
                 " (" + event.getTargetHostname() + ":" + event.getTargetPort() + ")" +
                 " status=" + (event.isHealthy() ? "HEALTHY" : "UNHEALTHY") +
                 (event.getMessage() != null ? ", message=" + event.getMessage() : ""));
@@ -821,7 +806,7 @@ public class GrpcProxyServer {
         }
 
         // 記錄調用失敗，但不立即輸出，等待統計報告時統一顯示
-        logger.debug("Call failure recorded: " + proxyHostname + " -> " + targetHostname + ":" + targetPort + 
+        TPILogger.tl.debug("Call failure recorded: " + proxyHostname + " -> " + targetHostname + ":" + targetPort + 
                     ", method: " + method + ", error: " + errorType + ", message: " + errorMessage);
 
         if ("CONNECTION_REFUSED".equals(errorType) || "CONNECTION_TIMEOUT".equals(errorType)) {
@@ -832,7 +817,7 @@ public class GrpcProxyServer {
                 status.setLastChecked(System.currentTimeMillis());
 
                 if (status.getConsecutiveFailures() == 0) {
-                    logger.debug("Scheduling immediate health check for " + proxyHostname + " due to first failure");
+                    TPILogger.tl.debug("Scheduling immediate health check for " + proxyHostname + " due to first failure");
                     scheduleImmediateHealthCheck(proxyHostname);
                 }
 
@@ -853,11 +838,11 @@ public class GrpcProxyServer {
 
         healthCheckExecutor.schedule(() -> {
             try {
-                logger.debug("Running immediate health check for upstream service: " + proxyHostname);
+                TPILogger.tl.debug("Running immediate health check for upstream service: " + proxyHostname);
 
                 DgrGrpcProxyMap mapping = proxyManager.getProxyMapping(proxyHostname);
                 if (mapping == null) {
-                    logger.debug("Cannot perform immediate health check - mapping not found for: " + proxyHostname);
+                    TPILogger.tl.debug("Cannot perform immediate health check - mapping not found for: " + proxyHostname);
                     return;
                 }
 
@@ -879,7 +864,7 @@ public class GrpcProxyServer {
                         int targetPort = mapping.getTargetPort();
 
                         // 狀態變化將在下次健康檢查報告中統一顯示
-                        logger.debug("Upstream service status changed: " + proxyHostname + 
+                        TPILogger.tl.debug("Upstream service status changed: " + proxyHostname + 
                                    " (" + targetHostname + ":" + targetPort + ") is now " + 
                                    (result.isSuccess() ? "HEALTHY" : "UNHEALTHY"));
 
@@ -889,7 +874,7 @@ public class GrpcProxyServer {
                 }
             } catch (Exception e) {
                 // 立即健康檢查錯誤將在下次健康檢查報告中統一顯示
-                logger.debug("Error during immediate health check for " + proxyHostname + ": " + e.getMessage());
+                TPILogger.tl.debug("Error during immediate health check for " + proxyHostname + ": " + e.getMessage());
             }
         }, 2, TimeUnit.SECONDS);
     }
@@ -904,7 +889,7 @@ public class GrpcProxyServer {
 
         UpstreamServiceStatus status = upstreamStatusMap.get(proxyHostname);
         if (status != null && !status.isHealthy()) {
-            logger.debug("Successful call to previously unhealthy upstream service: " + proxyHostname +
+            TPILogger.tl.debug("Successful call to previously unhealthy upstream service: " + proxyHostname +
                     ", scheduling immediate health check");
             scheduleImmediateHealthCheck(proxyHostname);
         }
@@ -938,11 +923,11 @@ public class GrpcProxyServer {
                 } catch (InterruptedException e) {
                     banner.append(" ...Shutdown error = INTERRUPTED - ").append(e.getMessage()).append("\n");
                     Thread.currentThread().interrupt();
-                    logger.error(banner.toString());
+                    TPILogger.tl.error(banner.toString());
                     return;
                 } catch (Exception e) {
                     banner.append(" ...Shutdown error = UNEXPECTED - ").append(e.getMessage()).append("\n");
-                    logger.error(banner.toString());
+                    TPILogger.tl.error(banner.toString());
                     return;
                 }
 
@@ -962,27 +947,19 @@ public class GrpcProxyServer {
                         }
                     }
 
-                    ServerBuilder<?> serverBuilder;
                     boolean tlsEnabled = sslContext != null && proxyProperties.getTls().isEnabled();
-
+                    NettyServerBuilder serverBuilder = getBaseServerBuilder();
                     if (tlsEnabled) {
-                        serverBuilder = NettyServerBuilder.forPort(serverPort)
-                                .sslContext(sslContext);
+                        serverBuilder.sslContext(sslContext);
                         banner.append(" ...Server configuration = TLS ENABLED on port ").append(serverPort).append("\n");
                     } else {
-                        serverBuilder = ServerBuilder.forPort(serverPort);
                         banner.append(" ...Server configuration = NO TLS on port ").append(serverPort).append("\n");
                     }
 
-                    serverBuilder
-                            .maxConnectionAge(60, TimeUnit.SECONDS)
-                            .maxConnectionAgeGrace(30, TimeUnit.SECONDS)
-                            .maxInboundMessageSize(20 * 1024 * 1024)
-                            .maxInboundMetadataSize(16 * 1024)
-                            .fallbackHandlerRegistry(registry);
+                    serverBuilder.fallbackHandlerRegistry(registry);
                     
-                    banner.append(" ...Connection limits = Age: 60s, Grace: 30s\n");
-                    banner.append(" ...Message limits = Inbound: 20MB, Metadata: 16KB\n");
+                    banner.append(" ...Connection limits = Age: 5m, Grace: 30s\n");
+                    banner.append(" ...Message limits = Inbound: 20MB, Metadata: 8KB\n");
 
                     try {
                         server = serverBuilder.build().start();
@@ -998,7 +975,7 @@ public class GrpcProxyServer {
                         banner.append(" ...CPU cores = ").append(runtime.availableProcessors()).append("\n");
 
                         banner.append("_____________________________________________\n");
-                        logger.info(banner.toString());
+                        TPILogger.tl.info(banner.toString());
                         
                         // 立即執行一次健康檢查
                         performHealthChecks();
@@ -1006,29 +983,29 @@ public class GrpcProxyServer {
                     } catch (java.net.BindException e) {
                         banner.append(" ...Server restart = FAILED (Port ").append(serverPort).append(" in use)\n");
                         banner.append("_____________________________________________\n");
-                        logger.error(banner.toString());
+                        TPILogger.tl.error(banner.toString());
                         throw e;
                     } catch (java.io.IOException e) {
                         banner.append(" ...Server restart = FAILED (IO Error: ").append(e.getMessage()).append(")\n");
                         banner.append("_____________________________________________\n");
-                        logger.error(banner.toString());
+                        TPILogger.tl.error(banner.toString());
                         throw e;
                     } catch (Exception e) {
                         banner.append(" ...Server restart = FAILED (Unexpected: ").append(e.getMessage()).append(")\n");
                         banner.append("_____________________________________________\n");
-                        logger.error(banner.toString());
+                        TPILogger.tl.error(banner.toString());
                         throw e;
                     }
                 } catch (Exception e) {
                     banner.append(" ...Configuration error = ").append(e.getMessage()).append("\n");
                     banner.append("_____________________________________________\n");
-                    logger.error(banner.toString());
+                    TPILogger.tl.error(banner.toString());
                 }
             } else {
                 banner.append(" ...Current server = NULL (nothing to restart)\n");
                 banner.append(" ...Action = SKIPPED\n");
                 banner.append("_____________________________________________\n");
-                logger.warn(banner.toString());
+                TPILogger.tl.warn(banner.toString());
             }
         } finally {
             serverLock.unlock();
@@ -1100,7 +1077,7 @@ public class GrpcProxyServer {
             }
             
             banner.append("_____________________________________________\n");
-            logger.info(banner.toString());
+            TPILogger.tl.info(banner.toString());
             
         } finally {
             serverLock.unlock();
@@ -1119,25 +1096,25 @@ public class GrpcProxyServer {
                 String peerAddress = String.valueOf(call.getAttributes().get(Grpc.TRANSPORT_ATTR_REMOTE_ADDR));
 
                 // gRPC調用統計將在統計報告中統一顯示，此處只記錄debug信息
-                logger.debug("gRPC call received: " + methodName + " from " + peerAddress);
+                TPILogger.tl.debug("gRPC call received: " + methodName + " from " + peerAddress);
 
                 return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
                         next.startCall(call, headers)) {
                     @Override
                     public void onMessage(ReqT message) {
-                        logger.debug("gRPC message: " + methodName + " - " + message);
+                        TPILogger.tl.debug("gRPC message: " + methodName + " - " + message);
                         super.onMessage(message);
                     }
 
                     @Override
                     public void onCancel() {
-                        logger.debug("gRPC call cancelled: " + methodName + " from " + peerAddress);
+                        TPILogger.tl.debug("gRPC call cancelled: " + methodName + " from " + peerAddress);
                         super.onCancel();
                     }
 
                     @Override
                     public void onComplete() {
-                        logger.debug("gRPC call completed: " + methodName + " from " + peerAddress);
+                        TPILogger.tl.debug("gRPC call completed: " + methodName + " from " + peerAddress);
                         super.onComplete();
                     }
                 };
@@ -1285,7 +1262,7 @@ public class GrpcProxyServer {
         
         banner.append("==========================================\n");
         
-        logger.info(banner.toString());
+        TPILogger.tl.info(banner.toString());
     }    
 
     /**
@@ -1340,7 +1317,7 @@ public class GrpcProxyServer {
         banner.append(" ...").append(message).append("\n");
         banner.append("_____________________________________________\n");
         
-        logger.info(banner.toString());
+        TPILogger.tl.info(banner.toString());
     }
     
     /**
@@ -1358,13 +1335,11 @@ public class GrpcProxyServer {
             banner.append(" ...Target = ").append(mapping.getTargetHostName()).append(":").append(mapping.getTargetPort()).append("\n");
             banner.append(" ...TLS mode = ").append(mapping.getSecureMode() != null ? mapping.getSecureMode() : "AUTO").append("\n");
             banner.append(" ...Status = ").append("Y".equals(mapping.getEnable()) ? "ENABLED" : "DISABLED").append("\n");
-            banner.append(" ...Timeouts = connect:").append(mapping.getConnectTimeoutMs())
-                  .append("ms, send:").append(mapping.getSendTimeoutMs())
-                  .append("ms, read:").append(mapping.getReadTimeoutMs()).append("ms\n");
+            banner.append(" ...Timeouts = connect:").append(mapping.getConnectTimeoutMs()).append("ms\n");
         }
         
         banner.append("_____________________________________________\n");
         
-        logger.info(banner.toString());
+        TPILogger.tl.info(banner.toString());
     }
 }

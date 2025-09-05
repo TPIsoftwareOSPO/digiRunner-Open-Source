@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.dpaa.service.DPB0209Service;
+import tpi.dgrv4.dpaa.util.ControllerUtil;
 import tpi.dgrv4.dpaa.vo.DPB0209Req;
 import tpi.dgrv4.dpaa.vo.DPB0209Resp;
-import tpi.dgrv4.gateway.util.ControllerUtil;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 import tpi.dgrv4.gateway.vo.TsmpHttpHeader;

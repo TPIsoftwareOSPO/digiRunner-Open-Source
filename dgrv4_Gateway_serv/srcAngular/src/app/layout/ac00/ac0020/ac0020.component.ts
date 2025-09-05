@@ -121,7 +121,7 @@ export class Ac0020Component extends BaseComponent implements OnInit {
     this.serverService.queryIdPInfoList_api({}).subscribe(res => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.dataList = res.RespBody.dataList;
-      }
+      } else this.dataList = [];
     })
   }
 

@@ -10,34 +10,48 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { AA0315Item, AA0315Req, AA0315Resp } from 'src/app/models/api/ApiService/aa0315_v3.interface';
+import {
+  AA0315Item,
+  AA0315Req,
+  AA0315Resp,
+} from 'src/app/models/api/ApiService/aa0315_v3.interface';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { RegHostService } from 'src/app/shared/services/api-reg-host.service';
 import { AA0806Req } from 'src/app/models/api/RegHostService/aa0806.interface';
-import { AA0316Item, AA0316Req } from 'src/app/models/api/ApiService/aa0316_v3.interface';
+import {
+  AA0316Item,
+  AA0316Req,
+} from 'src/app/models/api/ApiService/aa0316_v3.interface';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { CommonAPI } from 'src/app/shared/register-api/common-api.class';
 import { KeyValueComponent } from 'src/app/shared/key-value/key-value.module';
-import { AA0301Item, AA0301Req } from 'src/app/models/api/ApiService/aa0301_v3.interfcae';
-import { AA0302Req, AA0302Resp } from 'src/app/models/api/ApiService/aa0302_v3.interface';
+import {
+  AA0301Item,
+  AA0301Req,
+} from 'src/app/models/api/ApiService/aa0301_v3.interfcae';
+import {
+  AA0302Req,
+  AA0302Resp,
+} from 'src/app/models/api/ApiService/aa0302_v3.interface';
 import { AA0311Req } from 'src/app/models/api/ApiService/aa0311_v3.interface';
-import { AA0312Req, AA0312Resp } from 'src/app/models/api/ApiService/aa0312_v3.interface';
+import {
+  AA0312Req,
+  AA0312Resp,
+} from 'src/app/models/api/ApiService/aa0312_v3.interface';
 import * as ValidatorFns from '../../../shared/validator-functions';
-import { Subscription } from 'rxjs';
+import { pairwise, startWith, Subscription } from 'rxjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { NotifyListComponent } from 'src/app/shared/notify-list/notify-list.component';
-
 
 @Component({
   selector: 'app-ac0311',
   templateUrl: './ac0311.component.html',
   styleUrls: ['./ac0311.component.css'],
-  providers: [ApiService, MessageService, ConfirmationService]
+  providers: [ApiService, MessageService, ConfirmationService],
 })
 export class Ac0311Component extends BaseComponent implements OnInit {
-
   @ViewChild('upload_file') upload_file!: ElementRef;
   @ViewChild('keyValueForm') kv_form!: KeyValueComponent;
   @ViewChild('keyValueRequest') kv_request!: KeyValueComponent;
@@ -47,26 +61,26 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   oasForm!: FormGroup;
   customForm!: FormGroup;
   testForm!: FormGroup;
-  openApiCols: { field: string; header: string; }[] = [];
+  openApiCols: { field: string; header: string }[] = [];
   openApiList: Array<AA0315Item> = [];
   openApiListRowcount: number = 0;
-  tabList: { label: string; value: string; }[] = [];
+  tabList: { label: string; value: string }[] = [];
   currentTabIdx: number = 0;
   openApiDocData?: AA0315Resp;
   regHostIdList: { label: string; value: string }[] = [];
   apiDataFormats: { label: string; value: string }[] = [];
-  jwtSettingFlags: { label: string; value: string; }[] = [];
+  jwtSettingFlags: { label: string; value: string }[] = [];
   rowDataIdx: number = 0;
   oasTab: boolean = true;
   customTab: boolean = false;
-  httpmethods: { label: string; value: string; }[] = [];
+  httpmethods: { label: string; value: string }[] = [];
   disabledReqBody: boolean = true;
-  apiListCols: { field: string; header: string; }[] = [];
+  apiListCols: { field: string; header: string }[] = [];
   apiForm!: FormGroup;
   apiList: Array<AA0301Item> = [];
   selectedApi?: AA0301Item;
   apiListRowcount: number = 0;
-  protocols: { label: string; value: string; }[] = [];
+  protocols: { label: string; value: string }[] = [];
   apiDetail?: AA0302Resp;
   testResult?: AA0312Resp;
   joinBtnFlag: boolean = true;
@@ -87,19 +101,19 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   apiTypeList: { label: string; value: string }[] = [
     {
       label: 'Http API',
-      value: 'HTTP_API'
+      value: 'HTTP_API',
     },
     {
       label: 'AI Gateway',
-      value: 'AI_GATEWAY'
+      value: 'AI_GATEWAY',
     },
     {
       label: 'Webhook',
-      value: 'WEBHOOK'
+      value: 'WEBHOOK',
     },
   ];
 
-  jwtSettingSub?:Subscription;
+  jwtSettingSub?: Subscription;
 
   constructor(
     route: ActivatedRoute,
@@ -115,7 +129,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     private serverService: ServerService,
     private confirmationService: ConfirmationService,
     private alertService: AlertService,
-      private dialogService: DialogService,
+    private dialogService: DialogService
   ) {
     super(route, tr);
     this.oasForm = this.fb.group({
@@ -159,8 +173,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       redirectByIpDataList: new FormControl([]),
       headerMaskPolicy: new FormControl(0), //; 0,1,2,3
       headerMaskPolicyNum: new FormControl(1), //; 1~9999
-      headerMaskPolicySymbol: new FormControl('*'),//;   1 ~10
-      headerMaskKey: new FormControl(''),//;  XXXX,XXXXXX,XXXXX
+      headerMaskPolicySymbol: new FormControl('*'), //;   1 ~10
+      headerMaskKey: new FormControl(''), //;  XXXX,XXXXXX,XXXXX
       // headerPolicy: new FormControl(0),
       // headerMaskCharNum: new FormControl(1),
       // headerMaskValue: new FormControl('*'),
@@ -168,8 +182,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       // maskBodyKeyword: new FormControl(''),
       bodyMaskPolicy: new FormControl(0), //; 0,1,2,3
       bodyMaskPolicyNum: new FormControl(1), //; 1~9999
-      bodyMaskPolicySymbol: new FormControl('*'),//;   1 ~10
-      bodyMaskKeyword: new FormControl(''),//;  XXXX,XXXXXX,XXXX
+      bodyMaskPolicySymbol: new FormControl('*'), //;   1 ~10
+      bodyMaskKeyword: new FormControl(''), //;  XXXX,XXXXXX,XXXX
       labelList: new FormControl([]),
       failDiscoveryPolicy: new FormControl('0'),
       failHandlePolicy: new FormControl('0'),
@@ -187,15 +201,18 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       requestBodyCheck: new FormControl(false),
       requestBody: new FormControl({ value: '', disabled: true }),
       bodyText: new FormControl(''),
-      keyValueForm: new FormControl({ value: '', disabled: true })
+      keyValueForm: new FormControl({ value: '', disabled: true }),
     });
     this.apiForm = this.fb.group({
-      keyword: new FormControl('')
+      keyword: new FormControl(''),
     });
 
-    this.labelList.valueChanges.subscribe(res => {
-      this.labelList.setValue(Array.isArray(res) ? res.map(item => item.toLowerCase()) : [], { emitEvent: false })
-    })
+    this.labelList.valueChanges.subscribe((res) => {
+      this.labelList.setValue(
+        Array.isArray(res) ? res.map((item) => item.toLowerCase()) : [],
+        { emitEvent: false }
+      );
+    });
 
     this.uploadDoc?.valueChanges.subscribe((res) => {
       this.showHostUrl = false;
@@ -209,38 +226,37 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.filename!.reset();
       }
     });
-
   }
 
   ngOnInit() {
-
     //mode
     let modeReq = {
       id: 'DGR_PATHS_COMPATIBILITY',
-    } as DPB9901Req
+    } as DPB9901Req;
 
-    this.serverService.queryTsmpSettingDetail(modeReq).subscribe(res => {
+    this.serverService.queryTsmpSettingDetail(modeReq).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.pathType = res.RespBody.value;
-        this.oasForm.get("type")?.setValue(this.pathType == '2' ? '1' : this.pathType)
-        this.customForm.get("type")?.setValue(this.pathType == '2' ? '1' : this.pathType)
-
+        this.oasForm
+          .get('type')
+          ?.setValue(this.pathType == '2' ? '1' : this.pathType);
+        this.customForm
+          .get('type')
+          ?.setValue(this.pathType == '2' ? '1' : this.pathType);
       }
-    })
-
-
-
+    });
 
     // http method
     this.httpmethods = CommonAPI.methods;
     // 匯入種類
     let ReqBody = {
-      encodeItemNo: this.tool.Base64Encoder(this.tool.BcryptEncoder('REG_SRC')) + ',' + 28,
-      isDefault: 'N'
+      encodeItemNo:
+        this.tool.Base64Encoder(this.tool.BcryptEncoder('REG_SRC')) + ',' + 28,
+      isDefault: 'N',
     } as DPB0047Req;
-    this.list.querySubItemsByItemNo(ReqBody).subscribe(res => {
+    this.list.querySubItemsByItemNo(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-        let _tabOpt: { label: string, value: string }[] = [];
+        let _tabOpt: { label: string; value: string }[] = [];
         if (res.RespBody.subItems) {
           for (let item of res.RespBody.subItems) {
             _tabOpt.push({ label: item.subitemName, value: item.subitemNo });
@@ -251,15 +267,21 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     });
     // 資料格式
     let dataFormatReqBody = {
-      encodeItemNo: this.tool.Base64Encoder(this.tool.BcryptEncoder('API_DATA_FORMAT')) + ',' + 30,
-      isDefault: 'N'
+      encodeItemNo:
+        this.tool.Base64Encoder(this.tool.BcryptEncoder('API_DATA_FORMAT')) +
+        ',' +
+        30,
+      isDefault: 'N',
     } as DPB0047Req;
-    this.list.querySubItemsByItemNo(dataFormatReqBody).subscribe(res => {
+    this.list.querySubItemsByItemNo(dataFormatReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-        let _apiDataFormats: { label: string, value: string }[] = [];
+        let _apiDataFormats: { label: string; value: string }[] = [];
         if (res.RespBody.subItems) {
-          res.RespBody.subItems.map(item => {
-            _apiDataFormats.push({ label: item.subitemName, value: item.subitemNo });
+          res.RespBody.subItems.map((item) => {
+            _apiDataFormats.push({
+              label: item.subitemName,
+              value: item.subitemNo,
+            });
           });
         }
         this.apiDataFormats = _apiDataFormats;
@@ -267,15 +289,21 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     });
     // JWT設定
     let jwtSettingReqBody = {
-      encodeItemNo: this.tool.Base64Encoder(this.tool.BcryptEncoder('API_JWT_FLAG')) + ',' + 31,
-      isDefault: 'N'
+      encodeItemNo:
+        this.tool.Base64Encoder(this.tool.BcryptEncoder('API_JWT_FLAG')) +
+        ',' +
+        31,
+      isDefault: 'N',
     } as DPB0047Req;
-    this.list.querySubItemsByItemNo(jwtSettingReqBody).subscribe(res => {
+    this.list.querySubItemsByItemNo(jwtSettingReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-        let _jwtSettings: { label: string, value: string }[] = [];
+        let _jwtSettings: { label: string; value: string }[] = [];
         if (res.RespBody.subItems) {
-          res.RespBody.subItems.map(item => {
-            _jwtSettings.push({ label: item.subitemName, value: item.subitemNo });
+          res.RespBody.subItems.map((item) => {
+            _jwtSettings.push({
+              label: item.subitemName,
+              value: item.subitemNo,
+            });
           });
         }
         this.jwtSettingFlags = _jwtSettings;
@@ -284,53 +312,49 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     // protocol
     this.protocols = [
       { label: 'https://', value: 'https' },
-      { label: 'http://', value: 'http' }
+      { label: 'http://', value: 'http' },
     ];
     // 註冊主機清單
     let hostReqBody = {
-      paging: 'false'
+      paging: 'false',
     } as AA0806Req;
-    this.regHostService.queryRegHostList_1_ignore1298(hostReqBody).subscribe(res => {
-      if (this.tool.checkDpSuccess(res.ResHeader)) {
-        let _hostList: { label: string, value: string }[] = [];
-        res.RespBody.hostInfoList.map(item => {
-          _hostList.push({ label: item.regHost, value: item.regHostID });
-        });
-        this.regHostIdList = _hostList;
-      }
-    });
-    this.c_moduleName!.valueChanges.subscribe(text => {
+    this.regHostService
+      .queryRegHostList_1_ignore1298(hostReqBody)
+      .subscribe((res) => {
+        if (this.tool.checkDpSuccess(res.ResHeader)) {
+          let _hostList: { label: string; value: string }[] = [];
+          res.RespBody.hostInfoList.map((item) => {
+            _hostList.push({ label: item.regHost, value: item.regHostID });
+          });
+          this.regHostIdList = _hostList;
+        }
+      });
+    this.c_moduleName!.valueChanges.subscribe((text) => {
       if (text) {
         if (this.c_apiId!.value) {
           this.c_tsmpUrl!.setValue(`/${text}/${this.c_apiId!.value}`);
-        }
-        else {
+        } else {
           this.c_tsmpUrl!.setValue(`/${text}`);
         }
-      }
-      else {
+      } else {
         if (this.c_apiId!.value) {
           this.c_tsmpUrl!.setValue(`/${this.c_apiId!.value}`);
-        }
-        else {
+        } else {
           this.c_tsmpUrl!.setValue('');
         }
       }
     });
-    this.c_apiId!.valueChanges.subscribe(text => {
+    this.c_apiId!.valueChanges.subscribe((text) => {
       if (text) {
         if (this.c_moduleName!.value) {
           this.c_tsmpUrl!.setValue(`/${this.c_moduleName!.value}/${text}`);
-        }
-        else {
+        } else {
           this.c_tsmpUrl!.setValue(`/${text}`);
         }
-      }
-      else {
+      } else {
         if (this.c_moduleName!.value) {
           this.c_tsmpUrl!.setValue(`/${this.c_moduleName!.value}`);
-        }
-        else {
+        } else {
           this.c_tsmpUrl!.setValue('');
         }
       }
@@ -339,44 +363,40 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.o_type.valueChanges.subscribe(() => {
       this.tarUrlSubscription.unsubscribe();
       this.openApiDocData = undefined;
-    })
+    });
 
     this.init();
 
-    this.headerMaskPolicyNum.valueChanges.subscribe(res => {
+    this.headerMaskPolicyNum.valueChanges.subscribe((res) => {
       if (Number(res) <= 0) {
-        this.headerMaskPolicyNum.setValue(1)
+        this.headerMaskPolicyNum.setValue(1);
+      } else if (Number(res) > 9999) {
+        this.headerMaskPolicyNum.setValue(9999);
       }
-      else if (Number(res) > 9999) {
-        this.headerMaskPolicyNum.setValue(9999)
-      }
-    })
+    });
 
-    this.bodyMaskPolicyNum.valueChanges.subscribe(res => {
+    this.bodyMaskPolicyNum.valueChanges.subscribe((res) => {
       if (Number(res) <= 0) {
-        this.bodyMaskPolicyNum.setValue(1)
+        this.bodyMaskPolicyNum.setValue(1);
+      } else if (Number(res) > 9999) {
+        this.bodyMaskPolicyNum.setValue(9999);
       }
-      else if (Number(res) > 9999) {
-        this.bodyMaskPolicyNum.setValue(9999)
-      }
-    })
+    });
 
-    this.requestHeader?.valueChanges.subscribe(res=>{
+    this.requestHeader?.valueChanges.subscribe((res) => {
       this.keyValueRequest!.reset();
-    })
+    });
 
-    this.requestBodyCheck?.valueChanges.subscribe(res=>{
+    this.requestBodyCheck?.valueChanges.subscribe((res) => {
       if (res) {
         this.requestBody!.enable();
-      }
-      else {
+      } else {
         this.requestBody!.setValue('none');
         this.requestBody!.disable();
       }
-    })
+    });
 
-    this.requestBody.valueChanges.subscribe(res=> {
-
+    this.requestBody.valueChanges.subscribe((res) => {
       this.bodyText!.disable();
       this.bodyText!.reset();
       this.keyValueForm!.disable();
@@ -394,83 +414,109 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         default:
           break;
       }
-    })
+    });
 
-    this.c_apiType.valueChanges.subscribe(res=> {
+    this.c_apiType.valueChanges.subscribe((res) => {
       this.clearCustomizePageData(false);
-      if(res=='WEBHOOK'){
-        this.srcUrl?.setValue('dgr+webhook##dgrv4/webhook')
-        this.srcUrl?.disable();
+      if (res == 'WEBHOOK') {
+        this.srcUrl?.setValue('dgr+webhook##dgrv4/webhook');
+        // this.srcUrl?.disable();
+      } else if (res == 'AI_GATEWAY') {
+        this.redirectByIp.setValue(false);
+        this.c_methods?.setValue(['POST']);
+        this.c_methods?.disable();
       }
-    })
+    });
 
+    this.c_type.valueChanges
+      .pipe(startWith(this.c_type.value), pairwise())
+      .subscribe(([prev, next]) => {
+        if (
+          ['0', '1'].includes(prev) &&
+          ['0', '1'].includes(next) &&
+          prev != next
+        ) {
+          this.clearCustomizePageData(false);
+        }
+      });
   }
 
   async init() {
-    const code = ['digirunner_url', 'http_method', 'src_complete_url', 'api_key', 'api_desc', 'api_name', 'module_name'];
+    const code = [
+      'digirunner_url',
+      'http_method',
+      'src_complete_url',
+      'api_key',
+      'api_desc',
+      'api_name',
+      'module_name',
+    ];
     const dict = await this.tool.getDict(code);
     this.openApiCols = [
       { field: 'rearPath', header: dict['digirunner_url'] },
       { field: 'methods', header: dict['http_method'] },
-      { field: 'srcUrl', header: dict['src_complete_url'] }
+      { field: 'srcUrl', header: dict['src_complete_url'] },
     ];
     // API清單的cols
     this.apiListCols = [
       { field: 'apiKey', header: dict['api_key'] },
       { field: 'moduleName', header: dict['module_name'] },
       { field: 'apiName', header: dict['api_name'] },
-      { field: 'apiDesc', header: dict['api_desc'] }
+      { field: 'apiDesc', header: dict['api_desc'] },
     ];
   }
 
   //根據所選模式調整欄位名稱跟內容
   async setOpenApiCols() {
-    const code = ['digirunner_url', 'http_method', 'src_complete_url', 'tar_complete_url'];
+    const code = [
+      'digirunner_url',
+      'http_method',
+      'src_complete_url',
+      'tar_complete_url',
+    ];
     const dict = await this.tool.getDict(code);
-    if (this.o_type.value == '0')  //tsmpc
-    {
+    if (this.o_type.value == '0') {
+      //tsmpc
       this.openApiCols = [
         { field: 'rearPath', header: dict['digirunner_url'] },
         { field: 'methods', header: dict['http_method'] },
-        { field: 'srcUrl', header: dict['src_complete_url'] }
+        { field: 'srcUrl', header: dict['src_complete_url'] },
       ];
-    }
-    else  //dgrc
-    {
+    } //dgrc
+    else {
       this.openApiCols = [
         { field: 'summary', header: 'Summary' },
         { field: 'methods', header: dict['http_method'] },
-        { field: 'srcUrl', header: dict['tar_complete_url'] }
+        { field: 'srcUrl', header: dict['tar_complete_url'] },
       ];
     }
   }
 
   async uploadClickHandler(uploadValue) {
     if (!uploadValue) return;
-    if (typeof uploadValue == 'object') { // 透過 .json、.yml
-      this.fileService.uploadFile2(uploadValue).subscribe(res => {
+    if (typeof uploadValue == 'object') {
+      // 透過 .json、.yml
+      this.fileService.uploadFile2(uploadValue).subscribe((res) => {
         if (this.tool.checkDpSuccess(res.ResHeader)) {
           this.getOpenApiDocData(res.RespBody.tempFileName);
           this.tempFileName!.setValue(res.RespBody.tempFileName);
         }
       });
-    }
-    else if (typeof uploadValue == 'string') { // 透過URL
+    } else if (typeof uploadValue == 'string') {
+      // 透過URL
       let docFileData = await this.getUploadFile(uploadValue);
-      this.fileService.uploadFile2(docFileData).subscribe(res => {
+      this.fileService.uploadFile2(docFileData).subscribe((res) => {
         if (this.tool.checkDpSuccess(res.ResHeader)) {
           this.getOpenApiDocData(res.RespBody.tempFileName);
           this.tempFileName!.setValue(res.RespBody.tempFileName);
         }
       });
-    }
-    else {
+    } else {
       return;
     }
   }
 
   getOpenApiDocData(tempFileName: string) {
-
     this.setOpenApiCols();
 
     // 清除資料
@@ -495,7 +541,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.ngxService.start();
     let ReqBody = {
       tempFileName: tempFileName,
-      type: this.o_type.value
+      type: this.o_type.value,
     } as AA0315Req;
 
     if (this.showHostUrl) {
@@ -504,7 +550,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
     const _this = this;
 
-    this.apiService.uploadOpenApiDoc_v3(ReqBody).subscribe(res => {
+    this.apiService.uploadOpenApiDoc_v3(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.showHostUrl = false;
         this.ngxService.stop();
@@ -517,15 +563,16 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.openApiList = res.RespBody.openApiList;
         this.openApiListRowcount = this.openApiList.length;
 
-
-        const tmpTargetUrl = this.o_type.value == '0' ? (this.openApiDocData.protocol + this.openApiDocData.host) : (this.openApiDocData.protocol + this.openApiDocData.host + this.openApiDocData.basePath);
+        const tmpTargetUrl =
+          this.o_type.value == '0'
+            ? this.openApiDocData.protocol + this.openApiDocData.host
+            : this.openApiDocData.protocol +
+              this.openApiDocData.host +
+              this.openApiDocData.basePath;
         this.o_tarUrl.setValue(tmpTargetUrl);
-
-
 
         // let checkDuplicates = [];
         this.openApiList.map((item, idx) => {
-
           // if (checkDuplicates.indexOf(item.rearPath) == -1) {
           //     checkDuplicates.push(item.rearPath)
           // }
@@ -534,89 +581,119 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           // }
           // 動態產生各個rowdata的jwe設定相關control name
           this.oasForm.addControl(`jwtSetting_${idx}`, new FormControl(false));
-          this.oasForm.addControl(`jweFlag_${idx}`, new FormControl({ value: '0', disabled: true }));
-          this.oasForm.addControl(`jweFlagResp_${idx}`, new FormControl({ value: '0', disabled: true }));
+          this.oasForm.addControl(
+            `jweFlag_${idx}`,
+            new FormControl({ value: '0', disabled: true })
+          );
+          this.oasForm.addControl(
+            `jweFlagResp_${idx}`,
+            new FormControl({ value: '0', disabled: true })
+          );
           // 動態產生各個rowdata的功能設定相關control name
           this.oasForm.addControl(`urlRID_${idx}`, new FormControl(false));
           this.oasForm.addControl(`noOAuth_${idx}`, new FormControl(false));
-          this.oasForm.addControl(`tokenPayload_${idx}`, new FormControl(false));
+          this.oasForm.addControl(
+            `tokenPayload_${idx}`,
+            new FormControl(false)
+          );
           // 動態產生各個rowdata的資料格式control name
           this.oasForm.addControl(`dataFormat_${idx}`, new FormControl(''));
           if (this.openApiDocData?.moduleSrc == '1') {
             this.oasForm.get(`dataFormat_${idx}`)!.setValue('0');
-          }
-          else {
+          } else {
             this.oasForm.get(`dataFormat_${idx}`)!.setValue('1');
           }
           // 動態產生各個rowdata的API說明control name
           this.oasForm.addControl(`apiDesc_${idx}`, new FormControl(''));
           // 動態產生各個rowdata的API ID control name
-          this.oasForm.addControl(`apiId_${idx}`, new FormControl(item.rearPath));
+          this.oasForm.addControl(
+            `apiId_${idx}`,
+            new FormControl(item.rearPath)
+          );
           if (this.o_type.value == '0') {
-            this.oasForm.get(`apiId_${idx}`)?.valueChanges.subscribe(res => {
+            this.oasForm.get(`apiId_${idx}`)?.valueChanges.subscribe((res) => {
               // console.log(item.rearPath)
               item.rearPath = res;
-
-            })
+            });
           }
           // 動態產生各個rowdata的API來源URLcontrol name
           if (this.o_type.value == '0') {
-            this.oasForm.addControl(`srcUrl_${idx}`, new FormControl(item.srcUrl));
-          }
-          else {
-            const compTarURl = this.o_tarUrl.value.charAt(this.o_tarUrl.value.length - 1) == '/' ? this.o_tarUrl.value.substr(0, this.o_tarUrl.value.length - 1) + item.path : this.o_tarUrl.value + item.path
-            this.oasForm.addControl(`srcUrl_${idx}`, new FormControl(compTarURl));
+            this.oasForm.addControl(
+              `srcUrl_${idx}`,
+              new FormControl(item.srcUrl)
+            );
+          } else {
+            const compTarURl =
+              this.o_tarUrl.value.charAt(this.o_tarUrl.value.length - 1) == '/'
+                ? this.o_tarUrl.value.substr(
+                    0,
+                    this.o_tarUrl.value.length - 1
+                  ) + item.path
+                : this.o_tarUrl.value + item.path;
+            this.oasForm.addControl(
+              `srcUrl_${idx}`,
+              new FormControl(compTarURl)
+            );
           }
 
-          this.oasForm.get(`srcUrl_${idx}`)?.valueChanges.subscribe(res => {
+          this.oasForm.get(`srcUrl_${idx}`)?.valueChanges.subscribe((res) => {
             item.srcUrl = res;
-          })
+          });
 
-          this.oasForm.addControl(`summary_${idx}`, new FormControl(item.summary));
+          this.oasForm.addControl(
+            `summary_${idx}`,
+            new FormControl(item.summary)
+          );
           if (this.o_type.value == '1') {
-            this.oasForm.get(`summary_${idx}`)?.valueChanges.subscribe(res => {
-              item.summary = res;
-            })
+            this.oasForm
+              .get(`summary_${idx}`)
+              ?.valueChanges.subscribe((res) => {
+                item.summary = res;
+              });
           }
 
-          if (this.o_type.value == '0' && (item.srcUrl.indexOf('{') > -1 || item.srcUrl.indexOf('}') > -1)) {
+          if (
+            this.o_type.value == '0' &&
+            (item.srcUrl.indexOf('{') > -1 || item.srcUrl.indexOf('}') > -1)
+          ) {
             item.duplicateFlag = true;
           }
         });
 
-
-
-
         this.tarUrlSubscription = this.o_tarUrl.valueChanges.subscribe(() => {
-          const formatTarUrl = this.o_type.value == '0' ? this.o_tarUrl.value + this.openApiDocData?.basePath : this.o_tarUrl.value
+          const formatTarUrl =
+            this.o_type.value == '0'
+              ? this.o_tarUrl.value + this.openApiDocData?.basePath
+              : this.o_tarUrl.value;
           this.openApiList.map((item, idx) => {
-            const compTarURl = formatTarUrl.charAt(formatTarUrl.length - 1) == '/' ? formatTarUrl.substr(0, formatTarUrl.length - 1) + item.path : formatTarUrl + item.path
+            const compTarURl =
+              formatTarUrl.charAt(formatTarUrl.length - 1) == '/'
+                ? formatTarUrl.substr(0, formatTarUrl.length - 1) + item.path
+                : formatTarUrl + item.path;
             this.oasForm.get(`srcUrl_${idx}`)?.setValue(compTarURl);
             item.srcUrl = compTarURl;
-          })
-        })
+          });
+        });
 
-
-        const _this = this
+        const _this = this;
         const multiList = this.openApiList.filter((item, index) => {
-          return _this.openApiList.some((multi, idx) => item.rearPath === multi.rearPath && idx !== index)
-        })
+          return _this.openApiList.some(
+            (multi, idx) => item.rearPath === multi.rearPath && idx !== index
+          );
+        });
 
-        multiList.forEach(item => {
-          item.duplicateFlag = true
-        })
+        multiList.forEach((item) => {
+          item.duplicateFlag = true;
+        });
 
-
-
-        this.apiService.registerAPIList_v3_before().subscribe(res => {
+        this.apiService.registerAPIList_v3_before().subscribe((res) => {
           if (this.tool.checkDpSuccess(res.ResHeader)) {
             this.addFormValidator(this.oasForm, res.RespBody.constraints);
           }
         });
         this.o_moduleName!.markAsTouched();
         if (this.o_type.value == '1') this.o_tarUrl.markAsTouched();
-      }
-      else {
+      } else {
         if (res.ResHeader.rtnCode == '1424') {
           this.showHostUrl = true;
         }
@@ -630,24 +707,26 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         //加工
         let filename = this.getFilename(url);
         let jsonse = JSON.stringify(data);
-        let blob = new Blob([jsonse], { type: "application/json" });
+        let blob = new Blob([jsonse], { type: 'application/json' });
         let file = new File([blob], filename);
         resolve(file);
-      })
-    })
+      });
+    });
   }
 
   getFilename(url) {
-    url = url.split('/').pop().replace(/\#(.*?)$/, '').replace(/\?(.*?)$/, '');
-    url = url.split('.');  // separates filename and extension
-    return url += '.json';
+    url = url
+      .split('/')
+      .pop()
+      .replace(/\#(.*?)$/, '')
+      .replace(/\?(.*?)$/, '');
+    url = url.split('.'); // separates filename and extension
+    return (url += '.json');
   }
 
   async registerOpenApi() {
-
-
     // this.ngxService.start();
-    const codes = ['message.reg_api', 'message.register', 'message.success']
+    const codes = ['message.reg_api', 'message.register', 'message.success'];
     const dict = await this.tool.getDict(codes);
     let ReqBody = {
       apiSrc: 'R',
@@ -657,7 +736,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       moduleVersion: this.openApiDocData!.moduleVersion,
       regHostId: this.o_regHostId!.value,
       type: this.openApiDocData?.type,
-      targetUrl: this.o_tarUrl.value
+      targetUrl: this.o_tarUrl.value,
     } as AA0316Req;
     let _regApiList = Array<AA0316Item>();
     this.openApiList.map((item, idx) => {
@@ -666,50 +745,79 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         methods: item.methods,
         srcUrl: this.oasForm.get(`srcUrl_${idx}`)!.value,
         apiId: this.oasForm.get(`apiId_${idx}`)!.value,
-        dataFormat: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.oasForm.get(`dataFormat_${idx}`)!.value)) + ',' + this.apiDataFormats.findIndex(item => item.value == this.oasForm.get(`dataFormat_${idx}`)!.value),
+        dataFormat:
+          this.tool.Base64Encoder(
+            this.tool.BcryptEncoder(
+              this.oasForm.get(`dataFormat_${idx}`)!.value
+            )
+          ) +
+          ',' +
+          this.apiDataFormats.findIndex(
+            (item) => item.value == this.oasForm.get(`dataFormat_${idx}`)!.value
+          ),
         apiDesc: this.oasForm.get(`apiDesc_${idx}`)!.value,
-        jweFlag: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.oasForm.get(`jweFlag_${idx}`)!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.oasForm.get(`jweFlag_${idx}`)!.value),
-        jweFlagResp: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.oasForm.get(`jweFlagResp_${idx}`)!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.oasForm.get(`jweFlagResp_${idx}`)!.value),
+        jweFlag:
+          this.tool.Base64Encoder(
+            this.tool.BcryptEncoder(this.oasForm.get(`jweFlag_${idx}`)!.value)
+          ) +
+          ',' +
+          this.jwtSettingFlags.findIndex(
+            (item) => item.value == this.oasForm.get(`jweFlag_${idx}`)!.value
+          ),
+        jweFlagResp:
+          this.tool.Base64Encoder(
+            this.tool.BcryptEncoder(
+              this.oasForm.get(`jweFlagResp_${idx}`)!.value
+            )
+          ) +
+          ',' +
+          this.jwtSettingFlags.findIndex(
+            (item) =>
+              item.value == this.oasForm.get(`jweFlagResp_${idx}`)!.value
+          ),
         urlRID: this.oasForm.get(`urlRID_${idx}`)!.value,
         noOAuth: this.oasForm.get(`noOAuth_${idx}`)!.value,
         funFlag: {
-          tokenPayload: this.oasForm.get(`tokenPayload_${idx}`)!.value
+          tokenPayload: this.oasForm.get(`tokenPayload_${idx}`)!.value,
         },
         consumes: item.consumes,
         produces: item.produces,
         headers: item.headers,
         params: item.params,
         moduleName: item.moduleName,
-        summary: item.summary
-      }
-      );
-
+        summary: item.summary,
+      });
     });
     ReqBody.regApiList = _regApiList;
     this.setDuplicateData();
 
     this.ngxService.start();
-    this.apiService.registerAPIList_v3(ReqBody).subscribe(res => {
+    this.apiService.registerAPIList_v3(ReqBody).subscribe((res) => {
       this.ngxService.stop();
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         // this.openApiDocData = Object.assign({}) as AA0315Resp;
-        this.messageService.add({ severity: 'success', summary: dict['message.reg_api'], detail: `${dict['message.register']} ${dict['message.success']}!` });
+        this.messageService.add({
+          severity: 'success',
+          summary: dict['message.reg_api'],
+          detail: `${dict['message.register']} ${dict['message.success']}!`,
+        });
       }
       this.ngxService.stop();
     });
-  };
+  }
 
   callUploadDialogHandler(evt) {
     this.upload_file.nativeElement.click();
   }
 
   fileChangeHandler(evt) {
-    const filename = this.uploadfile!.value ? (this.uploadfile!.value as File).name : '';
+    const filename = this.uploadfile!.value
+      ? (this.uploadfile!.value as File).name
+      : '';
     this.filename!.setValue(filename);
   }
 
   uploadDocChangeHandler(evt) {
-
     this.showHostUrl = false;
     if (this.uploadDoc!.value == '0') {
       this.filename!.enable();
@@ -743,14 +851,13 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     document.getElementById(`expanded_${idx}`)!.style.display = 'none';
   }
 
-  jwtSettingClick(evt,idx:number){
+  jwtSettingClick(evt, idx: number) {
     if (this.oasForm.get(`jwtSetting_${idx}`)!.value) {
-          this.oasForm.get(`jweFlag_${idx}`)!.enable();
-          this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
-          this.oasForm.get(`jweFlagResp_${idx}`)!.enable();
-          this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('1');
-    }
-    else {
+      this.oasForm.get(`jweFlag_${idx}`)!.enable();
+      this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
+      this.oasForm.get(`jweFlagResp_${idx}`)!.enable();
+      this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('1');
+    } else {
       this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
       this.oasForm.get(`jweFlag_${idx}`)!.disable();
       this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('0');
@@ -767,8 +874,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
           this.oasForm.get(`jweFlagResp_${idx}`)!.enable();
           this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('1');
-        }
-        else {
+        } else {
           this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
           this.oasForm.get(`jweFlag_${idx}`)!.disable();
           this.oasForm.get(`jweFlagResp_${idx}`)!.setValue('0');
@@ -781,8 +887,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           this.c_jweFlag!.setValue('0');
           this.c_jweFlagResp!.enable();
           this.c_jweFlagResp!.setValue('1');
-        }
-        else {
+        } else {
           this.c_jweFlag!.setValue('0');
           this.c_jweFlag!.disable();
           this.c_jweFlagResp!.setValue('0');
@@ -812,7 +917,10 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   jweFlagOnChange(evn, idx?: number) {
     switch (this.currentTabIdx) {
       case 0:
-        if (evn.value == '0' && this.oasForm.get(`jweFlagResp_${idx}`)!.value == '0') {
+        if (
+          evn.value == '0' &&
+          this.oasForm.get(`jweFlagResp_${idx}`)!.value == '0'
+        ) {
           this.oasForm.get(`jwtSetting_${idx}`)!.setValue(false);
           this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
           this.oasForm.get(`jweFlag_${idx}`)!.disable();
@@ -835,7 +943,10 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   jweFlagRespOnChange(evn, idx?: number) {
     switch (this.currentTabIdx) {
       case 0:
-        if (evn.value == '0' && this.oasForm.get(`jweFlag_${idx}`)!.value == '0') {
+        if (
+          evn.value == '0' &&
+          this.oasForm.get(`jweFlag_${idx}`)!.value == '0'
+        ) {
           this.oasForm.get(`jwtSetting_${idx}`)!.setValue(false);
           this.oasForm.get(`jweFlag_${idx}`)!.setValue('0');
           this.oasForm.get(`jweFlag_${idx}`)!.disable();
@@ -866,11 +977,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       header: ' ',
       message: dict['cfm_oas_setting'],
       accept: () => {
-        this.cloneAllSetting()
-      }
+        this.cloneAllSetting();
+      },
     });
-
-
   }
 
   cloneAllSetting() {
@@ -878,7 +987,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     // 當前JWT設定值
     let _jwtSetting = this.oasForm.get(`jwtSetting_${this.rowDataIdx}`)!.value;
     let _jweFlag = this.oasForm.get(`jweFlag_${this.rowDataIdx}`)!.value;
-    let _jweFlagResp = this.oasForm.get(`jweFlagResp_${this.rowDataIdx}`)!.value;
+    let _jweFlagResp = this.oasForm.get(
+      `jweFlagResp_${this.rowDataIdx}`
+    )!.value;
     // 當前資料格式值
     let _dataFormat = this.oasForm.get(`dataFormat_${this.rowDataIdx}`)!.value;
     // 當前API說明值
@@ -886,7 +997,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     // 當前功能設定值
     let _urlRID = this.oasForm.get(`urlRID_${this.rowDataIdx}`)!.value;
     let _noOAuth = this.oasForm.get(`noOAuth_${this.rowDataIdx}`)!.value;
-    let _tokenPayload = this.oasForm.get(`tokenPayload_${this.rowDataIdx}`)!.value;
+    let _tokenPayload = this.oasForm.get(
+      `tokenPayload_${this.rowDataIdx}`
+    )!.value;
     // 當前API ID
     let _apiId = this.oasForm.get(`apiId_${this.rowDataIdx}`)!.value;
     // 當前API來源URL
@@ -899,8 +1012,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       if (this.oasForm.get(`jwtSetting_${idx}`)!.value == true) {
         this.oasForm.get(`jweFlag_${idx}`)!.enable();
         this.oasForm.get(`jweFlagResp_${idx}`)!.enable();
-      }
-      else {
+      } else {
         this.oasForm.get(`jweFlag_${idx}`)!.disable();
         this.oasForm.get(`jweFlagResp_${idx}`)!.disable();
       }
@@ -916,7 +1028,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       this.oasForm.get(`apiId_${idx}`)!.setValue(_apiId);
       // 套用所有API來源URL
       this.oasForm.get(`srcUrl_${idx}`)!.setValue(_srcUrl);
-      this.openTableExpandByIndex(idx)
+      this.openTableExpandByIndex(idx);
     });
   }
 
@@ -993,9 +1105,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let ReqBody = {
       keyword: this.keyword!.value,
       apiSrc: ['R'],
-      paging: 'Y'
+      paging: 'Y',
     } as AA0301Req;
-    this.apiService.queryAPIList_v3(ReqBody).subscribe(res => {
+    this.apiService.queryAPIList_v3(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.apiList = res.RespBody.dataList;
         this.apiListRowcount = this.apiList.length;
@@ -1011,9 +1123,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       apiKey: _apiKey.t ? _apiKey.ori : _apiKey.val,
       keyword: this.keyword!.value,
       apiSrc: ['R'],
-      paging: 'Y'
+      paging: 'Y',
     } as AA0301Req;
-    this.apiService.queryAPIList_v3(ReqBody).subscribe(res => {
+    this.apiService.queryAPIList_v3(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.apiList = this.apiList.concat(res.RespBody.dataList);
         this.apiListRowcount = this.apiList.length;
@@ -1027,97 +1139,129 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let _moduleName = this.selectedApi!.moduleName;
     let _apiName = this.selectedApi!.apiName;
     let _apiKey = this.selectedApi!.apiKey;
-    this.apiAlias!.setValue(`${_moduleName.t ? _moduleName.ori : _moduleName.val}-${_apiName.t ? _apiName.ori : _apiName.val}(${_apiKey.t ? _apiKey.ori : _apiKey.val})`);
+    this.apiAlias!.setValue(
+      `${_moduleName.t ? _moduleName.ori : _moduleName.val}-${
+        _apiName.t ? _apiName.ori : _apiName.val
+      }(${_apiKey.t ? _apiKey.ori : _apiKey.val})`
+    );
   }
 
   // 複製API
   copyApiDetail() {
     this.apiDetail = {} as AA0302Resp;
-    this.clearCustomizePageData();
+
     let _moduleName = this.selectedApi!.moduleName;
     let _apiKey = this.selectedApi!.apiKey;
     let ReqBody = {
       moduleName: _moduleName.t ? _moduleName.ori : _moduleName.val,
-      apiKey: _apiKey.t ? _apiKey.ori : _apiKey.val
+      apiKey: _apiKey.t ? _apiKey.ori : _apiKey.val,
     } as AA0302Req;
-    this.apiService.queryAPIDetail_v3(ReqBody).subscribe(res => {
+    this.apiService.queryAPIDetail_v3(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.apiDetail = res.RespBody;
-        // console.log('0302 :', this.apiDetail)
-        // 設定API Detail資料
-        // if (res.RespBody.protocol) {
-        //   let _protocol = res.RespBody.protocol.split('://')[0];
-        //   this.protocol!.setValue(_protocol);
-        // }
-        // if (res.RespBody.srcUrl?.t) {
-        //   if (res.RespBody.srcUrl.o?.includes('://')) {
-        //     this.srcUrl!.setValue(res.RespBody.srcUrl.o.split('://')[1]);
-        //   }
-        //   else {
-        //     this.srcUrl!.setValue(res.RespBody.srcUrl.o);
-        //   }
-        // }
-        // else {
-        //   if (res.RespBody.srcUrl?.v.includes('://')) {
-        //     this.srcUrl!.setValue(res.RespBody.srcUrl.v.split('://')[1]);
-        //   }
-        //   else {
-        //     this.srcUrl!.setValue(res.RespBody.srcUrl?.v);
-        //   }
-        // }
-        this.srcUrl!.setValue(res.RespBody.srcUrl?.o ? res.RespBody.srcUrl?.o : res.RespBody.srcUrl?.v);
 
-        this.c_moduleName!.setValue(res.RespBody.moduleName.t ? res.RespBody.moduleName.o : res.RespBody.moduleName.v);
-        this.c_apiId!.setValue(res.RespBody.apiKey.t ? res.RespBody.apiKey.o : res.RespBody.apiKey.v);
-        this.c_tsmpUrl!.setValue(`/${this.c_moduleName!.value}/${this.c_apiId!.value}`);
+        // this.clearCustomizePageData();
+
+
+
+         const _srcURl = res.RespBody.srcUrl?.o
+          ? res.RespBody.srcUrl?.o
+          : res.RespBody.srcUrl?.v ?? '';
+
+        let isAiGateway = this.tool.checkSrcUrlisAiGateway(_srcURl);
+        let isWebhook = this.tool.checkSrcUrlisWebhook(_srcURl)
+        if(isAiGateway){
+          this.c_apiType.setValue('AI_GATEWAY')
+        }else if(isWebhook){
+          this.c_apiType.setValue('WEBHOOK');
+        }
+        else this.clearCustomizePageData();
+
+        this.srcUrl!.setValue(_srcURl);
+
+        this.c_moduleName!.setValue(
+          res.RespBody.moduleName.t
+            ? res.RespBody.moduleName.o
+            : res.RespBody.moduleName.v
+        );
+        this.c_apiId!.setValue(
+          res.RespBody.apiKey.t ? res.RespBody.apiKey.o : res.RespBody.apiKey.v
+        );
+        this.c_tsmpUrl!.setValue(
+          `/${this.c_moduleName!.value}/${this.c_apiId!.value}`
+        );
         this.c_urlRID!.setValue(res.RespBody.urlRID == '1' ? true : false);
         this.c_noOAuth!.setValue(res.RespBody.noOAuth == '1' ? true : false);
         this.c_tokenPayload!.setValue(res.RespBody.funFlag == 1 ? true : false);
-        let _methods = res.RespBody.methodOfJson!.toLocaleUpperCase().split(',');
+        let _methods =
+          res.RespBody.methodOfJson!.toLocaleUpperCase().split(',');
         this.c_methods!.setValue(_methods);
         this.c_dataFormat!.setValue(res.RespBody.dataFormat.v);
         this.c_jweFlag!.setValue(res.RespBody.jweFlag.v);
         this.c_jweFlagResp!.setValue(res.RespBody.jweFlagResp.v);
         // JWT設定開關
-        if ((this.c_jweFlag!.value == '0' || this.c_jweFlag!.value == null) && (this.c_jweFlagResp!.value == '0' || this.c_jweFlagResp!.value == null)) {
+        if (
+          (this.c_jweFlag!.value == '0' || this.c_jweFlag!.value == null) &&
+          (this.c_jweFlagResp!.value == '0' ||
+            this.c_jweFlagResp!.value == null)
+        ) {
           this.c_jwtSetting!.setValue(false);
-        }
-        else {
+        } else {
           this.c_jwtSetting!.setValue(true);
         }
         // Requset設定
-        if ((this.c_jweFlag!.value == '0' || this.c_jweFlag!.value == null) && (this.c_jweFlagResp!.value == '0' || this.c_jweFlagResp!.value == null)) {
+        if (
+          (this.c_jweFlag!.value == '0' || this.c_jweFlag!.value == null) &&
+          (this.c_jweFlagResp!.value == '0' ||
+            this.c_jweFlagResp!.value == null)
+        ) {
           this.c_jweFlag!.disable();
-        }
-        else {
+        } else {
           this.c_jweFlag!.enable();
         }
         // Response設定
-        if ((this.c_jweFlag!.value == '0' || this.c_jweFlag!.value == null) && (this.c_jweFlagResp!.value == '0' || this.c_jweFlagResp!.value == null)) {
+        if (
+          (this.c_jweFlag!.value == '0' || this.c_jweFlag!.value == null) &&
+          (this.c_jweFlagResp!.value == '0' ||
+            this.c_jweFlagResp!.value == null)
+        ) {
           this.c_jweFlagResp!.disable();
-        }
-        else {
+        } else {
           this.c_jweFlagResp!.enable();
         }
         // this.c_regHostId!.setValue(res.RespBody.regHostId);
         this.c_apiDesc!.setValue(res.RespBody.apiDesc);
 
         if (this.c_type.value == '1') {
-          this.c_apiName.setValue(res.RespBody.apiName.o ? res.RespBody.apiName.o : res.RespBody.apiName.v);
-          this.c_dgrPath.setValue(res.RespBody.apiKey.o ? res.RespBody.apiKey.o : res.RespBody.apiKey.v);
+          this.c_apiName.setValue(
+            res.RespBody.apiName.o
+              ? res.RespBody.apiName.o
+              : res.RespBody.apiName.v
+          );
+          this.c_dgrPath.setValue(
+            res.RespBody.apiKey.o
+              ? res.RespBody.apiKey.o
+              : res.RespBody.apiKey.v
+          );
         }
 
         this.redirectByIp.setValue(res.RespBody.isRedirectByIp);
-        this.redirectByIpDataList.setValue(res.RespBody.redirectByIpDataList ? res.RespBody.redirectByIpDataList.map(row => {
-          return {
-            ipForRedirect: row.ipForRedirect,
-            ipSrcUrl: row.ipSrcUrl.t ? row.ipSrcUrl.o : row.ipSrcUrl.v
-          };
-        }) : [])
-        this.headerMaskKey.setValue(res.RespBody.headerMaskKey)
+        this.redirectByIpDataList.setValue(
+          res.RespBody.redirectByIpDataList
+            ? res.RespBody.redirectByIpDataList.map((row) => {
+                return {
+                  ipForRedirect: row.ipForRedirect,
+                  ipSrcUrl: row.ipSrcUrl.t ? row.ipSrcUrl.o : row.ipSrcUrl.v,
+                };
+              })
+            : []
+        );
+        this.headerMaskKey.setValue(res.RespBody.headerMaskKey);
         this.headerMaskPolicy.setValue(res.RespBody.headerMaskPolicy);
         this.headerMaskPolicyNum.setValue(res.RespBody.headerMaskPolicyNum);
-        this.headerMaskPolicySymbol.setValue(res.RespBody.headerMaskPolicySymbol);
+        this.headerMaskPolicySymbol.setValue(
+          res.RespBody.headerMaskPolicySymbol
+        );
 
         this.bodyMaskKeyword.setValue(res.RespBody.bodyMaskKeyword);
         this.bodyMaskPolicy.setValue(res.RespBody.bodyMaskPolicy);
@@ -1125,6 +1269,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.bodyMaskPolicySymbol.setValue(res.RespBody.bodyMaskPolicySymbol);
 
         this.labelList.setValue(res.RespBody.labelList);
+
+
       }
     });
   }
@@ -1136,19 +1282,24 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       method: this.t_method!.value,
     } as AA0312Req;
     if (this.basicAuth!.value) {
-      let encoder = btoa(this.userName!.value + ':' + this.passwd!.value)
-      let headerAuth = [{
-        key: 'Authorization',
-        value: `Basic ${encoder}`
-      }];
+      let encoder = btoa(this.userName!.value + ':' + this.passwd!.value);
+      let headerAuth = [
+        {
+          key: 'Authorization',
+          value: `Basic ${encoder}`,
+        },
+      ];
       ReqBody.headerList = this.keyvalueConvetToList(headerAuth);
     }
     if (this.requestHeader!.value) {
       if (ReqBody.headerList && ReqBody.headerList.length > 0) {
-        ReqBody.headerList = ReqBody.headerList.concat(this.keyvalueConvetToList(this.keyValueRequest!.value));
-      }
-      else {
-        ReqBody.headerList = this.keyvalueConvetToList(this.keyValueRequest!.value);
+        ReqBody.headerList = ReqBody.headerList.concat(
+          this.keyvalueConvetToList(this.keyValueRequest!.value)
+        );
+      } else {
+        ReqBody.headerList = this.keyvalueConvetToList(
+          this.keyValueRequest!.value
+        );
       }
     }
     if (this.requestBodyCheck!.value) {
@@ -1157,12 +1308,14 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           ReqBody.bodyText = this.bodyText!.value;
           break;
         case 'form':
-          ReqBody.paramList = this.keyvalueConvetToList(this.keyValueForm!.value);
+          ReqBody.paramList = this.keyvalueConvetToList(
+            this.keyValueForm!.value
+          );
           break;
       }
     }
     // console.log('AA0312 Req :', ReqBody)
-    this.apiService.testAPI_v3(ReqBody).subscribe(res => {
+    this.apiService.testAPI_v3(ReqBody).subscribe((res) => {
       this.ngxService.stop();
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.testResult = res.RespBody;
@@ -1171,57 +1324,91 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     });
   }
 
-  keyvalueConvetToList(keyvalues: { key: string, value: string, selected?: boolean }[]) {
+  keyvalueConvetToList(
+    keyvalues: { key: string; value: string; selected?: boolean }[]
+  ) {
     let keyValueList: Array<object> = new Array<object>();
     if (keyvalues && keyvalues.length) {
-      (keyvalues.filter(item => {
-        return item.selected;
-      })).map(keyvalue => {
-        let obj = {};
-        obj[keyvalue.key] = keyvalue.value;
-        keyValueList.push(obj);
-      });
+      keyvalues
+        .filter((item) => {
+          return item.selected;
+        })
+        .map((keyvalue) => {
+          let obj = {};
+          obj[keyvalue.key] = keyvalue.value;
+          keyValueList.push(obj);
+        });
     }
     return keyValueList;
   }
 
   async registerCustomApi() {
 
-    // this.ngxService.start();
     let reqBody = {
       apiSrc: 'R',
       protocol: this.protocol!.value,
       srcUrl: this.srcUrl!.value,
-      moduleName: this.c_type.value == '0' ? this.c_moduleName!.value : this.c_dgrPath.value,
-      apiId: this.c_type.value == '0' ? this.c_apiId!.value : this.c_dgrPath.value,
+      moduleName:
+        this.c_type.value == '0'
+          ? this.c_moduleName!.value
+          : this.c_dgrPath.value,
+      apiId:
+        this.c_type.value == '0' ? this.c_apiId!.value : this.c_dgrPath.value,
       urlRID: this.c_type.value == '0' ? this.c_urlRID!.value : false,
       noOAuth: this.c_noOAuth!.value,
       funFlag: {
-        tokenPayload: this.c_tokenPayload!.value
+        tokenPayload: this.c_tokenPayload!.value,
       },
       methods: this.c_methods!.value,
-      dataFormat: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_dataFormat!.value)) + ',' + this.apiDataFormats.findIndex(item => item.value == this.c_dataFormat!.value),
+      dataFormat:
+        this.tool.Base64Encoder(
+          this.tool.BcryptEncoder(this.c_dataFormat!.value)
+        ) +
+        ',' +
+        this.apiDataFormats.findIndex(
+          (item) => item.value == this.c_dataFormat!.value
+        ),
       // regHostId: this.c_regHostId!.value,
-      jweFlag: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_jweFlag!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.c_jweFlag!.value),
-      jweFlagResp: this.tool.Base64Encoder(this.tool.BcryptEncoder(this.c_jweFlagResp!.value)) + ',' + this.jwtSettingFlags.findIndex(item => item.value == this.c_jweFlagResp!.value),
+      jweFlag:
+        this.tool.Base64Encoder(
+          this.tool.BcryptEncoder(this.c_jweFlag!.value)
+        ) +
+        ',' +
+        this.jwtSettingFlags.findIndex(
+          (item) => item.value == this.c_jweFlag!.value
+        ),
+      jweFlagResp:
+        this.tool.Base64Encoder(
+          this.tool.BcryptEncoder(this.c_jweFlagResp!.value)
+        ) +
+        ',' +
+        this.jwtSettingFlags.findIndex(
+          (item) => item.value == this.c_jweFlagResp!.value
+        ),
       apiDesc: this.c_apiDesc!.value,
       type: this.c_type.value,
     } as AA0311Req;
-
-
 
     if (this.c_type?.value == '1') {
       reqBody.apiName = this.c_apiName.value;
       reqBody.failDiscoveryPolicy = this.failDiscoveryPolicy.value;
       reqBody.failHandlePolicy = this.failHandlePolicy.value;
-      reqBody.notifyNameList = this.c_notifyNameList.value
+      reqBody.notifyNameList = this.c_notifyNameList.value;
     }
 
     if (this.apiDetail && JSON.stringify(this.apiDetail) != '{}') {
-      reqBody.consumes = this.apiDetail.consumesOfJson!.t ? JSON.parse(this.apiDetail.consumesOfJson?.o ?? '') : JSON.parse(this.apiDetail.consumesOfJson!.v);
-      reqBody.produces = this.apiDetail.producesOfJson!.t ? JSON.parse(this.apiDetail.producesOfJson?.o ?? '') : JSON.parse(this.apiDetail.producesOfJson!.v);
-      reqBody.headers = this.apiDetail.headersOfJson!.t ? JSON.parse(this.apiDetail.headersOfJson?.o ?? '') : JSON.parse(this.apiDetail.headersOfJson!.v);
-      reqBody.params = this.apiDetail.paramsOfJson!.t ? JSON.parse(this.apiDetail.paramsOfJson?.o ?? '') : JSON.parse(this.apiDetail.paramsOfJson!.v);
+      reqBody.consumes = this.apiDetail.consumesOfJson!.t
+        ? JSON.parse(this.apiDetail.consumesOfJson?.o ?? '')
+        : JSON.parse(this.apiDetail.consumesOfJson!.v);
+      reqBody.produces = this.apiDetail.producesOfJson!.t
+        ? JSON.parse(this.apiDetail.producesOfJson?.o ?? '')
+        : JSON.parse(this.apiDetail.producesOfJson!.v);
+      reqBody.headers = this.apiDetail.headersOfJson!.t
+        ? JSON.parse(this.apiDetail.headersOfJson?.o ?? '')
+        : JSON.parse(this.apiDetail.headersOfJson!.v);
+      reqBody.params = this.apiDetail.paramsOfJson!.t
+        ? JSON.parse(this.apiDetail.paramsOfJson?.o ?? '')
+        : JSON.parse(this.apiDetail.paramsOfJson!.v);
     }
     // console.log('AA0311 Req :', ReqBody)
 
@@ -1229,9 +1416,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     // console.log(this.redirectByIp.value)
     reqBody.redirectByIp = this.redirectByIp.value;
     if (reqBody.redirectByIp) {
-
       //檢核***
-      this.redirectByIpDataList.value.forEach(async item => {
+      this.redirectByIpDataList.value.forEach(async (item) => {
         // console.log(item)
         const code = ['sourceIpRequired', 'ipSrcUrlRequired'];
         const dict = await this.tool.getDict(code);
@@ -1243,7 +1429,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           this.alertService.ok(dict['ipSrcUrlRequired'], '');
           return;
         }
-      })
+      });
       reqBody.redirectByIpDataList = this.redirectByIpDataList.value;
     }
 
@@ -1251,7 +1437,6 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     if (reqBody.headerMaskPolicy != '0') {
       reqBody.headerMaskPolicyNum = this.headerMaskPolicyNum.value;
       reqBody.headerMaskPolicySymbol = this.headerMaskPolicySymbol.value;
-
 
       if (this.headerMaskKey.value.length == 0) {
         const code = ['mask.header_key_required'];
@@ -1271,11 +1456,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       //   });
       // }
 
-
-      reqBody.headerMaskKey = this.headerMaskKey.value;//.join(',');
-
+      reqBody.headerMaskKey = this.headerMaskKey.value; //.join(',');
     }
-
 
     reqBody.bodyMaskPolicy = this.bodyMaskPolicy.value;
     if (reqBody.bodyMaskPolicy != '0') {
@@ -1293,15 +1475,20 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
     reqBody.labelList = this.labelList.value;
 
-    // console.log(reqBody);
-
-
-    this.apiService.registerAPI_v3(reqBody).subscribe(async res => {
+    this.apiService.registerAPI_v3(reqBody).subscribe(async (res) => {
       this.ngxService.stop();
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-        const codes = ['message.reg_api', 'message.register', 'message.success'];
+        const codes = [
+          'message.reg_api',
+          'message.register',
+          'message.success',
+        ];
         const dict = await this.tool.getDict(codes);
-        this.messageService.add({ severity: 'success', summary: dict['message.reg_api'], detail: `${dict['message.register']} ${dict['message.success']}!` });
+        this.messageService.add({
+          severity: 'success',
+          summary: dict['message.reg_api'],
+          detail: `${dict['message.register']} ${dict['message.success']}!`,
+        });
         this.clearCustomizePageData();
       }
     });
@@ -1327,7 +1514,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.o_regApiList!.setValue([]);
         this.hostUrl!.setValue('');
 
-        this.o_type.setValue(this.pathType == '2' ? '1' : this.pathType)
+        this.o_type.setValue(this.pathType == '2' ? '1' : this.pathType);
 
         if (this.c_type_sub) this.c_type_sub.unsubscribe();
         break;
@@ -1340,11 +1527,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         // });
         this.setCustomizePageValidate();
 
-
-
         // this.c_type.valueChanges.subscribe(()=>{
-
-
 
         // if(this.c_type.value == '0')
         // {
@@ -1369,22 +1552,22 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     }
   }
   c_type_sub?: Subscription;
-  clearCustomizePageData(resetAll:boolean = true) {
+  clearCustomizePageData(resetAll: boolean = true) {
     // console.log('clear customize')
 
     let tmpType = this.c_type.value;
-    if(resetAll) this.customForm.reset(); //清除所有資料
 
-    if(this.jwtSettingSub) {
+    if (resetAll) this.customForm.reset(); //清除所有資料
+
+    if (this.jwtSettingSub) {
       this.jwtSettingSub.unsubscribe();
       this.jwtSettingSub = undefined;
     }
 
-
     this.redirectByIp.setValue(false);
 
-    this.c_type?.setValue(tmpType)
-
+    this.c_type?.setValue(tmpType);
+    if (resetAll) this.c_apiType.setValue('HTTP_API');
     this.protocol!.setValue('https');
     this.srcUrl!.setValue('');
     this.srcUrl!.enable();
@@ -1393,6 +1576,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.c_urlRID!.setValue(false);
     this.c_noOAuth!.setValue(false);
     this.c_tokenPayload!.setValue(false);
+    this.c_methods?.enable();
     this.c_methods!.setValue([]);
     this.c_dataFormat!.setValue('1');
     this.c_jwtSetting!.setValue(false);
@@ -1418,14 +1602,14 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.failHandlePolicy.setValue('0');
     this.labelList.setValue([]);
 
-    if(resetAll) this.c_apiType.setValue('HTTP_API');
+    // this.c_apiType.setValue(tmpApiType);
 
     if (!this.c_type_sub) {
-      this.c_type_sub = this.c_type.valueChanges.subscribe(res => {
+      this.c_type_sub = this.c_type.valueChanges.subscribe((res) => {
         if (res == '0') {
           this.redirectByIp.setValue(false);
         }
-      })
+      });
     }
     this.jwtSettingSub = this.c_jwtSetting?.valueChanges.subscribe((states) => {
       // console.log(states);
@@ -1441,16 +1625,12 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.c_jweFlagResp!.disable();
       }
     });
-
-
   }
 
-
   setCustomizePageValidate() {
-
     this.clearCustomizePageData();
 
-    this.apiService.registerAPI_v3_before().subscribe(res => {
+    this.apiService.registerAPI_v3_before().subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.addFormValidator(this.customForm, res.RespBody.constraints);
 
@@ -1472,7 +1652,6 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         // }
       }
     });
-
   }
 
   onRowSelect(evn) {
@@ -1489,7 +1668,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     switch (action) {
       case 'regist':
         // await this.setCustomizePageValidate();
-        this.apiService.registerAPI_v3_before().subscribe(res => {
+        this.apiService.registerAPI_v3_before().subscribe((res) => {
           if (this.tool.checkDpSuccess(res.ResHeader)) {
             this.addFormValidator(this.customForm, res.RespBody.constraints);
             // if(this.c_type.value == '0')
@@ -1512,7 +1691,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
             //   }
           }
         });
-        const filename = this.uploadfile!.value ? (this.uploadfile!.value as File).name : '';
+        const filename = this.uploadfile!.value
+          ? (this.uploadfile!.value as File).name
+          : '';
         this.filename!.setValue(filename);
         this.uploadfile!.setValue('');
         if (this.pageNum == 2) {
@@ -1536,12 +1717,11 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.customForm.updateValueAndValidity();
         break;
       case 'test_api':
-
         this.currentTitle = `${this.title} > ${dict['button.test_url']}`;
         this.pageNum = 2;
         this.testResult = {} as AA0312Resp;
         this.showResult = false;
-        this.apiService.testAPI_v3_before().subscribe(res => {
+        this.apiService.testAPI_v3_before().subscribe((res) => {
           if (this.tool.checkDpSuccess(res.ResHeader)) {
             this.addFormValidator(this.testForm, res.RespBody.constraints);
             switch (this.currentTabIdx) {
@@ -1551,7 +1731,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
                 break;
               case 1:
                 this.t_method!.setValue(this.c_methods!.value[0]);
-                this.t_testURL!.setValue(`${this.protocol!.value}://${this.srcUrl!.value}`);
+                this.t_testURL!.setValue(
+                  `${this.protocol!.value}://${this.srcUrl!.value}`
+                );
                 break;
             }
           }
@@ -1570,9 +1752,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         let ReqBody = {
           keyword: this.keyword!.value,
           apiSrc: ['R'],
-          paging: 'Y'
+          paging: 'Y',
         } as AA0301Req;
-        this.apiService.queryAPIList_v3_ignore1298(ReqBody).subscribe(res => {
+        this.apiService.queryAPIList_v3_ignore1298(ReqBody).subscribe((res) => {
           if (this.tool.checkDpSuccess(res.ResHeader)) {
             this.apiList = res.RespBody.dataList;
             this.apiListRowcount = this.apiList.length;
@@ -1583,25 +1765,29 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   chechDuplicateColor(rowData: AA0315Item) {
-    return rowData.duplicateFlag ? '#FCD8CA' : '#ffffff'
+    return rowData.duplicateFlag ? '#FCD8CA' : '#ffffff';
   }
 
   setDuplicateData() {
-    const _this = this
+    const _this = this;
     const multiList = this.openApiList.filter((item, index) => {
       delete item.duplicateFlag;
-      return _this.openApiList.some((multi, idx) => item.rearPath === multi.rearPath && idx !== index)
-    })
+      return _this.openApiList.some(
+        (multi, idx) => item.rearPath === multi.rearPath && idx !== index
+      );
+    });
 
-    multiList.forEach(item => {
-      item.duplicateFlag = true
-    })
+    multiList.forEach((item) => {
+      item.duplicateFlag = true;
+    });
     this.openApiList.map((item, idx) => {
-      if (this.o_type.value == '0' && (item.srcUrl.indexOf('{') > -1 || item.srcUrl.indexOf('}') > -1)) {
+      if (
+        this.o_type.value == '0' &&
+        (item.srcUrl.indexOf('{') > -1 || item.srcUrl.indexOf('}') > -1)
+      ) {
         item.duplicateFlag = true;
       }
-    })
-
+    });
   }
 
   headerReturn() {
@@ -1609,16 +1795,15 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   async testApiEvt(testApi) {
-    this.resetFormValidator(this.testForm)
+    this.resetFormValidator(this.testForm);
     // console.log(testApi)
     const code = ['button.test_url'];
     const dict = await this.tool.getDict(code);
 
     this.currentTitle = `${this.title} > ${dict['button.test_url']}`;
 
-    this.apiService.testAPI_v3_before().subscribe(res => {
+    this.apiService.testAPI_v3_before().subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-
         this.keyValueRequest?.disable();
         this.t_method!.setValue(this.c_methods!.value[0]);
         this.t_testURL!.setValue(testApi);
@@ -1635,19 +1820,24 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   switchOri(rowData: any) {
     if (rowData.t) {
       rowData.t = !rowData.t;
-    }
-    else rowData.t = true;
+    } else rowData.t = true;
   }
 
   checkheaderMaskPolicySymbol() {
-    if (this.headerMaskPolicySymbol.value == undefined || this.headerMaskPolicySymbol.value.trim() == '') {
-      this.headerMaskPolicySymbol.setValue('*')
+    if (
+      this.headerMaskPolicySymbol.value == undefined ||
+      this.headerMaskPolicySymbol.value.trim() == ''
+    ) {
+      this.headerMaskPolicySymbol.setValue('*');
     }
   }
 
   checkbodyMaskPolicySymbol() {
-    if (this.bodyMaskPolicySymbol.value == undefined || this.bodyMaskPolicySymbol.value.trim() == '') {
-      this.bodyMaskPolicySymbol.setValue('*')
+    if (
+      this.bodyMaskPolicySymbol.value == undefined ||
+      this.bodyMaskPolicySymbol.value.trim() == ''
+    ) {
+      this.bodyMaskPolicySymbol.setValue('*');
     }
   }
 
@@ -1658,86 +1848,202 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       this.alertService.ok(dict['validation.maxlength'], '');
       this.labelList.value.pop();
     }
-
   }
 
   queryNotifyNameList() {
-          const ref = this.dialogService.open(NotifyListComponent, {
-            header: 'Notify Name',
-            width: '700px',
-          });
+    const ref = this.dialogService.open(NotifyListComponent, {
+      header: 'Notify Name',
+      width: '700px',
+    });
 
-          ref.onClose.subscribe((res) => {
-            this.c_notifyNameList.setValue(res);
-          });
+    ref.onClose.subscribe((res) => {
+      if(res) this.c_notifyNameList.setValue(res);
+    });
   }
 
-  public get uploadDoc() { return this.oasForm.get('uploadDoc'); }
-  public get filename() { return this.oasForm.get('filename'); }
-  public get docUrl() { return this.oasForm.get('docUrl'); }
-  public get uploadfile() { return this.oasForm.get('uploadfile'); };
-  public get o_apiSrc() { return this.oasForm.get('apiSrc'); };
-  public get o_moduleSrc() { return this.oasForm.get('moduleSrc'); };
-  public get o_moduleName() { return this.oasForm.get('moduleName'); };
-  public get o_moduleVersion() { return this.oasForm.get('moduleVersion'); };
-  public get tempFileName() { return this.oasForm.get('tempFileName'); };
-  public get o_regHostId() { return this.oasForm.get('regHostId'); };
-  public get o_regApiList() { return this.oasForm.get('regApiList'); };
-  public get o_type() { return this.oasForm.get('type')!; };
-  public get o_tarUrl() { return this.oasForm.get('targetUrl')!; };
+  public get uploadDoc() {
+    return this.oasForm.get('uploadDoc');
+  }
+  public get filename() {
+    return this.oasForm.get('filename');
+  }
+  public get docUrl() {
+    return this.oasForm.get('docUrl');
+  }
+  public get uploadfile() {
+    return this.oasForm.get('uploadfile');
+  }
+  public get o_apiSrc() {
+    return this.oasForm.get('apiSrc');
+  }
+  public get o_moduleSrc() {
+    return this.oasForm.get('moduleSrc');
+  }
+  public get o_moduleName() {
+    return this.oasForm.get('moduleName');
+  }
+  public get o_moduleVersion() {
+    return this.oasForm.get('moduleVersion');
+  }
+  public get tempFileName() {
+    return this.oasForm.get('tempFileName');
+  }
+  public get o_regHostId() {
+    return this.oasForm.get('regHostId');
+  }
+  public get o_regApiList() {
+    return this.oasForm.get('regApiList');
+  }
+  public get o_type() {
+    return this.oasForm.get('type')!;
+  }
+  public get o_tarUrl() {
+    return this.oasForm.get('targetUrl')!;
+  }
 
-  public get t_method() { return this.testForm.get('method')!; };
-  public get t_testURL() { return this.testForm.get('testURL')!; };
-  public get userName() { return this.testForm.get('userName')!; };
-  public get passwd() { return this.testForm.get('passwd')!; };
-  public get requestHeader() { return this.testForm.get('requestHeader')!; };
-  public get keyValueRequest() { return this.testForm.get('keyValueRequest')!; };
-  public get requestBodyCheck() { return this.testForm.get('requestBodyCheck')!; };
-  public get requestBody() { return this.testForm.get('requestBody')!; };
-  public get bodyText() { return this.testForm.get('bodyText')!; };
-  public get keyValueForm() { return this.testForm.get('keyValueForm')!; };
-  public get basicAuth() { return this.testForm.get('basicAuth')!; };
-  public get keyword() { return this.apiForm.get('keyword'); };
-  public get apiAlias() { return this.customForm.get('apiAlias'); };
-  public get protocol() { return this.customForm.get('protocol'); };
-  public get srcUrl() { return this.customForm.get('srcUrl'); };
-  public get c_moduleName() { return this.customForm.get('moduleName'); };
-  public get c_apiId() { return this.customForm.get('apiId'); };
-  public get c_tsmpUrl() { return this.customForm.get('tsmpUrl'); };
-  public get c_urlRID() { return this.customForm.get('urlRID'); };
-  public get c_noOAuth() { return this.customForm.get('noOAuth'); };
-  public get c_tokenPayload() { return this.customForm.get('tokenPayload'); };
-  public get c_methods() { return this.customForm.get('methods'); };
-  public get c_dataFormat() { return this.customForm.get('dataFormat'); };
+  public get t_method() {
+    return this.testForm.get('method')!;
+  }
+  public get t_testURL() {
+    return this.testForm.get('testURL')!;
+  }
+  public get userName() {
+    return this.testForm.get('userName')!;
+  }
+  public get passwd() {
+    return this.testForm.get('passwd')!;
+  }
+  public get requestHeader() {
+    return this.testForm.get('requestHeader')!;
+  }
+  public get keyValueRequest() {
+    return this.testForm.get('keyValueRequest')!;
+  }
+  public get requestBodyCheck() {
+    return this.testForm.get('requestBodyCheck')!;
+  }
+  public get requestBody() {
+    return this.testForm.get('requestBody')!;
+  }
+  public get bodyText() {
+    return this.testForm.get('bodyText')!;
+  }
+  public get keyValueForm() {
+    return this.testForm.get('keyValueForm')!;
+  }
+  public get basicAuth() {
+    return this.testForm.get('basicAuth')!;
+  }
+  public get keyword() {
+    return this.apiForm.get('keyword');
+  }
+  public get apiAlias() {
+    return this.customForm.get('apiAlias');
+  }
+  public get protocol() {
+    return this.customForm.get('protocol');
+  }
+  public get srcUrl() {
+    return this.customForm.get('srcUrl');
+  }
+  public get c_moduleName() {
+    return this.customForm.get('moduleName');
+  }
+  public get c_apiId() {
+    return this.customForm.get('apiId');
+  }
+  public get c_tsmpUrl() {
+    return this.customForm.get('tsmpUrl');
+  }
+  public get c_urlRID() {
+    return this.customForm.get('urlRID');
+  }
+  public get c_noOAuth() {
+    return this.customForm.get('noOAuth');
+  }
+  public get c_tokenPayload() {
+    return this.customForm.get('tokenPayload');
+  }
+  public get c_methods() {
+    return this.customForm.get('methods');
+  }
+  public get c_dataFormat() {
+    return this.customForm.get('dataFormat');
+  }
   // public get c_regHostId() { return this.customForm.get('regHostId'); };
-  public get c_jwtSetting() { return this.customForm.get('jwtSetting'); };
-  public get c_jweFlag() { return this.customForm.get('jweFlag'); };
-  public get c_jweFlagResp() { return this.customForm.get('jweFlagResp'); };
-  public get c_apiDesc() { return this.customForm.get('apiDesc'); };
-  public get c_type() { return this.customForm.get('type')!; };
-  public get c_dgrPath() { return this.customForm.get('dgrPath')!; };
-  public get c_apiName() { return this.customForm.get('apiName')!; };
+  public get c_jwtSetting() {
+    return this.customForm.get('jwtSetting');
+  }
+  public get c_jweFlag() {
+    return this.customForm.get('jweFlag');
+  }
+  public get c_jweFlagResp() {
+    return this.customForm.get('jweFlagResp');
+  }
+  public get c_apiDesc() {
+    return this.customForm.get('apiDesc');
+  }
+  public get c_type() {
+    return this.customForm.get('type')!;
+  }
+  public get c_dgrPath() {
+    return this.customForm.get('dgrPath')!;
+  }
+  public get c_apiName() {
+    return this.customForm.get('apiName')!;
+  }
 
-  public get redirectByIp() { return this.customForm.get('redirectByIp')!; };
-  public get redirectByIpDataList() { return this.customForm.get('redirectByIpDataList')!; };
+  public get redirectByIp() {
+    return this.customForm.get('redirectByIp')!;
+  }
+  public get redirectByIpDataList() {
+    return this.customForm.get('redirectByIpDataList')!;
+  }
 
-  public get headerMaskPolicy() { return this.customForm.get('headerMaskPolicy')!; };
-  public get headerMaskPolicyNum() { return this.customForm.get('headerMaskPolicyNum')!; };
-  public get headerMaskPolicySymbol() { return this.customForm.get('headerMaskPolicySymbol')!; };
-  public get headerMaskKey() { return this.customForm.get('headerMaskKey')!; };
+  public get headerMaskPolicy() {
+    return this.customForm.get('headerMaskPolicy')!;
+  }
+  public get headerMaskPolicyNum() {
+    return this.customForm.get('headerMaskPolicyNum')!;
+  }
+  public get headerMaskPolicySymbol() {
+    return this.customForm.get('headerMaskPolicySymbol')!;
+  }
+  public get headerMaskKey() {
+    return this.customForm.get('headerMaskKey')!;
+  }
 
-  public get bodyMaskPolicy() { return this.customForm.get('bodyMaskPolicy')!; };
-  public get bodyMaskPolicyNum() { return this.customForm.get('bodyMaskPolicyNum')!; };
-  public get bodyMaskPolicySymbol() { return this.customForm.get('bodyMaskPolicySymbol')!; };
-  public get bodyMaskKeyword() { return this.customForm.get('bodyMaskKeyword')!; };
+  public get bodyMaskPolicy() {
+    return this.customForm.get('bodyMaskPolicy')!;
+  }
+  public get bodyMaskPolicyNum() {
+    return this.customForm.get('bodyMaskPolicyNum')!;
+  }
+  public get bodyMaskPolicySymbol() {
+    return this.customForm.get('bodyMaskPolicySymbol')!;
+  }
+  public get bodyMaskKeyword() {
+    return this.customForm.get('bodyMaskKeyword')!;
+  }
 
-  public get labelList() { return this.customForm.get('labelList')!; };
+  public get labelList() {
+    return this.customForm.get('labelList')!;
+  }
 
-  public get failDiscoveryPolicy() { return this.customForm.get('failDiscoveryPolicy')!; };
-  public get failHandlePolicy() { return this.customForm.get('failHandlePolicy')!; };
-  public get c_apiType() { return this.customForm.get('apiType')!; };
-  public get c_notifyNameList() { return this.customForm.get('notifyNameList')!; };
+  public get failDiscoveryPolicy() {
+    return this.customForm.get('failDiscoveryPolicy')!;
+  }
+  public get failHandlePolicy() {
+    return this.customForm.get('failHandlePolicy')!;
+  }
+  public get c_apiType() {
+    return this.customForm.get('apiType')!;
+  }
+  public get c_notifyNameList() {
+    return this.customForm.get('notifyNameList')!;
+  }
 
-
-  public get hostUrl() { return this.oasForm.get('hostUrl'); };
+  public get hostUrl() {
+    return this.oasForm.get('hostUrl');
+  }
 }

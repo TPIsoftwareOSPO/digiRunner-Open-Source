@@ -217,44 +217,98 @@ public class TsmpApiImp {
 
 	@Column(name = "disable_scheduled_date")
 	private Long disableScheduledDate = 0L; // DGR API 預定停用日期
+
+	@Column(name = "notify_Name_List")
+	private String notifyNameList;
+	
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Origin"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Origin"
+	 */
+	@Column(name = "IS_CORS_ALLOW_ORIGIN")
+	private String isCorsAllowOrigin = "N";
+
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Methods"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Methods"
+	 */
+	@Column(name = "IS_CORS_ALLOW_METHODS")
+	private String isCorsAllowMethods = "N";
+
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Headers"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Headers"
+	 */
+	@Column(name = "IS_CORS_ALLOW_HEADERS")
+	private String isCorsAllowHeaders = "N";
+
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Origin" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Origin" of the CORS Header
+	 */
+	@Column(name = "CORS_ALLOW_ORIGIN")
+	private String corsAllowOrigin;
+	
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Methods" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Methods" of the CORS Header
+	 */
+	@Column(name = "CORS_ALLOW_METHODS")
+	private String corsAllowMethods;
+
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Headers" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Headers" of the CORS Header
+	 */
+	@Column(name = "CORS_ALLOW_HEADERS")
+	private String corsAllowHeaders;
 	
 	/* constructors */
 	public TsmpApiImp() {}
 
-
 	@Override
 	public String toString() {
-		return "TsmpApiImp [apiKey=" + apiKey + ", moduleName=" + moduleName + ", recordType=" + recordType + ", batchNo=" + batchNo + ", filename="
-				+ filename + ", apiName=" + apiName + ", apiDesc=" + apiDesc + ", apiOwner=" + apiOwner + ", urlRid=" + urlRid + ", apiSrc=" + apiSrc
-				+ ", srcUrl=" + srcUrl + ", apiUuid=" + apiUuid + ", pathOfJson=" + pathOfJson + ", methodOfJson=" + methodOfJson + ", paramsOfJson="
-				+ paramsOfJson + ", headersOfJson=" + headersOfJson + ", consumesOfJson=" + consumesOfJson + ", producesOfJson=" + producesOfJson
-				+ ", flow=" + flow + ", createTime=" + createTime + ", createUser=" + createUser + ", checkAct=" + checkAct + ", result=" + result
-				+ ", memo=" + memo + ", noOauth=" + noOauth + ", jweFlag=" + jweFlag + ", jweFlagResp=" + jweFlagResp + ", funFlag=" + funFlag
-				+ ", mockStatusCode=" + mockStatusCode + ", mockHeaders=" + mockHeaders + ", mockBody=" + mockBody + ", redirectByIp=" + redirectByIp
-				+ ", ipForRedirect1=" + ipForRedirect1 + ", ipSrcUrl1=" + ipSrcUrl1 + ", ipForRedirect2=" + ipForRedirect2 + ", ipSrcUrl2="
-				+ ipSrcUrl2 + ", ipForRedirect3=" + ipForRedirect3 + ", ipSrcUrl3=" + ipSrcUrl3 + ", ipForRedirect4=" + ipForRedirect4
-				+ ", ipSrcUrl4=" + ipSrcUrl4 + ", ipForRedirect5=" + ipForRedirect5 + ", ipSrcUrl5=" + ipSrcUrl5 + ", bodyMaskKeyword="
-				+ bodyMaskKeyword + ", bodyMaskPolicy=" + bodyMaskPolicy + ", bodyMaskPolicyNum=" + bodyMaskPolicyNum + ", bodyMaskPolicySymbol="
-				+ bodyMaskPolicySymbol + ", headerMaskKey=" + headerMaskKey + ", headerMaskPolicy=" + headerMaskPolicy + ", headerMaskPolicyNum="
-				+ headerMaskPolicyNum + ", headerMaskPolicySymbol=" + headerMaskPolicySymbol + ", label1=" + label1 + ", label2=" + label2
-				+ ", label3=" + label3 + ", label4=" + label4 + ", label5=" + label5 + ", apiCacheFlag=" + apiCacheFlag + ", fixedCacheTime="
-				+ fixedCacheTime + ", failDiscoveryPolicy=" + failDiscoveryPolicy + ", failHandlePolicy=" + failHandlePolicy + ", apiStatus="
-				+ apiStatus + ", publicFlag=" + publicFlag + ", apiReleaseTime=" + apiReleaseTime + ", scheduledLaunchDate=" + scheduledLaunchDate
-				+ ", scheduledRemovalDate=" + scheduledRemovalDate + ", enableScheduledDate=" + enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate
-				+ "]";
+		return "TsmpApiImp [apiKey=" + apiKey + ", moduleName=" + moduleName + ", recordType=" + recordType
+				+ ", batchNo=" + batchNo + ", filename=" + filename + ", apiName=" + apiName + ", apiDesc=" + apiDesc
+				+ ", apiOwner=" + apiOwner + ", urlRid=" + urlRid + ", apiSrc=" + apiSrc + ", srcUrl=" + srcUrl
+				+ ", apiUuid=" + apiUuid + ", pathOfJson=" + pathOfJson + ", methodOfJson=" + methodOfJson
+				+ ", paramsOfJson=" + paramsOfJson + ", headersOfJson=" + headersOfJson + ", consumesOfJson="
+				+ consumesOfJson + ", producesOfJson=" + producesOfJson + ", flow=" + flow + ", createTime="
+				+ createTime + ", createUser=" + createUser + ", checkAct=" + checkAct + ", result=" + result
+				+ ", memo=" + memo + ", noOauth=" + noOauth + ", jweFlag=" + jweFlag + ", jweFlagResp=" + jweFlagResp
+				+ ", funFlag=" + funFlag + ", mockStatusCode=" + mockStatusCode + ", mockHeaders=" + mockHeaders
+				+ ", mockBody=" + mockBody + ", redirectByIp=" + redirectByIp + ", ipForRedirect1=" + ipForRedirect1
+				+ ", ipSrcUrl1=" + ipSrcUrl1 + ", ipForRedirect2=" + ipForRedirect2 + ", ipSrcUrl2=" + ipSrcUrl2
+				+ ", ipForRedirect3=" + ipForRedirect3 + ", ipSrcUrl3=" + ipSrcUrl3 + ", ipForRedirect4="
+				+ ipForRedirect4 + ", ipSrcUrl4=" + ipSrcUrl4 + ", ipForRedirect5=" + ipForRedirect5 + ", ipSrcUrl5="
+				+ ipSrcUrl5 + ", bodyMaskKeyword=" + bodyMaskKeyword + ", bodyMaskPolicy=" + bodyMaskPolicy
+				+ ", bodyMaskPolicyNum=" + bodyMaskPolicyNum + ", bodyMaskPolicySymbol=" + bodyMaskPolicySymbol
+				+ ", headerMaskKey=" + headerMaskKey + ", headerMaskPolicy=" + headerMaskPolicy
+				+ ", headerMaskPolicyNum=" + headerMaskPolicyNum + ", headerMaskPolicySymbol=" + headerMaskPolicySymbol
+				+ ", label1=" + label1 + ", label2=" + label2 + ", label3=" + label3 + ", label4=" + label4
+				+ ", label5=" + label5 + ", apiCacheFlag=" + apiCacheFlag + ", fixedCacheTime=" + fixedCacheTime
+				+ ", failDiscoveryPolicy=" + failDiscoveryPolicy + ", failHandlePolicy=" + failHandlePolicy
+				+ ", apiStatus=" + apiStatus + ", publicFlag=" + publicFlag + ", apiReleaseTime=" + apiReleaseTime
+				+ ", scheduledLaunchDate=" + scheduledLaunchDate + ", scheduledRemovalDate=" + scheduledRemovalDate
+				+ ", enableScheduledDate=" + enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate
+				+ ", isCorsAllowOrigin=" + isCorsAllowOrigin + ", isCorsAllowMethods=" + isCorsAllowMethods
+				+ ", isCorsAllowHeaders=" + isCorsAllowHeaders + ", corsAllowOrigin=" + corsAllowOrigin
+				+ ", corsAllowMethods=" + corsAllowMethods + ", corsAllowHeaders=" + corsAllowHeaders + "]";
 	}
-
-
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(apiCacheFlag, apiDesc, apiKey, apiName, apiOwner, apiSrc, apiStatus, apiUuid, batchNo, bodyMaskKeyword, bodyMaskPolicy,
-				bodyMaskPolicyNum, bodyMaskPolicySymbol, checkAct, consumesOfJson, createTime, createUser, failDiscoveryPolicy, failHandlePolicy,
-				filename, fixedCacheTime, flow, funFlag, headerMaskKey, headerMaskPolicy, headerMaskPolicyNum, headerMaskPolicySymbol, headersOfJson,
-				ipForRedirect1, ipForRedirect2, ipForRedirect3, ipForRedirect4, ipForRedirect5, ipSrcUrl1, ipSrcUrl2, ipSrcUrl3, ipSrcUrl4, ipSrcUrl5,
-				jweFlag, jweFlagResp, label1, label2, label3, label4, label5, memo, methodOfJson, mockBody, mockHeaders, mockStatusCode, moduleName,
-				noOauth, paramsOfJson, pathOfJson, producesOfJson, recordType, redirectByIp, result, srcUrl, urlRid, publicFlag, apiReleaseTime,
-				scheduledLaunchDate, scheduledRemovalDate, enableScheduledDate, disableScheduledDate);
+		return Objects.hash(apiCacheFlag, apiDesc, apiKey, apiName, apiOwner, apiReleaseTime, apiSrc, apiStatus,
+				apiUuid, batchNo, bodyMaskKeyword, bodyMaskPolicy, bodyMaskPolicyNum, bodyMaskPolicySymbol, checkAct,
+				consumesOfJson, corsAllowHeaders, corsAllowMethods, corsAllowOrigin, createTime, createUser,
+				disableScheduledDate, enableScheduledDate, failDiscoveryPolicy, failHandlePolicy, filename,
+				fixedCacheTime, flow, funFlag, headerMaskKey, headerMaskPolicy, headerMaskPolicyNum,
+				headerMaskPolicySymbol, headersOfJson, ipForRedirect1, ipForRedirect2, ipForRedirect3, ipForRedirect4,
+				ipForRedirect5, ipSrcUrl1, ipSrcUrl2, ipSrcUrl3, ipSrcUrl4, ipSrcUrl5, isCorsAllowHeaders,
+				isCorsAllowMethods, isCorsAllowOrigin, jweFlag, jweFlagResp, label1, label2, label3, label4, label5,
+				memo, methodOfJson, mockBody, mockHeaders, mockStatusCode, moduleName, noOauth, paramsOfJson,
+				pathOfJson, producesOfJson, publicFlag, recordType, redirectByIp, result, scheduledLaunchDate,
+				scheduledRemovalDate, srcUrl, urlRid);
 	}
 
 	@Override
@@ -266,34 +320,53 @@ public class TsmpApiImp {
 		if (getClass() != obj.getClass())
 			return false;
 		TsmpApiImp other = (TsmpApiImp) obj;
-		return Objects.equals(apiCacheFlag, other.apiCacheFlag) && Objects.equals(apiDesc, other.apiDesc) && Objects.equals(apiKey, other.apiKey)
-				&& Objects.equals(apiName, other.apiName) && Objects.equals(apiOwner, other.apiOwner) && Objects.equals(apiSrc, other.apiSrc)
-				&& Objects.equals(apiStatus, other.apiStatus) && Objects.equals(apiUuid, other.apiUuid) && Objects.equals(batchNo, other.batchNo)
-				&& Objects.equals(bodyMaskKeyword, other.bodyMaskKeyword) && Objects.equals(bodyMaskPolicy, other.bodyMaskPolicy)
-				&& Objects.equals(bodyMaskPolicyNum, other.bodyMaskPolicyNum) && Objects.equals(bodyMaskPolicySymbol, other.bodyMaskPolicySymbol)
+		return Objects.equals(apiCacheFlag, other.apiCacheFlag) && Objects.equals(apiDesc, other.apiDesc)
+				&& Objects.equals(apiKey, other.apiKey) && Objects.equals(apiName, other.apiName)
+				&& Objects.equals(apiOwner, other.apiOwner) && Objects.equals(apiReleaseTime, other.apiReleaseTime)
+				&& Objects.equals(apiSrc, other.apiSrc) && Objects.equals(apiStatus, other.apiStatus)
+				&& Objects.equals(apiUuid, other.apiUuid) && Objects.equals(batchNo, other.batchNo)
+				&& Objects.equals(bodyMaskKeyword, other.bodyMaskKeyword)
+				&& Objects.equals(bodyMaskPolicy, other.bodyMaskPolicy)
+				&& Objects.equals(bodyMaskPolicyNum, other.bodyMaskPolicyNum)
+				&& Objects.equals(bodyMaskPolicySymbol, other.bodyMaskPolicySymbol)
 				&& Objects.equals(checkAct, other.checkAct) && Objects.equals(consumesOfJson, other.consumesOfJson)
+				&& Objects.equals(corsAllowHeaders, other.corsAllowHeaders)
+				&& Objects.equals(corsAllowMethods, other.corsAllowMethods)
+				&& Objects.equals(corsAllowOrigin, other.corsAllowOrigin)
 				&& Objects.equals(createTime, other.createTime) && Objects.equals(createUser, other.createUser)
-				&& Objects.equals(failDiscoveryPolicy, other.failDiscoveryPolicy) && Objects.equals(failHandlePolicy, other.failHandlePolicy)
-				&& Objects.equals(filename, other.filename) && Objects.equals(fixedCacheTime, other.fixedCacheTime)
-				&& Objects.equals(flow, other.flow) && Objects.equals(funFlag, other.funFlag) && Objects.equals(headerMaskKey, other.headerMaskKey)
-				&& Objects.equals(headerMaskPolicy, other.headerMaskPolicy) && Objects.equals(headerMaskPolicyNum, other.headerMaskPolicyNum)
-				&& Objects.equals(headerMaskPolicySymbol, other.headerMaskPolicySymbol) && Objects.equals(headersOfJson, other.headersOfJson)
-				&& Objects.equals(ipForRedirect1, other.ipForRedirect1) && Objects.equals(ipForRedirect2, other.ipForRedirect2)
-				&& Objects.equals(ipForRedirect3, other.ipForRedirect3) && Objects.equals(ipForRedirect4, other.ipForRedirect4)
+				&& Objects.equals(disableScheduledDate, other.disableScheduledDate)
+				&& Objects.equals(enableScheduledDate, other.enableScheduledDate)
+				&& Objects.equals(failDiscoveryPolicy, other.failDiscoveryPolicy)
+				&& Objects.equals(failHandlePolicy, other.failHandlePolicy) && Objects.equals(filename, other.filename)
+				&& Objects.equals(fixedCacheTime, other.fixedCacheTime) && Objects.equals(flow, other.flow)
+				&& Objects.equals(funFlag, other.funFlag) && Objects.equals(headerMaskKey, other.headerMaskKey)
+				&& Objects.equals(headerMaskPolicy, other.headerMaskPolicy)
+				&& Objects.equals(headerMaskPolicyNum, other.headerMaskPolicyNum)
+				&& Objects.equals(headerMaskPolicySymbol, other.headerMaskPolicySymbol)
+				&& Objects.equals(headersOfJson, other.headersOfJson)
+				&& Objects.equals(ipForRedirect1, other.ipForRedirect1)
+				&& Objects.equals(ipForRedirect2, other.ipForRedirect2)
+				&& Objects.equals(ipForRedirect3, other.ipForRedirect3)
+				&& Objects.equals(ipForRedirect4, other.ipForRedirect4)
 				&& Objects.equals(ipForRedirect5, other.ipForRedirect5) && Objects.equals(ipSrcUrl1, other.ipSrcUrl1)
 				&& Objects.equals(ipSrcUrl2, other.ipSrcUrl2) && Objects.equals(ipSrcUrl3, other.ipSrcUrl3)
-				&& Objects.equals(ipSrcUrl4, other.ipSrcUrl4) && Objects.equals(ipSrcUrl5, other.ipSrcUrl5) && Objects.equals(jweFlag, other.jweFlag)
-				&& Objects.equals(jweFlagResp, other.jweFlagResp) && Objects.equals(label1, other.label1) && Objects.equals(label2, other.label2)
-				&& Objects.equals(label3, other.label3) && Objects.equals(label4, other.label4) && Objects.equals(label5, other.label5)
-				&& Objects.equals(memo, other.memo) && Objects.equals(methodOfJson, other.methodOfJson) && Objects.equals(mockBody, other.mockBody)
-				&& Objects.equals(mockHeaders, other.mockHeaders) && Objects.equals(mockStatusCode, other.mockStatusCode)
-				&& Objects.equals(moduleName, other.moduleName) && Objects.equals(noOauth, other.noOauth)
-				&& Objects.equals(paramsOfJson, other.paramsOfJson) && Objects.equals(pathOfJson, other.pathOfJson)
-				&& Objects.equals(producesOfJson, other.producesOfJson) && Objects.equals(recordType, other.recordType)
-				&& Objects.equals(redirectByIp, other.redirectByIp) && Objects.equals(result, other.result) && Objects.equals(srcUrl, other.srcUrl)
-				&& Objects.equals(urlRid, other.urlRid) && Objects.equals(publicFlag, other.publicFlag) && Objects.equals(apiReleaseTime, other.apiReleaseTime)
-				&& Objects.equals(scheduledLaunchDate, other.scheduledLaunchDate) && Objects.equals(scheduledRemovalDate, other.scheduledRemovalDate)
-				&& Objects.equals(enableScheduledDate, other.enableScheduledDate) && Objects.equals(disableScheduledDate, other.disableScheduledDate);
+				&& Objects.equals(ipSrcUrl4, other.ipSrcUrl4) && Objects.equals(ipSrcUrl5, other.ipSrcUrl5)
+				&& Objects.equals(isCorsAllowHeaders, other.isCorsAllowHeaders)
+				&& Objects.equals(isCorsAllowMethods, other.isCorsAllowMethods)
+				&& Objects.equals(isCorsAllowOrigin, other.isCorsAllowOrigin) && Objects.equals(jweFlag, other.jweFlag)
+				&& Objects.equals(jweFlagResp, other.jweFlagResp) && Objects.equals(label1, other.label1)
+				&& Objects.equals(label2, other.label2) && Objects.equals(label3, other.label3)
+				&& Objects.equals(label4, other.label4) && Objects.equals(label5, other.label5)
+				&& Objects.equals(memo, other.memo) && Objects.equals(methodOfJson, other.methodOfJson)
+				&& Objects.equals(mockBody, other.mockBody) && Objects.equals(mockHeaders, other.mockHeaders)
+				&& Objects.equals(mockStatusCode, other.mockStatusCode) && Objects.equals(moduleName, other.moduleName)
+				&& Objects.equals(noOauth, other.noOauth) && Objects.equals(paramsOfJson, other.paramsOfJson)
+				&& Objects.equals(pathOfJson, other.pathOfJson) && Objects.equals(producesOfJson, other.producesOfJson)
+				&& Objects.equals(publicFlag, other.publicFlag) && Objects.equals(recordType, other.recordType)
+				&& Objects.equals(redirectByIp, other.redirectByIp) && Objects.equals(result, other.result)
+				&& Objects.equals(scheduledLaunchDate, other.scheduledLaunchDate)
+				&& Objects.equals(scheduledRemovalDate, other.scheduledRemovalDate)
+				&& Objects.equals(srcUrl, other.srcUrl) && Objects.equals(urlRid, other.urlRid);
 	}
 
 	public String getApiKey() {
@@ -768,11 +841,9 @@ public class TsmpApiImp {
 		this.failHandlePolicy = failHandlePolicy;
 	}
 
-
 	public String getApiStatus() {
 		return apiStatus;
 	}
-
 
 	public void setApiStatus(String apiStatus) {
 		this.apiStatus = apiStatus;
@@ -799,38 +870,87 @@ public class TsmpApiImp {
 		return scheduledLaunchDate;
 	}
 
-
 	public void setScheduledLaunchDate(Long scheduledLaunchDate) {
 		this.scheduledLaunchDate = scheduledLaunchDate;
 	}
-
 
 	public Long getScheduledRemovalDate() {
 		return scheduledRemovalDate;
 	}
 
-
 	public void setScheduledRemovalDate(Long scheduledRemovalDate) {
 		this.scheduledRemovalDate = scheduledRemovalDate;
 	}
-
 
 	public Long getEnableScheduledDate() {
 		return enableScheduledDate;
 	}
 
-
 	public void setEnableScheduledDate(Long enableScheduledDate) {
 		this.enableScheduledDate = enableScheduledDate;
 	}
-
 
 	public Long getDisableScheduledDate() {
 		return disableScheduledDate;
 	}
 
-
 	public void setDisableScheduledDate(Long disableScheduledDate) {
 		this.disableScheduledDate = disableScheduledDate;
+	}
+
+    public String getNotifyNameList() {
+        return notifyNameList;
+    }
+
+    public void setNotifyNameList(String notifyNameList) {
+        this.notifyNameList = notifyNameList;
+    }
+	
+	public String getIsCorsAllowOrigin() {
+		return isCorsAllowOrigin;
+	}
+
+	public void setIsCorsAllowOrigin(String isCorsAllowOrigin) {
+		this.isCorsAllowOrigin = isCorsAllowOrigin;
+	}
+
+	public String getIsCorsAllowMethods() {
+		return isCorsAllowMethods;
+	}
+
+	public void setIsCorsAllowMethods(String isCorsAllowMethods) {
+		this.isCorsAllowMethods = isCorsAllowMethods;
+	}
+
+	public String getIsCorsAllowHeaders() {
+		return isCorsAllowHeaders;
+	}
+
+	public void setIsCorsAllowHeaders(String isCorsAllowHeaders) {
+		this.isCorsAllowHeaders = isCorsAllowHeaders;
+	}
+
+	public String getCorsAllowOrigin() {
+		return corsAllowOrigin;
+	}
+
+	public void setCorsAllowOrigin(String corsAllowOrigin) {
+		this.corsAllowOrigin = corsAllowOrigin;
+	}
+
+	public String getCorsAllowMethods() {
+		return corsAllowMethods;
+	}
+
+	public void setCorsAllowMethods(String corsAllowMethods) {
+		this.corsAllowMethods = corsAllowMethods;
+	}
+
+	public String getCorsAllowHeaders() {
+		return corsAllowHeaders;
+	}
+
+	public void setCorsAllowHeaders(String corsAllowHeaders) {
+		this.corsAllowHeaders = corsAllowHeaders;
 	}
 }

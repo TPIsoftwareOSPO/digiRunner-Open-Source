@@ -26,7 +26,8 @@ public class DGRCControllerPostRaw {
 	}
 
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
-	@RequestMapping(value = "/dgrc/**", 
+	@RequestMapping(value = "/dgrc/**",
+			consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE },
 			produces = MediaType.ALL_VALUE)
 	public CompletableFuture<ResponseEntity<?>> dispatch(HttpServletRequest httpReq,
 														 HttpServletResponse httpRes,

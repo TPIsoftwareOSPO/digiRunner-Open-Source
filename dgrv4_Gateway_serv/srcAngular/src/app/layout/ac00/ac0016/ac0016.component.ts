@@ -131,7 +131,7 @@ export class Ac0016Component extends BaseComponent implements OnInit {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         // console.log(res.RespBody.dataList)
         this.tableData = res.RespBody.dataList;
-      }
+      }else this.tableData = [];
     })
   }
 
@@ -370,7 +370,7 @@ export class Ac0016Component extends BaseComponent implements OnInit {
     this.orgService.queryTOrgList({}).subscribe(res => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.orgList = res.RespBody.orgList;
-      }
+      } else this.orgList = [];
     });
   }
 

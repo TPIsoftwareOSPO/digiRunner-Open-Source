@@ -1,3 +1,8 @@
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpResponse,
+} from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
@@ -16,6 +21,12 @@ import { DPB0231Req } from 'src/app/models/api/ServerService/dpb0231.interface';
 import { AlertType } from 'src/app/models/common.enum';
 import { DialogService } from 'primeng/dynamicdialog';
 import { SslDecoderComponent } from './ssl-decoder/ssl-decoder.component';
+import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
+import { ServerService } from 'src/app/shared/services/api-server.service';
+import { CertInfoComponent } from './cert-info/cert-info.component';
+import { environment } from 'src/environments/environment';
+import { catchError, map, of } from 'rxjs';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-np0205',
@@ -44,7 +55,9 @@ export class Np0205Component extends BaseComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private alertService: AlertService,
     private messageService: MessageService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private httpClient: HttpClient,
+    private ngxSrvice: NgxUiLoaderService
   ) {
     super(route, tr);
     this.form = this.fb.group({
@@ -224,9 +237,13 @@ export class Np0205Component extends BaseComponent implements OnInit {
           .subscribe((res) => {
             if (this.toolService.checkDpSuccess(res.ResHeader)) {
               // this.alertService.ok(
-                // `${dict['message.update']} ${dict['message.success']}`
+              // `${dict['message.update']} ${dict['message.success']}`
               // );
-              this.messageService.add({ severity: 'success', summary: `${dict['message.update']}`, detail: `${dict['message.update']} ${dict['message.success']}` });
+              this.messageService.add({
+                severity: 'success',
+                summary: `${dict['message.update']}`,
+                detail: `${dict['message.update']} ${dict['message.success']}`,
+              });
               this.querySiteList();
             }
           });
@@ -310,7 +327,7 @@ export class Np0205Component extends BaseComponent implements OnInit {
     this.clientCA.checkMtlsConnection(req).subscribe((res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         if (res.RespBody.success) {
-          console.log(res.RespBody.msg);
+          // console.log(res.RespBody.msg);
 
           this.alertService.ok(
             'Connect Success',
@@ -339,6 +356,53 @@ export class Np0205Component extends BaseComponent implements OnInit {
         });
       }
     });
+  }
+
+  showCertInfo() {
+    const mtlsMemoType =
+      this.toolService.getLocale() == 'ZH-TW' ? 'zh_tw' : 'en_us';
+    this.ngxSrvice.start();
+    this.httpClient
+      .get(`${environment.apiUrl}/dgrv4/${mtlsMemoType}/mtlsMemo.md`, {
+        responseType: 'text',
+        observe: 'response',
+        headers: {
+          digiRunner: 'mtls memo',
+        },
+      })
+      .pipe(
+        map((response: HttpResponse<string>) => {
+          const contentType = response.headers.get('Content-Type');
+
+          if (contentType && contentType.includes('text/html')) {
+            return null;
+          }
+
+          // 如果 Content-Type 正確，回傳 body 內容
+          return response.body || '';
+        }),
+        catchError((error) => {
+          // 雖然你的情況是 200，但保留 catchError 處理真正的網路錯誤或伺服器錯誤
+          console.error('An unexpected error occurred:', error);
+          return of('# 載入檔案時發生錯誤');
+        })
+      )
+      .subscribe(async (res) => {
+        // console.log(res);
+        if (res) {
+          const code = ['cert'];
+          const dict = await this.toolService.getDict(code);
+          const ref = this.dialogService.open(CertInfoComponent, {
+            data: { details: res },
+            header: dict['cert'],
+            width: '800px',
+            styleClass: 'cHeader cContent cIcon',
+          });
+        }else{
+          this.alertService.error('Error','File does not exist.');
+        }
+        this.ngxSrvice.stop();
+      });
   }
 
   public get host() {

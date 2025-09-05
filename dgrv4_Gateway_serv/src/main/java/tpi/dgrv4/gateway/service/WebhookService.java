@@ -92,6 +92,8 @@ public class WebhookService {
 	@Getter(AccessLevel.PROTECTED)
 	private MailHelper mailHelper;
 
+	private static final List<String> ignoreField = Arrays.asList("url", "percent");
+
 	public ResponseEntity<?> handleNotifications(HttpServletRequest httpReq, HttpServletResponse httpResp, HttpHeaders headers) {
 		String encClientId = headers.getFirst(DgrHeader.CLIENT_ID);
 		String notifyIds = headers.getFirst(DgrHeader.NOTIFY);
@@ -394,6 +396,7 @@ public class WebhookService {
 		        String rawDataStr = (rawData == null || rawData.toString().trim().isEmpty()) ? "{}" : rawData.toString();
 		        Map<String, Object> rawDataMap = om.readValue(rawDataStr, Map.class);
 		        rawDataMap.putAll(fieldMap);
+				ignoreField.forEach(rawDataMap::remove);
 		        String reqRawData = om.writeValueAsString(rawDataMap);		        
 		        log.setContent(reqRawData.toString());
 				resp = HttpUtil.httpReqByRawDataList(reqUrl, "POST", reqRawData.toString(), tranferOne2List(httpHeader), true, false, httpResp.getOutputStream());

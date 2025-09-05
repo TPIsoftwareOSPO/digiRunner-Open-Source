@@ -1,0 +1,91 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <div class="form-group row">
+      <div class="col-12">
+        <button pButton pRipple type="button" icon="fas fa-redo-alt"
+          class="p-button-rounded p-button-text p-button-plain tpi-primary float-end"
+          [pTooltip]="'button.refresh' | translate" (click)="listAIUsage()"
+          ></button>
+      </div>
+    </div>
+    <p-table [value]="tableData" styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}"
+      responsiveLayout="scroll" [customSort]="true" (sortFunction)="customSort($event)"
+      #dt >
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th>ID</th>
+          <th pSortableColumn="aiApikeyConsumerType">{{'ai.consumer_type'|translate}}
+            <p-sortIcon field="aiApikeyConsumerType"></p-sortIcon>
+          </th>
+          <th pSortableColumn="aiApikeyConsumerId">{{'ai.consumer_id'|translate}}
+            <p-sortIcon field="aiApikeyConsumerId"></p-sortIcon>
+          </th>
+          <th>{{'ai.api_key_code'|translate}}</th>
+          <th pSortableColumn="dgrAiPromptTemplate.aiPromptTemplateName">{{'ai.template_name'|translate}}
+            <p-sortIcon field="dgrAiPromptTemplate.aiPromptTemplateName"></p-sortIcon>
+          </th>
+          <th pSortableColumn="requstTs">{{'ai.request_timestamp'|translate}}
+             <p-sortIcon field="requstTs"></p-sortIcon>
+          </th>
+          <th pSortableColumn="inputTokenCount">{{'ai.api_input_token'|translate}}
+             <p-sortIcon field="inputTokenCount"></p-sortIcon>
+          </th>
+          <th pSortableColumn="outputTokenCount">{{'ai.api_output_token'|translate}}
+             <p-sortIcon field="outputTokenCount"></p-sortIcon>
+          </th>
+          <th pSortableColumn="createDateTime">{{'create_time'|translate}}
+             <p-sortIcon field="createDateTime"></p-sortIcon>
+          </th>
+          <!-- <th>{{'action'|translate}}</th> -->
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td>{{ rowData.id}}</td>
+          <td>{{ rowData.aiApikeyConsumerType}}</td>
+          <td>{{ rowData.aiApikeyConsumerId}}</td>
+          <td>{{ rowData.dgrAiApiKey?.aiApikeyCode}}</td>
+          <td>{{ rowData.dgrAiPromptTemplate?.aiPromptTemplateName}}</td>
+          <td>{{ rowData.requstTs}}</td>
+          <td>{{ rowData.inputTokenCount}}</td>
+          <td>{{ rowData.outputTokenCount}}</td>
+          <td >{{ formateDate(rowData.createDateTime)}}</td>
+          <!-- <td style="text-align:center;width: 120px">
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              (click)="changePage('detail', rowData)" [pTooltip]="'button.detail' | translate"
+              tooltipPosition="top"></button> -->
+
+          <!-- <button pButton pRipple type="button" icon="fa fa-edit" class="p-button-rounded p-button-text p-button-plain"
+            (click)="changePage('update', rowData)" [pTooltip]="'button.update' | translate"
+            tooltipPosition="top"></button>
+
+          <button pButton pRipple type="button" icon="fa fa-trash-alt"
+            class="p-button-rounded p-button-text p-button-plain" (click)="changePage('delete', rowData)"
+            [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button> -->
+          <!-- </td> -->
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length>0">
+          <td [attr.colspan]="9" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+
+            <!-- 查詢更多 -->
+            <button type="button" icon="" class="btn tpi-header-return" (click)="moreData()"
+              *ngIf=" tableData.length< totalElements ">
+              {{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="9">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</app-container>

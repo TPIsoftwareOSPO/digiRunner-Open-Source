@@ -46,7 +46,7 @@ public class SystemDefaultRjobInitializer {
 	public static final String JWE_TLS_CERT_EXP = "JWE/TLS Cert Exp"; // JWE/TLS憑證到期提醒
 	public static final String HOUSEKEEPING_SCHEDULE = "Housekeeping Schedule"; // Housekeeping排程
 	public static final String API_AUTO_LISTING_SCHEDULE = "API auto listing schedule"; // 自動上下架排程
-	public static final String API_AUTO_ENABLES_SCHEDULE = "API auto enables schedule"; // 自動上下架排程
+	public static final String API_AUTO_ENABLES_SCHEDULE = "API auto enables schedule"; // 自動啟用停用排程
 
 	/**
 	 * 把要註冊的 Rjob 加入 defaultRjobList
@@ -135,7 +135,7 @@ public class SystemDefaultRjobInitializer {
 						.sortBy(1) //
 						.build());
 
-		// [自動上下架排程]: 預設每一天的1點0分執行一次
+		// [自動啟用停用排程]: 預設每一天的1點0分執行一次
 		register( //
 				API_AUTO_ENABLES_SCHEDULE, "Default API auto enables schedule", //
 				new DPB0101CronBuilder() //

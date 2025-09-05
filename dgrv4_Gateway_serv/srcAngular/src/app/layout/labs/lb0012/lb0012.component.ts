@@ -163,6 +163,10 @@ export class Lb0012Component extends BaseComponent implements OnInit {
     }
   }
 
+  headerReturn() {
+    this.changePage('query');
+  }
+
   public get keyword() {
     return this.form.get('keyword')!;
   }

@@ -345,12 +345,20 @@ public class ESLogBuffer {
     
     public static int abortNum = 0;
 
-    public int bulkWrite(String esUrl, String bulkBody, Map<String, String> headers) throws IOException {
+    public int bulkWrite(String esUrl, String bulkBody, Map<String, String> headers, boolean checkStatusFromFile) throws IOException {
         String baseFileName = generateFileName();
         String logFileName = baseFileName + APPEND_SUFFIX;
         String configFileName = baseFileName + CONFIG_SUFFIX;
         String markerFileName = baseFileName + COMPLETE_SUFFIX; // 新增完成標記檔案
 
+        if (checkStatusFromFile == true) {
+        	// true , 表示 "PAUSE" 檔案已存在
+        	TPILogger.tl
+			.warn(String.format("DiskSpaceMonitor.checkStatusFromFile() is [%b]",
+					checkStatusFromFile));
+        	return 202;
+        }
+        
         systrace("\n開始寫入日誌檔案: " + logFileName );
         
         // 使用虛擬線程執行 I/O 操作

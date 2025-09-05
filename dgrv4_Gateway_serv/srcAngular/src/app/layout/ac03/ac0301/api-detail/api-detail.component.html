@@ -250,14 +250,14 @@
   </div>
   <div class="form-group row" *ngIf="isWebhook">
     <div class="col-12">
-      
 
-        <label id="headerMask_label" class="control-label border-bottom-line col-3">Notify Name List</label>
-      
+
+      <label id="headerMask_label" class="control-label border-bottom-line col-3">Notify Name List</label>
+
       <label class="form-control ">
         {{ apiDetail?.notifyNameList ?? "-" }}
       </label>
-    </div> 
+    </div>
   </div>
 
   <div class="form-group row" *ngIf="apiDetail?.apiSrc.v !=='C' ">
@@ -445,6 +445,51 @@
       <label class="control-label">{{ "api_desc" | translate }}</label>
       <textarea class="form-control" rows="5" style="resize: none" [innerHtml]="apiDetail.apiDesc" readonly
         autoResize="autoResize"></textarea>
+    </div>
+  </div>
+
+  <!-- CORS Header -->
+  <div class="form-group row">
+    <div class="col-12">
+      <label class="control-label">CORS Header</label>
+    </div>
+    <div class="col-12">
+      <div class="form-group d-flex align-items-center">
+        <p-checkbox [binary]="true" inputId="isCorsAllowOrigin" [trueValue]="'Y'" [falseValue]="'N'"
+            disabled [ngModel]="apiDetail.isCorsAllowOrigin" [ngModelOptions]="{standalone: true}">
+        </p-checkbox>
+        <label class="mb-0 mx-2  text-nowrap col-3" for="isCorsAllowOrigin">
+          Access-Control-Allow-Origin
+        </label>
+        <div class="col">
+          <input type="text" class="form-control col-auto" readonly [ngModel]="apiDetail.corsAllowOrigin"/>
+        </div>
+      </div>
+
+      <div class="form-group d-flex align-items-center">
+        <p-checkbox [binary]="true" inputId="isCorsAllowMethods" [trueValue]="'Y'" [falseValue]="'N'"
+        disabled [ngModel]="apiDetail.isCorsAllowMethods" [ngModelOptions]="{standalone: true}">
+        </p-checkbox>
+        <label class="mb-0 mx-2  text-nowrap col-3" for="isCorsAllowMethods">
+          Access-Control-Allow-Methods
+        </label>
+        <div class="col">
+          <input type="text" class="form-control col" readonly [ngModel]="apiDetail.corsAllowMethods" />
+        </div>
+      </div>
+
+      <div class="form-group d-flex align-items-center">
+        <p-checkbox [binary]="true" inputId="isCorsAllowHeaders" [trueValue]="'Y'" [falseValue]="'N'"
+        disabled [ngModel]="apiDetail.isCorsAllowHeaders" [ngModelOptions]="{standalone: true}">
+        </p-checkbox>
+        <label class="mb-0 mx-2  text-nowrap col-3" for="isCorsAllowHeaders">
+          Access-Control-Allow-Headers
+        </label>
+        <div class="col">
+          <input type="text" class="form-control col" readonly [ngModel]="apiDetail.corsAllowHeaders"/>
+        </div>
+
+      </div>
     </div>
   </div>
 

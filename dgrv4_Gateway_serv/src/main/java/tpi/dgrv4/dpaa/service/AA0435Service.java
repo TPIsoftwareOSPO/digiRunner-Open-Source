@@ -128,6 +128,11 @@ public class AA0435Service {
             TsmpApiId apiId = new TsmpApiId(reg.getApiKey(), reg.getModuleName());
             TsmpApi api = getTsmpApiDao().findById(apiId).orElse(null);
 
+            if (api == null || reg == null) {
+                String apiKey = api!= null ? api.getApiKey() : reg.getApiKey();
+                String moduleName = api!= null ? api.getModuleName() : reg.getModuleName();
+                throw TsmpDpAaRtnCode._1481.throwing(apiKey, moduleName);
+            }
             Map<String, Object> rowData = new LinkedHashMap<>();
 
             for (ExportField field : fields) {

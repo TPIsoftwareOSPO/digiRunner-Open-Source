@@ -1,31 +1,18 @@
 package tpi.dgrv4.gateway.service;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Supplier;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSAlgorithm;
+import jakarta.annotation.PreDestroy;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.apache.tomcat.util.buf.HexUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,33 +26,8 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JWSAlgorithm;
-
-import jakarta.annotation.PreDestroy;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import oshi.util.tuples.Pair;
-import tpi.dgrv4.codec.utils.Base64Util;
-import tpi.dgrv4.codec.utils.CApiKeyUtils;
-import tpi.dgrv4.codec.utils.ExpireKeyUtil;
-import tpi.dgrv4.codec.utils.HexStringUtils;
-import tpi.dgrv4.codec.utils.JWEcodec;
-import tpi.dgrv4.codec.utils.JWScodec;
-import tpi.dgrv4.codec.utils.MaskUtil;
-import tpi.dgrv4.codec.utils.PEMUtil;
-import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
-import tpi.dgrv4.codec.utils.RandomUtil;
-import tpi.dgrv4.codec.utils.SHA256Util;
+import tpi.dgrv4.codec.utils.*;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.ifs.TraceCodeUtilIfs;
@@ -73,16 +35,11 @@ import tpi.dgrv4.common.utils.CheckmarxCommUtils;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.dpaa.es.DiskSpaceMonitor;
 import tpi.dgrv4.dpaa.component.DgrProtocol;
+import tpi.dgrv4.dpaa.es.DiskSpaceMonitor;
 import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
-import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
-import tpi.dgrv4.entity.entity.TsmpApi;
-import tpi.dgrv4.entity.entity.TsmpApiId;
-import tpi.dgrv4.entity.entity.TsmpApiReg;
-import tpi.dgrv4.entity.entity.TsmpApiRegId;
-import tpi.dgrv4.entity.entity.TsmpClient;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientCert;
 import tpi.dgrv4.entity.entity.jpql.TsmpReqLog;
 import tpi.dgrv4.entity.entity.jpql.TsmpResLog;
@@ -104,58 +61,45 @@ import tpi.dgrv4.gateway.constant.DgrHeader;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
-import tpi.dgrv4.gateway.vo.FixedCacheVo;
-import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
-import tpi.dgrv4.gateway.vo.TWHeader;
-import tpi.dgrv4.gateway.vo.TWReqRespJwe;
-import tpi.dgrv4.gateway.vo.TWReqRespJweRecipients;
-import tpi.dgrv4.gateway.vo.TWReqRespJws;
-import tpi.dgrv4.gateway.vo.TWReqRespJwsSignatures;
-import tpi.dgrv4.gateway.vo.TWResponse;
-import tpi.dgrv4.gateway.vo.TWResponseBody;
-import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
-import tpi.dgrv4.gateway.vo.TsmpApiLogResp;
+import tpi.dgrv4.gateway.vo.*;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
 @Slf4j
 @Service
 public class CommForwardProcService {
-	
+
 	@Value("${cors.allow.headers}")
 	private String corsAllowHeaders;
 
 	public static Map<String, FixedCacheVo> fixedCacheMap = new HashMap<>();
-	
-	@Value("${server.ssl.enabled:false}")
-	private boolean sslEnabled;
 
-	@Value("${server.port:8080}")
-	private int serverPort;
-
-	private final Supplier<String> protocol = () -> sslEnabled ? "https" : "http";
-
-	public String parseUrl(String targetUrl) {
-
-		var dgrProto = DgrProtocol.parse(targetUrl);
-
-		if (dgrProto.valid()) {
-			return protocol.get() + "://localhost:" + serverPort + "/" + dgrProto.path();
-		}
-
-		return targetUrl;
-	}
-	
 	public static final String AUTHORIZATION = "authorization";
 	public static final String TOKENPAYLOAD = "tokenpayload";
 	public static final String BACKAUTH = "backauth";
+
 	
 	public static final String API_TYPE = "apiType";
-	
+
 	public static final String NOTIFY = "notify";
+
 	private static final String MODULE_NAME = "moduleName";
 
 	private static final List<String> MASK_TOKEN_LIST = new ArrayList<>();
@@ -167,40 +111,50 @@ public class CommForwardProcService {
 	}
 
 	private ExecutorService executor;
-	
-//	@Autowired(required = false)
+
+	// @Autowired(required = false)
 	private TraceCodeUtilIfs traceCodeUtil;
-	
+
 	private DgrcRoutingHelper dgrcRoutingHelper;
 	private OAuthTokenService oAuthTokenService;
-	
+
 	private TokenHelper tokenHelper;
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
 	private JobHelper jobHelper;
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
 	private ObjectMapper objectMapper;
+	
 	private TsmpSettingService tsmpSettingService;
+	
 	private TokenCheck tokenCheck;
+	
 	private TsmpReqLogDao tsmpReqLogDao;
+	
 	private TsmpResLogDao tsmpResLogDao;
 	private TsmpClientCacheProxy tsmpClientCacheProxy;
 	private TsmpClientCertCacheProxy tsmpClientCertCacheProxy;
+
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
+
 	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
 
 	public static class ClientPublicKeyData {
 		private ResponseEntity<?> errRespEntity;
 		private PublicKey clientPublicKey;
+
 		public ResponseEntity<?> getErrRespEntity() {
 			return errRespEntity;
 		}
+
 		public void setErrRespEntity(ResponseEntity<?> errRespEntity) {
 			this.errRespEntity = errRespEntity;
 		}
+
 		public PublicKey getClientPublicKey() {
 			return clientPublicKey;
 		}
+
 		public void setClientPublicKey(PublicKey clientPublicKey) {
 			this.clientPublicKey = clientPublicKey;
 		}
@@ -213,7 +167,8 @@ public class CommForwardProcService {
 			TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, ObjectMapper objectMapper,
 			TsmpSettingService tsmpSettingService, TokenCheck tokenCheck, TsmpReqLogDao tsmpReqLogDao,
 			TsmpResLogDao tsmpResLogDao, TsmpClientCacheProxy tsmpClientCacheProxy,
-			TsmpClientCertCacheProxy tsmpClientCertCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper, DgrWebhookApiMapDao dgrWebhookApiMapDao) {
+			TsmpClientCertCacheProxy tsmpClientCertCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper,
+			DgrWebhookApiMapDao dgrWebhookApiMapDao) {
 		this.executor = Executors.newCachedThreadPool(new CustomizableThreadFactory("CommForwardProcService"));
 		this.traceCodeUtil = traceCodeUtil;
 
@@ -254,14 +209,14 @@ public class CommForwardProcService {
 	// 產生公鑰失敗
 	public static final String FAILED_TO_GENERATE_PUBLIC_KEY = "Failed to generate public key, client_id: ";
 
-
 	/**
 	 *
 	 * @param httpReq
 	 * @return A: partContentTypes B: parameterMap
 	 * @throws ServletException IOException
 	 */
-	public Pair<Map<String, String>, Map<String, String[]>> fetchFormDataPartsInfo(HttpServletRequest httpReq) throws ServletException, IOException {
+	public Pair<Map<String, String>, Map<String, String[]>> fetchFormDataPartsInfo(HttpServletRequest httpReq)
+			throws ServletException, IOException {
 		Map<String, String> partContentTypes = new HashMap<>();
 		Map<String, String[]> parametermap = new HashMap<>();
 		for (Part part : httpReq.getParts()) {
@@ -273,7 +228,7 @@ public class CommForwardProcService {
 				textContent = new String(textContent.getBytes(charset), charset);
 			}
 
-			parametermap.put(part.getName(), new String[]{textContent});
+			parametermap.put(part.getName(), new String[] { textContent });
 
 		}
 		return new Pair<>(partContentTypes, parametermap);
@@ -297,7 +252,7 @@ public class CommForwardProcService {
 	 * 1.若 srcUrl 值不是 "b64." 開頭, 為 URL 明碼, 只有一筆, 即要打的 URL <br>
 	 * 2.若 srcUrl 值為 "b64." 開頭, 用 "." <br>
 	 * 切割, 得到 Array, 可能有多筆機率和URL <br>
-	 * 
+	 *
 	 * @param srcUrl
 	 * @param isThrowing 是否要丟出例外
 	 * @return
@@ -394,18 +349,19 @@ public class CommForwardProcService {
 			}
 			return null;
 		}
- 
+
 		return srcUrlDataList;
 	}
 
-	/** 
-	 * 取得要打的目標URL順序清單,依機率演算法排序 <br> 
-	 * 1.若只有一個，即為要打的URL <br> 
-	 * 2.若有多個，依URL的機率計算(機率演算法)，取得要打的URL順序清單 <br> 
+	/**
+	 * 取得要打的目標URL順序清單,依機率演算法排序 <br>
+	 * 1.若只有一個，即為要打的URL <br>
+	 * 2.若有多個，依URL的機率計算(機率演算法)，取得要打的URL順序清單 <br>
 	 */
 	public List<String> getSortSrcUrlListForLB(String srcUrl) {
 		boolean isThrowing = false;// 是否要丟出例外
-		LinkedList<String[]> dataList = (LinkedList<String[]>) getSrcUrlToTargetUrlAndProbabilityList(srcUrl, isThrowing);
+		LinkedList<String[]> dataList = (LinkedList<String[]>) getSrcUrlToTargetUrlAndProbabilityList(srcUrl,
+				isThrowing);
 		if (CollectionUtils.isEmpty(dataList)) {
 			return null;
 		}
@@ -427,11 +383,11 @@ public class CommForwardProcService {
 
 		return srcUrlList;
 	}
-	
+
 	/**
-	 * 取得最終要打的目標URL <br> 
-	 * 1.若只有一個，即為要打的URL; <br> 
-	 * 2.若有多個，必須依URL的機率計算(機率演算法)，取得最終要打的URL <br> 
+	 * 取得最終要打的目標URL <br>
+	 * 1.若只有一個，即為要打的URL; <br>
+	 * 2.若有多個，必須依URL的機率計算(機率演算法)，取得最終要打的URL <br>
 	 */
 	public String getSrcUrlForLB(String srcUrl) {
 		boolean isThrowing = false;// 是否要丟出例外
@@ -462,7 +418,7 @@ public class CommForwardProcService {
 			Optional<TsmpApiReg> tsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId);
 			if (tsmpApiReg.isPresent()) {
 				String UrlRid = tsmpApiReg.get().getUrlRid();
-                return "1".equals(UrlRid);
+				return "1".equals(UrlRid);
 			}
 
 		}
@@ -517,9 +473,10 @@ public class CommForwardProcService {
 		String noAuth = apiReg.getNoOauth();
 		httpReq.setAttribute(TokenHelper.CLIENT_ID, "");
 		httpReq.setAttribute(TokenHelper.NO_AUTH, noAuth);
-		//設定extension所需資料 1:AI Gateway 2:Webhook
+
+		// 設定extension所需資料 1:AI Gateway 2:Webhook
 		// Set the required data for the extension: 1: AI Gateway, 2: Webhook
-		if (!"Y".equals(apiReg.getRedirectByIp()))
+		if ("N".equalsIgnoreCase(apiReg.getRedirectByIp()))
 			setApiTypeAttribute(httpReq, apiReg);
 
 		if ("1".equals(noAuth)) {
@@ -530,7 +487,7 @@ public class CommForwardProcService {
 			// 驗證打 API 的 authorization 或 x-api-key
 			String auth = httpHeaders.getFirst(AUTHORIZATION);
 			String xApiKey = httpHeaders.getFirst("x-api-key");
-			
+
 			if (StringUtils.hasText(auth)) {
 				// 驗證打 API 的 "Authorization"
 				ResponseEntity<?> respEntity = getTokenHelper().verifyApiForAuth(auth, httpReq, payload);
@@ -544,7 +501,7 @@ public class CommForwardProcService {
 				if (respEntity != null) {// 資料驗證有錯誤
 					return respEntity;
 				}
-				
+
 			} else {
 				// 沒有傳入 "Authorization" 和 "x-api-key"
 				if (!StringUtils.hasText(auth) && !StringUtils.hasText(xApiKey)) {
@@ -574,6 +531,7 @@ public class CommForwardProcService {
 		takeTurnsSleeping(clientId, priority); // 依照 JobQueueSize 與 priority 的數值，決定是否暫停。
 		return null;
 	}
+
 	private void setApiTypeAttribute(HttpServletRequest httpReq, TsmpApiReg apiReg) {
 
 		var dgrProto = DgrProtocol.parse(apiReg.getSrcUrl());
@@ -587,12 +545,13 @@ public class CommForwardProcService {
 
 			if (extensions.contains(ApiTypeEnum.WEBHOOK.getDgrProtocolExtensionId())) {
 				httpReq.setAttribute(API_TYPE, ApiTypeEnum.WEBHOOK.name());
-				List<DgrWebhookApiMap> webhookList = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(apiReg.getApiKey(), apiReg.getModuleName());
+				List<DgrWebhookApiMap> webhookList = getDgrWebhookApiMapDao()
+						.findByApiKeyAndModuleName(apiReg.getApiKey(), apiReg.getModuleName());
 				StringBuffer notifyStr = new StringBuffer();
 				Optional.ofNullable(webhookList).ifPresent(lst -> {
-					for (DgrWebhookApiMap m : lst) {			    	
-				    	notifyStr.append(m.getWebhookNotifyId()+";");
-				    }
+					for (DgrWebhookApiMap m : lst) {
+						notifyStr.append(m.getWebhookNotifyId() + ";");
+					}
 				});
 				httpReq.setAttribute(NOTIFY, notifyStr.toString());
 			}
@@ -602,8 +561,8 @@ public class CommForwardProcService {
 	public void takeTurnsSleeping(String clientid, Integer priority) throws InterruptedException {
 
 //		initProability_50_50();
-		//String sleepStrFlag = ProbabilityAlgUtils.getProbabilityAns(probMap5050);
-				
+		// String sleepStrFlag = ProbabilityAlgUtils.getProbabilityAns(probMap5050);
+
 		int jobQueueSizeThreshold = 300;
 		// 0:high / 5:default / 9:low
 		// 在 JobQueueSize > 300 的時候，中優先度與低優先度的請求皆停止100毫秒。
@@ -619,10 +578,10 @@ public class CommForwardProcService {
 			Thread.sleep(100);
 		}
 	}
-	
-	//機率表轉換為 Map, 執行緒安全的初始化 (高併發優化版)
+
+	// 機率表轉換為 Map, 執行緒安全的初始化 (高併發優化版)
 //	private static final Map<Integer, String> probMap5050 = initProability_50_50_v2();
-	
+
 //	private static Map<Integer, String> initProability_50_50_v2() {
 //	    Map<Integer, String> map = new HashMap<>(100);
 //	    for (int i = 0; i < 50; i++) {
@@ -634,42 +593,41 @@ public class CommForwardProcService {
 //	    return Collections.unmodifiableMap(map);
 //	}
 
-
 	public Map<String, List<String>> getConvertHeader(HttpServletRequest httpReq, HttpHeaders httpHeaders,
 			int tokenPayloadFlag, Boolean cApiKeySwitch, String uuid, String srcUrl) throws Exception {
 		List<String> compAddrs = getTsmpSettingService().getVal_TSMP_COMPOSER_ADDRESS();
 		String addr = srcUrl;
 
-		/* 
+		/*
 		 * 1. Composer API, 則 Header 要加上 "capi-key"
 		 * 若目標路徑有 TSMP_COMPOSER_ADDRESS 的值, 例如: https://10.20.30.88:18440,
 		 * dgrc --> Backend(Composer),
 		 * 則傳送 capi-key
 		 */
-		for (String a : compAddrs) { 
+		for (String a : compAddrs) {
 			if (addr.contains(a)) {
 				cApiKeySwitch = true;
 				break;
 			}
 		}
-		
+
 		/*
-		 * 2. 註冊的客製包 API, 則 Header 要加上 "capi-key" (expireCApiKey)
-		 * 若目標路徑有 "/dgrv4/cus/",
-		 * CURL --> dgrc --> Backend(/dgrv4/cus/**),
-		 * 則傳送 capi-key(expireCApiKey) + Authorization(當勾選no auth,如實傳送字串),
-		 * 例如: SCB 集團打 dgrc, 轉導到註冊的客製包 OneCert API 時,
+		 * 2. 註冊的客製包 API, 則 Header 要加上 "capi-key" (expireCApiKey) 若目標路徑有 "/dgrv4/cus/",
+		 * CURL --> dgrc --> Backend(/dgrv4/cus/**), 則傳送 capi-key(expireCApiKey) +
+		 * Authorization(當勾選no auth,如實傳送字串), 例如: SCB 集團打 dgrc, 轉導到註冊的客製包 OneCert API 時,
 		 */
 		boolean expireCApiKeySwitch = false;
 		if (srcUrl.contains("/dgrv4/cus/")) {
 			expireCApiKeySwitch = true;
 		}
-		
+
 		return getConvertHeader(httpReq, httpHeaders, tokenPayloadFlag, cApiKeySwitch, uuid, expireCApiKeySwitch);
 	}
 
 	/**
 	 * 處理 tokenpayload & backAuth 機制
+	 * 
+	 * @throws Exception
 	 */
 	public Map<String, List<String>> getConvertHeader(HttpServletRequest httpReq, HttpHeaders httpHeaders,
 			int tokenPayloadFlag, Boolean cApiKeySwitch, String uuid, boolean expireCApiKeySwitch) throws Exception {
@@ -691,7 +649,8 @@ public class CommForwardProcService {
 
 			var headerValueList = httpHeaders.get(key);
 
-			if (headerValueList == null) continue;
+			if (headerValueList == null)
+				continue;
 
 			if ("id-token".equalsIgnoreCase(key)) {
 				isIdToken = true;
@@ -723,7 +682,8 @@ public class CommForwardProcService {
 
 		// 2.dgR 要轉發出去的 "authorization"的值, 依 No Auth 是否勾選來自以下順序:
 		// 有勾選時,優先順序(大到小): "backAuth" -> "authorization"
-		// 沒有勾選時,優先順序(大到小): "id-token" -> "backAuth" -> (當"backAuth"="true"時) "authorization"
+		// 沒有勾選時,優先順序(大到小): "id-token" -> "backAuth" -> (當"backAuth"="true"時)
+		// "authorization"
 		if ("1".equals(noAuth)) {// 有勾選 No Auth
 			// 若 header 中有 "authorization", 將值放入或取代
 			if (isOrigAuth) {
@@ -739,7 +699,7 @@ public class CommForwardProcService {
 			// 若 header 中有 "backAuth", 將值放入或取代
 			if (isBackAuth) {
 				if ("true".equalsIgnoreCase(backAuthValueList.get(0)) && isOrigAuth) {
-					// 若 "backAuth" 的值為 "true", 原來的 "authorization" 會往後帶			
+					// 若 "backAuth" 的值為 "true", 原來的 "authorization" 會往後帶
 					headers.put(AUTHORIZATION, origAuthValueList);
 				} else {
 					headers.put(AUTHORIZATION, backAuthValueList);
@@ -768,7 +728,8 @@ public class CommForwardProcService {
 			String jws = ExpireKeyUtil.getExpireKey_60sec();
 			headers.put("capi-key", Arrays.asList(jws));
 		}
-		//處理 API extension的header
+
+		// 處理 API extension的header
 		// Process the API extension header
 		String apiType = (String) httpReq.getAttribute(API_TYPE);
 
@@ -784,11 +745,13 @@ public class CommForwardProcService {
 						Optional.ofNullable(httpReq.getAttribute(NOTIFY)).ifPresent(notify -> {
 							headers.put(DgrHeader.NOTIFY, List.of(notify.toString()));
 						});
-				case ApiTypeEnum.AI_GATEWAY ->
+				case ApiTypeEnum.AI_GATEWAY -> {
 						Optional.ofNullable(httpReq.getAttribute(TokenHelper.USER_NAME)).ifPresent(username -> {
 							var encUserName = getTsmpTAEASKHelper().encrypt(username.toString());
 							headers.put(DgrHeader.USER_NAME, List.of(encUserName));
 						});
+						headers.put(DgrHeader.ORIGIN_AUTHORIZATION, httpHeaders.get(AUTHORIZATION));
+				}
 			}
 		}
 
@@ -814,21 +777,21 @@ public class CommForwardProcService {
 		return "";
 	}
 
-	public HttpServletResponse getConvertResponse(HttpRespData respObj, HttpServletResponse httpRes) {
+	public HttpServletResponse getConvertResponse(HttpRespData respObj, HttpServletResponse httpRes, TsmpApiReg tsmpApiReg) {
 		// 此方法有更改,也要修改getConvertResponse(Map<String, List<String>> respHeader, int
 		// status, HttpServletResponse httpRes)
-		if(respObj.respHeader == null) {
+		if (respObj.respHeader == null) {
 			return httpRes;
 		}
 		httpRes.setStatus(respObj.statusCode);
 		respObj.respHeader.remove("Transfer-Encoding"); // 它不能回傳
 		respObj.respHeader.remove("Content-Length"); // 需自動計算
-		//大寫
+		// 大寫
 		respObj.respHeader.remove("Access-Control-Allow-Origin"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respObj.respHeader.remove("Access-Control-Allow-Headers"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respObj.respHeader.remove("Access-Control-Allow-Methods"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 
-		//小寫
+		// 小寫
 		respObj.respHeader.remove("access-control-allow-origin"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respObj.respHeader.remove("access-control-allow-headers"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respObj.respHeader.remove("access-control-allow-methods"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
@@ -848,11 +811,15 @@ public class CommForwardProcService {
 		 */
 		String dgrCspVal = getTsmpSettingService().getVal_DGR_CSP_VAL();// 例如: "*" 或 "https://10.20.30.88:18442
 																		// https://10.20.30.88:28442"
+		
+		// CORS 的值
+		String corsAllowOriginVal = getCorsAllowOrigin(tsmpApiReg);
+		String corsAllowHeadersVal = getCorsAllowHeaders(tsmpApiReg);
+		String corsAllowMethodsVal = getCorsAllowMethods(tsmpApiReg);
 
-		httpRes.setHeader("Access-Control-Allow-Origin", getTsmpSettingService().getVal_DGR_CORS_VAL()); // 從 TsmpSetting 取值，動態回傳。
-		//httpRes.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, SignCode, Language"); // CORS
-		httpRes.setHeader("Access-Control-Allow-Headers", corsAllowHeaders); //"3. corsAllowHeaders = " + corsAllowHeaders
-		httpRes.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,PATCH,DELETE"); // CORS
+		httpRes.setHeader("Access-Control-Allow-Origin", corsAllowOriginVal); // 從 TsmpSetting 或 API 註冊取值，動態回傳
+		httpRes.setHeader("Access-Control-Allow-Headers", corsAllowHeadersVal); //"3. corsAllowHeaders = " + corsAllowHeaders
+		httpRes.setHeader("Access-Control-Allow-Methods", corsAllowMethodsVal); // CORS
 		if (StringUtils.hasText(dgrCspVal) && !"*".equals(dgrCspVal.trim()))
 			httpRes.setHeader("Content-Security-Policy", dgrCspVal);
 		httpRes.setHeader("X-Frame-Options", "sameorigin");
@@ -860,51 +827,51 @@ public class CommForwardProcService {
 		httpRes.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 		httpRes.setHeader("Cache-Control", "no-cache");
 		httpRes.setHeader("Pragma", "no-cache");
-		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
-        
+		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
 		// in the phase don't do this, then next phase will do copy RESPONSE header
-//		respObj.respHeader.forEach((k, vs)->{
-//			vs.forEach((v)->{
-//				httpRes.addHeader(k, v);
-//			});
-//		});
+		// respObj.respHeader.forEach((k, vs)->{
+		// vs.forEach((v)->{
+		// httpRes.addHeader(k, v);
+		// });
+		// });
 
-		return httpRes;
+		return getConvertResponse(Collections.emptyMap(), respObj.statusCode, httpRes, tsmpApiReg);
 	}
 
 	public HttpServletResponse getConvertResponse(Map<String, List<String>> respHeader, int status,
-			HttpServletResponse httpRes) {
-//		{
-//			System.out.println(TPILogInfo.getLineNumber2());
-//			List<String> headerName = httpRes.getHeaderNames().stream().collect(Collectors.toList());
-//			for (String k : headerName) {
-//				Collection<String> valueList = httpRes.getHeaders(k);
-//				String value = this.convertAuth(k, valueList.toString());
-//				System.out.println("\tKey: " + k + ", Value: " + value);
-//			}
-//		}
+			HttpServletResponse httpRes, TsmpApiReg tsmpApiReg) {
+		// {
+		// System.out.println(TPILogInfo.getLineNumber2());
+		// List<String> headerName =
+		// httpRes.getHeaderNames().stream().collect(Collectors.toList());
+		// for (String k : headerName) {
+		// Collection<String> valueList = httpRes.getHeaders(k);
+		// String value = this.convertAuth(k, valueList.toString());
+		// System.out.println("\tKey: " + k + ", Value: " + value);
+		// }
+		// }
 
 		// 清空 retry 之前的 header
 		try {
-			httpRes.reset(); //code, headers
+			httpRes.reset(); // code, headers
 		} catch (Exception e) {
 			TPILogger.tl.warn("Response already commited HTTP code : " + httpRes.getStatus());
 			if (httpRes.getStatus() != 200) {
-				TPILogger.tl.warn(httpRes.getStatus() +", is commited:" + httpRes.isCommitted() + "|" + StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.warn(httpRes.getStatus() + ", is commited:" + httpRes.isCommitted() + "|"
+						+ StackTraceUtil.logStackTrace(e));
 			}
 			return null;
 		}
 
-
 		httpRes.setStatus(status);
 		respHeader.remove("Transfer-Encoding"); // 它不能回傳
 		respHeader.remove("Content-Length"); // 需自動計算
-		//大寫
+		// 大寫
 		respHeader.remove("Access-Control-Allow-Origin"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respHeader.remove("Access-Control-Allow-Headers"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respHeader.remove("Access-Control-Allow-Methods"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
-		//小寫
+		// 小寫
 		respHeader.remove("access-control-allow-origin"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respHeader.remove("access-control-allow-headers"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
 		respHeader.remove("access-control-allow-methods"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
@@ -923,13 +890,16 @@ public class CommForwardProcService {
 		 * "default-src * 'self' 'unsafe-inline'; img-src https://* 'self' data:;"
 		 */
 		String dgrCspVal = getTsmpSettingService().getVal_DGR_CSP_VAL();// 例如: "*" 或 "https://10.20.30.88:18442
-																		// https://10.20.30.88:28442"
+		// https://10.20.30.88:28442"
 
-		httpRes.setHeader("Access-Control-Allow-Origin", getTsmpSettingService().getVal_DGR_CORS_VAL()); // 從 TsmpSetting 取值，動態回傳。
-		//httpRes.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, SignCode, Language"); // CORS
-		httpRes.setHeader("Access-Control-Allow-Headers", corsAllowHeaders); //"4. corsAllowHeaders = " + corsAllowHeaders
-
-		httpRes.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,PATCH,DELETE"); // CORS
+		// CORS 的值
+		String corsAllowOriginVal = getCorsAllowOrigin(tsmpApiReg);
+		String corsAllowHeadersVal = getCorsAllowHeaders(tsmpApiReg);
+		String corsAllowMethodsVal = getCorsAllowMethods(tsmpApiReg);
+		
+		httpRes.setHeader("Access-Control-Allow-Origin", corsAllowOriginVal); // 從 TsmpSetting 或由 API 註冊取值，動態回傳
+		httpRes.setHeader("Access-Control-Allow-Headers", corsAllowHeadersVal); //"4. corsAllowHeaders = " + corsAllowHeaders
+		httpRes.setHeader("Access-Control-Allow-Methods", corsAllowMethodsVal); // CORS
 
 		if (StringUtils.hasText(dgrCspVal) && !"*".equals(dgrCspVal.trim()))
 			httpRes.setHeader("Content-Security-Policy", dgrCspVal);
@@ -938,33 +908,31 @@ public class CommForwardProcService {
 		httpRes.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 		httpRes.setHeader("Cache-Control", "no-cache");
 		httpRes.setHeader("Pragma", "no-cache");
-		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
-        
+		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
-		respHeader.forEach((k, vs) -> {
-			vs.forEach((v) -> {
-				// John 2024.10.16 , 和雲反應 "Header name was null"
-				if (k!=null && v!=null) {
-					httpRes.setHeader(k, v); // k, v maybe 可能為 null , "Header name was null"
-				} else {
-					if (k == null) {
-						TPILogger.tl.warn("[Header name] is null... \n\n");
-					}
-					if (v == null) {
-						TPILogger.tl.warn("[Header value] is null, Header name:'"+ k +"'\n\n");
-					}
-				}
-			});
-		});
-//		{
-//			System.out.println(TPILogInfo.getLineNumber2());
-//			List<String> headerName = httpRes.getHeaderNames().stream().collect(Collectors.toList());
-//			for (String k : headerName) {
-//				Collection<String> valueList = httpRes.getHeaders(k);
-//				String value = this.convertAuth(k, valueList.toString());
-//				System.out.println("\tKey: " + k + ", Value: " + value);
-//			}
-//		}
+		respHeader.entrySet().stream().filter(e -> {
+			if (e.getKey() == null) {
+				TPILogger.tl.warn("[Header name] is null... \n\n");
+			}
+			return e.getKey() != null;
+		}).filter(e -> {
+			if (e.getValue() == null) {
+				TPILogger.tl.warn("[Header value] is null, Header name:'" + e.getKey() + "'\n\n");
+			}
+			return e.getValue() != null;
+		}).peek(e -> {
+			if (CollectionUtils.contains(e.getValue().iterator(), null)) {
+				TPILogger.tl.warn("[Header value] contains null, Header name:'" + e.getKey() + "'\n\n");
+				e.getValue().remove(null);
+			}
+		}).filter(e -> {
+			if (e.getValue().isEmpty()) {
+				TPILogger.tl.warn("[Header value] is empty, Header name:'" + e.getKey() + "'\n\n");
+			}
+			return !e.getValue().isEmpty();
+		}).filter(e -> !e.getKey().startsWith(":")).map(e -> Map.entry(e.getKey(), String.join(",", e.getValue())))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)).forEach(httpRes::setHeader);
+
 		return httpRes;
 	}
 
@@ -973,14 +941,14 @@ public class CommForwardProcService {
 	 * 記錄 response 的時間 & http status code
 	 */
 	private void doFetchUriHistoryAfter(HttpServletRequest httpReq, int httpCode) {
-		if(httpReq != null) {
+		if (httpReq != null) {
 			httpReq.setAttribute(GatewayFilter.HTTP_CODE, httpCode);
-			
+
 			// 記錄 response 的時間 & http status code
 			GatewayFilter.fetchUriHistoryAfter(httpReq);
 		}
 	}
-	
+
 	/**
 	 * 取得調用API時,驗證token失敗的log
 	 */
@@ -989,7 +957,7 @@ public class CommForwardProcService {
 	}
 
 	/**
-	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br> 
+	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br>
 	 * 註: 僅 DGRC, TSMPC 呼叫
 	 */
 	public StringBuffer getLogResp(ResponseEntity<?> respEntity, Map<String, String> maskInfo,
@@ -1001,7 +969,7 @@ public class CommForwardProcService {
 	}
 
 	/**
-	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br> 
+	 * 授權錯誤 or 沒有目標URL時, 印出訊息 <br>
 	 * 註: 僅 TSMPC 呼叫, 20250407 tsmpc no call
 	 */
 	public StringBuffer getLogResp(ResponseEntity<?> respEntity, Map<String, String> maskInfo) {
@@ -1017,9 +985,12 @@ public class CommForwardProcService {
 		});
 
 		// 以下資料尚未生成
-//		writeLogger(log, "\tKey: " + "content-Length" + ", Value: " + respEntity.getHeaders().getContentLength());
-//		writeLogger(log, "\tKey: " + "getContentType" + ", Value: " + respEntity.getHeaders().getContentType());
-//		writeLogger(log, "\tKey: " + "getLocale" + ", Value: " + respEntity.getHeaders().getContentLanguage());
+		// writeLogger(log, "\tKey: " + "content-Length" + ", Value: " +
+		// respEntity.getHeaders().getContentLength());
+		// writeLogger(log, "\tKey: " + "getContentType" + ", Value: " +
+		// respEntity.getHeaders().getContentType());
+		// writeLogger(log, "\tKey: " + "getLocale" + ", Value: " +
+		// respEntity.getHeaders().getContentLanguage());
 
 		writeLogger(log, "--【End】--\r\n");
 
@@ -1049,7 +1020,7 @@ public class CommForwardProcService {
 			Map<String, String> maskInfo) throws IOException {
 		return getLogResp(httpRes, httpRespStr, content_Length, null, maskInfo);
 	}
-	
+
 	/**
 	 * 註: 僅 DGRC, TSMPC, Mock API Test 由此直接呼叫
 	 */
@@ -1057,32 +1028,33 @@ public class CommForwardProcService {
 			Map<String, String> maskInfo, HttpServletRequest httpReq) throws IOException {
 		int httpCode = -1;
 		if (httpRes != null) {
-			//記錄 response 的時間 & http status code
+			// 記錄 response 的時間 & http status code
 			httpCode = httpRes.getStatus();
 			doFetchUriHistoryAfter(httpReq, httpCode);
 		}
 
 		return getLogResp(httpRes, httpRespStr, contentLength, null, maskInfo);
 	}
+
 	/**
-	 * 取得調用目標URL 的 response log
-	 * 註: 僅 TSMPCServicePostForm 由此直接呼叫
+	 * 取得調用目標URL 的 response log 註: 僅 TSMPCServicePostForm 由此直接呼叫
 	 */
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
 			StringBuffer cfp_log, Map<String, String> maskInfo, HttpServletRequest httpReq) throws IOException {
 		int httpCode = -1;
 		if (httpRes != null) {
-			//記錄 response 的時間 & http status code
+			// 記錄 response 的時間 & http status code
 			httpCode = httpRes.getStatus();
 			doFetchUriHistoryAfter(httpReq, httpCode);
 		}
 
 		return getLogResp(httpRes, httpRespStr, contentLength, cfp_log, maskInfo);
-		
+
 	}
+
 	/**
-	 * 取得調用目標URL 的 response log
-	 * 註: 僅 TSMPCServicePostForm 由此直接呼叫, 20250407 TSMPCServicePostForm no call
+	 * 取得調用目標URL 的 response log 註: 僅 TSMPCServicePostForm 由此直接呼叫, 20250407
+	 * TSMPCServicePostForm no call
 	 */
 	public StringBuffer getLogResp(HttpServletResponse httpRes, String httpRespStr, int contentLength,
 			StringBuffer cfp_log, Map<String, String> maskInfo) throws IOException {
@@ -1093,12 +1065,14 @@ public class CommForwardProcService {
 		// print header
 		writeLogger(cfp_log, "--【Http Resp Header】--");
 
-//		List<String> headerName = httpRes.getHeaderNames().stream().distinct().collect(Collectors.toList());//移除重複的 HeaderName
+		// List<String> headerName =
+		// httpRes.getHeaderNames().stream().distinct().collect(Collectors.toList());//移除重複的
+		// HeaderName
 		List<String> headerName = httpRes.getHeaderNames().stream().collect(Collectors.toList());
 		for (String k : headerName) {
 			Collection<String> valueList = httpRes.getHeaders(k);
 			String tmpValue = valueList.toString();
-			//[ ] 符號總是位於 String 的第一個和最後一個字符，則可以使用 substring() 方法更有效地去除它們。
+			// [ ] 符號總是位於 String 的第一個和最後一個字符，則可以使用 substring() 方法更有效地去除它們。
 			tmpValue = tmpValue.substring(1, tmpValue.length() - 1);
 			String value = this.convertAuth(k, tmpValue, maskInfo);
 			writeLogger(cfp_log, "\tKey: " + k + ", Value: " + value);
@@ -1187,7 +1161,7 @@ public class CommForwardProcService {
 	}
 
 	public String maskBody(Map<String, String> maskInfo, String mbody) {
-		//checkmarx, Unchecked Input for Loop Condition
+		// checkmarx, Unchecked Input for Loop Condition
 		return CheckmarxCommUtils.sanitizeForCheckmarx(maskInfo, mbody);
 	}
 
@@ -1235,15 +1209,16 @@ public class CommForwardProcService {
 	// 可避免 找不到 moduleName 的問題
 	private String getAttribute(HttpServletRequest httpReq, String name) {
 		Object value = httpReq.getAttribute(name);
-		if (value == null) value = httpReq.getRequestURI();
+		if (value == null)
+			value = httpReq.getRequestURI();
 		return value.toString();
 	}
-	
-	private static boolean esDisable = false;			// Setting Flag
+
+	public static boolean esDisable = false; // Setting Flag
 	private static boolean checkStatusFromFile = false; // diskSpaceMonitor 檢查器
 	private static final AtomicLong ES_API_LOG_LAST_LOG_TIME = new AtomicLong(0);
 	private static final long ES_API_LOG_LOG_INTERVAL = 60000; // 例如每分鐘最多記錄一次
-	
+
 	public TsmpApiLogReq addEsTsmpApiLogReq1(String uuid, Map<String, String> logParams, //
 			Map<String, List<String>> esHeaderMap, String mbody, String entry, String aType) throws Exception {
 
@@ -1256,20 +1231,22 @@ public class CommForwardProcService {
 		reqVo.setModuleName(moduleName);
 		reqVo.setTxid(txid);
 		reqVo.setHttpMethod(httpMethod);
-        
+
 		// 是否禁止紀錄ES的LOG
 		esDisable = getTsmpSettingService().getVal_ES_LOG_DISABLE();
-		checkStatusFromFile = DiskSpaceMonitor.checkStatusFromFile();
+		checkStatusFromFile = DiskSpaceMonitor.checkStatusFromFile(); // Check if the disk is full 
 		if (esDisable || checkStatusFromFile) {
-		    long currentTime = System.currentTimeMillis();
-		    long lastLogTime = ES_API_LOG_LAST_LOG_TIME.get();
-		    
-		    // 如果距離上次日誌已經過了指定時間，則輸出日誌
-		    if (currentTime - lastLogTime > ES_API_LOG_LOG_INTERVAL && ES_API_LOG_LAST_LOG_TIME.compareAndSet(lastLogTime, currentTime)) {
-		        TPILogger.tl.warn(String.format("ES_LOG_DISABLE is [%b] or DiskSpaceMonitor.checkStatusFromFile() is [%b]",
-		            esDisable, checkStatusFromFile));
-		    }
-			
+			long currentTime = System.currentTimeMillis();
+			long lastLogTime = ES_API_LOG_LAST_LOG_TIME.get();
+
+			// 如果距離上次日誌已經過了指定時間，則輸出日誌
+			if (currentTime - lastLogTime > ES_API_LOG_LOG_INTERVAL
+					&& ES_API_LOG_LAST_LOG_TIME.compareAndSet(lastLogTime, currentTime)) {
+				TPILogger.tl
+						.warn(String.format("ES_LOG_DISABLE is [%b] or DiskSpaceMonitor.checkStatusFromFile() is [%b]",
+								esDisable, checkStatusFromFile));
+			}
+
 			reqVo.setIgnore(esDisable || checkStatusFromFile); // true 略過不寫 ES
 			return reqVo;
 		}
@@ -1306,29 +1283,30 @@ public class CommForwardProcService {
 		}
 
 		// 測試連線
-//		int index = 0;
-//		boolean isConnection = false;
-//		for(;index < arrEsUrl.length; index++) {
-//			isConnection = this.checkConnection(arrEsUrl[index]);
-//			if(isConnection) {
-//				break;
-//			}
-//		}
-//		if(!isConnection) {
-//			TPILogger.tl.error("es connection is fail");
-//			reqVo.setIgnore(true);
-//			return reqVo;
-//		}
+		// int index = 0;
+		// boolean isConnection = false;
+		// for(;index < arrEsUrl.length; index++) {
+		// isConnection = this.checkConnection(arrEsUrl[index]);
+		// if(isConnection) {
+		// break;
+		// }
+		// }
+		// if(!isConnection) {
+		// TPILogger.tl.error("es connection is fail");
+		// reqVo.setIgnore(true);
+		// return reqVo;
+		// }
 
 		// 解析資料
 		String node = "N/A";
 		try {
-			//防止KeeperServer斷線造成錯誤,所以try..catch
+			// 防止KeeperServer斷線造成錯誤,所以try..catch
 			node = TPILogger.lc.param.get(TPILogger.nodeInfo);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			try {
 				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-			}catch(Exception ex) {}
+			} catch (Exception ex) {
+			}
 		}
 		String orgId = logParams.get("orgId");
 		String jti = logParams.get("jti");
@@ -1343,8 +1321,10 @@ public class CommForwardProcService {
 		}
 		String type = "1";
 		Date nowDate = DateTimeUtil.now();
-		String ts = DateTimeUtil.dateTimeToString(nowDate, DateTimeFormatEnum.西元年月日T時分秒時區).orElseThrow(TsmpDpAaRtnCode._1295::throwing);
-		String originServerRequestTime = DateTimeUtil.dateTimeToString(nowDate, DateTimeFormatEnum.西元年月日T時分秒時區).orElseThrow(TsmpDpAaRtnCode._1295::throwing);
+		String ts = DateTimeUtil.dateTimeToString(nowDate, DateTimeFormatEnum.西元年月日T時分秒時區)
+				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
+		String originServerRequestTime = DateTimeUtil.dateTimeToString(nowDate, DateTimeFormatEnum.西元年月日T時分秒時區)
+				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
 		String cip = logParams.get("cip");
 		Integer httpStatus = 0;
 
@@ -1378,30 +1358,32 @@ public class CommForwardProcService {
 		reqVo.setCreateTimestamp(createTimestamp);
 
 		// index是否存在,不存在就建立
-		String indexName = "tsmp_api_log_" + DateTimeUtil.dateTimeToString(nowDate, DateTimeFormatEnum.西元年月日_4).orElseThrow(TsmpDpAaRtnCode._1295::throwing);
+		String indexName = "tsmp_api_log_" + DateTimeUtil.dateTimeToString(nowDate, DateTimeFormatEnum.西元年月日_4)
+				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
 		// if(!existIndex(arrEsUrl[index], indexName, arrIdPwd[index])) {
 		// createIndex(arrEsUrl[index], indexName, arrIdPwd[index]);
 		// }
 
-		//checkmarx, Excessive Data Exposure
-		String strJson = CheckmarxUtils.sanitizeForCheckmarx(objectMapper, reqVo) ;
-		
+		// checkmarx, Excessive Data Exposure
+		String strJson = CheckmarxUtils.sanitizeForCheckmarx(objectMapper, reqVo);
+
 //		String esReqUrl = arrEsUrl[index] + indexName + "/_doc";
 
 		// call es add data
-//		Map<String, String> header = new HashMap<>();
-//		header.put("Accept", "application/json");
-//		header.put("Content-Type", "application/json");
-//		header.put("Authorization", "Basic " + arrIdPwd[index]);
+		// Map<String, String> header = new HashMap<>();
+		// header.put("Accept", "application/json");
+		// header.put("Content-Type", "application/json");
+		// header.put("Authorization", "Basic " + arrIdPwd[index]);
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-//		String esReqUrl = DgrApiLog2ESQueue.getEsReqUrl(arrEsUrl, arrIdPwd, indexName, timeout);
+		// String esReqUrl = DgrApiLog2ESQueue.getEsReqUrl(arrEsUrl, arrIdPwd,
+		// indexName, timeout);
 		String esReqUrl = arrEsUrl[0] + indexName + "/_bulk"; // 上面那一行會造成 gateway 的 bottleneck
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(arrEsUrl, arrIdPwd, timeout, indexName, strJson, esReqUrl, id + "-" + type)
-						, TPILogger.tl.diskFreeThreshHold
-						, TPILogger.tl.deletePercent
-						, TPILogger.tl.allowWriteElastic);
+		DgrApiLog2ESQueue.put(
+				new DgrApiLog2ESQueue(arrEsUrl, arrIdPwd, timeout, indexName, strJson, esReqUrl, id + "-" + type),
+				TPILogger.tl.diskFreeThreshHold, TPILogger.tl.deletePercent, TPILogger.tl.allowWriteElastic, 
+				DiskSpaceMonitor.checkStatusFromFile());
 //		this.execute(() -> {
 //			try {
 //				HttpRespData resp = HttpUtil.httpReqByRawData(esReqUrl, HttpMethod.POST.toString(), strJson, header, false);
@@ -1415,14 +1397,13 @@ public class CommForwardProcService {
 		long startTime = System.currentTimeMillis();
 		reqVo.setStartTime(startTime);
 		reqVo.setEsUrl(esReqUrl);
-		//以防workIndex 超過陣列數
+		// 以防workIndex 超過陣列數
 		try {
 			if (DgrApiLog2ESQueue.workIndex > -1)
 				reqVo.setEsIdPwd(arrIdPwd[DgrApiLog2ESQueue.workIndex]);
 		} catch (Exception e) {
 			reqVo.setEsIdPwd(arrIdPwd[0]);
 		}
-
 
 		return reqVo;
 	}
@@ -1439,16 +1420,16 @@ public class CommForwardProcService {
 //			return false;
 //		}
 //	}
-	
+
 	public boolean checkConnection(String strUrl) {
-	    try {
-	    	// 未來有需要再改
-	    	// int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-	        return HttpsConnectionChecker.checkConnection(strUrl);
-	    } catch (Exception e) {
-	        TPILogger.tl.error("Connection failed! Url = " + strUrl + "\n" + StackTraceUtil.logStackTrace(e));
-	        return false;
-	    }
+		try {
+			// 未來有需要再改
+			// int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
+			return HttpsConnectionChecker.checkConnection(strUrl);
+		} catch (Exception e) {
+			TPILogger.tl.error("Connection failed! Url = " + strUrl + "\n" + StackTraceUtil.logStackTrace(e));
+			return false;
+		}
 	}
 
 	public boolean checkIgnoreApi(String entry, String api, String uri) {
@@ -1561,31 +1542,31 @@ public class CommForwardProcService {
 		reqVo2.setUrl(url);
 		reqVo2.setCreateTimestamp(createTimestamp);
 
-		//checkmarx, Excessive Data Exposure
-		String strJson = CheckmarxUtils.sanitizeForCheckmarx(objectMapper, reqVo2) ;
+		// checkmarx, Excessive Data Exposure
+		String strJson = CheckmarxUtils.sanitizeForCheckmarx(objectMapper, reqVo2);
 		String esReqUrl = reqVo.getEsUrl();
 
 		// call es add data
-//		Map<String, String> header = new HashMap<>();
-//		header.put("Accept", "application/json");
-//		header.put("Content-Type", "application/json");
-//		header.put("Authorization", "Basic " + reqVo.getEsIdPwd());
+		// Map<String, String> header = new HashMap<>();
+		// header.put("Accept", "application/json");
+		// header.put("Content-Type", "application/json");
+		// header.put("Authorization", "Basic " + reqVo.getEsIdPwd());
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type)
-				, TPILogger.tl.diskFreeThreshHold
-				, TPILogger.tl.deletePercent
-				, TPILogger.tl.allowWriteElastic);
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type),
+				TPILogger.tl.diskFreeThreshHold, TPILogger.tl.deletePercent, TPILogger.tl.allowWriteElastic, 
+				DiskSpaceMonitor.checkStatusFromFile());
 
-//		this.execute(() -> {
-//			try {
-//				HttpRespData resp = HttpUtil.httpReqByRawData(esReqUrl, HttpMethod.POST.toString(), strJson, header, false);
-//				//TPILogger.tl.debug(resp.getLogStr());
-//			} catch (Exception e) {
-//				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-//			}
-//		});
+		// this.execute(() -> {
+		// try {
+		// HttpRespData resp = HttpUtil.httpReqByRawData(esReqUrl,
+		// HttpMethod.POST.toString(), strJson, header, false);
+		// //TPILogger.tl.debug(resp.getLogStr());
+		// } catch (Exception e) {
+		// TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		// }
+		// });
 
 		// 傳遞用
 		long startTime = System.currentTimeMillis();
@@ -1680,26 +1661,26 @@ public class CommForwardProcService {
 		String strJson = getObjectMapper().writeValueAsString(respVo);
 		String esReqUrl = reqVo.getEsUrl();
 
-//		Map<String, String> cfpResp2_header = new HashMap<>();
-//		cfpResp2_header.put("Accept", "application/json");
-//		cfpResp2_header.put("Content-Type", "application/json");
-//		cfpResp2_header.put("Authorization", "Basic " + reqVo.getEsIdPwd());
+		// Map<String, String> cfpResp2_header = new HashMap<>();
+		// cfpResp2_header.put("Accept", "application/json");
+		// cfpResp2_header.put("Content-Type", "application/json");
+		// cfpResp2_header.put("Authorization", "Basic " + reqVo.getEsIdPwd());
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type)
-				, TPILogger.tl.diskFreeThreshHold
-				, TPILogger.tl.deletePercent
-				, TPILogger.tl.allowWriteElastic);
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type),
+				TPILogger.tl.diskFreeThreshHold, TPILogger.tl.deletePercent, TPILogger.tl.allowWriteElastic, 
+				DiskSpaceMonitor.checkStatusFromFile());
 
-//		this.execute(() -> {
-//			try {
-//				HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl, HttpMethod.POST.toString(), strJson, cfpResp2_header, false);
-//				//TPILogger.tl.debug(resp.getLogStr());
-//			} catch (Exception e) {
-//				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-//			}
-//		});
+		// this.execute(() -> {
+		// try {
+		// HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl,
+		// HttpMethod.POST.toString(), strJson, cfpResp2_header, false);
+		// //TPILogger.tl.debug(resp.getLogStr());
+		// } catch (Exception e) {
+		// TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		// }
+		// });
 	}
 
 	public void addEsTsmpApiLogResp1(ResponseEntity<?> verifyResp, TsmpApiLogReq reqVo, String mbody) throws Exception {
@@ -1793,26 +1774,26 @@ public class CommForwardProcService {
 		String strJson = getObjectMapper().writeValueAsString(respVo);
 		String esReqUrl = reqVo.getEsUrl();
 
-//		Map<String, String> cfpResp1_header = new HashMap<>();
-//		cfpResp1_header.put("Accept", "application/json");
-//		cfpResp1_header.put("Content-Type", "application/json");
-//		cfpResp1_header.put("Authorization", "Basic " + reqVo.getEsIdPwd());
+		// Map<String, String> cfpResp1_header = new HashMap<>();
+		// cfpResp1_header.put("Accept", "application/json");
+		// cfpResp1_header.put("Content-Type", "application/json");
+		// cfpResp1_header.put("Authorization", "Basic " + reqVo.getEsIdPwd());
 
 		// asynchronous call
 		int timeout = getTsmpSettingService().getVal_ES_TEST_TIMEOUT();
-		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type)
-				, TPILogger.tl.diskFreeThreshHold
-				, TPILogger.tl.deletePercent
-				, TPILogger.tl.allowWriteElastic);
+		DgrApiLog2ESQueue.put(new DgrApiLog2ESQueue(timeout, strJson, esReqUrl, id + "-" + type),
+				TPILogger.tl.diskFreeThreshHold, TPILogger.tl.deletePercent, TPILogger.tl.allowWriteElastic, 
+				DiskSpaceMonitor.checkStatusFromFile());
 
-//		this.execute(() -> {
-//			try {
-//				HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl, HttpMethod.POST.toString(), strJson, cfpResp1_header, false);
-//				//TPILogger.tl.debug(resp.getLogStr());
-//			} catch (Exception e) {
-//				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-//			}
-//		});
+		// this.execute(() -> {
+		// try {
+		// HttpRespData resp = HttpUtil.httpReqByRawData(reqUrl,
+		// HttpMethod.POST.toString(), strJson, cfpResp1_header, false);
+		// //TPILogger.tl.debug(resp.getLogStr());
+		// } catch (Exception e) {
+		// TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		// }
+		// });
 	}
 
 	public String convertMbody(String mbody, TsmpApiLogReq reqVo, String strContentLength)
@@ -2038,8 +2019,8 @@ public class CommForwardProcService {
 	}
 
 	/**
-	 * 若有勾選 Token Payload, 無論是 JWS 或 JWE, <br> 
-	 * token payload 是 payload 的 body 用 base64URL encode 的字串, <br> 
+	 * 若有勾選 Token Payload, 無論是 JWS 或 JWE, <br>
+	 * token payload 是 payload 的 body 用 base64URL encode 的字串, <br>
 	 * 放到 http header 的 "tokenpayload"
 	 */
 	public String getTokenpayload(String authorization) {
@@ -2113,12 +2094,12 @@ public class CommForwardProcService {
 		byte[] arrHttpMethod = dgrReqVo.getHttpMethod().getBytes(StandardCharsets.UTF_8);
 		byte[] arrUrl = reqUrl.getBytes(StandardCharsets.UTF_8);
 		byte[] arrMbody = null;
-		if(StringUtils.hasLength(mbody)) {
+		if (StringUtils.hasLength(mbody)) {
 			arrMbody = mbody.getBytes(StandardCharsets.UTF_8);
-		}else {
+		} else {
 			arrMbody = new byte[0];
 		}
-		
+
 		byte[] arrApiCacheId = new byte[arrHttpMethod.length + arrUrl.length + arrMbody.length];
 		System.arraycopy(arrHttpMethod, 0, arrApiCacheId, 0, arrHttpMethod.length);
 		System.arraycopy(arrUrl, 0, arrApiCacheId, arrHttpMethod.length, arrUrl.length);
@@ -2278,8 +2259,10 @@ public class CommForwardProcService {
 	public TsmpClientCert getClientCert(String clientId) {
 		// 取得今天的日期,去掉時分秒,例如:2023/7/1
 		Date dt = new Date();
-		String dtStr = DateTimeUtil.dateTimeToString(dt, DateTimeFormatEnum.西元年月日_2).orElseThrow(TsmpDpAaRtnCode._1295::throwing);
-		Date nowDate = DateTimeUtil.stringToDateTime(dtStr, DateTimeFormatEnum.西元年月日_2).orElseThrow(TsmpDpAaRtnCode._1295::throwing);
+		String dtStr = DateTimeUtil.dateTimeToString(dt, DateTimeFormatEnum.西元年月日_2)
+				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
+		Date nowDate = DateTimeUtil.stringToDateTime(dtStr, DateTimeFormatEnum.西元年月日_2)
+				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
 		long nowLong = nowDate.getTime();
 
 		// 找有效的憑證(過期時間 > 今天的日期),並依建立時間由小到大排序
@@ -2308,7 +2291,7 @@ public class CommForwardProcService {
 			}
 		}
 
-//		TPILogger.tl.debug("reqStr:" + jwtPayloadData.payloadStr);
+		// TPILogger.tl.debug("reqStr:" + jwtPayloadData.payloadStr);
 		return jwtPayloadData;
 	}
 
@@ -2329,6 +2312,75 @@ public class CommForwardProcService {
 
 			TsmpApi tsmpApi = getTsmpApi(httpReq);
 			String jweFlag = tsmpApi.getJewFlag();// 0:none, 1:JWE, 2:JWS
+
+			// 依 API 的設定,取得 request body
+			if ("1".equals(jweFlag)) {// JWE
+				TPILogger.tl.debug("API request body format: JWE");
+				String[] jwtInfoArr = payload.split("\\.");// 切分 JWT
+				if (jwtInfoArr.length != 5) {
+					ResponseEntity<?> errResEntity = getTokenHelper().getApiJweBodyFormatError();// 400
+					jwtPayloadData.errRespEntity = errResEntity;// 400
+				} else {
+					jwtPayloadData = getRequestJwtPayloadData(payload, clientId, noAuth);
+				}
+			} else if ("2".equals(jweFlag)) {// JWS
+				TPILogger.tl.debug("API request body format: JWS");
+				String[] jwtInfoArr = payload.split("\\.");// 切分 JWT
+				if (jwtInfoArr.length != 3) {
+					ResponseEntity<?> errResEntity = getTokenHelper().getApiJwsBodyFormatError();// 400
+					jwtPayloadData.errRespEntity = errResEntity;// 400
+				} else {
+					jwtPayloadData = getRequestJwtPayloadData(payload, clientId, noAuth);
+				}
+			} else {// none
+				// TPILogger.tl.debug("API request body format: NONE");// 為一般的格式,就不印出此訊息了
+				jwtPayloadData.payloadStr = payload;
+			}
+
+		} catch (Exception e) {
+			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
+			jwtPayloadData.errRespEntity = getTokenHelper().getApiBodyFormatError();// 400
+		}
+
+		return jwtPayloadData;
+	}
+
+	/**
+	 * 依 API 在 DB 的設定, 將 原文/JWE/JWS 的 request body 轉成 原文, 若有錯誤訊息ResponseEntity<?>,
+	 * 須加上 handleErrorHttpResp(httpRes, jwtPayloadData.errRespEntity), 才能在畫面顯示錯誤訊息
+	 */
+	public JwtPayloadData convertRequestBodyWithContext(HttpServletResponse httpRes, HttpServletRequest httpReq,
+			String payload, boolean isGet, String dgrApiProxyRequestEncoded) throws Exception {
+
+		JwtPayloadData jwtPayloadData = convertRequestBody(httpReq, payload, dgrApiProxyRequestEncoded);
+		ResponseEntity<?> errRespEntity = jwtPayloadData.errRespEntity;
+		if (errRespEntity != null) {// 資料驗證有錯誤
+			if (!isGet) {
+				handleErrorHttpResp(httpRes, jwtPayloadData.errRespEntity); // 直接 HTTP Resp 物件輸出了
+			}
+		}
+
+//		TPILogger.tl.debug("reqStr:" + jwtPayloadData.payloadStr);
+		return jwtPayloadData;
+	}
+
+	/**
+	 * 依 API 在 DB 的設定, 將 原文/JWE/JWS 的 request body 轉成 原文
+	 */
+	public JwtPayloadData convertRequestBody(HttpServletRequest httpReq, String payload,
+			String dgrApiProxyRequestEncoded) throws Exception {
+		// 從 request 中取得 client id、no Auth
+		String clientId = (String) httpReq.getAttribute(TokenHelper.CLIENT_ID);
+		String noAuth = (String) httpReq.getAttribute(TokenHelper.NO_AUTH);
+
+		JwtPayloadData jwtPayloadData = new JwtPayloadData();
+		try {
+			if (!StringUtils.hasLength(payload)) {// 沒有 request body 不處理
+				jwtPayloadData.payloadStr = payload;
+				return jwtPayloadData;
+			}
+
+			String jweFlag = dgrApiProxyRequestEncoded;// 0:none, 1:JWE, 2:JWS
 
 			// 依 API 的設定,取得 request body
 			if ("1".equals(jweFlag)) {// JWE
@@ -2374,10 +2426,10 @@ public class CommForwardProcService {
 
 		Map<String, Object> convertResponseBodyMap = new HashMap<>();
 
-		if(httpRes == null) {
+		if (httpRes == null) {
 			return null;
 		}
-		
+
 		int status = httpRes.getStatus();
 		if (status >= 300) {// statusCode 大於 300 的錯誤訊息直接顯示,不處理壓縮,不轉JWE/JWS
 			convertResponseBodyMap.put("httpArray", httpArray);
@@ -2490,7 +2542,7 @@ public class CommForwardProcService {
 
 		// 訊息使用 TW Open Banking 格式是否啟用
 		boolean isTwOpenBanking = getTsmpSettingService().getVal_DGR_TW_FAPI_ENABLE();
-//		TPILogger.tl.debug("isTwOpenBanking:" + isTwOpenBanking);
+		// TPILogger.tl.debug("isTwOpenBanking:" + isTwOpenBanking);
 
 		if (isTwOpenBanking) {
 			// TODO,做 TW Open Banking 的格式,是不是一律要有 token,不然無法取到 client id ?
@@ -2537,7 +2589,7 @@ public class CommForwardProcService {
 			}
 
 		} else {// NONE
-//			TPILogger.tl.debug("API response body format: NONE");// 為一般的格式,就不印出此訊息了
+			// TPILogger.tl.debug("API response body format: NONE");// 為一般的格式,就不印出此訊息了
 			respStr = payloadStr;
 		}
 
@@ -2617,7 +2669,7 @@ public class CommForwardProcService {
 		twReqRespJwe.setEncTwReqRespJweRecipientsList(twReqRespJweRecipientsList);
 		twReqRespJwe.setEncIv(jweIvBase64UrlEnc);
 		twReqRespJwe.setEncCipherText(jweCipherTextBase64UrlEnc);
-		twReqRespJwe.setEncTag(jweTagBase64UrlEnc); 
+		twReqRespJwe.setEncTag(jweTagBase64UrlEnc);
 
 		String respStr = getObjectMapper().writeValueAsString(twReqRespJwe);
 		return respStr;
@@ -2630,15 +2682,15 @@ public class CommForwardProcService {
 		// set HTTP Header
 		httpRes.addHeader("javaObject", getClass().getName());
 		httpRes.addHeader("Content-Type", "application/json;charset=UTF-8");
-		//checkmarx, Missing HSTS Header
-		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
-		        
+		// checkmarx, Missing HSTS Header
+		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+
 		// set HTTP Resp
 		// 2023/05/03 若這裡註解打開, Response 錯誤訊息時,會有 json 重複問題
-//		String json = objectMapper.writeValueAsString(errRespEntity.getBody());
-//		json = HttpUtil.toPrettyJson(json);
-//		ByteArrayInputStream bi = new ByteArrayInputStream(json.getBytes());				
-//		IOUtils.copy(bi, httpRes.getOutputStream());
+		// String json = objectMapper.writeValueAsString(errRespEntity.getBody());
+		// json = HttpUtil.toPrettyJson(json);
+		// ByteArrayInputStream bi = new ByteArrayInputStream(json.getBytes());
+		// IOUtils.copy(bi, httpRes.getOutputStream());
 	}
 
 	public TsmpApiLogReq addRdbTsmpApiLogReq1(String uuid, HttpServletRequest httpReq, //
@@ -2688,7 +2740,7 @@ public class CommForwardProcService {
 
 		// 是否禁止紀錄 RDB 的 LOG
 		boolean isAvailable = Boolean.parseBoolean(getTsmpSettingService().getVal_TSMP_APILOG_FORCE_WRITE_RDB());
-		if(!isAvailable) {
+		if (!isAvailable) {
 			reqVo.setIgnore(true);
 			return reqVo;
 		}
@@ -2709,13 +2761,14 @@ public class CommForwardProcService {
 		// node
 		String node = "N/A";
 		try {
-			//防止KeeperServer斷線造成錯誤,所以try..catch
+			// 防止KeeperServer斷線造成錯誤,所以try..catch
 			node = TPILogger.lc.param.get(TPILogger.nodeInfo);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			try {
 				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-			}catch(Exception ex) {}
-		}	
+			} catch (Exception ex) {
+			}
+		}
 		reqVo.setNode(node);
 
 		// orgId
@@ -2775,13 +2828,13 @@ public class CommForwardProcService {
 			}
 		});
 
-//		this.execute(() -> {
-//			try {
-//				getTsmpReqLogDao().save(reqLogEntity);
-//			} catch (Exception e) {
-//				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-//			}
-//		});
+		// this.execute(() -> {
+		// try {
+		// getTsmpReqLogDao().save(reqLogEntity);
+		// } catch (Exception e) {
+		// TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		// }
+		// });
 
 		// 傳遞用
 		reqVo.setCreateTimestamp(System.currentTimeMillis());
@@ -2798,6 +2851,39 @@ public class CommForwardProcService {
 
 		// 因為驗証錯誤不遮罩,所以contentLength給0
 		this.addRdbTsmpApiLogResp1(headerMap, reqVo, mbody, verifyResp.getStatusCode().value(), 0);
+	}
+
+	public boolean isAllowMethod(TsmpApiReg tsmpApiReg, HttpServletRequest httpReq) {
+		String method = httpReq.getMethod().toUpperCase();
+
+		String methodOfJson = tsmpApiReg.getMethodOfJson().toUpperCase();
+
+		if (methodOfJson.contains(method)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public ResponseEntity<OAuthTokenErrorResp> checkMethod(TsmpApiReg tsmpApiReg, HttpServletRequest httpReq)
+			throws Exception {
+
+		if (tsmpApiReg.getMethodOfJson() == null || httpReq == null) {
+			return null;
+		}
+
+		if (!isAllowMethod(tsmpApiReg, httpReq)) {
+
+			OAuthTokenErrorResp resp = new OAuthTokenErrorResp();
+			resp.setTimestamp(System.currentTimeMillis() + "");
+			resp.setStatus(HttpStatus.METHOD_NOT_ALLOWED.value());
+			resp.setError(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
+			resp.setMessage(String.format("Method not allowed. api_key:%s,module_name:%s,method:%s",
+					tsmpApiReg.getApiKey(), tsmpApiReg.getModuleName(), tsmpApiReg.getMethodOfJson()));
+			resp.setPath(httpReq.getRequestURI());
+			return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(resp);
+		}
+		return null;
 	}
 
 	public void addRdbTsmpApiLogResp1(HttpServletResponse httpResp, TsmpApiLogReq reqVo, String mbody,
@@ -2868,39 +2954,39 @@ public class CommForwardProcService {
 			}
 		});
 
-//		this.execute(() -> {
-//			try {
-//				getTsmpResLogDao().save(resLogEntity);
-//			} catch (Exception e) {
-//				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-//			}
-//		});
+		// this.execute(() -> {
+		// try {
+		// getTsmpResLogDao().save(resLogEntity);
+		// } catch (Exception e) {
+		// TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		// }
+		// });
 	}
-	
+
 	public boolean isFixedCacheUpdate(FixedCacheVo cacheVo, TsmpApiLogReq reqVo) {
 		TsmpApiId tsmpApiId = new TsmpApiId();
 		tsmpApiId.setModuleName(reqVo.getModuleName());
 		tsmpApiId.setApiKey(reqVo.getTxid());
 		TsmpApi tsmpApiVo = getTsmpApiCacheProxy().findById(tsmpApiId).orElse(null);
-		int cacheTime = 0 ;
-		if(tsmpApiVo != null) {
+		int cacheTime = 0;
+		if (tsmpApiVo != null) {
 			cacheTime = tsmpApiVo.getFixedCacheTime();
 		}
-		if(cacheTime == 0) {
+		if (cacheTime == 0) {
 			cacheTime = getTsmpSettingService().getVal_FIXED_CACHE_TIME();
 		}
-		long cacheTimestamp = cacheVo.getDataTimestamp() + ( cacheTime * 60 * 1000);
+		long cacheTimestamp = cacheVo.getDataTimestamp() + (cacheTime * 60 * 1000);
 		long nowTimestamp = System.currentTimeMillis();
-		
+
 		return nowTimestamp > cacheTimestamp;
 	}
-	
+
 	/**
 	 * 是否停止重試調用API, <br>
 	 * 依失敗處置策略判斷, <br>
 	 * Policy 0: 當連線失敗或 HTTP 狀態碼為 4xx(客戶端錯誤)、5xx(伺服器錯誤),則重試<br>
 	 */
-	protected boolean isStopReTry(String failDiscoveryPolicy, int httpStatus) {
+	public boolean isStopReTry(String failDiscoveryPolicy, int httpStatus) {
 		if (!StringUtils.hasLength(failDiscoveryPolicy)) {
 			failDiscoveryPolicy = "0";
 		}
@@ -2928,5 +3014,62 @@ public class CommForwardProcService {
 	protected String getAesKey() {
 		String key = System.getenv("TAEASK");
 		return key;
+	}
+	
+	/**
+	 * 取得 CORS "Access-Control-Allow-Origin" 的值, <br>
+	 * 1.預設值為 setting 的 DGR_CORS_VAL 值, <br>
+	 * 2.若 API 註冊有設定且要加入, 則以此為準 <br>
+	 */
+	public String getCorsAllowOrigin(TsmpApiReg tsmpApiReg) {
+		String corsAllowOrigin = getTsmpSettingService().getVal_DGR_CORS_VAL();
+		
+		if (tsmpApiReg != null) {
+			String apiIsCorsAllowOrigin = tsmpApiReg.getIsCorsAllowOrigin();
+			String apiOrigin = tsmpApiReg.getCorsAllowOrigin();
+			if("Y".equalsIgnoreCase(apiIsCorsAllowOrigin) && StringUtils.hasText(apiOrigin)) {
+				corsAllowOrigin = apiOrigin;
+			}
+		}
+		
+		return corsAllowOrigin;		
+	}
+	
+	/**
+	 * 取得 CORS "Access-Control-Allow-Methods" 的值 <br>
+	 * 1.預設值為 "POST,GET,OPTIONS,PUT,PATCH,DELETE", <br>
+	 * 2.若 API 註冊有設定且要加入, 則以此為準 <br>
+	 */
+	public String getCorsAllowMethods(TsmpApiReg tsmpApiReg) {
+		String corsAllowMethods = "POST,GET,OPTIONS,PUT,PATCH,DELETE";
+		
+		if (tsmpApiReg != null) {
+			String apiIsCorsAllowMethods = tsmpApiReg.getIsCorsAllowMethods();
+			String apiMethods = tsmpApiReg.getCorsAllowMethods();
+			if("Y".equalsIgnoreCase(apiIsCorsAllowMethods) && StringUtils.hasText(apiMethods)) {
+				corsAllowMethods = apiMethods;
+			}
+		}
+
+		return corsAllowMethods;
+	}
+
+	/**
+	 * 取得 CORS "Access-Control-Allow-Headers" 的值, <br>
+	 * 1.預設值為 properties 的 DGR_CORS_VAL 值, <br>
+	 * 2.若 API 註冊有設定且要加入, 則以此為準 <br>
+	 */
+	public String getCorsAllowHeaders(TsmpApiReg tsmpApiReg) {
+		String corsAllowHeadersStr = corsAllowHeaders;
+		
+		if (tsmpApiReg != null) {
+			String apiIsCorsAllowHeaders = tsmpApiReg.getIsCorsAllowHeaders();
+			String apiHeaders = tsmpApiReg.getCorsAllowHeaders();
+			if("Y".equalsIgnoreCase(apiIsCorsAllowHeaders) && StringUtils.hasText(apiHeaders)) {
+				corsAllowHeadersStr = apiHeaders;
+			}
+		}
+		
+		return corsAllowHeadersStr;
 	}
 }

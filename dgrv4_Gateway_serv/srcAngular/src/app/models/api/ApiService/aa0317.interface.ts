@@ -61,4 +61,10 @@ export interface AA0317RespItem {
     jweFlag?: string; // 0：不使用, 1：JWE, 2：JWS, null:不使用
     jweFlagResp?: string; // 0：不使用, 1：JWE, 2：JWS, null:不使用
     funFlag?: number;
+    isCorsAllowOrigin?: string;
+    isCorsAllowMethods?: string;
+    isCorsAllowHeaders?: string;
+    corsAllowOrigin?: string;
+    corsAllowMethods?: string;
+    corsAllowHeaders?: string;
 }

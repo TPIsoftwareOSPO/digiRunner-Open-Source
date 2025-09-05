@@ -23,13 +23,11 @@ import tpi.dgrv4.dpaa.vo.DPB0298Resp;
 import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
 import tpi.dgrv4.entity.entity.DgrWebhookNotify;
 import tpi.dgrv4.entity.entity.DgrWebhookNotifyField;
-import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
 import tpi.dgrv4.entity.repository.DgrWebhookNotifyDao;
 import tpi.dgrv4.entity.repository.DgrWebhookNotifyFieldDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +45,6 @@ public class DPB0298Service {
     @Getter(AccessLevel.PROTECTED)
     private DgrWebhookNotifyFieldDao dgrWebhookNotifyFieldDao;
 
-    @Setter(onMethod_ = @Autowired)
-    @Getter(AccessLevel.PROTECTED)
-    private DgrWebhookApiMapDao dgrWebhookApiMapDao;
-
 
     public DPB0298Resp exportWebhook(DPB0298Req req, HttpServletResponse response) {
         DPB0298Resp resp = new DPB0298Resp();
@@ -63,24 +57,20 @@ public class DPB0298Service {
                 throw TsmpDpAaRtnCode._1298.throwing();
             }
             // map data by webhook_notify_id and use notify_name to be key
-            Map<DgrWebhookNotify, List<DgrWebhookApiMap>> notifyListMap = getNotifyListMap(notifies);
-            // map data by webhook_notify_id and use notify_name to be key
             Map<String, List<DgrWebhookNotifyField>> fieldsMap = getFieldMap(notifies);
 
             XSSFWorkbook workbook = new XSSFWorkbook();
             OutputStream outputStream = response.getOutputStream();
-            XSSFSheet sheet = workbook.createSheet("WEBHOOK_NOTIFY_AND_MAP");
+            XSSFSheet sheet = workbook.createSheet("WEBHOOK_NOTIFY");
             String[] sheet1Header = {
                     "NOTIFY_NAME",
                     "NOTIFY_TYPE",
                     "ENABLE",
                     "MESSAGE",
-                    "PAYLOAD_FLAG",
-                    "API_KEY",
-                    "MODULE_NAME"
+                    "PAYLOAD_FLAG"
             };
             writeHeader(workbook, sheet, sheet1Header);
-            writeNotifySheet(sheet, notifyListMap);
+            writeNotifySheet(sheet, notifies);
 
             XSSFSheet sheet2 = workbook.createSheet("WEBHOOK_NOTIFY_FIELD");
             String[] sheet2Header = {
@@ -115,20 +105,8 @@ public class DPB0298Service {
                 ));
     }
 
-    private Map<DgrWebhookNotify, List<DgrWebhookApiMap>> getNotifyListMap(List<DgrWebhookNotify> notifies) {
-        return notifies.stream()
-                .collect(Collectors.toMap(
-                        notify -> notify,
-                        notify -> getDgrWebhookApiMapDao().findByWebhookNotifyId(notify.getWebhookNotifyId()),
-                        (existing, replacement) -> {
-                            List<DgrWebhookApiMap> merged = new ArrayList<>(existing);
-                            merged.addAll(replacement);
-                            return merged;
-                        }
-                ));
-    }
 
-    private void writeNotifySheet(XSSFSheet sheet, Map<DgrWebhookNotify, List<DgrWebhookApiMap>> notifyListMap) {
+    private void writeNotifySheet(XSSFSheet sheet, List<DgrWebhookNotify> notifyList) {
         CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
         //置中
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -141,62 +119,34 @@ public class DPB0298Service {
         cellStyle.setBorderLeft(BorderStyle.THIN);
         int rowNum = 1;
 
-        for (Map.Entry<DgrWebhookNotify, List<DgrWebhookApiMap>> entry : notifyListMap.entrySet()) {
-            DgrWebhookNotify notify = entry.getKey();
-            List<DgrWebhookApiMap> apiMaps = entry.getValue();
-
-            if (apiMaps.isEmpty()) {
-                Row row = sheet.createRow(rowNum++);
-                createNotifyRow(row, notify, null, cellStyle);
-            } else {
-                // 合併儲存格的起始行
-                int firstRow = rowNum;
-
-                // 寫入所有API映射
-                for (DgrWebhookApiMap apiMap : apiMaps) {
-                    Row row = sheet.createRow(rowNum++);
-                    createNotifyRow(row, notify, apiMap, cellStyle);
-                }
-
-
-                int lastRow = rowNum - 1;
-                if (lastRow > firstRow) { // 只有當有多行時才需要合併
-                    // 合併NOTIFY_NAME到MODULE_NAME的儲存格（假設是第0到6欄）
-                    for (int i = 0; i <= 4; i++) {
-                        sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, i, i));
-                    }
-                }
-            }
+        for (DgrWebhookNotify notify : notifyList) {
+            Row row = sheet.createRow(rowNum++);
+            createNotifyRow(row, notify,  cellStyle);
         }
         sheet.setColumnWidth(0, 20 * 256); // 20*256
         sheet.setColumnWidth(1, 20 * 256); // 20*256
         sheet.setColumnWidth(2, 20 * 256); // 50*256
         sheet.setColumnWidth(3, 40 * 256);
         sheet.setColumnWidth(4, 20 * 256);
-        sheet.setColumnWidth(5, 25 * 256);
-        sheet.setColumnWidth(6, 25 * 256);
 
     }
 
 
-    private void createNotifyRow(Row row, DgrWebhookNotify notify, DgrWebhookApiMap apiMap, CellStyle cellStyle) {
+    private void createNotifyRow(Row row, DgrWebhookNotify notify, CellStyle cellStyle) {
         int colNum = 0;
 
+        CellStyle textCellStyle = row.getSheet().getWorkbook().createCellStyle();
+        textCellStyle.cloneStyleFrom(cellStyle);
+        textCellStyle.setDataFormat(row.getSheet().getWorkbook()
+                .createDataFormat()
+                .getFormat("@"));
         // 通知基本資訊
-        createCell(row, colNum++, notify.getNotifyName(), cellStyle);
+        createCell(row, colNum++, notify.getNotifyName(), textCellStyle);
         createCell(row, colNum++, notify.getNotifyType(), cellStyle);
         createCell(row, colNum++, notify.getEnable(), cellStyle);
-        createCell(row, colNum++, notify.getMessage(), cellStyle);
-        createCell(row, colNum++, notify.getPayloadFlag(), cellStyle);
+        createCell(row, colNum++, notify.getMessage(), textCellStyle);
+        createCell(row, colNum, notify.getPayloadFlag(), cellStyle);
 
-        String apikey = null;
-        String moduleName = null;
-        if(apiMap!=null){
-            apikey = apiMap.getApiKey();
-           moduleName = apiMap.getModuleName();
-        }
-        createCell(row, colNum++, apikey, cellStyle);
-        createCell(row, colNum++, moduleName, cellStyle);
 
     }
 
@@ -256,11 +206,17 @@ public class DPB0298Service {
 
     private void createFieldsRow(Row row, String notifyName, DgrWebhookNotifyField field, CellStyle cellStyle) {
         int colNum = 0;
-        createCell(row, colNum++, notifyName, cellStyle);
-        createCell(row, colNum++, field.getFieldKey(), cellStyle);
-        createCell(row, colNum++, field.getFieldValue(), cellStyle);
+        CellStyle textCellStyle = row.getSheet().getWorkbook().createCellStyle();
+        textCellStyle.cloneStyleFrom(cellStyle);
+        textCellStyle.setDataFormat(row.getSheet().getWorkbook()
+                .createDataFormat()
+                .getFormat("@"));
+
+        createCell(row, colNum++, notifyName, textCellStyle);
+        createCell(row, colNum++, field.getFieldKey(), textCellStyle);
+        createCell(row, colNum++, field.getFieldValue(), textCellStyle);
         createCell(row, colNum++, field.getFieldType(), cellStyle);
-        createCell(row, colNum++, field.getMappingUrl(), cellStyle);
+        createCell(row, colNum, field.getMappingUrl(), textCellStyle);
     }
 
 

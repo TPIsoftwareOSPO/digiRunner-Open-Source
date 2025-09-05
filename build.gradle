@@ -35,7 +35,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-v4.5.16'
+	version = 'release-rc-v4.5.19.0-4-g052aa0662'
 	apply plugin:  'io.spring.dependency-management'
 
 	repositories {
@@ -62,8 +62,8 @@ subprojects {
 
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.16.3-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.16.3-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.5.19.0-4-g052aa0662-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.19.0-4-g052aa0662-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 		}
@@ -87,6 +87,8 @@ subprojects {
 		implementation 'commons-io:commons-io:2.16.1'
 		// CVE-2025-8885
 		implementation 'org.bouncycastle:bc-fips:2.1.1'
+		
+		implementation 'org.bouncycastle:bcpkix-fips:2.1.9'
 	}
 
 	// clear lib
@@ -249,6 +251,8 @@ project(':dgrv4_Gateway_serv'){
 		implementation 'io.netty:netty-codec:4.1.125.Final'
 		
 		implementation 'io.netty:netty-tcnative-boringssl-static:2.0.61.Final'
+		
+		implementation 'com.google.code.gson:gson:2.10.1'
 	}
 
 	protobuf {

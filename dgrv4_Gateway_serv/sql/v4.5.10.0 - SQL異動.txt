@@ -1,0 +1,49 @@
+-- 【dgRv4.5.10.0 - SQL 異動】
+-- 20250730週期排程中文換英文, tom
+-- Oracle/postgreSQL/H2  
+update tsmp_dp_appt_rjob set rjob_name='Open API Key Exp Checking', remark='[SYS]Default Open API Key Exp Checking' 
+, keyword_search = appt_rjob_id || '|Open API Key Exp Checking|[SYS]Default Open API Key Exp Checking' where remark='[SYS]預設Open API Key 快到期檢查';
+
+update tsmp_dp_appt_rjob set rjob_name='JWE/TLS Cert Exp', remark='[SYS]Default JWE/TLS Cert Exp' 
+, keyword_search = appt_rjob_id || '|JWE/TLS Cert Exp|[SYS]Default JWE/TLS Cert Exp' where remark='[SYS]預設JWE/TLS憑證到期提醒';
+
+update tsmp_dp_appt_rjob set rjob_name='Housekeeping Schedule', remark='[SYS]Default Housekeeping Schedule'
+, keyword_search = appt_rjob_id || '|Housekeeping Schedule|[SYS]Default Housekeeping Schedule' where remark='[SYS]預設Housekeeping排程';
+
+update tsmp_dp_appt_rjob set rjob_name='API auto listing schedule', remark='[SYS]Default API auto listing schedule'
+, keyword_search = appt_rjob_id || '|API auto listing schedule|[SYS]Default API auto listing schedule' where remark='[SYS]預設 API 自動上架下架排程';
+
+update tsmp_dp_appt_rjob set rjob_name='API auto enables schedule', remark='[SYS]Default API auto enables schedule'
+, keyword_search = appt_rjob_id || '|API auto enables schedule|[SYS]Default API auto enables schedule' where remark='[SYS]預設 API 自動啟用停用排程';
+
+-- SQL Server
+update tsmp_dp_appt_rjob set rjob_name='Open API Key Exp Checking', remark='[SYS]Default Open API Key Exp Checking' 
+, keyword_search = appt_rjob_id + '|Open API Key Exp Checking|[SYS]Default Open API Key Exp Checking' where remark='[SYS]預設Open API Key 快到期檢查';
+
+update tsmp_dp_appt_rjob set rjob_name='JWE/TLS Cert Exp', remark='[SYS]Default JWE/TLS Cert Exp' 
+, keyword_search = appt_rjob_id + '|JWE/TLS Cert Exp|[SYS]Default JWE/TLS Cert Exp' where remark='[SYS]預設JWE/TLS憑證到期提醒';
+
+update tsmp_dp_appt_rjob set rjob_name='Housekeeping Schedule', remark='[SYS]Default Housekeeping Schedule'
+, keyword_search = appt_rjob_id + '|Housekeeping Schedule|[SYS]Default Housekeeping Schedule' where remark='[SYS]預設Housekeeping排程';
+
+update tsmp_dp_appt_rjob set rjob_name='API auto listing schedule', remark='[SYS]Default API auto listing schedule'
+, keyword_search = appt_rjob_id + '|API auto listing schedule|[SYS]Default API auto listing schedule' where remark='[SYS]預設 API 自動上架下架排程';
+
+update tsmp_dp_appt_rjob set rjob_name='API auto enables schedule', remark='[SYS]Default API auto enables schedule'
+, keyword_search = appt_rjob_id + '|API auto enables schedule|[SYS]Default API auto enables schedule' where remark='[SYS]預設 API 自動啟用停用排程';
+
+-- mariaDB/MySQL
+update tsmp_dp_appt_rjob set rjob_name='Open API Key Exp Checking', remark='[SYS]Default Open API Key Exp Checking' 
+, keyword_search = concat(appt_rjob_id,'|Open API Key Exp Checking|[SYS]Default Open API Key Exp Checking') where remark='[SYS]預設Open API Key 快到期檢查';
+
+update tsmp_dp_appt_rjob set rjob_name='JWE/TLS Cert Exp', remark='[SYS]Default JWE/TLS Cert Exp' 
+, keyword_search = concat(appt_rjob_id, '|JWE/TLS Cert Exp|[SYS]Default JWE/TLS Cert Exp') where remark='[SYS]預設JWE/TLS憑證到期提醒';
+
+update tsmp_dp_appt_rjob set rjob_name='Housekeeping Schedule', remark='[SYS]Default Housekeeping Schedule'
+, keyword_search = concat(appt_rjob_id, '|Housekeeping Schedule|[SYS]Default Housekeeping Schedule') where remark='[SYS]預設Housekeeping排程';
+
+update tsmp_dp_appt_rjob set rjob_name='API auto listing schedule', remark='[SYS]Default API auto listing schedule'
+, keyword_search = concat(appt_rjob_id, '|API auto listing schedule|[SYS]Default API auto listing schedule') where remark='[SYS]預設 API 自動上架下架排程';
+
+update tsmp_dp_appt_rjob set rjob_name='API auto enables schedule', remark='[SYS]Default API auto enables schedule'
+, keyword_search = concat(appt_rjob_id, '|API auto enables schedule|[SYS]Default API auto enables schedule') where remark='[SYS]預設 API 自動啟用停用排程';

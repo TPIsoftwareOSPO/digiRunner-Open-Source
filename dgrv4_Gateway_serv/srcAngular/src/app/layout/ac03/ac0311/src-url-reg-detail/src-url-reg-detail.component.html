@@ -1,13 +1,20 @@
 <div class="mb-1 col-12 px-0" [formGroup]="form" style="align-items: center;display: flex;">
   <input type="number" class="form-control" formControlName="percent" min="0" max="100"
-         onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)"
-         pattern="[0-9]"  style="width:80px">
+    onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)" pattern="[0-9]"
+    style="width:80px" [readOnly]="apiTpye == 'WEBHOOK'">
   <label class="me-1">%</label>
-  <input type="text" class="form-control col" name="url" formControlName="url">
+  <input type="text" class="form-control col" name="url" formControlName="url" [readOnly]="apiTpye == 'AI_GATEWAY' || apiTpye == 'WEBHOOK'">
+  <button type="button" class="btn tpi-primary ms-1" [hidden]="disabled" *ngIf="apiTpye == 'AI_GATEWAY'"
+    (click)="procAiApikey()">
+    <i class="fa fa-plus"></i>
+    <span class="ps-1">AI APIKEY</span>
+  </button>
+  <p-checkbox class="ms-2" [binary]="true" [inputId]="'isMtls_'+_uuid" formControlName="isMtls" [hidden]="pathTpye == 'tsmpc'"> </p-checkbox>
+  <label class="mx-1" [for]="'isMtls_'+_uuid" [hidden]="pathTpye == 'tsmpc'">mtls</label>
   <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)" style="border-radius: 50%" [hidden]="disabled">
     <i class="fa fa-minus"></i>
   </button>
-  <button type="button" class="btn tpi-btn tpi-primary mx-1" (click)="testApi();" [disabled]="url.value==''">
-      {{'button.validate_url'|translate}}
+  <button type="button" class="btn tpi-btn tpi-primary mx-1" (click)="testApi();" [disabled]="url.value==''" *ngIf="apiTpye !== 'AI_GATEWAY'">
+    {{'button.validate_url'|translate}}
   </button>
 </div>

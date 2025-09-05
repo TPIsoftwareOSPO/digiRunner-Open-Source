@@ -154,6 +154,48 @@ public class TsmpApiReg implements Serializable {
 	
 	@Column(name = "FAIL_HANDLE_POLICY")
 	private String failHandlePolicy = "0";
+	
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Origin"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Origin"
+	 */
+	@Column(name = "IS_CORS_ALLOW_ORIGIN")
+	private String isCorsAllowOrigin = "N";
+
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Methods"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Methods"
+	 */
+	@Column(name = "IS_CORS_ALLOW_METHODS")
+	private String isCorsAllowMethods = "N";
+
+	/**
+	 * [ZH] 是否加入 CORS header "Access-Control-Allow-Headers"
+	 * [EN] Whether to add CORS header "Access-Control-Allow-Headers"
+	 */
+	@Column(name = "IS_CORS_ALLOW_HEADERS")
+	private String isCorsAllowHeaders = "N";
+
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Origin" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Origin" of the CORS Header
+	 */
+	@Column(name = "CORS_ALLOW_ORIGIN")
+	private String corsAllowOrigin;
+	
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Methods" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Methods" of the CORS Header
+	 */
+	@Column(name = "CORS_ALLOW_METHODS")
+	private String corsAllowMethods;
+
+	/**
+	 * [ZH] CORS Header 的 "Access-Control-Allow-Headers" 要加入的內容
+	 * [EN] Contents to be added to the "Access-Control-Allow-Headers" of the CORS Header
+	 */
+	@Column(name = "CORS_ALLOW_HEADERS")
+	private String corsAllowHeaders;
 
 	/* constructors */
 
@@ -178,7 +220,10 @@ public class TsmpApiReg implements Serializable {
 				+ ", bodyMaskPolicySymbol=" + bodyMaskPolicySymbol + ", headerMaskKey=" + headerMaskKey
 				+ ", headerMaskPolicy=" + headerMaskPolicy + ", headerMaskPolicyNum=" + headerMaskPolicyNum
 				+ ", headerMaskPolicySymbol=" + headerMaskPolicySymbol + ", failDiscoveryPolicy=" + failDiscoveryPolicy
-				+ ", failHandlePolicy=" + failHandlePolicy + "]";
+				+ ", failHandlePolicy=" + failHandlePolicy + ", isCorsAllowOrigin=" + isCorsAllowOrigin
+				+ ", isCorsAllowMethods=" + isCorsAllowMethods + ", isCorsAllowHeaders=" + isCorsAllowHeaders
+				+ ", corsAllowOrigin=" + corsAllowOrigin + ", corsAllowMethods=" + corsAllowMethods
+				+ ", corsAllowHeaders=" + corsAllowHeaders + "]";
 	}
 
 	/* getters and setters */
@@ -501,5 +546,54 @@ public class TsmpApiReg implements Serializable {
 
 	public void setFailHandlePolicy(String failHandlePolicy) {
 		this.failHandlePolicy = failHandlePolicy;
+	}
+	
+
+	public String getIsCorsAllowOrigin() {
+		return isCorsAllowOrigin;
+	}
+
+	public void setIsCorsAllowOrigin(String isCorsAllowOrigin) {
+		this.isCorsAllowOrigin = isCorsAllowOrigin;
+	}
+
+	public String getIsCorsAllowMethods() {
+		return isCorsAllowMethods;
+	}
+
+	public void setIsCorsAllowMethods(String isCorsAllowMethods) {
+		this.isCorsAllowMethods = isCorsAllowMethods;
+	}
+
+	public String getIsCorsAllowHeaders() {
+		return isCorsAllowHeaders;
+	}
+
+	public void setIsCorsAllowHeaders(String isCorsAllowHeaders) {
+		this.isCorsAllowHeaders = isCorsAllowHeaders;
+	}
+
+	public String getCorsAllowOrigin() {
+		return corsAllowOrigin;
+	}
+
+	public void setCorsAllowOrigin(String corsAllowOrigin) {
+		this.corsAllowOrigin = corsAllowOrigin;
+	}
+
+	public String getCorsAllowMethods() {
+		return corsAllowMethods;
+	}
+
+	public void setCorsAllowMethods(String corsAllowMethods) {
+		this.corsAllowMethods = corsAllowMethods;
+	}
+
+	public String getCorsAllowHeaders() {
+		return corsAllowHeaders;
+	}
+
+	public void setCorsAllowHeaders(String corsAllowHeaders) {
+		this.corsAllowHeaders = corsAllowHeaders;
 	}
 }

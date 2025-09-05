@@ -94,7 +94,7 @@ export class Ac0017Component extends BaseComponent implements OnInit {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         // console.log(res.RespBody)
         this.acAuthList = res.RespBody.dgrAcIdpInfo;
-      }
+      } else this.acAuthList = [];
     });
   }
 
@@ -300,14 +300,14 @@ export class Ac0017Component extends BaseComponent implements OnInit {
             detail: `${dict['copy']} ${dict['message.success']}`,
           });
 
-          console.log('複製成功');
+          // console.log('複製成功');
         })
         .catch((err) => {
-          console.error('複製失敗', err);
-          // 可加上錯誤提示
+          // console.error('複製失敗', err);
+
         });
     } else {
-      console.warn('無資料可複製');
+      // console.warn('無資料可複製');
     }
   }
 

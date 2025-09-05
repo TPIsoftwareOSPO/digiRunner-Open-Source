@@ -1298,8 +1298,8 @@
   "cusUserDataUrl_tip": "提供 DGR 获取使用者资料的 API URL，CUS 必须提供一支 API，让 DGR 可以获取对应的使用者资料",
   "cusUrlExp": "请在输入 URL 时遵循以下规则：\n\n1. URL 必须以 `http://` 或 `https://` 开头\n2. URL 必须是合法且完整的网址格式\n\n## 正确示例：\n- https://www.example.com\n- http://subdomain.example.com/page\n- https://www.example.com/path/to/resource?param=value\n\n## 错误示例：\n- www.example.com（缺少协议）\n- ftp://example.com（不允许的协议）\n- https://（不完整的 URL）",
   "clientKeyMima": "客户端金钥密码",
-  "cfm_mtls_enable": "您即将启用本站台mTLS连线！",
-  "cfm_mtls_disable": "您即将禁用本站台mTLS连线！",
+  "cfm_mtls_enable": "确定要启用凭证设定?",
+  "cfm_mtls_disable": "确定要停用凭证设定?",
   "allow_all": "允许所有",
   "xapikey_search": "X-API-Key 搜寻",
   "xapikey_name": "X-API-Key 名称",
@@ -1315,7 +1315,8 @@
   },
   "notify": {
     "name": "通知名称",
-    "type": "通知类型"
+    "type": "通知类型",
+    "sound": "通知音效"
   },
   "status_code": "状态码",
   "elapsed_time": "响应时间",
@@ -1323,17 +1324,49 @@
   "date_duration_tip": "开始时间为空时，表示立即开始；结束时间为空时，表示永不结束",
   "date_duration_start": "开始时间为空时，表示立即开始",
   "date_duration_end": "结束时间为空时，表示永不结束",
-  "api_abnormal_report": "API 異常報告",
+  "api_abnormal_report": "API异常即时资讯",
   "abnormal_condition_setting": "异常条件设定",
   "rpt_s_time": "报表起始时间",
   "srv_s_time": "服务启动时间",
   "api_abnormal_greater_than": "响应失败或响应时间大于",
   "api_abnormal_failures": "仅响应失败（HTTP状态码>=400）",
+  "ai": {
+    "llm_name": "LLM模型名称",
+    "apikey_count": "已注册API KEY数量",
+    "api_key_alias": "API密钥名称",
+    "api_key_code": "API密钥代码",
+    "usage_limit_input": "输入限制",
+    "usage_limit_output": "输出限制",
+    "provider": "供应商",
+    "provider_alias": "供应商名称",
+    "model": "模型",
+    "usage_limit": "使用限制",
+    "reject": "拒绝",
+    "use_anyway": "强制使用",
+    "consumer_type": "用户类型",
+    "consumer_id": "用户ID",
+    "template_name": "模板名称",
+    "request_timestamp": "请求时间",
+    "api_input_token": "API输入Token",
+    "api_output_token": "API输出Token",
+    "content": "内容"
+  },
   "grpc": {
     "tar_serv": "目标服务名称",
     "tar_host": "目标主机",
     "tar_port": "端口号",
-    "proxy_host": "转发地址"
+    "proxy_host": "转发地址",
+    "autotrust_certs": "证书验证",
+    "cert_tip_1": "1. 内容为文本格式（Base64 编码）",
+    "cert_tip_2": "2. 常见扩展名为 .pem 或 .crt",
+    "cert_tip_3": "3. 内容必须包含从 -----BEGIN CERTIFICATE----- 到 -----END CERTIFICATE-----",
+    "cert_tip_4": "4. 如果您的证书在 PKCS#12 的 keystore 中",
+    "cert_tip_4_1": "4.1. 例如：example.p12 是 PKCS#12 格式的 keystore（内含 X.509 证书与私钥）",
+    "cert_tip_4_2": "4.2. 可用以下命令转换成 PEM 格式文件（会同时输出私钥与证书）：\nopenssl pkcs12 -nodes -in example.p12 -out example.pem -passin pass:example",
+    "cert_tip_4_3": "4.3. 打开 example.pem，找到证书区块，\n-----BEGIN CERTIFICATE-----\nMIIFwjCCA6qgAwIBAgIIHrR+pmyYcSUwDQYJKoZIhvcNAQEMBQAwgYYxGDAWBgNV\n......\npY2+3U1hLAs6pNrmuSpGrbQa6QEx21jO7HCON7Ds/5Cl3ZCWlg4=\n-----END CERTIFICATE-----\n将它完整复制粘贴"
   },
-  "org_reset": "设置组织"
+  "org_reset": "设置组织",
+  "recent_api_abnormal_each_node": "观测各节点最近一次异常响应的 API",
+  "trustedCertsContent": "证书",
+  "cert": "证书"
 }

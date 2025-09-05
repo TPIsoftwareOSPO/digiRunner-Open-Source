@@ -112,7 +112,8 @@
         <div class="col-md-7 col-sm-12">
           <label id="cusName_label" class="control-label">{{'cusName'|translate}}</label><i
             class="far fa-question-circle ms-2" pTooltip="{{ 'cusName_tip' | translate }}" [escape]="false"></i>
-          <input formControlName="cusName" type="text" class="form-control" (focus)="isShowBtnSVG=true" (focusout)="isShowBtnSVG=false">
+          <input formControlName="cusName" type="text" class="form-control" (focus)="isShowBtnSVG=true" (focusout)="isShowBtnSVG=false"
+          (mouseenter)=" currentAction == 'detail'? isShowBtnSVG=true:undefined;" (mouseleave)="currentAction == 'detail'? isShowBtnSVG=false:undefined">
           <div *ngIf="cusName?.invalid && (cusName?.dirty || cusName?.touched)" class="text-danger">
             <!-- <small class="form-text">{{cusName.errors.isRequired}}</small> -->
             <small class="form-text">{{cusName.errors.maxlength}}</small>
@@ -204,7 +205,7 @@
       </div>
     </form>
     <div class="svg-panel">
-      <ng-container *ngIf="isShowBtnSVG || currentAction == 'detail'">
+      <ng-container *ngIf="isShowBtnSVG ">
         <svg width="1049" height="583" viewBox="0 0 1049 583" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="1049" height="583" fill="#F6F6F6"/>
           <rect x="693.5" y="219.5" width="278" height="37" rx="18.5" stroke="#343A40"/>

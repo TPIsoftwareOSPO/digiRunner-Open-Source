@@ -69,6 +69,12 @@ export interface AA0302Resp {
   updateDate?: string;
   updateUser?: string;
   notifyNameList?: Array<string>;
+  isCorsAllowOrigin?: string;
+  isCorsAllowMethods?: string;
+  isCorsAllowHeaders?: string;
+  corsAllowOrigin?: string;
+  corsAllowMethods?: string;
+  corsAllowHeaders?: string;
 }
 export interface AA0302RedirectByIpData {
   ipForRedirect: string;

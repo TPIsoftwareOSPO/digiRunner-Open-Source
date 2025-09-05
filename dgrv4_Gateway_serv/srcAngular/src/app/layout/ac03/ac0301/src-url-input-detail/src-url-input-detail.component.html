@@ -1,12 +1,20 @@
-<div class="form-group " [formGroup]="form">
-  <div class="col-12 px-0" [style]="{display: 'flex',width: '100%','align-items': 'center'}">
+<!-- <div class="form-group" [formGroup]="form"> -->
+  <!-- <div class="col-12 px-0" [style]="{display: 'flex',width: '100%','align-items': 'center'}"> -->
+<div class="mb-1 col-12 px-0" [formGroup]="form" style="align-items: center;display: flex;">
     <input type="number" class="form-control" formControlName="percent" min="0" max="100"
-         onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)"
-         pattern="[0-9]"  style="width:80px" [readOnly]="disabled">
+      onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)" pattern="[0-9]"
+      style="width:80px" [readOnly]="disabled">
     <label class="me-1">%</label>
-    <input type="text" class="form-control" name="url" formControlName="url" [readOnly]="disabled">
+    <input type="text" class="form-control" name="url" formControlName="url" [readOnly]="disabled || isAiGateway">
+    <p-checkbox class="ms-2" [binary]="true" [inputId]="'isMtls_'+_uuid" formControlName="isMtls" [hidden]="pathTpye == 'tsmpc'"> </p-checkbox>
+    <label class="mx-1" [for]="'isMtls_'+_uuid" [hidden]="pathTpye == 'tsmpc'">mtls</label>
+    <button type="button" class="btn tpi-primary ms-1" [hidden]="disabled" *ngIf="isAiGateway" style="min-width: 100px;"
+      (click)="procAiApikey()">
+      <i class="fa fa-plus"></i>
+      <span class="ps-1">AI APIKEY</span>
+    </button>
     <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)" style="border-radius: 50%" [hidden]="disabled">
       <i class="fa fa-minus"></i>
     </button>
-  </div>
+  <!-- </div> -->
 </div>

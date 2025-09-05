@@ -74,6 +74,7 @@ import { ClientCAComponent } from './../layout/np02/np0202/client-ca/client-ca.c
 import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-detail.component';
 import { SearchInputComponent } from '../layout/components/search-input/search-input.component';
 import { NotifyListComponent } from './notify-list/notify-list.component';
+import { AiApikeyComponent } from '../layout/ac03/ac0311/ai-apikey/ai-apikey.component';
 
 @NgModule({
   imports: [
@@ -145,6 +146,7 @@ import { NotifyListComponent } from './notify-list/notify-list.component';
     UserDetailComponent,
     SearchInputComponent,
     NotifyListComponent,
+    AiApikeyComponent
   ],
   declarations: [
     ContainerComponent,
@@ -200,7 +202,8 @@ import { NotifyListComponent } from './notify-list/notify-list.component';
     ClientCAComponent,
     UserDetailComponent,
     SearchInputComponent,
-    NotifyListComponent
+    NotifyListComponent,
+    AiApikeyComponent
   ],
   providers: [ApiBaseService, MessageService],
 })

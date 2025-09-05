@@ -1,0 +1,8 @@
+-- 【dgRv4.5.17.0 - SQL 異動】
+-- 20250805,API異常報表改API異常即時資訊, tom
+UPDATE tsmp_func SET func_name='API異常即時資訊', func_name_en='API Abnormal Real-time Information', func_desc='API異常即時資訊' 
+WHERE func_code='AC0503' AND locale='zh-TW';  
+
+UPDATE tsmp_func SET func_name='API Abnormal Real-time Information', func_name_en='API Abnormal Real-time Information'
+, func_desc='API Abnormal Real-time Information' 
+WHERE func_code='AC0503' AND locale='en-US';

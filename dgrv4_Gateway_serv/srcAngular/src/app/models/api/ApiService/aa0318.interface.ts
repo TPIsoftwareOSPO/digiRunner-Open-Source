@@ -23,7 +23,15 @@ export interface AA0318Item {
   checkAct: AA0318Pair;
   memo?: AA0318Trunc;
   srcURLByIpRedirectMap?: string | Array<AA0318srcURLByIpRedirectItem>;
+  failDiscoveryPolicy: string;
+  failHandlePolicy: string;
   srcURL: string;
+  isCorsAllowOrigin?: string;
+  isCorsAllowMethods?: string;
+  isCorsAllowHeaders?: string;
+  corsAllowOrigin?: string;
+  corsAllowMethods?: string;
+  corsAllowHeaders?: string;
 }
 
 export interface AA0318srcURLByIpRedirectItem {

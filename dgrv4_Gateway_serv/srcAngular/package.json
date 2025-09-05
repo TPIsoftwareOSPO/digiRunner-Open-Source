@@ -44,6 +44,7 @@
     "https-browserify": "^1.0.0",
     "jquery": "^3.6.0",
     "js-base64": "^3.7.2",
+    "marked": "^16.1.2",
     "ngx-ui-loader": "^13.0.0",
     "os-browserify": "^0.3.0",
     "primeicons": "^5.0.0",

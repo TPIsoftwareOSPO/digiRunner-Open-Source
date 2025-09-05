@@ -108,7 +108,6 @@ public class AA0303Service {
 	private EnableDisableProcessingFlow enableDisableProcessingFlow;
 	private List<ApiPublicFlagHandlerInterface> apiPublicFlagHandlers;
 
-
 	@Setter(onMethod_ = @Autowired)
 	@Getter(AccessLevel.PROTECTED)
 	private DgrWebhookApiMapDao dgrWebhookApiMapDao;

@@ -1,15 +1,33 @@
 package tpi.dgrv4.grpcproxy.manager;
 
-import io.grpc.HandlerRegistry;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.netty.NettyChannelBuilder;
-import io.netty.handler.ssl.SslContext;
-import jakarta.annotation.PostConstruct;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+
+import io.grpc.HandlerRegistry;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.NettyChannelBuilder;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.ssl.SslContext;
+import jakarta.annotation.PostConstruct;
+import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.DgrGrpcProxyMap;
 import tpi.dgrv4.entity.repository.DgrGrpcProxyMapDao;
 import tpi.dgrv4.gateway.keeper.TPILogger;
@@ -18,23 +36,13 @@ import tpi.dgrv4.grpcproxy.event.ProxyConfigChangedEvent;
 import tpi.dgrv4.grpcproxy.handler.HostBasedHandlerRegistry;
 import tpi.dgrv4.grpcproxy.security.TlsCertificateManager;
 
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Dynamic gRPC proxy manager, responsible for managing proxy channels and their configurations.
  * Supports dynamically adding, updating, and deleting proxy mappings.
  */
 @Component
 public class DynamicGrpcProxyManager {
-    private final TPILogger logger = TPILogger.tl;
+
     
     @Value("${grpc.proxy.enabled:false}")
     private boolean grpcProxyEnabled;
@@ -75,11 +83,11 @@ public class DynamicGrpcProxyManager {
     		TPILogger.tl.info("grpc proxy enabled is true");
     	}
     	
-        logger.debug("Initializing dynamic gRPC proxy manager");
+        TPILogger.tl.debug("Initializing dynamic gRPC proxy manager");
         try {
             refreshProxyMappings();
         } catch (Exception e) {
-            logger.error("Error initializing dynamic proxy manager: " + e.getMessage());
+        	TPILogger.tl.error("Error initializing dynamic proxy manager: " + StackTraceUtil.logStackTrace(e));
             // Create an empty handler registry to ensure the application can start
             handlerRegistry = new HostBasedHandlerRegistry(new HashMap<>());
         }
@@ -90,12 +98,12 @@ public class DynamicGrpcProxyManager {
      * This method is executed on application startup or when a manual refresh is triggered
      */
     public synchronized void refreshProxyMappings() {
-        logger.debug("Refreshing proxy mappings from database");
+        TPILogger.tl.debug("Refreshing proxy mappings from database");
 
         try {
             // Get all enabled proxy mappings
             List<DgrGrpcProxyMap> enabledMappings = dgrGrpcProxyMapDao.findByEnable("Y");
-            logger.debug("Found " + enabledMappings.size() + " enabled proxy mappings");
+            TPILogger.tl.debug("Found " + enabledMappings.size() + " enabled proxy mappings");
 
             // Remove channels that are no longer enabled
             List<String> newProxyHostnames = enabledMappings.stream()
@@ -120,13 +128,13 @@ public class DynamicGrpcProxyManager {
             // Create a new handler registry
             handlerRegistry = new HostBasedHandlerRegistry(proxyChannels);
 
-            logger.debug("Proxy mapping refresh completed. Active channels: " + proxyChannels.size() +
+            TPILogger.tl.debug("Proxy mapping refresh completed. Active channels: " + proxyChannels.size() +
                     ", hostnames: " + String.join(", ", proxyChannels.keySet()));
 
             // Publish refresh event to restart the server once
             eventPublisher.publishEvent(ProxyConfigChangedEvent.refreshEvent());
         } catch (Exception e) {
-            logger.error("Error refreshing proxy mappings: " + e.getMessage());
+        	TPILogger.tl.error("Error refreshing proxy mappings: " + StackTraceUtil.logStackTrace(e));
             throw e;
         }
     }
@@ -137,7 +145,7 @@ public class DynamicGrpcProxyManager {
      * @param mapping The proxy mapping to add
      */
     public synchronized void addProxyMapping(DgrGrpcProxyMap mapping) {
-        logger.debug("Adding new proxy mapping: " + mapping.getProxyHostName());
+        TPILogger.tl.debug("Adding new proxy mapping: " + mapping.getProxyHostName());
         if ("Y".equals(mapping.getEnable())) {
             updateProxyChannel(mapping, true); // Send event
         }
@@ -149,7 +157,7 @@ public class DynamicGrpcProxyManager {
      * @param mapping The proxy mapping to update
      */
     public synchronized void updateProxyMapping(DgrGrpcProxyMap mapping) {
-        logger.debug("Updating proxy mapping: " + mapping.getProxyHostName() + ", enable status: " + mapping.getEnable());
+        TPILogger.tl.debug("Updating proxy mapping: " + mapping.getProxyHostName() + ", enable status: " + mapping.getEnable());
         String proxyHostname = mapping.getProxyHostName();
 
         if ("Y".equals(mapping.getEnable())) {
@@ -173,7 +181,7 @@ public class DynamicGrpcProxyManager {
             return 0;
         }
 
-        logger.debug("Batch " + (enable ? "enabling" : "disabling") + " proxy services, count: " + mappings.size());
+        TPILogger.tl.debug("Batch " + (enable ? "enabling" : "disabling") + " proxy services, count: " + mappings.size());
 
         int successCount = 0;
         boolean needRestart = false;
@@ -195,7 +203,8 @@ public class DynamicGrpcProxyManager {
 
                 successCount++;
             } catch (Exception e) {
-                logger.error("Error processing proxy mapping: " + mapping.getProxyHostName());
+            	TPILogger.tl.error("Error processing proxy mapping: " + mapping.getProxyHostName()+"\n"+StackTraceUtil.logStackTrace(e));
+                
                 // Continue processing other mappings
             }
         }
@@ -209,7 +218,7 @@ public class DynamicGrpcProxyManager {
             eventPublisher.publishEvent(ProxyConfigChangedEvent.refreshEvent());
         }
 
-        logger.debug("Batch " + (enable ? "enabling" : "disabling") + " proxy services completed, success: " +
+        TPILogger.tl.debug("Batch " + (enable ? "enabling" : "disabling") + " proxy services completed, success: " +
                 successCount + ", failure: " + (mappings.size() - successCount));
 
         return successCount;
@@ -222,7 +231,7 @@ public class DynamicGrpcProxyManager {
      */
     public synchronized void deleteProxyMapping(DgrGrpcProxyMap mapping) {
         String proxyHostname = mapping.getProxyHostName();
-        logger.debug("Deleting proxy mapping: " + proxyHostname);
+        TPILogger.tl.debug("Deleting proxy mapping: " + proxyHostname);
         if (proxyChannels.containsKey(proxyHostname)) {
             removeProxyChannel(proxyHostname, true); // Send event
         }
@@ -234,7 +243,7 @@ public class DynamicGrpcProxyManager {
      * @param proxyHostname The proxy hostname to delete
      */
     public synchronized void deleteProxyMappingByHostname(String proxyHostname) {
-        logger.debug("Deleting proxy mapping by hostname: " + proxyHostname);
+        TPILogger.tl.debug("Deleting proxy mapping by hostname: " + proxyHostname);
         if (proxyChannels.containsKey(proxyHostname)) {
             removeProxyChannel(proxyHostname, true); // Send event
         }
@@ -248,7 +257,7 @@ public class DynamicGrpcProxyManager {
      * @return true if the target service supports TLS, false otherwise
      */
     private boolean detectTlsSupport(String hostname, int port) {
-        logger.debug("Detecting if target service supports TLS: " + hostname + ":" + port);
+        TPILogger.tl.debug("Detecting if target service supports TLS: " + hostname + ":" + port);
 
         try {
             // Try to connect to the target service using SSL
@@ -274,17 +283,17 @@ public class DynamicGrpcProxyManager {
                     // Perform SSL handshake
                     socket.startHandshake();
 
-                    logger.debug("Target service supports TLS: " + hostname + ":" + port);
+                    TPILogger.tl.debug("Target service supports TLS: " + hostname + ":" + port);
                     return true;
                 }
             }
         } catch (SSLHandshakeException e) {
             // If it's a certificate issue, the server might support TLS, but we don't trust its certificate
-            logger.debug("Target service might support TLS, but certificate validation failed (might need to trust certificate): " + hostname + ":" + port);
+            TPILogger.tl.debug("Target service might support TLS, but certificate validation failed (might need to trust certificate): " + hostname + ":" + port);
             return true;
         } catch (Exception e) {
             // Other exceptions, might not support TLS
-            logger.debug("Target service might not support TLS: " + hostname + ":" + port + ", error: " + e.getMessage());
+            TPILogger.tl.debug("Target service might not support TLS: " + hostname + ":" + port + ", error: " + e.getMessage());
             return false;
         }
     }
@@ -326,14 +335,12 @@ public class DynamicGrpcProxyManager {
         boolean unchanged = existingMapping.getTargetHostName().equals(mapping.getTargetHostName()) &&
                 existingMapping.getTargetPort() == mapping.getTargetPort() &&
                 existingMapping.getConnectTimeoutMs() == mapping.getConnectTimeoutMs() &&
-                existingMapping.getSendTimeoutMs() == mapping.getSendTimeoutMs() &&
-                existingMapping.getReadTimeoutMs() == mapping.getReadTimeoutMs() &&
                 Objects.equals(existingMapping.getSecureMode(), mapping.getSecureMode()) &&
                 Objects.equals(existingMapping.getTrustedCertsContent(), mapping.getTrustedCertsContent()) &&
                 Objects.equals(existingMapping.isAutoTrustUpstreamCerts(), mapping.isAutoTrustUpstreamCerts());
                 
         if (unchanged) {
-            logger.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " configuration unchanged, skipping update");
+            TPILogger.tl.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " configuration unchanged, skipping update");
         }
         return unchanged;
     }
@@ -346,9 +353,9 @@ public class DynamicGrpcProxyManager {
         ManagedChannel oldChannel = proxyChannels.remove(proxyHostname);
         try {
             oldChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-            logger.debug("Closed old channel for " + proxyHostname);
+            TPILogger.tl.debug("Closed old channel for " + proxyHostname);
         } catch (InterruptedException e) {
-            logger.error("Error closing channel for " + proxyHostname + e);
+        	TPILogger.tl.error("Error closing channel for " + proxyHostname +"\n"+StackTraceUtil.logStackTrace(e));
             Thread.currentThread().interrupt();
         }
     }
@@ -361,61 +368,60 @@ public class DynamicGrpcProxyManager {
     private boolean determineTlsUsage(DgrGrpcProxyMap mapping, String secureMode, String proxyHostname) {
         switch (secureMode) {
             case "SECURE":
-                logger.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " configured to force use of TLS");
+                TPILogger.tl.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " configured to force use of TLS");
                 return true;
             case "PLAINTEXT":
-                logger.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " configured to not use TLS (plaintext)");
+                TPILogger.tl.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " configured to not use TLS (plaintext)");
                 return false;
             case "AUTO":
             default:
                 boolean useTls = detectTlsSupport(mapping.getTargetHostName(), mapping.getTargetPort());
-                logger.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " auto-detected TLS result: " +
+                TPILogger.tl.debug(PROXY_MAPPING_LOG_PREFIX + proxyHostname + " auto-detected TLS result: " +
                         (useTls ? "using TLS" : "using plaintext"));
                 return useTls;
         }
     }
 
     private ManagedChannel createChannel(DgrGrpcProxyMap mapping, boolean useTls, String proxyHostname) {
-        return useTls ? createTlsChannel(mapping, proxyHostname) : createPlaintextChannel(mapping, proxyHostname);
-    }
-
-    private ManagedChannel createTlsChannel(DgrGrpcProxyMap mapping, String proxyHostname) {
-        try {
+    	String prefix = useTls ? "TLS channel:" : "plaintext channel:";
+    	try {
             NettyChannelBuilder channelBuilder = NettyChannelBuilder
-                    .forAddress(mapping.getTargetHostName(), mapping.getTargetPort());
+                    .forAddress(mapping.getTargetHostName(), mapping.getTargetPort())
+                    .withOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, mapping.getConnectTimeoutMs());
             
-            SslContext sslContext = createSslContext(mapping, proxyHostname);
-            channelBuilder.sslContext(sslContext);
+            if(useTls) {
+	            SslContext sslContext = createSslContext(mapping, proxyHostname);
+	            channelBuilder.sslContext(sslContext);
+            }else {
+            	channelBuilder.usePlaintext();
+            }
             
             ManagedChannel channel = applyChannelSettings((ManagedChannelBuilder<?>) channelBuilder).build();
-            logger.debug("Created TLS channel for " + proxyHostname + " with enhanced HTTP/2 settings");
+            if(useTls) {
+            	TPILogger.tl.debug("Created TLS channel for " + proxyHostname + " with enhanced HTTP/2 settings");
+            }else {
+            	TPILogger.tl.debug("Created plaintext channel for " + proxyHostname + " with enhanced HTTP/2 settings");
+            }
+            
             return channel;
         } catch (Exception e) {
-            logger.error("Error creating TLS channel: " + e.getMessage() + ", falling back to plaintext channel" + e);
+        	TPILogger.tl.error(prefix + StackTraceUtil.logStackTrace(e));
             return createPlaintextChannelFallback(mapping);
         }
+        
     }
 
     private SslContext createSslContext(DgrGrpcProxyMap mapping, String proxyHostname) throws Exception {
         if ("Y".equals(mapping.isAutoTrustUpstreamCerts())) {
-            logger.debug("Creating TLS channel with auto-trust all certificates for " + proxyHostname);
+            TPILogger.tl.debug("Creating TLS channel with auto-trust all certificates for " + proxyHostname);
             return tlsCertificateManager.createInsecureClientSslContext();
         } else if (mapping.getTrustedCertsContent() != null && !mapping.getTrustedCertsContent().isEmpty()) {
-            logger.debug("Creating TLS channel with custom trusted certificates for " + proxyHostname);
+            TPILogger.tl.debug("Creating TLS channel with custom trusted certificates for " + proxyHostname);
             return tlsCertificateManager.createClientSslContext(mapping.getTrustedCertsContent());
         } else {
-            logger.debug("No trusted certificates provided, creating TLS channel with auto-trust all certificates for " + proxyHostname);
+            TPILogger.tl.debug("No trusted certificates provided, creating TLS channel with auto-trust all certificates for " + proxyHostname);
             return tlsCertificateManager.createInsecureClientSslContext();
         }
-    }
-
-    private ManagedChannel createPlaintextChannel(DgrGrpcProxyMap mapping, String proxyHostname) {
-        ManagedChannel channel = applyChannelSettings((ManagedChannelBuilder<?>) ManagedChannelBuilder
-                .forAddress(mapping.getTargetHostName(), mapping.getTargetPort())
-                .usePlaintext())
-                .build();
-        logger.debug("Created plaintext channel for " + proxyHostname + " with enhanced HTTP/2 settings");
-        return channel;
     }
 
     private ManagedChannel createPlaintextChannelFallback(DgrGrpcProxyMap mapping) {
@@ -468,7 +474,7 @@ public class DynamicGrpcProxyManager {
     }
 
     private void logChannelCreation(DgrGrpcProxyMap mapping, String proxyHostname, String secureMode, String securityInfo) {
-        logger.debug("Added new channel: " + proxyHostname + " -> " +
+        TPILogger.tl.debug("Added new channel: " + proxyHostname + " -> " +
                 mapping.getTargetHostName() + ":" + mapping.getTargetPort() +
                 " (timeout settings: connect=" + mapping.getConnectTimeoutMs() +
                 "ms, send=" + mapping.getSendTimeoutMs() +
@@ -503,9 +509,9 @@ public class DynamicGrpcProxyManager {
         if (channel != null) {
             try {
                 channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-                logger.debug("Removed channel for hostname: " + proxyHostname);
+                TPILogger.tl.debug("Removed channel for hostname: " + proxyHostname);
             } catch (InterruptedException e) {
-                logger.error("Error closing channel for hostname: " + proxyHostname + e);
+            	TPILogger.tl.error("Error closing channel for hostname: " + proxyHostname +"\n"+StackTraceUtil.logStackTrace(e));
                 Thread.currentThread().interrupt();
             }
 

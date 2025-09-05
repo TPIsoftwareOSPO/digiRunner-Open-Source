@@ -1,0 +1,191 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <div class="form-group row">
+      <div class="col-12">
+        <button type="button" class="btn tpi-btn tpi-second float-end"
+          (click)="changePage('create');">{{'button.create'|translate}}</button>
+      </div>
+    </div>
+    <p-table [columns]="cols" [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+      [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngFor="let col of columns" scope="col" [ngStyle]="{width:col.field=='id'?'175px':'auto'}">
+            {{col.header}}
+          </th>
+          <th style="width:120px;" scope="col">{{'action'|translate}}
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td *ngFor="let col of columns" [style.width]="col.width">
+            <span *ngIf="col.field != 'aiApiKeyEnable'">
+              <!-- {{rowData[col.field]}} -->
+              <ng-container *ngIf="col.field === 'aiProviderName'">
+                {{ rowData.dgrAiProvider?.aiProviderName }}
+              </ng-container>
+              <ng-container *ngIf="col.field === 'aiModel'">
+                {{ rowData.dgrAiProvider?.aiModel }}
+              </ng-container>
+              <ng-container *ngIf="col.field !== 'provider' && col.field !== 'model'">
+                {{ rowData[col.field] }}
+              </ng-container>
+            </span>
+            <div class="text-center" *ngIf="col.field == 'aiApiKeyEnable'">
+              <img [alt]="rowData.aiApikeyEnable" style="width: 20px; height: 20px"
+                [src]="rowData.aiApikeyEnable ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+            </div>
+          </td>
+          <td style="text-align:center;width: 120px">
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              (click)="changePage('detail', rowData)" [pTooltip]="'button.detail' | translate"
+              tooltipPosition="top"></button>
+
+            <button pButton pRipple type="button" icon="fa fa-edit"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
+              [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
+
+            <button pButton pRipple type="button" icon="fa fa-trash-alt"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('delete', rowData)"
+              [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
+          </td>
+
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length>0">
+          <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+            <!-- <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button> -->
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="columns.length+1">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <!-- 建立 / 更新 / 詳細資料 -->
+  <div [hidden]="pageNum != 2">
+    <form [formGroup]="formE">
+      <div class="form-group row">
+        <div class="col-4">
+          <label for="aiApiKeyName" class="control-label required">{{'ai.api_key_alias'|translate}}</label>
+          <input type="text" class="form-control" id="aiApiKeyName" formControlName="aiApiKeyName">
+          <div *ngIf="aiApiKeyName.invalid && (aiApiKeyName.dirty || aiApiKeyName.touched)" class="text-danger">
+            <small class="form-text">{{aiApiKeyName?.errors.required|translate}}</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <label for="aiProviderId"
+            class="required control-label">{{'ai.provider'|translate}}/{{'ai.model'|translate}}</label>
+          <p-dropdown [options]="aiProviderList" placeholder="{{'plz_chs' | translate}}" formControlName="aiProviderId"
+            [style]="{'width':'100%'}" *ngIf="currentAction !=='detail'"  optionLabel="aiProviderAlias" optionValue="aiProviderId">
+            <ng-template let-option pTemplate="item">
+              {{ option.aiProviderAlias }}<br>
+              <small class="text-muted">({{ option.aiProviderName }} - {{ option.aiModel }})</small>
+            </ng-template>
+          </p-dropdown>
+          <div *ngIf="aiProviderId.invalid && (aiProviderId.dirty || aiProviderId.touched)" class="text-danger">
+            <small class="form-text">{{aiProviderId?.errors.required|translate}}</small>
+          </div>
+          <input type="text" class="form-control" id="aiProviderAlias" formControlName="aiProviderAlias"
+            *ngIf="currentAction == 'detail'">
+        </div>
+        <div class="col-4">
+          <label id="enable_label" class="control-label required">{{'status'|translate}}</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="aiApiKeyEnable" value="Y" inputId="enableY"></p-radioButton>
+                <label for="enableY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="aiApiKeyEnable" value="N" inputId="enableN"></p-radioButton>
+                <label for="enableN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12">
+          <label for="aiApiKeyCode" class="control-label required">{{'ai.api_key_code'|translate}}</label>
+          <input type="text" class="form-control" id="aiApiKeyCode" formControlName="aiApiKeyCode">
+          <div *ngIf="aiApiKeyCode.invalid && (aiApiKeyCode.dirty || aiApiKeyCode.touched)" class="text-danger">
+            <small class="form-text">{{aiApiKeyCode?.errors.required|translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-6">
+          <label for="usageLimitInputToken" class="control-label required">{{'ai.usage_limit_input'|translate}}</label>
+          <input type="number" min="0" class="form-control" id="usageLimitInputToken"
+            formControlName="usageLimitInputToken">
+          <div *ngIf="usageLimitInputToken.invalid && (usageLimitInputToken.dirty || usageLimitInputToken.touched)"
+            class="text-danger">
+            <small class="form-text">{{usageLimitInputToken?.errors.required|translate}}</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <label for="usageLimitOutputToken"
+            class="control-label required">{{'ai.usage_limit_output'|translate}}</label>
+          <input type="number" min="0" class="form-control" id="usageLimitOutputToken"
+            formControlName="usageLimitOutputToken">
+          <div *ngIf="usageLimitOutputToken.invalid && (usageLimitOutputToken.dirty || usageLimitOutputToken.touched)"
+            class="text-danger">
+            <small class="form-text">{{usageLimitOutputToken?.errors.required|translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-4">
+          <label class="control-label required">{{'ai.usage_limit'|translate}}</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="usageLimitPolicy" value="REJECT"
+                  inputId="usageLimitPolicyY"></p-radioButton>
+                <label for="usageLimitPolicyY" class="ms-2 mb-0">{{'ai.reject'|translate}}</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="usageLimitPolicy" value="USE_ANYWAY"
+                  inputId="usageLimitPolicyN"></p-radioButton>
+                <label for="usageLimitPolicyN" class="ms-2 mb-0">{{'ai.use_anyway'|translate}}</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12 col-lg-12">
+          <button type="button" class="btn tpi-btn float-start me-3" [hidden]="currentAction=='detail'"
+            [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']" [disabled]="!formE.valid"
+            (click)="procData();">{{btnName}}</button>
+
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
+            (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</app-container>
+<p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{width: '400px'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="row" style="justify-content: center;">
+      <button type="button" pButton icon="pi pi-check"
+        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
+        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>

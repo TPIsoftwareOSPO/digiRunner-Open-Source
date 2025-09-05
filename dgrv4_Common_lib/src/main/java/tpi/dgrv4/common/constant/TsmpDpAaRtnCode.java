@@ -426,6 +426,8 @@ public enum TsmpDpAaRtnCode implements ITsmpDpAaError<TsmpDpAaException> {
 	_1557(TsmpDpModule.DP5, "57", "啟用日期需要小於停用日期"),
 	_1558(TsmpDpModule.DP5, "58", "停用日期需要小於啟用日期"),
 	_1559(TsmpDpModule.DP5, "59", "{{0}}"),
+	_1560(TsmpDpModule.DP5, "60", "憑證過期"),
+
 	_1561(TsmpDpModule.DP5, "61", "對稱式加密失敗：{{0}}"),
 	_1562(TsmpDpModule.DP5, "62", "對稱式解密失敗：{{0}}"),
 
@@ -468,6 +470,7 @@ public enum TsmpDpAaRtnCode implements ITsmpDpAaError<TsmpDpAaException> {
 	_2036(TsmpDpModule.DP10, "36", "必須先移除預定下架日期"),
 	_2037(TsmpDpModule.DP10, "37", "上架日期需要小於下架日期"),
 	_2038(TsmpDpModule.DP10, "38", "下架日期需要小於上架日期"),
+	_2039(TsmpDpModule.DP10, "39", "啟用中，無法刪除"),
     ;
 
 	private TsmpDpModule module;

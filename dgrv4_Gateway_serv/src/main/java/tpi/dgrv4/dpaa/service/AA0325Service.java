@@ -45,6 +45,7 @@ public class AA0325Service {
 
 	private ObjectMapper objectMapper;
 	private TsmpSettingService tsmpSettingService;
+	private int times = 0;
 
 	@Autowired
 	public AA0325Service(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService) {
@@ -86,7 +87,14 @@ public class AA0325Service {
 		if (TPILogger.lc != null) {
 			TPILogger.lc.send(composerInfoPacket);
 		} else {
-			//因為不一定要啟動keeper server且這又是每秒call一次,所以不印Log了
+			//因為不一定要啟動keeper server且這又是每秒call一次
+			if(times%60==0) {
+				TPILogger.tl.error("<Keeper Server> Lost Connection");
+			}
+			times++;
+			if(times >= 10000) {
+				times = 0;
+			}
 		}
 
 		// 是否禁止紀錄ES的LOG

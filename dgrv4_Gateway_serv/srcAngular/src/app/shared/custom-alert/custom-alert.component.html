@@ -1,9 +1,9 @@
 <div class="custom-dialog container-fluid ">
   <div class="d-flex justify-content-center py-2">
-    <i *ngIf="config.data.type == 'info'" class="fas fa-info-circle text-info icon-large"></i>
-    <i *ngIf="config.data.type == 'warning'" class="fas fa-exclamation-circle text-warning icon-large"></i>
-    <i *ngIf="config.data.type == 'error'" class="fas fa-times-circle text-danger icon-large"></i>
-    <i *ngIf="config.data.type == 'success'" class="far fa-check-circle text-success icon-large"></i>
+    <i [hidden]="config.data.type !== 'info'" class="fas fa-info-circle text-info icon-large"></i>
+    <i [hidden]="config.data.type !== 'warning'" class="fas fa-exclamation-circle text-warning icon-large"></i>
+    <i [hidden]="config.data.type !== 'error'" class="fas fa-times-circle text-danger icon-large"></i>
+    <i [hidden]="config.data.type !== 'success'" class="far fa-check-circle text-success icon-large"></i>
   </div>
 
   <div class="text-center">

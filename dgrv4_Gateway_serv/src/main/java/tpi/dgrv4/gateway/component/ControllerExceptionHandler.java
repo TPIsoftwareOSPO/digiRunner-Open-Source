@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -54,6 +55,12 @@ public class ControllerExceptionHandler {
 		this.tsmpSettingService = tsmpSettingService;
 	}
 
+	@ExceptionHandler(Throwable.class)
+	public ResponseEntity<String> handleUnTrackException(Throwable e) {
+		var stacktrace = StackTraceUtil.logStackTrace(e);
+		TPILogger.tl.error("UnTrackError: " + stacktrace);
+		return ResponseEntity.internalServerError().body(e.getMessage());
+	}
 
 	@ExceptionHandler(DgrException.class)
 	public ModelAndView handleDgrException(DgrException ex) {

@@ -98,7 +98,7 @@ export class Ac0021Component extends BaseComponent implements OnInit {
       .subscribe((res) => {
         if (this.toolService.checkDpSuccess(res.ResHeader)) {
           this.tableData = res.RespBody.infoList;
-        }
+        } else this.tableData = [];
         this.ngxSrvice.stop();
       });
   }

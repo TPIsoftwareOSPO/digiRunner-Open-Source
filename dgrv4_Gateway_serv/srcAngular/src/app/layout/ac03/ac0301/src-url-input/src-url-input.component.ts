@@ -8,138 +8,157 @@ import * as base64 from 'js-base64'
   selector: 'app-src-url-input',
   templateUrl: './src-url-input.component.html',
   styleUrls: ['./src-url-input.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => SrcUrlInputComponent),
-    multi: true
-  }]
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SrcUrlInputComponent),
+      multi: true,
+    },
+  ],
 })
 export class SrcUrlInputComponent implements OnInit {
-
   onTouched!: () => void;
   onChange!: (value: any) => void;
 
-  @ViewChild('srcUrlInput', { read: ViewContainerRef, static: true }) srcUrlInputRef!: ViewContainerRef;
+  @ViewChild('srcUrlInput', { read: ViewContainerRef, static: true })
+  srcUrlInputRef!: ViewContainerRef;
 
-  @Input() _disabled:boolean = false;
+  @Input() _disabled: boolean = false;
 
   _srcUrl: string = '';
-  _srcUrlList: { percent: string, url: string, no: number }[] = [];
+  _srcUrlList: { percent: string, url: string, no: number, isMtls:boolean}[] = [];
   hostnums: number = 0;
 
   _equal100: boolean = false;
+  // mtlsStr:string = 'mtls://';
 
-  constructor(
-    private toolService: ToolService,
-  ) { }
 
-  ngOnInit(): void {
-  }
+  @Input() isAiGateway: boolean = false;
+
+   private _pathType: string = '';
+  @Input()
+  set pathType(value: string) { this._pathType = value;}
+  get pathType(): string { return this._pathType;}
+
+
+  constructor(private toolService: ToolService) {}
+
+  ngOnInit(): void {}
 
   writeValue(srcUrl: string): void {
-    this.srcUrlInputRef.clear();
-    this._srcUrlList = [];
-    this._srcUrl = '';
-    this._equal100 = false;
-    this.hostnums = 0;
+    setTimeout(() => {
+      this.srcUrlInputRef.clear();
+      this._srcUrlList = [];
+      this._srcUrl = '';
+      this._equal100 = false;
+      this.hostnums = 0;
 
-    this._srcUrl = srcUrl;
+      this._srcUrl = srcUrl;
 
+      if (this._srcUrl.includes('b64.')) {
+        if (this._srcUrl?.substring(0, 3) == 'b64') {
+          let srcUrlArr = this._srcUrl.split('.');
+          srcUrlArr.shift();
 
-    if (this._srcUrl.includes('b64.')) {
-
-      if (this._srcUrl?.substring(0, 3) == 'b64') {
-
-        let srcUrlArr = this._srcUrl.split('.');
-        srcUrlArr.shift();
-
-
-        let srcUrlArrEdit: { percent: string, url: string }[] = [];
-        for (let i = 0; i < srcUrlArr.length; i++) {
-          if (i % 2 == 0) {
-            srcUrlArrEdit.push({
-               percent: srcUrlArr[i],
-               url: base64.Base64.decode(srcUrlArr[i + 1])
+          let srcUrlArrEdit: { percent: string; url: string }[] = [];
+          for (let i = 0; i < srcUrlArr.length; i++) {
+            if (i % 2 == 0) {
+              srcUrlArrEdit.push({
+                percent: srcUrlArr[i],
+                url: base64.Base64.decode(srcUrlArr[i + 1]),
               });
+            }
+          }
+          // console.log(srcUrlArrEdit)
+          if (srcUrlArrEdit.length > 0) {
+            let totPer: number = 0;
+
+            srcUrlArrEdit.forEach((item) => {
+              totPer += Number(item.percent);
+              this.addSrcUrlInput(item);
+            });
+
+            this._equal100 = totPer == 100;
+          } else {
+            this.addSrcUrlInput();
           }
         }
-        // console.log(srcUrlArrEdit)
-        if (srcUrlArrEdit.length > 0) {
-          let totPer: number = 0;
-
-          srcUrlArrEdit.forEach(item => {
-            totPer += Number(item.percent);
-            this.addSrcUrlInput(item)
-          })
-
-          this._equal100 = totPer == 100;
-
-        } else {
-          this.addSrcUrlInput();
-        }
-
+      } else {
+        this.addSrcUrlInput({ percent: '100', url: this._srcUrl });
+        this._equal100 = true;
       }
-
-    }
-    else {
-      this.addSrcUrlInput({ percent: '100', url: this._srcUrl });
-      this._equal100 = true;
-    }
-
+    }, 0);
   }
 
-  addSrcUrlInput(item?: { percent: string, url: string }) {
-    // this.hostInputRef.clear();
-    // var componentFactory = this.factoryResolver.resolveComponentFactory(HostInputDetailComponent);
-    let componentRef = this.srcUrlInputRef.createComponent(SrcUrlInputDetailComponent);
+  addSrcUrlInput(item?: { percent: string; url: string }) {
+
+    let componentRef = this.srcUrlInputRef.createComponent(
+      SrcUrlInputDetailComponent
+    );
     if (item) {
-      this._srcUrlList.push({ percent: item.percent, url: item.url, no: this.hostnums });
+       const dgrProtocol_match = this.toolService.dgrProtocol_match(item.url);
+      let isMtls = false;
+      if(dgrProtocol_match.length>0){
+        isMtls = dgrProtocol_match.some(item => item.includes('mtls'))
+      }
+
+      this._srcUrlList.push({ percent: item.percent, url: item.url, no: this.hostnums, isMtls: isMtls });
     }
     else {
-      this._srcUrlList.push({ percent: '0', url: '', no: this.hostnums });
+      this._srcUrlList.push({ percent: '0', url: '', no: this.hostnums, isMtls:false });
     }
     // this.componentRef.instance.hostnums = this.hostnums;
     componentRef.instance._ref = componentRef;
     componentRef.instance.no = this.hostnums;
     componentRef.instance.data = this._srcUrlList[this.hostnums];
     componentRef.instance.disabled = this._disabled;
+    componentRef.instance.isAiGateway = this.isAiGateway;
+    componentRef.instance.pathTpye = this.pathType;
     this.hostnums++;
-    componentRef.instance.change.subscribe((res: { percent: string, url: string, no: number }) => {
+    componentRef.instance.change.subscribe((res: { percent: string, url: string, no: number, isMtls:boolean }) => {
       let idx = this._srcUrlList.findIndex(x => x.no === res.no);
 
       if (!idx && this._srcUrlList.length == 0) {
-        this._srcUrlList.push({ percent: '100', url: '', no: this.hostnums })
+        this._srcUrlList.push({ percent: '100', url: '', no: this.hostnums , isMtls:false})
       } else {
         let idx = this._srcUrlList.findIndex(host => host.no === res.no);
         this._srcUrlList[idx].percent = res.percent;
         this._srcUrlList[idx].url = res.url;
         this._srcUrlList[idx].no = res.no;
+        this._srcUrlList[idx].isMtls = res.isMtls;
       }
 
       // console.log(this._srcUrlList.length)
       if (this._srcUrlList.length == 1) {
-        this.onChange(this._srcUrlList[0].url);
+        // if (this._srcUrlList[0].isMtls) {
+        //   this.onChange(
+        //     `b64.${this._srcUrlList[0].percent}.${base64.Base64.encodeURL(
+        //       this._srcUrlList[0].url
+        //     )}`
+        //   );
+        // } else
+          this.onChange(this._srcUrlList[0].url);
       }
       else {
         let encodeStrPool: string[] = this._srcUrlList.map(x => {
           return x.percent + '.' + base64.Base64.encodeURL(x.url)
         });
 
-        let encodeString = 'b64.' + encodeStrPool.join('.')
+        let encodeString = 'b64.' + encodeStrPool.join('.');
         this.onChange(encodeString);
       }
 
 
 
-      let totPer: number = 0;
-      this._srcUrlList.forEach(item => {
-        totPer += Number(item.percent);
-      })
-      this._equal100 = totPer == 100;
-
-    });
-    componentRef.instance.remove.subscribe(no => {
-      let idx = this._srcUrlList.findIndex(host => host.no === no);
+        let totPer: number = 0;
+        this._srcUrlList.forEach((item) => {
+          totPer += Number(item.percent);
+        });
+        this._equal100 = totPer == 100;
+      }
+    );
+    componentRef.instance.remove.subscribe((no) => {
+      let idx = this._srcUrlList.findIndex((host) => host.no === no);
       this._srcUrlList.splice(idx, 1);
 
       if (this._srcUrlList.length == 0) {
@@ -148,6 +167,7 @@ export class SrcUrlInputComponent implements OnInit {
         this.addSrcUrlInput();
       }
       else if (this._srcUrlList.length == 1) {
+
         this.onChange(this._srcUrlList[0].url);
       }
       else {
@@ -156,26 +176,27 @@ export class SrcUrlInputComponent implements OnInit {
           return x.percent + '.' + base64.Base64.encodeURL(x.url)
         });
 
-
-        let encodeString = (this._srcUrlList.length > 0 && (this._srcUrlList[0].percent + this._srcUrlList[0].percent) != '') ? 'b64.' + encodeStrPool.join('.') : ''
+        let encodeString =
+          this._srcUrlList.length > 0 &&
+          this._srcUrlList[0].percent + this._srcUrlList[0].percent != ''
+            ? 'b64.' + encodeStrPool.join('.')
+            : '';
 
         let totPer: number = 0;
-        this._srcUrlList.forEach(item => {
+        this._srcUrlList.forEach((item) => {
           totPer += Number(item.percent);
-        })
+        });
         this._equal100 = totPer == 100;
         this.onChange(encodeString);
       }
     });
   }
 
-
   registerOnChange(fn: (value: any) => void): void {
-    this.onChange = fn
+    this.onChange = fn;
   }
 
   registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
-
 }

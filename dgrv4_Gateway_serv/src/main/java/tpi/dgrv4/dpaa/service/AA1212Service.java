@@ -288,10 +288,10 @@ public class AA1212Service {
 							}
 
 							String[] arrApiLogRow = strApiLog.split(",");
-							if(arrApiLogRow.length == 3) {
+							if(arrApiLogRow.length >= 3) {
 								String strUri = arrApiLogRow[0].strip();
 								Integer statusCode = Integer.valueOf(arrApiLogRow[1].strip());
-								Integer elapsedTime = Integer.valueOf(arrApiLogRow[2].strip());
+								Integer elapsedTime = Integer.valueOf(arrApiLogRow[2].replace("ms", "").strip());
 								UrlStatusRecord urlStatusRecord = new UrlStatusRecord(strUri, statusCode, elapsedTime);
 								urlStatusRecordList.add(urlStatusRecord);
 								allNodeVo.getUrlStatusRecordList().add(urlStatusRecord);

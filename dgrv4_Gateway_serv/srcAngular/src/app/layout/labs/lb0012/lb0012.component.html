@@ -1,13 +1,9 @@
-<app-container [title]="currentTitle">
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form">
       <div class="form-group row">
-        <div class="col-4">
-          <label class="control-label">{{ "keyword_search" | translate }}</label>
-          <app-search-input placeholder="{{'keyword_search'|translate}}" [control]="form.get('keyword')"
-            [searchFn]="queryWebhookLogs.bind(this)" class="col-9 col-lg-4 col-sm-6"></app-search-input>
-        </div>
-        <div class="col-lg-4 col-md-6 col-sm-8 ">
+
+        <div class="col-lg-auto col-md-6 col-sm-8 ">
           <label id="startDate_label" class="control-label">{{'date_range'|translate}}</label>
           <div class="d-flex ">
             <div>
@@ -33,7 +29,11 @@
             </div>
           </div>
         </div>
-
+        <div class="col-12 col-lg-4">
+          <label class="control-label">{{ "keyword_search" | translate }}</label>
+          <app-search-input placeholder="{{'keyword_search'|translate}}" [control]="form.get('keyword')"
+            [searchFn]="queryWebhookLogs.bind(this)" class="col-9 col-lg-4 col-sm-6"></app-search-input>
+        </div>
 
       </div>
 

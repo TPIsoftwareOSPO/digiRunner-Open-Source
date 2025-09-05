@@ -327,8 +327,6 @@ export class Ac0315Component extends BaseComponent implements OnInit {
         })
         // } else if (res.ResHeader.rtnCode === '0158') { // 不要導入回 API 列表，因為 route param 查詢有錯誤
         //     this.router.navigate(['/ac03/ac0301', { apiSrc: ApiSrc.Composed, status: '1', request: JSON.stringify(req) }]);
-      } else {
-        this.alert.ok(res.ResHeader.rtnCode, res.ResHeader.rtnMsg);
       }
     });
   }

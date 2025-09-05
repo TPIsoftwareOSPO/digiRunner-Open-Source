@@ -115,43 +115,42 @@ public class DPB0292Service {
         // 檢查如果有提供服務器證書，那麼必須同時提供私鑰
         if ((req.getServerCertContent() != null && !req.getServerCertContent().isEmpty()) &&
                 (req.getServerKeyContent() == null || req.getServerKeyContent().isEmpty())) {
-            throw TsmpDpAaRtnCode._1297.throwing("提供了服務器證書但缺少私鑰");
+        	 throw TsmpDpAaRtnCode._1559.throwing("Server private key is required when server certificate is provided");
         }
 
         // 檢查如果有提供私鑰，那麼必須同時提供服務器證書
         if ((req.getServerKeyContent() != null && !req.getServerKeyContent().isEmpty()) &&
                 (req.getServerCertContent() == null || req.getServerCertContent().isEmpty())) {
-            throw TsmpDpAaRtnCode._1297.throwing("提供了私鑰但缺少服務器證書");
+        	throw TsmpDpAaRtnCode._1559.throwing("Server certificate is required when server private key is provided");
         }
 
         // 如果有提供服務器證書，驗證其有效性
         if (req.getServerCertContent() != null && !req.getServerCertContent().isEmpty()) {
             boolean isValid = tlsCertificateManager.validateCertificate(req.getServerCertContent());
             if (!isValid) {
-                throw TsmpDpAaRtnCode._1297.throwing("服務器證書無效");
+            	throw TsmpDpAaRtnCode._1352.throwing("Server certificate");
             }
         }
 
-        // 如果有提供信任的 CA 證書，驗證其有效性
-        if (req.getTrustedCertsContent() != null && !req.getTrustedCertsContent().isEmpty()) {
-            boolean isValid = tlsCertificateManager.validateCertificate(req.getTrustedCertsContent());
-            if (!isValid) {
-                //throw TsmpDpAaRtnCode._1297.throwing("信任的 CA 證書無效");
-            	throw TsmpDpAaRtnCode._1352.throwing("{{trustedCertsContent}}");
-            }
-        }
 
         // 檢查安全模式是否有效
         String secureMode = req.getSecureMode();
         if (secureMode != null && !secureMode.isEmpty() &&
                 !secureMode.equals("AUTO") && !secureMode.equals("SECURE") && !secureMode.equals("PLAINTEXT")) {
-            throw TsmpDpAaRtnCode._1297.throwing("安全模式無效，必須是 AUTO、SECURE 或 PLAINTEXT");
+        	throw TsmpDpAaRtnCode._1559.throwing("Invalid secure mode. Must be AUTO, SECURE or PLAINTEXT");
         }
 
-        // 安全模式啟用時檢查證書是否存在
         String trustedCertsContent = req.getTrustedCertsContent();
-        if("SECURE".equals(secureMode) && trustedCertsContent.isEmpty()) {
-            throw TsmpDpAaRtnCode._1296.throwing("trustedCertsContent");
+        // 安全模式啟用時檢查證書是否存在
+        if("SECURE".equals(secureMode) && "N".equals(req.getAutoTrustUpstreamCerts())) {
+            if(!StringUtils.hasText(trustedCertsContent)) {
+            	throw TsmpDpAaRtnCode._1350.throwing("{{trustedCertsContent}}");
+            }else {
+            	boolean isValid = tlsCertificateManager.validateCertificate(trustedCertsContent);
+                if (!isValid) {
+                    throw TsmpDpAaRtnCode._1352.throwing("{{trustedCertsContent}}");
+                }
+            }
         }
     }
 
@@ -331,6 +330,12 @@ public class DPB0292Service {
         } catch (NumberFormatException e) {
             throw TsmpDpAaRtnCode._1297.throwing();
         }
+        
+       boolean isExistProxy = getDgrGrpcProxyMapDao().existsByProxyHostNameAndGrpcproxyMapIdNot(proxyHostname,Long.parseLong(gRPCProxyMapId));
+       if (isExistProxy) {
+    	   //因為匯入也會呼叫,所以不做{{proxyHostname}}
+    	   throw TsmpDpAaRtnCode._1353.throwing("Proxy hostname/domain name", proxyHostname);
+       }
     }
 
     /**

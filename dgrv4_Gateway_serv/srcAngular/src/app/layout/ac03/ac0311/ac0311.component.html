@@ -472,14 +472,14 @@
                     <div class="form-group row">
                         <div class="col-12">
                             <label id="srcUrl_label" class="control-label required">{{'tar_url'|translate}}</label>
-                            <div  class="form-group" *ngIf="c_type.value =='1' && c_apiType.value!=='WEBHOOK'">
+                            <div  class="form-group" *ngIf="c_type.value =='1' && (c_apiType.value=='HTTP_API' )">
                               <!--  formControlName="byHosturl" trueValue="Y" falseValue="N" -->
                               <p-checkbox [binary]="true" inputId="redirectByIp" formControlName="redirectByIp"> </p-checkbox>
                               <label class="mb-0 ms-2" for="redirectByIp" >{{'diversionSrcIP'|translate}}</label>
                             </div>
                             <!-- class="p-3" style="background-color: #eaeaea;border-radius: 15px;" -->
                             <div [hidden]="redirectByIp.value">
-                              <app-src-url-reg formControlName="srcUrl" (testApiEvt)="testApiEvt($event)"></app-src-url-reg>
+                              <app-src-url-reg formControlName="srcUrl" (testApiEvt)="testApiEvt($event)" [apiType]="c_apiType.value" [pathType]="c_type.value"></app-src-url-reg>
                             </div>
                             <!-- <hr class="my-1"> -->
                             <div [hidden]="!redirectByIp.value">
@@ -671,7 +671,7 @@
                                   <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID" ></p-checkbox>
                                   <label class="ms-2 mb-0" for="urlRID">{{(c_type.value=='0')?('path_param'|translate):''}}</label>
                                 </div>
-                                <div class="p-form-check">
+                                <div class="p-form-check" *ngIf="c_apiType.value !== 'AI_GATEWAY'">
                                   <p-checkbox [binary]="true" inputId="noOAuth" formControlName="noOAuth" ></p-checkbox>
                                   <label class="ms-2 mb-0" for="noOAuth">{{'no_auth' | translate}}</label>
                                 </div>
@@ -944,8 +944,8 @@
                         (click)="changePage('regist');">{{'button.return_to_list'|translate}}</button>
                 </div>
             </div>
-            <div *ngIf="showResult" class="form-group row">
-                <table style="width: 100%;">
+            <div *ngIf="showResult" class="form-group col">
+                <table class="table table-bordered" style="width: 100%;">
                     <caption></caption>
                     <thead>
                         <tr class="text-center" scope="col">
@@ -971,7 +971,7 @@
                             <th class="text-right" style="width: 10%;" scope="col">{{'body'|translate}}</th>
                             <td>
                                 <span class="form-control" [innerHtml]="testResult.resBody"
-                                    style="background-color: #e9ecef;opacity: 1;height: auto;overflow: auto;"></span>
+                                    style="background-color: #e9ecef;opacity: 1;height: auto;overflow: auto;font-size: 14px;"></span>
                             </td>
                         </tr>
                     </tbody>

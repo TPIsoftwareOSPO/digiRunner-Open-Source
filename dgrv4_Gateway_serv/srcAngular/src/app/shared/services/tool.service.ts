@@ -31,6 +31,7 @@ import { TranslateService } from '@ngx-translate/core';
 import * as bcrypt from 'bcryptjs';
 import { Router } from '@angular/router';
 import { Menu } from 'src/app/models/menu.model';
+import * as base64 from 'js-base64';
 // import { AA0101func } from 'src/app/models/api/FuncService/aa0101.interface';
 // import { LdapEnvItem } from 'src/app/models/api/LoginService/ldaplogin.interface';
 
@@ -866,4 +867,97 @@ export class ToolService {
     );
   }
 
+  dgrProtocol_match(testString: string = '') {
+    // /^(dgr)((\+[-a-zA-Z]+)+)##(.+)/
+    // ^dgr(\\+[-a-zA-Z]+)+##(.+)
+    // 'dgr+ai-gateway+mtls+webhook+chatgpt##https://chad.test/1'
+    const match = testString.match(/^(dgr)((\+[-a-zA-Z]+)+)##(.+)/);
+
+    if (match) {
+      const base = match[1]; // dgr
+      const plusParts = match[2].match(/\+[-a-zA-Z]+/g) || []; // 所有 +xxx
+      const url = match[4]; // ## 後面的內容
+      return [base, ...plusParts, url];
+    }
+    return [];
+  }
+
+  //判斷是否mtls來增加或移除url字樣
+  toggleMtlsFlag(input: string, ismtls: boolean): string {
+    if(input=='') return ''
+    const dgrPrefixRegex = /^dgr\+(.+?)##(.*)$/;
+
+    const match = input.match(dgrPrefixRegex);
+
+    if (match) {
+      // 符合 dgr+...## 的格式
+      const prefix = match[1]; // 例如 webhook、webhook+mtls、mtls
+      const rest = match[2]; // 例如 prompt/xxx
+
+      const services = prefix.split('+').filter(Boolean);
+      const hasMtls = services.includes('mtls');
+
+      if (ismtls) {
+        // 增加 +mtls（避免重複加）
+        if (!hasMtls) services.push('mtls');
+      } else {
+        // 移除 +mtls
+        const filtered = services.filter((s) => s !== 'mtls');
+        if (filtered.length === 0) {
+          // 僅剩 mtls，代表原本是 dgr+mtls##xxx ➜ 直接移除整個前綴
+          return rest;
+        }
+        return `dgr+${filtered.join('+')}##${rest}`;
+      }
+
+      return `dgr+${services.join('+')}##${rest}`;
+    } else {
+      // 非 dgr+## 開頭的字串
+      return ismtls ? `dgr+mtls##${input}` : input;
+    }
+  }
+
+  checkSrcUrlisAiGateway(_srcUrl: string): boolean {
+    let isAiGateway: boolean = false;
+    if (_srcUrl.includes('b64.')) {
+      if (_srcUrl.substring(0, 3) == 'b64') {
+        let srcUrlArr = _srcUrl.split('.');
+        srcUrlArr.shift();
+
+        let srcUrlArrEdit: { percent: string; url: string }[] = [];
+        for (let i = 0; i < srcUrlArr.length; i++) {
+          if (i % 2 == 0) {
+            srcUrlArrEdit.push({
+              percent: srcUrlArr[i],
+              url: base64.Base64.decode(srcUrlArr[i + 1]),
+            });
+          }
+        }
+
+        isAiGateway = srcUrlArrEdit.some((item) => {
+          const dgrProtocol_match = this.dgrProtocol_match(item.url);
+          return dgrProtocol_match.some((item) => item.includes('ai-gateway'));
+        });
+      }
+    } else {
+      const dgrProtocol_match = this.dgrProtocol_match(_srcUrl);
+      isAiGateway = dgrProtocol_match.some((item) =>
+        item.includes('ai-gateway')
+      );
+    }
+    return isAiGateway;
+  }
+
+  checkSrcUrlisWebhook(_srcUrl: string): boolean {
+    let isWebhook: boolean = false;
+    if (!_srcUrl.includes('b64.')) {
+      const dgrProtocol_match = this.dgrProtocol_match(_srcUrl);
+
+      if (dgrProtocol_match.length > 0) {
+        // console.log(dgrProtocol_match)
+        isWebhook = dgrProtocol_match.some((item) => item.includes('webhook'));
+      }
+    }
+    return isWebhook;
+  }
 }

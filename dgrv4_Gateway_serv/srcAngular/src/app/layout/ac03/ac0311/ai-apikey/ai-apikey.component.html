@@ -1,0 +1,67 @@
+<div class="container">
+  <div class="form-group">
+    <p-table [columns]="cols" [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+      [style]="{'word-break':'break-word'}" responsiveLayout="scroll" [(selection)]="selected">
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th style="width: 2.25em"></th>
+          <th *ngFor="let col of columns" scope="col" [ngStyle]="{width:col.field=='id'?'175px':'auto'}">
+            {{col.header}}
+          </th>
+          <!-- <th style="width:120px;" scope="col">{{'action'|translate}}
+          </th> -->
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td>
+            <p-tableRadioButton [value]="rowData"></p-tableRadioButton>
+          </td>
+
+          <td *ngFor="let col of columns" [style.width]="col.width">
+
+            <span *ngIf="col.field != 'aiApiKeyEnable'">
+              <!-- {{rowData[col.field]}} -->
+              <ng-container *ngIf="col.field === 'aiProviderName'">
+                {{ rowData.dgrAiProvider?.aiProviderName }}
+              </ng-container>
+              <ng-container *ngIf="col.field === 'aiModel'">
+                {{ rowData.dgrAiProvider?.aiModel }}
+              </ng-container>
+              <ng-container *ngIf="col.field !== 'provider' && col.field !== 'model'">
+                {{ rowData[col.field] }}
+              </ng-container>
+            </span>
+
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length>0">
+          <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+            <!-- <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button> -->
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="columns.length+1">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="text-center">
+    <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="confirmProc()"
+      [disabled]="tableData.length == 0">
+      {{ "button.confirm" | translate }}
+    </button>
+    <button type="button" class="btn tpi-btn tpi-cancel" (click)="cancelProc()">
+      {{ "button.cancel" | translate }}
+    </button>
+  </div>
+</div>

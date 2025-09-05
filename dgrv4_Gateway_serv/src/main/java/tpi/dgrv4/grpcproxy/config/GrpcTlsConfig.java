@@ -19,13 +19,13 @@ public class GrpcTlsConfig {
 
     private final TPILogger logger = TPILogger.tl;
 
-    @Value("${server.ssl.key-store:#{null}}")
+    @Value("${grpc.proxy.tls.key-store:#{null}}")
     private String keyStorePath;
 
-    @Value("${server.ssl.key-store-password:#{null}}")
+    @Value("${grpc.proxy.tls.key-store-password:#{null}}")
     private String keyStorePassword;
 
-    @Value("${server.ssl.keyStoreType:JKS}")
+    @Value("${grpc.proxy.tls.key-store-type:JKS}")
     private String keyStoreType;
 
     @Bean

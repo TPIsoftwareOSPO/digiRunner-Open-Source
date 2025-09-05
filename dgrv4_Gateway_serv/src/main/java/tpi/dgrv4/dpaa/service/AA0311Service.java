@@ -1,37 +1,16 @@
 package tpi.dgrv4.dpaa.service;
 
-import static tpi.dgrv4.dpaa.util.ServiceUtil.nvl;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import tpi.dgrv4.codec.utils.Base64Util;
-import tpi.dgrv4.common.constant.AuditLogEvent;
-import tpi.dgrv4.common.constant.RegexpConstant;
-import tpi.dgrv4.common.constant.SafeHttpMethod;
-import tpi.dgrv4.common.constant.TableAct;
-import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
-import tpi.dgrv4.common.constant.TsmpDpPublicFlag;
+import tpi.dgrv4.common.constant.*;
 import tpi.dgrv4.common.exceptions.BcryptParamDecodeException;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -46,28 +25,21 @@ import tpi.dgrv4.dpaa.vo.AA0311RedirectByIpData;
 import tpi.dgrv4.dpaa.vo.AA0311Req;
 import tpi.dgrv4.dpaa.vo.AA0311Resp;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
-import tpi.dgrv4.entity.entity.DgrAcIdpUser;
-import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
-import tpi.dgrv4.entity.entity.TsmpApi;
-import tpi.dgrv4.entity.entity.TsmpApiId;
-import tpi.dgrv4.entity.entity.TsmpApiReg;
-import tpi.dgrv4.entity.entity.TsmpApiRegId;
-import tpi.dgrv4.entity.entity.TsmpUser;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
-import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
-import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
-import tpi.dgrv4.entity.repository.DgrWebhookNotifyDao;
-import tpi.dgrv4.entity.repository.TsmpApiDao;
-import tpi.dgrv4.entity.repository.TsmpApiRegDao;
-import tpi.dgrv4.entity.repository.TsmpRegHostDao;
-import tpi.dgrv4.entity.repository.TsmpRegModuleDao;
-import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.entity.repository.*;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.CommForwardProcService;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static tpi.dgrv4.dpaa.util.ServiceUtil.nvl;
 
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
@@ -91,7 +63,7 @@ public class AA0311Service {
 	private final DgrAcIdpUserDao dgrAcIdpUserDao;
 	private final DgrWebhookApiMapDao dgrWebhookApiMapDao;
 	private final DgrWebhookNotifyDao dgrWebhookNotifyDao;
-	
+
 	@Transactional
 	public AA0311Resp registerAPI(TsmpAuthorization auth, AA0311Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
 		
@@ -317,6 +289,7 @@ public class AA0311Service {
 		if (srcUrlDataList.size() == 1 ) {
 
 			String[] srcUrlData = srcUrlDataList.get(0);
+//			if (srcUrlData[1].startsWith("http"))
 				return srcUrlData[1];// 目標URL
 		}
 
@@ -651,8 +624,8 @@ public class AA0311Service {
 				// 若srcUrl值不是"b64.", 也不是"http"開頭, 才需要加協定
 				int index = srcUrl.indexOf("b64.");
 				int index2 = srcUrl.indexOf("http");
-				var dgrProto = DgrProtocol.parse(srcUrl);
-				if (index != 0 && index2 != 0 && !dgrProto.valid()) {
+				boolean isDgrProtocol = DgrProtocol.parse(srcUrl).valid();
+				if (index != 0 && index2 != 0 && !isDgrProtocol) {
 					// not "b64.", not "http", not dgr protocol
 					srcUrl = String.format("%s://%s", protocol,srcUrl );
 				}
@@ -711,8 +684,8 @@ public class AA0311Service {
 				// 若srcUrl值不是"b64.", 也不是"http"開頭, 才需要加協定
 				int index = srcUrl.indexOf("b64.");
 				int index2 = srcUrl.indexOf("http");
-				var dgrProto = DgrProtocol.parse(srcUrl);
-				if (index != 0 && index2 != 0 && !dgrProto.valid()) {
+				var isDgrProtocol = DgrProtocol.parse(srcUrl).valid();
+				if (index != 0 && index2 != 0 && !isDgrProtocol) {
 					// not "b64.", not "http", not dgr protocol
 					srcUrl = String.format("%s://%s", protocol, srcUrl);
 
@@ -816,24 +789,24 @@ public class AA0311Service {
 		tsmpApiReg.setFailHandlePolicy(nvl(failHandlePolicy, "0"));
 		
 		tsmpApiReg = getTsmpApiRegDao().saveAndFlush(tsmpApiReg);
-		
+
 		// 處理API webhook通知Map
 		// Process API webhook notification mapping
 		Optional.ofNullable(req.getNotifyNameList()).ifPresent(lst -> {
-		    for (String notifyName : lst) {
-		    	var n = getDgrWebhookNotifyDao().findFirstByNotifyName(notifyName);
-		    	if(n.isPresent()) {
-		    		DgrWebhookApiMap m = new DgrWebhookApiMap();
-			    	m.setApiKey(req.getApiId());
-			    	m.setModuleName(req.getModuleName());
-			    	m.setWebhookNotifyId(n.get().getWebhookNotifyId());
-			    	m.setCreateDateTime(DateTimeUtil.now());
-			    	m.setCreateUser(userName);
-			    	getDgrWebhookApiMapDao().save(m);
-		    	}
-		    }
+			for (String notifyName : lst) {
+				var n = getDgrWebhookNotifyDao().findFirstByNotifyName(notifyName);
+				if(n.isPresent()) {
+					DgrWebhookApiMap m = new DgrWebhookApiMap();
+					m.setApiKey(req.getApiId());
+					m.setModuleName(req.getModuleName());
+					m.setWebhookNotifyId(n.get().getWebhookNotifyId());
+					m.setCreateDateTime(DateTimeUtil.now());
+					m.setCreateUser(userName);
+					getDgrWebhookApiMapDao().save(m);
+				}
+			}
 		});
-		
+
 		if (TsmpApiSrc.COMPOSED.value().equals(req.getApiSrc())
 				|| TsmpApiSrc.REGISTERED.value().equals(req.getApiSrc())) {
 			// 寫入 Audit Log D

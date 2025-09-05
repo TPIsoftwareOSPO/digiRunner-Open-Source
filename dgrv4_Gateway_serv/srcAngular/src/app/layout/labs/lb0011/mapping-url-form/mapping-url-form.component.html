@@ -1,4 +1,3 @@
-
 <form [formGroup]="form">
   <div class="form-group" *ngIf="webhookType=='DISCORD'">
     <div class="form-group row">
@@ -92,21 +91,12 @@
         <small class="form-text">{{to?.errors.required | translate}}</small>
       </div>
     </div>
-    <div class="col-4">
-      <label id="notificationDisabled_label" class="control-label fw-bold">NotificationDisabled</label>
-      <div class="p-form-check-line">
-        <ng-container>
-          <div class="p-form-check">
-            <p-radioButton formControlName="notificationDisabled" value="Y"
-              inputId="notificationDisabledY"></p-radioButton>
-            <label for="notificationDisabledY" class="ms-2 mb-0">Y</label>
-          </div>
-          <div class="p-form-check">
-            <p-radioButton formControlName="notificationDisabled" value="N"
-              inputId="notificationDisabledN"></p-radioButton>
-            <label for="notificationDisabledN" class="ms-2 mb-0">N</label>
-          </div>
-        </ng-container>
+    <div class="col-4 ">
+      <label id="notificationDisabled_label" class="control-label fw-bold"></label>
+      <div class="d-flex align-items-center">
+        <p-checkbox [binary]="true" trueValue="N" falseValue="Y" formControlName="notificationDisabled" inputId="notificationDisabled"
+          [ngModelOptions]="{standalone: true}"></p-checkbox>
+        <label class="mb-0 ms-2" for="notificationDisabled">{{"notify.sound" |translate}}</label>
       </div>
     </div>
   </div>

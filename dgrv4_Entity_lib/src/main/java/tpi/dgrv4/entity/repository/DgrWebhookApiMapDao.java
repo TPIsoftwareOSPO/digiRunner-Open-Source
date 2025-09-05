@@ -21,5 +21,7 @@ public interface DgrWebhookApiMapDao extends JpaRepository<DgrWebhookApiMap, Lon
     //	DgrWebhookApiMap findByApiKeyAndModuleNameAndWebhookNotifyId(String apiKey, String moduleName,Long webhookNotifyId)
     void deleteByWebhookNotifyId(Long notifyIds);
 
+    void deleteByApiKeyAndModuleName(String apiKey, String moduleName);
+
 
 }

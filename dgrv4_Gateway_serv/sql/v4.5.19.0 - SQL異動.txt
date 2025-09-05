@@ -1,0 +1,3 @@
+-- 【dgRv4.5.19.0 - SQL 異動】
+-- 20250902,刪除不要的setting, tom
+delete from tsmp_setting where id in ('MTLS_CHINESE_MEMO','MTLS_ENGLISH_MEMO');  

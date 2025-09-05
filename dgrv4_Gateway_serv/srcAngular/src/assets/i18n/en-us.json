@@ -1301,8 +1301,8 @@
   "cusUserDataUrl_tip": "API URL for DGR to retrieve user data. The CUS must provide an API that allows DGR to obtain the corresponding user data.",
   "cusUrlExp": "Please follow these rules when entering URLs:\n\n1. The URL must start with `http://` or `https://` \n2. The URL must be a valid and complete web address\n\n## Correct Examples:\n- https://www.example.com\n- http://subdomain.example.com/page\n- https://www.example.com/path/to/resource?param=value\n\n## Incorrect Examples:\n- www.example.com (missing protocol)\n- ftp://example.com (unsupported protocol)\n- https://(incomplete URL)",
   "clientKeyMima": "Client key password",
-  "cfm_mtls_enable": "You are about to enable mTLS connection for this site!",
-  "cfm_mtls_disable": "You are about to disable the mTLS connection for this site!",
+  "cfm_mtls_enable": "Confirm enable?",
+  "cfm_mtls_disable": "Confirm disable?",
   "allow_all": "Allow all",
   "xapikey_search": "X-API-Key search",
   "xapikey_name": "X-API-Key name",
@@ -1318,7 +1318,8 @@
   },
   "notify": {
     "name": "Notify Name",
-    "type": "Notify Type"
+    "type": "Notify Type",
+    "sound": "Notification Sound"
   },
   "status_code": "Status Code",
   "elapsed_time": "Elapsed Time",
@@ -1326,17 +1327,50 @@
   "date_duration_tip": "When the start time is empty, it means to start immediately. When the end time is empty, it means to never end.",
   "date_duration_start": "When the start time is empty, it means to start immediately.",
   "date_duration_end": "When the end time is empty, it means to never end.",
-  "api_abnormal_report": "API Abnormal Report",
+  "api_abnormal_report": "API Abnormal Real-time Information",
   "abnormal_condition_setting": "Abnormal condition setting",
   "rpt_s_time": "Report start time",
   "srv_s_time": "Service start time",
   "api_abnormal_greater_than": "Response failed or elapsed time is greater than",
   "api_abnormal_failures": "Only respond to failures (HTTP status code >= 400)",
+  "ai": {
+    "llm_name": "LLM Model Name",
+    "apikey_count": "Registered API Key Count",
+    "api_key_alias": "API Key Alias",
+    "api_key_code": "API Key Code",
+    "usage_limit_input": "Input Limit",
+    "usage_limit_output": "Output Limit",
+    "provider": "Provider",
+    "provider_alias": "Provider Alias",
+    "model": "Model",
+    "usage_limit": "Usage Limit",
+    "reject": "Reject",
+    "use_anyway": "Use Anyway",
+    "consumer_type": "Consumer Type",
+    "consumer_id": "Consumer ID",
+    "template_name": "Template Name",
+    "request_timestamp": "Request Timestamp",
+    "api_input_token": "API Input Token",
+    "api_output_token": "API Output Token",
+    "content": "Content"
+  },
   "grpc": {
     "tar_serv": "Target Service Name",
     "tar_host": "Target Host",
     "tar_port": "Port Number",
-    "proxy_host": "Proxy Address"
+    "proxy_host": "Proxy Address",
+    "autotrust_certs": "Certificate Verification",
+    "cert_tip_1": "1. Content must be in text format (Base64 encoded).",
+    "cert_tip_2": "2. Common file extensions are .pem or .crt.",
+    "cert_tip_3": "3. The content must include the full block from\n-----BEGIN CERTIFICATE-----\nto\n-----END CERTIFICATE-----",
+    "cert_tip_4": "4. If your certificate is stored inside a PKCS#12 keystore:",
+    "cert_tip_4_1": "4.1. For example: example.p12 is a PKCS#12 keystore (containing an X.509 certificate and private key).",
+    "cert_tip_4_2": "4.2. You can convert it into a PEM file (which will include both the private key and the certificate) using:\nopenssl pkcs12 -nodes -in example.p12 -out example.pem -passin pass:example",
+    "cert_tip_4_3": "4.3. Open example.pem and locate the certificate block:\n-----BEGIN CERTIFICATE-----\nMIIFwjCCA6qgAwIBAgIIHrR+pmyYcSUwDQYJKoZIhvcNAQEMBQAwgYYxGDAWBgNV\n......\npY2+3U1hLAs6pNrmuSpGrbQa6QEx21jO7HCON7Ds/5Cl3ZCWlg4=\n-----END CERTIFICATE-----\nCopy and paste the entire block exactly as shown."
+
   },
-  "org_reset": "Configure Organization "
+  "org_reset": "Configure Organization",
+  "recent_api_abnormal_each_node": "Observe the API with the most recent abnormal response from each node",
+  "trustedCertsContent": "Certificate",
+  "cert": "Certificate"
 }

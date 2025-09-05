@@ -9,10 +9,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.HexStringUtils;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -85,6 +86,10 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 			}
 			// 檢查資料
 			TsmpApiReg apiReg = getCommForwardProcService().getTsmpApiReg(httpReq);
+			ResponseEntity<?> allowMethodErrRespEntity = getCommForwardProcService().checkMethod(apiReg, httpReq);
+			if (allowMethodErrRespEntity != null) {
+				return allowMethodErrRespEntity;
+			}
 			maskInfo = new HashMap<>();
 			maskInfo.put("bodyMaskPolicy", apiReg.getBodyMaskPolicy());
 			maskInfo.put("bodyMaskPolicySymbol", apiReg.getBodyMaskPolicySymbol());
@@ -153,10 +158,10 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 			boolean isMockTest = checkIfMockTest(httpHeaders);
 			if (isMockTest) {
 				return mockForwardTo(httpReq, httpRes, httpHeaders, tsmpcPostRaw_srcUrl, uuid, tokenPayload,
-						tsmpcPostRawDgrReqVo, tsmpcPostRawDgrReqVo_rdb, cApiKeySwitch);
+						tsmpcPostRawDgrReqVo, tsmpcPostRawDgrReqVo_rdb, cApiKeySwitch, apiReg);
 			} else {
 				return forwardTo(httpReq, httpRes, httpHeaders, payload, tsmpcPostRaw_srcUrl, uuid, tokenPayload,
-						tsmpcPostRawDgrReqVo, tsmpcPostRawDgrReqVo_rdb, cApiKeySwitch);
+						tsmpcPostRawDgrReqVo, tsmpcPostRawDgrReqVo_rdb, cApiKeySwitch, apiReg);
 			}
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
@@ -166,112 +171,130 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 
 	protected ResponseEntity<?> forwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders, String reqMbody, String srcUrl, String uuid, int tokenPayload,
-			TsmpApiLogReq tsmpcPostRawDgrReqVo, TsmpApiLogReq tsmpcPostRawDgrReqVo_rdb, Boolean cApiKeySwitch)
+			TsmpApiLogReq tsmpcPostRawDgrReqVo, TsmpApiLogReq tsmpcPostRawDgrReqVo_rdb, Boolean cApiKeySwitch, TsmpApiReg tsmpApiReg)
 			throws Exception {
+		try {
+			// 2. tsmpc req header / body
+			// 3. tsmpc resp header / body / code
 
-		// 2. tsmpc req header / body
-		// 3. tsmpc resp header / body / code
+			// http header
+			Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders,
+					tokenPayload, cApiKeySwitch, uuid, false);
 
-		// http header
-		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders,
-				tokenPayload, cApiKeySwitch, uuid, false);
-
-		// 2,3道是否走cache
-		HttpRespData respObj = new HttpRespData();
-		String autoCacheId = getCommForwardProcService().getAutoCacheIdByFlagStart(tsmpcPostRawDgrReqVo, srcUrl,
-				reqMbody);
-		String fixedCacheId = getCommForwardProcService().getFixedCacheIdByFlagStart(tsmpcPostRawDgrReqVo, srcUrl,
-				reqMbody);
-		if (StringUtils.hasText(autoCacheId)) {// 自適應cache
-			AutoCacheParamVo paramVo = new AutoCacheParamVo();
-			paramVo.setHeader(header);
-			paramVo.setReqMbody(reqMbody);
-			paramVo.setSrcUrl(srcUrl);
-			paramVo.setDgrReqVo(tsmpcPostRawDgrReqVo);
-			paramVo.setUuid(uuid);
-			paramVo.setHttpMethod(httpReq.getMethod());
-			AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
-					paramVo);
-			if (apiCacheRespVo != null) {// 走cache
-				// 若為檔案,就回應不能使用cache
-				respObj.setRespData(apiCacheRespVo.getStatusCode(), apiCacheRespVo.getRespStr(),
-						apiCacheRespVo.getHttpRespArray(), apiCacheRespVo.getRespHeader());
-			} else {// cache發生未知錯誤,call api
-				respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody, uuid,
-						false);
-			}
-		} else if (StringUtils.hasText(fixedCacheId)) {// 固定cache
-			FixedCacheVo cacheVo = CommForwardProcService.fixedCacheMap.get(fixedCacheId);
-			if (cacheVo != null) {// 走cache
-				boolean isUpdate = getCommForwardProcService().isFixedCacheUpdate(cacheVo, tsmpcPostRawDgrReqVo);
-				if (isUpdate) {// 更新紀錄
-					respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody,
-							uuid, true);
-					// statusCode小於400才更新紀錄
+			// 2,3道是否走cache
+			HttpRespData respObj = new HttpRespData();
+			String autoCacheId = getCommForwardProcService().getAutoCacheIdByFlagStart(tsmpcPostRawDgrReqVo, srcUrl,
+					reqMbody);
+			String fixedCacheId = getCommForwardProcService().getFixedCacheIdByFlagStart(tsmpcPostRawDgrReqVo, srcUrl,
+					reqMbody);
+			if (StringUtils.hasText(autoCacheId)) {// 自適應cache
+				AutoCacheParamVo paramVo = new AutoCacheParamVo();
+				paramVo.setHeader(header);
+				paramVo.setReqMbody(reqMbody);
+				paramVo.setSrcUrl(srcUrl);
+				paramVo.setDgrReqVo(tsmpcPostRawDgrReqVo);
+				paramVo.setUuid(uuid);
+				paramVo.setHttpMethod(httpReq.getMethod());
+				AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
+						paramVo);
+				if (apiCacheRespVo != null) {// 走cache
+					// 若為檔案,就回應不能使用cache
+					respObj.setRespData(apiCacheRespVo.getStatusCode(), apiCacheRespVo.getRespStr(),
+							apiCacheRespVo.getHttpRespArray(), apiCacheRespVo.getRespHeader());
+				} else {// cache發生未知錯誤,call api
+					respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody, uuid,
+							false);
+				}
+			} else if (StringUtils.hasText(fixedCacheId)) {// 固定cache
+				FixedCacheVo cacheVo = CommForwardProcService.fixedCacheMap.get(fixedCacheId);
+				if (cacheVo != null) {// 走cache
+					boolean isUpdate = getCommForwardProcService().isFixedCacheUpdate(cacheVo, tsmpcPostRawDgrReqVo);
+					if (isUpdate) {// 更新紀錄
+						respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody,
+								uuid, true);
+						// statusCode小於400才更新紀錄
+						if (respObj.statusCode < 400) {
+							cacheVo.setData(respObj.httpRespArray);
+							cacheVo.setDataTimestamp(System.currentTimeMillis());
+							cacheVo.setRespStr(respObj.respStr);
+							cacheVo.setFile(respObj.isFile());
+							cacheVo.setRespHeader(respObj.respHeader);
+							cacheVo.setStatusCode(respObj.statusCode);
+							CommForwardProcService.fixedCacheMap.put(fixedCacheId, cacheVo);
+						} else {// 否則就取上次紀錄
+							respObj.setRespData(cacheVo.getStatusCode(), cacheVo.getRespStr(), cacheVo.getData(),
+									cacheVo.getRespHeader());
+						}
+					} else {// 取得cache資料
+						respObj.setRespData(cacheVo.getStatusCode(), cacheVo.getRespStr(), cacheVo.getData(),
+								cacheVo.getRespHeader());
+					}
+				} else {// call api
+					respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody, uuid,
+							true);
+					// statusCode小於400才紀錄
 					if (respObj.statusCode < 400) {
+						Map<String, List<String>> respHeader = respObj.respHeader;
+						cacheVo = new FixedCacheVo();
 						cacheVo.setData(respObj.httpRespArray);
 						cacheVo.setDataTimestamp(System.currentTimeMillis());
 						cacheVo.setRespStr(respObj.respStr);
 						cacheVo.setFile(respObj.isFile());
-						cacheVo.setRespHeader(respObj.respHeader);
+						cacheVo.setRespHeader(respHeader);
 						cacheVo.setStatusCode(respObj.statusCode);
 						CommForwardProcService.fixedCacheMap.put(fixedCacheId, cacheVo);
-					} else {// 否則就取上次紀錄
-						respObj.setRespData(cacheVo.getStatusCode(), cacheVo.getRespStr(), cacheVo.getData(),
-								cacheVo.getRespHeader());
 					}
-				} else {// 取得cache資料
-					respObj.setRespData(cacheVo.getStatusCode(), cacheVo.getRespStr(), cacheVo.getData(),
-							cacheVo.getRespHeader());
 				}
 			} else {// call api
 				respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody, uuid,
-						true);
-				// statusCode小於400才紀錄
-				if (respObj.statusCode < 400) {
-					Map<String, List<String>> respHeader = respObj.respHeader;
-					cacheVo = new FixedCacheVo();
-					cacheVo.setData(respObj.httpRespArray);
-					cacheVo.setDataTimestamp(System.currentTimeMillis());
-					cacheVo.setRespStr(respObj.respStr);
-					cacheVo.setFile(respObj.isFile());
-					cacheVo.setRespHeader(respHeader);
-					cacheVo.setStatusCode(respObj.statusCode);
-					CommForwardProcService.fixedCacheMap.put(fixedCacheId, cacheVo);
-				}
+						false);
 			}
-		} else {// call api
-			respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPostRawDgrReqVo, reqMbody, uuid,
-					false);
+
+			// 不論是 cache , 直接call, 統一在這裡 set RESPONSE HEADER
+			httpRes = getCommForwardProcService().getConvertResponse(respObj.respHeader, respObj.statusCode, httpRes, tsmpApiReg);
+
+			// 轉換 Response Body 格式
+			Map<String, Object> convertResponseBodyMap = getCommForwardProcService().convertResponseBody(httpRes, httpReq,
+					respObj.httpRespArray, respObj.respStr);
+			byte[] httpArray = (byte[]) convertResponseBodyMap.get("httpArray");
+			String httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");
+
+			int content_Length = 0;
+			if (httpArray != null) {
+			    content_Length = httpArray.length;
+			    // http InputStream copy into Array
+			    try {
+			        // 檢查非同步請求是否仍然有效
+			        if (!httpRes.isCommitted()) {
+			            IOUtils.copy(new ByteArrayInputStream(httpArray), httpRes.getOutputStream());
+			        } else {
+			            TPILogger.tl.warn("Response already committed or async completed");
+			            return null;
+			        }
+			    } catch (AsyncRequestNotUsableException e) {
+			        TPILogger.tl.warn(httpRes.getStatus() + ", " + StackTraceUtil.logStackTrace(e));
+			        return null;
+			    }
+			}
+
+			// print
+			StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo,
+					httpReq);
+			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
+
+			// 第一組ES RESP
+			getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, tsmpcPostRawDgrReqVo, httpRespStr, content_Length);
+			// 第一組RDB RESP
+			getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, tsmpcPostRawDgrReqVo_rdb, httpRespStr,
+					content_Length);
+
+			return null;
+		} catch (AsyncRequestNotUsableException e) {
+			return null; // 不再拋出例外，避免影響其他請求
+		} catch (Exception e) {
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+			throw e;
 		}
-
-		// 不論是 cache , 直接call, 統一在這裡 set RESPONSE HEADER
-		httpRes = getCommForwardProcService().getConvertResponse(respObj.respHeader, respObj.statusCode, httpRes);
-
-		// 轉換 Response Body 格式
-		Map<String, Object> convertResponseBodyMap = getCommForwardProcService().convertResponseBody(httpRes, httpReq,
-				respObj.httpRespArray, respObj.respStr);
-		byte[] httpArray = (byte[]) convertResponseBodyMap.get("httpArray");
-		String httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");
-
-		int content_Length = 0;
-		if (httpArray != null) {
-			content_Length = httpArray.length;
-			// http InputStream copy into Array
-			IOUtils.copy(new ByteArrayInputStream(httpArray), httpRes.getOutputStream());
-		}
-
-		// print
-		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo, httpReq);
-		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
-
-		// 第一組ES RESP
-		getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, tsmpcPostRawDgrReqVo, httpRespStr, content_Length);
-		// 第一組RDB RESP
-		getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, tsmpcPostRawDgrReqVo_rdb, httpRespStr,
-				content_Length);
-
-		return null;
 	}
 
 	public HttpRespData callback(AutoCacheParamVo vo) {
@@ -331,50 +354,59 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(sb.toString());
+		
+		// Must call respObj.getLogStr() first
+		// Threshhold > 10,000 => print warn msg.
+		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+		httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
+		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 
 		// 4. resp header / body / code
 		byte[] httpArray = respObj.httpRespArray;
 		int contentLength = (httpArray == null) ? 0 : httpArray.length;
 		// 若respObj.respStr為null帶表有檔案則寫入檔案sha256
-//		if (!StringUtils.hasLength(respObj.respStr)){
-//			respObj.respStr = getRespFileLog(respObj);
-//		}
+		// if (!StringUtils.hasLength(respObj.respStr)){
+		// respObj.respStr = getRespFileLog(respObj);
+		// }
 		getCommForwardProcService().addEsTsmpApiLogResp2(respObj, tsmpcPostRawBackendReqVo, contentLength);
 		return respObj;
 
-//		httpRes = getCommForwardProcService().getConvertResponse(respObj, httpRes);
+		// httpRes = getCommForwardProcService().getConvertResponse(respObj, httpRes);
 
 		// 4. resp header / body / code
 		// for logs
-//		byte[] httpArray = null;
-//		String httpRespStr = null;
-//		Map<String, Object> rsMap = new HashMap<>();
+		// byte[] httpArray = null;
+		// String httpRespStr = null;
+		// Map<String, Object> rsMap = new HashMap<>();
 		// 若有回傳檔案會包含file Sha256字串
-//		if ( !respObj.respStr.contains("file Sha256")) {
-////			httpArray = respObj.respStr.getBytes();
-////			httpRespStr = new String(httpArray , StandardCharsets.UTF_8);
-//			//第二組ES RESP
-//			getCommForwardProcService().addEsTsmpApiLogResp2(respObj, bankendReqVo, httpArray.length);
-//			rsMap.put("isFile", "0");
-//		} else {
-////			httpArray = getInputStreamToByteArray(respObj.respInputStreamObj);
-////			httpRespStr = getLogHasFile(respObj.respInputStreamObj);
-////			byte[] hash = SHA256Util.getSHA256(httpArray);
-////			String fileSha256 = HexStringUtils.toString(hash);
-//			//第二組ES RESP
-//			//不自動遮罩所以給0
-//			getCommForwardProcService().addEsTsmpApiLogResp2(respObj, bankendReqVo, respObj.respStr, 0);
-//			TPILogger.tl.debug("\n\n##----- file SHA256 -----------\n"+respObj.respStr+"\n");
-//			rsMap.put("isFile", "1");
-//			rsMap.put("fileSha256", respObj.respStr);
-//		}
+		// if ( !respObj.respStr.contains("file Sha256")) {
+		//// httpArray = respObj.respStr.getBytes();
+		//// httpRespStr = new String(httpArray , StandardCharsets.UTF_8);
+		// //第二組ES RESP
+		// getCommForwardProcService().addEsTsmpApiLogResp2(respObj, bankendReqVo,
+		// httpArray.length);
+		// rsMap.put("isFile", "0");
+		// } else {
+		//// httpArray = getInputStreamToByteArray(respObj.respInputStreamObj);
+		//// httpRespStr = getLogHasFile(respObj.respInputStreamObj);
+		//// byte[] hash = SHA256Util.getSHA256(httpArray);
+		//// String fileSha256 = HexStringUtils.toString(hash);
+		// //第二組ES RESP
+		// //不自動遮罩所以給0
+		// getCommForwardProcService().addEsTsmpApiLogResp2(respObj, bankendReqVo,
+		// respObj.respStr, 0);
+		// TPILogger.tl.debug("\n\n##----- file SHA256
+		// -----------\n"+respObj.respStr+"\n");
+		// rsMap.put("isFile", "1");
+		// rsMap.put("fileSha256", respObj.respStr);
+		// }
 
-//		rsMap.put("httpArray", httpArray);
-//		rsMap.put("httpRespStr", respObj.respStr);
-//		rsMap.put("statusCode", respObj.statusCode);
-//		rsMap.put("respHeader", respObj.respHeader);
-//		
-//		return rsMap;
+		// rsMap.put("httpArray", httpArray);
+		// rsMap.put("httpRespStr", respObj.respStr);
+		// rsMap.put("statusCode", respObj.statusCode);
+		// rsMap.put("respHeader", respObj.respHeader);
+		//
+		// return rsMap;
 	}
 
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl)
@@ -423,9 +455,10 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 		HttpRespData httpRespData = HttpUtil.httpReqByRawDataList(reqUrl, httpMethod, payload, header, true, false,
 				maskInfo);
 		// 判斷是否有檔案 有檔案回傳Stream 無則回傳String
-//		if (!httpRespData.respHeader.containsKey("Content-Disposition")){
-//			httpRespData.respStr = HttpUtil.toPrettyJson(HttpUtil.read(httpRespData.respInputStreamObj));
-//		}
+		// if (!httpRespData.respHeader.containsKey("Content-Disposition")){
+		// httpRespData.respStr =
+		// HttpUtil.toPrettyJson(HttpUtil.read(httpRespData.respInputStreamObj));
+		// }
 
 		return httpRespData;
 	}
@@ -462,13 +495,13 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 	}
 
 	public String getRespFileLog(HttpRespData respObj) throws UnsupportedEncodingException {
-//		byte[] httpArray = getInputStreamToByteArray(respObj.respInputStreamObj);
-//		byte[] hash = SHA256Util.getSHA256(httpArray);
-//		String fileSha256Log = "--file Sha256\n";
-//		String fileSha256 = HexStringUtils.toString(hash);
-//		fileSha256Log = fileSha256Log + fileSha256;
-//		respObj.respInputStreamObj = new ByteArrayInputStream(httpArray);
-//		return fileSha256Log;
+		// byte[] httpArray = getInputStreamToByteArray(respObj.respInputStreamObj);
+		// byte[] hash = SHA256Util.getSHA256(httpArray);
+		// String fileSha256Log = "--file Sha256\n";
+		// String fileSha256 = HexStringUtils.toString(hash);
+		// fileSha256Log = fileSha256Log + fileSha256;
+		// respObj.respInputStreamObj = new ByteArrayInputStream(httpArray);
+		// return fileSha256Log;
 		return null;
 	}
 
@@ -494,9 +527,9 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 
 	protected ResponseEntity<?> mockForwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			HttpHeaders httpHeaders, String srcUrl, String uuid, int tokenPayload, TsmpApiLogReq dgrReqVo,
-			TsmpApiLogReq dgrReqVo_rdb, Boolean cApiKeySwitch) throws Exception {
+			TsmpApiLogReq dgrReqVo_rdb, Boolean cApiKeySwitch, TsmpApiReg tsmpApiReg) throws Exception {
 		return this.mockApiTestService.mockForwardTo(httpReq, httpRes, httpHeaders, srcUrl, uuid, tokenPayload,
-				dgrReqVo, dgrReqVo_rdb, cApiKeySwitch);
+				dgrReqVo, dgrReqVo_rdb, cApiKeySwitch, tsmpApiReg);
 	}
 
 }

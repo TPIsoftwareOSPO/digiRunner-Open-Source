@@ -35,25 +35,15 @@ import tpi.dgrv4.dpaa.vo.AA0317Req;
 import tpi.dgrv4.dpaa.vo.AA0317ReqItem;
 import tpi.dgrv4.dpaa.vo.AA0317Resp;
 import tpi.dgrv4.dpaa.vo.AA0317RespItem;
-import tpi.dgrv4.entity.entity.TsmpApi;
-import tpi.dgrv4.entity.entity.TsmpApiId;
-import tpi.dgrv4.entity.entity.TsmpApiReg;
-import tpi.dgrv4.entity.entity.TsmpApiRegId;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.DgrComposerFlow;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
-import tpi.dgrv4.entity.repository.DgrComposerFlowDao;
-import tpi.dgrv4.entity.repository.TsmpApiDao;
-import tpi.dgrv4.entity.repository.TsmpApiRegDao;
-import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
-import tpi.dgrv4.entity.repository.TsmpRegModuleDao;
+import tpi.dgrv4.entity.repository.*;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
-
 @Service
 public class AA0317Service {
-
-	private TPILogger logger = TPILogger.tl;
 
 	private TsmpOrganizationDao tsmpOrganizationDao;
 	private TsmpApiDao tsmpApiDao;
@@ -62,11 +52,13 @@ public class AA0317Service {
 	private ComposerService composerService;
 	private ObjectMapper objectMapper;
 	private DgrComposerFlowDao dgrComposerFlowDao;
+	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
+	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
 	
 	@Autowired
 	public AA0317Service(TsmpOrganizationDao tsmpOrganizationDao, TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao,
 			TsmpRegModuleDao tsmpRegModuleDao, ComposerService composerService, ObjectMapper objectMapper,
-			DgrComposerFlowDao dgrComposerFlowDao) {
+			DgrComposerFlowDao dgrComposerFlowDao, DgrWebhookApiMapDao dgrWebhookApiMapDao ,DgrWebhookNotifyDao dgrWebhookNotifyDao) {
 		super();
 		this.tsmpOrganizationDao = tsmpOrganizationDao;
 		this.tsmpApiDao = tsmpApiDao;
@@ -75,6 +67,8 @@ public class AA0317Service {
 		this.composerService = composerService;
 		this.objectMapper = objectMapper;
 		this.dgrComposerFlowDao = dgrComposerFlowDao;
+		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
+		this.dgrWebhookNotifyDao = dgrWebhookNotifyDao;
 	}
 
 	protected class ApiData {
@@ -134,18 +128,18 @@ public class AA0317Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 		return resp;
 	}
 
 	protected void checkParams(String orgId, String userName, AA0317Req req, List<ApiData> apiDataList) {
-		if (StringUtils.isEmpty(userName)) {
+		if (!StringUtils.hasLength(userName)) {
 			throw TsmpDpAaRtnCode._1258.throwing();
 		}
 		
-		if (StringUtils.isEmpty(orgId)) {
+		if (!StringUtils.hasLength(orgId)) {
 			throw TsmpDpAaRtnCode._1273.throwing();
 		}
 
@@ -167,8 +161,8 @@ public class AA0317Service {
 		ApiData apiData;
 		for (AA0317ReqItem reqItem : reqItemList) {
 			// apiKey, moduleName 不得為空
-			if (StringUtils.isEmpty(reqItem.getApiKey()) || //
-				StringUtils.isEmpty(reqItem.getModuleName())) {
+			if (!StringUtils.hasLength(reqItem.getApiKey()) || //
+				!StringUtils.hasLength(reqItem.getModuleName())) {
 				throw TsmpDpAaRtnCode._1296.throwing();
 			}
 			tsmpApiId = reqItem.toTsmpApiId();
@@ -176,7 +170,7 @@ public class AA0317Service {
 			// 取出 TSMP_API 資料
 			Optional<TsmpApi> opt_tsmpApi = getTsmpApiDao().findById(tsmpApiId);
 			if (!opt_tsmpApi.isPresent()) {
-				this.logger.debug(String.format("TSMP_API not found: %s-%s", tsmpApiId.getModuleName(), tsmpApiId.getApiKey()));
+				TPILogger.tl.debug(String.format("TSMP_API not found: %s-%s", tsmpApiId.getModuleName(), tsmpApiId.getApiKey()));
 				throw TsmpDpAaRtnCode._1298.throwing();
 			}
 			tsmpApi = opt_tsmpApi.get();
@@ -185,7 +179,7 @@ public class AA0317Service {
 			apiSrc = tsmpApi.getApiSrc();
 			if (!(TsmpApiSrc.REGISTERED.value().equals(apiSrc) || TsmpApiSrc.COMPOSED.value().equals(apiSrc))) {
 				ignoreCnt++;
-				this.logger.debug(String.format("Not registered or composed API: %s-%s", tsmpApiId.getModuleName(), tsmpApiId.getApiKey()));
+				TPILogger.tl.debug(String.format("Not registered or composed API: %s-%s", tsmpApiId.getModuleName(), tsmpApiId.getApiKey()));
 				continue;
 			}
 
@@ -195,7 +189,7 @@ public class AA0317Service {
 			tsmpApiRegId = reqItem.toTsmpApiRegId();
 			Optional<TsmpApiReg> opt_tsmpApiReg = getTsmpApiRegDao().findById(tsmpApiRegId);
 			if (!opt_tsmpApiReg.isPresent()) {
-				this.logger.debug(String.format("TSMP_API_REG not found: %s-%s", tsmpApiId.getModuleName(), tsmpApiId.getApiKey()));
+				TPILogger.tl.debug(String.format("TSMP_API_REG not found: %s-%s", tsmpApiId.getModuleName(), tsmpApiId.getApiKey()));
 				throw TsmpDpAaRtnCode._1298.throwing();
 			}
 			tsmpApiReg = opt_tsmpApiReg.get();
@@ -221,8 +215,8 @@ public class AA0317Service {
 
 	protected void checkApiOrg(TsmpApi tsmpApi, List<String> userOrgIdList) {
 		String apiOrgId = tsmpApi.getOrgId();
-		if (!StringUtils.isEmpty(apiOrgId) && !userOrgIdList.contains(apiOrgId)) {
-			this.logger.debug(String.format("Violate organization principle: apiOrgId(%s) not in %s", apiOrgId, userOrgIdList));
+		if (StringUtils.hasLength(apiOrgId) && !userOrgIdList.contains(apiOrgId)) {
+			TPILogger.tl.debug(String.format("Violate organization principle: apiOrgId(%s) not in %s", apiOrgId, userOrgIdList));
 			throw TsmpDpAaRtnCode._1298.throwing();
 		}
 	}
@@ -328,7 +322,18 @@ public class AA0317Service {
 		labelList.sort(null);
 
 		respItem.setLabelList(labelList);
-		
+
+
+		List<String> notifyNameList = new ArrayList<>();
+		List<DgrWebhookApiMap> mList = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(apiData.getTsmpApi().getApiKey(), apiData.getTsmpApi().getModuleName());
+		Optional.ofNullable(mList).ifPresent(lst -> {
+			for (DgrWebhookApiMap m : lst) {
+				Optional<DgrWebhookNotify> n = getDgrWebhookNotifyDao().findById(m.getWebhookNotifyId());
+                n.ifPresent(dgrWebhookNotify -> notifyNameList.add(dgrWebhookNotify.getNotifyName()));
+			}
+		});
+		respItem.setNotifyNameList(notifyNameList);
+
 		
 		String isRedirectByIp = apiData.getTsmpApiReg().getRedirectByIp();
 		if (StringUtils.hasLength(isRedirectByIp)) {
@@ -405,6 +410,15 @@ public class AA0317Service {
 		respItem.setFailDiscoveryPolicy(nvl(apiData.getTsmpApiReg().getFailDiscoveryPolicy(), "0"));
 		respItem.setFailHandlePolicy(nvl(apiData.getTsmpApiReg().getFailHandlePolicy(), "0"));
 
+		// CORS header
+		respItem.setIsCorsAllowOrigin(nvl(apiData.getTsmpApiReg().getIsCorsAllowOrigin(), "N"));
+		respItem.setIsCorsAllowMethods(nvl(apiData.getTsmpApiReg().getIsCorsAllowMethods(), "N"));
+		respItem.setIsCorsAllowHeaders(nvl(apiData.getTsmpApiReg().getIsCorsAllowHeaders(), "N"));
+
+		respItem.setCorsAllowOrigin(apiData.getTsmpApiReg().getCorsAllowOrigin());
+		respItem.setCorsAllowMethods(apiData.getTsmpApiReg().getCorsAllowMethods());
+		respItem.setCorsAllowHeaders(apiData.getTsmpApiReg().getCorsAllowHeaders());
+		
 		apiData.setRespItem(respItem);
 	}
 
@@ -439,14 +453,14 @@ public class AA0317Service {
 	}
 	
 	protected String getAppId(String applicationStr) {
-		if (StringUtils.isEmpty(applicationStr)) return null;
+		if (!StringUtils.hasLength(applicationStr)) return null;
 		try {
 			// ex: {"id": "123456", "nodes": [...], ...}
 			Map<String, Object> application = getObjectMapper().readValue(applicationStr, //
 				new TypeReference<Map<String, Object>>(){});
 			return (String) application.get("id");
 		} catch (Exception e) {
-			this.logger.debug("Cannot parse [application] as Map<String, Object>: " + applicationStr);
+			TPILogger.tl.debug("Cannot parse [application] as Map<String, Object>: " + applicationStr);
 		}
 		return null;
 	}
@@ -528,6 +542,14 @@ public class AA0317Service {
 
 	protected ObjectMapper getObjectMapper() {
 		return this.objectMapper;
+	}
+
+	protected  DgrWebhookApiMapDao getDgrWebhookApiMapDao(){
+		return  this.dgrWebhookApiMapDao;
+	}
+
+	protected DgrWebhookNotifyDao getDgrWebhookNotifyDao(){
+		return dgrWebhookNotifyDao;
 	}
 
 }

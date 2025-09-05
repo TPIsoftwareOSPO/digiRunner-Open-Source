@@ -203,7 +203,8 @@ public class AdaptiveTimeoutManager {
      * Determine if method is likely streaming based on method name
      */
     private boolean isLikelyStreamingMethod(String methodName) {
-        String lowerName = methodName.toLowerCase();
+    	return true;
+        /*String lowerName = methodName.toLowerCase();
         return lowerName.contains("stream") ||
                 lowerName.contains("watch") ||
                 lowerName.contains("observe") ||
@@ -212,7 +213,7 @@ public class AdaptiveTimeoutManager {
                 lowerName.contains("list") ||
                 lowerName.contains("upload") ||
                 lowerName.contains("download") ||
-                lowerName.contains("chat");
+                lowerName.contains("chat");*/
     }
 
     /**

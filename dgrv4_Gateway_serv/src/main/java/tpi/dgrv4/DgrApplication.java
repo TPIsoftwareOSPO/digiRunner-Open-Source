@@ -4,10 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.scheduling.annotation.EnableAsync;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
-@SpringBootApplication()
+@SpringBootApplication
+@EnableAsync(proxyTargetClass = true)
 public class DgrApplication extends SpringBootServletInitializer {
 
 	@Override

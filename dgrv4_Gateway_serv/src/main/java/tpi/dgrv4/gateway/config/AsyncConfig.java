@@ -12,7 +12,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Supplier;
 
 @Configuration
-@EnableAsync(proxyTargetClass = true)
 public class AsyncConfig {
 
 

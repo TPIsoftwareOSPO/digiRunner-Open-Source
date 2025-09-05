@@ -71,7 +71,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
       .subscribe(res => {
         if (this.toolService.checkDpSuccess(res.ResHeader)) {
           this.dataList = res.RespBody.ldapIdPInfoList;
-        }
+        } else this.dataList = [];
       })
   }
 

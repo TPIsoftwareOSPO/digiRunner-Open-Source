@@ -115,3 +115,15 @@ button.btn.btn-deta {
   height: 32px;
   padding: 0;
 }
+
+.btn-cert{
+  padding: 4px;
+  border-radius: .25rem;
+   color: #ea7448;
+  background: #fcd8ca;  
+  cursor: pointer;
+  &:hover {
+    color: #ffffff !important;
+    background: #ea7448 !important;
+  }
+}

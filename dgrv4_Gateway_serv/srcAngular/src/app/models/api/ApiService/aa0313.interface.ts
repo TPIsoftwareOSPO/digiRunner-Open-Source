@@ -25,7 +25,7 @@ export interface AA0313Req {
   mockHeaders?: Array<AA0313KeyVal>;
   mockBody?: string;
   redirectByIp: boolean;
-  redirectByIpDataList?: Array<AA0313RediretByIpData>  //  redirectByIp ? true => 1~5
+  redirectByIpDataList?: Array<AA0313RediretByIpData>; //  redirectByIp ? true => 1~5
   headerMaskPolicy: string; //0,1,2,3
   headerMaskPolicyNum?: number; // 1-9999
   headerMaskPolicySymbol?: string; // char length 1~10
@@ -35,19 +35,25 @@ export interface AA0313Req {
   bodyMaskPolicySymbol?: string;
   bodyMaskKeyword?: string;
   labelList?: Array<string>;
-  fixedCacheTime?:number;
+  fixedCacheTime?: number;
   failDiscoveryPolicy?: string;
   failHandlePolicy?: string;
   notifyNameList?: Array<string>;
+  isCorsAllowOrigin?: string;
+  isCorsAllowMethods?: string;
+  isCorsAllowHeaders?: string;
+  corsAllowOrigin?: string;
+  corsAllowMethods?: string;
+  corsAllowHeaders?: string;
 }
 // 要改為 extends AA0316Func
 export interface AA0313Func {
   tokenPayload: boolean;
 }
 
-export interface AA0313RediretByIpData{
-	ipForRedirect: string;
-	ipSrcUrl: string
+export interface AA0313RediretByIpData {
+  ipForRedirect: string;
+  ipSrcUrl: string;
 }
 
 export interface ResAA0313Before extends BaseRes {
@@ -58,6 +64,6 @@ export interface AA0313RespBefore {
 }
 export interface AA0313KeyVal {
   key: string;
-  value: string
+  value: string;
 }
-export interface ResAA0313 extends BaseRes { }
+export interface ResAA0313 extends BaseRes {}

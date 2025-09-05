@@ -101,7 +101,10 @@
       <div class="form-group row">
         <div class="col-6">
           <div class="field-flex-space-between">
-            <label id="rootCa_label" class="control-label font-weight-bold">Root CA</label>
+            <div class="d-flex">            
+              <label id="rootCa_label" class="control-label font-weight-bold">Root CA</label>              
+              <i class="far fa-question-circle btn-cert ms-2" (click)="showCertInfo()"></i>              
+            </div>
             <button type="button" class="btn tpi-detail" (click)="procSSLDecoder(rootCa?.value, 'Root CA')">
               [ {{ "button.detail" | translate }} ]
             </button>
@@ -196,7 +199,7 @@
           <button *ngIf="currentAction == 'update'" type="button" class="btn tpi-btn tpi-primary float-left mr-2"
             [disabled]="!form.valid" (click)="update();">{{'button.update'|translate}}</button>
 
-          <button type="button" class="btn tpi-btn tpi-primary" (click)="changePage('default')">
+          <button type="button" class="btn tpi-btn tpi-primary ms-2" (click)="changePage('default')">
             {{ "button.return_to_list" | translate }}
           </button>
         </div>

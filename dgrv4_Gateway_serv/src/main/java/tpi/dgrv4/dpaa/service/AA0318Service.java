@@ -1,22 +1,52 @@
 package tpi.dgrv4.dpaa.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpDpFileType;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.dpaa.vo.*;
+import tpi.dgrv4.dpaa.vo.AA0317Data;
+import tpi.dgrv4.dpaa.vo.AA0317Module;
+import tpi.dgrv4.dpaa.vo.AA0317RedirectByIpData;
+import tpi.dgrv4.dpaa.vo.AA0317RegModule;
+import tpi.dgrv4.dpaa.vo.AA0317RespItem;
+import tpi.dgrv4.dpaa.vo.AA0318Item;
+import tpi.dgrv4.dpaa.vo.AA0318Pair;
+import tpi.dgrv4.dpaa.vo.AA0318Req;
+import tpi.dgrv4.dpaa.vo.AA0318Resp;
+import tpi.dgrv4.dpaa.vo.AA0318Trunc;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpRtnCodeCacheProxy;
-import tpi.dgrv4.entity.entity.*;
+import tpi.dgrv4.entity.entity.TsmpApi;
+import tpi.dgrv4.entity.entity.TsmpApiId;
+import tpi.dgrv4.entity.entity.TsmpApiReg;
+import tpi.dgrv4.entity.entity.TsmpApiRegId;
+import tpi.dgrv4.entity.entity.TsmpDpFile;
+import tpi.dgrv4.entity.entity.TsmpDpItems;
+import tpi.dgrv4.entity.entity.TsmpDpItemsId;
+import tpi.dgrv4.entity.entity.TsmpRtnCode;
 import tpi.dgrv4.entity.entity.jpql.TsmpApiImp;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiImpDao;
@@ -27,37 +57,19 @@ import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
-import java.util.*;
-import java.util.function.Function;
-
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class AA0318Service {
 
-	private TPILogger logger = TPILogger.tl;
-
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-	private TsmpDpFileDao tsmpDpFileDao;
-	private TsmpApiImpDao tsmpApiImpDao;
-	private TsmpApiDao tsmpApiDao;
-	private TsmpApiRegDao tsmpApiRegDao;
-	private FileHelper fileHelper;
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	public AA0318Service(TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy, TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy,
-			TsmpDpFileDao tsmpDpFileDao, TsmpApiImpDao tsmpApiImpDao, TsmpApiDao tsmpApiDao,
-			TsmpApiRegDao tsmpApiRegDao, FileHelper fileHelper, ObjectMapper objectMapper) {
-		super();
-		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
-		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
-		this.tsmpDpFileDao = tsmpDpFileDao;
-		this.tsmpApiImpDao = tsmpApiImpDao;
-		this.tsmpApiDao = tsmpApiDao;
-		this.tsmpApiRegDao = tsmpApiRegDao;
-		this.fileHelper = fileHelper;
-		this.objectMapper = objectMapper;
-	}
+	private final TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private final TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
+	private final TsmpDpFileDao tsmpDpFileDao;
+	private final TsmpApiImpDao tsmpApiImpDao;
+	private final TsmpApiDao tsmpApiDao;
+	private final TsmpApiRegDao tsmpApiRegDao;
+	private final FileHelper fileHelper;
+	private final ObjectMapper objectMapper;
 
 	public AA0318Resp uploadRegCompAPIs(TsmpAuthorization auth, AA0318Req req, final String locale) {
 		String userName = auth.getUserName();
@@ -75,7 +87,7 @@ public class AA0318Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.debug(String.format("Upload Reg/Comp API error: %s", StackTraceUtil.logStackTrace(e)));
+			TPILogger.tl.debug(String.format("Upload Reg/Comp API error: %s", StackTraceUtil.logStackTrace(e)));
 			throw TsmpDpAaRtnCode._1203.throwing();
 		}
 		return resp;
@@ -96,24 +108,24 @@ public class AA0318Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.debug(String.format("Upload Reg/Comp API error: %s", StackTraceUtil.logStackTrace(e)));
+			TPILogger.tl.debug(String.format("Upload Reg/Comp API error: %s", StackTraceUtil.logStackTrace(e)));
 			throw TsmpDpAaRtnCode._1203.throwing();
 		}
 		return resp;
 	}
 
 	protected AA0317Data checkParams(String userName, String orgId, AA0318Req req) {
-		if (StringUtils.isEmpty(userName)) {
+		if (!StringUtils.hasLength(userName)) {
 			throw TsmpDpAaRtnCode._1258.throwing();
 		}
 
-		if (StringUtils.isEmpty(orgId)) {
+		if (!StringUtils.hasLength(orgId)) {
 			throw TsmpDpAaRtnCode._1273.throwing();
 		}
 
 		// 沒有傳入暫存檔名
 		String tempFileName = req.getTempFileName();
-		if (StringUtils.isEmpty(tempFileName)) {
+		if (!StringUtils.hasLength(tempFileName)) {
 			throw TsmpDpAaRtnCode.NO_INCLUDING_FILE.throwing();
 		}
 
@@ -139,7 +151,7 @@ public class AA0318Service {
 		try {
 			fileContent = getFileHelper().download( tsmpDpFileList.get(0) );
 		} catch (Exception e) {
-			this.logger.debug(String.format("File download error: %s", StackTraceUtil.logStackTrace(e)));
+			TPILogger.tl.debug(String.format("File download error: %s", StackTraceUtil.logStackTrace(e)));
 		}
 		if (fileContent == null || fileContent.length == 0) {
 			throw TsmpDpAaRtnCode._1233.throwing();
@@ -150,7 +162,7 @@ public class AA0318Service {
 		try {
 			aa0317Data = convertToAA0317Data(fileContent);
 		} catch (Exception e) {
-			this.logger.debug(String.format("Cannot convert json to AA0317Data: %s", StackTraceUtil.logStackTrace(e)));
+			TPILogger.tl.debug(String.format("Cannot convert json to AA0317Data: %s", StackTraceUtil.logStackTrace(e)));
 		}
 		if (aa0317Data == null) {
 			throw TsmpDpAaRtnCode._1291.throwing();
@@ -247,6 +259,12 @@ public class AA0318Service {
 		aa0317RespItem.setHttpMethod( getNodeAsText(node, "httpMethod") );
 		aa0317RespItem.setParams( getNodeAsText(node, "params") );
 		aa0317RespItem.setProduce( getNodeAsText(node, "produce") );
+		ArrayNode notifyNameListNode = getNodeAsArrayNode(node, "notifyNameList");
+		List<String> notifyNameList = new ArrayList<>();
+		if (notifyNameListNode != null) {
+			notifyNameListNode.forEach(n -> notifyNameList.add(n.asText()));
+		}
+		aa0317RespItem.setNotifyNameList(notifyNameList);
 //		ArrayNode flowNode = getNodeAsArrayNode(node, "flow");
 //		List<String> flow = null;
 //		if (flowNode != null) {
@@ -312,6 +330,16 @@ public class AA0318Service {
 		aa0317RespItem.setScheduledRemovalDate(getNodeAsText(node, "scheduledRemovalDate"));
 		aa0317RespItem.setEnableScheduledDate(getNodeAsText(node, "enableScheduledDate"));
 		aa0317RespItem.setDisableScheduledDate(getNodeAsText(node, "disableScheduledDate"));
+		
+		// CORS header
+		aa0317RespItem.setIsCorsAllowOrigin(getNodeAsText(node, "isCorsAllowOrigin"));
+		aa0317RespItem.setIsCorsAllowMethods(getNodeAsText(node, "isCorsAllowMethods"));
+		aa0317RespItem.setIsCorsAllowHeaders(getNodeAsText(node, "isCorsAllowHeaders"));
+
+		aa0317RespItem.setCorsAllowOrigin(getNodeAsText(node, "corsAllowOrigin"));
+		aa0317RespItem.setCorsAllowMethods(getNodeAsText(node, "corsAllowMethods"));
+		aa0317RespItem.setCorsAllowHeaders(getNodeAsText(node, "corsAllowHeaders"));
+		
 		return aa0317RespItem;
 	}
 
@@ -353,7 +381,7 @@ public class AA0318Service {
 				try {
 					tsmpApiImp = convertToTsmpApiImp(api, fileName, userName);
 				} catch (Exception e) {
-					this.logger.debug(String.format("AA0317RespItem convert to TsmpApiImp error: %s", StackTraceUtil.logStackTrace(e)));
+					TPILogger.tl.debug(String.format("AA0317RespItem convert to TsmpApiImp error: %s", StackTraceUtil.logStackTrace(e)));
 					throw TsmpDpAaRtnCode._1203.throwing();
 				}
 
@@ -396,7 +424,7 @@ public class AA0318Service {
 		} else {
 			maxBatchNo = maxBatchNo.intValue() + 1;
 		}
-		this.logger.debug(String.format("Get batch no = %d", maxBatchNo));
+		TPILogger.tl.debug(String.format("Get batch no = %d", maxBatchNo));
 		return maxBatchNo;
 	}
 
@@ -449,7 +477,7 @@ public class AA0318Service {
 		i.setScheduledRemovalDate(null != api.getScheduledRemovalDate() ? Long.parseLong(api.getScheduledRemovalDate()) : null);
 		i.setEnableScheduledDate(null != api.getEnableScheduledDate() ? Long.parseLong(api.getEnableScheduledDate()) : null);
 		i.setDisableScheduledDate(null != api.getDisableScheduledDate() ? Long.parseLong(api.getDisableScheduledDate()) : null);
-		
+		i.setNotifyNameList(null != api.getNotifyNameList() ?api.getNotifyNameList().stream().collect(Collectors.joining(",")):null);
 		List<AA0317RedirectByIpData> redirectByIpDataList = api.getRedirectByIpDataList();
 		if (redirectByIpDataList.size() > 0) {
 
@@ -520,6 +548,15 @@ public class AA0318Service {
 		i.setLabel4(label[3]);
 		i.setLabel5(label[4]);
 		
+		// CORS header
+		i.setIsCorsAllowOrigin(api.getIsCorsAllowOrigin());
+		i.setIsCorsAllowMethods(api.getIsCorsAllowMethods());
+		i.setIsCorsAllowHeaders(api.getIsCorsAllowHeaders());
+
+		i.setCorsAllowOrigin(api.getCorsAllowOrigin());
+		i.setCorsAllowMethods(api.getCorsAllowMethods());
+		i.setCorsAllowHeaders(api.getCorsAllowHeaders());
+	
 		return i;
 	}
 
@@ -552,7 +589,8 @@ public class AA0318Service {
 		item.setEndpoint(tsmpApiImp.getPathOfJson());
 		item.setCheckAct( toPair(tsmpApiImp.getCheckAct(), "API_IMP_CHECK_ACT", locale) );
 		item.setMemo( trunc(tsmpApiImp.getMemo(), 50) );
-		
+		if (StringUtils.hasLength(tsmpApiImp.getNotifyNameList()))
+			item.setNotifyNameList(Arrays.asList(tsmpApiImp.getNotifyNameList().split(",")));
 		Map<String, String> map = new HashMap<>();
 		map.put(tsmpApiImp.getIpForRedirect1(), tsmpApiImp.getIpSrcUrl1());
 		map.put(tsmpApiImp.getIpForRedirect2(), tsmpApiImp.getIpSrcUrl2());
@@ -561,7 +599,19 @@ public class AA0318Service {
 		map.put(tsmpApiImp.getIpForRedirect5(), tsmpApiImp.getIpSrcUrl5());
         map.entrySet().removeIf(entry -> !StringUtils.hasLength(entry.getKey()));
 
-		item.setSrcURLByIpRedirectMap(map );
+		item.setSrcURLByIpRedirectMap(map);
+		
+		item.setFailDiscoveryPolicy(tsmpApiImp.getFailDiscoveryPolicy());
+		item.setFailHandlePolicy(tsmpApiImp.getFailHandlePolicy());
+		
+		// CORS header
+		item.setIsCorsAllowOrigin(tsmpApiImp.getIsCorsAllowOrigin());
+		item.setIsCorsAllowMethods(tsmpApiImp.getIsCorsAllowMethods());
+		item.setIsCorsAllowHeaders(tsmpApiImp.getIsCorsAllowHeaders());
+
+		item.setCorsAllowOrigin(tsmpApiImp.getCorsAllowOrigin());
+		item.setCorsAllowMethods(tsmpApiImp.getCorsAllowMethods());
+		item.setCorsAllowHeaders(tsmpApiImp.getCorsAllowHeaders());
 		
 		return item;
 	}
@@ -574,7 +624,7 @@ public class AA0318Service {
 		try {
 			getFileHelper().moveTemp(userName, refFileCateCode, refId, tempFilename, isCreate, isUpdate);
 		} catch (Exception e) {
-			this.logger.debug(String.format("File save error: %s", StackTraceUtil.logStackTrace(e)));
+			TPILogger.tl.debug(String.format("File save error: %s", StackTraceUtil.logStackTrace(e)));
 		}
 	}
 
@@ -599,7 +649,7 @@ public class AA0318Service {
 		AA0318Trunc aa0318Trunc = new AA0318Trunc();
 		aa0318Trunc.setT(Boolean.FALSE);
 		aa0318Trunc.setVal(value);
-		if (!StringUtils.isEmpty(value) && value.length() > maxLength) {
+		if (StringUtils.hasLength(value) && value.length() > maxLength) {
 			aa0318Trunc.setT(Boolean.TRUE);
 			aa0318Trunc.setOri(value);
 			aa0318Trunc.setVal(value.substring(0, maxLength));

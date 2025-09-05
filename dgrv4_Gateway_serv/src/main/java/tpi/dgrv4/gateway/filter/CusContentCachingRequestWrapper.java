@@ -1,118 +1,115 @@
 package tpi.dgrv4.gateway.filter;
 
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.http.HttpServletRequest;
+public class CusContentCachingRequestWrapper extends CusContentCachingRequestWrapper2 {
+    private byte[] body;
 
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.ContentCachingRequestWrapper;
+    private String token;
 
-public class CusContentCachingRequestWrapper extends ContentCachingRequestWrapper {
+    private Map<String, String[]> parameterMap;
 
-	private byte[] body;
-	
-	private String token;
+    public CusContentCachingRequestWrapper(HttpServletRequest request) throws IOException {
+        super(request);
+        super.getParameterMap(); // init cache in ContentCachingRequestWrapper
+        body = super.getContentAsByteArray();// first option for application/x-www-form-urlencoded
+        if (body.length == 0) {
+            try {
+                body = super.getInputStream().readAllBytes(); // second option for other body formats
+            } catch (IOException ex) {
+                body = new byte[0];
+            }
+        }
+    }
 
-	public CusContentCachingRequestWrapper(HttpServletRequest request) throws IOException {
-		super(request);
-		super.getParameterMap(); // init cache in ContentCachingRequestWrapper
-		body = super.getContentAsByteArray(); // first option for application/x-www-form-urlencoded
-		if (body.length == 0) {
-			try {
-				body = super.getInputStream().readAllBytes(); // second option for other body formats
-			} catch (IOException ex) {
-				body = new byte[0];
-			}
-		}
-	}
-	
-	public void setToken(String token) {
-		this.token = token;
-	}
+    public void setToken(String token) {
+        this.token = token;
+    }
 
-	@Override
-	public String getHeader(String key) {
-		if ("authorization".equalsIgnoreCase(key)) {
-			String authorization = super.getHeader(key);
-			if (StringUtils.hasLength(authorization)) {
-				return authorization;
-			}
-			return token;
-		}
-		return super.getHeader(key);
-	}
-	
-	@Override
-	public Enumeration<String> getHeaderNames() {
-		List<String> names = Collections.list(super.getHeaderNames());
-		if (StringUtils.hasLength(token)) {
-			names.add("authorization");
-		}
-		return Collections.enumeration(names);
-	}
+    @Override
+    public String getHeader(String key) {
+        if ("authorization".equalsIgnoreCase(key)) {
+            String authorization = super.getHeader(key);
+            if (StringUtils.hasLength(authorization)) {
+                return authorization;
+            }
+            return token;
+        }
+        return super.getHeader(key);
+    }
 
-	@Override
-	public Enumeration<String> getHeaders(String name) {
-		List<String> values = Collections.list(super.getHeaders(name));
-		if ("authorization".equalsIgnoreCase(name)) {
-			if (CollectionUtils.isEmpty(values) || values.contains("")) {
-				values = Arrays.asList(token);
-			}
-		}
-		return Collections.enumeration(values);
-	}
+    @Override
+    public Enumeration<String> getHeaderNames() {
+        List<String> names = Collections.list(super.getHeaderNames());
+        if (StringUtils.hasLength(token)) {
+            names.add("authorization");
+        }
+        return Collections.enumeration(names);
+    }
 
-	public byte[] getBody() {
-		return body;
-	}
+    @Override
+    public Enumeration<String> getHeaders(String name) {
+        List<String> values = Collections.list(super.getHeaders(name));
+        if ("authorization".equalsIgnoreCase(name)) {
+            if (CollectionUtils.isEmpty(values) || values.contains("")) {
+                values = Arrays.asList(token);
+            }
+        }
+        return Collections.enumeration(values);
+    }
 
-	@Override
-	public ServletInputStream getInputStream() {
-		return new RequestCachingInputStream(body);
-	}
+    public byte[] getBody() {
+        return body;
+    }
 
-	@Override
-	public BufferedReader getReader() throws IOException {
-		return new BufferedReader(new InputStreamReader(getInputStream(), getCharacterEncoding()));
-	}
+    @Override
+    public ServletInputStream getInputStream() {
+        return new RequestCachingInputStream(body);
+    }
 
-	private static class RequestCachingInputStream extends ServletInputStream {
+    @Override
+    public BufferedReader getReader() throws IOException {
+        return new BufferedReader(new InputStreamReader(getInputStream(), getCharacterEncoding()));
+    }
 
-		private final ByteArrayInputStream inputStream;
+    private static class RequestCachingInputStream extends ServletInputStream {
 
-		public RequestCachingInputStream(byte[] bytes) {
-			inputStream = new ByteArrayInputStream(bytes);
-		}
+        private final ByteArrayInputStream inputStream;
 
-		@Override
-		public int read() throws IOException {
-			return inputStream.read();
-		}
+        public RequestCachingInputStream(byte[] bytes) {
+            inputStream = new ByteArrayInputStream(bytes);
+        }
 
-		@Override
-		public boolean isFinished() {
-			return inputStream.available() == 0;
-		}
+        @Override
+        public int read() throws IOException {
+            return inputStream.read();
+        }
 
-		@Override
-		public boolean isReady() {
-			return true;
-		}
+        @Override
+        public boolean isFinished() {
+            return inputStream.available() == 0;
+        }
 
-		@Override
-		public void setReadListener(ReadListener readlistener) {
-		}
+        @Override
+        public boolean isReady() {
+            return true;
+        }
 
-	}
+        @Override
+        public void setReadListener(ReadListener readlistener) {
+        }
+
+    }
+
 
 }

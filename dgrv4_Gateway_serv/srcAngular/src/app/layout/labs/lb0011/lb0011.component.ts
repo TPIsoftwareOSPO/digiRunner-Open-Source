@@ -22,6 +22,9 @@ import { DPB0283Req } from 'src/app/models/api/ServerService/dpb0283.interface';
 import { DPB0282Resp } from 'src/app/models/api/ServerService/dpb0282.interface';
 import { DPB0284Req } from 'src/app/models/api/ServerService/dpb0284.interface';
 import { Subscription } from 'rxjs';
+import { AlertType } from 'src/app/models/common.enum';
+import * as FileSaver from 'file-saver';
+import * as dayjs from 'dayjs';
 
 @Component({
   selector: 'app-lb0011',
@@ -54,6 +57,9 @@ export class Lb0011Component extends BaseComponent implements OnInit {
   notifyTypeSubscription: Subscription | undefined;
   _formValid: boolean = false;
 
+  fileName: string = '';
+  file: any = null;
+
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
@@ -64,7 +70,7 @@ export class Lb0011Component extends BaseComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private serverService: ServerService,
     private alertService: AlertService,
-    private ngxSrvice: NgxUiLoaderService
+    private ngxService: NgxUiLoaderService
   ) {
     super(route, tr);
   }
@@ -464,6 +470,68 @@ export class Lb0011Component extends BaseComponent implements OnInit {
 
   set_formValid(event) {
     this._formValid = event;
+  }
+
+  exportFile() {
+    this.ngxService.start();
+    this.serverService.exportWebhook().subscribe((res) => {
+      if (res.type === 'application/json') {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const jsonData = JSON.parse(reader.result as string);
+          this.alertService.ok(
+            jsonData.ResHeader.rtnMsg,
+            '',
+            AlertType.warning,
+            jsonData.ResHeader.txDate + '<br>' + jsonData.ResHeader.txID
+          );
+        };
+        reader.readAsText(res);
+      } else {
+        const data: Blob = new Blob([res], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+        });
+
+        const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
+        FileSaver.saveAs(data, `Webhook_${date}.xlsx`);
+      }
+      this.ngxService.stop();
+    });
+  }
+
+  importFile() {
+    this.serverService.importWebhook(this.file).subscribe(async (res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        const code = ['uploading', 'message.success', 'upload_result'];
+        const dict = await this.toolService.getDict(code);
+        this.messageService.add({
+          severity: 'success',
+          summary: dict['upload_result'],
+          detail: `${dict['message.success']}!`,
+        });
+        this.file = null;
+        this.fileName = '';
+        this.queryWebhookNotify();
+      }
+      this.ngxService.stop();
+    });
+  }
+
+  openFileBrowser() {
+    $('#file').click();
+  }
+
+  async fileChange(event: any) {
+    let file: FileList = event.target.files;
+    if (file.length != 0) {
+      this.file = file.item(0);
+      this.fileName = file[0].name;
+      event.target.value = '';
+    } else {
+      // this.fileData!.setValue(null);
+      this.file = null;
+      event.target.value = '';
+    }
   }
 
   public get keyword() {

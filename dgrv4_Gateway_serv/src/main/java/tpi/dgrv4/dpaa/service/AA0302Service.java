@@ -38,7 +38,6 @@ import tpi.dgrv4.dpaa.vo.AA0302Resp;
 import tpi.dgrv4.dpaa.vo.AA0302Trunc;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
-import tpi.dgrv4.entity.entity.DgrWebhookNotify;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -70,8 +69,6 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
 public class AA0302Service {
-
-	private TPILogger logger = TPILogger.tl;
 
 	private Long moduleId;
 
@@ -142,7 +139,7 @@ public class AA0302Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			// 1297:執行錯誤
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
@@ -155,11 +152,11 @@ public class AA0302Service {
 		String moduleName = req.getModuleName();
 		String oId = authorization.getOrgId();
 
-		if (StringUtils.isEmpty(apiKey) || StringUtils.isEmpty(moduleName)) {
+		if (!StringUtils.hasLength(apiKey) || !StringUtils.hasLength(moduleName)) {
 			throw TsmpDpAaRtnCode._1296.throwing(); // 1296:缺少必填參數
 		}
 
-		if (StringUtils.isEmpty(oId)) {
+		if (!StringUtils.hasLength(oId)) {
 			throw TsmpDpAaRtnCode._1273.throwing(); // 1273:組織單位ID:必填參數
 		}
 
@@ -174,15 +171,15 @@ public class AA0302Service {
 		// 取得組織原則 (組織與子組織的orgId)
 		List<String> userOrgIdList = getTsmpOrganizationDao().queryOrgDescendingByOrgId_rtn_id(oId, Integer.MAX_VALUE);
 		if (CollectionUtils.isEmpty(userOrgIdList)) {
-			this.logger.debug("Violation organization principle, org not found.");
+			TPILogger.tl.debug("Violation organization principle, org not found.");
 			throw TsmpDpAaRtnCode._1298.throwing(); // 1298:查無資料
 		}
 
 		api = optApi.get();
 		String apiOId = api.getOrgId();
-		if (!StringUtils.isEmpty(apiOId)) {
+		if (StringUtils.hasLength(apiOId)) {
 			if (!userOrgIdList.contains(apiOId)) {
-				this.logger.debug(String.format("Violation organization principle. API orgId %s not in %s", apiOId,
+				TPILogger.tl.debug(String.format("Violation organization principle. API orgId %s not in %s", apiOId,
 						userOrgIdList.toString()));
 				throw TsmpDpAaRtnCode._1298.throwing(); // 1298:查無資料
 			}
@@ -260,7 +257,7 @@ public class AA0302Service {
 			throw TsmpDpAaRtnCode._1436.throwing(); // 1436:找不到已啟動或最近上傳的模組
 		}
 		if (nApiModule == null) {
-			logger.debug("TsmpnApiModule not found ! ");
+			TPILogger.tl.debug("TsmpnApiModule not found ! ");
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 
@@ -311,7 +308,7 @@ public class AA0302Service {
 		}
 
 		if (apiModule == null) {
-			logger.debug("TsmpApiModule not found ! ");
+			TPILogger.tl.debug("TsmpApiModule not found ! ");
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 
@@ -400,7 +397,6 @@ public class AA0302Service {
 			resp.setControls(setJavaContrlos());
 
 		} else if (TsmpApiSrc.REGISTERED.value().equals(apiSrc)) {
-			TsmpApiReg detail = (TsmpApiReg) obj;
 			resp.setApiUUID(nvl(api.getApiUid()));
 			resp.setModuleId(getModuleId());
 			resp = setRegDetailData(obj, resp, apiSrc);
@@ -552,7 +548,7 @@ public class AA0302Service {
 		String subitemName = "";
 		String apiStatus = api.getApiStatus();
 
-		if (StringUtils.isEmpty(apiStatus)) {
+		if (!StringUtils.hasLength(apiStatus)) {
 			apiStatus = "";
 		} else {
 			subitemName = apiStatus;
@@ -572,7 +568,7 @@ public class AA0302Service {
 		String subitemName = "";
 		String apiSrc = api.getApiSrc();
 
-		if (StringUtils.isEmpty(apiSrc)) {
+		if (!StringUtils.hasLength(apiSrc)) {
 			apiSrc = "";
 		} else {
 			subitemName = apiSrc;
@@ -606,7 +602,7 @@ public class AA0302Service {
 
 	private AA0302Resp setJweFlag(TsmpApi api, AA0302Resp resp, String locale) {
 		String jweFlag = api.getJewFlag();
-		if (StringUtils.isEmpty(jweFlag)) {
+		if (!StringUtils.hasLength(jweFlag)) {
 			jweFlag = "0";
 		}
 		String subitemName = jweFlag;
@@ -623,7 +619,7 @@ public class AA0302Service {
 
 	private AA0302Resp setJweFlagResp(TsmpApi api, AA0302Resp resp, String locale) {
 		String jweFlagResp = api.getJewFlagResp();
-		if (StringUtils.isEmpty(jweFlagResp)) {
+		if (!StringUtils.hasLength(jweFlagResp)) {
 			jweFlagResp = "0";
 		}
 		String subitemName = jweFlagResp;
@@ -641,7 +637,7 @@ public class AA0302Service {
 	private AA0302Resp setDataFormat(TsmpApi api, AA0302Resp resp, String locale) {
 		String subitemName = "";
 		String dataFormat = api.getDataFormat();
-		if (StringUtils.isEmpty(dataFormat)) {
+		if (!StringUtils.hasLength(dataFormat)) {
 			dataFormat = "1";
 		}
 		subitemName = dataFormat;
@@ -669,7 +665,7 @@ public class AA0302Service {
 		TsmpOrganization org = getOrganization(orgId);
 		if (org != null) {
 			orgName = org.getOrgName();
-			if (StringUtils.isEmpty(orgName)) {
+			if (!StringUtils.hasLength(orgName)) {
 				orgName = org.getOrgId();
 			}
 		} else {
@@ -813,13 +809,13 @@ public class AA0302Service {
 		}
 
 		String urlRid = detail.getUrlRid(); // urlRID
-		if (StringUtils.isEmpty(urlRid)) {
+		if (!StringUtils.hasLength(urlRid)) {
 			urlRid = "0";
 		}
 		resp.setUrlRID(urlRid);
 
 		String noOauth = detail.getNoOauth(); // noOAuth
-		if (StringUtils.isEmpty(noOauth)) {
+		if (!StringUtils.hasLength(noOauth)) {
 			noOauth = "0";
 		}
 		resp.setNoOAuth(noOauth);
@@ -955,6 +951,14 @@ public class AA0302Service {
 		    }
 		});
 		resp.setNotifyNameList(notifyNameList);
+		
+		// CORS header
+		resp.setIsCorsAllowOrigin(nvl(detail.getIsCorsAllowOrigin(), "N")); // 若沒有值, 則設為"N"
+		resp.setIsCorsAllowMethods(nvl(detail.getIsCorsAllowMethods(), "N"));// 若沒有值, 則設為"N"
+		resp.setIsCorsAllowHeaders(nvl(detail.getIsCorsAllowHeaders(), "N"));// 若沒有值, 則設為"N"
+		resp.setCorsAllowOrigin(nvl(detail.getCorsAllowOrigin()));
+		resp.setCorsAllowMethods(nvl(detail.getCorsAllowMethods()));
+		resp.setCorsAllowHeaders(nvl(detail.getCorsAllowHeaders()));
 
 		return resp;
 	}
@@ -1035,7 +1039,7 @@ public class AA0302Service {
 				methodOfJson = String.join(",", strList);
 			}
 		} catch (IOException e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing(); // 1297:執行錯誤
 		}
 		return methodOfJson;

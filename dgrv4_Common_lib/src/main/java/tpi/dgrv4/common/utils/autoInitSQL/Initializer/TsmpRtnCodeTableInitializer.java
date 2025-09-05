@@ -1041,6 +1041,7 @@ public class TsmpRtnCodeTableInitializer {
 			// 20240905, 自訂錯誤訊息, Mini Lee
 		    createTsmpRtnCode((tsmpRtnCodeColumn = "1559"), (locale = "zh-TW"), (tsmpRtnMsg = "{{0}}"), (tsmpRtnDesc = ""));
 		    createTsmpRtnCode((tsmpRtnCodeColumn = "1559"), (locale = "en-US"), (tsmpRtnMsg = "{{0}}"), (tsmpRtnDesc = ""));
+
 		    
 		    // 20250206, 對稱式加密/解密失敗訊息, Mini Lee
 		    createTsmpRtnCode((tsmpRtnCodeColumn = "1561"), (locale = "zh-TW"), (tsmpRtnMsg = "對稱式加密失敗：{{0}}"), (tsmpRtnDesc = ""));
@@ -1048,6 +1049,10 @@ public class TsmpRtnCodeTableInitializer {
 			
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1562"), (locale = "zh-TW"), (tsmpRtnMsg = "對稱式解密失敗：{{0}}"), (tsmpRtnDesc = ""));
 		    createTsmpRtnCode((tsmpRtnCodeColumn = "1562"), (locale = "en-US"), (tsmpRtnMsg = "Symmetric decryption error: {{0}}"), (tsmpRtnDesc = ""));
+			// 20250116, 刪除失敗，狀態為啟用中, Zoe Lee
+			createTsmpRtnCode((tsmpRtnCodeColumn = "2039"), (locale = "zh-TW"), (tsmpRtnMsg = "啟用中，無法刪除"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "2039"), (locale = "en-US"), (tsmpRtnMsg = "Enabled, cannot be deleted."), (tsmpRtnDesc = ""));
+
 		
 			// 20250701, 查無簽核關卡設定訊息, Kevin Cheng
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1565"), (locale = "zh-TW"), (tsmpRtnMsg = "查無簽核關卡設定，應設定簽核關卡"), (tsmpRtnDesc = ""));
@@ -1056,9 +1061,12 @@ public class TsmpRtnCodeTableInitializer {
 			// 20250722, 結束日期不可小於開始日期, Kevin Cheng
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1566"), (locale = "zh-TW"), (tsmpRtnMsg = "結束日期不可小於開始日期"), (tsmpRtnDesc = ""));
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1566"), (locale = "en-US"), (tsmpRtnMsg = "End date cannot be less than start date"), (tsmpRtnDesc = ""));
-		
-		
-		
+
+			// 20250723, 憑證過期, Zoe Lee
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1560"), (locale = "zh-TW"), (tsmpRtnMsg = "憑證過期"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1560"), (locale = "en-US"), (tsmpRtnMsg = "The Certificate has expired."), (tsmpRtnDesc = ""));
+
+
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

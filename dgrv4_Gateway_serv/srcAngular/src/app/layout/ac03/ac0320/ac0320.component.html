@@ -13,7 +13,7 @@
               (click)="updateStatus('N')">
               {{ "button.disable" | translate }}
             </button>
-            <button type="button" class="btn tpi-primary tpi-btn" (click)="export()">
+            <button type="button" class="btn tpi-primary tpi-btn" (click)="export()" [disabled]="selected.length == 0">
               {{ "button.export" | translate }}
             </button>
           </div>
@@ -88,24 +88,17 @@
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-6">
-          <label id="serviceName_label" class="control-label">{{'grpc.tar_serv'|translate}}</label>
-          <input type="text" class="form-control" id="serviceName" formControlName="serviceName">
-          <div *ngIf="serviceName?.invalid && (serviceName?.dirty || serviceName?.touched)" class="text-danger">
-            <small class="form-text">{{serviceName?.errors.isRequired | translate}}</small>
-          </div>
-        </div>
-        <div class="col-6">
-          <label id="enable_label" class="control-label">Enable</label>
+        <div class="col">
+          <label id="enable_label" class="control-label">{{'status'|translate}}</label>
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
                 <p-radioButton formControlName="enable" value="Y" inputId="enableY"></p-radioButton>
-                <label for="enableY" class="ms-2 mb-0">Y</label>
+                <label for="enableY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
                 <p-radioButton formControlName="enable" value="N" inputId="enableN"></p-radioButton>
-                <label for="enableN" class="ms-2 mb-0">N</label>
+                <label for="enableN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
             </ng-container>
           </div>
@@ -113,6 +106,15 @@
       </div>
       <div class="form-group row">
         <div class="col-6">
+          <label id="serviceName_label" class="control-label">{{'grpc.tar_serv'|translate}}</label>
+          <input type="text" class="form-control" id="serviceName" formControlName="serviceName">
+          <div *ngIf="serviceName?.invalid && (serviceName?.dirty || serviceName?.touched)" class="text-danger">
+            <small class="form-text">{{serviceName?.errors.isRequired | translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-3">
           <label id="targetHostName_label" class="control-label">{{'grpc.tar_host'|translate}}</label>
           <input type="text" class="form-control" id="targetHostName" formControlName="targetHostName"
             placeholder="IP address or Hostname">
@@ -121,7 +123,7 @@
             <small class="form-text">{{targetHostName?.errors.isRequired | translate}}</small>
           </div>
         </div>
-        <div class="col-6">
+        <div class="col-3">
           <label id="targetPort_label" class="control-label">{{'grpc.tar_port'|translate}}</label>
           <input type="text" class="form-control" id="targetPort" formControlName="targetPort">
           <div *ngIf="targetPort?.invalid && (targetPort?.dirty || targetPort?.touched)" class="text-danger">
@@ -130,34 +132,58 @@
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-12">
-          <label id="targetHostName_label" class="control-label">{{'grpc.tar_host'|translate}} TLS</label>
-          <div class="p-form-check-line form-group">
-            <ng-container>
-              <div class="p-form-check">
-                <p-radioButton formControlName="secureMode" value="SECURE" inputId="secureModeY"></p-radioButton>
-                <label for="secureModeY" class="ms-2 mb-0">Y</label>
-              </div>
-              <div class="p-form-check">
-                <p-radioButton formControlName="secureMode" value="PLAINTEXT" inputId="secureModeN"></p-radioButton>
-                <label for="secureModeN" class="ms-2 mb-0">N</label>
-              </div>
-            </ng-container>
+        <div class="col-6 row">
+          <div class="col-4">
+            <label id="" class="control-label fw-bold required">{{'grpc.tar_host'|translate}} Protocol</label>
+            <div class="p-form-check-line form-group">
+              <ng-container>
+                <div class="p-form-check">
+                  <p-radioButton formControlName="secureMode" value="SECURE" inputId="secureModeY"></p-radioButton>
+                  <label for="secureModeY" class="ms-2 mb-0">gRPCS</label>
+                </div>
+                <div class="p-form-check">
+                  <p-radioButton formControlName="secureMode" value="PLAINTEXT" inputId="secureModeN"></p-radioButton>
+                  <label for="secureModeN" class="ms-2 mb-0">gRPC</label>
+                </div>
+              </ng-container>
+            </div>
           </div>
-          <div style="display:block" *ngIf="secureMode.value ==='SECURE'">
-            <label id="targetHostName_label" class="control-label fw-bold">{{"certificate_authority"|translate }}( X.509
-              )</label>
-            <textarea rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent"
-              pInputTextarea></textarea>
-          </div>
-          <div *ngIf="trustedCertsContent?.invalid && (trustedCertsContent?.dirty || trustedCertsContent?.touched)"
-            class="text-danger">
-            <small class="form-text">{{trustedCertsContent?.errors.required | translate}}</small>
-          </div>
+
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-12">
+        <div class="col-4" *ngIf="secureMode.value ==='SECURE'">
+          <div class="p-form-check-line">
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" [trueValue]="'N'" [falseValue]="'Y'" inputId="autoTrustUpstreamCerts_label"
+                formControlName="autoTrustUpstreamCerts"></p-checkbox>
+              <label for="autoTrustUpstreamCerts_label"
+                class="control-label mb-0 ms-2">{{'grpc.autotrust_certs'|translate}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12" style="display:block" *ngIf="autoTrustUpstreamCerts.value ==='N'">
+          <label id="targetHostName_label" class="control-label fw-bold required">{{"certificate_authority"|translate
+            }}( X.509
+            )</label><i class="far fa-question-circle tip ms-2" tooltipStyleClass='tooltip-custom-w' [pTooltip]="
+      ( 'grpc.cert_tip_1' | translate ) + '<br/>' +
+      ( 'grpc.cert_tip_2' | translate ) + '<br/>' +
+      ( 'grpc.cert_tip_3' | translate ) + '<br/>' +
+      ( 'grpc.cert_tip_4' | translate ) + '<br/>' +
+      ( 'grpc.cert_tip_4_1' | translate ) + '<br/>' +
+      ( 'grpc.cert_tip_4_2' | translate ) + '<br/>' +
+      ( 'grpc.cert_tip_4_3' | translate )" [escape]="false"></i>
+          <textarea rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent"
+            pInputTextarea></textarea>
+        </div>
+        <div *ngIf="trustedCertsContent?.invalid && (trustedCertsContent?.dirty || trustedCertsContent?.touched)"
+          class="text-danger">
+          <small class="form-text">{{trustedCertsContent?.errors.required | translate}}</small>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-6">
           <label id="proxyHostName_label" class="control-label">Proxy hostname/domain name</label>
           <input type="text" class="form-control" id="proxyHostName" formControlName="proxyHostName"
             placeholder="Hostname or Domain name" [readonly]="currentAction=='update'">
@@ -167,7 +193,7 @@
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-4">
+        <div class="col-3">
           <label id="connectTimeoutMs_label" class="control-label">Connect timeout</label>
           <div class="d-flex align-items-center">
             <input type="number" class="form-control" id="connectTimeoutMs" formControlName="connectTimeoutMs">
@@ -206,8 +232,13 @@
             [disabled]="formEdit.invalid" (click)="create()">{{'button.create'|translate}}</button>
           <button *ngIf="currentAction=='update'" type="button" class="btn tpi-btn tpi-primary float-start me-3"
             [disabled]="formEdit.invalid" (click)="update()">{{'button.update'|translate}}</button>
+          <button type="button" class="btn tpi-btn tpi-night float-start me-3" (click)="connectionTest()">
+            {{ "button.connect_test" | translate }}
+          </button>
           <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
             (click)="changePage('query')">{{'button.return_to_list'|translate}}</button>
+
+
         </div>
       </div>
     </form>
@@ -280,8 +311,7 @@
           <td rowspan="2">{{rowData.targetPort}}</td>
           <td rowspan="1">{{rowData.create?('button.create'|translate):''}}
             {{rowData.update?('button.update'|translate):''}}</td>
-          <td rowspan="1"
-            [ngStyle]="{'width': 'auto', 'background-color': (rowData.success ? '#FAEBD7' : '')}">
+          <td rowspan="1" [ngStyle]="{'width': 'auto', 'background-color': (rowData.success ? '#FAEBD7' : '')}">
             <ng-container *ngIf="checkImportStatus; else empty">
               <ng-container *ngIf="rowData.success != null; else empty">
                 {{ rowData.success ? ('message.success' | translate) : ('message.fail' | translate) }}

@@ -19,6 +19,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.httpu.utils.HttpUtil;
 
 /**
  * 提供了連接池和 keep-alive 機制,適合高併發場景。
@@ -78,12 +79,12 @@ public class EsHttpClient {
         return instance;
     }
     
-    public int bulkWrite(String esUrl, String bulkBody, Map<String, String> headers, Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic) throws IOException {
+    public int bulkWrite(String esUrl, String bulkBody, Map<String, String> headers, Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic, boolean checkStatusFromFile) throws IOException {
        
         // 第一次使用時，需要初始化（通常在應用啟動時）
         ESLogBuffer logBuffer = getESLogBuffer(diskFreeThreshHold, deletePercent, allowWriteElastic);
         // 使用緩衝器寫入日誌
-        return logBuffer.bulkWrite(esUrl, bulkBody, headers);
+        return logBuffer.bulkWrite(esUrl, bulkBody, headers, checkStatusFromFile);
     }
     
     public ESLogBuffer getESLogBuffer(Float diskFreeThreshHold, int deletePercent, boolean allowWriteElastic) {

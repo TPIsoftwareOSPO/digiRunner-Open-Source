@@ -282,6 +282,8 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String ES_CHECK_CONNECTION = "ES_CHECK_CONNECTION";
 
 		public static final String AUDIT_LOG_RETENTION_DAYS = "AUDIT_LOG_RETENTION_DAYS";
+
+		public  static final String KIBANA_REFERER_ALLOWLIST = "KIBANA_REFERER_ALLOWLIST";
 	}
 
 	public List<TsmpSetting> findByIdLike(String id);

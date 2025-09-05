@@ -70,8 +70,6 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class AA0313Service {
 
-	private TPILogger logger = TPILogger.tl;
-
 	private TsmpUserDao tsmpUserDao;
 	private TsmpOrganizationDao tsmpOrganizationDao;
 	private TsmpApiDao tsmpApiDao;
@@ -83,14 +81,14 @@ public class AA0313Service {
 	private ObjectMapper objectMapper;
 	private DgrAuditLogService dgrAuditLogService;
 	private CommForwardProcService commForwardProcService;
+
 	private DaoGenericCacheService daoGenericCacheService;
+	
 	private DgrAcIdpUserDao dgrAcIdpUserDao;
 	
-	@Setter(onMethod_ = @Autowired)
 	@Getter(AccessLevel.PROTECTED)
 	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
 	
-	@Setter(onMethod_ = @Autowired)
 	@Getter(AccessLevel.PROTECTED)
 	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
 
@@ -203,7 +201,7 @@ public class AA0313Service {
 			req.setDataFormat(dataFormat);
 			req.setApiCacheFlag(apiCacheFlag);
 		} catch (BcryptParamDecodeException e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1299.throwing();
 		}
 		
@@ -361,6 +359,38 @@ public class AA0313Service {
 				});
 			}
 		}
+		
+		// CORS header
+		if (!StringUtils.hasLength(req.getIsCorsAllowOrigin())) {
+			throw TsmpDpAaRtnCode._1350.throwing("{{isCorsAllowOrigin}}");
+		}
+
+		if (!StringUtils.hasLength(req.getIsCorsAllowMethods())) {
+			throw TsmpDpAaRtnCode._1350.throwing("{{isCorsAllowMethods}}");
+		}
+
+		if (!StringUtils.hasLength(req.getIsCorsAllowHeaders())) {
+			throw TsmpDpAaRtnCode._1350.throwing("{{isCorsAllowHeaders}}");
+		}
+
+		if ("Y".equals(req.getIsCorsAllowOrigin())) {
+			if (!StringUtils.hasLength(req.getCorsAllowOrigin())) {
+				throw TsmpDpAaRtnCode._1350.throwing("{{Access-Control-Allow-Origin}}");
+			}
+		}
+
+		if ("Y".equals(req.getIsCorsAllowMethods())) {
+			if (!StringUtils.hasLength(req.getCorsAllowMethods())) {
+				throw TsmpDpAaRtnCode._1350.throwing("{{Access-Control-Allow-Methods}}");
+			}
+		}
+
+		if ("Y".equals(req.getIsCorsAllowHeaders())) {
+			if (!StringUtils.hasLength(req.getCorsAllowHeaders())) {
+				throw TsmpDpAaRtnCode._1350.throwing("{{Access-Control-Allow-Headers}}");
+			}
+		}
+		
 		return Pair.of(tsmpApi, tsmpApiReg);
 	}
 
@@ -477,7 +507,7 @@ public class AA0313Service {
 	protected TsmpApi checkApiExists(String apiKey, String moduleName) {
 		Optional<TsmpApi> opt = getTsmpApiDao().findById(new TsmpApiId(apiKey, moduleName));
 		if (!opt.isPresent()) {
-			this.logger.debug(String.format("API doesn't exist: %s-%s", moduleName, apiKey));
+			TPILogger.tl.debug(String.format("API doesn't exist: %s-%s", moduleName, apiKey));
 			throw TsmpDpAaRtnCode.NO_API_INFO.throwing();
 		}
 		return opt.get();
@@ -486,7 +516,7 @@ public class AA0313Service {
 	protected TsmpApiReg checkApiRegExists(String apiKey, String moduleName) {
 		Optional<TsmpApiReg> opt = getTsmpApiRegDao().findById(new TsmpApiRegId(apiKey, moduleName));
 		if (!opt.isPresent()) {
-			this.logger.debug(String.format("API REG doesn't exist: %s-%s", moduleName, apiKey));
+			TPILogger.tl.debug(String.format("API REG doesn't exist: %s-%s", moduleName, apiKey));
 			throw TsmpDpAaRtnCode.NO_API_INFO.throwing();
 		}
 		return opt.get();
@@ -495,7 +525,7 @@ public class AA0313Service {
 	protected void checkApiOrg(TsmpApi tsmpApi, List<String> userOrgIdList) {
 		String apiOrgId = tsmpApi.getOrgId();
 		if (StringUtils.hasLength(apiOrgId) && !userOrgIdList.contains(apiOrgId)) {
-			this.logger.debug(String.format("Violate organization principle: apiOrgId(%s) not in %s", apiOrgId, userOrgIdList));
+			TPILogger.tl.debug(String.format("Violate organization principle: apiOrgId(%s) not in %s", apiOrgId, userOrgIdList));
 			throw TsmpDpAaRtnCode.NO_API_INFO.throwing();
 		}
 	}
@@ -629,8 +659,8 @@ public class AA0313Service {
 				String methodOfJson = getObjectMapper().writeValueAsString(req.getMethodOfJson());
 				tsmpApiReg.setMethodOfJson(methodOfJson);
 			} catch (Exception e) {
-				this.logger.debug(String.format("Method of json convert error: %s-%s-%s", tsmpApiReg.getModuleName(), tsmpApiReg.getApiKey(), req.getMethodOfJson()));
-				this.logger.error(StackTraceUtil.logStackTrace(e));
+				TPILogger.tl.debug(String.format("Method of json convert error: %s-%s-%s", tsmpApiReg.getModuleName(), tsmpApiReg.getApiKey(), req.getMethodOfJson()));
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			}
 		}
 		
@@ -711,6 +741,14 @@ public class AA0313Service {
 		String failHandlePolicy = req.getFailHandlePolicy();
 		tsmpApiReg.setFailDiscoveryPolicy(nvl(failDiscoveryPolicy, "0"));
 		tsmpApiReg.setFailHandlePolicy(nvl(failHandlePolicy, "0"));
+		
+		// CORS header
+		tsmpApiReg.setIsCorsAllowOrigin(req.getIsCorsAllowOrigin());
+		tsmpApiReg.setIsCorsAllowMethods(req.getIsCorsAllowMethods());
+		tsmpApiReg.setIsCorsAllowHeaders(req.getIsCorsAllowHeaders());
+		tsmpApiReg.setCorsAllowOrigin(req.getCorsAllowOrigin());
+		tsmpApiReg.setCorsAllowMethods(req.getCorsAllowMethods());
+		tsmpApiReg.setCorsAllowHeaders(req.getCorsAllowHeaders());
 		
 		tsmpApiReg = getTsmpApiRegDao().saveAndFlush(tsmpApiReg);
 		

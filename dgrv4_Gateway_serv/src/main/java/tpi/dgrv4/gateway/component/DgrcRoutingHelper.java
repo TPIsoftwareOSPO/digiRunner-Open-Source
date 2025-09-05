@@ -1,34 +1,33 @@
 package tpi.dgrv4.gateway.component;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
+import oshi.util.tuples.Pair;
+import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.UrlCodecHelper;
-import tpi.dgrv4.entity.entity.TsmpApi;
-import tpi.dgrv4.entity.entity.TsmpApiId;
-import tpi.dgrv4.entity.entity.TsmpApiReg;
-import tpi.dgrv4.entity.entity.TsmpApiRegId;
-import tpi.dgrv4.entity.entity.TsmpSetting;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
+import tpi.dgrv4.gateway.component.cache.proxy.DgrMtlsClientCertCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiRegCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpSettingCacheProxy;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.CommForwardProcService;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
+import tpi.dgrv4.httpu.utils.CertificateInfo;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class DgrcRoutingHelper {
@@ -39,16 +38,19 @@ public class DgrcRoutingHelper {
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
 	private TsmpSettingCacheProxy tsmpSettingCacheProxy;
 	private CommForwardProcService commForwardProcService;
+	private TsmpSettingService tsmpSettingService;
 
-	@Autowired
 	public DgrcRoutingHelper(TsmpApiCacheProxy tsmpApiCacheProxy, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
-			TsmpSettingCacheProxy tsmpSettingCacheProxy, CommForwardProcService commForwardProcService) {
+			TsmpSettingCacheProxy tsmpSettingCacheProxy, CommForwardProcService commForwardProcService ,DgrMtlsClientCertCacheProxy dgrMtlsClientCertCacheProxy ,TsmpSettingService tsmpSettingService) {
 		super();
 		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
 		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
 		this.tsmpSettingCacheProxy = tsmpSettingCacheProxy;
 		this.commForwardProcService = commForwardProcService;
+		this.dgrMtlsClientCertCacheProxy = dgrMtlsClientCertCacheProxy;
+		this.tsmpSettingService = tsmpSettingService;
 	}
+	private DgrMtlsClientCertCacheProxy dgrMtlsClientCertCacheProxy;
 
 	public TsmpApiReg calculateRoute(String reqUrl) {
 
@@ -304,6 +306,56 @@ public class DgrcRoutingHelper {
 		srcUrl = tsmpSettingValue[0] + srcUrl;
 		return srcUrl;
 	}
+
+	private ConcurrentHashMap<String, String> decryptedKeyMimaCache = new ConcurrentHashMap<>();
+	private static final int MAX_CACHE_SIZE = 1000;
+	/***
+	 * 取得mtls憑證資訊
+	 * Get mTLS certificate information
+	 * @param host
+	 * @param port
+	 * @return
+	 */
+	public Pair<Boolean, CertificateInfo> getMtlsInfo(String host, Integer port) {
+		boolean isMtls = false;
+//		DgrMtlsClientCert dgrMtlsClientCert = mtlsProxyKeeper.findByHostAndPortAndEnable(host, port, "Y");
+		DgrMtlsClientCert dgrMtlsClientCert = getDgrMtlsClientCertCacheProxy().findByHostAndPortAndEnable(host, port, "Y");
+
+		var certBuilder = CertificateInfo.builder();
+		if (dgrMtlsClientCert != null) {
+			isMtls = true;
+			String keyMima = dgrMtlsClientCert.getKeyMima();
+			String decryptedKeyMima = decryptedKeyMimaCache.get(keyMima);
+			if (decryptedKeyMima == null) {
+				try {
+					// ENC decrypt
+					decryptedKeyMima = getTsmpSettingService().getENCPlainVal(keyMima);
+					decryptedKeyMimaCache.put(keyMima, decryptedKeyMima);
+				} catch (Exception e) {
+					throw TsmpDpAaRtnCode._1434.throwing("{{keyMima}}");
+				}
+			}
+			certBuilder
+					.rootCA(dgrMtlsClientCert.getRootCa())
+					.clientCert(dgrMtlsClientCert.getClientCert())
+					.clientKey(dgrMtlsClientCert.getClientKey())
+					.keyMima(decryptedKeyMima);
+			evictLRUEntries();
+		}
+		return new Pair<>(isMtls, certBuilder.build());
+	}
+	private void evictLRUEntries() {
+		// 刪除最少使用的以保持緩存大小
+		// Delete the least recently used to maintain cache size
+		if (decryptedKeyMimaCache.size() > MAX_CACHE_SIZE) {
+			Iterator<Map.Entry<String, String>> iterator = decryptedKeyMimaCache.entrySet().iterator();
+			while (iterator.hasNext() && decryptedKeyMimaCache.size() > MAX_CACHE_SIZE) {
+				Map.Entry<String, String> entry = iterator.next();
+				iterator.remove();
+			}
+		}
+	}
+
 	
 	protected TsmpApiCacheProxy getTsmpApiCacheProxy() {
 		return tsmpApiCacheProxy;
@@ -319,5 +371,13 @@ public class DgrcRoutingHelper {
 
 	protected CommForwardProcService getCommForwardProcService() {
 		return commForwardProcService;
+	}
+
+	protected TsmpSettingService getTsmpSettingService() {
+		return tsmpSettingService;
+	}
+
+	protected DgrMtlsClientCertCacheProxy getDgrMtlsClientCertCacheProxy() {
+		return dgrMtlsClientCertCacheProxy;
 	}
 }

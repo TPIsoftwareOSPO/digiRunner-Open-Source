@@ -25,11 +25,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.dpaa.controller.DPB0118Controller;
 import tpi.dgrv4.dpaa.controller.VersionController;
 import tpi.dgrv4.dpaa.vo.AA0302KeyVal;
 import tpi.dgrv4.entity.entity.TsmpApi;
+import tpi.dgrv4.entity.entity.TsmpApiReg;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiCacheProxy;
+import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
@@ -59,16 +60,16 @@ public final class MockApiTestService {
 		return !CollectionUtils.isEmpty(values) && values.get(0).equals(Boolean.TRUE.toString());
 	}
 
-	public ResponseEntity<?> mockForwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes, 
-			HttpHeaders httpHeaders, String srcUrl, String uuid, 
-			int tokenPayload, TsmpApiLogReq dgrReqVo, TsmpApiLogReq dgrReqVo_rdb, Boolean cApiKeySwitch) throws Exception {
+	public ResponseEntity<?> mockForwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
+			HttpHeaders httpHeaders, String srcUrl, String uuid, int tokenPayload, TsmpApiLogReq dgrReqVo,
+			TsmpApiLogReq dgrReqVo_rdb, Boolean cApiKeySwitch, TsmpApiReg tsmpApiReg) throws Exception {
 
 		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders,
 				tokenPayload, cApiKeySwitch, uuid, false);
 		String reqMbody = "";
-		HttpRespData respObj = callForwardApi(header, httpRes, srcUrl, dgrReqVo, reqMbody, uuid, false);
+		HttpRespData respObj = callForwardApi(header, httpRes, srcUrl, dgrReqVo, reqMbody, uuid, false, httpReq, tsmpApiReg);
 
-		httpRes = getCommForwardProcService().getConvertResponse(respObj.respHeader, respObj.statusCode, httpRes);
+		httpRes = getCommForwardProcService().getConvertResponse(respObj.respHeader, respObj.statusCode, httpRes, tsmpApiReg);
 
 		// 轉換 Response Body 格式
 		Map<String, Object> convertResponseBodyMap = getCommForwardProcService().convertResponseBody(httpRes, httpReq,
@@ -94,9 +95,9 @@ public final class MockApiTestService {
 		return null;
 	}
 
-	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletResponse httpRes, 
-			String srcUrl, TsmpApiLogReq dgrReqVo, String reqMbody, String uuid, boolean isFixedCache)
-			throws Exception {
+	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletResponse httpRes, String srcUrl,
+			TsmpApiLogReq dgrReqVo, String reqMbody, String uuid, boolean isFixedCache, HttpServletRequest httpReq,
+			TsmpApiReg tsmpApiReg) throws Exception {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("\n--【LOGUUID】【" + uuid + "】【Start Mock-to-Backend】--");
@@ -112,7 +113,13 @@ public final class MockApiTestService {
 		sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(sb.toString()); // can't read resp String
 
-		httpRes = getCommForwardProcService().getConvertResponse(respObj, httpRes); // handle HTTP resp HEADER
+		// Must call respObj.getLogStr() first
+		// Threshhold > 10,000 => print warn msg.
+		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+		httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
+		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
+
+		httpRes = getCommForwardProcService().getConvertResponse(respObj, httpRes, tsmpApiReg); // handle HTTP resp HEADER
 
 		byte[] httpArray = respObj.respStr.getBytes();
 

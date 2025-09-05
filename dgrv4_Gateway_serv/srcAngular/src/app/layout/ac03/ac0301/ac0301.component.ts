@@ -84,6 +84,7 @@ import { AA0434DTO } from 'src/app/models/api/ApiService/aa0434.interfcae';
 import { TOrgService } from 'src/app/shared/services/org.service';
 import { OrganizationComponent } from 'src/app/shared/organization/organization.component';
 import { Subscription } from 'rxjs';
+import * as ValidatorFns from '../../../shared/validator-functions';
 
 @Component({
   selector: 'app-ac0301',
@@ -186,10 +187,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   };
 
   // dgrProtocol:Array<string> = [];
+
   isWebhook: boolean = false;
+  isAiGateway: boolean = false;
   reloadFlag: boolean = false;
 
-  jwtSettingSub?:Subscription;
+  jwtSettingSub?: Subscription;
 
   constructor(
     route: ActivatedRoute,
@@ -275,6 +278,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       failDiscoveryPolicy: new FormControl(''),
       failHandlePolicy: new FormControl(''),
       notifyNameList: new FormControl(),
+      isCorsAllowOrigin: new FormControl(),
+      isCorsAllowMethods: new FormControl(),
+      isCorsAllowHeaders: new FormControl(),
+      corsAllowOrigin: new FormControl(),
+      corsAllowMethods: new FormControl(),
+      corsAllowHeaders: new FormControl(),
     });
 
     //取得acConf
@@ -1550,7 +1559,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   async updateApi() {
-    // console.log(this.u_apiStatus?.value)
+    // console.log(this.u_srcUrl!.value)
     // return;
     switch (this.apiDetail!.apiSrc.v) {
       case 'R':
@@ -1693,6 +1702,14 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         updateRCapiReqBody.failDiscoveryPolicy = this.failDiscoveryPolicy.value;
         updateRCapiReqBody.failHandlePolicy = this.failHandlePolicy.value;
         updateRCapiReqBody.notifyNameList = this.notifyNameList.value;
+
+        updateRCapiReqBody.isCorsAllowHeaders = this.isCorsAllowHeaders.value;
+        updateRCapiReqBody.isCorsAllowMethods = this.isCorsAllowMethods.value;
+        updateRCapiReqBody.isCorsAllowOrigin = this.isCorsAllowOrigin.value;
+
+        updateRCapiReqBody.corsAllowHeaders = this.corsAllowHeaders.value ?? '';
+        updateRCapiReqBody.corsAllowMethods = this.corsAllowMethods.value ?? '';
+        updateRCapiReqBody.corsAllowOrigin = this.corsAllowOrigin.value ?? '';
 
         this.apiService
           .updateRegCompAPI(updateRCapiReqBody)
@@ -1876,7 +1893,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     const code = ['button.detail', 'button.update', 'upload_reg_comp_api_file'];
     const dict = await this.tool.getDict(code);
     this.resetFormValidator(this.detailForm);
-    if(this.jwtSettingSub) {
+    if (this.jwtSettingSub) {
       this.jwtSettingSub.unsubscribe();
       this.jwtSettingSub = undefined;
     }
@@ -1959,6 +1976,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         this.resetFormValidator(this.updateForm);
         this.updateForm.enable();
         this.isWebhook = false;
+        this.isAiGateway = false;
         // 註冊主機
         // this.regService
         //   .queryRegHostList_1_ignore1298({ paging: 'false' } as AA0806Req)
@@ -2194,30 +2212,82 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 this.apiDetail.failDiscoveryPolicy
               );
               this.failHandlePolicy.setValue(this.apiDetail.failHandlePolicy);
-              this.notifyNameList.setValue(this.apiDetail.notifyNameList);
+              if(this.apiDetail.notifyNameList) this.notifyNameList.setValue([...this.apiDetail.notifyNameList]);
 
-              const dgrProtocol_match = this.toolServiceW.dgrProtocol_match(
-                this.apiDetail?.srcUrl?.o
-                  ? this.apiDetail.srcUrl.o
-                  : this.apiDetail?.srcUrl!.v
-              );
+              const _srcURl = this.apiDetail?.srcUrl?.o
+                ? this.apiDetail.srcUrl.o
+                : this.apiDetail?.srcUrl!.v;
+              //check ai-gateway
+              this.isAiGateway = this.tool.checkSrcUrlisAiGateway(_srcURl);
 
-              if (dgrProtocol_match.length > 0) {
-                this.isWebhook = dgrProtocol_match.some((item) =>
-                  item.includes('webhook')
-                );
+              //check webhook
+              this.isWebhook = this.tool.checkSrcUrlisWebhook(_srcURl);
 
-                if (this.isWebhook) {
-                  this.u_srcUrl?.disable();
-                } else {
-                  this.u_srcUrl?.enable();
-                }
+              if (this.isWebhook) {
+                this.u_srcUrl?.disable();
+              } else {
+                this.u_srcUrl?.enable();
               }
+
+              this.isCorsAllowOrigin.setValue(res.RespBody.isCorsAllowOrigin);
+              if (this.isCorsAllowOrigin.value == 'Y') {
+                this.corsAllowOrigin!.setValidators(
+                  ValidatorFns.requiredValidator()
+                );
+              }
+              this.isCorsAllowOrigin.valueChanges.subscribe((res) => {
+                if (res == 'Y') {
+                  this.corsAllowOrigin!.setValidators(
+                    ValidatorFns.requiredValidator()
+                  );
+                } else {
+                  this.corsAllowOrigin.clearValidators();
+                  this.corsAllowOrigin.updateValueAndValidity();
+                }
+              });
+
+              this.isCorsAllowMethods.setValue(res.RespBody.isCorsAllowMethods);
+              if (this.isCorsAllowMethods.value == 'Y') {
+                this.corsAllowMethods!.setValidators(
+                  ValidatorFns.requiredValidator()
+                );
+              }
+              this.isCorsAllowMethods.valueChanges.subscribe((res) => {
+                if (res == 'Y') {
+                  this.corsAllowMethods!.setValidators(
+                    ValidatorFns.requiredValidator()
+                  );
+                } else {
+                  this.corsAllowMethods.clearValidators();
+                  this.corsAllowMethods.updateValueAndValidity();
+                }
+              });
+
+              this.isCorsAllowHeaders.setValue(res.RespBody.isCorsAllowHeaders);
+              if (this.isCorsAllowHeaders.value == 'Y') {
+                this.corsAllowHeaders!.setValidators(
+                  ValidatorFns.requiredValidator()
+                );
+              }
+              this.isCorsAllowHeaders.valueChanges.subscribe((res) => {
+                if (res == 'Y') {
+                  this.corsAllowHeaders!.setValidators(
+                    ValidatorFns.requiredValidator()
+                  );
+                } else {
+                  this.corsAllowHeaders.clearValidators();
+                  this.corsAllowHeaders.updateValueAndValidity();
+                }
+              });
+
+              this.corsAllowHeaders.setValue(res.RespBody.corsAllowHeaders);
+              this.corsAllowMethods.setValue(res.RespBody.corsAllowMethods);
+              this.corsAllowOrigin.setValue(res.RespBody.corsAllowOrigin);
+
             }
           });
         break;
       case 'swagger':
-        // console.log('111',rowData)
         let tarUrl: string = '';
         if (
           location.hostname == 'localhost' ||
@@ -2260,6 +2330,39 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         break;
     }
   }
+
+  // checkSrcUrlisAiGateway(_srcUrl: string): boolean {
+  //   let isAiGateway: boolean = false;
+  //   if (_srcUrl.includes('b64.')) {
+  //     if (_srcUrl.substring(0, 3) == 'b64') {
+  //       let srcUrlArr = _srcUrl.split('.');
+  //       srcUrlArr.shift();
+
+  //       let srcUrlArrEdit: { percent: string; url: string }[] = [];
+  //       for (let i = 0; i < srcUrlArr.length; i++) {
+  //         if (i % 2 == 0) {
+  //           srcUrlArrEdit.push({
+  //             percent: srcUrlArr[i],
+  //             url: base64.Base64.decode(srcUrlArr[i + 1]),
+  //           });
+  //         }
+  //       }
+
+  //       isAiGateway = srcUrlArrEdit.some((item) => {
+  //         const dgrProtocol_match = this.toolServiceW.dgrProtocol_match(
+  //           item.url
+  //         );
+  //         return dgrProtocol_match.some((item) => item.includes('ai-gateway'));
+  //       });
+  //     }
+  //   } else {
+  //     const dgrProtocol_match = this.toolServiceW.dgrProtocol_match(_srcUrl);
+  //     isAiGateway = dgrProtocol_match.some((item) =>
+  //       item.includes('ai-gateway')
+  //     );
+  //   }
+  //   return isAiGateway;
+  // }
 
   originStringTable(item: any) {
     return item ? (!item.ori ? item.val : item.t ? item.val : item.ori) : '';
@@ -2722,10 +2825,13 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     const ref = this.dialogService.open(NotifyListComponent, {
       header: 'Notify Name',
       width: '700px',
+      data: {
+        notifyNameList: this.notifyNameList.value
+      }
     });
 
     ref.onClose.subscribe((res) => {
-      this.notifyNameList.setValue(res);
+     if(res)  this.notifyNameList.setValue(res);
     });
   }
 
@@ -2926,6 +3032,25 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
   public get notifyNameList() {
     return this.updateForm.get('notifyNameList')!;
+  }
+
+  public get isCorsAllowOrigin() {
+    return this.updateForm.get('isCorsAllowOrigin')!;
+  }
+  public get isCorsAllowMethods() {
+    return this.updateForm.get('isCorsAllowMethods')!;
+  }
+  public get isCorsAllowHeaders() {
+    return this.updateForm.get('isCorsAllowHeaders')!;
+  }
+  public get corsAllowOrigin() {
+    return this.updateForm.get('corsAllowOrigin')!;
+  }
+  public get corsAllowMethods() {
+    return this.updateForm.get('corsAllowMethods')!;
+  }
+  public get corsAllowHeaders() {
+    return this.updateForm.get('corsAllowHeaders')!;
   }
 
   public get file() {

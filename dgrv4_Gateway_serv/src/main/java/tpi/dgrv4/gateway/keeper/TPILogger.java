@@ -16,6 +16,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import lombok.Setter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.annotation.PostConstruct;
 import org.apache.catalina.Context;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
@@ -32,12 +37,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zaxxer.hikari.HikariDataSource;
-
-import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
 import tpi.dgrv4.codec.utils.UUID64Util;
@@ -88,6 +87,7 @@ import tpi.dgrv4.gateway.service.MonitorHostService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.service.WebsiteService;
 import tpi.dgrv4.gateway.vo.ClientKeeper;
+import tpi.dgrv4.httpu.utils.HttpUtil2;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.tcp.utils.communication.ClinetNotifier;
 import tpi.dgrv4.tcp.utils.communication.LinkerClient;
@@ -132,13 +132,19 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	private String instanceId;
 	
 	@Value("${es.apilog.disk.free.threshold:0.2f}")
-	public Float diskFreeThreshHold; 
+	public Float diskFreeThreshHold; //Delete files when disk space < 20%, ESLogBuffer.java 
 	
 	@Value("${es.apilog.disk.deletePercert:80}")
-	public int deletePercent;
+	public int deletePercent;  //Delete 80% of files, ESLogBuffer.java
 	
 	@Value("${es.apilog.allow.write.elastic:false}")
-	public boolean allowWriteElastic;
+	public boolean allowWriteElastic;  //dgR write flag, ESLogBuffer.java
+	
+	@Value("${es.api.log.store.dir.max.size:5GB}")
+	public String esApiLogDirMaxSize; // Max 5GB, stop writing when exceeded , DiskSpaceMonitor.java
+	
+	@Value("${es.api.log.store.dir.max.files:50000}")
+	public int esApiLogDirMaxFiles; // Max file count, stop writing when exceeded , DiskSpaceMonitor.java	
 
 	public static final String dgrNodeLostContactDaoStr = "dgrNodeLostContactDaoStr";
 	private Thread scheduler_t_refresh = null;
@@ -181,11 +187,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	@Value("${digiRunner.gtw.deploy.interval.ms:1000}")
 	private Long deployIntervalMs;
 
-	@Value("${es.api.log.store.dir.max.size:5GB}")
-	private String esApiLogDirMaxSize;
-	
-	@Value("${es.api.log.store.dir.max.files:50000}")
-	private int esApiLogDirMaxFiles;
 	
 	// 從配置中獲取最大目錄大小
     private long getConfiguredMaxDirSize() {
@@ -250,6 +251,9 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	public boolean sensitiveEnable;
 	@Value("${check.sensitive.info.keyword:pwd,password,mima}")
 	public String sensitiveKeyword;
+	@Value("${dgr.forward.api.elapsed.time.threshold:10000}")
+	public long elapsedTimeThreshold;
+	
 	
 	
 //	@Autowired(required = false)
@@ -318,6 +322,14 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	}
 
 
+	@Value(value = "${httpClient.connection.timeout:0}")
+	private int connectTimeout;
+	@Value(value = "${http2.client.poolsize:0}")
+	private int poolsize;
+	@Value(value = "${mtls.certificate.verification.enabled:false}")
+	private Boolean mtlsVerifyEnabled;
+	@Value(value = "${http2.client.max.stream:0}")
+	private int maxStream;
 	static {
 		tl = new TPILogger();
 		ITPILogger.tl = tl;
@@ -338,6 +350,18 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		cusIpPortForBroadcast = cusIpPort;
 		cusSchemeForBroadcast = cusScheme;
 		PORT = serverConfigProperties.getPort();
+	}
+
+	private void setHttpUtil2TimeoutAndClientPoolAndMaxStream(int connectTimeout, int poolsize, int maxStream)  {
+			if (connectTimeout > 0 ) {
+				HttpUtil2.setThreadPoolAndTimeout(connectTimeout);
+			}
+			if (poolsize > 0) {
+				HttpUtil2.setClientPoolSize(poolsize);
+			}
+		if (maxStream > 0) {
+			HttpUtil2.setMaxStreame(maxStream);
+		}
 	}
 
 	public static void initLoggerLevel(String loggerLevel) {
@@ -785,7 +809,8 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		}
 
 		updateESLogFlag();
-		
+		setHttpUtil2TimeoutAndClientPoolAndMaxStream(connectTimeout, poolsize, maxStream);
+		HttpUtil2.setValidityCheck(mtlsVerifyEnabled);
 		initHttpUtil();
 	}
 	
@@ -793,6 +818,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		if (TPILogger.isFirstConnection) {
 			HttpUtil.SENSITIVE_ENABLE = this.sensitiveEnable;
 			HttpUtil.SENSITIVE_KEYWORD = this.sensitiveKeyword;
+			HttpUtil.ELAPSED_TIME_THRESHOLD = this.elapsedTimeThreshold;
 		}
 	}
 	

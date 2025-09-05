@@ -1307,8 +1307,8 @@
   "cusUserDataUrl_tip": "ユーザー データを取得するための DGR の API URL を提供します。DGR が対応するユーザー データを取得できるように、CUS は API を提供する必要があります",
   "cusUrlExp": "以下の規則に従ってURLを入力してください：\n\n1. URL は`http://` または `https://` で始まること。\n2. URL は合法的かつ完全なURL形式であること。\n\n## 正しい例：\n- https://www.example.com\n- http://subdomain.example.com/page\n- https://www.example.com/path/to/resource?param=value\n\n## 間違った例：\n- www.example.com（プロトコルがない）\n- ftp://example.com（許可されていないプロトコル）\n- https://（不完全な URL）",
   "clientKeyMima": "クライアントキーのパスワード",
-  "cfm_mtls_enable": "このサイトに対して mTLS 接続を有効にしようとしています!",
-  "cfm_mtls_disable": "このサイトの mTLS 接続を無効にしようとしています!",
+  "cfm_mtls_enable": "これらの証明書設定を有効にしてもよろしいですか?",
+  "cfm_mtls_disable": "これらの証明書設定を無効にしてもよろしいですか?",
   "allow_all": "すべてを許可",
   "xapikey_search": "X-API-Key 検索",
   "xapikey_name": "X-API-Key 名",
@@ -1324,7 +1324,8 @@
   },
   "notify": {
     "name": "通知名",
-    "type": "通知タイプ"
+    "type": "通知タイプ",
+    "sound": "通知効果音"
   },
   "status_code": "ステータスコード",
   "elapsed_time": "応答時間",
@@ -1332,17 +1333,49 @@
   "date_duration_tip": "開始時間が空の場合、即時開始を意味します。終了時間が空の場合、無期限を意味します。",
   "date_duration_start": "開始時間が空の場合、即時開始を意味します。",
   "date_duration_end": "終了時間が空の場合、無期限を意味します。",
-  "api_abnormal_report": "API異常レポート",
+  "api_abnormal_report": "API例外リアルタイム情報",
   "abnormal_condition_setting": "異常条件設定",
   "rpt_s_time": "レポート開始時間",
   "srv_s_time": "サービス起動時間",
   "api_abnormal_greater_than": "応答失敗または応答時間が超過",
   "api_abnormal_failures": "応答失敗のみ（HTTPステータスコード>=400）",
+  "ai": {
+    "llm_name": "LLMモデル名",
+    "apikey_count": "登録済みAPIキー数",
+    "api_key_alias": "APIキー名",
+    "api_key_code": "APIキーコード",
+    "usage_limit_input": "入力制限",
+    "usage_limit_output": "出力制限",
+    "provider": "プロバイダー",
+    "provider_alias": "サプライヤー名",
+    "model": "モデル",
+    "usage_limit": "使用制限",
+    "reject": "拒否",
+    "use_anyway": "強制使用",
+    "consumer_type": "ユーザータイプ",
+    "consumer_id": "ユーザーID",
+    "template_name": "テンプレート名",
+    "request_timestamp": "リクエスト時刻",
+    "api_input_token": "API入力トークン",
+    "api_output_token": "API出力トークン",
+    "content": "コンテンツ"
+  },
   "grpc": {
     "tar_serv": "ターゲットサービス名",
     "tar_host": "ターゲットホスト",
     "tar_port": "ポート番号",
-    "proxy_host": "プロキシアドレス"
+    "proxy_host": "プロキシアドレス",
+    "autotrust_certs": "証明書の検証",
+    "cert_tip_1": "1. 内容はテキスト形式（Base64 エンコード）",
+    "cert_tip_2": "2. よくある拡張子は .pem または .crt",
+    "cert_tip_3": "3. 内容は\n-----BEGIN CERTIFICATE-----\nから\n-----END CERTIFICATE-----\nまでを含む必要があります",
+    "cert_tip_4": "4. 証明書が PKCS#12 の keystore にある場合",
+    "cert_tip_4_1": "4.1. 例：example.p12 は PKCS#12 形式の keystore（X.509 証明書と秘密鍵を含む）です",
+    "cert_tip_4_2": "4.2. 次のコマンドで PEM 形式ファイルに変換できます（秘密鍵と証明書が同時に出力されます）：\nopenssl pkcs12 -nodes -in example.p12 -out example.pem -passin pass:example",
+    "cert_tip_4_3": "4.3. example.pem を開き、証明書ブロックを探します。\n-----BEGIN CERTIFICATE-----\nMIIFwjCCA6qgAwIBAgIIHrR+pmyYcSUwDQYJKoZIhvcNAQEMBQAwgYYxGDAWBgNV\n......\npY2+3U1hLAs6pNrmuSpGrbQa6QEx21jO7HCON7Ds/5Cl3ZCWlg4=\n-----END CERTIFICATE-----\nこれを完全にコピー＆ペーストしてください"
   },
-  "org_reset": "組織設定"
+  "org_reset": "組織設定",
+  "recent_api_abnormal_each_node": "各ノードで直近に異常応答を返したAPIを観測します",
+  "trustedCertsContent": "証書",
+  "cert": "証書"
 }

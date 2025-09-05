@@ -3640,3 +3640,171 @@ CREATE TABLE dgr_grpcproxy_map
     version                   INT                    DEFAULT 1,         -- 版號
     CONSTRAINT PK_grpcproxy_map PRIMARY KEY (grpcproxy_map_id)
 );
+
+-- 20250812 , DGR_MTLS_CLIENT_CERT , Zoe Lee
+CREATE TABLE dgr_mtls_client_cert
+(
+    dgr_mtls_client_cert_id    BIGINT        NOT NULL,                       -- ID
+    host                       VARCHAR(255)   NOT NULL,                       -- 主機
+    port                       INT            NOT NULL,                       -- 通訊埠
+    root_ca                    VARCHAR(4000)  NOT NULL,                       -- 根憑證
+    client_cert                VARCHAR(4000)  NOT NULL,                       -- 客戶端憑證
+    client_key                 VARCHAR(4000)  NOT NULL,                       -- 客戶端金鑰
+    key_mima                   NVARCHAR(2000),                                -- 客戶端憑證密碼
+    remark                     NVARCHAR(200),                                 -- 備註
+    enable                     VARCHAR(1)     NOT NULL,                       -- 啟用=Y / 停用=N
+    root_ca_expire_date        DATETIME       NOT NULL,                       -- ROOT_CA 的到期時間
+    crt_expire_date            DATETIME       NOT NULL,                       -- CLIENT_CERT 的到期時間
+    create_date_time           DATETIME       DEFAULT CURRENT_TIMESTAMP,      -- 建立日期
+    create_user                NVARCHAR(1000) DEFAULT 'SYSTEM',               -- 建立人員
+    update_date_time           DATETIME,                                      -- 更新日期
+    update_user                NVARCHAR(1000),                                -- 更新人員
+    version                    INT            DEFAULT 1,                      -- 版號
+    CONSTRAINT PK_DGR_MTLS_CLIENT_CERT PRIMARY KEY (dgr_mtls_client_cert_id)
+);
+-- 20250801 , add column , Zoe Lee
+ALTER TABLE TSMP_API_IMP ADD NOTIFY_NAME_LIST VARCHAR(2000);
+
+-- 20250812 , 檢查並建立 dgr_ai_provider 表 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE dgr_ai_provider (
+        ai_provider_id              BIGINT          NOT NULL,                       -- ID
+        -- 將此欄位長度調整為 1700，這是 MSSQL 非叢集索引鍵的最大長度 (1700 bytes)。
+        ai_provider_name            NVARCHAR(1700)   NOT NULL,                       -- 供應商名稱
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        ai_provider_alias           NVARCHAR(MAX)    NOT NULL,                       -- 任意名稱
+        -- 將此欄位長度調整為 1700，以符合 MSSQL 的非叢集索引鍵長度限制。
+        ai_model                    NVARCHAR(1700)   NOT NULL,                       -- LLM 模型名稱
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        generate_api                NVARCHAR(MAX)    NOT NULL,                       -- 此模型生成內容 API URL
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        count_token_api             NVARCHAR(MAX)    NOT NULL,                       -- 此模型計算 TOKEN API URL
+        create_date_time            DATETIME2        DEFAULT GETDATE(),              -- 建立日期
+        create_user                 NVARCHAR(1000)   DEFAULT 'SYSTEM',               -- 建立人員
+        update_date_time            DATETIME2,                                       -- 更新日期
+        update_user                 NVARCHAR(1000),                                  -- 更新人員
+        version                     INT             DEFAULT 1,                      -- 版號
+        ai_provider_enable          NVARCHAR(1)      NOT NULL DEFAULT 'Y',           -- Y = 啟用, N = 停用
+        CONSTRAINT PK_dgr_ai_provider PRIMARY KEY(ai_provider_id)
+    );
+END
+GO
+
+-- 20250812 , 檢查並建立索引 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND name = N'index_dgr_ai_provider_ai_provider_name_ai_provider')
+CREATE INDEX index_dgr_ai_provider_ai_provider_name_ai_provider ON dgr_ai_provider (ai_provider_name);
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND name = N'index_dgr_ai_provider_ai_provider_name_ai_model')
+CREATE INDEX index_dgr_ai_provider_ai_provider_name_ai_model ON dgr_ai_provider (ai_model);
+GO
+
+-- 20250812 , 檢查並建立 dgr_ai_apikey 表 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_apikey]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE dgr_ai_apikey (
+        ai_apikey_id                BIGINT          NOT NULL,                   -- ID
+        ai_apikey_name              NVARCHAR(1000)   NOT NULL,                   -- 此 APIKEY 名稱 (任意命名)
+        ai_provider_id              BIGINT,                                     -- AI 供應商 ID
+        ai_apikey_code              NVARCHAR(500)    NOT NULL,                   -- API KEY CODE 內容
+        usage_limit_input_token     BIGINT          NOT NULL DEFAULT 0,         -- 此 APIKEY 使用 input token 上限 0 = 不設限
+        usage_limit_output_token    BIGINT          NOT NULL DEFAULT 0,         -- 此 APIKEY 使用 output token 上限 0 = 不設限
+        usage_input_token_count     BIGINT          NOT NULL DEFAULT 0,         -- 此 APIKEY 使用 input token 總數
+        usage_output_token_count    BIGINT          NOT NULL DEFAULT 0,         -- 此 APIKEY 使用 output token 總數
+        usage_limit_policy          NVARCHAR(500)    NOT NULL DEFAULT 'REJECT',  -- 當 input / output 達到上限時的執行策略
+        ai_apikey_enable            NVARCHAR(1)      NOT NULL DEFAULT 'Y',       -- Y = 啟用, N = 停用
+        create_date_time            DATETIME2        DEFAULT GETDATE(),          -- 建立日期
+        create_user                 NVARCHAR(1000)   DEFAULT 'SYSTEM',           -- 建立人員
+        update_date_time            DATETIME2,                                   -- 更新日期
+        update_user                 NVARCHAR(1000),                              -- 更新人員
+        version                     INT             DEFAULT 1,                  -- 版號
+        CONSTRAINT PK_dgr_ai_apikey PRIMARY KEY(ai_apikey_id)
+    );
+END
+GO
+
+-- 20250812 , 檢查並建立索引 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_apikey]') AND name = N'index_dgr_ai_apikey_ai_provider_id')
+CREATE INDEX index_dgr_ai_apikey_ai_provider_id ON dgr_ai_apikey (ai_provider_id);
+GO
+
+-- 20250812 , 檢查並建立 dgr_ai_apikey_usage 表 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_apikey_usage]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE dgr_ai_apikey_usage (
+        ai_apikey_usage_id          BIGINT          NOT NULL,                   -- ID
+        ai_apikey_consumer_type     NVARCHAR(1000),                              -- APIKEY 使用者類型 user = 個人使用者, client = client
+        ai_apikey_consumer_id       NVARCHAR(1000),                              -- APIKEY 使用者 ID
+        ai_apikey_id                BIGINT          NOT NULL,                   -- APIKEY ID
+        requst_ts                   BIGINT          NOT NULL,                   -- 使用者請求時間，以毫秒數記錄
+        input_token_count           BIGINT          NOT NULL DEFAULT 0,         -- 請求內容 input token 數
+        output_token_count          BIGINT          NOT NULL DEFAULT 0,         -- 請求回傳 output token 數
+        ai_prompt_template_id       BIGINT,                                     -- AI 提示模板 ID
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        http_transaction_status     NVARCHAR(MAX),                               -- HTTP 交易狀態
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        ai_usage_prompt_input       NVARCHAR(MAX),                               -- AI 使用者請求內容
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        ai_usage_prompt_output      NVARCHAR(MAX),                               -- AI 使用者請求回傳內容
+        create_date_time            DATETIME2        DEFAULT GETDATE(),          -- 建立日期
+        CONSTRAINT PK_dgr_ai_apikey_usage PRIMARY KEY(ai_apikey_usage_id)
+    );
+END
+GO
+
+-- 20250812 , 檢查並建立索引 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_apikey_usage]') AND name = N'index_dgr_ai_apikey_usage_ai_apikey_id')
+CREATE INDEX index_dgr_ai_apikey_usage_ai_apikey_id ON dgr_ai_apikey_usage (ai_apikey_id);
+GO
+
+-- 20250812 , 檢查並建立 dgr_ai_prompt_template 表 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_prompt_template]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE dgr_ai_prompt_template (
+        ai_prompt_template_id       BIGINT          NOT NULL,               -- ID
+        -- 將此欄位長度調整為 1700，以符合 MSSQL 的唯一索引鍵長度限制。
+        ai_prompt_template_name     NVARCHAR(1700)   NOT NULL,               -- AI 提示模板名稱
+        -- 欄位長度設定為 MSSQL 最大長度 (NVARCHAR(MAX))，因為此欄位無索引。
+        ai_prompt_template_content  NVARCHAR(MAX)    NOT NULL,               -- AI 提示模板內容
+        ai_prompt_template_enable   NVARCHAR(1)      NOT NULL DEFAULT 'Y',   -- Y = 啟用, N = 停用
+        ai_prompt_template_remark   NVARCHAR(400),                           -- AI 提示模板備註
+        CONSTRAINT PK_dgr_ai_prompt_template PRIMARY KEY(ai_prompt_template_id),
+        CONSTRAINT UQ_dgr_ai_prompt_template_name UNIQUE (ai_prompt_template_name)
+    );
+END
+GO
+
+-- 20250812 , 檢查並建立 dgr_ai_prompt_template_binding 表 , Vulcan
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_prompt_template_binding]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE dgr_ai_prompt_template_binding (
+        ai_consumer_prompt_template_binding_id BIGINT NOT NULL,  -- ID
+        ai_prompt_template_id                  BIGINT NOT NULL,  -- AI 提示模板 ID
+        ai_apikey_consumer_type                NVARCHAR(1000),    -- APIKEY 使用者類型 user / client
+        ai_apikey_consumer_id                  NVARCHAR(1000),    -- APIKEY 使用者 ID
+        CONSTRAINT PK_dgr_ai_prompt_template_binding PRIMARY KEY(ai_consumer_prompt_template_binding_id)
+    );
+END
+GO
+
+-- 20250812 , 檢查並建立索引 , Vulcan	
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_prompt_template_binding]') AND name = N'index_dgr_ai_prompt_template_binding_ai_prompt_template_id')
+CREATE INDEX index_dgr_ai_prompt_template_binding_ai_prompt_template_id ON dgr_ai_prompt_template_binding (ai_prompt_template_id);
+GO
+
+-- 20250819, TSMP外部API註冊資料, 增加欄位 ,Mini Lee
+ALTER TABLE TSMP_API_REG ADD IS_CORS_ALLOW_ORIGIN VARCHAR(1) DEFAULT 'N' NULL;
+ALTER TABLE TSMP_API_REG ADD IS_CORS_ALLOW_METHODS VARCHAR(1) DEFAULT 'N' NULL;
+ALTER TABLE TSMP_API_REG ADD IS_CORS_ALLOW_HEADERS VARCHAR(1) DEFAULT 'N' NULL;
+ALTER TABLE TSMP_API_REG ADD CORS_ALLOW_ORIGIN VARCHAR(1000) NULL;
+ALTER TABLE TSMP_API_REG ADD CORS_ALLOW_METHODS VARCHAR(200) NULL;
+ALTER TABLE TSMP_API_REG ADD CORS_ALLOW_HEADERS VARCHAR(1000) NULL;
+
+-- 20250819, TSMP API 匯入資料, 增加欄位 ,Mini Lee
+ALTER TABLE TSMP_API_IMP ADD IS_CORS_ALLOW_ORIGIN VARCHAR(1) DEFAULT 'N' NULL;
+ALTER TABLE TSMP_API_IMP ADD IS_CORS_ALLOW_METHODS VARCHAR(1) DEFAULT 'N' NULL;
+ALTER TABLE TSMP_API_IMP ADD IS_CORS_ALLOW_HEADERS VARCHAR(1) DEFAULT 'N' NULL;
+ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_ORIGIN VARCHAR(1000) NULL;
+ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_METHODS VARCHAR(200) NULL;
+ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_HEADERS VARCHAR(1000) NULL;

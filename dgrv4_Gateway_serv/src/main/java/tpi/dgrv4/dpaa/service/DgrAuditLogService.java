@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -16,35 +17,10 @@ import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.TableAct;
 import tpi.dgrv4.common.utils.StackTraceUtil;
-import tpi.dgrv4.entity.entity.Authorities;
-import tpi.dgrv4.entity.entity.DgrAcIdpUser;
-import tpi.dgrv4.entity.entity.DgrAuditLogD;
-import tpi.dgrv4.entity.entity.DgrAuditLogM;
-import tpi.dgrv4.entity.entity.OauthClientDetails;
-import tpi.dgrv4.entity.entity.TsmpApi;
-import tpi.dgrv4.entity.entity.TsmpApiReg;
-import tpi.dgrv4.entity.entity.TsmpClient;
-import tpi.dgrv4.entity.entity.TsmpDpClientext;
-import tpi.dgrv4.entity.entity.TsmpGroup;
-import tpi.dgrv4.entity.entity.TsmpGroupApi;
-import tpi.dgrv4.entity.entity.TsmpGroupAuthorities;
-import tpi.dgrv4.entity.entity.TsmpGroupAuthoritiesMap;
-import tpi.dgrv4.entity.entity.TsmpRole;
-import tpi.dgrv4.entity.entity.TsmpRoleFunc;
-import tpi.dgrv4.entity.entity.TsmpRoleRoleMapping;
-import tpi.dgrv4.entity.entity.TsmpSetting;
-import tpi.dgrv4.entity.entity.TsmpUser;
-import tpi.dgrv4.entity.entity.Users;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.DgrComposerFlow;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientHost;
-import tpi.dgrv4.entity.repository.AuthoritiesDao;
-import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
-import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
-import tpi.dgrv4.entity.repository.TsmpClientDao;
-import tpi.dgrv4.entity.repository.TsmpGroupAuthoritiesDao;
-import tpi.dgrv4.entity.repository.TsmpGroupDao;
-import tpi.dgrv4.entity.repository.TsmpRoleDao;
-import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.entity.repository.*;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
@@ -66,12 +42,13 @@ public class DgrAuditLogService {
 	private TsmpGroupDao tsmpGroupDao;
 	private TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao;
 	private TsmpClientDao tsmpClientDao;
+	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
 	
 	@Autowired
 	public DgrAuditLogService(DgrAuditLogMDao dgrAuditLogMDao, DgrAuditLogDDao dgrAuditLogDDao,
 			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao, FileHelper fileHelper, ObjectMapper objectMapper,
 			TsmpUserDao tsmpUserDao, TsmpSettingService tsmpSettingService, TsmpGroupDao tsmpGroupDao,
-			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpClientDao tsmpClientDao) {
+			TsmpGroupAuthoritiesDao tsmpGroupAuthoritiesDao, TsmpClientDao tsmpClientDao,DgrWebhookNotifyDao dgrWebhookNotifyDao) {
 		super();
 		this.dgrAuditLogMDao = dgrAuditLogMDao;
 		this.dgrAuditLogDDao = dgrAuditLogDDao;
@@ -84,6 +61,7 @@ public class DgrAuditLogService {
 		this.tsmpGroupDao = tsmpGroupDao;
 		this.tsmpGroupAuthoritiesDao = tsmpGroupAuthoritiesDao;
 		this.tsmpClientDao = tsmpClientDao;
+		this.dgrWebhookNotifyDao = dgrWebhookNotifyDao;
 	}
 
 	/**
@@ -515,11 +493,23 @@ public class DgrAuditLogService {
 
 		} else if (TsmpSetting.class.getSimpleName().equals(entityName)) {
 			dgrAuditLogD = doTsmpSetting(dgrAuditLogD, rowStr);
+		}else if(DgrWebhookApiMap.class.getSimpleName().equals(entityName)){
+			dgrAuditLogD = doDgrWebhookApiMap(dgrAuditLogD, rowStr);
 		}
 
 		return dgrAuditLogD;
 	}
-	
+
+	private DgrAuditLogD doDgrWebhookApiMap(DgrAuditLogD dgrAuditLogD, String rowStr) throws JsonProcessingException {
+		DgrWebhookApiMap dgrWebhookApiMap = getObjectMapper().readValue(rowStr, DgrWebhookApiMap.class);
+		dgrAuditLogD.setParam1(String.valueOf(dgrWebhookApiMap.getModuleName()));
+		dgrAuditLogD.setParam2(String.valueOf(dgrWebhookApiMap.getApiKey()));
+		DgrWebhookNotify notify = getDgrWebhookNotifyDao().findById(dgrWebhookApiMap.getWebhookNotifyId()).orElse(null);
+		dgrAuditLogD.setParam3(notify != null ? notify.getNotifyName() : null);
+		//新增/更新
+		return dgrAuditLogD;
+	}
+
 	private DgrAuditLogD doTsmpSetting(DgrAuditLogD dgrAuditLogD, String rowStr) throws Exception {
 		TsmpSetting tsmpSetting = getObjectMapper().readValue(rowStr, TsmpSetting.class);
 		dgrAuditLogD.setParam1(String.valueOf(tsmpSetting.getId()));//新增/更新/刪除的 Id
@@ -849,6 +839,10 @@ public class DgrAuditLogService {
 
 	protected TsmpClientDao getTsmpClientDao() {
 		return tsmpClientDao;
+	}
+
+	protected  DgrWebhookNotifyDao getDgrWebhookNotifyDao(){
+		return dgrWebhookNotifyDao;
 	}
 }
 

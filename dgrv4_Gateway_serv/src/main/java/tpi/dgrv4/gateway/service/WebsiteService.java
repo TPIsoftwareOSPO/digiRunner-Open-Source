@@ -338,6 +338,12 @@ public class WebsiteService {
 				if (isShowLog) {
 					backendLog.append(respObj.getLogStr());
 					TPILogger.tl.debug(backendLog.toString());
+					
+					// Must call respObj.getLogStr() first
+					// Threshhold > 10,000 => print warn msg.
+					Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+					request.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
+					request.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 				}
 				
 				
@@ -743,7 +749,19 @@ public class WebsiteService {
 		}
 		return dgrcPostForm_boundary;
 	}
+    private void checkReferer(HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        List<String> referer = httpHeaders.entrySet().stream()
+                .filter(e -> "referer".equalsIgnoreCase(e.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
 
+        if (CollectionUtils.isEmpty(referer)||!(referer.getFirst().contains("dgrv4")||referer.getFirst().contains("/website/composer"))){
+            TPILogger.tl.info("Composer`s  referer  is " + referer);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        }
+    }
 	private void composerReq(HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response,
 			String websiteName, String payload) throws IOException {
 
@@ -770,7 +788,16 @@ public class WebsiteService {
 		// composer的特別加工,若URI後面為UUID,轉向目標是/editor/tsmpApi/,並加上x-forwarded-for,因為會call
 		// DPB0143檢查IP
 		if (websiteName.equals("composer")) {
-			resourceURL = resourceURL + "?" + request.getQueryString();
+            try {
+                checkReferer(httpHeaders,request,response);
+                if (response.isCommitted()) {
+                    return; // 權限失敗已回應，直接結束
+                }
+            } catch (Exception e) {
+                TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+                throw TsmpDpAaRtnCode._1297.throwing();
+            }
+            resourceURL = resourceURL + "?" + request.getQueryString();
 			String[] arrUri = uri.split("/");
 			String lastPath = arrUri[arrUri.length - 1];
 			if (lastPath.split("-").length == 5) {

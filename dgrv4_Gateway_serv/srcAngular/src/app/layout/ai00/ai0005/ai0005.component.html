@@ -1,0 +1,116 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <div class="form-group row">
+      <div class="col-12">
+        <button type="button" class="btn tpi-btn tpi-second float-end"
+          (click)="changePage('create');">{{'button.create'|translate}}</button>
+      </div>
+    </div>
+
+    <p-table [value]="tableData" styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}"
+      responsiveLayout="scroll">
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th>Consumer Type</th>
+          <th style="width:20%;">Consumer ID</th>
+          <th>Template Name</th>
+          <th style="width:120px;">{{'action'|translate}}</th>
+        </tr>
+      </ng-template>
+       <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          
+          <td>{{ rowData.aiApikeyConsumerType}}</td>
+          <td>{{ rowData.aiApikeyConsumerId}}</td>
+          <td>{{ rowData.dgrAiPromptTemplate?.aiPromptTemplateName}}</td>
+          <td style="text-align:center;width: 120px">
+            <button pButton pRipple type="button" icon="fa fa-edit"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
+              [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
+
+            <button pButton pRipple type="button" icon="fa fa-trash-alt"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('delete', rowData)"
+              [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length>0">
+          <td [attr.colspan]="4" style="color: #b7b7b7;">
+            <span>{{'row_count' | translate}}: {{tableData.length}}</span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="4">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div [hidden]="pageNum != 2">
+    <form [formGroup]="formE">      
+      <div class="form-group row">
+        <div class="col-4">
+          <label for="aiApiKeyConsumerId" class="control-label required">Consumer ID</label>
+          <input type="text" class="form-control" id="aiApiKeyConsumerId" formControlName="aiApiKeyConsumerId">
+          <div *ngIf="aiApiKeyConsumerId.invalid && (aiApiKeyConsumerId.dirty || aiApiKeyConsumerId.touched)"
+            class="text-danger">
+            <small class="form-text">{{aiApiKeyConsumerId?.errors.required|translate}}</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <label for="aiApiKeyConsumerType" class="control-label required">Consumer Type</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="aiApiKeyConsumerType" value="user" inputId="typeU"></p-radioButton>
+                <label for="typeU" class="ms-2 mb-0">User</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="aiApiKeyConsumerType" value="client" inputId="typeC"></p-radioButton>
+                <label for="typeC" class="ms-2 mb-0">Client</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">        
+        <div class="col-4">
+          <label for="aiPromptTemplateId" class="required control-label">Template Name</label>
+          <p-dropdown [options]="aIPromptTemplateData" placeholder="{{'plz_chs' | translate}}"
+            formControlName="aiPromptTemplateId" [style]="{'width':'100%'}">
+          </p-dropdown>
+          <div *ngIf="aiPromptTemplateId.invalid && (aiPromptTemplateId.dirty || aiPromptTemplateId.touched)"
+            class="text-danger">
+            <small class="form-text">{{aiPromptTemplateId?.errors.required|translate}}</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12 col-lg-12">
+          <button type="button" class="btn tpi-btn float-start me-3" [hidden]="currentAction=='detail'"
+            [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']" [disabled]="!formE.valid"
+            (click)="procData();">{{btnName}}</button>
+
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
+            (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</app-container>
+<p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{width: '400px'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="row" style="justify-content: center;">
+      <button type="button" pButton icon="pi pi-check"
+        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
+        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>

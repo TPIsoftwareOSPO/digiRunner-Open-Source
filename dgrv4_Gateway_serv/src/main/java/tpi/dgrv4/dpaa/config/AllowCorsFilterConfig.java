@@ -11,22 +11,17 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 
-import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Configuration
 public class AllowCorsFilterConfig implements Filter {
 
-	@Value("${cors.allow.headers}")
-	private String corsAllowHeaders;
-	
 	/* [static] field */
 
 	/* [static] */
@@ -79,15 +74,17 @@ public class AllowCorsFilterConfig implements Filter {
 
 	public void allowCORS(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
 
-		// 取得 "Access-Control-Allow-Origin" 的值, 從 GatewayFilter.java 放入
-		String acao = (String) httpServletRequest.getServletContext().getAttribute("Access-Control-Allow-Origin");
+		// 取得 CORS 的值, 從 GatewayFilter.java 放入
+		String corsAllowOriginVal = (String) httpServletRequest.getServletContext().getAttribute("Access-Control-Allow-Origin");
+		String corsAllowHeadersVal = (String) httpServletRequest.getServletContext().getAttribute("Access-Control-Allow-Headers");
+		String corsAllowMethodsVal = (String) httpServletRequest.getServletContext().getAttribute("Access-Control-Allow-Methods");
 		
 		// 取得 "Content-Security-Policy" 的值, 從 GatewayFilter.java 放入
 		String dgrCspVal = (String) httpServletRequest.getServletContext().getAttribute("Content-Security-Policy");
 
 		// 當值為空時，使用預設值 "*"
-		if (!StringUtils.hasText(acao)) {
-			acao = "*";
+		if (!StringUtils.hasText(corsAllowOriginVal)) {
+			corsAllowOriginVal = "*";
 		}
 		
 		// 當值為空時，使用預設值 "*"
@@ -96,11 +93,11 @@ public class AllowCorsFilterConfig implements Filter {
 		}
 //		String cspVal = String.format(GatewayFilter.cspDefaultVal, dgrCspVal);
 
-		httpServletResponse.setHeader("Access-Control-Allow-Origin", acao);
-		httpServletResponse.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,PATCH,DELETE");
+		httpServletResponse.setHeader("Access-Control-Allow-Origin", corsAllowOriginVal);
+		httpServletResponse.setHeader("Access-Control-Allow-Methods", corsAllowMethodsVal);
 		httpServletResponse.setHeader("Access-Control-Max-Age", "3600");
 		//httpServletResponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, SignCode, Language");
-		httpServletResponse.setHeader("Access-Control-Allow-Headers", corsAllowHeaders); //"1. corsAllowHeaders = " + corsAllowHeaders
+		httpServletResponse.setHeader("Access-Control-Allow-Headers", corsAllowHeadersVal); //"1. corsAllowHeaders = " + corsAllowHeaders
 
 		httpServletResponse.setHeader("X-Frame-Options", "sameorigin");
 		httpServletResponse.setHeader("X-Content-Type-Options", "nosniff");

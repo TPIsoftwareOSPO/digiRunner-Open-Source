@@ -11,12 +11,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
+
+import lombok.AccessLevel;
+import lombok.Setter;
 import tpi.dgrv4.common.constant.BcryptFieldValueEnum;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -25,13 +34,16 @@ import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.common.vo.ReqHeader;
+import tpi.dgrv4.dpaa.component.DpaaSystemInfoHelper;
 import tpi.dgrv4.dpaa.component.cache.proxy.TsmpOrganizationCacheProxy;
+import tpi.dgrv4.dpaa.es.ESLogBuffer;
 import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.AA0301Item;
 import tpi.dgrv4.dpaa.vo.AA0301Pair;
 import tpi.dgrv4.dpaa.vo.AA0301Req;
 import tpi.dgrv4.dpaa.vo.AA0301Resp;
 import tpi.dgrv4.dpaa.vo.AA0301Trunc;
+import tpi.dgrv4.dpaa.vo.DpaaSystemInfo;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.entity.TsmpApi;
@@ -45,6 +57,7 @@ import tpi.dgrv4.entity.repository.TsmpApiRegDao;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
 import tpi.dgrv4.entity.vo.AA0301SearchCriteria;
 import tpi.dgrv4.gateway.component.ServiceConfig;
+import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
@@ -62,6 +75,18 @@ public class AA0301Service {
 	private TsmpOrganizationDao tsmpOrganizationDao;
 	private TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy;
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
+	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers"))
+	ThreadPoolTaskExecutor asyncWorkerPool;
+
+	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers-highway"))
+	@Qualifier("async-workers-highway")
+	ThreadPoolTaskExecutor asyncWorkerHighwayPool;
+	
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private ConfigurableApplicationContext applicationContext;
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private JobHelper jobHelper;
 
 	private String[] keyList = { "apiKey", "apiSrc", "moduleName", "apiName" };
 	private String[] valueList = { "asc", "desc" };
@@ -84,6 +109,7 @@ public class AA0301Service {
 		AA0301Resp resp = new AA0301Resp();
 		// 1273:組織單位ID:必填參數, 1290:參數錯誤, 1298:查無資料, 1354:[{{0}}] 不存在: {{1}}
 		try {
+			long startTime = System.currentTimeMillis();
 			String locale = ServiceUtil.getLocale(reqHeader.getLocale());
 			AA0301SearchCriteria cri = setCriAndCheckData(authorization, req, locale);
 
@@ -104,7 +130,10 @@ public class AA0301Service {
 				resp.setSortBy(sortBy);
 			}
 			resp.setDataList(itemList);
-
+			long endTime = System.currentTimeMillis();
+			printLog(endTime-startTime);
+			
+			
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
@@ -113,6 +142,66 @@ public class AA0301Service {
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 		return resp;
+	}
+	
+	protected void printLog(long execTime) {
+		StringBuilder sb = new StringBuilder();
+		// 取 cpu ram disk 資料
+		DpaaSystemInfo infoVo = new DpaaSystemInfo();
+		getDpaaSystemInfoHelper().setCpuUsedRateAndMem(infoVo);
+		getDpaaSystemInfoHelper().setDiskInfo(infoVo);
+		getDpaaSystemInfoHelper().setRuntimeInfo(infoVo);
+		getDpaaSystemInfoHelper().setDiskInfo(infoVo);		
+		
+		// JVM memory
+		String freeMemory = Runtime.getRuntime().freeMemory() / 1024 / 1024 + "MB";
+		String totalMemory = Runtime.getRuntime().totalMemory() / 1024 / 1024 + "MB";
+		String maxMemory = Runtime.getRuntime().maxMemory() / 1024 / 1024 + "MB";
+		
+		sb.setLength(0); //清空
+		
+		// append CPU / RAM
+		sb.append("\n\t" + String.format("%.2f %%", infoVo.getCpu() * 100) + "..................CPU\n\t" +
+		freeMemory + " / " + totalMemory + " / " + maxMemory + 
+		"...Memory(free/total/Max)" + "\n\t");
+		
+		// country road / highway status
+		Function<ThreadPoolTaskExecutor, String> poolInfoGen = (ThreadPoolTaskExecutor pool) -> {
+			var asyncWorkerInfoTpl = "%d threads....."+pool.getThreadNamePrefix()+"%s%n\t";
+			return "......................................................\n\t" +
+					String.format(asyncWorkerInfoTpl, pool.getActiveCount(), "activeCount") +
+					String.format(asyncWorkerInfoTpl, pool.getPoolSize(), "poolSize");
+		};
+		
+		// async worker pool
+		sb.append(poolInfoGen.apply(asyncWorkerPool));
+		sb.append(poolInfoGen.apply(asyncWorkerHighwayPool));
+		
+		// 取得 db connection 狀態
+		HikariDataSource hikaridataSource = 
+				(HikariDataSource) applicationContext.getBean(HikariDataSource.class);
+		HikariPoolMXBean poolMXBean = hikaridataSource.getHikariPoolMXBean();
+		sb.append("......................................................\n\t");
+		sb.append("(total=" + poolMXBean.getTotalConnections() + 
+				", active=" + poolMXBean.getActiveConnections() + 
+				", idle=" + poolMXBean.getIdleConnections() + 
+				", waiting=" + poolMXBean.getThreadsAwaitingConnection() + ") ..... db status \n\t");
+		//HikariPool-1 - Before cleanup stats (total=5, active=0, idle=5, waiting=0)
+		sb.append("......................................................\n\t");
+		
+		sb.append("JobManager\t\t=" + jobHelper.getJobQueueSize(1) + jobHelper.getQueueStatus(1) + "\n");
+		sb.append("\tDeferrableJobManager\t=" + jobHelper.getJobQueueSize(2) + jobHelper.getQueueStatus(2) + "\n");
+		sb.append("\tRefreshCacheJobManager\t=" + jobHelper.getJobQueueSize(3) + jobHelper.getQueueStatus(3) +"\n");
+//						sb.append("\tJob-2nd-runner.buff2ndWaitCount\t=" + DeferrableJobManager.buff2ndWaitCount.get() +"\n");
+		sb.append("\t......................................................\n\t");
+																										// (1,006 GB, Use%=0.1313, Free%=)
+		sb.append("Disk (Size=" + String.format("%,d %s", (infoVo.getDtotal() / 1024 / 1024 / 1024), "GB") + 
+		          ", Use=" + String.format("%.2f", infoVo.getDusage() * 100) + "%" + 
+		          ", Free=" + String.format("%.2f", (1 - infoVo.getDusage()) * 100) + "%" + ")\n");
+
+		sb.append("\t......................................................\n\t");
+		sb.append(String.format("Execution Time = %s ms", execTime));
+		TPILogger.tl.info(sb.toString());
 	}
 
 	/**
@@ -516,6 +605,10 @@ public class AA0301Service {
 
 	protected TsmpApiRegDao getTsmpApiRegDao() {
 		return tsmpApiRegDao;
+	}
+
+	protected DpaaSystemInfoHelper getDpaaSystemInfoHelper() {
+		return dpaaSystemInfoHelper;
 	}
 	
 	

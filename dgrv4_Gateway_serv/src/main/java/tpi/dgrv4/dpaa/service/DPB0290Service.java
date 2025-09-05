@@ -3,6 +3,8 @@ package tpi.dgrv4.dpaa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -118,14 +120,6 @@ public class DPB0290Service {
             }
         }
 
-        // 如果有提供信任的 CA 證書，驗證其有效性
-        if (req.getTrustedCertsContent() != null && !req.getTrustedCertsContent().isEmpty()) {
-            boolean isValid = tlsCertificateManager.validateCertificate(req.getTrustedCertsContent());
-            if (!isValid) {
-                throw TsmpDpAaRtnCode._1352.throwing("Trusted CA certificate");
-            }
-        }
-
         // 檢查安全模式是否有效
         String secureMode = req.getSecureMode();
         if (secureMode != null && !secureMode.isEmpty() &&
@@ -135,8 +129,15 @@ public class DPB0290Service {
 
         // 安全模式啟用時檢查證書是否存在
         String trustedCertsContent = req.getTrustedCertsContent();
-        if("SECURE".equals(secureMode) && (trustedCertsContent == null || trustedCertsContent.isEmpty())) {
-            throw TsmpDpAaRtnCode._1350.throwing("trustedCertsContent");
+        if("SECURE".equals(secureMode) && "N".equals(req.getAutoTrustUpstreamCerts())) {
+            if(!StringUtils.hasText(trustedCertsContent)) {
+            	throw TsmpDpAaRtnCode._1350.throwing("{{trustedCertsContent}}");
+            }else {
+            	boolean isValid = tlsCertificateManager.validateCertificate(trustedCertsContent);
+                if (!isValid) {
+                    throw TsmpDpAaRtnCode._1352.throwing("{{trustedCertsContent}}");
+                }
+            }
         }
     }
 
@@ -217,10 +218,10 @@ public class DPB0290Service {
         }
 
         // 檢查是否已存在相同的映射
-        DgrGrpcProxyMap dgrGrpcProxyMap = getDgrGrpcProxyMapDao().findByProxyHostNameAndTargetHostNameAndTargetPort(
-                proxyHostName, targetHostName, Integer.parseInt(targetPort));
+        DgrGrpcProxyMap dgrGrpcProxyMap = getDgrGrpcProxyMapDao().findFirstByProxyHostName(proxyHostName);
         if (dgrGrpcProxyMap != null) {
-            throw TsmpDpAaRtnCode._1559.throwing("Duplicate gRPC proxy mapping found for proxyHostName: " + proxyHostName);
+        	//因為匯入也會呼叫,所以不做{{proxyHostName}}
+            throw TsmpDpAaRtnCode._1353.throwing("Proxy hostname/domain name", proxyHostName);
         }
     }
 

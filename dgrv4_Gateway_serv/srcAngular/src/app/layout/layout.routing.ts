@@ -1,9 +1,6 @@
-import { AboutComponent } from './about/about.component';
 import { LayoutComponent } from './layout.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { za0000Component } from './za00/za0000/za0000.component';
-
 
 
 const routes: Routes = [
@@ -108,7 +105,7 @@ const routes: Routes = [
       { path: 'np02/np0202', loadChildren: () => import('./np02/np0202/np0202.module').then(m => m.Np0202Module), data: { id: 'np0202' } },
       { path: 'np02/np0203', loadChildren: () => import('./np02/np0203/np0203.module').then(m => m.Np0203Module), data: { id: 'np0203' } },
       { path: 'np02/np0204', loadChildren: () => import('./np02/np0204/np0204.module').then(m => m.Np0204Module), data: { id: 'np0204' } },
-      // { path: 'np02/np0205', loadChildren: () => import('./np02/np0205/np0205.module').then(m => m.Np0205Module), data: { id: 'np0205' } },
+      { path: 'np02/np0205', loadChildren: () => import('./np02/np0205/np0205.module').then(m => m.Np0205Module), data: { id: 'np0205' } },
 
       // { path: 'np03/np0301', loadChildren: () => import('./np03/np0301/np0301.module').then(m => m.Np0301Module), data: { id: 'np0301' } },
       // { path: 'np03/np0302', loadChildren: () => import('./np03/np0302/np0302.module').then(m => m.Np0302Module), data: { id: 'np0302' } },
@@ -146,6 +143,13 @@ const routes: Routes = [
       { path: 'lb00/lb0010', loadChildren: () => import('./labs/lb0010/lb0010.module').then(m => m.Lb0010Module), data: { id: 'lb0010' } }, //Bot Detection
       { path: 'lb00/lb0011', loadChildren: () => import('./labs/lb0011/lb0011.module').then(m => m.Lb0011Module), data: { id: 'lb0011' } }, //webhook
       { path: 'lb00/lb0012', loadChildren: () => import('./labs/lb0012/lb0012.module').then(m => m.Lb0012Module), data: { id: 'lb0012' } }, //webhook logs
+
+       //ai gateway
+      { path: 'ai00/ai0001', loadChildren: () => import('./ai00/ai0001/ai0001.module').then(m => m.Ai0001Module), data: { id: 'ai0001' } }, //ai provider
+      { path: 'ai00/ai0002', loadChildren: () => import('./ai00/ai0002/ai0002.module').then(m => m.Ai0002Module), data: { id: 'ai0002' } }, //ai apikey
+      { path: 'ai00/ai0003', loadChildren: () => import('./ai00/ai0003/ai0003.module').then(m => m.Ai0003Module), data: { id: 'ai0003' } }, //ai apikey usage
+      { path: 'ai00/ai0004', loadChildren: () => import('./ai00/ai0004/ai0004.module').then(m => m.Ai0004Module), data: { id: 'ai0004' } }, //ai prompt template
+      { path: 'ai00/ai0005', loadChildren: () => import('./ai00/ai0005/ai0005.module').then(m => m.Ai0005Module), data: { id: 'ai0005' } }, //User AI Prompt Template Setting
 
       //註冊自定義報表容器
       { path: 'ac09/:cusfunc', loadChildren: () => import('./ac09/ac0900/ac0900.module').then(m => m.Ac0900Module) },

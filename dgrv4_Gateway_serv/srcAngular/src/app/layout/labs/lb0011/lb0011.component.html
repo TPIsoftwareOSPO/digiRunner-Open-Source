@@ -27,7 +27,26 @@
             (click)="changePage('create');">{{'button.create'|translate}}</button>
         </div>
       </div>
+      <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
+
+        <button type="button" class="btn tpi-btn tpi-primary me-2"
+          (click)="exportFile()">{{'button.export'|translate}}</button>
+
+        <div style="display: flex;align-items: center;">
+
+          <div class="ui-inputgroup me-2">
+            <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
+            <input type="text" class="form-control" value="{{fileName}}" readOnly
+              placeholder="{{'upload_file' | translate}}">
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+              [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
+          </div>
+          <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!fileName"
+            (click)="importFile()">{{'button.import'|translate}}</button>
+        </div>
+      </div>
     </form>
+
     <hr>
     <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll">
       <ng-template pTemplate="header" let-columns>
@@ -113,7 +132,7 @@
           </div>
         </div>
         <div class="col-4">
-          <label id="enableE_label" class="control-label">Enable</label>
+          <label id="enableE_label" class="control-label">{{"status" | translate}}</label>
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of statusListIgnoreAll">
               <div class="p-form-check">
@@ -152,7 +171,7 @@
       </div>
       <div class="form-group row">
         <div class="col-12">
-          <app-mapping-url-form formControlName="fieldList" [webhookType]="notifyTypeE.value"
+          <app-mapping-url-form formControlName="fieldList" [webhookType]="notifyTypeE.value" (formValid)="set_formValid($event)"
             (percentValid)="set_formValid($event)"></app-mapping-url-form>
         </div>
       </div>

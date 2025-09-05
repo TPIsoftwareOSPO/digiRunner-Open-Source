@@ -1,6 +1,7 @@
 package tpi.dgrv4.dpaa.es;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -109,18 +110,20 @@ public class DiskSpaceMonitor {
 			TPILogger.tl.info("DiskSpaceMonitor stopped");
 		}
 	}
+	
+	public static long currentFileCount = -1L;
+	public static long currentFilesSize = -1L;
 
 	private void checkDiskSpace() {
 		TPILogger.tl.info(StackTraceUtil.getStackTraceAsString());
 		try {
 			// 使用 Java NIO 計算文件數量
-			long fileCount;
 			try (Stream<Path> files = Files.walk(LOG_DIR)) {
-				fileCount = files.filter(Files::isRegularFile).count();
+				currentFileCount = files.filter(Files::isRegularFile).count();
 			}
 
 			// 使用跨平台方法計算目錄大小（替換原本使用系統命令的部分）
-			long currentSize = calculateDirectorySize(LOG_DIR);
+			currentFilesSize = calculateDirectorySize(LOG_DIR);
 
 			boolean oldStatus = pauseWriting;
 
@@ -128,26 +131,31 @@ public class DiskSpaceMonitor {
 			// 若沒有緩衝區，狀態會頻繁切換：暫停 → 恢復 → 暫停 → 恢復
 			// 「抖動」會造成系統不穩定且產生大量通知
 			// 根據結果決定是否暫停寫入
-			if (currentSize > maxDirSizeBytes || fileCount > maxFiles) {
+			if (currentFilesSize > maxDirSizeBytes || currentFileCount > maxFiles) {
 				pauseWriting = true;
-			} else if (currentSize < maxDirSizeBytes * 0.8 && fileCount < maxFiles * 0.8) {
+			} else if (currentFilesSize < maxDirSizeBytes * 0.8 && currentFileCount < maxFiles * 0.8) {
 				// 新增緩衝區，避免頻繁切換狀態
 				pauseWriting = false;
 			}
 			
-			TPILogger.tl.info(
-				    String.format("...oldPauseWriting=%b, pauseWriting=%b, currentSize=%d, fileCount=%d", oldStatus,
-				    pauseWriting, currentSize, fileCount));
+			TPILogger.tl.info(String.format(
+					"...oldPauseWriting=%b, if(FileSize=(%s > %s) || currentFilesCount=(%d > %d)) = pauseWriting=%b",
+					oldStatus, formatSize(currentFilesSize), formatSize(maxDirSizeBytes),
+					currentFileCount, maxFiles, pauseWriting));
 
 			// 只有狀態變化時才通知
 			if (oldStatus != pauseWriting) {
 				notifyApplications();
 				TPILogger.tl.warn("API-Log to BulkFile Writing status changed to: " + (pauseWriting ? "paused" : "active") + " (Size: "
-						+ formatSize(currentSize) + "/" + formatSize(maxDirSizeBytes) + ", Files: " + fileCount + "/"
+						+ currentFilesSize + "/" + formatSize(maxDirSizeBytes) + ", Files: " + currentFileCount + "/"
 						+ maxFiles + ")");
 			}
 		} catch (NoSuchFileException e) {
 			TPILogger.tl.trace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
+			checkDiskSpace();
+		} catch (UncheckedIOException e) {
+			TPILogger.tl.trace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
+			checkDiskSpace();
 		} catch (Exception e) {
 			TPILogger.tl.error("Error checking disk space: " + StackTraceUtil.logTpiShortStackTrace(e));
 		}
@@ -167,7 +175,7 @@ public class DiskSpaceMonitor {
 	}
 
 	// 格式化文件大小顯示
-	private String formatSize(long size) {
+	public static String formatSize(long size) {
 		String[] units = { "B", "KB", "MB", "GB", "TB" };
 		int unitIndex = 0;
 		double sizeDbl = size;

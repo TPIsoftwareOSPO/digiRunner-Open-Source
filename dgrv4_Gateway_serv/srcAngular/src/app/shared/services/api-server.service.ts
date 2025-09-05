@@ -516,36 +516,160 @@ import {
   RespDPB0290,
   RespDPB0290Before,
 } from 'src/app/models/api/ServerService/dpb0290.interface';
-import { DPB0292Req, ReqDPB0292, RespDPB0292, RespDPB0292Before } from 'src/app/models/api/ServerService/dpb0292.interface';
-import { DPB0293Req, ReqDPB0293, RespDPB0293 } from 'src/app/models/api/ServerService/dpb0293.interface';
-import { DPB0291Req, ReqDPB0291, RespDPB0291 } from 'src/app/models/api/ServerService/dpb0291.interface';
-import { DPB0220Req, ReqDPB0220, RespDPB0220 } from 'src/app/models/api/ServerService/dpb0220.interface';
-import { DPB0222Req, DPB0222RespBefore, ReqDPB0222, RespDPB0222 } from 'src/app/models/api/ServerService/dpb0222.interface';
-import { DPB0221Req, ReqDPB0221, RespDPB0221 } from 'src/app/models/api/ServerService/dpb0221.interface';
-import { DPB0223Req, DPB0223RespBefore, ReqDPB0223, RespDPB0223, RespDPB0223RespBefore } from 'src/app/models/api/ServerService/dpb0223.interface';
-import { DPB0224Req, ReqDPB0224, RespDPB0224 } from 'src/app/models/api/ServerService/dpb0224.interface';
-import { DPB0240Req, ReqDPB0240, RespDPB0240 } from 'src/app/models/api/ServerService/dpb0240.interface';
-import { DPB0242Req, ReqDPB0242, RespDPB0242, RespDPB0242Before } from 'src/app/models/api/ServerService/dpb0242.interface';
-import { DPB0241Req, ReqDPB0241, RespDPB0241 } from 'src/app/models/api/ServerService/dpb0241.interface';
-import { DPB0243Req, ReqDPB0243, RespDPB0243, RespDPB0243Before } from 'src/app/models/api/ServerService/dpb0243.interface';
-import { DPB0244Req, ReqDPB0244, RespDPB0244 } from 'src/app/models/api/ServerService/dpb0244.interface';
-import { DPB0234Req, ReqDPB0234, RespDPB0234 } from 'src/app/models/api/ServerService/dpb0234.interface';
-import { DPB0232Req, ReqDPB0232, RespDPB0232 } from 'src/app/models/api/ServerService/dpb0232.interface';
-import { DPB0233Req, DPB0233RespBefore, ReqDPB0233, RespDPB0233 } from 'src/app/models/api/ServerService/dpb0233.interface';
-import { ReqDPB9938, RespDPB9938 } from 'src/app/models/api/ServerService/dpb9938.interface';
-import { ReqDPB9939, RespDPB9939 } from 'src/app/models/api/ServerService/dpb9939.interface';
-import { DPB0280Req, ReqDPB0280, RespDPB0280 } from 'src/app/models/api/ServerService/dpb0280.interface';
-import { DPB0281Req, ReqDPB0281, RespDPB0281, RespDPB0281Before } from 'src/app/models/api/ServerService/dpb0281.interface';
-import { DPB0282Req, ReqDPB0282, RespDPB0282 } from 'src/app/models/api/ServerService/dpb0282.interface';
-import { DPB0283Req, ReqDPB0283, RespDPB0283, RespDPB0283Before } from 'src/app/models/api/ServerService/dpb0283.interface';
-import { DPB0284Req, ReqDPB0284, RespDPB0284 } from 'src/app/models/api/ServerService/dpb0284.interface';
-import { DPB0285Req, ReqDPB0285, RespDPB0285 } from 'src/app/models/api/ServerService/dpb0285.interface';
-import { DPB0286Req, ReqDPB0286, RespDPB0286 } from 'src/app/models/api/ServerService/dpb0286.interface';
-import { AA1212Req, ReqAA1212, ResAA1212 } from 'src/app/models/api/ReportService/aa1212.interface';
-import { AA0435Req, ReqAA0435, RespAA0435 } from 'src/app/models/api/ApiService/aa0435.interfcae';
-import { ReqDPB0295, RespDPB0295 } from 'src/app/models/api/ServerService/dpb0295.interface';
+import {
+  DPB0292Req,
+  ReqDPB0292,
+  RespDPB0292,
+  RespDPB0292Before,
+} from 'src/app/models/api/ServerService/dpb0292.interface';
+import {
+  DPB0293Req,
+  ReqDPB0293,
+  RespDPB0293,
+} from 'src/app/models/api/ServerService/dpb0293.interface';
+import {
+  DPB0291Req,
+  ReqDPB0291,
+  RespDPB0291,
+} from 'src/app/models/api/ServerService/dpb0291.interface';
+import {
+  DPB0220Req,
+  ReqDPB0220,
+  RespDPB0220,
+} from 'src/app/models/api/ServerService/dpb0220.interface';
+import {
+  DPB0222Req,
+  DPB0222RespBefore,
+  ReqDPB0222,
+  RespDPB0222,
+} from 'src/app/models/api/ServerService/dpb0222.interface';
+import {
+  DPB0221Req,
+  ReqDPB0221,
+  RespDPB0221,
+} from 'src/app/models/api/ServerService/dpb0221.interface';
+import {
+  DPB0223Req,
+  DPB0223RespBefore,
+  ReqDPB0223,
+  RespDPB0223,
+  RespDPB0223RespBefore,
+} from 'src/app/models/api/ServerService/dpb0223.interface';
+import {
+  DPB0224Req,
+  ReqDPB0224,
+  RespDPB0224,
+} from 'src/app/models/api/ServerService/dpb0224.interface';
+import {
+  DPB0240Req,
+  ReqDPB0240,
+  RespDPB0240,
+} from 'src/app/models/api/ServerService/dpb0240.interface';
+import {
+  DPB0242Req,
+  ReqDPB0242,
+  RespDPB0242,
+  RespDPB0242Before,
+} from 'src/app/models/api/ServerService/dpb0242.interface';
+import {
+  DPB0241Req,
+  ReqDPB0241,
+  RespDPB0241,
+} from 'src/app/models/api/ServerService/dpb0241.interface';
+import {
+  DPB0243Req,
+  ReqDPB0243,
+  RespDPB0243,
+  RespDPB0243Before,
+} from 'src/app/models/api/ServerService/dpb0243.interface';
+import {
+  DPB0244Req,
+  ReqDPB0244,
+  RespDPB0244,
+} from 'src/app/models/api/ServerService/dpb0244.interface';
+import {
+  DPB0234Req,
+  ReqDPB0234,
+  RespDPB0234,
+} from 'src/app/models/api/ServerService/dpb0234.interface';
+import {
+  DPB0232Req,
+  ReqDPB0232,
+  RespDPB0232,
+} from 'src/app/models/api/ServerService/dpb0232.interface';
+import {
+  DPB0233Req,
+  DPB0233RespBefore,
+  ReqDPB0233,
+  RespDPB0233,
+} from 'src/app/models/api/ServerService/dpb0233.interface';
+import {
+  ReqDPB9938,
+  RespDPB9938,
+} from 'src/app/models/api/ServerService/dpb9938.interface';
+import {
+  ReqDPB9939,
+  RespDPB9939,
+} from 'src/app/models/api/ServerService/dpb9939.interface';
+import {
+  DPB0280Req,
+  ReqDPB0280,
+  RespDPB0280,
+} from 'src/app/models/api/ServerService/dpb0280.interface';
+import {
+  DPB0281Req,
+  ReqDPB0281,
+  RespDPB0281,
+  RespDPB0281Before,
+} from 'src/app/models/api/ServerService/dpb0281.interface';
+import {
+  DPB0282Req,
+  ReqDPB0282,
+  RespDPB0282,
+} from 'src/app/models/api/ServerService/dpb0282.interface';
+import {
+  DPB0283Req,
+  ReqDPB0283,
+  RespDPB0283,
+  RespDPB0283Before,
+} from 'src/app/models/api/ServerService/dpb0283.interface';
+import {
+  DPB0284Req,
+  ReqDPB0284,
+  RespDPB0284,
+} from 'src/app/models/api/ServerService/dpb0284.interface';
+import {
+  DPB0285Req,
+  ReqDPB0285,
+  RespDPB0285,
+} from 'src/app/models/api/ServerService/dpb0285.interface';
+import {
+  DPB0286Req,
+  ReqDPB0286,
+  RespDPB0286,
+} from 'src/app/models/api/ServerService/dpb0286.interface';
+import {
+  AA1212Req,
+  ReqAA1212,
+  ResAA1212,
+} from 'src/app/models/api/ReportService/aa1212.interface';
+import {
+  AA0435Req,
+  ReqAA0435,
+  RespAA0435,
+} from 'src/app/models/api/ApiService/aa0435.interfcae';
+import {
+  ReqDPB0295,
+  RespDPB0295,
+} from 'src/app/models/api/ServerService/dpb0295.interface';
 import { RespDPB0296 } from 'src/app/models/api/ServerService/dpb0296.interface';
-import { DgrGrpcProxyMapDto, ReqDPB0297, RespDPB0297 } from 'src/app/models/api/ServerService/dpb0297.interface';
+import {
+  DgrGrpcProxyMapDto,
+  ReqDPB0297,
+  RespDPB0297,
+} from 'src/app/models/api/ServerService/dpb0297.interface';
+import { RespDPB0299 } from 'src/app/models/api/ServerService/dpb0299.interface';
+import { DPB0300Req, ReqDPB0300, RespDPB0300 } from 'src/app/models/api/ServerService/dpb0300.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -1799,7 +1923,7 @@ export class ServerService {
 
   deleteXApiKey(ReqBody: DPB0209Req): Observable<RespDPB0209> {
     let body = {
-      ReqHeader: this.api.getReqHeader(TxID.deleteGtwIdPInfo_jdbc),
+      ReqHeader: this.api.getReqHeader(TxID.deleteXApiKey),
       ReqBody: ReqBody,
     } as ReqDPB0209;
     const path = `${this.indexPath}/DPB0209`;
@@ -2289,7 +2413,9 @@ export class ServerService {
     return this.api.excuteTsmpSetting<RespDPB0296>(path, file, req);
   }
 
-  importGrpcSetting(ReqBody: Array<DgrGrpcProxyMapDto>): Observable<RespDPB0297> {
+  importGrpcSetting(
+    ReqBody: Array<DgrGrpcProxyMapDto>
+  ): Observable<RespDPB0297> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.importGrpcSetting),
       ReqBody: ReqBody,
@@ -2298,5 +2424,30 @@ export class ServerService {
     return this.api.npPost<RespDPB0297>(path, body);
   }
 
+  exportWebhook(): Observable<Blob> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.exportWebhook),
+      ReqBody: {},
+    };
+    const path = `${this.indexPath}/DPB0298`;
+    return this.api.excutePostGetFile(path, body);
+  }
 
+   importWebhook(file: File): Observable<RespDPB0299> {
+    const req = {
+      ReqHeader: this.api.getReqHeader(TxID.importWebhook),
+      ReqBody: {},
+    };
+    const path = `${this.indexPath}/DPB0299`;
+    return this.api.excuteTsmpSetting<RespDPB0299>(path, file, req);
+  }
+
+  testConnGrpc(ReqBody: DPB0300Req): Observable<RespDPB0300> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.testConnGrpc),
+      ReqBody: ReqBody,
+    } as ReqDPB0300;
+    const path = `${this.indexPath}/DPB0300`;
+    return this.api.npPost<RespDPB0300>(path, body);
+  }
 }

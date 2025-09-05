@@ -68,7 +68,7 @@ public class AA1213Service {
 						}
 						
 						String[] arrApiLogRow = strApiLog.split(",");
-						if(arrApiLogRow.length == 3) {
+						if(arrApiLogRow.length >= 3) {
 							String strUri = arrApiLogRow[0].strip().replace("\n", "");
 							//filter only uri
 							strUri = strUri.substring(strUri.indexOf("(") + 1, strUri.length() - 1);
@@ -137,7 +137,7 @@ public class AA1213Service {
 	private AA1213RespItem getRespItem(AA1213Req req, String nodeName, String[] arrApiLogRow, TsmpApi tsmpApiVo) {
 		String strUri = arrApiLogRow[0].strip();
 		Integer statusCode = Integer.valueOf(arrApiLogRow[1].strip());
-		Integer elapsedTime = Integer.valueOf(arrApiLogRow[2].strip());
+		Integer elapsedTime = Integer.valueOf(arrApiLogRow[2].replace("ms", "").strip());
 		AA1213RespItem itemVo = new AA1213RespItem();
 		
 		boolean isAbnormalData = false;

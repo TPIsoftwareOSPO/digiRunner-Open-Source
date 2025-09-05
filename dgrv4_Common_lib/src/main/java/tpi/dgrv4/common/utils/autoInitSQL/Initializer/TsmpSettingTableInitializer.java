@@ -305,6 +305,11 @@ public class TsmpSettingTableInitializer {
 //			-- 2025/06/10 Audit log retention days, Kevin Cheng
 			createTsmpSetting((id = "AUDIT_LOG_RETENTION_DAYS"), (value = "0"), (memo = "Audit log retention days, default: 0, setting to 0 means using gov_long time setting"));
 
+			//  --2025/07/31 kibana allowlist ,Zoe Lee
+			createTsmpSetting((id = "KIBANA_REFERER_ALLOWLIST"),(value = "/app/dashboards,/app/discover,/app/monitoring"),(memo = "Allowed Referer list for Kibana. Multiple paths should be separated by \",\"."));
+
+
+
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

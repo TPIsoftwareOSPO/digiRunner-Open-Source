@@ -1,15 +1,15 @@
 package tpi.dgrv4.dpaa.service;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +24,7 @@ import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.TableAct;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
+import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.job.NoticeClearCacheEventsJob;
@@ -37,6 +38,8 @@ import tpi.dgrv4.dpaa.vo.AA0319RespItem;
 import tpi.dgrv4.dpaa.vo.AA0319Trunc;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpRtnCodeCacheProxy;
+import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
+import tpi.dgrv4.entity.entity.DgrWebhookNotify;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiId;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
@@ -51,6 +54,8 @@ import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
 import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
 import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
 import tpi.dgrv4.entity.repository.DgrComposerFlowDao;
+import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
+import tpi.dgrv4.entity.repository.DgrWebhookNotifyDao;
 import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiImpDao;
 import tpi.dgrv4.entity.repository.TsmpApiRegDao;
@@ -63,12 +68,10 @@ import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.DigiRunnerGtwDeployProperties;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
-import tpi.dgrv4.gateway.vo.TsmpAuthorization;
+import tpi.dgrv4.gateway.vo.TsmpAuthorization;	
 
 @Service
 public class  AA0319Service {
-
-	private TPILogger logger = TPILogger.tl;
 
 	private TsmpApiDao tsmpApiDao;
 	private TsmpApiRegDao tsmpApiRegDao;
@@ -87,6 +90,8 @@ public class  AA0319Service {
 	private DaoGenericCacheService daoGenericCacheService;
 	private DgrComposerFlowDao dgrComposerFlowDao;
 	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
+	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
+	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
 	
 	@Autowired
 	public AA0319Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao, TsmpApiImpDao tsmpApiImpDao,
@@ -95,7 +100,7 @@ public class  AA0319Service {
 			ApplicationContext ctx, JobHelper jobHelper, ObjectMapper objectMapper, ComposerService composerService,
 			DgrAuditLogService dgrAuditLogService, DgrAuditLogMDao dgrAuditLogMDao, DgrAuditLogDDao dgrAuditLogDDao,
 			DaoGenericCacheService daoGenericCacheService, DgrComposerFlowDao dgrComposerFlowDao,
-			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties) {
+			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties,DgrWebhookApiMapDao dgrWebhookApiMapDao,DgrWebhookNotifyDao dgrWebhookNotifyDao) {
 		super();
 		this.tsmpApiDao = tsmpApiDao;
 		this.tsmpApiRegDao = tsmpApiRegDao;
@@ -114,6 +119,9 @@ public class  AA0319Service {
 		this.daoGenericCacheService = daoGenericCacheService;
 		this.dgrComposerFlowDao = dgrComposerFlowDao;
 		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
+		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
+		this.dgrWebhookNotifyDao = dgrWebhookNotifyDao;
+
 	}
 
 	@Transactional
@@ -172,7 +180,7 @@ public class  AA0319Service {
 				String apiKey = tsmpApiImp.getApiKey();
 				String moduleName = tsmpApiImp.getModuleName();
 				String key = moduleName + apiKey;
-				this.logger.debug(String.format("flow data: apiKey=%s, moduleName=%s", apiKey, moduleName));				
+				TPILogger.tl.debug(String.format("flow data: apiKey=%s, moduleName=%s", apiKey, moduleName));				
 				nodeDataHM.put(key, tsmpApiImp);
 				respItemHM.put(key, respItem);
 			}
@@ -225,11 +233,11 @@ public class  AA0319Service {
 	protected List<TsmpApiImp> checkParams(String userName, String orgId, AA0319Req req, List<String> userOrgIdList) {
 		boolean isMemoryRole = getDigiRunnerGtwDeployProperties().isMemoryRole();
 		
-		if (StringUtils.isEmpty(userName)) {
+		if (!StringUtils.hasLength(userName)) {
 			throw TsmpDpAaRtnCode._1258.throwing();
 		}
 
-		if (StringUtils.isEmpty(orgId)) {
+		if (!StringUtils.hasLength(orgId)) {
 			throw TsmpDpAaRtnCode._1273.throwing();
 		}
 
@@ -266,7 +274,7 @@ public class  AA0319Service {
 			String apiKey = reqItem.getApiKey();
 			String moduleName = reqItem.getModuleName();
 
-			if (StringUtils.isEmpty(apiKey) || StringUtils.isEmpty(moduleName)) {
+			if (!StringUtils.hasLength(apiKey) || !StringUtils.hasLength(moduleName)) {
 				throw TsmpDpAaRtnCode._1469.throwing();
 			}
 
@@ -310,7 +318,7 @@ public class  AA0319Service {
 
 		// 備份原有資料
 		String rtnCode = doBackup(batchNo, tsmpApiImp, locale, userOrgIdList);
-		if (!StringUtils.isEmpty(rtnCode)) {
+		if (StringUtils.hasLength(rtnCode)) {
 			return returnWithResult(respItem, tsmpApiImp, rtnCode, locale);
 		}
 
@@ -389,7 +397,7 @@ public class  AA0319Service {
 		Optional<TsmpApiReg> opt_tsmpApiReg = getTsmpApiRegDao().findById(tsmpApiRegId);
 
 		if (!(opt_tsmpApi.isPresent() && opt_tsmpApiReg.isPresent())) {
-			this.logger.debug(String.format("Skip backup: apiKey=%s, moduleName=%s", apiKey, moduleName));
+			TPILogger.tl.debug(String.format("Skip backup: apiKey=%s, moduleName=%s", apiKey, moduleName));
 			return null;
 		}
 
@@ -397,8 +405,8 @@ public class  AA0319Service {
 
 		// API組織原則
 		String apiOrgId = tsmpApi.getOrgId();
-		if (!StringUtils.isEmpty(apiOrgId) && !userOrgIdList.contains(apiOrgId)) {
-			this.logger.debug(
+		if (StringUtils.hasLength(apiOrgId) && !userOrgIdList.contains(apiOrgId)) {
+			TPILogger.tl.debug(
 					String.format("Violate organization principle: apiOrgId(%s) not in %s", apiOrgId, userOrgIdList));
 			return TsmpDpAaRtnCode._1219.getCode();
 		}
@@ -414,7 +422,7 @@ public class  AA0319Service {
 			// 將現有 TSMP_API, TSMP_API_REG 資料備份進 TSMP_API_IMP
 			insertTsmpApiImp(batchNo, tsmpApi, opt_tsmpApiReg.get());
 		} catch (Exception e) {
-			this.logger.debug("Backup error: apiKey=" + apiKey + ", moduleName=" + moduleName + "\n"
+			TPILogger.tl.debug("Backup error: apiKey=" + apiKey + ", moduleName=" + moduleName + "\n"
 					+ StackTraceUtil.logStackTrace(e));
 			return e.getMessage();
 		}
@@ -498,6 +506,15 @@ public class  AA0319Service {
 		i.setLabel5(tsmpApi.getLabel5());
 
 		i.setApiStatus(tsmpApi.getApiStatus());
+		
+		// CORS header
+		i.setIsCorsAllowOrigin(tsmpApiReg.getIsCorsAllowOrigin());
+		i.setIsCorsAllowMethods(tsmpApiReg.getIsCorsAllowMethods());
+		i.setIsCorsAllowHeaders(tsmpApiReg.getIsCorsAllowHeaders());
+
+		i.setCorsAllowOrigin(tsmpApiReg.getCorsAllowOrigin());
+		i.setCorsAllowMethods(tsmpApiReg.getCorsAllowMethods());
+		i.setCorsAllowHeaders(tsmpApiReg.getCorsAllowHeaders());
 
 		getTsmpApiImpDao().saveAndFlush(i);
 	}
@@ -518,28 +535,79 @@ public class  AA0319Service {
 				updateTsmpApi(userName, tsmpApiImp, iip);
 				updateTsmpApiReg(userName, tsmpApiImp, iip);
 			} else {
-				this.logger.debug(
+				TPILogger.tl.debug(
 						String.format("Unknown checkAct: %s, apiKey=%s, moduleName=%s", checkAct, apiKey, moduleName));
 			}
+			     deleteAndCreateDgrWebhookApiMap(tsmpApiImp, iip);
 			return null;
 		} catch (Exception e) {
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			// 復原資料
 			restoreFromTsmpApiImp(e, checkAct, apiKey, moduleName, batchNo, userName, iip);
 			return createParams_1452(checkAct, apiKey, moduleName, locale, e);
 		}
 	}
 
+	private void deleteAndCreateDgrWebhookApiMap(TsmpApiImp tsmpApiImp, InnerInvokeParam iip)  {
+		String listStr = tsmpApiImp.getNotifyNameList();
+		if (!StringUtils.hasLength(listStr)) {
+			return ;
+		}
+
+		List<String> notifyNames = Arrays.stream(listStr.split(","))
+				.map(String::trim)
+				.filter(StringUtils::hasLength)
+				.collect(Collectors.toList());
+
+		// Validate all notify names exist first
+		for (String notifyName : notifyNames) {
+			Optional<DgrWebhookNotify> notify = getDgrWebhookNotifyDao().findFirstByNotifyName(notifyName);
+			if (notify.isEmpty()) {
+				throw new TsmpDpAaException(String.format("Webhook setting does not exist: %s", notifyName));
+			}
+		}
+
+		// Delete existing mappings
+		List<DgrWebhookApiMap> deleteMap = getDgrWebhookApiMapDao().findByApiKeyAndModuleName(tsmpApiImp.getApiKey(),
+				tsmpApiImp.getModuleName());
+
+		for (DgrWebhookApiMap map : deleteMap) {
+			String oldRowStr = getDgrAuditLogService().writeValueAsString(iip, map);
+			String lineNumber = StackTraceUtil.getLineNumber();
+			getDgrWebhookApiMapDao().delete(map);
+			getDgrAuditLogService().createAuditLogD(iip, lineNumber, DgrWebhookApiMap.class.getSimpleName(), TableAct.D.value(),
+					oldRowStr, null);
+		}
+		notifyNames.forEach(notifyName -> {
+			DgrWebhookNotify notify = getDgrWebhookNotifyDao()
+					.findFirstByNotifyName(notifyName)
+					.orElse(null);
+
+			DgrWebhookApiMap map = new DgrWebhookApiMap();
+			map.setWebhookNotifyId(notify.getWebhookNotifyId());
+			map.setApiKey(tsmpApiImp.getApiKey());
+			map.setModuleName(tsmpApiImp.getModuleName());
+			map.setCreateUser(tsmpApiImp.getCreateUser());
+			map.setCreateDateTime(DateTimeUtil.now());
+			getDgrWebhookApiMapDao().save(map);
+			String  lineNumber = StackTraceUtil.getLineNumber();
+
+			getDgrAuditLogService().createAuditLogD(iip, lineNumber, DgrWebhookApiMap.class.getSimpleName(), TableAct.C.value(),
+					null, map);
+		});
+	}
+
 	protected void restoreFromTsmpApiImp(Throwable e, String checkAct, String apiKey, String moduleName, //
 			Integer batchNo, String userName, InnerInvokeParam iip) {
 		if ("C".equals(checkAct)) {
-			this.logger.debug("Create API error: " + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.debug("Create API error: " + StackTraceUtil.logStackTrace(e));
 			deleteTsmpApi(apiKey, moduleName);
 			deleteTsmpApiReg(apiKey, moduleName);
 			// 刪除auditLog
 			getDgrAuditLogDDao().deleteByTxnUid(iip.getTxnUid());
 			getDgrAuditLogMDao().deleteByTxnUid(iip.getTxnUid());
 		} else if ("U".equals(checkAct)) {
-			this.logger.debug("Update API error: " + StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.debug("Update API error: " + StackTraceUtil.logStackTrace(e));
 			// 找出先前備份的資料
 			TsmpApiImpId tsmpApiImpId = new TsmpApiImpId(apiKey, moduleName, "B", batchNo);
 			Optional<TsmpApiImp> opt_forRestore = getTsmpApiImpDao().findById(tsmpApiImpId);
@@ -552,10 +620,10 @@ public class  AA0319Service {
 					getDgrAuditLogDDao().deleteByTxnUid(iip.getTxnUid());
 					getDgrAuditLogMDao().deleteByTxnUid(iip.getTxnUid());
 				} catch (Exception ee) {
-					this.logger.debug("Restore data error\n" + StackTraceUtil.logStackTrace(ee));
+					TPILogger.tl.debug("Restore data error\n" + StackTraceUtil.logStackTrace(ee));
 				}
 			} else {
-				this.logger.debug("No backup data found");
+				TPILogger.tl.debug("No backup data found");
 			}
 		}
 	}
@@ -586,7 +654,7 @@ public class  AA0319Service {
 		tsmpApi.setApiDesc(source.getApiDesc());
 		tsmpApi.setApiOwner(source.getApiOwner());
 		String apiUid = source.getApiUuid();
-		if (StringUtils.isEmpty(apiUid)) {
+		if (!StringUtils.hasLength(apiUid)) {
 			apiUid = UUID.randomUUID().toString().toUpperCase();
 		}
 		tsmpApi.setApiUid(apiUid);
@@ -681,6 +749,14 @@ public class  AA0319Service {
 
 		String failHandlePolicy = source.getFailHandlePolicy();
 		tsmpApiReg.setFailHandlePolicy(failHandlePolicy);
+		
+		// CORS header
+		tsmpApiReg.setIsCorsAllowOrigin(source.getIsCorsAllowOrigin());
+		tsmpApiReg.setIsCorsAllowMethods(source.getIsCorsAllowMethods());
+		tsmpApiReg.setIsCorsAllowHeaders(source.getIsCorsAllowHeaders());
+		tsmpApiReg.setCorsAllowOrigin(source.getCorsAllowOrigin());
+		tsmpApiReg.setCorsAllowMethods(source.getCorsAllowMethods());
+		tsmpApiReg.setCorsAllowHeaders(source.getCorsAllowHeaders());
 
 		tsmpApiReg = getTsmpApiRegDao().saveAndFlush(tsmpApiReg);
 
@@ -873,7 +949,7 @@ public class  AA0319Service {
 		AA0319Trunc aa0319Trunc = new AA0319Trunc();
 		aa0319Trunc.setT(Boolean.FALSE);
 		aa0319Trunc.setVal(value);
-		if (!StringUtils.isEmpty(value) && value.length() > maxLength) {
+		if (StringUtils.hasLength(value) && value.length() > maxLength) {
 			aa0319Trunc.setT(Boolean.TRUE);
 			aa0319Trunc.setOri(value);
 			aa0319Trunc.setVal(value.substring(0, maxLength));
@@ -927,11 +1003,11 @@ public class  AA0319Service {
 									if(tsmpApiVo.getApiUid() != null && !tsmpApiVo.getApiUid().equals(uuid)) {
 										temp = temp.replaceAll(uuid, tsmpApiVo.getApiUid());
 										flow = flow.substring(0, 4) + Base64Util.base64URLEncode(temp.getBytes());
-										this.logger.debug("apiId change");
+										TPILogger.tl.debug("apiId change");
 									}
 								}
 							}else {
-								this.logger.debug("apiId not found");
+								TPILogger.tl.debug("apiId not found");
 							}
 						}
 					}
@@ -1055,5 +1131,13 @@ public class  AA0319Service {
 
 	protected DigiRunnerGtwDeployProperties getDigiRunnerGtwDeployProperties() {
 		return digiRunnerGtwDeployProperties;
+	}
+
+	protected  DgrWebhookApiMapDao getDgrWebhookApiMapDao(){
+		return  this.dgrWebhookApiMapDao;
+	}
+
+	protected  DgrWebhookNotifyDao getDgrWebhookNotifyDao(){
+		return  dgrWebhookNotifyDao;
 	}
 }

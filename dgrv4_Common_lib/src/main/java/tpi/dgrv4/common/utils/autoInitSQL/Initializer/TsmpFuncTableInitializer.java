@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("java:S1192")
 @Service
 public class TsmpFuncTableInitializer {
 	
@@ -43,7 +44,9 @@ public class TsmpFuncTableInitializer {
 			//系統現況查詢
 			"NP05","NP0504","NP0512","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012"		
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			// AI Gateway
+			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};	
 	public static final String[] ENTERPRISE = new String[] {
 			//v4-權限管理
@@ -65,7 +68,9 @@ public class TsmpFuncTableInitializer {
 			//系統現況查詢
 			"NP05","NP0504","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012"
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			// AI Gateway
+			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};
 	public static final String[] ENTERPRISE_LITE = new String[] {
 			//v4-權限管理
@@ -82,13 +87,15 @@ public class TsmpFuncTableInitializer {
 			//20250407 no execute
 			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
 			//用戶憑證管理
-			"NP02","NP0201","NP0202","NP0203","NP0204",
+			"NP02","NP0201","NP0202","NP0203","NP0204","NP0205",
 			//各類申請單
 			"NP03","NP0304","NP0401","NP0402",
 			//系統現況查詢
 			"NP05","NP0504","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012"
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			// AI Gateway
+			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};
 	public static final String[] EXPRESS = new String[] {
 			//v4-權限管理
@@ -105,13 +112,15 @@ public class TsmpFuncTableInitializer {
 			//20250407 no execute
 			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
 			//用戶憑證管理
-			"NP02","NP0201","NP0202","NP0203","NP0204",
+			"NP02","NP0201","NP0202","NP0203","NP0204","NP0205",
 			//各類申請單
 			"NP03","NP0304","NP0401","NP0402",
 			//系統現況查詢
 			"NP05","NP0504","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012"
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			// AI Gateway
+			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};
 	
 	public List<TsmpFuncVo> insertTsmpFunc(LicenseEditionTypeVo licenseEdition, boolean isOsType) {
@@ -172,8 +181,8 @@ public class TsmpFuncTableInitializer {
 	    	createTsmpFunc("AC0501","digiRunner監控","digiRunnerMonitor","digiRunner Server監控",null,"zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0502","System Resource","","digiRunnerDashboard",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0502","digiRunner儀表板","digiRunnerDashboard","digiRunner儀表板",null,"zh-TW","manager",DateTimeUtil.now());
-	    	createTsmpFunc("AC0503","API Abnormal Report","API Abnormal Report","API Abnormal Report","","en-US","manager",DateTimeUtil.now());
-            createTsmpFunc("AC0503","API異常報表","API Abnormal Report","API異常報表","","zh-TW","manager",DateTimeUtil.now());
+	    	createTsmpFunc("AC0503","API Abnormal Real-time Information","API Abnormal Real-time Information","API Abnormal Real-time Information","","en-US","manager",DateTimeUtil.now());
+            createTsmpFunc("AC0503","API異常即時資訊","API Abnormal Real-time Information","API異常即時資訊","","zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0508","Elastic Stack","","Monitor and explore system data effortlessly using interactive ELK dashboards powered by Elastic Stack.",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0508","ELK儀表板","","",null,"zh-TW","manager",DateTimeUtil.now());
 	    	
@@ -329,6 +338,19 @@ public class TsmpFuncTableInitializer {
 	    	
 	    	createTsmpFunc("LB0010","Bot Detection","Bot Detection","botDetection","","en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("LB0010","Bot Detection","Bot Detection","botDetection","","zh-TW","manager",DateTimeUtil.now());
+
+			createTsmpFunc("AI00","AI Gateway","AI Gateway","aiGateway","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AI00","AI Gateway","AI Gateway","aiGateway","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0001","AI Provider","AI Provider","aiProvider","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0001","AI 供應商","AI 供應商","aiProvider","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0002","AI APIKEY","AI APIKEY","aiAPIKEY","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0002","AI APIKEY","AI APIKEY","aiAPIKEY","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0003","AI APIKEY USAGE","AI APIKEY USAGE","aiAPIKEYUsage","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0003","AI APIKEY 使用情況","AI APIKEY 使用情況","aiAPIKEYUsage","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0004","AI Prompt Template","AI Prompt Template","aiPromptTemplate","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0004","AI 提示詞樣版","AI 提示詞樣版","aiPromptTemplate","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0005","User AI Prompt Template","User AI Prompt Template","userAiPromptTemplateSetting","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0005","使用者 AI 提示詞樣版設定","使用者預設 AI 提示詞樣版設定","userAiPromptTemplateSetting","","zh-TW","manager",DateTimeUtil.now());
 			
 			createTsmpFunc("LB0011","Webhook","Webhook","Real time event notification mechanism","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("LB0011","Webhook","Webhook","即時事件通知推送機制","","zh-TW","manager",DateTimeUtil.now());

@@ -62,7 +62,7 @@ public class AcIdPCallbackService {
 		
 		// 前端AC IdP errMsg顯示訊息的URL
 		String acIdPMsgUrl = getTsmpSettingService().getVal_AC_IDP_MSG_URL();
-		
+				
 		try {
 			String reqUri = httpReq.getRequestURI();
 			String txnUid = getDgrAuditLogService().getTxnUid();

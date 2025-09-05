@@ -1,6 +1,7 @@
 package tpi.dgrv4.gateway.component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.constant.DgrTokenGrantType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
@@ -51,10 +53,11 @@ public class IdPTokenHelper {
     	
         try {
         	String idpwd = String.format("%s:%s", clientId, clientMima);
-        	byte[] Authorization = Base64.getEncoder().withoutPadding().encode(idpwd.getBytes());
-        	
         	Map<String, String> header = new HashMap<>();
-        	header.put("Authorization", "Basic " + new String(Authorization));
+        	
+        	byte[] basicByte = idpwd.getBytes(StandardCharsets.UTF_8);
+    		String basicString = "Basic " + Base64Util.base64Encode(basicByte);
+        	header.put("Authorization", basicString);
         	
         	Map<String, String> formData = new HashMap<>();
 			formData.put("grant_type", DgrTokenGrantType.AUTHORIZATION_CODE);
@@ -68,8 +71,8 @@ public class IdPTokenHelper {
         	int statusCode = tokenResp.statusCode;
         	
         	if (statusCode >= 300) {
-        		// IdP(GOOGLE/MS) Token API Failed, HTTP Status Code '401' : %s"
-				String errMsg = String.format("IdP(%s) Token API Failed, HTTP Status Code '%s': %s" //
+        		// IdP(GOOGLE/MS/OIDC) response fail message(/auth/token): HTTP Status Code '401' : %s"
+				String errMsg = String.format("IdP(%s) response fail message(/auth/token): HTTP Status Code '%s': %s" //
 						, idPType //
 						, statusCode + "" //
 						, tokenResp.respStr //

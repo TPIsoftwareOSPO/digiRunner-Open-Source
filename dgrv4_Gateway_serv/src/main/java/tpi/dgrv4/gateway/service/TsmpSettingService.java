@@ -1454,5 +1454,13 @@ public class TsmpSettingService {
 		return getBooleanVal(key, false);
 	}
 
+	public String getKey_KIBANA_REFERER_ALLOWLIST (){
+		return  TsmpSettingDao.Key.KIBANA_REFERER_ALLOWLIST ;
+	}
+
+	public  String getVal_KIBANA_REFERER_ALLOWLIST (){
+		String key = getKey_KIBANA_REFERER_ALLOWLIST ();
+		return getStringVal(key);
+	}
 
 }

@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class HostBasedHandlerRegistry extends HandlerRegistry {
-    private final TPILogger logger = TPILogger.tl;
     private final Map<String, ManagedChannel> proxyChannels;
     private static final boolean ENABLE_VERBOSE_LOGGING = false; // Logging switch
 
@@ -25,10 +24,10 @@ public class HostBasedHandlerRegistry extends HandlerRegistry {
         // Add diagnostic logs
         if (ENABLE_VERBOSE_LOGGING) {
             if (!this.proxyChannels.isEmpty()) {
-                logger.debug("Initializing HostBasedHandlerRegistry, including the following hostnames: " +
+                TPILogger.tl.debug("Initializing HostBasedHandlerRegistry, including the following hostnames: " +
                         String.join(", ", this.proxyChannels.keySet()));
             } else {
-                logger.warn("Initializing HostBasedHandlerRegistry, but no hostnames are included");
+                TPILogger.tl.warn("Initializing HostBasedHandlerRegistry, but no hostnames are included");
             }
         }
     }
@@ -39,7 +38,7 @@ public class HostBasedHandlerRegistry extends HandlerRegistry {
         // If null or empty, fail fast
         if (authority == null || authority.isEmpty()) {
             if (ENABLE_VERBOSE_LOGGING) {
-                logger.warn("Received null or empty authority header in lookupMethod, method: " + methodName);
+                TPILogger.tl.warn("Received null or empty authority header in lookupMethod, method: " + methodName);
             }
             return null;
         }
@@ -56,14 +55,14 @@ public class HostBasedHandlerRegistry extends HandlerRegistry {
         // Check if hostname is empty
         if (hostname.isEmpty()) {
             if (ENABLE_VERBOSE_LOGGING) {
-                logger.warn("Empty hostname extracted from authority: " + authority + ", method: " + methodName);
+                TPILogger.tl.warn("Empty hostname extracted from authority: " + authority + ", method: " + methodName);
             }
             return null;
         }
 
         if (ENABLE_VERBOSE_LOGGING) {
-            logger.debug("Looking up handler for hostname '" + hostname + "', method: " + methodName);
-            logger.debug("Available hostname mappings: " + String.join(", ", proxyChannels.keySet()));
+            TPILogger.tl.debug("Looking up handler for hostname '" + hostname + "', method: " + methodName);
+            TPILogger.tl.debug("Available hostname mappings: " + String.join(", ", proxyChannels.keySet()));
         }
 
         // Look up the channel for this hostname
@@ -72,14 +71,14 @@ public class HostBasedHandlerRegistry extends HandlerRegistry {
         // If no mapping exists for this hostname, log a warning and return null
         if (channel == null) {
             if (ENABLE_VERBOSE_LOGGING) {
-                logger.warn("No mapping found for hostname: " + hostname);
+                TPILogger.tl.warn("No mapping found for hostname: " + hostname);
             }
             return null;
         }
 
         // Create and return a proxy method definition
         if (ENABLE_VERBOSE_LOGGING) {
-            logger.debug("Creating proxy method definition for hostname '" + hostname + "', method: " + methodName);
+            TPILogger.tl.debug("Creating proxy method definition for hostname '" + hostname + "', method: " + methodName);
         }
         return createProxyMethodDefinition(methodName, channel);
     }
