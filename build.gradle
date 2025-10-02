@@ -66,7 +66,12 @@ subprojects {
 		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.5.19.0-4-g052aa0662-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
+			//CVE-2025-41249
+			exclude group:'org.springframework', module:'spring-core'
 		}
+		
+		// Correct the above exclusions, CVE-2025-41249
+		implementation 'org.springframework:spring-core:6.2.11'
 		
 		implementation ('org.springframework.boot:spring-boot-starter-web'){
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
@@ -221,7 +226,7 @@ project(':dgrv4_Gateway_serv'){
 		
 		// gRPC Proxy
 		implementation 'net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE'
-		implementation 'io.grpc:grpc-netty-shaded:1.61.0'
+		implementation 'io.grpc:grpc-netty-shaded:1.75.0'
 		implementation ('io.grpc:grpc-protobuf:1.61.0'){
 			exclude group:'com.google.protobuf', module:'protobuf-java'
 		}
@@ -241,7 +246,7 @@ project(':dgrv4_Gateway_serv'){
 			exclude group:'io.netty', module:'netty-codec'
 		}
 		// Correct the above exclusions, CVE-2025-55163
-		implementation ('io.netty:netty-codec-http2:4.1.124.Final') {
+		implementation ('io.netty:netty-codec-http2:4.1.125.Final') {
 			//CVE-2025-58057
 			exclude group:'io.netty', module:'netty-codec'
 		}
