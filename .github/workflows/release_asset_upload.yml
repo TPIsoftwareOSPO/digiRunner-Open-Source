@@ -37,40 +37,40 @@ jobs:
           ./gradlew :dgrv4_Gateway_serv:clean :dgrv4_Gateway_serv:bootJar
 
       - name: Create release directory
-        run: mkdir -p $H2_PACKAGE_NAME/keys
+        run: mkdir -p ${{ env.H2_PACKAGE_NAME }}/keys
 
       - name: Copy JAR and other assets
         run: |
-          mv dgrv4_Gateway_serv/build/libs/* $H2_PACKAGE_NAME/
-          mv dgrv4_Gateway_serv/keys/* $H2_PACKAGE_NAME/keys/
-          mv $H2_PACKAGE_NAME/*.jar $H2_PACKAGE_NAME/digirunner.jar
+          mv dgrv4_Gateway_serv/build/libs/* ${{ env.H2_PACKAGE_NAME }}/
+          mv dgrv4_Gateway_serv/keys/* ${{ env.H2_PACKAGE_NAME }}/keys/
+          mv ${{ env.H2_PACKAGE_NAME }}/*.jar ${{ env.H2_PACKAGE_NAME }}/digirunner.jar
 
       - name: Download Windows amd64 TPIsoftwareOSPO quickstart portable
         uses: robinraju/release-downloader@v1
         with:
           repository: TPIsoftwareOSPO/quickstart
           tag: v${{ env.QUICKSTART_VERSION }}
-          fileName: "quickstart-portable_$QUICKSTART_VERSION_windows_amd64.zip"
-          out-file-path: $DOWNLOADS_DIR
+          fileName: "quickstart-portable_${{ env.QUICKSTART_VERSION }}_windows_amd64.zip"
+          out-file-path: ${{ env.DOWNLOADS_DIR }}
 
       - name: Download Macos apple chip TPIsoftwareOSPO quickstart portable
         uses: robinraju/release-downloader@v1
         with:
           repository: TPIsoftwareOSPO/quickstart
           tag: v${{ env.QUICKSTART_VERSION }}
-          fileName: "quickstart-portable_$QUICKSTART_VERSION_darwin_arm64.tar.gz"
-          out-file-path: $DOWNLOADS_DIR
+          fileName: "quickstart-portable_$${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz"
+          out-file-path: ${{ env.DOWNLOADS_DIR }}
 
       - name: Download Java 21 JRE from Azul Zulu
         run: |
           echo "Downloading Win Java JRE from: $WIN_JRE_URL"
-          curl -L -o $DOWNLOADS_DIR/win/java_jre.zip $WIN_JRE_URL
+          curl -L -o ${{ env.DOWNLOADS_DIR }}/win/java_jre.zip $WIN_JRE_URL
           if [ $? -ne 0 ]; then
           echo "Error: Java JRE download failed from $WIN_JRE_URL"
           exit 1
           fi
           echo "Downloading Mac Java JRE from: $MAC_JRE_URL"
-          curl -L -o $DOWNLOADS_DIR/mac/java_jre.zip $MAC_JRE_URL
+          curl -L -o ${{ env.DOWNLOADS_DIR }}/mac/java_jre.zip $MAC_JRE_URL
           if [ $? -ne 0 ]; then
           echo "Error: Java JRE download failed from $MAC_JRE_URL"
           exit 1
@@ -78,52 +78,41 @@ jobs:
 
       - name: Extract Java JRE packages
         run: |
-          unzip -q $DOWNLOADS_DIR/win/java_jre.zip -d $TEMP_DIR/win && rm $DOWNLOADS_DIR/win/java_jre.zip
-          unzip -q $DOWNLOADS_DIR/mac/java_jre.zip -d $TEMP_DIR/mac && rm $DOWNLOADS_DIR/mac/java_jre.zip
-          mv $TEMP_DIR/win/zulu21.42.19-ca-jre21.0.7-win_x64 $TEMP_DIR/win/jre
-          mv $TEMP_DIR/mac/zulu21.42.19-ca-jre21.0.7-macosx_aarch64 $TEMP_DIR/mac/jre
-          echo "ls -l $TEMP_DIR/win/jre"
-          ls -l $TEMP_DIR/win/jre 
-          echo "ls -l $TEMP_DIR/mac/jre"
-          ls -l $TEMP_DIR/mac/jre
+          unzip -q ${{ env.DOWNLOADS_DIR }}/win/java_jre.zip -d ${{ env.TEMP_DIR }}/win && rm ${{ env.DOWNLOADS_DIR }}/win/java_jre.zip
+          unzip -q ${{ env.DOWNLOADS_DIR }}/mac/java_jre.zip -d ${{ env.TEMP_DIR }}/mac && rm ${{ env.DOWNLOADS_DIR }}/mac/java_jre.zip
+          mv ${{ env.TEMP_DIR }}/win/zulu21.42.19-ca-jre21.0.7-win_x64 ${{ env.TEMP_DIR }}/win/jre
+          mv ${{ env.TEMP_DIR }}/mac/zulu21.42.19-ca-jre21.0.7-macosx_aarch64 ${{ env.TEMP_DIR }}/mac/jre
+          echo "ls -l ${{ env.TEMP_DIR }}/win/jre"
+          ls -l ${{ env.TEMP_DIR }}/win/jre 
+          echo "ls -l ${{ env.TEMP_DIR }}/mac/jre"
+          ls -l ${{ env.TEMP_DIR }}/mac/jre
 
       - name: Packet Mac Portable
         run: |
-          mkdir $TAG_macos_arm6
-          tar -xzf quickstart-portable_$QUICKSTART_VERSION_darwin_arm64.tar.gz -C $TEMP_DIR/$TAG_macos_arm6/quickstart
-          mv  $TEMP_DIR/$TAG_macos_arm6/quickstart/quickstart-portable $TAG_macos_arm6/quickstart
-          mv $TEMP_DIR/$TAG_macos_arm6/jre $TAG_macos_arm6
-          mv deploys/quickstart/quickstart-mac.yaml $TAG_macos_arm6/quickstart.yaml
-          cp -R $H2_PACKAGE_NAME/* $TAG_macos_arm6/digirunner
-
+          mkdir ${{ env.TAG }}_macos_arm6
+          tar -xzf quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz -C ${{ env.TEMP_DIR }}/${{ env.TAG }}_macos_arm6/quickstart
+          mv  ${{ env.TEMP_DIR }}/${{ env.TAG }}_macos_arm6/quickstart/quickstart-portable ${{ env.TAG }}_macos_arm6/quickstart
+          mv ${{ env.TEMP_DIR }}/${{ env.TAG }}_macos_arm6/jre ${{ env.TAG }}_macos_arm6
+          mv deploys/quickstart/quickstart-mac.yaml ${{ env.TAG }}_macos_arm6/quickstart.yaml
+          cp -R ${{ env.H2_PACKAGE_NAME }}/* ${{ env.TAG }}_macos_arm6/digirunner
 
       - name: Zip release assets
         run: |
-          zip -r $H2_PACKAGE_NAME.zip $H2_PACKAGE_NAME/
-          mv mac $TAG_macos_arm64
-          zip -r $TAG_macos_arm64.zip $TAG_macos_arm6/
-
-#      - name: Upload Release Asset
-#        uses: actions/upload-release-asset@v1.0.2
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ github.event.release.upload_url }}
-#          asset_path: $H2_PACKAGE_NAME.zip
-#          asset_name: $H2_PACKAGE_NAME.zip
-#          asset_content_type: application/zip
+          zip -r ${{ env.H2_PACKAGE_NAME }}.zip ${{ env.H2_PACKAGE_NAME }}/
+          mv mac ${{ env.TAG }}_macos_arm64
+          zip -r ${{ env.TAG }}_macos_arm64.zip ${{ env.TAG }}_macos_arm6/
 
       - name: Create GitHub Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: $TAG
-          name: digirunner portable packages $TAG
+          tag_name: ${{ env.TAG }}
+          name: digirunner portable packages ${{ env.TAG }}
           body: |
             Combined package generated from:
-            - digiRunner-Open-Source: $TAG
-            - TPIsoftwareOSPO/quickstart: $QUICKSTART_VERSION
+            - digiRunner-Open-Source: ${{ env.TAG }}
+            - TPIsoftwareOSPO/quickstart: ${{ env.QUICKSTART_VERSION }}
           files: |
-            $H2_PACKAGE_NAME.zip
+            ${{ env.H2_PACKAGE_NAME }}.zip
             mac_arm64_${{ env.RELEASE_TAG }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
