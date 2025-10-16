@@ -128,8 +128,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
-          name: digirunner portable packages ${{ env.TAG }}
+          name: ${{ env.TAG }}
           body: |
+            ### files:
+                - ${{ env.H2_PACKAGE_NAME }}.zip: digirunner with dependencies and H2 database package
+                - ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip: digirunner with dependencies and H2 database packaged with MacOS ARM64 quickstart portable and Azul Zulu Java 21 JRE
+                - ${{ env.WIN_AMD64_PACKAGE_NAME }}.zip: digirunner with dependencies and H2 database packaged with Windows AMD64 quickstart portable and Azul Zulu Java 21 JRE
             ### References:
               - TPIsoftwareOSPO/quickstart: [v${{ env.QUICKSTART_VERSION }}](https://github.com/TPIsoftwareOSPO/quickstart/releases/tag/v${{ env.QUICKSTART_VERSION }})
           files: |
