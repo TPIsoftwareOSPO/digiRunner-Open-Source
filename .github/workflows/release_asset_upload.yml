@@ -102,6 +102,7 @@ jobs:
           mv ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart/quickstart-portable ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
           mv ${{ env.TEMP_DIR }}/mac/jre ${{ env.MAC_ARM64_PACKAGE_NAME }}
           mv deploys/quickstart/quickstart-mac.yaml ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart.yaml
+          mkdir -p ${{ env.MAC_ARM64_PACKAGE_NAME }}/digirunner
           cp -R ${{ env.H2_PACKAGE_NAME }}/* ${{ env.MAC_ARM64_PACKAGE_NAME }}/digirunner
 
       - name: Zip release assets
