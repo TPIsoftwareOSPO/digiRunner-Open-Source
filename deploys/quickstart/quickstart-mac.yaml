@@ -1,0 +1,48 @@
+tasks:
+  - name: permission
+    executable: xattr
+    base_dir: .
+    args:
+      - -dr
+      - com.apple.quarantine
+      - ./jre/bin
+    healthcheck:
+      frequency:
+        delay: 1s
+      command:
+        scripts:
+          - bash
+          - -c
+          - 'if [[ $(xattr ./jre/bin/java) == "com.apple.provenance" ]]; then exit 0; else exit 1;fi'
+
+  - name: db-detect
+    executable: bash
+    depends_on:
+      - permission
+    base_dir: .
+    args:
+      - -c
+      - |
+        rm -f digirunner.args
+        cat << EOF > digirunner.args
+        -Dserver.port=31080
+        -Dspring.datasource.url=jdbc:h2:./db/dgrdb;NON_KEYWORDS=VALUE;Mode=MySQL
+        EOF
+        ls ./db/*.db &> /dev/null && echo '-Dspring.sql.init.mode=never' >> digirunner.args || echo '-Dspring.sql.init.mode=always' >> digirunner.args;
+    healthcheck:
+      frequency:
+        delay: 1s
+      command:
+        scripts:
+          - ls
+          - digirunner.args
+  - name: digirunner-opensource
+    executable: jre/bin/java
+    base_dir: .
+    depends_on:
+      - db-detect
+    args:
+      - -cp
+      - ./digirunner/digirunner.jar
+      - "@digirunner.args"
+      - org.springframework.boot.loader.launch.PropertiesLauncher
