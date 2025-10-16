@@ -96,7 +96,7 @@ jobs:
       - name: Packet Mac Portable
         run: |
           mkdir ${{ env.MAC_ARM64_PACKAGE_NAME }}
-          tar -xzf quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz -C ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
+          tar -xzf ${{ env.DOWNLOADS_DIR }}/quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz -C ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
           mv  ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart/quickstart-portable ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
           mv ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/jre ${{ env.MAC_ARM64_PACKAGE_NAME }}
           mv deploys/quickstart/quickstart-mac.yaml ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart.yaml
