@@ -130,8 +130,8 @@ jobs:
           tag_name: ${{ env.TAG }}
           name: digirunner portable packages ${{ env.TAG }}
           body: |
-            ### TPIsoftwareOSPO/quickstart:
-              - version: [${{ env.QUICKSTART_VERSION }}](https://github.com/TPIsoftwareOSPO/quickstart/releases/tag/v${{ env.QUICKSTART_VERSION }})
+            ### References:
+              - TPIsoftwareOSPO/quickstart: [${{ env.QUICKSTART_VERSION }}](https://github.com/TPIsoftwareOSPO/quickstart/releases/tag/v${{ env.QUICKSTART_VERSION }})
           files: |
             ${{ env.H2_PACKAGE_NAME }}.zip
             ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip
