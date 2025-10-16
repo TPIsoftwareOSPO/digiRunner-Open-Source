@@ -54,7 +54,7 @@ jobs:
           fileName: "quickstart-portable_${{ env.QUICKSTART_VERSION }}_windows_amd64.zip"
           out-file-path: ${{ env.DOWNLOADS_DIR }}
 
-      - name: Download Macos apple chip TPIsoftwareOSPO quickstart portable
+      - name: Download Macos M chip TPIsoftwareOSPO quickstart portable
         uses: robinraju/release-downloader@v1
         with:
           repository: TPIsoftwareOSPO/quickstart
@@ -64,16 +64,16 @@ jobs:
 
       - name: Download Java 21 JRE from Azul Zulu
         run: |
-          echo "Downloading Win Java JRE from: $WIN_JRE_URL"
-          curl -L -o ${{ env.DOWNLOADS_DIR }}/win/java_jre.zip $WIN_JRE_URL
+          echo "Downloading Win Java JRE from: ${{ env.WIN_JRE_URL }}"
+          curl -L -o ${{ env.DOWNLOADS_DIR }}/win/java_jre.zip ${{ env.WIN_JRE_URL }}
           if [ $? -ne 0 ]; then
-          echo "Error: Java JRE download failed from $WIN_JRE_URL"
+          echo "Error: Java JRE download failed from ${{ env.WIN_JRE_URL }}"
           exit 1
           fi
-          echo "Downloading Mac Java JRE from: $MAC_JRE_URL"
-          curl -L -o ${{ env.DOWNLOADS_DIR }}/mac/java_jre.zip $MAC_JRE_URL
+          echo "Downloading Mac Java JRE from: ${{ env.MAC_JRE_URL }}"
+          curl -L -o ${{ env.DOWNLOADS_DIR }}/mac/java_jre.zip ${{ env.MAC_JRE_URL }}
           if [ $? -ne 0 ]; then
-          echo "Error: Java JRE download failed from $MAC_JRE_URL"
+          echo "Error: Java JRE download failed from ${{ env.MAC_JRE_URL }}"
           exit 1
           fi
 
