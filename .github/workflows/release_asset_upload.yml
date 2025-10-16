@@ -38,7 +38,12 @@ jobs:
           ./gradlew :dgrv4_Gateway_serv:clean :dgrv4_Gateway_serv:bootJar
 
       - name: Create release directory
-        run: mkdir -p ${{ env.H2_PACKAGE_NAME }}/keys
+        run: |
+          mkdir -p ${{ env.H2_PACKAGE_NAME }}/keys
+          mkdir -p ${{ env.TEMP_DIR }}/win
+          mkdir -p ${{ env.TEMP_DIR }}/mac
+          mkdir -p ${{ env.DOWNLOADS_DIR }}/win
+          mkdir -p ${{ env.DOWNLOADS_DIR }}/mac
 
       - name: Copy JAR and other assets
         run: |
