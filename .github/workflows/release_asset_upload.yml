@@ -49,7 +49,7 @@ jobs:
         uses: robinraju/release-downloader@v1
         with:
           repository: TPIsoftwareOSPO/quickstart
-          tag: "v$QUICKSTART_VERSION"
+          tag: v${{ env.QUICKSTART_VERSION }}
           fileName: "quickstart-portable_$QUICKSTART_VERSION_windows_amd64.zip"
           out-file-path: $DOWNLOADS_DIR
 
@@ -57,7 +57,7 @@ jobs:
         uses: robinraju/release-downloader@v1
         with:
           repository: TPIsoftwareOSPO/quickstart
-          tag: "v$QUICKSTART_VERSION"
+          tag: v${{ env.QUICKSTART_VERSION }}
           fileName: "quickstart-portable_$QUICKSTART_VERSION_darwin_arm64.tar.gz"
           out-file-path: $DOWNLOADS_DIR
 
