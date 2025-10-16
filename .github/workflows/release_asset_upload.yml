@@ -6,9 +6,9 @@ on:
 
 env:
   TAG: ${{ github.event.release.tag_name }}
-  H2_PACKAGE_NAME: h2_package-${{ github.event.release.tag_name }}
-  MAC_ARM64_PACKAGE_NAME: macos_arm64-${{ github.event.release.tag_name }}
-  WIN_AMD64_PACKAGE_NAME: windows_amd64-${{ github.event.release.tag_name }}
+  H2_PACKAGE_NAME: digirunner-opensource-h2_package-${{ github.event.release.tag_name }}
+  MAC_ARM64_PACKAGE_NAME: digirunner-opensource-macos_arm64-${{ github.event.release.tag_name }}
+  WIN_AMD64_PACKAGE_NAME: digirunner-opensource-windows_amd64-${{ github.event.release.tag_name }}
   QUICKSTART_VERSION: 1.3.8
   TEMP_DIR: ${{ github.workspace }}/temp
   DOWNLOADS_DIR: ${{ github.workspace }}/downloads
@@ -120,9 +120,9 @@ jobs:
 
       - name: Zip release assets
         run: |
-          zip -r ${{ env.H2_PACKAGE_NAME }}.zip ${{ env.H2_PACKAGE_NAME }}/
-          zip -r ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip ${{ env.MAC_ARM64_PACKAGE_NAME }}/
-          zip -r ${{ env.WIN_AMD64_PACKAGE_NAME }}.zip ${{ env.WIN_AMD64_PACKAGE_NAME }}/
+          zip -q -r ${{ env.H2_PACKAGE_NAME }}.zip ${{ env.H2_PACKAGE_NAME }}/
+          zip -q -r ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip ${{ env.MAC_ARM64_PACKAGE_NAME }}/
+          zip -q -r ${{ env.WIN_AMD64_PACKAGE_NAME }}.zip ${{ env.WIN_AMD64_PACKAGE_NAME }}/
 
       - name: Create GitHub Release and Upload Asset
         uses: softprops/action-gh-release@v2
