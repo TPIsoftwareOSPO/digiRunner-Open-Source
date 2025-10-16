@@ -7,6 +7,7 @@ on:
 env:
   TAG: ${{ github.event.release.tag_name }}
   H2_PACKAGE_NAME: ${{ github.event.release.tag_name }}_h2_package
+  MAC_ARM64_PACKAGE_NAME: ${{ github.event.release.tag_name }}_macos_arm64
   QUICKSTART_VERSION: 1.3.8
   TEMP_DIR: ${{ github.workspace }}/temp
   DOWNLOADS_DIR: ${{ github.workspace }}/downloads
@@ -58,7 +59,7 @@ jobs:
         with:
           repository: TPIsoftwareOSPO/quickstart
           tag: v${{ env.QUICKSTART_VERSION }}
-          fileName: "quickstart-portable_$${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz"
+          fileName: "quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz"
           out-file-path: ${{ env.DOWNLOADS_DIR }}
 
       - name: Download Java 21 JRE from Azul Zulu
@@ -89,18 +90,17 @@ jobs:
 
       - name: Packet Mac Portable
         run: |
-          mkdir ${{ env.TAG }}_macos_arm6
-          tar -xzf quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz -C ${{ env.TEMP_DIR }}/${{ env.TAG }}_macos_arm6/quickstart
-          mv  ${{ env.TEMP_DIR }}/${{ env.TAG }}_macos_arm6/quickstart/quickstart-portable ${{ env.TAG }}_macos_arm6/quickstart
-          mv ${{ env.TEMP_DIR }}/${{ env.TAG }}_macos_arm6/jre ${{ env.TAG }}_macos_arm6
-          mv deploys/quickstart/quickstart-mac.yaml ${{ env.TAG }}_macos_arm6/quickstart.yaml
-          cp -R ${{ env.H2_PACKAGE_NAME }}/* ${{ env.TAG }}_macos_arm6/digirunner
+          mkdir ${{ env.MAC_ARM64_PACKAGE_NAME }}
+          tar -xzf quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz -C ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
+          mv  ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart/quickstart-portable ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
+          mv ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/jre ${{ env.MAC_ARM64_PACKAGE_NAME }}
+          mv deploys/quickstart/quickstart-mac.yaml ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart.yaml
+          cp -R ${{ env.H2_PACKAGE_NAME }}/* ${{ env.MAC_ARM64_PACKAGE_NAME }}/digirunner
 
       - name: Zip release assets
         run: |
           zip -r ${{ env.H2_PACKAGE_NAME }}.zip ${{ env.H2_PACKAGE_NAME }}/
-          mv mac ${{ env.TAG }}_macos_arm64
-          zip -r ${{ env.TAG }}_macos_arm64.zip ${{ env.TAG }}_macos_arm6/
+          zip -r ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip ${{ env.MAC_ARM64_PACKAGE_NAME }}/
 
       - name: Create GitHub Release and Upload Asset
         uses: softprops/action-gh-release@v2
@@ -113,6 +113,6 @@ jobs:
             - TPIsoftwareOSPO/quickstart: ${{ env.QUICKSTART_VERSION }}
           files: |
             ${{ env.H2_PACKAGE_NAME }}.zip
-            mac_arm64_${{ env.RELEASE_TAG }}.zip
+            ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
