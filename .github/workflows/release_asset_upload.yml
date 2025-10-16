@@ -6,7 +6,7 @@ on:
 
 env:
   TAG: ${{ github.event.release.tag_name }}
-  H2_PACKAGE_NAME: digirunner-opensource-h2-package-${{ github.event.release.tag_name }}
+  H2_PACKAGE_NAME: digirunner-opensource-h2pack-${{ github.event.release.tag_name }}
   MAC_ARM64_PACKAGE_NAME: digirunner-opensource-macos-arm64-${{ github.event.release.tag_name }}
   WIN_AMD64_PACKAGE_NAME: digirunner-opensource-windows-amd64-${{ github.event.release.tag_name }}
   QUICKSTART_VERSION: 1.3.8
