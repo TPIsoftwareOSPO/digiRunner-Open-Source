@@ -6,8 +6,9 @@ on:
 
 env:
   TAG: ${{ github.event.release.tag_name }}
-  H2_PACKAGE_NAME: ${{ github.event.release.tag_name }}_h2_package
-  MAC_ARM64_PACKAGE_NAME: ${{ github.event.release.tag_name }}_macos_arm64
+  H2_PACKAGE_NAME: digirunner-opensource-h2-package-${{ github.event.release.tag_name }}
+  MAC_ARM64_PACKAGE_NAME: digirunner-opensource-macos-arm64-${{ github.event.release.tag_name }}
+  WIN_AMD64_PACKAGE_NAME: digirunner-opensource-windows-amd64-${{ github.event.release.tag_name }}
   QUICKSTART_VERSION: 1.3.8
   TEMP_DIR: ${{ github.workspace }}/temp
   DOWNLOADS_DIR: ${{ github.workspace }}/downloads
@@ -96,16 +97,32 @@ jobs:
       - name: Packet Mac Portable
         run: |
           mkdir ${{ env.MAC_ARM64_PACKAGE_NAME }}
+          mkdir -p ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
           tar -xzf ${{ env.DOWNLOADS_DIR }}/quickstart-portable_${{ env.QUICKSTART_VERSION }}_darwin_arm64.tar.gz -C ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
-          mv  ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart/quickstart-portable ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
-          mv ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/jre ${{ env.MAC_ARM64_PACKAGE_NAME }}
+          ls -al ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
+          mv ${{ env.TEMP_DIR }}/${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart/quickstart-portable ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart
+          mv ${{ env.TEMP_DIR }}/mac/jre ${{ env.MAC_ARM64_PACKAGE_NAME }}
           mv deploys/quickstart/quickstart-mac.yaml ${{ env.MAC_ARM64_PACKAGE_NAME }}/quickstart.yaml
+          mkdir -p ${{ env.MAC_ARM64_PACKAGE_NAME }}/digirunner
           cp -R ${{ env.H2_PACKAGE_NAME }}/* ${{ env.MAC_ARM64_PACKAGE_NAME }}/digirunner
+
+      - name: Packet Windows Portable
+        run: |
+          mkdir ${{ env.WIN_AMD64_PACKAGE_NAME }}
+          mkdir -p ${{ env.TEMP_DIR }}/${{ env.WIN_AMD64_PACKAGE_NAME }}/quickstart
+          unzip ${{ env.DOWNLOADS_DIR }}/quickstart-portable_${{ env.QUICKSTART_VERSION }}_windows_amd64.zip -d ${{ env.TEMP_DIR }}/${{ env.WIN_AMD64_PACKAGE_NAME }}/quickstart
+          ls -al ${{ env.TEMP_DIR }}/${{ env.WIN_AMD64_PACKAGE_NAME }}/quickstart
+          mv ${{ env.TEMP_DIR }}/${{ env.WIN_AMD64_PACKAGE_NAME }}/quickstart/quickstart-portable.exe ${{ env.WIN_AMD64_PACKAGE_NAME }}/quickstart.exe
+          mv ${{ env.TEMP_DIR }}/win/jre ${{ env.WIN_AMD64_PACKAGE_NAME }}
+          mv deploys/quickstart/quickstart-windows.yaml ${{ env.WIN_AMD64_PACKAGE_NAME }}/quickstart.yaml
+          mkdir -p ${{ env.WIN_AMD64_PACKAGE_NAME }}/digirunner
+          cp -R ${{ env.H2_PACKAGE_NAME }}/* ${{ env.WIN_AMD64_PACKAGE_NAME }}/digirunner
 
       - name: Zip release assets
         run: |
-          zip -r ${{ env.H2_PACKAGE_NAME }}.zip ${{ env.H2_PACKAGE_NAME }}/
-          zip -r ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip ${{ env.MAC_ARM64_PACKAGE_NAME }}/
+          zip -q -r ${{ env.H2_PACKAGE_NAME }}.zip ${{ env.H2_PACKAGE_NAME }}/
+          zip -q -r ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip ${{ env.MAC_ARM64_PACKAGE_NAME }}/
+          zip -q -r ${{ env.WIN_AMD64_PACKAGE_NAME }}.zip ${{ env.WIN_AMD64_PACKAGE_NAME }}/
 
       - name: Create GitHub Release and Upload Asset
         uses: softprops/action-gh-release@v2
@@ -113,11 +130,11 @@ jobs:
           tag_name: ${{ env.TAG }}
           name: digirunner portable packages ${{ env.TAG }}
           body: |
-            Combined package generated from:
-            - digiRunner-Open-Source: ${{ env.TAG }}
-            - TPIsoftwareOSPO/quickstart: ${{ env.QUICKSTART_VERSION }}
+            ### TPIsoftwareOSPO/quickstart:
+              - version: [${{ env.QUICKSTART_VERSION }}](https://github.com/TPIsoftwareOSPO/quickstart/releases/tag/v${{ env.QUICKSTART_VERSION }})
           files: |
             ${{ env.H2_PACKAGE_NAME }}.zip
             ${{ env.MAC_ARM64_PACKAGE_NAME }}.zip
+            ${{ env.WIN_AMD64_PACKAGE_NAME }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,56 @@
+tasks:
+  - name: permission
+    executable: powershell.exe
+    base_dir: .
+    args:
+      - -Command
+      - |
+        Get-ChildItem -Path .\jre\bin -Recurse -File | Unblock-File
+    healthcheck:
+      frequency:
+        delay: 1s
+      command:
+        scripts:
+          - powershell.exe
+          - -Command
+          - "Get-Item -Path .\\jre\\bin\\java.exe -Stream Zone.Identifier -ErrorAction SilentlyContinue | Out-Null; if (-not $?) { exit 0 } else { exit 1 }"
+  - name: db-detect
+    executable: powershell.exe
+    base_dir: .
+    depends_on:
+      - permission
+    args:
+      - -Command
+      - |
+        Remove-Item -Path digirunner.args -ErrorAction SilentlyContinue;
+
+        $content = @"
+        -Dserver.port=31080
+        -Dspring.datasource.url=jdbc:h2:.\db\dgrdb;NON_KEYWORDS=VALUE;Mode=MySQL
+        "@
+        $content | Out-File -FilePath digirunner.args -Encoding ascii; 
+
+        if (Test-Path -Path ".\db\*.db") {
+            Add-Content -Path digirunner.args -Value '-Dspring.sql.init.mode=never';
+        } else {
+            Add-Content -Path digirunner.args -Value '-Dspring.sql.init.mode=always';
+        }
+    healthcheck:
+      frequency:
+        delay: 1s
+      command:
+        scripts:
+          - powershell.exe
+          - -Command
+          - "if ((Test-Path -Path 'digirunner.args') -and ((Get-Item 'digirunner.args').Length -gt 0)) { exit 0 } else { exit 1 }"
+
+  - name: digirunner-opensource
+    executable: .\jre\bin\java.exe
+    base_dir: .
+    depends_on:
+      - db-detect
+    args:
+      - -cp
+      - .\digirunner\digirunner.jar
+      - "@digirunner.args"
+      - org.springframework.boot.loader.launch.PropertiesLauncher
