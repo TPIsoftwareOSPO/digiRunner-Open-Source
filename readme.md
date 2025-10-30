@@ -210,8 +210,8 @@ If you want to **try digiRunner quickly without installation or setup**, you can
 #### 🧩 Step 1. Download the Package
 Choose your OS and download the corresponding file from the [release](https://github.com/TPIsoftwareOSPO/digiRunner-Open-Source/releases/):
 
-- **macOS (ARM64):** [`digirunner-opensource-macos-arm64-vX.X.X.X-rc-packages.zip`]  
-- **Windows (AMD64):** [`digirunner-opensource-windows-amd64-vX.X.X.X-rc-packages.zip`]
+- **macOS (ARM64):** [`digirunner-opensource-macos-arm64-vX.X.X.X(version name).zip`]  
+- **Windows (AMD64):** [`digirunner-opensource-windows-amd64-vX.X.X.X(version name).zip`]
   
 #### ⚙️ Step 2. Extract and Run
 1. Unzip the downloaded package.  
