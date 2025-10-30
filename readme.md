@@ -4,6 +4,13 @@
 ## Table of contents
 - [Overview](#overview)
 - [Quick Start](#quick-start)
+  - [Using Container](#1-using-container)
+    - [Option 1: Docker](#option-1-docker)
+    - [Option 2: Docker-Compose](#option-2-docker-compose)
+    - [Option 3: Kubernetes](#option-3-kubernetes)
+    - [Option 4: Helm](#option-4-helm)
+  - [Run digiRunner Instantly on Your Local Machine](#2-run-digirunner-instantly-on-your-local-machine)
+  - [Run Your Own Build](#3-run-your-own-build)
 - [Create a Simple Api Proxy](#create-a-simple-api-proxy)
 - [Documentation](#documentation)
 - [Build Your Own JAR](#build-your-own-jar)
@@ -193,8 +200,64 @@ Contributions:
 - Use the default credentials to login: 
   - username: `manager`
   - password: `manager123`
+---
 
-### 2. Run Your Own Build
+
+### 2. Run digiRunner Instantly on Your Local Machine
+
+If you want to **try digiRunner quickly without installation or setup**, you can use our pre-packaged version for your operating system.
+
+#### 🧩 Step 1. Download the Package
+Choose your OS and download the corresponding file from the [release](https://github.com/TPIsoftwareOSPO/digiRunner-Open-Source/releases/):
+
+- **macOS (ARM64):** [`digirunner-opensource-macos-arm64-vX.X.X.X-rc-packages.zip`]  
+- **Windows (AMD64):** [`digirunner-opensource-windows-amd64-vX.X.X.X-rc-packages.zip`]
+  
+#### ⚙️ Step 2. Extract and Run
+1. Unzip the downloaded package.  
+2. Open the extracted folder.  
+3. Double-click **`quickstart.exe`** to launch digiRunner on your local machine.  
+
+You can now start exploring digiRunner immediately — no installation, no configuration required!
+
+#### 🌐 Step 3. Access digiRunner in Your Browser
+After launching digiRunner, open your browser and go to:
+
+👉 [http://localhost:18080/dgrv4/login](http://localhost:18080/dgrv4/login)
+
+Use the following default credentials to log in:
+
+```
+
+username: manager
+password: manager123
+
+```
+
+Once logged in, you can start exploring digiRunner’s management console and test its features locally.
+
+#### ⚠️ Note
+You may receive a **security or firewall warning** from macOS or Windows when you run the file for the first time.  
+This is because we haven’t yet registered with Apple or Microsoft developer programs.  
+
+> Simply **allow or bypass the warning** (e.g., “Keep Anyway” / “Allow app to run”) to continue.  
+> Once launched, digiRunner will run safely and locally on your machine.
+
+#### 🧹 Step 4. Clean Up
+After testing, you can simply **delete the entire extracted folder** — digiRunner does not modify or install anything on your system.
+
+---
+
+This Quickstart version is ideal for users who want to:
+- Test digiRunner locally in just a few minutes  
+- Explore API management features without setup overhead  
+- Safely remove everything after testing  
+
+Enjoy your hands-on experience with digiRunner! 💡
+
+
+
+### 3. Run Your Own Build
 
 ### Pre-requisites
 
