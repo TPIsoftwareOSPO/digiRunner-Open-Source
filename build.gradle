@@ -193,7 +193,11 @@ project(':dgrv4_Gateway_serv'){
 
 		// websocket
 		implementation ('org.springframework.boot:spring-boot-starter-websocket'){
+   			//CVE-2025-41254
+   			exclude group:'org.springframework', module:'spring-websocket'
 		}
+		//修正上方排除的CVE-2025-41254
+		implementation 'org.springframework:spring-websocket:6.2.12'
 		
 		implementation 'io.undertow:undertow-core:2.3.17.Final'
 		implementation 'io.undertow:undertow-websockets-jsr:2.3.17.Final'
