@@ -68,17 +68,21 @@ subprojects {
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 			//CVE-2025-41249
 			exclude group:'org.springframework', module:'spring-core'
+			//CVE-2025-11226
+			exclude group:'ch.qos.logback', module:'logback-core'
 		}
 		
 		// Correct the above exclusions, CVE-2025-41249
-		implementation 'org.springframework:spring-core:6.2.11'
+		implementation 'org.springframework:spring-core:6.2.11'		
+		// Correct the above exclusions, CVE-2025-11226
+		implementation 'ch.qos.logback:logback-core:1.5.19'
 		
 		implementation ('org.springframework.boot:spring-boot-starter-web'){
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
 		}
 		
 		// 修正上方排除的 org.apache.tomcat.embed:tomcat-embed-core
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10'
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.12'
 
 		// 添加 Undertow (乾淨的 undertow) , 預計升級 springboot v3.4.0
     	implementation ('org.springframework.boot:spring-boot-starter-undertow'){}
@@ -90,8 +94,8 @@ subprojects {
 		compileOnly 'org.projectlombok:lombok:1.18.32'
 		annotationProcessor 'org.projectlombok:lombok:1.18.32'
 		implementation 'commons-io:commons-io:2.16.1'
-		// CVE-2025-8885
-		implementation 'org.bouncycastle:bc-fips:2.1.1'
+		// CVE-2025-8885,CVE-2025-12194
+		implementation 'org.bouncycastle:bc-fips:2.1.2'
 		
 		implementation 'org.bouncycastle:bcpkix-fips:2.1.9'
 	}
