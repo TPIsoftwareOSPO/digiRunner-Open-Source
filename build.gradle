@@ -209,7 +209,7 @@ project(':dgrv4_Gateway_serv'){
 		//  compileOnly:  JDBC Driver 5 種
 		implementation 'com.h2database:h2'
 		implementation project(':dgrv4_H2Config_lib')
-		implementation 'com.microsoft.sqlserver:mssql-jdbc:12.8.2.jre8'
+		implementation 'com.microsoft.sqlserver:mssql-jdbc:13.2.1.jre11'
 		implementation 'com.oracle.database.jdbc:ojdbc11'
 		implementation 'org.postgresql:postgresql:42.7.7'
 		implementation('org.mariadb.jdbc:mariadb-java-client:3.1.2', {
