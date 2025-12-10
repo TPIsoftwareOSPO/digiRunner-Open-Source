@@ -1,5 +1,7 @@
 [![][tpi-logo]][tpi-url]
-# digiRunner: Mission-Critical API Gateway & Management for Microservices
+# digiRunner:The Unified Control Plane for APIs & AI Services
+Bridge your infrastructure to the AI revolution. Securely.
+An enterprise-grade API Gateway built to govern Microservices and orchestrate Large Language Models (LLMs) with precision.
 [TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog) | [Community](https://github.com/TPIsoftwareOSPO/digiRunner-Open-Source/discussions)
 ## Table of contents
 - [Overview](#overview)
@@ -18,23 +20,33 @@
 
 ## Overview
 
-Welcome to digiRunner, the mission-critical, open-source API management platform purpose-built to help developers tame complexity, enforce security, and streamline API operations—without the bloat or barriers.
-Whether you're launching your first microservice or governing dozens of API endpoints in a production-critical environment, digiRunner makes modern API management simple, scalable, and reliable where it matters most.
+digiRunner is a lightweight, high-performance API Gateway designed for the modern hybrid cloud. As enterprises race to adopt Generative AI, they face a new set of challenges: unpredictable costs, vendor lock-in, and security risks associated with exposing internal data to public models.
+digiRunner evolves beyond traditional traffic management to become your AI Gateway. It acts as a smart bridge between your applications and AI providers (like OpenAI, Azure, or local Ollama instances), allowing you to decouple your business logic from the rapidly changing AI landscape.
+With digiRunner, you stop hardcoding API keys and start managing AI as a governed infrastructure asset.
 
-## What Makes digiRunner Different?
 
-Managing APIs across services, teams, and environments can be messy—especially when uptime, performance, and security are non-negotiable. digiRunner fixes that with a streamlined control plane and tools that just make sense.
-With digiRunner, you can:
+## Why digiRunner AI Gateway?
 
-•	✅ Route API requests intelligently and dynamically
+We provide the Guardrails and Governance missing from standard model APIs.
 
-•	✅ Secure APIs using OAuth2, OIDC, RBAC, and token-based flows
+1. 🛡️ Zero Vendor Lock-in (Universal Interface)
 
-•	✅ Apply rate limits, traffic shaping, and quotas effortlessly
+Stop rewriting code every time a new model is released.
+- Provider Abstraction: Define your AI Provider (e.g., OpenAI, Azure) and Model configurations centrally. Your apps call a unified digiRunner endpoint, allowing you to switch backend models instantly without deploying new code.
+- Secure Key Management: Never expose provider API keys in client-side code again. digiRunner injects credentials securely at the gateway layer.
 
-•	✅ Monitor real-time usage, latency, and anomalies
+2. 💰 FinOps & Tokenomics Control
 
-All with a clean UI, strong defaults, and smart documentation that scales with your mission-critical systems.
+Traditional rate limiting (Requests Per Minute) fails with LLMs, where a single request can consume 10k+ tokens. digiRunner understands Tokenomics.
+- Granular Cost Control: Enforce strict Input Limits (prevent long context abuse) and Output Limits (prevent runaway generation).
+- Flexible Policy: Choose between Reject (hard stop) to cap budget, or Use Anyway to allow traffic while flagging overages for audit.
+
+3. 📝 Prompt Engineering as Infrastructure
+
+Treat your Prompts like APIs—versioned, managed, and visible.
+- Template Registry: Use the built-in AI Prompt Template engine to create, update, and enable/disable prompts globally.
+- Standardization: Ensure all applications use approved, optimized prompts to reduce hallucinations and ensure brand consistency.
+
 
 ## Solving Real API Challenges
 
@@ -50,21 +62,12 @@ All with a clean UI, strong defaults, and smart documentation that scales with y
 
 
 
-## Key Features
+## Core API Management Features
+Under the hood, digiRunner remains a powerhouse for standard RESTful services:
+- High Performance: Low-latency routing designed for high-concurrency environments.
+- K8s & Hybrid Ready: Seamlessly integrates with Kubernetes (K3s/Rancher) for local or cloud deployments.
+- Full Lifecycle Management: Design, Publish, Secure, and Analyze your APIs from a single dashboard.
 
-- Smart Routing Engine – Route API traffic based on URL paths, headers, query parameters, and other request metadata. Supports dynamic and conditional routing logic for microservices, legacy systems, and multi-version APIs.
-
-- Intelligent Non-Blocking Traffic Dispatching – With simple configurations, digiRunner intelligently distributes traffic across optimal routes, even in the event of API congestion or backend latency. This ensures system stability, minimizes bottlenecks, and improves responsiveness during peak loads.
-
-- Real-Time Monitoring Dashboard – Monitor live request metrics, error rates, and latency with a rich, visual dashboard. Interactive indicators and customizable alerts enable early issue detection and faster resolution—empowering teams to collaborate efficiently and maintain system health in real time.
-
-- Role-Based Access Control (RBAC) – Set granular access policies per user, team, or role. Combine this with API key authentication or OAuth2/OIDC to ensure only the right consumers can access your APIs.
-
-- Rate Limiting & Quotas – Define limits on request rates per consumer, application, or endpoint. Enforce burst limits, sustained usage thresholds, and usage quotas to maintain reliability under high load.
-
-- Token-based Auth – Seamlessly integrate secure authentication flows using OAuth2, OpenID Connect (OIDC), and static API keys. Supports multi-tenant identity providers for enterprise use cases.
-
-- Easy Setup – Deploy digiRunner anywhere—locally for development, in Docker containers for portability, or on cloud platforms for production-scale infrastructure. Configuration is UI-driven with CLI support.
 
 ## Where digiRunner Fits: Real-World Scenarios
 
@@ -85,12 +88,8 @@ These use cases build on digiRunner’s core strengths in observability, scalabi
 
 ## Service Structure
 
-```mermaid
-graph LR;
-Browser-->OpenDGR;
-OpenDGR-->Backend-A;
-OpenDGR-->Backend-B;
-```
+<img width="1293" height="717" alt="image" src="https://github.com/user-attachments/assets/1f8e0202-d53a-4237-9bf7-17c8d4e1a528" />
+
 
 ## Quick Start
 
