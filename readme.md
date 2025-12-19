@@ -88,7 +88,9 @@ These use cases build on digiRunner’s core strengths in observability, scalabi
 
 ## Service Structure
 
-<img width="1293" height="717" alt="image" src="https://github.com/user-attachments/assets/1f8e0202-d53a-4237-9bf7-17c8d4e1a528" />
+<img width="1344" height="768" alt="Readme_Image_2025_12_16" src="https://github.com/user-attachments/assets/a8dacaf4-cdbf-4e0f-99f2-d74bd48da746" />
+
+
 
 
 ## Quick Start
