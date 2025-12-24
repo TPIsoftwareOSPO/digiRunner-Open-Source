@@ -258,8 +258,8 @@ project(':dgrv4_Gateway_serv'){
 			//CVE-2025-58057
 			exclude group:'io.netty', module:'netty-codec'
 		}
-		// Correct the above exclusions, CVE-2025-58056
-		implementation 'io.netty:netty-codec-http:4.1.125.Final'
+		// Correct the above exclusions, CVE-2025-58056, CVE-2025-67735
+		implementation 'io.netty:netty-codec-http:4.1.129.Final'
 		// Correct the above exclusions, CVE-2025-58057
 		implementation 'io.netty:netty-codec:4.1.125.Final'
 		
