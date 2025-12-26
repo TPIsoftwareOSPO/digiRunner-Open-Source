@@ -186,7 +186,8 @@
     "searchByTags": "Search By Label",
     "refresh": "Refresh",
     "label_reset": "Reset label",
-    "preview": "Preview"
+    "preview": "Preview",
+    "next": "Next"
   },
   "calendar": {
     "day": "Day",
@@ -1367,10 +1368,25 @@
     "cert_tip_4_1": "4.1. For example: example.p12 is a PKCS#12 keystore (containing an X.509 certificate and private key).",
     "cert_tip_4_2": "4.2. You can convert it into a PEM file (which will include both the private key and the certificate) using:\nopenssl pkcs12 -nodes -in example.p12 -out example.pem -passin pass:example",
     "cert_tip_4_3": "4.3. Open example.pem and locate the certificate block:\n-----BEGIN CERTIFICATE-----\nMIIFwjCCA6qgAwIBAgIIHrR+pmyYcSUwDQYJKoZIhvcNAQEMBQAwgYYxGDAWBgNV\n......\npY2+3U1hLAs6pNrmuSpGrbQa6QEx21jO7HCON7Ds/5Cl3ZCWlg4=\n-----END CERTIFICATE-----\nCopy and paste the entire block exactly as shown."
-
   },
   "org_reset": "Configure Organization",
   "recent_api_abnormal_each_node": "Observe the API with the most recent abnormal response from each node",
   "trustedCertsContent": "Certificate",
-  "cert": "Certificate"
+  "cert": "Certificate",
+  "changeMimaFirstLogin": "Change Password on First Login",
+  "forget_mima": "Forgot Password",
+  "reset_mima": "Reset Password",
+  "input_otp_code": "Enter OTP code",
+  "otp_valid_desc": "An OTP verification code has been sent to {{email}}.\nIf you haven't received it, please check your spam folder.",
+  "reset_account_select": "Please select the account to reset",
+  "newMima": "New password",
+  "newUserBlock": "New password",
+  "clientBlock": "Password",
+  "expired_in_alert": {
+    "title": "You're about to be signed out",
+    "desc": "You will be automatically logged out for security reasons in:",
+    "cfm": "Would you like to keep working?"
+  },
+  "keeper_address": "Keeper Address",
+  "change_keeper_address": "Change Keeper Address"
 }

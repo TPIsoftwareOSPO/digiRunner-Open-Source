@@ -44,7 +44,7 @@ export class Lb0011Component extends BaseComponent implements OnInit {
   btnName: string = '';
 
   notifyTypeList: { label: string; value: string }[] = [
-    { label: 'Line', value: 'LINE' },
+    { label: 'LINE', value: 'LINE' },
     { label: 'Email', value: 'EMAIL' },
     { label: 'Slack', value: 'SLACK' },
     { label: 'Discord', value: 'DISCORD' },

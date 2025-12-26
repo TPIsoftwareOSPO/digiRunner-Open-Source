@@ -18,6 +18,7 @@ import { DPB0190RespItem } from 'src/app/models/api/ServerService/dpb0190.interf
 import { DPB0204Req } from 'src/app/models/api/ServerService/dpb0204.interface';
 import { DPB0203Req, DPB0203Resp } from 'src/app/models/api/ServerService/dpb0203.interface';
 import { DPB0205Req } from 'src/app/models/api/ServerService/dpb0205.interface';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ac0229',
@@ -85,6 +86,7 @@ select * from users u, tsmp_user ts where upper(u.username) = upper('tspuser') a
     private confirmationService: ConfirmationService,
     private serverService: ServerService,
     private alertService: AlertService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
@@ -360,10 +362,10 @@ select * from users u, tsmp_user ts where upper(u.username) = upper('tspuser') a
           return;
         }
 
+
         this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
 
-        this._fileSrc = fileReader.result!;
-
+        this._fileSrc = fileReader.result;
 
       }
       fileReader.readAsDataURL(files.item(0)!);

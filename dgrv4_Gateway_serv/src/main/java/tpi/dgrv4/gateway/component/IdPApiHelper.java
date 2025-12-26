@@ -177,7 +177,6 @@ public class IdPApiHelper {
 
 	/**
 	 * 調用 login API <br>
-	 * s
 	 */
 	public ApiUserInfoData callLoginApi(String reqUserName, String userMima, String userIp,
 			Object infoData, String reqUri) throws IOException {

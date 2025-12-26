@@ -6,31 +6,41 @@ import { ActivatedRoute } from '@angular/router';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.service';
-import { DPB0095Item, DPB0095Req } from 'src/app/models/api/OpenApiService/dpb0095.interface';
+import {
+  DPB0095Item,
+  DPB0095Req,
+} from 'src/app/models/api/OpenApiService/dpb0095.interface';
 import { DPB0169RespItem } from 'src/app/models/api/ServerService/dpb0169.interface';
-import { DPB0184Req, DPB0184RespItem } from 'src/app/models/api/ServerService/dpb0184.interface';
+import {
+  DPB0184Req,
+  DPB0184RespItem,
+} from 'src/app/models/api/ServerService/dpb0184.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import * as dayjs from 'dayjs';
-import { DPB0185Req, DPB0185Resp } from 'src/app/models/api/ServerService/dpb0185.interface';
+import {
+  DPB0185Req,
+  DPB0185Resp,
+} from 'src/app/models/api/ServerService/dpb0185.interface';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0186Req } from 'src/app/models/api/ServerService/dpb0186.interface';
 import { DPB0187Req } from 'src/app/models/api/ServerService/dpb0187.interface';
 import { KeyValueFormComponent } from './key-value-form/key-value-form.component';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ac0228',
   templateUrl: './ac0228.component.html',
   styleUrls: ['./ac0228.component.css'],
-  providers: [MessageService, ConfirmationService]
+  providers: [MessageService, ConfirmationService],
 })
 export class Ac0228Component extends BaseComponent implements OnInit {
-  @ViewChild("keyValueComp") keyValueComp!: KeyValueFormComponent;
+  @ViewChild('keyValueComp') keyValueComp!: KeyValueFormComponent;
 
   currentTitle = this.title;
   pageNum: number = 1;
   form!: FormGroup;
   formEdit!: FormGroup;
-  clientListCols: { field: string; header: string; }[] = [];
+  clientListCols: { field: string; header: string }[] = [];
   clientList: Array<DPB0095Item> = [];
   currentClient?: DPB0095Item;
   currentAction: string = '';
@@ -38,7 +48,7 @@ export class Ac0228Component extends BaseComponent implements OnInit {
   gtwIdPInfo?: DPB0185Resp;
   methodsList: { label: string; value: string }[] = [
     { value: 'POST', label: 'POST' },
-    { value: 'GET', label: 'GET' }
+    { value: 'GET', label: 'GET' },
   ];
   _fileSrc: any = null;
 
@@ -51,7 +61,7 @@ export class Ac0228Component extends BaseComponent implements OnInit {
 
   respType: { label: string; value: string }[] = [
     { value: 'H', label: 'HTTP status' },
-    { value: 'R', label: 'HTTP status + return code' }
+    { value: 'R', label: 'HTTP status + return code' },
   ];
 
   idTokenExp: string = `{
@@ -75,8 +85,6 @@ export class Ac0228Component extends BaseComponent implements OnInit {
     "check": "Y"
 }`;
 
-
-
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
@@ -87,12 +95,12 @@ export class Ac0228Component extends BaseComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private serverService: ServerService,
     private alertService: AlertService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
 
   async ngOnInit() {
-
     this.form = this.fb.group({
       keyword: new FormControl(''),
     });
@@ -119,7 +127,7 @@ export class Ac0228Component extends BaseComponent implements OnInit {
       updateUser: new FormControl(''),
       updateDateTime: new FormControl(''),
       idtLightId: new FormControl(''),
-      idtRoleName: new FormControl('')
+      idtRoleName: new FormControl(''),
     });
 
     const codes = ['client_id', 'client_name', 'client_alias'];
@@ -128,31 +136,37 @@ export class Ac0228Component extends BaseComponent implements OnInit {
     this.clientListCols = [
       { field: 'clientId', header: dict['client_id'] },
       { field: 'clientName', header: dict['client_name'] },
-      { field: 'clientAlias', header: dict['client_alias'] }
+      { field: 'clientAlias', header: dict['client_alias'] },
     ];
 
-    this.openApiService.queryClientListByRegStatusLike_ignore1298({ keyword: this.keyword!.value, regStatus: '2' }).subscribe(res => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        this.clientList = res.RespBody.dataList;
-      }
-    });
+    this.openApiService
+      .queryClientListByRegStatusLike_ignore1298({
+        keyword: this.keyword!.value,
+        regStatus: '2',
+      })
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.clientList = res.RespBody.dataList;
+        }
+      });
   }
 
   queryClientList() {
-
     this.clientList = [];
     this.currentClient = undefined;
 
     let ReqBody = {
       keyword: this.keyword!.value,
-      regStatus: '2'
+      regStatus: '2',
     } as DPB0095Req;
 
-    this.openApiService.queryClientListByRegStatusLike(ReqBody).subscribe(res => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        this.clientList = res.RespBody.dataList;
-      }
-    });
+    this.openApiService
+      .queryClientListByRegStatusLike(ReqBody)
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.clientList = res.RespBody.dataList;
+        }
+      });
   }
 
   headerReturn() {
@@ -160,10 +174,8 @@ export class Ac0228Component extends BaseComponent implements OnInit {
 
     if (this.pageNum > 2) {
       this.pageNum = 2;
-      this.currentTitle = `${this.title} > GTW API IdP Client List`
-    }
-    else
-      this.changePage('queryClientList')
+      this.currentTitle = `${this.title} > GTW API IdP Client List`;
+    } else this.changePage('queryClientList');
   }
 
   viewGtwIdPinfoList(rowData: DPB0095Item) {
@@ -174,34 +186,45 @@ export class Ac0228Component extends BaseComponent implements OnInit {
 
   queryGtwIdPInfoByClientId_api() {
     this.pageNum = 2;
-    this.currentTitle = `${this.title} > GTW API IdP Client List`
+    this.currentTitle = `${this.title} > GTW API IdP Client List`;
     let reqBody = {
-      clientId: this.currentClient?.clientId
-    } as DPB0184Req
+      clientId: this.currentClient?.clientId,
+    } as DPB0184Req;
     this.gtwIdpList = [];
-    this.serverService.queryGtwIdPInfoByClientId_api(reqBody).subscribe(res => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        // console.log('resp', res.RespBody.dataList)
-        this.gtwIdpList = res.RespBody.dataList;
-      }
-    })
+    this.serverService
+      .queryGtwIdPInfoByClientId_api(reqBody)
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          // console.log('resp', res.RespBody.dataList)
+          this.gtwIdpList = res.RespBody.dataList;
+        }
+      });
   }
 
   moreClientList() {
     let ReqBody = {
       clientId: this.clientList[this.clientList.length - 1].clientId,
       keyword: this.keyword!.value,
-      regStatus: '2'
+      regStatus: '2',
     } as DPB0095Req;
-    this.openApiService.queryClientListByRegStatusLike(ReqBody).subscribe(res => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        this.clientList = this.clientList.concat(res.RespBody.dataList);
-      }
-    });
+    this.openApiService
+      .queryClientListByRegStatusLike(ReqBody)
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.clientList = this.clientList.concat(res.RespBody.dataList);
+        }
+      });
   }
 
   async changePage(action: string, rowData?: DPB0169RespItem) {
-    const codes = ['button.detail', 'button.create', 'button.update', 'cfm_del', 'message.delete', 'message.success'];
+    const codes = [
+      'button.detail',
+      'button.create',
+      'button.update',
+      'cfm_del',
+      'message.delete',
+      'message.success',
+    ];
     const dict = await this.toolService.getDict(codes);
     this.resetFormValidator(this.formEdit);
     this.currentAction = action;
@@ -214,54 +237,72 @@ export class Ac0228Component extends BaseComponent implements OnInit {
         this.pageNum = 1;
         break;
       case 'clientList':
-        this.currentTitle = `${this.title} > GTW API IdP Client List`
+        this.currentTitle = `${this.title} > GTW API IdP Client List`;
         this.pageNum = 2;
         break;
       case 'detail':
         let reqDetail = {
-          id: rowData?.id
+          id: rowData?.id,
         } as DPB0185Req;
-        this.serverService.queryIdPUserDetail_api(reqDetail).subscribe(res => {
-          if (this.toolService.checkDpSuccess(res.ResHeader)) {
-            this.currentTitle += `> ${dict['button.detail']}`
-            this.pageNum = 4;
-            this.gtwIdPInfo = res.RespBody;
-            this.formEdit.disable();
-            this.id.setValue(res.RespBody.id);
-            this.clientId.setValue(res.RespBody.clientId);
-            this.status.setValue(res.RespBody.status);
-            this.remark.setValue(res.RespBody.remark);
-            this.apiMethod.setValue(res.RespBody.apiMethod);
-            this.apiUrl.setValue(res.RespBody.apiUrl);
-            this.reqHeader.setValue(res.RespBody.reqHeader);
-            this.reqBodyType.setValue(res.RespBody.reqBodyType);
-            if (this.reqBodyType.value === 'F' || this.reqBodyType.value === 'X') {
-              this.reqBody.disable();
+        this.serverService
+          .queryIdPUserDetail_api(reqDetail)
+          .subscribe((res) => {
+            if (this.toolService.checkDpSuccess(res.ResHeader)) {
+              this.currentTitle += `> ${dict['button.detail']}`;
+              this.pageNum = 4;
+              this.gtwIdPInfo = res.RespBody;
+              this.formEdit.disable();
+              this.id.setValue(res.RespBody.id);
+              this.clientId.setValue(res.RespBody.clientId);
+              this.status.setValue(res.RespBody.status);
+              this.remark.setValue(res.RespBody.remark);
+              this.apiMethod.setValue(res.RespBody.apiMethod);
+              this.apiUrl.setValue(res.RespBody.apiUrl);
+              this.reqHeader.setValue(res.RespBody.reqHeader);
+              this.reqBodyType.setValue(res.RespBody.reqBodyType);
+              if (
+                this.reqBodyType.value === 'F' ||
+                this.reqBodyType.value === 'X'
+              ) {
+                this.reqBody.disable();
+              }
+              this.reqBody.setValue(res.RespBody.reqBody);
+              this.sucByType.setValue(res.RespBody.sucByType);
+              this.sucByField.setValue(res.RespBody.sucByField);
+              this.sucByValue.setValue(res.RespBody.sucByValue);
+              this.idtName.setValue(res.RespBody.idtName);
+              this.idtEmail.setValue(res.RespBody.idtEmail);
+              this.idtPicture.setValue(res.RespBody.idtPicture);
+              if (res.RespBody.iconFile) this._fileSrc = res.RespBody.iconFile;
+              this.pageTitle.setValue(res.RespBody.pageTitle);
+
+              this.createUser.setValue(res.RespBody.createUser);
+              this.createDateTime.setValue(
+                res.RespBody.createDateTime
+                  ? this.toolService.setformate(
+                      new Date(res.RespBody.createDateTime),
+                      'YYYY-MM-DD HH:mm:ss'
+                    )
+                  : ''
+              );
+              this.updateUser.setValue(res.RespBody.updateUser);
+              this.updateDateTime.setValue(
+                res.RespBody.updateDateTime
+                  ? this.toolService.setformate(
+                      new Date(res.RespBody.updateDateTime),
+                      'YYYY-MM-DD HH:mm:ss'
+                    )
+                  : ''
+              );
+              this.idtLightId.setValue(res.RespBody.idtLightId);
+              this.idtRoleName.setValue(res.RespBody.idtRoleName);
             }
-            this.reqBody.setValue(res.RespBody.reqBody);
-            this.sucByType.setValue(res.RespBody.sucByType);
-            this.sucByField.setValue(res.RespBody.sucByField);
-            this.sucByValue.setValue(res.RespBody.sucByValue);
-            this.idtName.setValue(res.RespBody.idtName);
-            this.idtEmail.setValue(res.RespBody.idtEmail);
-            this.idtPicture.setValue(res.RespBody.idtPicture);
-            if (res.RespBody.iconFile) this._fileSrc = res.RespBody.iconFile;
-            this.pageTitle.setValue(res.RespBody.pageTitle);
-
-            this.createUser.setValue(res.RespBody.createUser);
-            this.createDateTime.setValue(res.RespBody.createDateTime ? this.toolService.setformate(new Date(res.RespBody.createDateTime), 'YYYY-MM-DD HH:mm:ss') : '');
-            this.updateUser.setValue(res.RespBody.updateUser);
-            this.updateDateTime.setValue(res.RespBody.updateDateTime ? this.toolService.setformate(new Date(res.RespBody.updateDateTime), 'YYYY-MM-DD HH:mm:ss') : '');
-            this.idtLightId.setValue(res.RespBody.idtLightId);
-            this.idtRoleName.setValue(res.RespBody.idtRoleName);
-
-          }
-        })
+          });
         break;
       case 'create':
-        this.serverService.createGtwIdPInfo_api_before().subscribe(res => {
+        this.serverService.createGtwIdPInfo_api_before().subscribe((res) => {
           if (this.toolService.checkDpSuccess(res.ResHeader)) {
-            this.currentTitle += `> ${dict['button.create']}`
+            this.currentTitle += `> ${dict['button.create']}`;
             this.pageNum = 4;
             // console.log(res.RespBody.constraints)
             this.addFormValidator(this.formEdit, res.RespBody.constraints);
@@ -271,137 +312,157 @@ export class Ac0228Component extends BaseComponent implements OnInit {
             this.sucByType.markAsTouched();
             this.reqBodyType.markAsTouched();
 
-
-            this.sucByType.valueChanges.subscribe(res => {
+            this.sucByType.valueChanges.subscribe((res) => {
               if (res === 'R') {
                 const validStr = [
-                  { field: "sucByField", type: "string", isRequired: { msg: "必填", value: true } },
-                  { field: "sucByValue", type: "string", isRequired: { msg: "必填", value: true } },
+                  {
+                    field: 'sucByField',
+                    type: 'string',
+                    isRequired: { msg: '必填', value: true },
+                  },
+                  {
+                    field: 'sucByValue',
+                    type: 'string',
+                    isRequired: { msg: '必填', value: true },
+                  },
                 ];
-                this.addFormValidator(this.formEdit, validStr)
-              }
-              else {
+                this.addFormValidator(this.formEdit, validStr);
+              } else {
                 this.sucByField.clearValidators();
                 this.sucByField.updateValueAndValidity();
                 this.sucByValue.clearValidators();
                 this.sucByValue.updateValueAndValidity();
               }
               this.formEdit.updateValueAndValidity();
-            })
+            });
 
             this.reqBodyType.valueChanges.subscribe((res) => {
               this.reqBody.setValue('');
-              if(res=='F'||res=='X'){
+              if (res == 'F' || res == 'X') {
                 this.keyValueComp.addKeyValue();
               }
-            })
+            });
           }
-        })
+        });
         break;
       case 'update':
         let reqD = {
-          id: rowData?.id
+          id: rowData?.id,
         } as DPB0185Req;
-        this.serverService.queryIdPUserDetail_api(reqD).subscribe(res => {
+        this.serverService.queryIdPUserDetail_api(reqD).subscribe((res) => {
           if (this.toolService.checkDpSuccess(res.ResHeader)) {
-
             this.gtwIdPInfo = res.RespBody;
             // console.log(this.gtwIdPInfo)
 
-            this.serverService.updateGtwIdPInfo_api_before().subscribe(resValid => {
-              if (this.toolService.checkDpSuccess(resValid.ResHeader)) {
-                this.currentTitle += `> ${dict['button.update']}`
-                this.pageNum = 4;
-                this.addFormValidator(this.formEdit, resValid.RespBody.constraints);
+            this.serverService
+              .updateGtwIdPInfo_api_before()
+              .subscribe((resValid) => {
+                if (this.toolService.checkDpSuccess(resValid.ResHeader)) {
+                  this.currentTitle += `> ${dict['button.update']}`;
+                  this.pageNum = 4;
+                  this.addFormValidator(
+                    this.formEdit,
+                    resValid.RespBody.constraints
+                  );
 
-                this.id.setValue(res.RespBody.id);
-                this.id.disable();
-                this.clientId.setValue(res.RespBody.clientId);
-                this.clientId.disable();
-                this.status.setValue(res.RespBody.status);
-                this.remark.setValue(res.RespBody.remark);
-                this.apiMethod.setValue(res.RespBody.apiMethod);
-                this.apiUrl.setValue(res.RespBody.apiUrl);
-                this.reqHeader.setValue(res.RespBody.reqHeader);
-                this.reqBodyType.setValue(res.RespBody.reqBodyType);
-                this.reqBody.setValue(res.RespBody.reqBody);
-                this.sucByType.setValue(res.RespBody.sucByType);
-                this.sucByField.setValue(res.RespBody.sucByField);
-                this.sucByValue.setValue(res.RespBody.sucByValue);
-                this.idtName.setValue(res.RespBody.idtName);
-                this.idtEmail.setValue(res.RespBody.idtEmail);
-                this.idtPicture.setValue(res.RespBody.idtPicture);
-                this.idtLightId.setValue(res.RespBody.idtLightId);
-                this.idtRoleName.setValue(res.RespBody.idtRoleName);
+                  this.id.setValue(res.RespBody.id);
+                  this.id.disable();
+                  this.clientId.setValue(res.RespBody.clientId);
+                  this.clientId.disable();
+                  this.status.setValue(res.RespBody.status);
+                  this.remark.setValue(res.RespBody.remark);
+                  this.apiMethod.setValue(res.RespBody.apiMethod);
+                  this.apiUrl.setValue(res.RespBody.apiUrl);
+                  this.reqHeader.setValue(res.RespBody.reqHeader);
+                  this.reqBodyType.setValue(res.RespBody.reqBodyType);
+                  this.reqBody.setValue(res.RespBody.reqBody);
+                  this.sucByType.setValue(res.RespBody.sucByType);
+                  this.sucByField.setValue(res.RespBody.sucByField);
+                  this.sucByValue.setValue(res.RespBody.sucByValue);
+                  this.idtName.setValue(res.RespBody.idtName);
+                  this.idtEmail.setValue(res.RespBody.idtEmail);
+                  this.idtPicture.setValue(res.RespBody.idtPicture);
+                  this.idtLightId.setValue(res.RespBody.idtLightId);
+                  this.idtRoleName.setValue(res.RespBody.idtRoleName);
 
-                // console.log(res.RespBody.iconFile)
-                if (res.RespBody.iconFile) this._fileSrc = res.RespBody.iconFile;
-                this.pageTitle.setValue(res.RespBody.pageTitle);
+                  // console.log(res.RespBody.iconFile)
+                  if (res.RespBody.iconFile)
+                    this._fileSrc = res.RespBody.iconFile;
+                  this.pageTitle.setValue(res.RespBody.pageTitle);
 
-                this.sucByType.valueChanges.subscribe(res_sucByType => {
-                  if (res_sucByType === 'R') {
-                    const validStr = [
-                      { field: "sucByField", type: "string", isRequired: { msg: "必填", value: true } },
-                      { field: "sucByValue", type: "string", isRequired: { msg: "必填", value: true } },
-                    ];
-                    this.addFormValidator(this.formEdit, validStr)
-                    this.sucByField.setValue(res.RespBody.sucByField ? res.RespBody.sucByField : '');
-                    this.sucByField.markAsTouched();
-                    this.sucByValue.setValue(res.RespBody.sucByField ? res.RespBody.sucByField : '');
-                    this.sucByValue.markAsTouched();
-                    // console.log(this.sucByField)
+                  this.sucByType.valueChanges.subscribe((res_sucByType) => {
+                    if (res_sucByType === 'R') {
+                      const validStr = [
+                        {
+                          field: 'sucByField',
+                          type: 'string',
+                          isRequired: { msg: '必填', value: true },
+                        },
+                        {
+                          field: 'sucByValue',
+                          type: 'string',
+                          isRequired: { msg: '必填', value: true },
+                        },
+                      ];
+                      this.addFormValidator(this.formEdit, validStr);
+                      this.sucByField.setValue(
+                        res.RespBody.sucByField ? res.RespBody.sucByField : ''
+                      );
+                      this.sucByField.markAsTouched();
+                      this.sucByValue.setValue(
+                        res.RespBody.sucByField ? res.RespBody.sucByField : ''
+                      );
+                      this.sucByValue.markAsTouched();
+                      // console.log(this.sucByField)
+                    } else {
+                      this.sucByField.clearValidators();
+                      this.sucByField.updateValueAndValidity();
+                      this.sucByValue.clearValidators();
+                      this.sucByValue.updateValueAndValidity();
+                    }
+                    this.formEdit.updateValueAndValidity();
+                  });
 
-                  }
-                  else {
-                    this.sucByField.clearValidators();
-                    this.sucByField.updateValueAndValidity();
-                    this.sucByValue.clearValidators();
-                    this.sucByValue.updateValueAndValidity();
-                  }
-                  this.formEdit.updateValueAndValidity();
-                })
-
-                this.reqBodyType.valueChanges.subscribe((res) => {
-                  this.reqBody.setValue('');
-                  if(res=='F'||res=='X'){
-                    this.keyValueComp.addKeyValue();
-                  }
-                })
-
-              }
-            })
-
+                  this.reqBodyType.valueChanges.subscribe((res) => {
+                    this.reqBody.setValue('');
+                    if (res == 'F' || res == 'X') {
+                      this.keyValueComp.addKeyValue();
+                    }
+                  });
+                }
+              });
           }
-        })
+        });
         break;
       case 'delete':
         this.confirmationService.confirm({
           header: dict['cfm_del'],
           message: `${rowData?.id}`,
           accept: () => {
-
-            this.serverService.deleteGtwIdPInfo_api({ id: rowData!.id }).subscribe(async res => {
-
-              if (this.toolService.checkDpSuccess(res.ResHeader)) {
-                this.messageService.add({
-                  severity: 'success', summary: `${dict['message.delete']} GTW API IdP Client List`,
-                  detail: `${dict['message.delete']} ${dict['message.success']}!`
-                });
-                this.queryGtwIdPInfoByClientId_api();
-              }
-            })
-
-          }
+            this.serverService
+              .deleteGtwIdPInfo_api({ id: rowData!.id })
+              .subscribe(async (res) => {
+                if (this.toolService.checkDpSuccess(res.ResHeader)) {
+                  this.messageService.add({
+                    severity: 'success',
+                    summary: `${dict['message.delete']} GTW API IdP Client List`,
+                    detail: `${dict['message.delete']} ${dict['message.success']}!`,
+                  });
+                  this.queryGtwIdPInfoByClientId_api();
+                }
+              });
+          },
         });
         break;
     }
-
   }
 
   formateDate(date: Date) {
     if (!date) return '';
     const procDate = Number(date);
-    return dayjs(procDate).format('YYYY-MM-DD HH:mm:ss') != 'Invalid Date' ? dayjs(procDate).format('YYYY-MM-DD HH:mm:ss') : '';
+    return dayjs(procDate).format('YYYY-MM-DD HH:mm:ss') != 'Invalid Date'
+      ? dayjs(procDate).format('YYYY-MM-DD HH:mm:ss')
+      : '';
   }
 
   openFileBrowser() {
@@ -414,45 +475,55 @@ export class Ac0228Component extends BaseComponent implements OnInit {
   }
 
   async fileChange(files: FileList) {
-    const code = ['uploading', 'cfm_img_format', 'cfm_size', 'message.success', 'upload_result', 'waiting'];
+    const code = [
+      'uploading',
+      'cfm_img_format',
+      'cfm_size',
+      'message.success',
+      'upload_result',
+      'waiting',
+    ];
     const dict = await this.toolService.getDict(code);
     if (files.length != 0) {
       let fileReader = new FileReader();
       fileReader.onloadend = () => {
-
         if (files.item(0)!.size > 2000) {
           this.alertService.ok('Error', 'File size cannot exceed 2k.');
           this.clearFile();
           return;
         }
 
-        this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
+        this.messageService.add({
+          severity: 'success',
+          summary: dict['upload_result'],
+          detail: `${dict['message.success']}!`,
+        });
 
-        this._fileSrc = fileReader.result!;
-
-
-      }
+        this._fileSrc = fileReader.result;
+      };
       fileReader.readAsDataURL(files.item(0)!);
-    }
-    else {
+    } else {
       this._fileSrc = null;
     }
   }
 
   async create() {
-
-    const code = ['header_required', 'body_keyvalue_required', 'body_raw_required'];
+    const code = [
+      'header_required',
+      'body_keyvalue_required',
+      'body_raw_required',
+    ];
     const dict = await this.toolService.getDict(code);
 
     // 檢查request header 欄位有無空白
 
     if (this.reqHeader.value) {
       // console.log('header', this.reqHeader.value)
-      const checkReqHeaderData = JSON.parse(this.reqHeader.value)
-      const checkReqHeader = checkReqHeaderData.every(headerData => {
-        return (Object.keys(headerData).map(key => {
-          return key != '' && headerData[key] != ''
-        }))[0];
+      const checkReqHeaderData = JSON.parse(this.reqHeader.value);
+      const checkReqHeader = checkReqHeaderData.every((headerData) => {
+        return Object.keys(headerData).map((key) => {
+          return key != '' && headerData[key] != '';
+        })[0];
       });
 
       if (!checkReqHeader) {
@@ -464,16 +535,18 @@ export class Ac0228Component extends BaseComponent implements OnInit {
     // 檢查request body 欄位有無空白
     if (this.reqBodyType.value !== 'N') {
       if (!this.reqBody.value || this.reqBody.value === '') {
-        this.reqBodyType.value === 'R' ? this.alertService.ok(dict['body_raw_required'], '') : this.alertService.ok(dict['body_keyvalue_required'], '')
+        this.reqBodyType.value === 'R'
+          ? this.alertService.ok(dict['body_raw_required'], '')
+          : this.alertService.ok(dict['body_keyvalue_required'], '');
         return;
       }
 
       if (this.reqBodyType.value == 'F' || this.reqBodyType.value == 'X') {
-        const checkReqBodyData = JSON.parse(this.reqBody.value)
-        const checkReqBody = checkReqBodyData.every(headerData => {
-          return (Object.keys(headerData).map(key => {
-            return key != '' && headerData[key] != ''
-          }))[0];
+        const checkReqBodyData = JSON.parse(this.reqBody.value);
+        const checkReqBody = checkReqBodyData.every((headerData) => {
+          return Object.keys(headerData).map((key) => {
+            return key != '' && headerData[key] != '';
+          })[0];
         });
 
         if (!checkReqBody) {
@@ -496,45 +569,52 @@ export class Ac0228Component extends BaseComponent implements OnInit {
       idtPicture: this.idtPicture.value,
       pageTitle: this.pageTitle.value,
       idtLightId: this.idtLightId.value,
-      idtRoleName: this.idtRoleName.value
+      idtRoleName: this.idtRoleName.value,
     } as DPB0186Req;
     // console.log(this.reqHeader.value)
-    if (this.reqHeader.value && this.reqHeader.value !== '') reqCreate.reqHeader = this.reqHeader.value;
+    if (this.reqHeader.value && this.reqHeader.value !== '')
+      reqCreate.reqHeader = this.reqHeader.value;
     if (this.reqBodyType.value !== 'N') reqCreate.reqBody = this.reqBody.value;
     if (this.sucByType.value === 'R') {
       reqCreate.sucByField = this.sucByField.value;
       reqCreate.sucByValue = this.sucByValue.value;
     }
 
-    if (this._fileSrc) reqCreate.iconFile = this._fileSrc
+    if (this._fileSrc) reqCreate.iconFile = this._fileSrc;
 
+    this.serverService
+      .createGtwIdPInfo_api(reqCreate)
+      .subscribe(async (res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          const code = ['message.create', 'message.success'];
+          const dict = await this.toolService.getDict(code);
+          this.messageService.add({
+            severity: 'success',
+            summary: `${dict['message.create']} GTW API IdP Client List`,
+            detail: `${dict['message.create']} ${dict['message.success']}!`,
+          });
 
-    this.serverService.createGtwIdPInfo_api(reqCreate).subscribe(async res => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        const code = ['message.create', 'message.success'];
-        const dict = await this.toolService.getDict(code);
-        this.messageService.add({
-          severity: 'success', summary: `${dict['message.create']} GTW API IdP Client List`,
-          detail: `${dict['message.create']} ${dict['message.success']}!`
-        });
-
-        this.queryGtwIdPInfoByClientId_api();
-      }
-    })
+          this.queryGtwIdPInfoByClientId_api();
+        }
+      });
   }
 
   async update() {
-    const code = ['header_required', 'body_keyvalue_required', 'body_raw_required'];
+    const code = [
+      'header_required',
+      'body_keyvalue_required',
+      'body_raw_required',
+    ];
     const dict = await this.toolService.getDict(code);
 
     // 檢查request header 欄位有無空白
 
     if (this.reqHeader.value) {
-      const checkReqHeaderData = JSON.parse(this.reqHeader.value)
-      const checkReqHeader = checkReqHeaderData.every(headerData => {
-        return (Object.keys(headerData).map(key => {
-          return key != '' && headerData[key] != ''
-        }))[0];
+      const checkReqHeaderData = JSON.parse(this.reqHeader.value);
+      const checkReqHeader = checkReqHeaderData.every((headerData) => {
+        return Object.keys(headerData).map((key) => {
+          return key != '' && headerData[key] != '';
+        })[0];
       });
 
       if (!checkReqHeader) {
@@ -546,16 +626,18 @@ export class Ac0228Component extends BaseComponent implements OnInit {
     // 檢查request body 欄位有無空白
     if (this.reqBodyType.value !== 'N') {
       if (!this.reqBody.value || this.reqBody.value === '') {
-        this.reqBodyType.value === 'R' ? this.alertService.ok(dict['body_raw_required'], '') : this.alertService.ok(dict['body_keyvalue_required'], '')
+        this.reqBodyType.value === 'R'
+          ? this.alertService.ok(dict['body_raw_required'], '')
+          : this.alertService.ok(dict['body_keyvalue_required'], '');
         return;
       }
 
       if (this.reqBodyType.value == 'F' || this.reqBodyType.value == 'X') {
-        const checkReqBodyData = JSON.parse(this.reqBody.value)
-        const checkReqBody = checkReqBodyData.every(headerData => {
-          return (Object.keys(headerData).map(key => {
-            return key != '' && headerData[key] != ''
-          }))[0];
+        const checkReqBodyData = JSON.parse(this.reqBody.value);
+        const checkReqBody = checkReqBodyData.every((headerData) => {
+          return Object.keys(headerData).map((key) => {
+            return key != '' && headerData[key] != '';
+          })[0];
         });
 
         if (!checkReqBody) {
@@ -579,57 +661,105 @@ export class Ac0228Component extends BaseComponent implements OnInit {
       idtPicture: this.idtPicture.value,
       pageTitle: this.pageTitle.value,
       idtLightId: this.idtLightId.value,
-      idtRoleName: this.idtRoleName.value
+      idtRoleName: this.idtRoleName.value,
     } as DPB0187Req;
 
-    if (this.reqHeader.value && this.reqHeader.value !== '') reqbody.reqHeader = this.reqHeader.value;
+    if (this.reqHeader.value && this.reqHeader.value !== '')
+      reqbody.reqHeader = this.reqHeader.value;
     if (this.reqBodyType.value !== 'N') reqbody.reqBody = this.reqBody.value;
     if (this.sucByType.value === 'R') {
       reqbody.sucByField = this.sucByField.value;
       reqbody.sucByValue = this.sucByValue.value;
     }
 
-    if (this._fileSrc) reqbody.iconFile = this._fileSrc
+    if (this._fileSrc) reqbody.iconFile = this._fileSrc;
 
-    this.serverService.updateGtwIdPInfo_api(reqbody).subscribe(async res => {
+    this.serverService.updateGtwIdPInfo_api(reqbody).subscribe(async (res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         const code = ['message.update', 'message.success'];
         const dict = await this.toolService.getDict(code);
         this.messageService.add({
-          severity: 'success', summary: `${dict['message.update']} GTW API IdP Client List`,
-          detail: `${dict['message.update']} ${dict['message.success']}!`
+          severity: 'success',
+          summary: `${dict['message.update']} GTW API IdP Client List`,
+          detail: `${dict['message.update']} ${dict['message.success']}!`,
         });
 
         this.queryGtwIdPInfoByClientId_api();
       }
-    })
-
+    });
   }
 
-  public get keyword() { return this.form.get('keyword'); };
+  public get keyword() {
+    return this.form.get('keyword');
+  }
 
-  public get id() { return this.formEdit.get('id')!; };
-  public get clientId() { return this.formEdit.get('clientId')!; };
-  public get status() { return this.formEdit.get('status')!; };
-  public get remark() { return this.formEdit.get('remark')!; };
-  public get apiMethod() { return this.formEdit.get('apiMethod')!; };
-  public get apiUrl() { return this.formEdit.get('apiUrl')!; };
-  public get reqHeader() { return this.formEdit.get('reqHeader')!; };
-  public get reqBodyType() { return this.formEdit.get('reqBodyType')!; };
-  public get reqBody() { return this.formEdit.get('reqBody')!; };
-  public get sucByType() { return this.formEdit.get('sucByType')!; };
-  public get sucByField() { return this.formEdit.get('sucByField')!; };
-  public get sucByValue() { return this.formEdit.get('sucByValue')!; };
-  public get idtName() { return this.formEdit.get('idtName')!; };
-  public get idtEmail() { return this.formEdit.get('idtEmail')!; };
-  public get idtPicture() { return this.formEdit.get('idtPicture')!; };
-  public get iconFile() { return this.formEdit.get('iconFile')!; };
-  public get pageTitle() { return this.formEdit.get('pageTitle')!; };
-  public get createUser() { return this.formEdit.get('createUser')!; };
-  public get createDateTime() { return this.formEdit.get('createDateTime')!; };
-  public get updateUser() { return this.formEdit.get('updateUser')!; };
-  public get updateDateTime() { return this.formEdit.get('updateDateTime')!; };
-  public get idtLightId() { return this.formEdit.get('idtLightId')!; };
-  public get idtRoleName() { return this.formEdit.get('idtRoleName')!; };
-
+  public get id() {
+    return this.formEdit.get('id')!;
+  }
+  public get clientId() {
+    return this.formEdit.get('clientId')!;
+  }
+  public get status() {
+    return this.formEdit.get('status')!;
+  }
+  public get remark() {
+    return this.formEdit.get('remark')!;
+  }
+  public get apiMethod() {
+    return this.formEdit.get('apiMethod')!;
+  }
+  public get apiUrl() {
+    return this.formEdit.get('apiUrl')!;
+  }
+  public get reqHeader() {
+    return this.formEdit.get('reqHeader')!;
+  }
+  public get reqBodyType() {
+    return this.formEdit.get('reqBodyType')!;
+  }
+  public get reqBody() {
+    return this.formEdit.get('reqBody')!;
+  }
+  public get sucByType() {
+    return this.formEdit.get('sucByType')!;
+  }
+  public get sucByField() {
+    return this.formEdit.get('sucByField')!;
+  }
+  public get sucByValue() {
+    return this.formEdit.get('sucByValue')!;
+  }
+  public get idtName() {
+    return this.formEdit.get('idtName')!;
+  }
+  public get idtEmail() {
+    return this.formEdit.get('idtEmail')!;
+  }
+  public get idtPicture() {
+    return this.formEdit.get('idtPicture')!;
+  }
+  public get iconFile() {
+    return this.formEdit.get('iconFile')!;
+  }
+  public get pageTitle() {
+    return this.formEdit.get('pageTitle')!;
+  }
+  public get createUser() {
+    return this.formEdit.get('createUser')!;
+  }
+  public get createDateTime() {
+    return this.formEdit.get('createDateTime')!;
+  }
+  public get updateUser() {
+    return this.formEdit.get('updateUser')!;
+  }
+  public get updateDateTime() {
+    return this.formEdit.get('updateDateTime')!;
+  }
+  public get idtLightId() {
+    return this.formEdit.get('idtLightId')!;
+  }
+  public get idtRoleName() {
+    return this.formEdit.get('idtRoleName')!;
+  }
 }

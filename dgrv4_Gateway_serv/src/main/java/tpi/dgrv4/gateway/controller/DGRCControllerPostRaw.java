@@ -1,49 +1,43 @@
 package tpi.dgrv4.gateway.controller;
 
-import java.util.concurrent.CompletableFuture;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import tpi.dgrv4.gateway.filter.GatewayFilter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.gateway.aspect.annotation.ThroughputPoint;
+import tpi.dgrv4.gateway.component.ControllerExceptionHandler;
+import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.DGRCServicePostRaw;
 
 @RestController
 public class DGRCControllerPostRaw {
-	
+
+    @Setter(onMethod_ = @Autowired)
 	private DGRCServicePostRaw service;
-	
-	@Autowired
-	public DGRCControllerPostRaw(DGRCServicePostRaw service) {
-		super();
-		this.service = service;
-	}
+
 
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
-	@RequestMapping(value = "/dgrc/**",
+	@ThroughputPoint
+    @RequestMapping(value = "/dgrc/**",
 			consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE },
 			produces = MediaType.ALL_VALUE)
-	public CompletableFuture<ResponseEntity<?>> dispatch(HttpServletRequest httpReq,
+	public void dispatch(HttpServletRequest httpReq,
 														 HttpServletResponse httpRes,
 														 @RequestHeader HttpHeaders headers,
 														 @RequestBody(required = false) String payload) throws Exception {
 
-		String selectWorkThread = httpReq.getAttribute(GatewayFilter.SETWORK_THREAD).toString();
-        CompletableFuture<ResponseEntity<?>> resp;
-        if (selectWorkThread.equals(GatewayFilter.FAST)) {
-            resp = service.forwardToPostRawDataAsyncFast(headers, httpReq, httpRes, payload);
-        } else { // "slow"
-            resp = service.forwardToPostRawDataAsync(headers, httpReq, httpRes, payload);
-        }
-        GatewayFilter.setApiRespThroughput();
-        return resp;
-
+        service.forwardToPostRawData(headers, httpReq, httpRes, payload);
 
     }
 }

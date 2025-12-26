@@ -27,9 +27,11 @@ import io.grpc.netty.NettyChannelBuilder;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContext;
 import jakarta.annotation.PostConstruct;
+import tpi.dgrv4.common.utils.CheckmarxCommUtils;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.DgrGrpcProxyMap;
 import tpi.dgrv4.entity.repository.DgrGrpcProxyMapDao;
+import tpi.dgrv4.escape.CheckmarxUtils;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.grpcproxy.config.GrpcProxyProperties;
 import tpi.dgrv4.grpcproxy.event.ProxyConfigChangedEvent;
@@ -266,7 +268,8 @@ public class DynamicGrpcProxyManager {
             // Use try-with-resources to ensure proper socket closure
             try (Socket tempSocket = new Socket()) {
                 // Set connection timeout
-                tempSocket.connect(new InetSocketAddress(hostname, port), 5000);
+            	//checkmarx, SSRF
+                CheckmarxCommUtils.sanitizeForCheckmarxConn(tempSocket, hostname, port, 5000);
 
                 // Start SSL handshake
                 try (SSLSocket socket = (SSLSocket) factory.createSocket(

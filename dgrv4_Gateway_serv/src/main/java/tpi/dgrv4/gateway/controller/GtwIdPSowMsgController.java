@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.Base64Util;
+import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 /**
@@ -35,6 +36,8 @@ public class GtwIdPSowMsgController {
 		
 		String msg = req.getParameter("msg");
 		msg = new String(Base64Util.base64URLDecode(msg));
+		//checkmarx, Reflected XSS All Clients 
+		msg = ESAPI.encoder().encodeForHTML(msg);
 		return new ResponseEntity<Object>(msg, HttpStatus.OK);
 	}
 }

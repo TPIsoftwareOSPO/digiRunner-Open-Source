@@ -82,6 +82,7 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.AdaptiveThreadPoolExecutor;
 import tpi.dgrv4.gateway.util.DigiRunnerGtwDeployProperties;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
+import tpi.dgrv4.gateway.vo.ClientCredentialCacheVo;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.OAuthTokenResp;
@@ -114,6 +115,8 @@ public class OAuthTokenService {
 	private AdaptiveThreadPoolExecutor executor = new AdaptiveThreadPoolExecutor();
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	public static Map<String, ClientCredentialCacheVo> clientCredentialCacheVoMap = new HashMap<>();
 
 	@Autowired
 	public OAuthTokenService(TsmpUserDao tsmpUserDao, AuthoritiesDao authoritiesDao,
@@ -425,6 +428,11 @@ public class OAuthTokenService {
 				origRefreshToken = parameters.get("refresh_token");
 
 			}
+			
+			ClientCredentialCacheVo cacheVo = null;
+			
+			// token JWE加密是否啟用,預設為false(JWS)
+			boolean isJwe = getTsmpSettingService().getVal_DGR_TOKEN_JWE_ENABLE();
 
 			if (DgrTokenGrantType.REFRESH_TOKEN.equalsIgnoreCase(grantType)
 					|| DgrTokenGrantType.COOKIE_TOKEN.equalsIgnoreCase(grantType)) {
@@ -565,7 +573,7 @@ public class OAuthTokenService {
 						: "";
 				audIdList = Arrays.asList(aud.split(","));
 
-				if (DgrTokenGrantType.AUTHORIZATION_CODE.equalsIgnoreCase(grantType)) { // for GTW idP
+				if (DgrTokenGrantType.AUTHORIZATION_CODE.equalsIgnoreCase(grantType)) { // for GTW IdP
 					// scope 種類1: client 的 group ID(僅一般群組)
 					scopeList = getTokenHelper().getClientGroupScopeList(clientId, scopeList);
 
@@ -578,10 +586,24 @@ public class OAuthTokenService {
 					// scope 種類: client 的 group ID(僅一般群組)
 					scopeList = getTokenHelper().getClientGroupScopeList(clientId, scopeList);
 				}
-
+				
 				accessTokenValidity = authClientDetails.getAccessTokenValidity();// access token 授權期限, 單位為秒
 				accessTokenValidity = getTokenHelper().getTokenValidity(accessTokenValidity);// 若授權期限沒有值, 設為10分鐘
 				accessTokenExp = getTokenExp(accessTokenValidity, stime);// 由 stime 開始算
+				
+				// client_credentials 為解決大量產生 token 時, 寫入 TSMP_TOKEN_HISTORY I/O 效能瓶頸, 改用 cache
+				// 上面的資料檢查成功, 才能取 cache 的值
+				if (DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType)) {
+					// 依 cache id, 取得 cache 資料
+					cacheVo = clientCredentialCacheVoMap.get(clientId);
+					if (cacheVo != null) {// 走cache
+						boolean isCacheUpdate = isUpdateClientCredentialCache(cacheVo, accessTokenValidity, isJwe,
+								scopeList);
+						if (!isCacheUpdate) {// 快取仍有效, 取快取值回傳
+							return new ResponseEntity<OAuthTokenResp>(cacheVo.getoAuthTokenResp(), HttpStatus.OK);
+						}
+					}
+				}
 
 				Long refreshTokenValidity = authClientDetails.getRefreshTokenValidity();// refresh token 授權期限, 單位為杪
 				refreshTokenValidity = getTokenHelper().getTokenValidity(refreshTokenValidity);// 若授權期限沒有值, 設為10分鐘
@@ -590,8 +612,8 @@ public class OAuthTokenService {
 				String authGrantTypes = authClientDetails.getAuthorizedGrantTypes();
 				List<String> authGrantTypesList = new ArrayList<>();
 				authGrantTypesList = Arrays.asList(authGrantTypes.split(","));
-				isHasRefreshToken = authGrantTypesList.contains(DgrTokenGrantType.REFRESH_TOKEN);// client 是否有被授權
-																									// refresh_token
+				// client 是否有被授權 refresh_token
+				isHasRefreshToken = authGrantTypesList.contains(DgrTokenGrantType.REFRESH_TOKEN);
 
 				// client_credentials 時使用
 				authClientDetailsAuthorities = StringUtils.hasLength(authClientDetails.getAuthorities())
@@ -609,9 +631,6 @@ public class OAuthTokenService {
 			PublicKey publicKey = getTsmpCoreTokenHelper().getKeyPair().getPublic();
 			// 取得 Private Key
 			PrivateKey privateKey = getTsmpCoreTokenHelper().getKeyPair().getPrivate();
-
-			// token JWE加密是否啟用,預設為false(JWS)
-			boolean isJwe = getTsmpSettingService().getVal_DGR_TOKEN_JWE_ENABLE();
 
 			String tokenUserName = userName;
 			if (StringUtils.hasLength(userName_b64)) {// 為 AC IdP 流程
@@ -685,6 +704,12 @@ public class OAuthTokenService {
 					refreshTokenJti, scopeStr, stime, accessTokenExp, refreshTokenExp, grantType, oldAccessTokenJti,
 					oauthTokenData.idPType, idTokenJwtstr, refreshTokenJwtstr);
 
+			if (DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType)) {
+				// 若核發 token, 則更新 cache 紀錄
+				updateClientCredentialCache(cacheVo, clientId, resp, scopeList.toString(), accessTokenValidity,
+						accessTokenExp, isJwe);
+			}
+			
 			errRespEntity = new ResponseEntity<OAuthTokenResp>(resp, HttpStatus.OK);
 			return errRespEntity;
 
@@ -695,6 +720,60 @@ public class OAuthTokenService {
 			errRespEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
 			return errRespEntity;
 		}
+	}
+	
+	/**
+	 * Cache 是否要更新 <br>
+	 * 需更新的時機為 Cache 過期、Access token 授權時間改變、Group ID 改變、token JWS 或 JWE 改變
+	 */
+	public boolean isUpdateClientCredentialCache(ClientCredentialCacheVo cacheVo, long accessTokenValidity,
+			boolean isJwe, List<String> scopeList) {
+		long expTimestamp = cacheVo.getExpTimestamp(); // 毫秒
+		long nowTimestamp = System.currentTimeMillis();
+
+		if (nowTimestamp > expTimestamp) {// Cache 過期
+			return true;
+		}
+
+		if (accessTokenValidity != cacheVo.getAccessTokenValidity()) {// Access token 授權時間改變
+			return true;
+		}
+
+		String scopeListCache = cacheVo.getScopeList();
+		if (!scopeList.toString().equals(scopeListCache)) {// Group ID 改變
+			return true;
+		}
+
+		boolean isJweCache = cacheVo.isJwe();
+		if (isJwe != isJweCache) {// token JWS 或 JWE 改變
+			return true;
+		}
+
+		return false;
+	}
+	
+	/**
+	 * 更新 Client Credential Cache 內容
+	 */
+	private void updateClientCredentialCache(ClientCredentialCacheVo cacheVo, String clientId,
+			OAuthTokenResp oAuthTokenResp, String scopeList, long accessTokenValidity, long accessTokenExp,
+			boolean isJwe) {
+		if (accessTokenValidity <= 10) {// 授權期限 <= 10秒, 不做快取
+			clientCredentialCacheVoMap.remove(clientId);
+			return;
+		}
+
+		if (cacheVo == null) {
+			cacheVo = new ClientCredentialCacheVo();
+		}
+
+		cacheVo.setExpTimestamp((accessTokenExp - 10) * 1000);// token 到期時間 - 10秒, 再轉成亳秒
+		cacheVo.setAccessTokenValidity(accessTokenValidity);// Access token 授權時間, 單位: 分
+		cacheVo.setoAuthTokenResp(oAuthTokenResp);
+		cacheVo.setScopeList(scopeList);
+		cacheVo.setJwe(isJwe);
+
+		clientCredentialCacheVoMap.put(clientId, cacheVo);
 	}
 
 	private void sendNotifyLandingRequestToDgr(OAuthTokenData oauthTokenData, boolean isHasRefreshToken,
@@ -1920,8 +1999,8 @@ public class OAuthTokenService {
 	}
 
 	/**
-	 * 不用處理: 1.grantType 為 "refresh_token" 2.AC IdP 的 "delegate_auth" 其他: 計算 client
-	 * token 可用量
+	 * 不用處理: 1.grantType 為 "refresh_token" 2.AC IdP 的 "delegate_auth" <br>
+	 * 其他: 計算 client token 可用量
 	 */
 	private ResponseEntity<?> doClientTokenQuota(OAuthTokenData oauthTokenData, Map<String, String> parameters,
 			String grantType, String clientId, String retokenJti, String reqUri) {

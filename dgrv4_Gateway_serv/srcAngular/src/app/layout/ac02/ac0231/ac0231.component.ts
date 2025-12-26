@@ -15,6 +15,7 @@ import { DPB0240Req, DPB0240RespItem } from 'src/app/models/api/ServerService/dp
 import { DPB0241Req, DPB0241Resp } from 'src/app/models/api/ServerService/dpb0241.interface';
 import { DPB0242Req } from 'src/app/models/api/ServerService/dpb0242.interface';
 import { DPB0243Req } from 'src/app/models/api/ServerService/dpb0243.interface';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ac0231',
@@ -48,6 +49,7 @@ export class Ac0231Component extends BaseComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private serverService: ServerService,
     private alertService: AlertService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
@@ -330,9 +332,7 @@ export class Ac0231Component extends BaseComponent implements OnInit {
 
         this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
 
-        this._fileSrc = fileReader.result!;
-        console.log(this._fileSrc.length)
-
+        this._fileSrc = fileReader.result;
       }
       fileReader.readAsDataURL(files.item(0)!);
     }

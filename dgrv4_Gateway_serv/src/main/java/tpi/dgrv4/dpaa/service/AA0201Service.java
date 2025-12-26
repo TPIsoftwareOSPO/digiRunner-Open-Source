@@ -190,6 +190,9 @@ public class AA0201Service {
 			 * 都要將 Client pwd 經過 SHA512URL base64 hash 的值,更新至 TSMP_CLIENT.client_secret	
 			 */
 			String clientPwd = new String(ServiceUtil.base64Decode(clientBlock));//Client PW,經過 Base64 Decode 的值
+			if(!clientPwd.matches(this.getTsmpSettingService().getVal_CLIENT_PWD_STRENGTH())) {
+				throw TsmpDpAaRtnCode._1352.throwing("{{clientBlock}}");
+			}
 			String sha512Pwd = ServiceUtil.getSHA512ToBase64(clientPwd);
 			
 			//7.將AA0201Req欄位新增到TSMP_CLIENT資料表，有些欄位是固定值TSMP_CLIENT.SECURITY_LEVEL_ID= "SYSTEM"

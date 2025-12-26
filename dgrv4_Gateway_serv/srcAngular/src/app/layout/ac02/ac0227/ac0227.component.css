@@ -5,3 +5,11 @@
   border: 0;
   border-top:1px solid #ddd;
 }
+.noimg{
+  background-color: #ededed;
+  border: 2px solid #dedede;
+  border-radius: 5px;
+  margin-left: 20px;
+  width: 50px;
+  min-height: 50px;
+}

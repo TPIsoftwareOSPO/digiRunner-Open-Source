@@ -21,16 +21,59 @@ import { UTCDatetimeFormatPipe } from './utc-datetime.format.pipe';
 import { IndexStatusPipe } from 'src/app/shared/pipes/index-status.pipe';
 import { DataChangeStatusPipe } from './data-change-status.pipe';
 import { ReportTypePipe } from './reportType.pipe';
-
+import { AiUsageLimitPolicyPipe } from './ai-usage-limit-policy.pipe';
+import { SafeUrlPipe } from './safe-url.pipe';
 
 @NgModule({
-    imports: [
-        CommonModule
-    ],
-    declarations: [ListboxStringSplitPipe, ListboxArraySplitPipe, TransformMenuNamePipe, APIStatusPipe, ModuleStatusPipe, SafePipe, ClientStatusPipe, DatetimeFormatPipe, UserStatusPipe, TaskStatusPipe, APISrcPipe, TimeSplitPipe, ClientPublicStatusPipe, APIJWTSStatusPipe, StringLengthPipe, EventFlagPipe,
-       IndexStatusPipe, UTCDatetimeFormatPipe, DataChangeStatusPipe, ReportTypePipe],
-    exports: [ListboxStringSplitPipe, ListboxArraySplitPipe, TransformMenuNamePipe, APIStatusPipe, ModuleStatusPipe, SafePipe, ClientStatusPipe, DatetimeFormatPipe, UserStatusPipe, TaskStatusPipe, APISrcPipe, TimeSplitPipe, ClientPublicStatusPipe, APIJWTSStatusPipe, StringLengthPipe, EventFlagPipe,
-        IndexStatusPipe, UTCDatetimeFormatPipe, DataChangeStatusPipe, ReportTypePipe],
-    providers: [FuncService]
+  imports: [CommonModule],
+  declarations: [
+    ListboxStringSplitPipe,
+    ListboxArraySplitPipe,
+    TransformMenuNamePipe,
+    APIStatusPipe,
+    ModuleStatusPipe,
+    SafePipe,
+    ClientStatusPipe,
+    DatetimeFormatPipe,
+    UserStatusPipe,
+    TaskStatusPipe,
+    APISrcPipe,
+    TimeSplitPipe,
+    ClientPublicStatusPipe,
+    APIJWTSStatusPipe,
+    StringLengthPipe,
+    EventFlagPipe,
+    IndexStatusPipe,
+    UTCDatetimeFormatPipe,
+    DataChangeStatusPipe,
+    ReportTypePipe,
+    AiUsageLimitPolicyPipe,
+    SafeUrlPipe,
+  ],
+  exports: [
+    ListboxStringSplitPipe,
+    ListboxArraySplitPipe,
+    TransformMenuNamePipe,
+    APIStatusPipe,
+    ModuleStatusPipe,
+    SafePipe,
+    ClientStatusPipe,
+    DatetimeFormatPipe,
+    UserStatusPipe,
+    TaskStatusPipe,
+    APISrcPipe,
+    TimeSplitPipe,
+    ClientPublicStatusPipe,
+    APIJWTSStatusPipe,
+    StringLengthPipe,
+    EventFlagPipe,
+    IndexStatusPipe,
+    UTCDatetimeFormatPipe,
+    DataChangeStatusPipe,
+    ReportTypePipe,
+    AiUsageLimitPolicyPipe,
+    SafeUrlPipe,
+  ],
+  providers: [FuncService],
 })
-export class SharedPipesModule { }
+export class SharedPipesModule {}

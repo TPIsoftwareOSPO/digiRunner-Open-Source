@@ -29,7 +29,7 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理(AC0706為無建立功能的告警頁面)
-			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0702","AC0706",
+			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0511","AC0702","AC0706",
 			//報表管理(Kibana)
 			"AC09","AC0901","AC0902","AC0903","AC0904","AC0905","AC0906","AC0907","AC0908","AC0909","AC0910",
 			//報表管理(JS)
@@ -58,7 +58,7 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理
-			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0702",
+			"AC05","AC0501","AC0502","AC0503","AC0508","AC0509","AC0510","AC0511","AC0702",
 			//報表管理(Kibana)
 			"AC09","AC0901","AC0902","AC0903","AC0904","AC0905","AC0906","AC0907","AC0908","AC0909","AC0910",
 			//用戶憑證管理
@@ -82,7 +82,7 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0315","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理(AC0706為無建立功能的告警頁面)
-			"AC05","AC0501","AC0503","AC0509","AC0706",
+			"AC05","AC0501","AC0503","AC0509","AC0511","AC0706",
 			//報表管理(JS)
 			//20250407 no execute
 			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
@@ -107,7 +107,7 @@ public class TsmpFuncTableInitializer {
 			//API管理
 			"AC03","AC0301","AC0311","AC0316","AC0318","AC0319","AC0320","AC0322",
 			//監控管理
-			"AC05","AC0501","AC0503","AC0509","AC0706",
+			"AC05","AC0501","AC0503","AC0509","AC0511","AC0706",
 			//報表管理(JS)
 			//20250407 no execute
 			//"AC13","AC1301","AC1302","AC1303","AC1304","AC1305",
@@ -193,6 +193,8 @@ public class TsmpFuncTableInitializer {
 	    	
 	    	createTsmpFunc("AC0510","API Dashboard","","APIDashboard",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0510","API儀表板","APIDashboard","API儀表板",null,"zh-TW","manager",DateTimeUtil.now());
+	    	createTsmpFunc("AC0511","Home Dashboard","Home Dashboard","Home Dashboard",null,"en-US","manager",DateTimeUtil.now());
+	    	createTsmpFunc("AC0511","首頁儀表板","Home Dashboard","首頁儀表板",null,"zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0702","Alert Settings","Alert Query","Alert Query",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0702","告警設定","Alert查詢","Alert查詢",null,"zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0706","Alert Settings","Alert Query","Alert Query",null,"en-US","manager",DateTimeUtil.now());
@@ -348,9 +350,9 @@ public class TsmpFuncTableInitializer {
 			createTsmpFunc("AI0003","AI APIKEY USAGE","AI APIKEY USAGE","aiAPIKEYUsage","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("AI0003","AI APIKEY 使用情況","AI APIKEY 使用情況","aiAPIKEYUsage","","zh-TW","manager",DateTimeUtil.now());
 			createTsmpFunc("AI0004","AI Prompt Template","AI Prompt Template","aiPromptTemplate","","en-US","manager",DateTimeUtil.now());
-			createTsmpFunc("AI0004","AI 提示詞樣版","AI 提示詞樣版","aiPromptTemplate","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0004","AI 提示詞樣板","AI 提示詞樣板","aiPromptTemplate","","zh-TW","manager",DateTimeUtil.now());
 			createTsmpFunc("AI0005","User AI Prompt Template","User AI Prompt Template","userAiPromptTemplateSetting","","en-US","manager",DateTimeUtil.now());
-			createTsmpFunc("AI0005","使用者 AI 提示詞樣版設定","使用者預設 AI 提示詞樣版設定","userAiPromptTemplateSetting","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("AI0005","使用者 AI 提示詞樣板設定","使用者預設 AI 提示詞樣板設定","userAiPromptTemplateSetting","","zh-TW","manager",DateTimeUtil.now());
 			
 			createTsmpFunc("LB0011","Webhook","Webhook","Real time event notification mechanism","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("LB0011","Webhook","Webhook","即時事件通知推送機制","","zh-TW","manager",DateTimeUtil.now());

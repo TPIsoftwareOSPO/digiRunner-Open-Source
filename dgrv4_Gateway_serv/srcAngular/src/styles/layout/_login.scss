@@ -99,7 +99,7 @@
       width: 100%;
       font-size: 1rem;
       display: inline-block;
-      padding: 7px 10px 6px 40px;
+      padding: 7px 40px 6px 40px;
       background-color: #fff;
 
       color: #666666;
@@ -118,6 +118,17 @@
         width: $size;
         height: $size;
       }
+    }
+    .mima {
+       position: absolute;
+       top: 50%;
+       transform: translateY(-50%);
+       right: 15px;
+       cursor: pointer;
+       color: #b7b7b7;
+    }
+    .mima:hover {
+         color: #777777;
     }
   }
   .sign-btn-grid {
@@ -150,6 +161,29 @@
     }
   }
 }
+
+.link-container{
+  text-align: right;
+}
+
+.getmima-link {
+  font-size: 0.8rem;
+  color: #0d6efd;
+  cursor: pointer;
+  display: inline;
+  text-decoration: none; /* 預設移除底線 */
+  transition: color 0.15s ease-in-out; /* 讓顏色變化更平滑 */
+}
+
+.getmima-link:hover,
+.getmima-link:focus
+{
+  color: #0a58ca; /* 滑鼠移上時，顏色稍微變深 */
+  text-decoration: underline; /* 確保底線還在 */
+   outline: 2px solid #0d6efd; /* 當使用鍵盤聚焦時，顯示外框 */
+  outline-offset: 2px; /* 讓外框跟文字有點間距 */
+}
+
 @media (max-width: 800px) {
   .login-page {
     grid-template-columns: 1fr;

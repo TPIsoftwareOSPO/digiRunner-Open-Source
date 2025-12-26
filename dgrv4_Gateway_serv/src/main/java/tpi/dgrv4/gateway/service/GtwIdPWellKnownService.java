@@ -43,12 +43,15 @@ public class GtwIdPWellKnownService {
 		String reqUri = httpReq.getRequestURI();
 		ResponseEntity<?> respEntity = null;
 		try {
+			//checkmarx, Reflected XSS All Clients 
+			idPType = ESAPI.encoder().encodeForHTML(idPType);
+			
 			// 檢查傳入的資料
 			respEntity = checkReqParam(idPType);
 			if (respEntity != null) {// 資料驗證有錯誤
 				return respEntity;
 			}
-			
+
 			String respJsonStr = getGtwIdPWellKnown(idPType);
 			//checkmarx, Reflected XSS All Clients 
 			respJsonStr = ESAPI.encoder().encodeForHTML(respJsonStr);
@@ -58,6 +61,8 @@ public class GtwIdPWellKnownService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
+			//checkmarx, Reflected XSS All Clients 
+			reqUri = ESAPI.encoder().encodeForHTML(reqUri);
 			respEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
 			return respEntity;
 		}

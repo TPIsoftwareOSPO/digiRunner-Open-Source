@@ -14,10 +14,7 @@ import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -168,11 +165,11 @@ public class WebhookService {
 										}
 									}));
 									//checkmarx, Missing HSTS Header
-									httpResp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
-									
-									boolean isStreaming = MediaType.TEXT_EVENT_STREAM_VALUE.equalsIgnoreCase(httpResp.getContentType());									
+									httpResp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+
+									boolean isStreaming = MediaType.TEXT_EVENT_STREAM_VALUE.equalsIgnoreCase(httpResp.getContentType()) && resp.statusCode < 400;
 									resp.fetchByte(new HashMap<String, String>(), isStreaming); // because Enable inputStream																		
-							        
+                                    httpResp.setStatus(resp.statusCode);
 									// content output
 									if(!isStreaming) {
 										ByteArrayInputStream bi = new ByteArrayInputStream(resp.httpRespArray);
@@ -233,19 +230,19 @@ public class WebhookService {
 	        //merge req rawData and custom fields to new rawData
 	        ObjectMapper om = new ObjectMapper();
 	        String rawData = om.writeValueAsString(payload);				
-	        log.setContent(rawData.toString());
+	        log.setContent(calculateMsgAndMask(rawData.toString()));
 			resp = HttpUtil.httpReqByRawData(reqUrl, "POST", rawData.toString(), httpHeader, false);			
 			
 			// if HttpCode is not HttpStatus.OK then set message to remark
 			if(HttpStatus.OK.value() != resp.statusCode) {
 				JsonNode jsonNode = om.readTree(resp.respStr);				
 	            String errorMsg = jsonNode.get("message").asText();
-	            log.setRemark(errorMsg);				
+	            log.setRemark(calculateMsgAndMask(errorMsg));
 			}
 		} catch (TsmpDpAaException e) {
-			log.setRemark(e.getMessage());
+			log.setRemark(calculateMsgAndMask(e.getMessage()));
 		} catch (Exception e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 		}
 		getDgrWebhookNotifyLogDao().save(log);
 	}
@@ -261,7 +258,7 @@ public class WebhookService {
 			}	
 			
 			String content = wh.getMessage();
-			log.setContent(wh.getMessage());						
+			log.setContent(calculateMsgAndMask(wh.getMessage()));
 			
 			String identif = String.format(//
 					"clientId=%s" //
@@ -274,9 +271,9 @@ public class WebhookService {
 			TsmpMailEvent event = getMail(subject, recipients, content);			
 			getPrepareMailService().createMailSchedule(Arrays.asList(event), identif, TsmpDpMailType.SAME.text(), "0");
 		} catch (TsmpDpAaException e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 		} catch (Exception e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
 		}		
 		getDgrWebhookNotifyLogDao().save(log);
@@ -298,7 +295,7 @@ public class WebhookService {
 			fieldMap.put("text", wh.getMessage());					
 			ObjectMapper objectMapper = new ObjectMapper();
 	        String rawData = objectMapper.writeValueAsString(fieldMap);
-			log.setContent(rawData);
+			log.setContent(calculateMsgAndMask(rawData));
 			resp = HttpUtil.httpReqByRawData(reqUrl, "POST", rawData, httpHeader, false);				
 			
 			// if HttpCode is not HttpStatus.OK then set message to remark
@@ -306,12 +303,12 @@ public class WebhookService {
 				ObjectMapper om = new ObjectMapper();
 				JsonNode jsonNode = om.readTree(resp.respStr);				
 	            String message = jsonNode.get("message").asText();
-	            log.setRemark(message);				
+	            log.setRemark(calculateMsgAndMask(message));
 			}
 		} catch (TsmpDpAaException e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 		} catch (Exception e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
 		}		
 		getDgrWebhookNotifyLogDao().save(log);
@@ -343,12 +340,12 @@ public class WebhookService {
 				ObjectMapper om = new ObjectMapper();
 				JsonNode jsonNode = om.readTree(resp.respStr);				
 	            String message = jsonNode.get("_misc").asText();
-	            log.setRemark(message);				
+	            log.setRemark(calculateMsgAndMask(message));
 			}
 		} catch (TsmpDpAaException e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 		} catch (Exception e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
 		}		
 		getDgrWebhookNotifyLogDao().save(log);
@@ -398,10 +395,10 @@ public class WebhookService {
 		        rawDataMap.putAll(fieldMap);
 				ignoreField.forEach(rawDataMap::remove);
 		        String reqRawData = om.writeValueAsString(rawDataMap);		        
-		        log.setContent(reqRawData.toString());
+		        log.setContent(calculateMsgAndMask(reqRawData.toString()));
 				resp = HttpUtil.httpReqByRawDataList(reqUrl, "POST", reqRawData.toString(), tranferOne2List(httpHeader), true, false, httpResp.getOutputStream());
 			} else {
-				log.setContent(wh.getMessage());
+				log.setContent(calculateMsgAndMask(wh.getMessage()));
 				// parse request form-data
 				Map<String, String[]> parameterMap = httpReq.getParameterMap();
 				for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
@@ -417,12 +414,12 @@ public class WebhookService {
 			}			
 			// if HttpCode is not HttpStatus.OK then set message to remark
 			if(HttpStatus.OK.value() != resp.statusCode) {
-				log.setRemark(resp.respStr);		
+				log.setRemark(calculateMsgAndMask(resp.respStr));
 			}
 		} catch (TsmpDpAaException e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 		} catch (Exception e) {
-			log.setRemark(e.getMessage());
+            log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
 		}
 		getDgrWebhookNotifyLogDao().save(log);
@@ -461,5 +458,20 @@ public class WebhookService {
 	protected String getSendTime() {
 		String sendTime = this.getTsmpSettingService().getVal_MAIL_SEND_TIME();// 多久後寄發Email(ms)
 		return sendTime;
-	}	
+	}
+
+    private String calculateMsgAndMask(String msg){
+        if (!StringUtils.hasLength(msg)) {
+            return "";
+        }
+        int keepLength = 998;
+        int totalLength = msg.length();
+        if (totalLength<=2000)
+            return msg;
+        else{
+            String firstPart = msg.substring(0, keepLength);
+            String lastPart = msg.substring(totalLength - keepLength);
+            return firstPart + "..." + lastPart;
+        }
+    }
 }

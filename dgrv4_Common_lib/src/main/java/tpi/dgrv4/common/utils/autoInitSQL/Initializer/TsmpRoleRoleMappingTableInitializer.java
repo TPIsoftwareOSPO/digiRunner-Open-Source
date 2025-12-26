@@ -19,7 +19,9 @@ public class TsmpRoleRoleMappingTableInitializer {
 			String roleName;
 			String roleNameMapping;
 			createTsmpRoleRoleMapping((roleRoleId = 1L), (roleName = "ADMIN"), (roleNameMapping = "ADMIN"));
-			createTsmpRoleRoleMapping((roleRoleId = 2L), (roleName = "ADMIN"), (roleNameMapping = "FrontPageDashboard"));
+			//The ID may exist, so if it is processed in AutoInitSQL.insertTsmpRoleRoleMapping, do not add it again.
+			//該ID可能會存在,所以有在AutoInitSQL.insertTsmpRoleRoleMapping加工,就不要再增加了
+			//createTsmpRoleRoleMapping((roleRoleId = 2L), (roleName = "ADMIN"), (roleNameMapping = "FrontPageDashboard"));
 
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);

@@ -92,7 +92,7 @@ export class IdpssoComponent implements OnInit {
                     }
 
                     if(r.RespBody.idTokenJwtstr) sessionStorage.setItem('idTokenJwtstr', r.RespBody.idTokenJwtstr);
-
+                    if(r.RespBody.firstTimeLogin) sessionStorage.setItem('firstTimeLogin', r.RespBody.firstTimeLogin?'true':'false');
                     this.setFuncList().pipe(
                       tap(r => {
                         if (r) this.router.navigateByUrl('/dashboard');

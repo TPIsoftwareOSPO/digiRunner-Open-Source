@@ -1,8 +1,9 @@
 <div class="dashboard-card-wrapper">
-  <ng-container *ngFor="let item of dataList; let i = index">
+  <ng-container *ngFor="let item of dataList; let i = index; trackBy: trackByNodeName">
     <ng-container *ngIf="item.nodeName === 'All Node'">
       <div class="first-col">
-        <ng-container *ngTemplateOutlet="dashboardCard; context: { $implicit: item }"></ng-container>
+        <ng-container *ngTemplateOutlet="dashboardCard; context: { $implicit: item }"></ng-container>        
+        <ng-container *ngTemplateOutlet="keeperCard"></ng-container>
         <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
       </div>
     </ng-container>
@@ -12,14 +13,33 @@
     </ng-container>
   </ng-container>
 
-  <div *ngIf="dataList.length==0">
-    <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
+
+  <div *ngIf="dataList.length==0" class="first-col">
+    <ng-container *ngTemplateOutlet="keeperCard"></ng-container>
+    <div *ngIf="lastLoginLogList.length>0">
+      <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
+    </div>
   </div>
 </div>
+<!-- keeper位址 -->
+<ng-template #keeperCard>
+<div class="dashboard-card fixed-card">
+  <div class="dashboard-card-title" style="margin-top: 1rem; height: unset;">
+      <h5>{{ "keeper_address" | translate }}
+        <i class="fas fa-cog navicon" (click)="navigateSetting()" [pTooltip]="'change_keeper_address' | translate"></i>
+      </h5>
+      <span>
+        <img alt="keeper site" style="width: 20px; height: 20px"
+              [src]=" dataList.length > 0 ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+        {{keeperIP}} {{ (keeperPort && keeperIP!='')? ': '+keeperPort :''}}
+      </span>
+  </div>
+</div>
+</ng-template>
 <ng-template #lastLoginLogCard>
   <!-- 歷史登入紀錄 -->
   <div class="dashboard-card fixed-card">
-    <div class="dashboard-card-title">
+    <div class="dashboard-card-title" style="margin-top: 1rem;">
       <h5>{{ "last_login_log" | translate }}</h5>
     </div>
     <div style="width: 100%">
@@ -39,7 +59,6 @@
             <td>{{ rowData.loginDate }}</td>
             <td>{{ rowData.loginIp }}</td>
             <td>
-              <!-- {{rowData.loginStatus}} -->
               <div class="flex text-center" [pTooltip]="rowData.loginStatus">
                 <i style="color: #6fcaa0" class="fas fa-check" *ngIf="rowData.loginStatus === 'SUCCESS'"></i>
                 <i style="color: #da7a53" class="fas fa-times" *ngIf="rowData.loginStatus === 'FAILED'"></i>
@@ -72,33 +91,41 @@
         </div>
       </div>
     </div>
-    <div class="dashboard-card-body-row" style="--columns: 1">
+    <div class="dashboard-card-body-row" style="--columns: 2;grid-template-columns: 1.8fr 1fr;">
       <ng-container *ngTemplateOutlet="apiRequest; context: { $implicit: item }"></ng-container>
-    </div>
-    <div class="dashboard-card-body-row" style="--columns: 2;grid-template-columns: 1.5fr 1fr;">
       <ng-container *ngTemplateOutlet="badAttempt; context: { $implicit: item }"></ng-container>
-      <ng-container *ngTemplateOutlet="averageTime; context: { $implicit: item }"></ng-container>
     </div>
-    <ng-container *ngIf="item.nodeName !== 'All Node'">
-      <div class="dashboard-card-body-row" style="--columns: 1" *ngIf="item.db != null">
-        <ng-container *ngTemplateOutlet="DBConnection; context: { $implicit: item }"></ng-container>
+    <div class="dashboard-card-body-row" [style.--columns]="item.queue != null ? 2 : 1">
+      <div [style.padding-right]="item.cache == null ? '10px' : null">
+        <ng-container *ngTemplateOutlet="averageTime; context: { $implicit: item }"></ng-container>
       </div>
-      <div class="dashboard-card-body-row" style="--columns: 2">
-        <ng-container *ngIf="item.cache != null">
-          <ng-container *ngTemplateOutlet="Cache; context: { $implicit: item }"></ng-container>
-        </ng-container>
-        <ng-container *ngIf="item.queue != null">
+
+       <ng-container *ngIf="item.queue != null">
           <ng-container *ngTemplateOutlet="Queue; context: { $implicit: item }"></ng-container>
         </ng-container>
+    </div>
+    <ng-container *ngIf="item.nodeName !== 'All Node'">
+      <div class="dashboard-card-body-row" style="--columns: 2">
+        <ng-container *ngIf="item.db != null">
+          <ng-container *ngTemplateOutlet="DBConnection; context: { $implicit: item }"></ng-container>
+        </ng-container>
+      <ng-container *ngIf="item.cache != null">
+        <ng-container *ngTemplateOutlet="Cache; context: { $implicit: item }"></ng-container>
+      </ng-container>
       </div>
       <div class="dashboard-card-body-row" style="--columns: 2">
         <ng-container *ngIf="item.nodeInfo != null">
-          <ng-container *ngTemplateOutlet="NodeInfo; context: { $implicit: item }"></ng-container>
+          <ng-container *ngTemplateOutlet="NodeInfoCPU; context: { $implicit: item }"></ng-container>
         </ng-container>
+        <ng-container *ngIf="item.nodeInfo != null">
+          <ng-container *ngTemplateOutlet="NodeInfoRAM; context: { $implicit: item }"></ng-container>
+        </ng-container>
+      </div>
+      <!-- <div class="dashboard-card-body-row" style="--columns: 1">
         <ng-container *ngIf="item.apiThreadStatus != null">
           <ng-container *ngTemplateOutlet="APIThreadStatus; context: { $implicit: item }"></ng-container>
         </ng-container>
-      </div>
+      </div> -->
     </ng-container>
     <div class="dashboard-card-body-row" style="--columns: 1">
       <ng-container *ngTemplateOutlet="top5FastList; context: { $implicit: item }"></ng-container>
@@ -137,6 +164,7 @@
         <span>/{{ item?.fail?.percentage }}</span>
       </div>
     </div>
+    <!-- <div style="width: 95%;height: 100%; min-height: 200px;" id="reqChart_{{item.nodeName}}"></div> -->
   </div>
 </ng-template>
 <ng-template #badAttempt let-item>
@@ -144,9 +172,9 @@
     <label class="dashboard-label">Bad Attempt (400 Above)
       <i *ngIf="item.badAttemptList && item.badAttemptList.length > 0" class="far fa-list-alt badAttemptIcon"
         (click)="showBadAttemptList(item.badAttemptList)"></i></label>
-    <!-- <div style="width: 50%;height: 100%" [id]="'badAttemptReport_'+item.nodeName"></div> -->
+
     <div class="info-row">
-      <!-- <div class="http-code-row"> -->
+
       <div class="info-row-label">
         <i class="fas fa-circle" style="color: #14b8a6"></i>
         <span>401</span>
@@ -154,10 +182,8 @@
       <div class="info-row-value">
         <span>{{ item?.badAttempt?.code401 }}</span>
       </div>
-      <!-- </div> -->
     </div>
     <div class="info-row">
-      <!-- <div class="http-code-row"> -->
       <div class="info-row-label">
         <i class="fas fa-circle" style="color: #3b82f6"></i>
         <span>403</span>
@@ -165,10 +191,8 @@
       <div class="info-row-value">
         <span>{{ item?.badAttempt?.code403 }}</span>
       </div>
-      <!-- </div> -->
     </div>
     <div class="info-row">
-      <!-- <div class="http-code-row"> -->
       <div class="info-row-label">
         <i class="fas fa-circle" style="color: #ffbe77"></i>
         <span>other</span>
@@ -176,7 +200,6 @@
       <div class="info-row-value">
         <span>{{ item?.badAttempt?.others }}</span>
       </div>
-      <!-- </div> -->
     </div>
   </div>
 </ng-template>
@@ -187,16 +210,15 @@
       <label label="info-row-label">req</label>
       <div class="info-row-value">
         <span>{{ item?.reqTps }}</span>
-        <!-- <span>/s</span> -->
       </div>
     </div>
     <div class="info-row">
       <label label="info-row-label">resp</label>
       <div class="info-row-value">
         <span>{{ item?.respTps }}</span>
-        <!-- <span>/s</span> -->
       </div>
     </div>
+    <div class="mx-0" style="width: 100%;height: 100%; min-height: 200px;" id="tpsChart_{{item.nodeName}}"></div>
   </div>
 </ng-template>
 <ng-template #top5FastList let-item>
@@ -204,7 +226,8 @@
     <div class="card-title">
       <label class="dashboard-label d-flex">Top5 Fast Ranking
         <div class="align-item-center">
-          <i class="fas fa-link ms-2 navicon" [pTooltip]="'api_abnormal_report' | translate" (click)="navigateReport()"></i>
+          <i class="fas fa-link ms-2 navicon" [pTooltip]="'api_abnormal_report' | translate"
+            (click)="navigateReport()"></i>
         </div>
       </label>
       <!-- <div class="include-fail-btn">
@@ -276,7 +299,8 @@
     <div class="card-title">
       <label class="dashboard-label d-flex">Top5 Slow Ranking
         <div class="align-item-center">
-          <i class="fas fa-link ms-2 navicon" [pTooltip]="'api_abnormal_report' | translate" (click)="navigateReport()"></i>
+          <i class="fas fa-link ms-2 navicon" [pTooltip]="'api_abnormal_report' | translate"
+            (click)="navigateReport()"></i>
         </div>
       </label>
       <!-- <div class="include-fail-btn">
@@ -362,6 +386,7 @@
       <label label="info-row-label">Waiting</label>
       <span class="info-row-value">{{ item?.db.waiting }}</span>
     </div>
+    <div style="width: 100%;height: 100%; min-height: 200px;" id="dbChart_{{item.nodeName}}"></div>
   </div>
 </ng-template>
 <ng-template #Cache let-item>
@@ -379,6 +404,7 @@
       <label label="info-row-label">Fixed</label>
       <span class="info-row-value">{{ item?.cache.fixed }}</span>
     </div>
+    <div class="mx-0" style="width: 100%;height: 100%; min-height: 200px;" id="cacheChart_{{item.nodeName}}"></div>
   </div>
 </ng-template>
 <ng-template #Queue let-item>
@@ -388,14 +414,15 @@
       <label label="info-row-label">ES</label>
       <span class="info-row-value">{{ item?.queue.es }}</span>
     </div>
-    <div class="info-row">
+    <!-- <div class="info-row">
       <label label="info-row-label">RDB</label>
       <span class="info-row-value">{{ item?.queue.rdb }}</span>
-    </div>
+    </div> -->
+    <div style="width: 100%;height: 100%; min-height: 200px;" id="esChart_{{item.nodeName}}"></div>
   </div>
 </ng-template>
 
-<ng-template #NodeInfo let-item>
+<ng-template #NodeInfoCPU let-item>
   <div class="average-time">
     <label class="dashboard-label">Node Info</label>
     <label class="panel-label">CPU {{ item?.nodeInfo.cpuCore }} core</label>
@@ -403,6 +430,11 @@
       <label label="info-row-label">Usage Rate</label>
       <span class="info-row-value">{{ item?.nodeInfo.cpuUsage }}</span>
     </div>
+    <div style="width: 100%;height: 100%; min-height: 200px;" id="cpuChart_{{item.nodeName}}"></div>
+  </div>
+</ng-template>
+<ng-template #NodeInfoRAM let-item>
+  <div class="average-time">
     <label class="panel-label">Memory</label>
     <div class="info-row">
       <label label="info-row-label">Free</label>
@@ -416,36 +448,48 @@
       <label label="info-row-label">Max</label>
       <span class="info-row-value">{{ item?.nodeInfo.memMax }}</span>
     </div>
+    <div class="info-row">
+      <div class="mx-2" style="width: 100%;height: 100%; min-height: 200px;" id="memChart_{{item.nodeName}}"></div>
+    </div>
   </div>
 </ng-template>
 <ng-template #APIThreadStatus let-item>
   <div class="average-time">
     <label class="dashboard-label">API Thread Status</label>
-    <label class="panel-label">Country road</label>
-    <div class="info-row">
-      <label label="info-row-label">Active Count</label>
-      <span class="info-row-value">{{
-        item?.apiThreadStatus.countryRoadActvieCount
-        }}</span>
+    <div class="dashboard-card-body-row" style="--columns: 2">
+      <div>
+        <label class="panel-label">Country road</label>
+        <div class="info-row">
+          <label label="info-row-label">Active Count</label>
+          <span class="info-row-value">{{
+            item?.apiThreadStatus.countryRoadActvieCount
+            }}</span>
+        </div>
+        <div class="info-row">
+          <label label="info-row-label">Pool Size</label>
+          <span class="info-row-value">{{
+            item?.apiThreadStatus.countryRoadPoolSize
+            }}</span>
+        </div>
+      </div>
+      <div>
+        <label class="panel-label">Highway</label>
+        <div class="info-row">
+          <label label="info-row-label">Active Count</label>
+          <span class="info-row-value">{{
+            item?.apiThreadStatus.highwayActvieCount
+            }}</span>
+        </div>
+        <div class="info-row">
+          <label label="info-row-label">Pool Size</label>
+          <span class="info-row-value">{{
+            item?.apiThreadStatus.highwayPoolSize
+            }}</span>
+        </div>
+      </div>
     </div>
     <div class="info-row">
-      <label label="info-row-label">Pool Size</label>
-      <span class="info-row-value">{{
-        item?.apiThreadStatus.countryRoadPoolSize
-        }}</span>
-    </div>
-    <label class="panel-label">Highway</label>
-    <div class="info-row">
-      <label label="info-row-label">Active Count</label>
-      <span class="info-row-value">{{
-        item?.apiThreadStatus.highwayActvieCount
-        }}</span>
-    </div>
-    <div class="info-row">
-      <label label="info-row-label">Pool Size</label>
-      <span class="info-row-value">{{
-        item?.apiThreadStatus.highwayPoolSize
-        }}</span>
+      <div style="width: 100%;height: 100%; min-height: 200px;" id="threadChart_{{item.nodeName}}"></div>
     </div>
   </div>
 </ng-template>

@@ -1066,6 +1066,13 @@ public class TsmpRtnCodeTableInitializer {
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1560"), (locale = "zh-TW"), (tsmpRtnMsg = "憑證過期"), (tsmpRtnDesc = ""));
 			createTsmpRtnCode((tsmpRtnCodeColumn = "1560"), (locale = "en-US"), (tsmpRtnMsg = "The Certificate has expired."), (tsmpRtnDesc = ""));
 
+			//20250902, 忘記密碼, tom
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1567"), (locale = "zh-TW"), (tsmpRtnMsg = "{{0}}驗證失敗"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1567"), (locale = "en-US"), (tsmpRtnMsg = "{{0}} verification failed"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1568"), (locale = "zh-TW"), (tsmpRtnMsg = "超過驗證有效時間{{0}}分鐘"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1568"), (locale = "en-US"), (tsmpRtnMsg = "Verification validity period has exceeded {{0}} minutes"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1569"), (locale = "zh-TW"), (tsmpRtnMsg = "已達錯誤{{0}}次上限，請重新發送"), (tsmpRtnDesc = ""));
+			createTsmpRtnCode((tsmpRtnCodeColumn = "1569"), (locale = "en-US"), (tsmpRtnMsg = "The error limit of {{0}} has been reached. Please try again"), (tsmpRtnDesc = ""));
 
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);

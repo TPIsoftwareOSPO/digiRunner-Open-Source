@@ -62,6 +62,27 @@ public class CustomDataSourceConfig {
 
     private DataSourceProperties dataSourceProperties;
     private ObjectMapper om;
+    
+    @Value(value = "${httpclient.connection.timeout:0}")
+    private int connectTimeout;
+    @Value(value = "${httpclient.socket.timeout:0}")
+    private int socketTimeout;
+    @Value(value = "${httpclient.connection.max-per-route:500}")
+    private int connectionMaxPerRoute;
+    @Value(value = "${httpclient.connection.max-total:2000}")
+    private int connectionMaxTotal;
+    @Value(value = "${httpclient.idle.cleanup.seconds:60}")
+    private int idleCleanupSeconds;
+    
+    @Value(value = "${proxy.enabled:false}")
+    private String proxyEnabled;
+
+    @Value(value = "${proxy.httpProxy:1.1.1.1}")
+    private String httpProxy;
+    @Value(value = "${proxy.httpsProxy:1.1.1.1}")
+    private String httpsProxy;
+    @Value(value = "${proxy.noProxy:*}")
+    private String noProxy;
 
     @Autowired
     public CustomDataSourceConfig(DataSourceProperties dataSourceProperties, ObjectMapper om) {
@@ -160,6 +181,19 @@ public class CustomDataSourceConfig {
         HttpRespData dbInfoResp = null;
         try {
 
+        	 HttpUtil.initialize(configuration -> {
+                 configuration
+                         .connectTimeout(connectTimeout)
+                         .connectionMaxPerRoute(connectionMaxPerRoute)
+                         .connectionTotalMax(connectionMaxTotal)
+                         .socketTimeout(socketTimeout)
+                         .idleCleanupSeconds(idleCleanupSeconds)
+                 ;
+
+                 if (Boolean.parseBoolean(proxyEnabled)) {
+                     configuration.proxyConfig(new HttpUtil.Configuration.ProxyConfig(httpProxy, httpsProxy, noProxy));
+                 }
+             });
             dbInfoResp = HttpUtil.httpReqByRawData(url, "POST", DpaaHttpUtil.toReqPayloadJson(new Object(), null),
                     header, false);
 

@@ -12,7 +12,7 @@ import com.zaxxer.hikari.HikariPoolMXBean;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.gateway.keeper.TPILogger;
-import tpi.dgrv4.gateway.service.IUndertowMetricsService;
+import tpi.dgrv4.gateway.service.ITomcatMetricsService;
 import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 
 @Service
@@ -25,12 +25,12 @@ public class RealtimeDashboardService {
 	public final static String BAD_ATTEMPT_OTHERS = "badAttemptOthers";
 	
 //	@Autowired(required = false)
-	private IUndertowMetricsService undertowMetricsService;
+	private ITomcatMetricsService undertowMetricsService;
 	
 	private HikariDataSource dataSource;
 	
 	@Autowired
-	public RealtimeDashboardService(@Nullable IUndertowMetricsService undertowMetricsService, HikariDataSource dataSource) {
+	public RealtimeDashboardService(@Nullable ITomcatMetricsService undertowMetricsService, HikariDataSource dataSource) {
 		super();
 		this.undertowMetricsService = undertowMetricsService;
 		this.dataSource = dataSource;
@@ -55,12 +55,12 @@ public class RealtimeDashboardService {
 			
 			
 			//threadStatus
-			if (undertowMetricsService != null) {
-				packet.setCountryRoadActiveCount(String.format("%,d",undertowMetricsService.getAsyncWorkerPool().getActiveCount()));
-				packet.setCountryRoadPoolSize(String.format("%,d",undertowMetricsService.getAsyncWorkerPool().getPoolSize()));
-				packet.setHighwayActiveCount(String.format("%,d",undertowMetricsService.getAsyncWorkerHighwayPool().getActiveCount()));
-				packet.setHighwayPoolSize(String.format("%,d",undertowMetricsService.getAsyncWorkerHighwayPool().getPoolSize()));
-			}
+//			if (undertowMetricsService != null) {
+//				packet.setCountryRoadActiveCount(String.format("%,d",undertowMetricsService.getAsyncWorkerPool().getActiveCount()));
+//				packet.setCountryRoadPoolSize(String.format("%,d",undertowMetricsService.getAsyncWorkerPool().getPoolSize()));
+//				packet.setHighwayActiveCount(String.format("%,d",undertowMetricsService.getAsyncWorkerHighwayPool().getActiveCount()));
+//				packet.setHighwayPoolSize(String.format("%,d",undertowMetricsService.getAsyncWorkerHighwayPool().getPoolSize()));
+//			}
 			
 			//db
 			HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();		

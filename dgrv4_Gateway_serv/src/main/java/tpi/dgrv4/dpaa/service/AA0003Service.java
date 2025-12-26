@@ -80,19 +80,31 @@ public class AA0003Service {
 				resp = new AA0003Resp();
 				String idPType = auth.getIdpType();
 				resp.setIdPType(idPType);
+				
+				boolean isGetIdpUserData = false;
+				
+				if (DgrIdPType.GOOGLE.equals(idPType) // GOOGLE
+						|| DgrIdPType.MS.equals(idPType) // MS
+						|| DgrIdPType.OIDC.equals(idPType)) { // OIDC
+					if (auth.getIdTokenJwtstr() == null) {
+						// 若 Delegate AC User 先建立 "OIDC" 使用者，再使用 其他 IdP 登入(AC_IDP_LOGIN_IGNORE_TYPE =
+						// true)，會沒有 Id Token 資料
+						isGetIdpUserData = true;
+
+					} else {
+						resp.setIdTokenJwtstr(auth.getIdTokenJwtstr());
+					}
+				}
 
 				if (DgrIdPType.LDAP.equals(idPType) // LDAP
 						|| DgrIdPType.MLDAP.equals(idPType) // MLDAP
 						|| DgrIdPType.API.equals(idPType) // API
-						|| DgrIdPType.CUS.equals(idPType)) // CUS
-				{
+						|| DgrIdPType.CUS.equals(idPType) // CUS
+						|| isGetIdpUserData) {
 					String userNameForQuery = auth.getUserNameForQuery();
 					DgrAcIdpUser idpUser = getDgrAcIdpUserDao().findFirstByUserNameAndIdpType(userNameForQuery,
 							idPType);
 					resp = getIdpUserData(idpUser, userNameForQuery, resp);
-
-				} else {// GOOGLE 或 MS
-					resp.setIdTokenJwtstr(auth.getIdTokenJwtstr());
 				}
 
 			} else {

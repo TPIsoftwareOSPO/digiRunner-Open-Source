@@ -3241,3 +3241,17 @@ ALTER TABLE tsmp_api_imp ADD is_cors_allow_headers VARCHAR(1) DEFAULT 'N' NULL;
 ALTER TABLE tsmp_api_imp ADD cors_allow_origin VARCHAR(1000) NULL;
 ALTER TABLE tsmp_api_imp ADD cors_allow_methods VARCHAR(200) NULL;
 ALTER TABLE tsmp_api_imp ADD cors_allow_headers VARCHAR(1000) NULL;
+
+-- 20250825, dgr_otp , Tom
+CREATE TABLE IF NOT EXISTS dgr_otp (
+    otp_id                 BIGINT          NOT NULL,                    -- ID
+    email                  VARCHAR(100)    NOT NULL,                    -- email
+    otp_code               VARCHAR(10)     NOT NULL,                    -- 驗證碼
+    expire_key             VARCHAR(400)    NOT NULL,                    -- 到期key
+    error_limit            INT             NOT NULL DEFAULT 0,          -- 錯誤上限
+    PRIMARY KEY (otp_id),
+    UNIQUE KEY (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20251003, v4, 加大欄位長度, Mini Lee
+ALTER TABLE tsmp_token_history MODIFY COLUMN user_name NVARCHAR(400);

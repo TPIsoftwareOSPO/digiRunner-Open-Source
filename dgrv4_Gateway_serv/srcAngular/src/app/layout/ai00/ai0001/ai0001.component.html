@@ -82,7 +82,7 @@
         </div>
 
         <div class="col-4">
-          <label class="control-label required">Enable</label>
+          <label class="control-label required">{{'status'|translate}}</label>
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
@@ -99,7 +99,7 @@
       </div>
       <div class="form-group row">
         <div class="col-8">
-          <label for="aiModel" class="control-label required">{{'ai.model'|translate}}</label>
+          <label for="aiModel" class="control-label required">{{'ai.llm_name'|translate}}</label>
           <input type="text" class="form-control" id="aiModel" formControlName="aiModel">
           <div *ngIf="aiModel.invalid && (aiModel.dirty || aiModel.touched)" class="text-danger">
             <small class="form-text">{{aiModel?.errors.required | translate}}</small>

@@ -307,9 +307,39 @@ public class TsmpSettingTableInitializer {
 
 			//  --2025/07/31 kibana allowlist ,Zoe Lee
 			createTsmpSetting((id = "KIBANA_REFERER_ALLOWLIST"),(value = "/app/dashboards,/app/discover,/app/monitoring"),(memo = "Allowed Referer list for Kibana. Multiple paths should be separated by \",\"."));
+			
+		    //  --2025/09/11 first time login change ,Tom
+			createTsmpSetting((id = "FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED"),(value = "false"),(memo = "Whether to display the password change for the first login"));
 
+		    //  --2025/09/16 pwd strength ,Tom
+		    createTsmpSetting((id = "PWD_STRENGTH"),(value = "^.{6,}$"),(memo = "Regular Expression for Password Strength"));
+		    createTsmpSetting((id = "PWD_STRENGTH_DESC"),(value = "The password must be at least 6 digits"),(memo = "Password strength description"));
+		    
+		    //  --2025/10/02 client pwd strength ,Tom
+		    createTsmpSetting((id = "CLIENT_PWD_STRENGTH"),(value = "^.{6,}$"),(memo = "Regular Expression for client Password Strength"));
+		    createTsmpSetting((id = "CLIENT_PWD_STRENGTH_DESC"),(value = "The password must be at least 6 digits"),(memo = "Client password strength description"));
+            
+		    //  --2025/11/03 show properties  ,Zoe Lee
+            createTsmpSetting((id = "SHOW_ALL_PROPERTIES"),(value = "false"),(memo = "If true, all properties will be displayed."));
 
+            //  --2025/11/10 httputil log resp time    ,Zoe Lee
+            createTsmpSetting((id = "HTTPUTIL_RESP_TIME_LOG"),(value = "false"),(memo = "Enable logging for HttpUtil request response time. Logs are output at DEBUG level. (Default: false)"));
 
+            //  --2025/11/10 properties mask list ,Zoe Lee
+            createTsmpSetting((id = "PROPERTIES_MASK_LIST"),(value = "password,mima"),(memo="Comma-separated list of keywords to mask values on the 'All Properties' page (case-insensitive)"));
+            
+            // -- 2025/12/01, Mini Lee, AC OAuth 2.0 IdP 是否啟用了傳送核准郵件和自動建立使用者功能？ （true/false）（預設: true）
+			createTsmpSetting((id = "AC_IDP_OAUTH2_REVIEW_ENABLE"), (value = "true"), (memo = "Is the AC OAuth 2.0 IdP sending the approval email and auto-creating users enabled? (true/false) (default: true)"));
+            
+            // -- 2025/12/01, Mini Lee, 核發 AC OAuth 2.0 IdP token, 其中 username 從 IdP ID token 的什麼參數取得 (預設: sub)
+  			createTsmpSetting((id = "AC_IDP_OAUTH2_USERNAME"), (value = "sub"), (memo = "Issues an AC OAuth 2.0 IdP token, where the username is obtained from which parameter of the IdP ID token (default: sub)"));
+  			
+  			// -- 2025/12/01, Mini Lee, AC_IDP 登入時,是否只檢查username,忽略 IdP type;預設為 false,須檢查 username 和 type (true/false)(default: false)
+  			createTsmpSetting((id = "AC_IDP_LOGIN_IGNORE_TYPE"), (value = "false"), (memo = "AC_IDP determines whether to check only the username and ignore the IdP type during login; the default is false, meaning both username and type must be checked (true/false) (default: false)"));
+            
+  			// -- 2025/12/01, Mini Lee, AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false)
+  			createTsmpSetting((id = "AC_IDP_USERNAME_B64_ENCODE"), (value = "false"), (memo = "When logging into AC_IDP, does the username use base64 encoding (true/false) (default: false)"));
+  			
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

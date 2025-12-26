@@ -25,8 +25,7 @@
               {{rowData[col.field]}}
             </span>
             <div *ngIf="col.field == 'userAlias'">
-              <!-- <img src="https://10.20.30.88:18442/dgrv4/ac4/assets/images/DigiFusion_digiRunner_logo_horizontal.png" -->
-              <img [src]="rowData.icon" style="max-height:50px;border-radius: 50%;">
+              <img [src]="rowData.icon|safeUrl" style="max-height:50px;border-radius: 50%;">
               {{rowData.userAlias}}
             </div>
           </td>
@@ -116,43 +115,6 @@
           </div>
         </div>
       </div>
-
-      <!-- <div class="form-group row">
-        <div class="col-4">
-          <label  class="control-label">User Name</label>
-          <div class="border-style">
-            <img *ngIf="userInfo" [src]="userInfo.icon" class="mt-1" style="width:50px;border-radius: 50%;">
-            {{userInfo?.userAlias}}
-          </div>
-
-        </div>
-        <div class="col-4">
-          <label  class="control-label">Status</label>
-          <div>
-            <label  class="form-control border-style">{{userInfo?.statusName}}</label>
-          </div>
-
-
-        </div>
-        <div class="col-4">
-          <label  class="control-label">Type</label>
-          <div>
-            <label  class="form-control border-style">{{userInfo?.idpType}}</label>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- <div class="form-group row text-left">
-        <div class="card col-12">
-          <div class="card-body">
-            <h5 class="card-subtitle mb-2 text-muted">{{userInfo?.idpType}} ( {{ userInfo?.statusName }} )</h5>
-            <h5 class="card-title">
-              <img *ngIf="userInfo" [src]="userInfo.icon" class="img-thumbnail rounded" >
-              {{userInfo?.userAlias}}
-            </h5>
-          </div>
-      </div>
-      </div> -->
 
       <!-- 角色清單 -->
       <div class="form-group row">

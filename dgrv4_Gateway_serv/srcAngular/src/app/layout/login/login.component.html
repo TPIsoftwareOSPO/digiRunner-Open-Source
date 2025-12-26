@@ -10,25 +10,149 @@
     <!-- <div class="row justify-content-md-center bg" style="padding-top: 15vh"> -->
     <!--上下置中 align-items-center -->
     <!-- <div style="width: 380px"> -->
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-      <section class="login_section">
-        <img
-          class="img-logo"
-          src="assets/images/svg/logo.svg"
-          alt=""
-          title="v202102251030-v3"
-        />
+    <form [formGroup]="form">
+      <section class="login_section ">
+        <img class="img-logo" src="assets/images/svg/logo.svg" alt="" title="v202102251030-v3" />
 
         <!-- 請重新登入 -->
-        <div class="line">
+        <div class="line" [hidden]="loginState!==''">
           <p [hidden]="!relogin">Welcome Back!</p>
           <div [hidden]="relogin">
             <span>{{ "logoutBySystem" | translate }}</span>
             <span>{{ "plz_login_again" | translate }}</span>
           </div>
         </div>
+        <!-- <取回密碼> 輸入驗證碼 -->
+        <div class="form-wrapper py-3" [hidden]="loginState != 'otp_valid'">
+          <div class="form-group text-center fw-bold">
+            <p>{{'input_otp_code'|translate}}</p>
+          </div>
+          <div class="form-group ">
+            <input id="otpCode" #_otpcode type="text" class="form-control" formControlName="otpCode"
+              [placeholder]="'plz_enter'|translate" inputmode="numeric" pattern="[0-9]" />
+            <div [innerHTML]="'otp_valid_desc'|translate:{ email: email.value}"></div>
+          </div>
+          <div class="text-center">
+            <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="validOTP()" [disabled]="!otpCode.value">
+              {{ "button.next" | translate }}
+            </button>
+            <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="procValidCode()"
+              [disabled]="form.invalid || validTime>0">
+              {{ ('button.resend' | translate) }}
+              <span *ngIf="validTime > 0"> ({{validTime}}s)</span>
+            </button>
+            <button type="button" class="btn btn tpi-btn tpi-cancel" (click)="backDefaultLogin()">
+              {{ "button.cancel" | translate }}
+            </button>
+          </div>
+        </div>
+        <!-- 取回密碼 > 選擇重設帳號及設定密碼 -->
+        <div class="form-wrapper py-3" [hidden]="loginState != 'chg_mima'">
+          <div class="form-group text-center fw-bold">
+            <p>{{'reset_account_select'|translate}}</p>
+          </div>
+          <div class="form-group">
+            <p-table [value]="userListData" [(selection)]="selectedUser" selectionMode="multiple"
+              (selectionChange)="onSelectionChange()" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
+              styleClass="p-datatable-striped">
+              <ng-template pTemplate="header" let-columns>
+                <tr>
+                  <th style="width: 2.25em" scope="col">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                  </th>
+                  <th>
+                    {{'user_name'|translate}}
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-rowData let-columns="columns">
+                <tr>
+                  <td>
+                    <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+                  </td>
+                  <td>
+                    {{rowData}}
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+          <div class="form-group text-center fw-bold mt-3">
+            <span>{{'reset_mima'|translate}}</span>
+          </div>
+          <div class="form-group row">
+            <div class="col-12">
+              <label id="newMima_label" for="newMima" class="control-label">{{'new_password' | translate}}
+                <i *ngIf="mimatip" class="far fa-question-circle tip" [pTooltip]="mimatip" [escape]="false"></i>
+              </label>
+              <div class="ui-inputgroup">
+                <input [type]="newMask ? 'text' : 'password'" class="form-control" id="newMima"
+                  formControlName="newMima" placeholder="{{'new_password' | translate}}">
+                <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                  (click)="toggleMask('newMima')"></button>
+              </div>
+              <div *ngIf="newMima?.invalid && (newMima?.dirty || newMima?.touched)" class="text-danger">
+                <small class="form-text">{{newMima.errors.isRequired | translate}}</small>
+                <small class="form-text">{{newMima.errors.pattern | translate}}</small>
+                <div>
+                  <small *ngIf="confirmNewMima.value" class="form-text">{{newMima.errors.confirm_mima |
+                  translate}}</small>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-12">
+              <label for="confirmNewMima" class="control-label required">{{'cfm_new_password' | translate}}</label>
+              <div class="ui-inputgroup">
+                <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmNewMima"
+                  formControlName="confirmNewMima" placeholder="{{'cfm_new_password' | translate}}">
+                <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                  (click)="toggleMask('cfmMima')"></button>
+              </div>
+              <div *ngIf="confirmNewMima?.invalid && (confirmNewMima?.dirty || confirmNewMima?.touched)"
+                class="text-danger">
+                <small class="form-text">{{confirmNewMima.errors.required | translate}}</small>
+                <small class="form-text">{{confirmNewMima.errors.confirm_mima | translate}}</small>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="changeMima()" [disabled]="form.invalid">
+              {{ "button.confirm" | translate }}
+            </button>
+            <button type="button" class="btn btn tpi-btn tpi-cancel" (click)="backDefaultLogin()">
+              {{ "button.cancel" | translate }}
+            </button>
+          </div>
+        </div>
 
-        <div class="form-wrapper">
+        <!-- <取回密碼> 輸入email -->
+        <div class="form-wrapper py-3" [hidden]="loginState != 'user_email'">
+          <div class="form-group text-center fw-bold">
+            <p>{{ 'reset_mima'|translate}}</p>
+          </div>
+          <div class="form-group col-12">
+            <label id="email_label" class="control-label">Email</label>
+            <input id="email" #usermail type="text" class="form-control" formControlName="email"
+              [placeholder]="'plz_enter'|translate" />
+            <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="text-danger">
+              <small class="form-text">{{email.errors.pattern}}</small>
+              <small class="form-text">{{email.errors.isRequired}}</small>
+            </div>
+          </div>
+          <div class="text-center">
+            <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="procValidCode()"
+              [disabled]="form.invalid">
+              {{ "button.next" | translate }}
+            </button>
+            <button type="button" class="btn btn tpi-btn tpi-cancel" (click)="backDefaultLogin()">
+              {{ "button.cancel" | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-wrapper" [hidden]="loginState != ''">
           <div class="form-area">
             <div class="input-line">
               <label class="mb-2" for="uname">{{ "user_name" | translate }}</label>
@@ -36,13 +160,8 @@
                 <span class="sign">
                   <img src="assets/images/login/i_user.png" alt="number" />
                 </span>
-                <input
-                  type="text"
-                  #username
-                  class="form-control"
-                  formControlName="uname"
-                  [placeholder]="'user_name' | translate"
-                />
+                <input type="text" #username class="form-control" formControlName="uname"
+                  (keydown.enter)="checkAndFocus()" [placeholder]="'user_name' | translate" />
               </div>
             </div>
             <div class="input-line">
@@ -51,33 +170,31 @@
                 <span class="sign">
                   <img src="assets/images/login/i_pwd.png" alt="pass" />
                 </span>
-                <input
-                  type="password"
-                  class="form-control"
-                  formControlName="pwd"
-                  [placeholder]="'user_password' | translate"
-                />
+                <input #mima [type]="mimaMask ? 'text' : 'password'" class="form-control" formControlName="pwd"
+                  (keydown.enter)="submitForm()" [placeholder]="'user_password' | translate" />
+                <span>
+                  <i class="mima" [ngClass]="mimaMask ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    (click)="toggleMask('loginMima')"></i>
+                </span>
               </div>
             </div>
           </div>
           <div class="sign-btn-grid">
-            <button type="submit" class="btn btn-login">
+            <button type="button" class="btn btn-login" (click)="submitForm()">
               {{ "login" | translate }}
             </button>
           </div>
+          <div class="link-container">
+            <div class="getmima-link" tabindex="0" (click)="getMimaLink()" (keydown.enter)="getMimaLink()">
+              {{'forget_mima'|translate}}
+            </div>
+          </div>
+          <hr class="my-2">
           <div class="sign-btn-grid" style="--grid-columns: 1fr 1fr">
-            <button
-              type="button"
-              class="btn btn-login"
-              (click)="ssologin('GOOGLE')"
-            >
+            <button type="button" class="btn btn-login" (click)="ssologin('GOOGLE')">
               <i class="pi pi-google"></i>
             </button>
-            <button
-              type="button"
-              class="btn btn-login"
-              (click)="ssologin('MS')"
-            >
+            <button type="button" class="btn btn-login" (click)="ssologin('MS')">
               <i class="pi pi-microsoft"></i>
             </button>
           </div>
@@ -99,12 +216,8 @@
               API
             </button>
             <ng-container *ngFor="let cus of cusIdpLoginList">
-              <button
-                *ngIf="cusIdpLoginList.length > 0"
-                type="button"
-                class="btn btn-login"
-                (click)="goCusPage(cus.cusLoginUrl)"
-              >
+              <button *ngIf="cusIdpLoginList.length > 0" type="button" class="btn btn-login"
+                (click)="goCusPage(cus.cusLoginUrl)">
                 {{ cus.acIdpInfoCusName }}
               </button>
             </ng-container>

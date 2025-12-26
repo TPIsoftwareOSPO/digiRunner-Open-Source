@@ -14,6 +14,7 @@ import { DPB0197Req } from 'src/app/models/api/ServerService/dpb0197.interface';
 import { DPB0196Req, DPB0196Resp } from 'src/app/models/api/ServerService/dpb0196.interface';
 import { DPB0198Req } from 'src/app/models/api/ServerService/dpb0198.interface';
 import { KeyValueFormComponent } from '../../ac02/ac0228/key-value-form/key-value-form.component';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ac0020',
@@ -79,6 +80,7 @@ export class Ac0020Component extends BaseComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private serverService: ServerService,
     private alertService: AlertService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
@@ -344,9 +346,8 @@ export class Ac0020Component extends BaseComponent implements OnInit {
         }
 
         this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
-
-        this._fileSrc = fileReader.result!;
-
+        
+        this._fileSrc = fileReader.result;
 
       }
       fileReader.readAsDataURL(files.item(0)!);

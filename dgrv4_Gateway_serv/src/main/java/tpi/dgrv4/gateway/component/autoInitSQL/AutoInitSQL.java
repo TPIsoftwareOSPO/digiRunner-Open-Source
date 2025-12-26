@@ -749,6 +749,21 @@ public class AutoInitSQL {
 				autoInitSQLTsmpRoleRoleMappinglist.add(autoInitSQLTsmpRoleRoleMapping);
 			}
 		}
+		
+		//強制新增,因為ID可能被用走了,造成沒insert
+		//Forced to add, because the ID may have been used, resulting in no insert
+//		if(getAutoInitSQLTsmpRoleRoleMappingDao().findByRoleNameAndRoleNameMapping("ADMIN","FrontPageDashboard").size() == 0) {
+//			for(long i=2; i<10000; i++) {
+//				if (!getAutoInitSQLTsmpRoleRoleMappingDao().existsById(i)) {
+//					AutoInitSQLTsmpRoleRoleMapping autoInitSQLTsmpRoleRoleMapping = new AutoInitSQLTsmpRoleRoleMapping();
+//		        	autoInitSQLTsmpRoleRoleMapping.setRoleRoleId(i);
+//		            autoInitSQLTsmpRoleRoleMapping.setRoleName("ADMIN");
+//		            autoInitSQLTsmpRoleRoleMapping.setRoleNameMapping("FrontPageDashboard");
+//		            autoInitSQLTsmpRoleRoleMappinglist.add(autoInitSQLTsmpRoleRoleMapping);
+//					break;
+//				}
+//			}
+//		}
 
 		if (autoInitSQLTsmpRoleRoleMappinglist.size() > 0) {
 			getAutoInitSQLTsmpRoleRoleMappingDao().saveAllAndFlush(autoInitSQLTsmpRoleRoleMappinglist);
@@ -769,12 +784,30 @@ public class AutoInitSQL {
 				tsmpRolelist.add(tsmpRole);
 			}
 		}
-
+		//強制新增,因為ID可能被用走了,造成沒insert
+		//Forced to add, because the ID may have been used, resulting in no insert
+//		if(!getTsmpRoleDao().existsByRoleName("FrontPageDashboard")) {
+//			for(int i=1001; i<10000; i++) {
+//				if (!getTsmpRoleDao().existsById(""+i)) {
+//					TsmpRole tsmpRole = new TsmpRole();
+//					tsmpRole.setRoleId(""+i);
+//					tsmpRole.setRoleName("FrontPageDashboard");
+//					tsmpRole.setRoleAlias("FrontPageDashboard");
+//					tsmpRole.setCreateUser("manager");
+//					tsmpRole.setCreateTime(DateTimeUtil.now());
+//					tsmpRolelist.add(tsmpRole);
+//					break;
+//				}
+//			}
+//		}
+		
 		if (tsmpRolelist.size() > 0) {
 			getTsmpRoleDao().saveAllAndFlush(tsmpRolelist);
 		}
 
 	}
+	
+	
 
 	private void insertUsers() {
 		List<UsersVo> usersVos = getUserTableInitializr().insertUsers();

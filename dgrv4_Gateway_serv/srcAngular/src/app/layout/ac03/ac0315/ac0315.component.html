@@ -49,10 +49,10 @@
               <label for="tsmpUrl" class="fw-bold" >{{'tar_url'|translate}}</label>
             </div>
             <div class="col-8 d-flex pe-0" style="justify-content: end;">
-              <div class="me-3">
+              <!-- <div class="me-3">
                 <p-checkbox [binary]="true" inputId="urlRID" formControlName="urlRID"></p-checkbox>
                 <label class="ms-2 mb-0" for="urlRID">{{'path_param' | translate}}</label>
-              </div>
+              </div> -->
               <div>
                 <p-checkbox [binary]="true" inputId="no_oauth" formControlName="no_oauth"></p-checkbox>
                 <label class="ms-2 mb-0" for="no_oauth">{{'no_auth' | translate}}</label>
@@ -206,9 +206,13 @@
             <img *ngIf="col.field === 'apiStatus'" style="width: 20px;height: 20px;"
               [src]="col.type.transform(rowData[col.field].v)" alt="status" />
             <span *ngIf="col.field === 'apiKey'">
-              {{rowData[col.field].val}}
-              <a *ngIf="rowData[col.field].t == true" href="javascript:void(0)" pTooltip="{{rowData[col.field].ori}}"
-                (click)="copyData(rowData[col.field].ori);">...{{'show_more'|translate}}</a>
+              {{ rowData[col.field].ori && !rowData[col.field].t ? rowData[col.field].ori : rowData[col.field].val}}
+              <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
+                {{rowData[col.field].t ? ("show_more" | translate): '' }}
+                <i class="fas"
+                  [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
+                {{rowData[col.field].t ? '' : ("show_less" | translate) }}
+              </label>
             </span>
             <span *ngIf="col.field == 'apiSrc'">
               {{rowData[col.field].n}}
@@ -216,18 +220,12 @@
             <span *ngIf="col.field == 'moduleName' || col.field == 'apiName'">
 
               {{ rowData[col.field].ori && !rowData[col.field].t ? rowData[col.field].ori : rowData[col.field].val}}
-              <!-- <a *ngIf="apiDetail.moduleName.t == true" href="javascript:void(0)" pTooltip="{{ apiDetail.moduleName.o }}"
-                            (click)="copyData(apiDetail.moduleName.o)">...{{ "show_more" | translate }}</a> -->
               <label class="moreless" *ngIf="rowData[col.field].ori" (click)="switchOri(rowData[col.field])">
                 {{rowData[col.field].t ? ("show_more" | translate): '' }}
                 <i class="fas"
                   [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
-              <!-- {{rowData[col.field].val}}
-                            <a *ngIf="rowData[col.field].t == true" href="javascript:void(0)"
-                                pTooltip="{{rowData[col.field].ori}}"
-                                (click)="copyData(rowData[col.field].ori);">...{{'show_more'|translate}}</a> -->
             </span>
             <span *ngIf="col.field == 'apiDesc' && rowData['apiDesc']">
               {{ rowData[col.field].ori && !rowData[col.field].t ? rowData[col.field].ori : rowData[col.field].val}}
@@ -237,10 +235,6 @@
                   [ngClass]="[rowData[col.field].t ?  'fa-angle-double-right mt-1' : 'fa-angle-double-left  mt-1 me-1']"></i>
                 {{rowData[col.field].t ? '' : ("show_less" | translate) }}
               </label>
-              <!-- {{rowData[col.field].val}}
-                            <a *ngIf="rowData[col.field].t == true" href="javascript:void(0)"
-                                pTooltip="{{rowData[col.field].ori}}"
-                                (click)="copyData(rowData[col.field].ori);">...{{'show_more'|translate}}</a> -->
             </span>
             <span *ngIf="col.field == 'jweFlag'">
               <img *ngIf="rowData['jweFlag'].v == '1'" src="assets/images/jwe_req_flag.png" alt="JWE">

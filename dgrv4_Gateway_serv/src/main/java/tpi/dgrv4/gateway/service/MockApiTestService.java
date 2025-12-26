@@ -9,6 +9,7 @@ import java.util.Optional;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.Setter;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import tpi.dgrv4.dpaa.controller.VersionController;
 import tpi.dgrv4.dpaa.vo.AA0302KeyVal;
 import tpi.dgrv4.entity.entity.TsmpApi;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
+import tpi.dgrv4.gateway.component.ResponseHandler;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiCacheProxy;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
@@ -44,7 +46,8 @@ public final class MockApiTestService {
 	private VersionController versionController;
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
 	private ObjectMapper objectMapper;
-
+    @Setter(onMethod_ = @Autowired)
+    private ResponseHandler responseHandler;
 	@Autowired
 	public MockApiTestService(CommForwardProcService commForwardProcService, VersionController versionController,
 			TsmpApiCacheProxy tsmpApiCacheProxy, ObjectMapper objectMapper) {
@@ -77,20 +80,30 @@ public final class MockApiTestService {
 		byte[] httpArray = (byte[]) convertResponseBodyMap.get("httpArray");
 		String httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");
 
-		ByteArrayInputStream bi = new ByteArrayInputStream(httpArray);
+//		ByteArrayInputStream bi = new ByteArrayInputStream(httpArray);
 
 		// http InputStream copy into Array
-		IOUtils.copy(bi, httpRes.getOutputStream());
+//		IOUtils.copy(bi, httpRes.getOutputStream());
+
+
+        int contentLength = 0;
+        if (httpArray != null) {
+        		contentLength = httpArray.length;
+            responseHandler
+                    .response(httpRes)
+                    .handle(httpArray)
+                    .write();
+        }
 
 		// print
-		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, httpArray.length, null,
+		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, contentLength, null,
 				httpReq);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End MOCK】--\n" + resLog.toString());
 
 		// 第一組ES RESP
-		getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, dgrReqVo, httpRespStr, httpArray.length);
+		getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, dgrReqVo, httpRespStr, contentLength);
 		// 第一組 RDB Resp
-		getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, dgrReqVo_rdb, httpRespStr, httpArray.length);
+		getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, dgrReqVo_rdb, httpRespStr, contentLength);
 
 		return null;
 	}
@@ -115,7 +128,7 @@ public final class MockApiTestService {
 
 		// Must call respObj.getLogStr() first
 		// Threshhold > 10,000 => print warn msg.
-		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid, srcUrl, respObj.respStr)).ifPresent(TPILogger.tl::warn);
 		httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
 		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 

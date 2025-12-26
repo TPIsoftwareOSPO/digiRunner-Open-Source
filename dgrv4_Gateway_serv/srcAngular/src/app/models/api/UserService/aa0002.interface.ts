@@ -13,4 +13,5 @@ export interface AA0002Resp {
     userID: string;
     userAlias: string;
     idTokenJwtstr?: string;
+    firstTimeLogin?: boolean;
 }

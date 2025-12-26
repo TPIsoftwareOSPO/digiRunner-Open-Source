@@ -12,32 +12,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import tpi.dgrv4.gateway.filter.GatewayFilter;
+import tpi.dgrv4.gateway.aspect.annotation.ThroughputPoint;
 import tpi.dgrv4.gateway.service.TSMPCServiceGet;
 
 @RestController
 public class TSMPCControllerGet {
 
 	private TSMPCServiceGet service;
-	
+
 	@Autowired
 	public TSMPCControllerGet(TSMPCServiceGet service) {
 		super();
 		this.service = service;
 	}
 
+	@ThroughputPoint
 	@GetMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"})
-	public Callable dispatch(@RequestHeader HttpHeaders httpHeaders, 
-			HttpServletRequest httpReq, 
-			HttpServletResponse httpRes) {
+	public ResponseEntity<?> dispatch(@RequestHeader HttpHeaders httpHeaders,
+			HttpServletRequest httpReq,
+			HttpServletResponse httpRes) throws Exception {
 
-		return () -> {
-			ResponseEntity<?> resp = service.forwardToGet(httpHeaders, httpReq, httpRes);
-
-			// 計算API每秒轉發吞吐量
-			GatewayFilter.setApiRespThroughput();
-
-			return resp;
-		};
+		return service.forwardToGet(httpHeaders, httpReq, httpRes);
 	}
 }

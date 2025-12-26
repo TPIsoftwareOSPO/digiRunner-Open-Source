@@ -907,4 +907,50 @@ public class TsmpSettingService {
 		String key = getKey_LOG_RETENTION_DAYS();
 		return getStringVal(key);
 	}
+	
+	public String getKey_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED() {
+		return TsmpSettingDao.Key.FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED;
+	}
+
+	public boolean getVal_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED() {
+		String key = getKey_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED();
+		return getBooleanVal(key, false);
+	}
+	
+	public String getKey_PWD_STRENGTH() {
+		return TsmpSettingDao.Key.PWD_STRENGTH;
+	}
+
+	public String getVal_PWD_STRENGTH() {
+		String key = getKey_PWD_STRENGTH();
+		return getStringVal(key);
+	}
+	
+	public String getKey_PWD_STRENGTH_DESC() {
+		return TsmpSettingDao.Key.PWD_STRENGTH_DESC;
+	}
+
+	public String getVal_PWD_STRENGTH_DESC() {
+		String key = getKey_PWD_STRENGTH_DESC();
+		return getStringVal(key);
+	}
+	
+	public String getKey_CLIENT_PWD_STRENGTH() {
+		return TsmpSettingDao.Key.CLIENT_PWD_STRENGTH;
+	}
+
+	public String getVal_CLIENT_PWD_STRENGTH() {
+		String key = getKey_CLIENT_PWD_STRENGTH();
+		return getStringVal(key);
+	}
+	
+	public String getKey_CLIENT_PWD_STRENGTH_DESC() {
+		return TsmpSettingDao.Key.CLIENT_PWD_STRENGTH_DESC;
+	}
+
+	public String getVal_CLIENT_PWD_STRENGTH_DESC() {
+		String key = getKey_CLIENT_PWD_STRENGTH_DESC();
+		return getStringVal(key);
+	}
+	
 }

@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.entity.repository.TsmpClientVgroupDao;
 import tpi.dgrv4.entity.repository.TsmpVgroupDao;
+import tpi.dgrv4.escape.CheckmarxUtils;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.GtwIdPVgroupService;
@@ -92,7 +93,8 @@ public class GtwIdPMockJSConsentUiController {
 			// [EN] Do not use httpResp.sendRedirect (302), to avoid the front end redirecting twice,
 			// sendRedirect is HTTP 302 redirect, will change the URL, is a client redirect (http code 302),
 			// RequestDispatcher.forward is server-side forwarding, the URL remains unchanged (http code 200).
-			httpReq.getRequestDispatcher(redirectUrl).forward(httpReq, httpResp); 
+			//checkmarx, Relative Path Traversal 
+			CheckmarxUtils.sanitizeForCheckmarx(httpReq, httpResp, redirectUrl); 
 			
 			return null;
 		} catch (Exception e) {

@@ -1,0 +1,67 @@
+<div class="container">
+  <form [formGroup]="form">
+    <div class="form-group row">
+      <div class="col-12">
+        <label id="oriMima_label" for="oriMima" class="control-label">{{'org_password' | translate}}</label>
+        <div class="ui-inputgroup">
+          <input [type]="oriMask ? 'text' : 'password'" class="form-control" id="oriMima" formControlName="oriMima"
+            placeholder="{{'org_password' | translate}}">
+          <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+            (click)="toggleMask('oriMima')"></button>
+        </div>
+        <!-- <input type="password" class="form-control" id="oriMima" formControlName="oriMima"
+          placeholder="{{'org_password' | translate}}"> -->
+        <div *ngIf="oriMima?.invalid && (oriMima?.dirty || oriMima?.touched)" class="text-danger">
+          <small class="form-text">{{oriMima.errors.isRequired | translate}}</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-12">
+        <label id="newMima_label" for="newMima" class="control-label">{{'new_password' | translate}}
+          <i *ngIf="mimatip" class="far fa-question-circle tip" [pTooltip]="mimatip" [escape]="false"></i>
+        </label>
+        <div class="ui-inputgroup">
+          <input [type]="newMask ? 'text' : 'password'" class="form-control" id="newMima" formControlName="newMima"
+            placeholder="{{'new_password' | translate}}">
+          <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+            (click)="toggleMask('newMima')"></button>
+        </div>
+        <!-- <input type="password" class="form-control" id="newMima" formControlName="newMima"
+          placeholder="{{'new_password' | translate}}"> -->
+        <div *ngIf="newMima?.invalid && (newMima?.dirty || newMima?.touched)" class="text-danger">
+          <div>
+            <small *ngIf="confirmNewMima.value" class="form-text">{{newMima.errors.confirm_mima | translate}}</small>
+          </div>
+          <small class="form-text">{{newMima.errors.pattern | translate}}</small>
+          <small class="form-text">{{newMima.errors.isRequired | translate}}</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-12">
+        <label for="confirmNewMima" class="control-label required">{{'cfm_new_password' | translate}}</label>
+        <div class="ui-inputgroup">
+          <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmNewMima"
+            formControlName="confirmNewMima" placeholder="{{'cfm_new_password' | translate}}">
+          <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+            (click)="toggleMask('cfmMima')"></button>
+        </div>
+        <!-- <input type="password" class="form-control" id="confirmNewMima" formControlName="confirmNewMima"
+          placeholder="{{'cfm_new_password' | translate}}"> -->
+        <div *ngIf="confirmNewMima?.invalid && (confirmNewMima?.dirty || confirmNewMima?.touched)" class="text-danger">
+          <small class="form-text">{{confirmNewMima.errors.required | translate}}</small>
+          <small class="form-text">{{confirmNewMima.errors.confirm_mima | translate}}</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="text-center">
+        <button type="button" class="btn tpi-btn tpi-primary" (click)="confirm()" [disabled]="form.invalid">
+          {{ "button.confirm" | translate }}
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>

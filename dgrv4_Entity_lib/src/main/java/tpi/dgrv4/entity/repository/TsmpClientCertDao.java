@@ -3,12 +3,11 @@ package tpi.dgrv4.entity.repository;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import jakarta.transaction.Transactional;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientCert;
 
 @Repository
@@ -28,7 +27,8 @@ public interface TsmpClientCertDao extends JpaRepository<TsmpClientCert, Long> {
 	
 	public long deleteByClientIdAndClientCertId(String clientId, Long clientCertId);
 	
-	public List<TsmpClientCert> findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, Long expiredAt);
+//	public List<TsmpClientCert> findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, Long expiredAt);// 不使用
+	public List<TsmpClientCert> query_findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, Long expiredAt);
 
 	public void deleteByClientIdAndCertFileName(String clientId, String certFileName);
 }

@@ -185,7 +185,8 @@
     "searchByTags": "依標籤搜尋",
     "refresh": "重新整理",
     "label_reset": "重設標籤",
-    "preview": "預覽"
+    "preview": "預覽",
+    "next": "下一步"
   },
   "calendar": {
     "day": "天",
@@ -1334,7 +1335,7 @@
   "api_abnormal_greater_than": "回應失敗或回應時間大於",
   "api_abnormal_failures": "僅回應失敗(HTTP狀態碼>=400)",
   "ai": {
-    "llm_name": "LLM模型名稱",
+    "llm_name": "模型名稱",
     "apikey_count": "已註冊API KEY數量",
     "api_key_alias": "API金鑰名稱",
     "api_key_code": "API金鑰代碼",
@@ -1371,5 +1372,21 @@
   "org_reset": "設定組織",
   "recent_api_abnormal_each_node": "觀測各節點最近一次異常回應的 API",
   "trustedCertsContent": "憑證",
-  "cert": "憑證"
+  "cert": "憑證",
+  "changeMimaFirstLogin": "初次登入密碼變更",
+  "forget_mima": "忘記密碼",
+  "reset_mima": "重設密碼",
+  "input_otp_code": "輸入驗證碼",
+  "otp_valid_desc": "OTP 驗證碼已寄至 {{email}}。<br>若未收到，請檢查您的垃圾郵件夾",
+  "reset_account_select": "請選取欲重設的帳號",
+  "newMima": "新密碼",
+  "newUserBlock": "新密碼",
+  "clientBlock": "密碼",
+  "expired_in_alert": {
+    "title": "您即將登出",
+    "desc":"基於安全考量，系統將於倒數結束後自動登出：",
+    "cfm": "您要繼續使用嗎？"
+  },
+  "keeper_address":"Keeper 位址",
+  "change_keeper_address": "變更Keeper位址"
 }

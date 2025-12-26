@@ -12,6 +12,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0181LdapDataItem, DPB0181Req } from 'src/app/models/api/ServerService/dpb0181.interface';
 import { DPB0180Req, DPB0180Resp } from 'src/app/models/api/ServerService/dpb0180.interface';
 import { DPB0182LdapDataItem, DPB0182Req } from 'src/app/models/api/ServerService/dpb0182.interface';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ac0019',
@@ -41,6 +42,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
     private fb: FormBuilder,
     private alertService: AlertService,
     private confirmationService: ConfirmationService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
@@ -195,8 +197,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
 
         this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
 
-        this._fileSrc = fileReader.result!;
-
+        this._fileSrc = fileReader.result;
 
       }
       fileReader.readAsDataURL(files.item(0)!);

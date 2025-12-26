@@ -106,6 +106,11 @@ public class TsmpDpMailTpltTableInitializer {
 	        // webhook
 	        createTsmpDpMailTplt((mailtpltId = 20000027L), (code = "body.webhook"), (templateTxt = "<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"), (remark = ""), (keywordSearch = "body.webhook|<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"));
 	        
+	        ////忘記密碼
+	        createTsmpDpMailTplt((mailtpltId = 20000028L), (code = "subject.otp"),(templateTxt = "【digiRunner】 Verification code notification"), (remark = "ForgetMima,AA0550"), (keywordSearch = "subject.otp|【digiRunner】 Verification code notification|ForgetMima,AA0550"));
+	        createTsmpDpMailTplt((mailtpltId = 20000029L), (code = "body.otp"), (templateTxt = "<p>Hello, &nbsp;digiRunner&nbsp;User:</p><p>Your verification code is <b><font color=#ff0000>{{code}}</font></b></p> <p>Please complete the process within <b><font color=#ff0000>{{minutes}}</font></b> minutes.</p>"), (remark = "ForgetMima,AA0550"), (keywordSearch = "body.otp|<p>Hello, &nbsp;digiRunner&nbsp;User:</p><p>Your verification code is <b><font color=#ff0000>{{code}}</font></b></p> <p>Please complete the process within <b><font color=#ff0000>{{minutes}}</font></b> minutes.</p>|ForgetMima,AA0550"));
+	        createTsmpDpMailTplt((mailtpltId = 20000030L), (code = "subject.changeMima"),(templateTxt = "【digiRunner】 Password change successful notification"), (remark = "ForgetMima,AA0552"), (keywordSearch = "subject.changeMima|【digiRunner】 Verification code notification|ForgetMima,AA0552"));
+	        createTsmpDpMailTplt((mailtpltId = 20000031L), (code = "body.changeMima"), (templateTxt = "<p>Dear {{tUser}},</p><p>Your password was successfully changed on {{date}}.<br/>If you have not changed your password, please notify the system administrator.</p>"), (remark = "ForgetMima,AA0552"), (keywordSearch = "body.changeMima|<p>Dear {{tUser}},</p><p>Your password was successfully changed on {{date}}.<br/>If you have not changed your password, please notify the system administrator.</p>|ForgetMima,AA0552"));
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;
@@ -206,6 +211,12 @@ public class TsmpDpMailTpltTableInitializer {
 		        // Webhook
 		        createTsmpDpMailTplt((mailtpltId = 20000027L), (code = "body.webhook"), (templateTxt = "<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"), (remark = ""), (keywordSearch = "body.webhook|<p>&nbsp; &nbsp;Webhook Notify：<br />&nbsp; &nbsp; {{message}} </p>"));
 		        
+		        //忘記密碼
+		        createTsmpDpMailTplt((mailtpltId = 20000028L), (code = "subject.otp"),(templateTxt = "【digiRunner】驗證碼通知"), (remark = "ForgetMima,AA0550"), (keywordSearch = "subject.otp|【digiRunner】驗證碼通知|ForgetMima,AA0550"));
+		        createTsmpDpMailTplt((mailtpltId = 20000029L), (code = "body.otp"), (templateTxt = "<p>digiRunner&nbsp;用戶您好:</p><p>您的驗證碼是<b><font color=#ff0000>{{code}}</font></b></p> <p>請在<b><font color=#ff0000>{{minutes}}</font></b>分鐘內完成此流程。</p>"), (remark = "ForgetMima,AA0550"), (keywordSearch = "body.otp|<p>digiRunner&nbsp;用戶您好:</p><p>您的驗證碼是<b><font color=#ff0000>{{code}}</font></b></p> <p>請在<b><font color=#ff0000>{{minutes}}</font></b>分鐘內完成此流程。</p>|ForgetMima,AA0550"));
+		        createTsmpDpMailTplt((mailtpltId = 20000030L), (code = "subject.changeMima"),(templateTxt = "【digiRunner】密碼修改成功通知"), (remark = "ForgetMima,AA0552"), (keywordSearch = "subject.changeMima|【digiRunner】密碼修改成功通知|ForgetMima,AA0552"));
+		        createTsmpDpMailTplt((mailtpltId = 20000031L), (code = "body.changeMima"), (templateTxt = "<p>{{tUser}}您好,</p><p>您的密碼在{{date}}變更成功。<br/>如果您沒有更改密碼，請通知系統管理員。</p>"), (remark = "ForgetMima,AA0552"), (keywordSearch = "body.changeMima|<p>{{tUser}}您好,</p><p>您的密碼在{{date}}變更成功。<br/>如果您沒有更改密碼，請通知系統管理員。</p>|ForgetMima,AA0552"));
+		
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

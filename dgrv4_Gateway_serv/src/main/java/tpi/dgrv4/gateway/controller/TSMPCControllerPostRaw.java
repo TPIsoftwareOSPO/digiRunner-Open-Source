@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import tpi.dgrv4.gateway.filter.GatewayFilter;
+import tpi.dgrv4.gateway.aspect.annotation.ThroughputPoint;
 import tpi.dgrv4.gateway.service.TSMPCServicePostRaw;
 
 @RestController
@@ -27,20 +27,13 @@ public class TSMPCControllerPostRaw {
 
 
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
-	@RequestMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"}, 
+	@ThroughputPoint
+	@RequestMapping(value = {"/tsmpc/*/*/**", "/tsmpg/*/*/**"},
 			produces = MediaType.ALL_VALUE)
-	public Callable dispatch(HttpServletRequest httpReq, 
+	public ResponseEntity<?> dispatch(HttpServletRequest httpReq,
 			HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders headers, 
-			@RequestBody(required = false) String payload) {
-		
-		return () -> {
-			ResponseEntity<?> resp = service.forwardToPostRawData(headers, httpReq, httpRes, payload);
-			
-			// 計算API每秒轉發吞吐量
-			GatewayFilter.setApiRespThroughput();
-
-			return resp;
-		};
+			@RequestBody(required = false) String payload) throws Exception {
+		return service.forwardToPostRawData(headers, httpReq, httpRes, payload);
 	}
 }

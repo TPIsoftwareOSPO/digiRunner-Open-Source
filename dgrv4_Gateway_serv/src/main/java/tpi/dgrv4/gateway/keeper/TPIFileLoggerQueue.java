@@ -4,6 +4,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,14 @@ public class TPIFileLoggerQueue {
 	public String msg = null;
 
 	public static boolean flag = true; //由 'LoggerFlagController' 控制是否不寫入 File
-	
+
+	private static final ExecutorService executorService = Executors.newThreadPerTaskExecutor(
+			Thread.ofVirtual()
+					.name("V-"+TPIFileLoggerQueue.class.getSimpleName()+"-")
+					.factory()
+	);
+
+
 	public TPIFileLoggerQueue(int level , String msg) {
 		this.level = level;
 		this.msg = msg;
@@ -81,11 +90,7 @@ public class TPIFileLoggerQueue {
 	}
 	
 	public static void startThread() {
-		new Thread() {
-			public void run() {
-				processLogFileOut();
-			}
-		}.start();
+		executorService.execute(TPIFileLoggerQueue::processLogFileOut);
 	}
 	
 	public static void processLogFileOut(){

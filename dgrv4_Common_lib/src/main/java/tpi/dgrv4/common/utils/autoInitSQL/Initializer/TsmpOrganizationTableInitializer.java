@@ -12,6 +12,7 @@ import tpi.dgrv4.common.utils.autoInitSQL.vo.TsmpOrganizationVo;
 @Service
 public class TsmpOrganizationTableInitializer {
 
+	public static final String DEFAULT_ORG_ID="100000";
 
 	private  List<TsmpOrganizationVo> tsmpOrganizationList = new LinkedList<>();
 
@@ -22,7 +23,7 @@ public class TsmpOrganizationTableInitializer {
 			String parentId;
 			String orgPath;
 			String createUser;
-			createTsmpOrganization((orgId = "100000"), (orgName = "TSMPDefaultRoot"), (parentId = ""),(orgPath = "100000"), (createUser = "manager"));
+			createTsmpOrganization((orgId = DEFAULT_ORG_ID), (orgName = "TSMPDefaultRoot"), (parentId = ""),(orgPath = "100000"), (createUser = "manager"));
 
 		} catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);

@@ -120,26 +120,32 @@ public class DPB9939Service {
 				respData.respStr = new String(loginResp.body());
 			} else {
 				Map<String, List<String>> header = new HashMap<>();
+                List<String> cookies = new ArrayList<>();
 				// 特別處理Cookie
-				loginResp.headers().map().forEach((key, valList) -> valList.forEach((val) -> {
-					if (key != null) {
-						// jti 是dgR的所以要排除，否則可能會造成kibana取得錯誤的身分
-						if (key.equalsIgnoreCase(HttpHeaders.SET_COOKIE)) {
-							List<String> list = new ArrayList<>();
-							if (!val.startsWith("jti")) {
-								list.add(val);
+                loginResp.headers().map().forEach((key, valList) -> {
+                    if (key != null) {
+                        if (key.equalsIgnoreCase(HttpHeaders.SET_COOKIE)) {
+                            valList.forEach(setCookieValue -> {
+                                String cookieValue = setCookieValue.split(";")[0].trim();
+                                cookies.add(cookieValue);
+                            });
+                        } else if (!key.startsWith(":")) {
+                            header.put(key, new ArrayList<>(valList));
+                        }
+                    }
+                });
 
-							}
-							// req 的時候要改成Cookie
-							header.put(HttpHeaders.COOKIE, list);
-						} else {
-							if (!key.startsWith(":"))
-								header.put(key, valList);
-						}
-					}
-				}));
+                if (!cookies.isEmpty()) {
+                    header.put(HttpHeaders.COOKIE, Arrays.asList(String.join("; ", cookies)));
 
-				respData = callApi(url, header, true);
+                }
+                header.put("Connection", Arrays.asList("close"));
+                header.put("Cache-Control", Arrays.asList("no-cache, no-store, must-revalidate"));
+                header.put("Pragma", Arrays.asList("no-cache"));
+                header.put("User-Agent", Arrays.asList("DGRV4-StatusCheck/" + System.currentTimeMillis()));
+
+                respData = callApi(url, header, true);
+                getKibanaService2().clearCacheMap();
 			}
 		} else {
 			throw TsmpDpAaRtnCode._1559.throwing("Error auth type. : " + auth);
@@ -150,7 +156,9 @@ public class DPB9939Service {
 
 	protected HttpUtil.HttpRespData callApi(String url, Map<String, List<String>> header, boolean isRedirect)
 			throws IOException {
-		return HttpUtil.httpReqByGetList(url, header, false, isRedirect);
+        HttpUtil.HttpRespData resp = HttpUtil.httpReqByGetList(url, header, false, isRedirect);
+        TPILogger.tl.debug(resp.getLogStr());
+		return resp;
 	}
 
 	public Map<String, List<String>> getHeader(String user, String mima) {
@@ -160,6 +168,8 @@ public class DPB9939Service {
 		header.put("Accept", Arrays.asList("application/json"));
 		header.put("Content-Type", Arrays.asList("application/json"));
 		header.put("Authorization", Arrays.asList("Basic " + basicAuth));
+        header.put("Cache-Control", Arrays.asList("no-cache, no-store, must-revalidate"));
+        header.put("Pragma", Arrays.asList("no-cache"));
 		return header;
 	}
 

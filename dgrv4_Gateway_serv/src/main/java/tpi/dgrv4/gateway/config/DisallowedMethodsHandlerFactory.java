@@ -1,36 +1,66 @@
 package tpi.dgrv4.gateway.config;
 
-import io.undertow.server.HandlerWrapper;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.DisallowedMethodsHandler;
-import io.undertow.util.HttpString;
-import jakarta.validation.Valid;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
-public class DisallowedMethodsHandlerFactory implements WebServerFactoryCustomizer<UndertowServletWebServerFactory> {
+public class DisallowedMethodsHandlerFactory {
 
     @Value("${undertow.disallow-methods:true}")
     @Getter
     private boolean disallowMethods;
 
-    @Override
-    public void customize(UndertowServletWebServerFactory factory) {
+    @Bean
+    public FilterRegistrationBean<DisallowedMethodsFilter> disallowedMethodsFilter() {
+        FilterRegistrationBean<DisallowedMethodsFilter> registrationBean = new FilterRegistrationBean<>();
+        
         if (isDisallowMethods()) {
-            factory.addDeploymentInfoCustomizers(deploymentInfo -> {
-                deploymentInfo.addInitialHandlerChainWrapper(new HandlerWrapper() {
-                    @Override
-                    public HttpHandler wrap(HttpHandler handler) {
-                        HttpString[] disallowedHttpMethods = {HttpString.tryFromString("TRACE"),
-                                HttpString.tryFromString("TRACK")};
-                        return new DisallowedMethodsHandler(handler, disallowedHttpMethods);
-                    }
-                });
-            });
+            registrationBean.setFilter(new DisallowedMethodsFilter());
+            registrationBean.addUrlPatterns("/*");
+            registrationBean.setOrder(1); // 設定過濾器優先順序
+        }
+        
+        return registrationBean;
+    }
+
+    public static class DisallowedMethodsFilter implements Filter {
+        
+        private static final List<String> DISALLOWED_METHODS = Arrays.asList("TRACE", "TRACK");
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            
+            String method = httpRequest.getMethod();
+            
+            if (DISALLOWED_METHODS.contains(method.toUpperCase())) {
+                httpResponse.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                httpResponse.getWriter().write("Method Not Allowed");
+                return;
+            }
+            
+            chain.doFilter(request, response);
+        }
+
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+        }
+
+        @Override
+        public void destroy() {
         }
     }
 }

@@ -92,7 +92,7 @@ public class AA0101Service {
 	 * LB0004 - Customer Setting <br>
 	 */
 	private boolean isRemove(String funcCode) {
-		String[] v3MemuList = new String[] { "AC04", "AC08", "AC11", "NP01", "AC0318", "LB0004" };// 要移除的 funCode 開頭清單
+		String[] v3MemuList = new String[] { "AC04", "AC08", "AC1107", "NP01", "AC0318", "LB0004" };// 要移除的 funCode 開頭清單
 
 		for (String str : v3MemuList) {
 			if (funcCode.startsWith(str)) {

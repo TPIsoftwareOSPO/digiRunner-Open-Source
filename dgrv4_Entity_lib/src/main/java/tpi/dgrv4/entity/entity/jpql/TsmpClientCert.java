@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.TableGenerator;
-
 import tpi.dgrv4.entity.component.fuzzy.FuzzyEntityListener;
 
 @Entity
@@ -26,8 +25,12 @@ public class TsmpClientCert extends TsmpClientCertBasic{
  
 
 	/* constructors */
-	
-	public TsmpClientCert() {
+	public TsmpClientCert() {}	
+
+	public TsmpClientCert(String clientId, String pubKey, String certFileName) {
+		this.clientId = clientId;
+		this.pubKey = pubKey;
+		this.certFileName = certFileName;
 	}
 
 	/* methods */

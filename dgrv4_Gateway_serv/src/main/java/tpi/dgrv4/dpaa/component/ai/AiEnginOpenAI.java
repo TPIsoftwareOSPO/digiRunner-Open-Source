@@ -1,8 +1,6 @@
 package tpi.dgrv4.dpaa.component.ai;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,21 +10,19 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.model.Attempt;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Component
 public class AiEnginOpenAI implements AiEngine {
 
-    @Setter(onMethod_ = @Autowired)
-    AiEngineShareComponent shareComponent;
-
     @Override
     public Attempt<AiEngineDTO.Output> generateContent(AiEngineDTO.Input input) {
         DgrAiPromptTemplate template = input.template();
         DgrAiApiKey apiKey = input.apiKey();
         String prompt = input.inputPrompt();
-
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         var body = Map.of(
                 "model", apiKey.getDgrAiProvider().getAiModel(),
                 "instructions", template.getAiPromptTemplateContent(),
@@ -35,7 +31,7 @@ public class AiEnginOpenAI implements AiEngine {
 
         try {
             var builder = AiEngineDTO.Output.builder();
-            var rawBody = shareComponent.gson().toJson(body);
+            var rawBody = gson.toJson(body);
 
             var headers = Map.of(
                     "Authorization", "Bearer " + apiKey.getAiApikeyCode(),
@@ -48,7 +44,7 @@ public class AiEnginOpenAI implements AiEngine {
 
             var aiResponse = JsonParser.parseString(resp.respStr).getAsJsonObject();
 
-            if (aiResponse.has("error")) {
+            if (aiResponse.has("error") && !aiResponse.get("error").isJsonNull()) {
                 builder.candidates(List.of(aiResponse.toString()));
 
                 return Attempt.failure(new Exception(builder.build().toString()));
@@ -56,19 +52,26 @@ public class AiEnginOpenAI implements AiEngine {
 
             if (aiResponse.has("output") && aiResponse.get("output").isJsonArray()) {
                 var outputs = aiResponse.getAsJsonArray("output")
-                        .get(0)
-                        .getAsJsonObject()
-                        .get("content")
-                        .getAsJsonArray()
                         .asList()
                         .stream()
                         .map(JsonElement::getAsJsonObject)
-                        .map(json -> {
-                            if ("output_text".equals(json.get("type").getAsString())) {
-                                return json.get("text").getAsString();
-                            }
-                            return json.getAsString();
+                        .filter(ele -> ele.has("content"))
+                        .filter(json -> json.get("content").isJsonArray())
+                        .map( json -> json.getAsJsonArray("content"))
+                        .map(contents -> {
+                            var candidates = new ArrayList<String>();
+                            contents.forEach(content -> {
+                                var json =  content.getAsJsonObject();
+                                if (json.has("type")
+                                        && "output_text".equalsIgnoreCase(json.get("type").getAsString())
+                                        && json.has("text")
+                                ) {
+                                    candidates.add(json.get("text").getAsString());
+                                }
+                            });
+                            return candidates;
                         })
+                        .flatMap(List::stream)
                         .toList();
                 builder.candidates(outputs);
             }

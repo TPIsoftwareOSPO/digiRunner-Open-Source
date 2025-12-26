@@ -183,7 +183,7 @@ public class TSMPCServicePatch {
 		
 		// Must call respObj.getLogStr() first
 		// Threshhold > 10,000 => print warn msg.
-		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid, reqUrl , respObj.respStr)).ifPresent(TPILogger.tl::warn);
 		httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
 		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 

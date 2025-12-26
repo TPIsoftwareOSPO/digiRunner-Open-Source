@@ -21,7 +21,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of queryStatusOpt">
               <div class="p-form-check">
-                <p-radioButton formControlName="encodeStatus" value={{stat.value}}  inputId="encodeStatus{{stat.value}}"></p-radioButton>
+                <p-radioButton formControlName="encodeStatus" value={{stat.value}}
+                  inputId="encodeStatus{{stat.value}}"></p-radioButton>
                 <label for="encodeStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -137,8 +138,8 @@
             placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}">
         </div> -->
         <app-search-input placeholder="{{'group_id'|translate}}、{{'group_name'|translate}}、{{'group_alias'|translate}}"
-        [control]="form.get('keyword')" [searchFn]="queryGroupListData.bind(this)"
-        class="col-9 col-lg-6 col-sm-6"></app-search-input>
+          [control]="form.get('keyword')" [searchFn]="queryGroupListData.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
       <!-- <div class="form-group row">
         <div class="col-12 col-xl-12 col-lg-12">
@@ -256,26 +257,44 @@
       </div>
       <div class="form-group row">
         <div class="col-6">
-          <label for="clientBlock" class="required control-label">{{'password' | translate}}</label>
-          <input type="password" autocomplete="new-password" class="form-control" id="clientBlock"
-            formControlName="clientBlock" placeholder="{{'password' | translate}}">
+          <label for="clientBlock" class="required control-label">{{'clientBlock' | translate}}
+             <i *ngIf="mimatip" class="far fa-question-circle tip" [pTooltip]="mimatip" [escape]="false"></i>
+          </label>
+          <div class="ui-inputgroup">
+            <input [type]="newMask ? 'text' : 'password'" autocomplete="new-password" class="form-control"
+              id="clientBlock" formControlName="clientBlock" placeholder="{{'password' | translate}}">
+            <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="toggleMask('newMima')"></button>
+          </div>
+
           <div *ngIf="clientBlock.invalid && (clientBlock.dirty || clientBlock.touched)" class="text-danger">
             <small class="form-text">{{clientBlock.errors.maxlength | translate:maxlength256}}</small>
+            <small class="form-text">{{clientBlock.errors.minlength | translate}}</small>
             <small class="form-text">{{clientBlock.errors.required | translate}}</small>
-            <small *ngIf="confirmClientBlock.value" class="form-text">{{clientBlock.errors.confirm_mima | translate}}</small>
+            <small class="form-text">{{clientBlock.errors.pattern | translate}}</small>
+            <div>
+              <small *ngIf="confirmClientBlock.value" class="form-text">{{clientBlock.errors.confirm_mima |
+                translate}}</small>
+            </div>
           </div>
         </div>
         <div class="col-6">
           <label for="confirmClientBlock" class="required control-label">{{'cfm_password' |
             translate}}</label>
-          <input type="password" class="form-control" id="confirmClientBlock" formControlName="confirmClientBlock"
-            placeholder="{{'cfm_password' | translate}}">
+          <div class="ui-inputgroup">
+            <input [type]="cfmMask ? 'text' : 'password'" type="password" class="form-control" id="confirmClientBlock"
+              formControlName="confirmClientBlock" placeholder="{{'cfm_password' | translate}}">
+            <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="toggleMask('cfmMima')"></button>
+          </div>
           <div *ngIf="confirmClientBlock.invalid && (confirmClientBlock.dirty || confirmClientBlock.touched)"
             class="text-danger">
             <small class="form-text">{{confirmClientBlock.errors.maxlength |
               translate:maxlength256}}</small>
             <small class="form-text">{{confirmClientBlock.errors.required | translate}}</small>
-            <small class="form-text">{{confirmClientBlock.errors.confirm_mima | translate}}</small>
+            <div>
+              <small class="form-text">{{confirmClientBlock.errors.confirm_mima | translate}}</small>
+            </div>
           </div>
         </div>
       </div>
@@ -323,7 +342,7 @@
         </div>
         <div class="col-lg-4">
           <label for="tps">{{'tps_default' | translate}}
-             <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i>
+            <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i>
           </label>
           <input type="number" min="0" onkeyup="this.value=this.value.replace(/[^\d]/,'')" class="form-control" id="tps"
             formControlName="tps" placeholder="{{'tps_default' | translate}}">
@@ -359,7 +378,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of createStatusOpt">
               <div class="p-form-check">
-                <p-radioButton formControlName="createStatus" value={{stat.value}}  inputId="createStatus{{stat.value}}"></p-radioButton>
+                <p-radioButton formControlName="createStatus" value={{stat.value}}
+                  inputId="createStatus{{stat.value}}"></p-radioButton>
                 <label for="createStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -378,7 +398,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of publicFlags">
               <div class="p-form-check">
-                <p-radioButton formControlName="publicFlag" value={{stat.value}}  inputId="publicFlag{{stat.value}}"></p-radioButton>
+                <p-radioButton formControlName="publicFlag" value={{stat.value}}
+                  inputId="publicFlag{{stat.value}}"></p-radioButton>
                 <label for="publicFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -503,7 +524,8 @@
             id="newApiQuota" formControlName="newApiQuota">
         </div>
         <div class="col-lg-4">
-          <label for="newTps">{{'tps_default' | translate}} <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i></label>
+          <label for="newTps">{{'tps_default' | translate}} <i class="far fa-question-circle"
+              [pTooltip]="'tps_node' | translate" [escape]="false"></i></label>
           <input type="number" min="0" onkeyup="this.value=this.value.replace(/[^\d]/,'')" class="form-control"
             id="newTps" formControlName="newTps" placeholder="{{'tps_default' | translate}}">
         </div>
@@ -530,7 +552,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of publicFlags">
               <div class="p-form-check">
-                <p-radioButton formControlName="newEncodePublicFlag" value={{stat.value}}  inputId="newEncodePublicFlag{{stat.value}}"></p-radioButton>
+                <p-radioButton formControlName="newEncodePublicFlag" value={{stat.value}}
+                  inputId="newEncodePublicFlag{{stat.value}}"></p-radioButton>
                 <label for="newEncodePublicFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -934,8 +957,8 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri_label" class="control-label">Default Redirect URI</label><i
-                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
-                pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
+                  class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
+                  pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri">
                 <div
                   *ngIf="webServerRedirectUri.invalid && (webServerRedirectUri.dirty || webServerRedirectUri.touched)"
@@ -950,8 +973,8 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri1_label" class="control-label">Extends Redirect URI 1</label><i
-                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
-                pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
+                  class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
+                  pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri1">
                 <div
                   *ngIf="webServerRedirectUri1.invalid && (webServerRedirectUri1.dirty || webServerRedirectUri1.touched)"
@@ -963,8 +986,8 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri2_label" class="control-label">Extends Redirect URI 2</label><i
-                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
-                pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
+                  class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
+                  pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri2">
                 <div
                   *ngIf="webServerRedirectUri2.invalid && (webServerRedirectUri2.dirty || webServerRedirectUri2.touched)"
@@ -976,8 +999,8 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri3_label" class="control-label">Extends Redirect URI 3</label><i
-                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
-                pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
+                  class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
+                  pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri3">
                 <div
                   *ngIf="webServerRedirectUri3.invalid && (webServerRedirectUri3.dirty || webServerRedirectUri3.touched)"
@@ -989,8 +1012,8 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri4_label" class="control-label">Extends Redirect URI 4</label><i
-                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
-                pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
+                  class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
+                  pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri4">
                 <div
                   *ngIf="webServerRedirectUri4.invalid && (webServerRedirectUri4.dirty || webServerRedirectUri4.touched)"
@@ -1002,8 +1025,8 @@
             <div class="form-group row">
               <div class="col-sm-12 mt-2">
                 <label id="webServerRedirectUri5_label" class="control-label">Extends Redirect URI 5</label><i
-                class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
-                pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
+                  class="far fa-question-circle ms-2" tooltipStyleClass='tooltip-custom-w'
+                  pTooltip="{{ 'redirectURItip' | translate }}" [escape]="false"></i>
                 <input type="url" class="form-control" formControlName="webServerRedirectUri5">
                 <div
                   *ngIf="webServerRedirectUri5.invalid && (webServerRedirectUri5.dirty || webServerRedirectUri5.touched)"
@@ -1090,8 +1113,8 @@
                 <!-- </div> -->
                 <div class="form-group row mt-2">
                   <div class="col">
-                    <button type="button" class="btn tpi-btn tpi-primary" (click)="deleteXApiKeyById(xApiKeyItem)"
-                    >{{'button.delete'|translate}}</button>
+                    <button type="button" class="btn tpi-btn tpi-primary"
+                      (click)="deleteXApiKeyById(xApiKeyItem)">{{'button.delete'|translate}}</button>
                   </div>
 
                 </div>
@@ -1118,15 +1141,17 @@
                 <div class="col-3">
                   <label id="effectiveAt_label" class="control-label">{{'effective_date'|translate}}</label>
                   <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="effectiveAt"
-                    appendTo="body" dateFormat="yy/mm/dd" [showIcon]="true" [showIcon]="true" [showButtonBar]="true" (onClearClick)="onClearClick('effectiveAt')"
-                    [readonlyInput]="true" [minDate]="minDateEff"></p-calendar>
+                    appendTo="body" dateFormat="yy/mm/dd" [showIcon]="true" [showIcon]="true" [showButtonBar]="true"
+                    (onClearClick)="onClearClick('effectiveAt')" [readonlyInput]="true"
+                    [minDate]="minDateEff"></p-calendar>
 
                 </div>
                 <div class="col-3">
                   <label id="expiredAt_label" class="control-label">{{'expired_date'|translate}}</label>
                   <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="expiredAt"
-                    appendTo="body" dateFormat="yy/mm/dd" [showIcon]="true" [showIcon]="true" [showButtonBar]="true" (onClearClick)="onClearClick('expiredAt')"
-                    [readonlyInput]="true" [minDate]="minDateExp"></p-calendar>
+                    appendTo="body" dateFormat="yy/mm/dd" [showIcon]="true" [showIcon]="true" [showButtonBar]="true"
+                    (onClearClick)="onClearClick('expiredAt')" [readonlyInput]="true"
+                    [minDate]="minDateExp"></p-calendar>
                   <div *ngIf="expiredAt.invalid && (expiredAt.dirty || expiredAt.touched)" class="text-danger">
                     <small class="form-text">{{expiredAt.errors.isRequired | translate}}</small>
                   </div>
@@ -1134,7 +1159,8 @@
               </div>
               <div class="form-group row">
                 <div class="col-12">
-                  <label id="groupIdList_label" class="control-label required">{{'x_api_key.authority_group'|translate}}</label>
+                  <label id="groupIdList_label"
+                    class="control-label required">{{'x_api_key.authority_group'|translate}}</label>
                 </div>
                 <div class="form-group col-12">
                   <button type="button" class="btn tpi-btn tpi-primary pull-right" (click)="addGroupToList()">
@@ -1240,7 +1266,8 @@
                 <div class="p-form-check-line form-group">
                   <ng-container *ngFor="let stat of updateStatusOpt">
                     <div class="p-form-check">
-                      <p-radioButton formControlName="updateStatus" value={{stat.value}}  inputId="updateStatus{{stat.value}}"></p-radioButton>
+                      <p-radioButton formControlName="updateStatus" value={{stat.value}}
+                        inputId="updateStatus{{stat.value}}"></p-radioButton>
                       <label for="updateStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                     </div>
                   </ng-container>
@@ -1253,7 +1280,8 @@
                       formControlName="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}
                   </label> -->
                   <div class="p-form-check">
-                    <p-checkbox [binary]="true" inputId="resetPwdFailTimes" formControlName="resetPwdFailTimes" ></p-checkbox>
+                    <p-checkbox [binary]="true" inputId="resetPwdFailTimes"
+                      formControlName="resetPwdFailTimes"></p-checkbox>
                     <label class="ms-2 mb-0" for="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}</label>
                   </div>
                   <div *ngIf="resetPwdFailTimes.invalid && (resetPwdFailTimes.dirty || resetPwdFailTimes.touched)"
@@ -1279,8 +1307,12 @@
               <div class="col-sm-6">
                 <label id="clientBlock_label" for="clientBlock" class="control-label">{{'current_password' |
                   translate}}</label>
-                <input type="password" autocomplete="new-password" class="form-control" formControlName="clientBlock"
-                  placeholder="{{'password' | translate}}">
+                <div class="ui-inputgroup">
+                  <input [type]="oriMask ? 'text' : 'password'" autocomplete="new-password" class="form-control"
+                    formControlName="clientBlock" placeholder="{{'password' | translate}}">
+                  <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    class="ms-1 tpi-night" (click)="toggleMask('oriMima')"></button>
+                </div>
                 <div *ngIf="clientBlock.invalid && (clientBlock.dirty || clientBlock.touched)" class="text-danger">
                   <small class="form-text">{{clientBlock.errors.maxlength}}</small>
                 </div>
@@ -1302,26 +1334,41 @@
             <div class="form-group row">
               <div class="col-sm-6">
                 <label id="newClientBlock_label" for="newClientBlock" class="control-label">
-                  {{'new_password' | translate}}</label>
-                <input type="password" class="form-control" formControlName="newClientBlock"
-                  placeholder="{{'new_password' | translate}}">
+                  {{'new_password' | translate}}
+                <i *ngIf="mimatip" class="far fa-question-circle tip" [pTooltip]="mimatip" [escape]="false"></i></label>
+                <div class="ui-inputgroup">
+                  <input [type]="newMask ? 'text' : 'password'" class="form-control" formControlName="newClientBlock"
+                    placeholder="{{'new_password' | translate}}">
+                  <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    class="ms-1 tpi-night" (click)="toggleMask('newMima')"></button>
+                </div>
                 <div *ngIf="newClientBlock.invalid && (newClientBlock.dirty || newClientBlock.touched)"
                   class="text-danger">
+                  <small class="form-text">{{newClientBlock.errors.pattern}}</small>
                   <small class="form-text">{{newClientBlock.errors.maxlength|translate:{value:256} }}</small>
-                  <small *ngIf="confirmNewClientBlock.value" class="form-text">{{newClientBlock.errors.confirm_mima |translate}}</small>
+                  <small class="form-text">{{newClientBlock.errors.minlength|translate }}</small>
+                  <div>
+                    <small *ngIf="confirmNewClientBlock.value" class="form-text">{{newClientBlock.errors.confirm_mima |translate}}</small>
+                  </div>
                 </div>
               </div>
               <div class="col-sm-6">
                 <label id="confirmNewClientBlock_label" for="confirmNewClientBlock"
                   class="control-label">{{'cfm_password' |
                   translate}}</label>
-                <input type="password" class="form-control" formControlName="confirmNewClientBlock"
-                  placeholder="{{'cfm_password' | translate}}">
+                <div class="ui-inputgroup">
+                  <input [type]="cfmMask ? 'text' : 'password'" class="form-control"
+                    formControlName="confirmNewClientBlock" placeholder="{{'cfm_password' | translate}}">
+                  <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    class="ms-1 tpi-night" (click)="toggleMask('cfmMima')"></button>
+                </div>
                 <div
                   *ngIf="confirmNewClientBlock.invalid && (confirmNewClientBlock.dirty || confirmNewClientBlock.touched)"
                   class="text-danger">
                   <small class="form-text">{{confirmNewClientBlock.errors.maxlength|translate:{value:256} }}</small>
-                  <small class="form-text">{{confirmNewClientBlock.errors.confirm_mima |translate}}</small>
+                  <div>
+                    <small class="form-text">{{confirmNewClientBlock.errors.confirm_mima |translate}}</small>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1396,8 +1443,9 @@
         </div>
         <div class="col-sm-6">
           <label>{{'authorized_api_groups'|translate}}</label>
-          <p-listbox *ngIf="clientDetailGroupList && clientDetailGroupList.length" [emptyMessage]="'no_data_result'|translate"
-            [options]="clientDetailGroupList | listbox_array_split" [style]="{width:'100%'}" [readonly]="true">
+          <p-listbox *ngIf="clientDetailGroupList && clientDetailGroupList.length"
+            [emptyMessage]="'no_data_result'|translate" [options]="clientDetailGroupList | listbox_array_split"
+            [style]="{width:'100%'}" [readonly]="true">
           </p-listbox>
         </div>
       </div>
@@ -1432,7 +1480,8 @@
       </div>
       <div class="form-group row">
         <div class="col-sm-3">
-          <label>{{'tps_default'|translate}} <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate" [escape]="false"></i></label>
+          <label>{{'tps_default'|translate}} <i class="far fa-question-circle" [pTooltip]="'tps_node' | translate"
+              [escape]="false"></i></label>
           <label class="form-control border-line">{{clientDetail.tps}}</label>
         </div>
         <div class="col-sm-3">
@@ -1477,7 +1526,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of clientDetailStatusOpt">
               <div class="p-form-check">
-                <p-radioButton value={{stat.value}} [ngModelOptions]="{standalone: true}" [(ngModel)]="clientDetail.status" disabled></p-radioButton>
+                <p-radioButton value={{stat.value}} [ngModelOptions]="{standalone: true}"
+                  [(ngModel)]="clientDetail.status" disabled></p-radioButton>
                 <label class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -1497,7 +1547,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of publicFlags">
               <div class="p-form-check">
-                <p-radioButton value={{stat.value}} [ngModelOptions]="{standalone: true}" [(ngModel)]="clientDetail.publicFlag" disabled></p-radioButton>
+                <p-radioButton value={{stat.value}} [ngModelOptions]="{standalone: true}"
+                  [(ngModel)]="clientDetail.publicFlag" disabled></p-radioButton>
                 <label class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -1552,9 +1603,10 @@
   <div *ngIf="pageNum == 7">
     <form [formGroup]="form">
       <div class="form-group col-12 d-flex">
-        <app-search-input placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}"
-        [control]="form.get('keyword')" [searchFn]="queryGroupList.bind(this)"
-        class="col-9 col-lg-6 col-sm-6"></app-search-input>
+        <app-search-input
+          placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}、{{'group_desc'|translate}}"
+          [control]="form.get('keyword')" [searchFn]="queryGroupList.bind(this)"
+          class="col-9 col-lg-6 col-sm-6"></app-search-input>
       </div>
 
     </form>
@@ -1626,9 +1678,10 @@
     <form [formGroup]="form">
       <div class="form-group col-12 d-flex">
         <div class="col-12 d-flex align-items-center">
-          <app-search-input placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}"
-          [control]="form.get('keyword')" [searchFn]="searchVGroupList.bind(this)"
-          class="col-9 col-lg-6 col-sm-6"></app-search-input>
+          <app-search-input
+            placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}、{{'virtul_group_desc'|translate}}、{{'api_key'|translate}}、{{'module_name'|translate}}、{{'api_name'|translate}}"
+            [control]="form.get('keyword')" [searchFn]="searchVGroupList.bind(this)"
+            class="col-9 col-lg-6 col-sm-6"></app-search-input>
         </div>
       </div>
 

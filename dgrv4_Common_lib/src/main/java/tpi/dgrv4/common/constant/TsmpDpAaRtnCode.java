@@ -432,7 +432,10 @@ public enum TsmpDpAaRtnCode implements ITsmpDpAaError<TsmpDpAaException> {
 	_1562(TsmpDpModule.DP5, "62", "對稱式解密失敗：{{0}}"),
 
 	_1565(TsmpDpModule.DP5, "65", "查無簽核關卡設定，應設定簽核關卡"),
-	_1566(TsmpDpModule.DP4, "66", "結束日期不可小於開始日期"),
+	_1566(TsmpDpModule.DP5, "66", "結束日期不可小於開始日期"),
+	_1567(TsmpDpModule.DP5, "67", "{{0}}驗證失敗"),
+	_1568(TsmpDpModule.DP5, "68", "超過驗證有效時間{{0}}分鐘"),
+	_1569(TsmpDpModule.DP5, "69", "已達錯誤{{0}}次上限，請重新發送"),
 	
 	_2000(TsmpDpModule.DP10, "00", "必填"),
 	_2001(TsmpDpModule.DP10, "01", "最大長度為 [{{0}}]"),

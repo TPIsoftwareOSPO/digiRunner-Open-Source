@@ -1182,6 +1182,42 @@ public class TsmpSettingService {
 		return getBooleanVal(gateway_key, false);
 	}
 	
+	public String getKey_AC_IDP_OAUTH2_REVIEW_ENABLE() {
+		return TsmpSettingDao.Key.AC_IDP_OAUTH2_REVIEW_ENABLE;
+	}
+	
+	public boolean getVal_AC_IDP_OAUTH2_REVIEW_ENABLE() {
+		String gateway_key = getKey_AC_IDP_OAUTH2_REVIEW_ENABLE();
+		return getBooleanVal(gateway_key, false);
+	}
+	
+	public String getKey_AC_IDP_OAUTH2_USERNAME() {
+		return TsmpSettingDao.Key.AC_IDP_OAUTH2_USERNAME;
+	}
+	
+	public String getVal_AC_IDP_OAUTH2_USERNAME() {
+		String key = getKey_AC_IDP_OAUTH2_USERNAME();
+		return getStringVal(key);
+	}
+	
+	public String getKey_AC_IDP_LOGIN_IGNORE_TYPE() {
+		return TsmpSettingDao.Key.AC_IDP_LOGIN_IGNORE_TYPE;
+	}
+	
+	public boolean getVal_AC_IDP_LOGIN_IGNORE_TYPE() {
+		String key = getKey_AC_IDP_LOGIN_IGNORE_TYPE();
+		return getBooleanVal(key, false);
+	}
+	
+	public String getKey_AC_IDP_USERNAME_B64_ENCODE() {
+		return TsmpSettingDao.Key.AC_IDP_USERNAME_B64_ENCODE;
+	}
+	
+	public boolean getVal_AC_IDP_USERNAME_B64_ENCODE() {
+		String key = getKey_AC_IDP_USERNAME_B64_ENCODE();
+		return getBooleanVal(key, false);
+	}
+	
 	// GTW IdP
 	public String getKey_GTW_IDP_JWK1() {
 		return TsmpSettingDao.Key.GTW_IDP_JWK1;
@@ -1458,9 +1494,61 @@ public class TsmpSettingService {
 		return  TsmpSettingDao.Key.KIBANA_REFERER_ALLOWLIST ;
 	}
 
-	public  String getVal_KIBANA_REFERER_ALLOWLIST (){
-		String key = getKey_KIBANA_REFERER_ALLOWLIST ();
-		return getStringVal(key);
+    public List<String> getVal_KIBANA_REFERER_ALLOWLIST() {
+        String key = getKey_KIBANA_REFERER_ALLOWLIST();
+        return getListVal(key, ",", String::valueOf);
+    }
+	
+	public String getKey_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED() {
+		return TsmpSettingDao.Key.FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED;
 	}
 
+	public boolean getVal_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED() {
+		String key = getKey_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED();
+		return getBooleanVal(key, false);
+	}
+    public boolean getVal_SHOW_ALL_PROPERTIES() {
+        String key = getKey_SHOW_ALL_PROPERTIES();
+        return getBooleanVal(key, Boolean.TRUE);
+    }
+
+    public String getKey_SHOW_ALL_PROPERTIES() {
+        return TsmpSettingDao.Key.SHOW_ALL_PROPERTIES;
+    }
+
+    public boolean getVal_HTTPUTIL_RESP_TIME_LOG() {
+        String key = getKey_HTTPUTIL_RESP_TIME_LOG();
+        return getBooleanVal(key, Boolean.FALSE);
+    }
+
+    public String getKey_HTTPUTIL_RESP_TIME_LOG() {
+        return TsmpSettingDao.Key.HTTPUTIL_RESP_TIME_LOG;
+    }
+
+    public List<String> getVal_PROPERTIES_MASK_LIST() {
+        String key = getKey_PROPERTIES_MASK_LIS();
+        return getListVal(key,",", String::valueOf);
+    }
+
+    public String getKey_PROPERTIES_MASK_LIS() {
+        return TsmpSettingDao.Key.PROPERTIES_MASK_LIST;
+    }
+    
+	public String getKey_PROFILEUPDATE_INVALIDATE_TOKEN() {
+		return TsmpSettingDao.Key.PROFILEUPDATE_INVALIDATE_TOKEN;
+	}
+
+	public boolean getVal_PROFILEUPDATE_INVALIDATE_TOKEN() {
+		String key = getKey_PROFILEUPDATE_INVALIDATE_TOKEN();
+		return getBooleanVal(key, false);
+	}
+	
+	public String getKey_USER_UPDATE_BY_SELF() {
+		return TsmpSettingDao.Key.USER_UPDATE_BY_SELF;
+	}
+
+	public boolean getVal_USER_UPDATE_BY_SELF() {
+		String key = getKey_USER_UPDATE_BY_SELF();
+		return getBooleanVal(key, false);
+	}
 }

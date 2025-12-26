@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.constant.TsmpRoleTxidMapListType;
 import tpi.dgrv4.entity.entity.Authorities;
 import tpi.dgrv4.entity.entity.TsmpRoleTxidMap;
@@ -28,8 +29,6 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 @Service
 public class DPB0115Service {
 
-	private TPILogger logger;
-	
 	private AuthoritiesCacheProxy authoritiesCacheProxy;
 	private TsmpRoleTxidMapCacheProxy tsmpRoleTxidMapCacheProxy;
 	
@@ -87,8 +86,8 @@ public class DPB0115Service {
 		
 		List<Authorities> authorities = getAuthoritiesCacheProxy().findByUsername(userName);
 		if (authorities == null || authorities.isEmpty()) {
-			getLogger().debug("User [" + userName + "] has no roles");
-			throw DgrRtnCode._1264.throwing();
+			TPILogger.tl.debug("User [" + userName + "] has no roles");
+			throw TsmpDpAaRtnCode._1264.throwing();
 		}
 		return authorities.stream().map((a) -> {
 			return a.getAuthority();	// role_id
@@ -252,9 +251,4 @@ public class DPB0115Service {
 	protected TsmpRoleTxidMapCacheProxy getTsmpRoleTxidMapCacheProxy() {
 		return this.tsmpRoleTxidMapCacheProxy;
 	}
-
-	protected TPILogger getLogger() {
-		return this.logger;
-	}
-
 }

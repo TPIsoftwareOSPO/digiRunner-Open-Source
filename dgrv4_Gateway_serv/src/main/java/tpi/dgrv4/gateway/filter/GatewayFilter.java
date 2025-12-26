@@ -1,31 +1,32 @@
 package tpi.dgrv4.gateway.filter;
 
 import java.io.IOException;
+import java.io.Serial;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,7 +62,6 @@ import tpi.dgrv4.gateway.service.CommForwardProcService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.service.WebsiteService;
 import tpi.dgrv4.gateway.util.ControllerUtil;
-import tpi.dgrv4.gateway.vo.ErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.ResHeader;
@@ -70,52 +70,42 @@ import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 @Component
 public class GatewayFilter extends OncePerRequestFilter {
 
-	@Value("${cors.allow.headers}")
-	private String corsAllowHeaders;
-	
-    @Value("${async.highway-pool-size-rate:0.1}")
-    private Float highwayPoolSizeRate;
-	
-	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers"))
-	ThreadPoolTaskExecutor asyncWorkerPool;
-
-	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers-highway"))
-	@Qualifier("async-workers-highway")
-	ThreadPoolTaskExecutor asyncWorkerHighwayPool;
-
-	// StringBuffer 的高併發替代品 StringBuilder(非同步) + ThreadLocal(多執行緒安全性)
-	// High-concurrency alternative to StringBuffer: StringBuilder(asynchronous) +
-	// ThreadLocal(thread safety)
-	private static final ThreadLocal<StringBuilder> sbBuilderHolder = ThreadLocal
-			.withInitial(() -> new StringBuilder());
-
 	// [ZH]高併發網路流量快速通關分派裝置(記憶單元)
 	// [EN]High-concurrency network traffic fast-pass dispatch device (memory unit)
 	private static final Map<String, Map<String, Long>> apiRespTimeMap = new ConcurrentHashMap<>();
 
-//	public static final String cspDefaultVal = "default-src %s 'self' 'unsafe-inline'; img-src https://* 'self' data:;";
-
-	public static final Object throughputObjLock = new Object();
-	public static final LinkedHashMap<Integer, Integer> apiReqThroughput = new LinkedHashMap<Integer, Integer>() {
+	private static final Object apiReqThroughputObjLock = new Object();
+	private static final Object apiRespThroughputObjLock = new Object();
+	private static final LinkedHashMap<Long, Long> apiReqThroughput = new LinkedHashMap<>() {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+		protected boolean removeEldestEntry(Map.Entry<Long, Long> eldest) {
 			// [ZH]限制HashMap大小為10個
 			// [EN]Limit HashMap size to 10 entries
 			return size() > 10;
 		}
 	};
-	public static final LinkedHashMap<Integer, Integer> apiRespThroughput = new LinkedHashMap<Integer, Integer>() {
+	private static final LinkedHashMap<Long, Long> apiRespThroughput = new LinkedHashMap<>() {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+		protected boolean removeEldestEntry(Map.Entry<Long, Long> eldest) {
 			// [ZH]限制HashMap大小為10個
 			// [EN]Limit HashMap size to 10 entries
 			return size() > 10;
 		}
 	};
+
+	public static Long getReqTps(long key) {
+		return GatewayFilter.apiReqThroughput.getOrDefault(key, 0L);
+	}
+
+	public static Long getRespTps(long key) {
+		return GatewayFilter.apiRespThroughput.getOrDefault(key, 0L);
+	}
 
 	private static final long TSMPC_ROUTING = 0;
 	private static final long DGRC_ROUTING = 1;
@@ -128,78 +118,59 @@ public class GatewayFilter extends OncePerRequestFilter {
 	// [ZH]高併發網路流量快速通關分派裝置(控制旗標)	
 	// [EN]High concurrent network traffic fast clearance dispatch device (control flag)
 	public static final String START_TIME = "startTime";
-	public static final String END_TIME = "endTime";
-	public static final String SETWORK_THREAD = "SetWorkThread";
-	public static final String FAST = "fast";
-	public static final String SLOW = "slow";
+
 	public static final String ELAPSED_TIME = "elapsedTime";
 	public static final String HTTP_CODE = "httpCode";
 	public static final String ELAPSED_TIME23 = "elapsedTime23";
 	public static final String HTTP_CODE23 = "httpCode23";
 	public static final String SET_CIRCUIT_BREAKER = "setCircuitBreaker";
-	public static final boolean CIRCUIT_BREAKER_STATUS = true; // [ZH]表示要熔斷 // [EN]Indicates that the circuit break is to be blown
 	public static final long ELAPSED_TIME_DEF_VAL = 999999L; // [ZH]耗時的預設值 // [EN]Preset time consumption
 	public static final int HTTP_CODE_DEF_VAL = -1; // [ZH]HTTP code 的預設值 // [EN]Default value of HTTP code
-	public static final double PEAK_USAGE_VALUE = 0.8; // [ZH]尖峰使用量的值 // [EN]Peak usage value
-	public static final long ELAPSED_TOO_LONG_VALUE = 30000L; // [ZH]耗時過久的值 // [EN]Value that took too long
 
+	@Setter(onMethod_ = @Autowired)
 	private TPILogger logger;
+	@Setter(onMethod_ = @Autowired)
 	private ApiStatusCheck apiStatusCheck;
+	@Setter(onMethod_ = @Autowired)
 	private IgnoreApiPathCheck ignoreApiPathCheck;
+	@Setter(onMethod_ = @Autowired)
 	private SqlInjectionCheck sqlInjectionCheck;
+	@Setter(onMethod_ = @Autowired)
 	private TrafficCheck trafficCheck;
+	@Setter(onMethod_ = @Autowired)
 	private XssCheck xssCheck;
+	@Setter(onMethod_ = @Autowired)
 	private XxeCheck xxeCheck;
+	@Setter(onMethod_ = @Autowired)
 	private TokenCheck tokenCheck;
+	@Setter(onMethod_ = @Autowired)
 	private ApiNotFoundCheck apiNotFoundCheck;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private DgrcRoutingHelper dgrcRoutingHelper;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpSettingService tsmpSettingService;
+	@Setter(onMethod_ = @Autowired)
 	private CommForwardProcService commForwardProcService;
+	@Setter(onMethod_ = @Autowired)
 	private WebsiteService websiteService;
+	@Setter(onMethod_ = @Autowired)
 	private HostHeaderCheck hostHeaderCheck;
+	@Setter(onMethod_ = @Autowired)
 	private DgrJtiCheck dgrJtiCheck;
+	@Setter(onMethod_ = @Autowired)
 	private ModeCheck modeCheck;
+	@Setter(onMethod_ = @Autowired)
 	private CusTokenCheck cusTokenCheck;
+	@Setter(onMethod_ = @Autowired)
 	private BotDetectionCheck dotBotDetectionCheck;
 
 
-
-	@Autowired
-	public GatewayFilter(TPILogger logger, ApiStatusCheck apiStatusCheck, IgnoreApiPathCheck ignoreApiPathCheck,
-			SqlInjectionCheck sqlInjectionCheck, TrafficCheck trafficCheck, XssCheck xssCheck, XxeCheck xxeCheck,
-			TokenCheck tokenCheck, ApiNotFoundCheck apiNotFoundCheck, TsmpApiCacheProxy tsmpApiCacheProxy,
-			DgrcRoutingHelper dgrcRoutingHelper, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
-			TsmpSettingService tsmpSettingService, CommForwardProcService commForwardProcService,
-			WebsiteService websiteService, HostHeaderCheck hostHeaderCheck, DgrJtiCheck dgrJtiCheck,
-			ModeCheck modeCheck, CusTokenCheck cusTokenCheck, BotDetectionCheck dotBotDetectionCheck) {
-		super();
-		this.logger = logger;
-		this.apiStatusCheck = apiStatusCheck;
-		this.ignoreApiPathCheck = ignoreApiPathCheck;
-		this.sqlInjectionCheck = sqlInjectionCheck;
-		this.trafficCheck = trafficCheck;
-		this.xssCheck = xssCheck;
-		this.xxeCheck = xxeCheck;
-		this.tokenCheck = tokenCheck;
-		this.apiNotFoundCheck = apiNotFoundCheck;
-		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
-		this.dgrcRoutingHelper = dgrcRoutingHelper;
-		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
-		this.tsmpSettingService = tsmpSettingService;
-		this.commForwardProcService = commForwardProcService;
-		this.websiteService = websiteService;
-		this.hostHeaderCheck = hostHeaderCheck;
-		this.dgrJtiCheck = dgrJtiCheck;
-		this.modeCheck = modeCheck;
-		this.cusTokenCheck = cusTokenCheck;
-		this.dotBotDetectionCheck = dotBotDetectionCheck;
-
-	}
-
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+	protected void doFilterInternal(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull FilterChain filterChain)
 			throws ServletException, IOException {
 		
 		TsmpApiReg tsmpApiReg = null;
@@ -214,8 +185,19 @@ public class GatewayFilter extends OncePerRequestFilter {
 			String remoteHost = request.getRemoteHost();
 			String method01 = request.getMethod();
 
-			showSrcURI(uri, remoteAdd, remoteHost, method01, QString); // debug 顯示 URI & src IP
-			
+			if (getTsmpSettingService().getVal_REQUEST_URI_ENABLED()) {
+				String debugMsg = "\n"
+						+ "...request.getRequestURI():[" + method01 + "] (" + uri + ")\n"
+						+ "...request.getQueryString():(" + QString + ")\n"
+						+ "...request.getRemoteAddr():(" + remoteAdd + ")\n"
+						+ "...request.getRemoteHost():(" + remoteHost + ")\n"
+						+ "\n";
+
+				TPILogger.tl.debug(debugMsg);
+			}
+
+
+
 			// [ZH]若 Host Header 不符合安全檢查就 true, 否則 false
 			// [EN]true if the Host Header does not meet the security check, false otherwise
 			if (hostHeaderCheck.check(request)) {
@@ -258,30 +240,37 @@ public class GatewayFilter extends OncePerRequestFilter {
 			String kibanaPrefix = getTsmpSettingService().getVal_KIBANA_REPORTURL_PREFIX();
 			// [ZH]判斷不包含特定 path 的路由
 			// [EN]Determines routes that do not contain a specific path
-			boolean b = (uri.length() >= 4 && (uri.substring(0, 4).equals("/11/")));
-			b = b || (uri.length() >= 4 && (uri.substring(0, 4).equals("/17/")));
-			b = b || (uri.length() >= 6 && (uri.substring(0, 6).equals("/dgrc/")));
-			b = b || (uri.length() >= 7 && (uri.substring(0, 7).equals("/tsmpc/")));
-			b = b || (uri.length() >= 7 && (uri.substring(0, 7).equals("/tsmpg/")));// [ZH]因為v3的noAuth要用tsmpg // [EN]Because v3's noAuth needs to use tsmpg
-			b = b || (uri.length() >= 7 && (uri.substring(0, 7).equals("/dgrv4/")));
-			b = b || (uri.length() >= 7 && (uri.substring(0, 7).equals("/oauth/")));
-			b = b || (uri.length() >= 10 && (uri.substring(0, 10).equals("/mocktest/")));
-			b = b || (uri.length() >= 8 && (uri.substring(0, 8).equals("/kibana/")));
-			b = b || (uri.length() >= 21 && (uri.substring(0, 21).equals("/composer/swagger3.0/")));
-			b = b || (uri.length() >= 9 && (uri.substring(0, 9).equals("/website/")));
-			b = b || (uri.length() >= 10 && (uri.substring(0, 10).equals("/http-api/")));
-			b = b || (uri.length() >= 16 && (uri.substring(0, 16).equals("/_plugin/kibana/")));
-			b = b || (uri.length() >= 13 && (uri.substring(0, 13).equals("/_dashboards/"))); // [ZH]AWS上的OpenSearch的URL路徑 // [EN]URL path for OpenSearch on AWS
-			b = b || (uri.length() >= 12 && (uri.substring(0, 12).equals("/dgrliveness")));	// [ZH]國壽要求一個 非/dgrv4的探針API // [EN]China Life requires a non-dgrv4 probe API
-			b = b || (uri.length() >= 9 && (uri.substring(0, 9).equals("/liveness"))); // [ZH]國壽要求一個 非/dgrv4的探針API // [EN]China Life requires a non-dgrv4 probe API
-			b = b || (uri.length() >= 10 && (uri.substring(0, 10).equals("/readiness"))); // 國壽要求一個 非/dgrv4的探針API // [EN]China Life requires a non-dgrv4 probe API
-			b = b || (uri.length() >= 8 && (uri.substring(0, 8).equals("/kibana/")))            
-					|| isGCPkibana(request, kibanaPrefix); // [ZH]判斷是不是走/kibana2的GCP 相關URL // [EN]Determine whether to use the GCP related URL of /kibana2
-			b = !(b);
 
-			// [ZH]true 即為 tsmpc, dgrc 路由
-			// [EN]true means tsmpc, dgrc routing
-			if (b) {
+			var dgrManagedRoute = Set.of(
+					"/11/",
+					"/17/",
+					"/dgrc/",
+					"/tsmpc/",
+					"/tsmpg/",// [ZH]因為v3的noAuth要用tsmpg // [EN]Because v3's noAuth needs to use tsmpg
+					"/dgrv4/",
+					"/oauth/",
+					"/mocktest/",
+					"/kibana/",
+					"/composer/swagger3.0/",
+					"/website/",
+					"/http-api/",
+					"/_plugin/kibana/",
+					"/_dashboards/",// [ZH]AWS上的OpenSearch的URL路徑 // [EN]URL path for OpenSearch on AWS
+					"/dgrliveness", // [ZH]國壽要求一個 非/dgrv4的探針API // [EN]China Life requires a non-dgrv4 probe API
+					"/liveness", // [ZH]國壽要求一個 非/dgrv4的探針API // [EN]China Life requires a non-dgrv4 probe API
+					"/readiness" // 國壽要求一個 非/dgrv4的探針API // [EN]China Life requires a non-dgrv4 probe API
+			);
+
+			// [ZH]true dgr 系統管控路由
+			// [EN]true dgr system routing
+			boolean isDgrManagedRoute = dgrManagedRoute.stream()
+					.anyMatch(uri::startsWith)
+					|| isGCPkibana(request, kibanaPrefix) // [ZH]判斷是不是走/kibana2的GCP 相關URL // [EN]Determine whether to use the GCP related URL of /kibana2
+					;
+
+			// [ZH] 如果不是 dgr 系統管控路由，則添加 path
+			// [EN] add path if not dgr system routing
+			if (!isDgrManagedRoute) {
 				if (compatibilityPaths == TSMPC_ROUTING) {
 					uri = addTsmpcToUri(uri);
 					entry = "tsmpc";
@@ -295,7 +284,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 				// [ZH]混合 路由模式
 				// [EN]Mixed routing mode
 				if (compatibilityPaths == TSMP_DGRCROUTING) {
-					if (uri.split("/").length == 3 && uri.length() >= 7 && uri.substring(0, 7).equals("/tsmpc/")) {
+					if (uri.split("/").length == 3 && uri.startsWith("/tsmpc/")) {
 						// [ZH]判定它是 tsmpc
 						// [EN]Determine if it is tsmpc
 						entry = "tsmpc";
@@ -340,13 +329,13 @@ public class GatewayFilter extends OncePerRequestFilter {
 					tsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId).orElse(null);
 					
 					String path = null;
-					if (uri.substring(0, 5).equals("/dgrc")) {
-						path = uri.substring(5, uri.length());
+					if (uri.startsWith("/dgrc")) {
+						path = uri.substring(5);
 						entry = "dgrc";
 					}
-					if (uri.substring(0, 6).equals("/tsmpc") || uri.substring(0, 6).equals("/tsmpg") // [ZH]因為v3的noAuth要用tsmpg // [EN]Because v3's noAuth needs to use tsmpg
+					if (uri.startsWith("/tsmpc") || uri.startsWith("/tsmpg") // [ZH]因為v3的noAuth要用tsmpg // [EN]Because v3's noAuth needs to use tsmpg
 					) {
-						path = uri.substring(6, uri.length());
+						path = uri.substring(6);
 						entry = "tsmpc";
 					}
 					if (!ignoreApiPathCheck.check(path)) {
@@ -375,17 +364,6 @@ public class GatewayFilter extends OncePerRequestFilter {
 			// The uri will only change to "dgrc" or "tsmpc", of course the uri may not change at all
 			// High concurrent network traffic fast clearance dispatch device: The result of the calculation is temporarily stored in request.setAttribute(k,v)
 			request = rewriteRequestURI(request, uri);
-			
-			// [ZH]如果有熔斷, 輸出錯誤訊息後 return
-			// [EN]If there is a circuit break, output an error message and return
-			boolean isCircuitBreaker = circuitBreakerResponseFlush(request, response, uri);
-			if (isCircuitBreaker) {
-				return;
-			}
-			
-			// [ZH]計算API Req每秒轉發吞吐量
-			// [EN]Calculate the API Req forwarding throughput per second
-			setApiReqThroughput();
 
 		} catch (DgrException e) {
 			if (e.getHttpCode() == 0) {
@@ -425,7 +403,6 @@ public class GatewayFilter extends OncePerRequestFilter {
 		 * "default-src * 'self' 'unsafe-inline'; img-src https://* 'self' data:;"
 		 */
 
-		String uri = request.getRequestURI();
 
 		boolean isSse = false;
 
@@ -442,13 +419,18 @@ public class GatewayFilter extends OncePerRequestFilter {
 			.injectHeader("Access-Control-Allow-Methods", corsAllowMethodsVal) // CORS
 			.injectHeader("X-Frame-Options", "sameorigin")
 			.injectHeader("X-Content-Type-Options", "nosniff")
-			.injectHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
 			.injectHeader("Referrer-Policy", "strict-origin-when-cross-origin")
 			.injectHeader("Cache-Control", "no-cache")
 			.injectHeader("Pragma", "no-cache");
-		if (StringUtils.hasText(dgrCspVal) && !"*".equals(dgrCspVal.trim()));
+		
+		//checkmarx, Missing HSTS Header
+		responseWrapper.injectHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+
+		if (StringUtils.hasText(dgrCspVal) && !"*".equals(dgrCspVal.trim())) {
 			responseWrapper.injectHeader("Content-Security-Policy", dgrCspVal);
-		if (request.getHeader("isSse") != null || isSse) {
+		}
+
+		if (request.getHeader("isSse") != null) {
 			responseWrapper.injectHeader("Content-Type", "text/event-stream");
 		}
 		
@@ -466,22 +448,17 @@ public class GatewayFilter extends OncePerRequestFilter {
 			return;
 		}
 
-//		filterChain.doFilter(request, responseWrapper);
 		try {
-			// ... 原有邏輯 ...
-			// ... original logic ...
 			filterChain.doFilter(request, response);
-//			filterChain.doFilter(request, responseWrapper); //response 空白一片
 	    } catch (Exception e) {
 	    	if (response.getStatus() == 200) {
 	    		// [ZH]為了解決高併發時, 2個 worker thread 搶 filter 的問題
 	    		// [EN]To solve the problem of two worker threads competing for filters during high concurrency
 	    		// jakarta.servlet.ServletException: Request processing failed: java.lang.IllegalStateException: AsyncWebRequest must not be null
-	    		StringBuilder sb = new StringBuilder();
-	    		sb.append("\nresponse.getStatus()::" + response.getStatus());
-	    		sb.append("\nrequest.getRequestURI()::" + request.getRequestURI());
-	    		sb.append("\nmsg::" + e.getLocalizedMessage());
-	    		TPILogger.tl.warn(sb.toString());
+                String sb = "\nresponse.getStatus()::" + response.getStatus() +
+                        "\nrequest.getRequestURI()::" + request.getRequestURI() +
+                        "\nmsg::" + e.getLocalizedMessage();
+	    		TPILogger.tl.warn(sb);
 	    		return ;
 	    	}
 	    	TPILogger.tl.error("response.getStatus(): " + response.getStatus());
@@ -490,44 +467,8 @@ public class GatewayFilter extends OncePerRequestFilter {
 	    	// [ZH]重新拋出異常，確保錯誤能被正確處理
 	    	// [EN]Rethrow the exception to ensure the error is handled correctly
 	        throw e;  
-	    } finally {
-	        // 清理資源
-	        //cleanup();
 	    }
 
-	}
-
-	/**
-	 * [ZH]如果有熔斷, 將錯誤訊息輸出, 回傳 true; <br>
-	 * 否則, 回傳 false <br>
-	 * [EN]If there is a circuit break, output the error message and return true; <br>
-	 * Otherwise, return false <br>
-	 */
-	private boolean circuitBreakerResponseFlush(HttpServletRequest request, HttpServletResponse response, String uri)
-			throws JsonProcessingException {
-		Object cbAttrObj = request.getAttribute(GatewayFilter.SET_CIRCUIT_BREAKER);
-		if (!(cbAttrObj instanceof Boolean)) {
-			return false;
-		}
-
-		if ((boolean) cbAttrObj) {
-			// [ZH]熔斷不執行API, 顯示錯誤訊息
-			// [EN]The API is not executed and an error message is displayed
-			String errMsg = "Service is temporarily unavailable. Please try again later." + "Circuit breaker uri:"
-					+ uri;
-			ResponseEntity<ErrorResp> errRespEntity = new ResponseEntity<>(new ErrorResp("Service Unavailable", errMsg),
-					HttpStatus.TOO_MANY_REQUESTS);// 429
-			ObjectMapper mapper = new ObjectMapper();
-			String errorRespStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(errRespEntity);
-			TPILogger.tl.warn(errorRespStr);
-
-			// [ZH]將內容輸出
-			// [EN]Output the content
-			responseFlush(response, errRespEntity.getStatusCode().value(), errorRespStr);
-			return true; // [ZH]有熔斷 // [EN]There is a circuit break
-		}
-
-		return false; //[ZH] 沒有熔斷 // [EN]No circuit break
 	}
 	
 	/**
@@ -551,46 +492,14 @@ public class GatewayFilter extends OncePerRequestFilter {
 		// 如果 keyUri 存在，維持原來的值
 
 		// 如果 apiRespTimeMap 的 key 的值不存在, 則建立一個新的 ConcurrentHashMap<String, Long> 並存入
-		Map<String, Long> innerMap = apiRespTimeMap.computeIfAbsent(keyUri, k -> new ConcurrentHashMap<>());
-		// 只有當 innerMap 是空的時，才放入值
-		if (innerMap.isEmpty()) {
+
+		if (!apiRespTimeMap.containsKey(keyUri)) {
+			var innerMap = new ConcurrentHashMap<String, Long>();
 			innerMap.put(GatewayFilter.ELAPSED_TIME, GatewayFilter.ELAPSED_TIME_DEF_VAL);
 			innerMap.put(GatewayFilter.HTTP_CODE, (long) GatewayFilter.HTTP_CODE_DEF_VAL);
+			apiRespTimeMap.put(keyUri, innerMap);
 		}
-	}
 
-	/**
-	 * [ZH]高併發網路流量快速通關分派裝置(控制單元) <br>
-	 * 依據 method URI, 截取上一次 Request 的往返時間 elapsed time <br>
-	 * [EN]High concurrent network traffic fast clearance dispatching device (control unit) <br>
-	 * Based on the method URI, intercept the elapsed time of the last Request. <br>
-	 */
-	private static long fetchUriHistoryElapsed(HttpServletRequest request) {
-		String method01 = request.getMethod();
-		String keyUri = getUriKeyString(method01, request.getRequestURI());
-		return getApiResultMapValue(apiRespTimeMap, keyUri, GatewayFilter.ELAPSED_TIME);
-	}
-
-	/**
-	 * [ZH]高併發網路流量快速通關分派裝置(控制單元) <br>
-	 * 依據 method URI, 截取上一次 Response HTTP code <br>
-	 * [EN]High concurrent network traffic fast clearance dispatching device (control unit) <br>
-	 * Based on the method URI, intercept the last Response HTTP code <br>
-	 */
-	private static Long fetchUriHistoryHttpCode(HttpServletRequest request) {
-		String method01 = request.getMethod();
-		String keyUri = getUriKeyString(method01, request.getRequestURI());
-		return getApiResultMapValue(apiRespTimeMap, keyUri, GatewayFilter.HTTP_CODE);
-	}
-
-	/**
-	 * [ZH]取得上次打 API 記錄的值, API 耗時或 HTTP code <br>
-	 * [EN]Get the value of the last API record, API time or HTTP code <br>
-	 */
-	private static Long getApiResultMapValue(Map<String, Map<String, Long>> apiRespTimeMap, String keyUri, String key) {
-		// 更優雅地處理 null 值
-		return Optional.ofNullable(apiRespTimeMap.get(keyUri)).map(m -> m.get(key)) // 正常取值
-				.orElse(-1L); // null 時, 返回預設值 -1
 	}
 
 	/**
@@ -603,7 +512,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * Calculate the elapsed time and store it in (memory cell) <br>
 	 */
 	public static void fetchUriHistoryAfter(HttpServletRequest request) {
-		long endTime = System.currentTimeMillis();
+		long endTime = Instant.now().toEpochMilli();
 
 		// 以此 Request 記錄它的 URI Key: [GET] /aa/bb , 沒有含 QueryString
 		long startTime = Optional.ofNullable(request.getAttribute(GatewayFilter.START_TIME))
@@ -640,39 +549,33 @@ public class GatewayFilter extends OncePerRequestFilter {
 		String keyUri = getUriKeyString(method01, srcUri);
 		Map<String, Long> innerMap = apiRespTimeMap.computeIfAbsent(keyUri, k -> new ConcurrentHashMap<>());
 		innerMap.put(GatewayFilter.ELAPSED_TIME, elapsed);
-		innerMap.put(GatewayFilter.HTTP_CODE, Long.valueOf(httpCode));
+		innerMap.put(GatewayFilter.HTTP_CODE, (long) httpCode);
 		innerMap.put(GatewayFilter.ELAPSED_TIME23, elapsedTime23);   // 2-3 log data
-		innerMap.put(GatewayFilter.HTTP_CODE23, Long.valueOf(httpCode23)); // 2-3 log data
+		innerMap.put(GatewayFilter.HTTP_CODE23, (long) httpCode23); // 2-3 log data
 
 		// realtime dashboard
+
 		if (httpCode >= 400 || httpCode <= 0) {
-			Long fail = RealtimeDashboardService.realtimeDashobardApiMap.computeIfAbsent(RealtimeDashboardService.FAIL,
-					k -> 0L);
-			RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.FAIL, ++fail);
-			if (httpCode == 401) {
-				Long badAttempt401 = RealtimeDashboardService.realtimeDashobardApiMap
-						.computeIfAbsent(RealtimeDashboardService.BAD_ATTEMPT_401, k -> 0L);
-				RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.BAD_ATTEMPT_401,
-						++badAttempt401);
-			} else if (httpCode == 403) {
-				Long badAttempt403 = RealtimeDashboardService.realtimeDashobardApiMap
-						.computeIfAbsent(RealtimeDashboardService.BAD_ATTEMPT_403, k -> 0L);
-				RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.BAD_ATTEMPT_403,
-						++badAttempt403);
-			} else {
-				Long badAttemptOthers = RealtimeDashboardService.realtimeDashobardApiMap
-						.computeIfAbsent(RealtimeDashboardService.BAD_ATTEMPT_OTHERS, k -> 0L);
-				RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.BAD_ATTEMPT_OTHERS,
-						++badAttemptOthers);
-			}
+
+			RealtimeDashboardService.realtimeDashobardApiMap.merge(
+					RealtimeDashboardService.FAIL, 1L, Long::sum
+			);
+
+			String key = switch (httpCode) {
+				case 401 -> RealtimeDashboardService.BAD_ATTEMPT_401;
+				case 403 -> RealtimeDashboardService.BAD_ATTEMPT_403;
+				default -> RealtimeDashboardService.BAD_ATTEMPT_OTHERS;
+			};
+			RealtimeDashboardService.realtimeDashobardApiMap.merge(
+					key, 1L, Long::sum
+			);
+
 		} else {
-			Long success = RealtimeDashboardService.realtimeDashobardApiMap
-					.computeIfAbsent(RealtimeDashboardService.SUCCESS, k -> 0L);
-			RealtimeDashboardService.realtimeDashobardApiMap.put(RealtimeDashboardService.SUCCESS, ++success);
+			RealtimeDashboardService.realtimeDashobardApiMap.merge(
+					RealtimeDashboardService.SUCCESS, 1L, Long::sum
+			);
 		}
 
-		// print
-		// fetchUriHistoryList(); //不需要輸出以免影響 CPU 使用率
 	}
 
 	/**
@@ -687,11 +590,11 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * [EN]URI maintains original 40-character URL width<br>
 	 */
 	public static String fetchUriHistoryList() {
-	    StringBuilder sb = sbBuilderHolder.get();
+	    StringBuilder sb = new StringBuilder();
 		// [ZH]調整分隔線長度到 75 個字元
 		// [EN]Adjust separator line length to 75 characters
-	    sb.append(String.format("%75s", "").replace(' ', '-')+"\n");
-	    
+	    sb.append(String.format("%75s", "").replace(' ', '-')).append("\n");
+
 	    apiRespTimeMap.forEach((key, value) -> {
 	        if (key.length() > 40) {
 	            for (int i = 0; i < key.length(); i += 40) {
@@ -724,262 +627,21 @@ public class GatewayFilter extends OncePerRequestFilter {
 	            httpCodeVal1, elapsedTime1, httpCodeVal2, elapsedTimeVal2));
 	        sb.append("\n");
 	    });
-	    
-	    String result = sb.toString();
-	    sb.setLength(0); // 清空
-	    return result;
-	}
-	public static String fetchUriHistoryList001() {
-		StringBuilder sb = sbBuilderHolder.get();
-		sb.append(String.format("%60s", "").replace(' ', '-')+"\n");
-		
-		apiRespTimeMap.forEach((key, value) -> {
-			if (key.length() > 40) {
-				for (int i = 0; i < key.length(); i += 40) {
-					if (i + 40 < key.length()) {
-						sb.append(key, i, i + 40).append("\n");
-					} else {
-						sb.append(String.format("%-40s", key.substring(i)));
-					}
-				}
-			} else {
-				sb.append(String.format("%-40s", key));
-			}
 
-			Long httpCode = value.get(GatewayFilter.HTTP_CODE);
-			long elapsedTime = value.get(GatewayFilter.ELAPSED_TIME);
-			String httpCodeVal = "";
-			if (httpCode == null) {
-				httpCodeVal = "";
-			} else {
-				httpCodeVal = httpCode + "";
-			}
-			sb.append(", " + httpCodeVal + ",  " + elapsedTime + "ms\n");
-		});
-		String result = sb.toString();
-		sb.setLength(0); // 清空
-		
-		return result;
-	}
-
-	public static StringBuilder getFetchUriHistoryListInitValue() {
-		StringBuilder sb = sbBuilderHolder.get();
-		sb.append(String.format("%60s", "").replace(' ', '-') + "\n");
-
-		return sb;
-	}
-
-	public void unload() {
-		sbBuilderHolder.remove();
+	    return sb.toString();
 	}
 
 	/**
 	 * [ZH]高併發網路流量快速通關分派裝置(運算單元)
 	 * [EN]High-Concurrency Network Traffic Fast-Pass Dispatch Device (Computing Unit)
-	 * @param method01
-	 * @param uri
-	 * @return
-	 */
-	private static String getUriKeyString(String method01, String uri) {
-		String key = "[" + method01 + "] (" + uri + ")";
-		return key;
-	}
-
-	/**
-	 * [ZH]高併發網路流量快速通關分派裝置(運算單元)+(控制單元)
-	 * [EN]High-Concurrency Network Traffic Fast-Pass Dispatch Device (Computing Unit) + (Control Unit)
-	 * @param dgrcUri
-	 * @return newUri
-	 */
-	private void fetchUriHistoryRouterControl(HttpServletRequest request) {
-
-		// [ZH]開始記錄 URI 的資訊, 未來做為 '高併發網路流量快速通關分派裝置' 轉發的依據
-		// [EN]Start recording URI information, which will be used as the basis for forwarding by the 'High-Concurrency Network Traffic Fast-Pass Dispatch Device'
-		fetchUriHistoryBefore(request);
-
-		long lastTime = fetchUriHistoryElapsed(request);
-		Long httpCode = fetchUriHistoryHttpCode(request);
-		
-		// [ZH]Policy-1. <測速分流>  執行較快的: 走快車道
-		// [EN]Policy-1. <Speed Test Distribution> Faster execution: Use the fast lane
-		boolean isAlwaysSlow = false; 
-		if (highwayPoolSizeRate == 0) { 
-			// [ZH]當 highway-pool-size-rate=0 時, 表示沒有快車道(預設僅1個), 一律走慢車道
-			// [EN]When highway-pool-size-rate=0, it means there is no fast lane (only 1 by default), all vehicles must use the slow lane
-			isAlwaysSlow = true;
-		} else if (lastTime < tsmpSettingService.getVal_HIGHWAY_THRESHOLD()) {
-			request.setAttribute(GatewayFilter.SETWORK_THREAD, GatewayFilter.FAST);
-			return;
-		}
-		
-		// [ZH]Policy-3. <事前預防> 執行較久的: 走慢車道 or 熔斷 or 換快車道
-		// [EN]Policy-3. <Preventive Measure> Longer execution: Use slow lane OR circuit break OR switch to fast lane
-		
-		// [ZH]慢車道現況
-		// [EN]Current status of slow lane
-		int activeCount = asyncWorkerPool.getActiveCount();
-		int maxPoolSize = asyncWorkerPool.getMaxPoolSize();
-		
-		// [ZH]若慢車道的使用量尖峰, 判斷是否熔斷
-		// [EN]Check if circuit breaking is needed when slow lane usage reaches peak
-		boolean isCircuitBreaker = isCircuitBreaker(activeCount, maxPoolSize, lastTime, httpCode);
-		if (isCircuitBreaker) { // 熔斷
-			request.setAttribute(GatewayFilter.SET_CIRCUIT_BREAKER, GatewayFilter.CIRCUIT_BREAKER_STATUS);
-			return;
-		}
-		
-		if(isAlwaysSlow) { 
-			// [ZH]沒有快車道, 走慢車道, 不須考慮換快車道
-			// [EN]There is no fast lane, take the slow lane, don't consider changing to the fast lane
-			request.setAttribute(GatewayFilter.SETWORK_THREAD, GatewayFilter.SLOW);
-			return;
-		}
-		
-		// [ZH]快車道現況
-		// [EN]Current status of fast lane
-		int activeCountHighway = asyncWorkerHighwayPool.getActiveCount();
-		int maxPoolSizeHighway = asyncWorkerHighwayPool.getMaxPoolSize();
-		
-		// [ZH]Policy-2. <物盡其用> 如果慢車道的使用量已滿,且快車道為離峰,可走快車道; 否則維持慢車道
-		// [EN]Policy-2. <Resource Optimization> If slow lane usage is full and fast lane is off-peak, can use fast lane; otherwise maintain slow lane
-		boolean isTakeFast = isTakeFast(activeCount, maxPoolSize, activeCountHighway, maxPoolSizeHighway);
-		if (isTakeFast) {
-			request.setAttribute(GatewayFilter.SETWORK_THREAD, GatewayFilter.FAST);
-		} else {
-			request.setAttribute(GatewayFilter.SETWORK_THREAD, GatewayFilter.SLOW);
-		}
-	}
-
-	/**
-	 * [ZH]判斷是否要熔斷 <br>
-	 * 自動熔斷機制:一般情況下,不會啟動熔斷機制 <br>
-	 * 當慢車道使用量 >= 80% (尖峰)時, 啟動熔斷機制, <br>
-	 * 若 API 的上次執行時間為 30 sec (timeout 時間) 以上, 且不在 200-499 範圍時才熔斷, <br>
-	 * 則判斷為記錄不良, 熔斷此 API 的新流量 <br>
-	 * 當慢車道低於滿載的 80%, 則釋放流量, 停用熔斷判斷機制 <br>
-     * [EN]Determine whether circuit breaking should be activated <br>
-     * Automatic circuit breaking mechanism: Under normal circumstances, circuit breaking will not be activated <br>
-     * When slow lane usage >= 80% (peak), circuit breaking mechanism is activated, <br>
-     * If the API's last execution time is above 30 sec (timeout period), and the response is not within 200-499 range, <br>
-     * Then it is considered a bad record, and new traffic to this API will be circuit broken <br>
-     * When slow lane drops below 80% capacity, traffic is released and circuit breaking mechanism is deactivated <br>
      */
-	protected boolean isCircuitBreaker(float activeCount, float maxPoolSize, long lastTime, long httpCode) {
-		// [ZH]若是初始值 999999 & -1 , 表示第一次, 則不熔斷
-		// [EN]If the initial value is 999999 & -1, indicating first time, then do not circuit break
-		if (lastTime == GatewayFilter.ELAPSED_TIME_DEF_VAL && httpCode == GatewayFilter.HTTP_CODE_DEF_VAL) {
-			// [ZH]第一次進入不熔斷
-			// [EN]First entry will not trigger circuit breaking
-			return false; 
-		}
-		
-		// [ZH]慢車道使用量 (尖峰表示 '>=0.8')
-		// [EN]Slow lane usage (peak indicates '>=0.8')
-		float usage = activeCount / maxPoolSize;
-
-		// [ZH]如果不滿足熔斷條件, 即"離峰"或"沒有耗時過久",直接返回 false
-		// [EN]If circuit breaking conditions are not met, meaning "off-peak" or "not time-consuming", return false directly
-		if (usage < GatewayFilter.PEAK_USAGE_VALUE || lastTime < GatewayFilter.ELAPSED_TOO_LONG_VALUE) { 
-			return false;
-		}
-	    
-	    // [ZH]只有當 HTTP code 不在 200-499 範圍時才熔斷, 此時 usage >= 0.8
-		// [EN]Only circuit break when HTTP code is not in 200-499 range, at this point usage >= 0.8
-	    boolean isCircuit = !(httpCode >= 200 && httpCode < 500);
-	    if (isCircuit) {
-	    	// [ZH]觸發熔斷
-	    	// [EN]Trigger circuit breaking
-	    	TPILogger.tl.warn("\n\tCircuit Breaker::" + "activeCount:" + activeCount +
-	    			", maxPoolSize:" + maxPoolSize +
-	    			", usage:" + usage +
-	    			", lastTime:" + lastTime +
-	    			", httpCode:" + httpCode);
-	    }
-	    return isCircuit;
-	}
-
-	/**
-	 * [ZH]判斷慢車是否改走快車道 <br>
-	 * 若慢車道(country road)的使用量已滿(100%), 即 已使用的路(activeCount) = 可使用的路(maxPoolSize) <br>
-	 * (a).若 highway 的 activeCount 占 maxPoolSize < 80% (離峰)時, 慢車可以走快車道 <br>
-	 * (b).若 highway 的 activeCount 占 maxPoolSize >= 80% 時, 慢車不能走快車道 <br>
-	 * [EN]Determine if slow lane traffic should be redirected to fast lane <br>
-	 * If slow lane (country road) usage is full (100%), meaning active count = pool size <br>
-	 * (a). When highway's activeCount to maxPoolSize ratio < 80% (off-peak), slow lane
-	 * traffic can be redirected to fast lane <br>
-	 * (b). When highway's activeCount to maxPoolSize ratio >= 80%, slow lane traffic
-	 * cannot be redirected to fast lane <br>
-	 */
-	protected boolean isTakeFast(float activeCount, float maxPoolSize, float activeCountHighway,
-			float maxPoolSizeHighway) {
-		if (activeCount != maxPoolSize) {
-			// [ZH]慢車道使用量未滿(100%), 維持走慢車道
-			// [EN]Slow lane usage is not full (100%), maintain slow lane routing
-			
-			// [ZH]走慢車道
-			// [EN]Route through slow lane
-			return false; 
-		}
-
-		// 快車道使用量
-		// Fast lane usage
-		float usage = activeCountHighway / maxPoolSizeHighway;
-		if (usage < GatewayFilter.PEAK_USAGE_VALUE) {
-			// [ZH]快車道離峰時, 可走快車道
-			// [EN]During fast lane off-peak, can route through fast lane
-			
-			// [ZH]走快車道
-			// [EN]Route through fast lane
-			return true;
-		}
-		
-		// [ZH]走慢車道
-		// [EN]Route through slow lane
-		return false;
-	}
-
-	private void showSrcURI(String uri, String remoteAddr, String remoteHost, String method01, String qString) {
-		boolean reqUriFlag = getTsmpSettingService().getVal_REQUEST_URI_ENABLED();
-		if (reqUriFlag) {
-			//...request.getRequestURI():[GET] (/dgrv4/ImGTW/refreshGTW)
-			//...request.getRemoteAddr():(remoteAdd)
-			//...request.getRemoteHost():(remoteHost)
-			
-			// [ZH]從 Thread 中取一個 sb 物件來用
-			// [EN]Get a sb object from Thread to use
-			StringBuilder sb = sbBuilderHolder.get();
-
-			sb.append("\n...request.getRequestURI():[" + method01 + "] (" + uri + ")");
-			sb.append("\n...request.getQueryString():(" + qString + ")");
-			sb.append("\n...request.getRemoteAddr():(" + remoteAddr + ")");
-			sb.append("\n...request.getRemoteHost():(" + remoteHost + ")\n");
-			TPILogger.tl.debug(sb.toString());
-			sb.setLength(0);
-		}
-	}
-	
-	/**
-	 * [ZH]是否要記錄到高併發網路流量快速通關分派裝置, <br>
-	 * 若 http method 為 "OPTIONS" 時, 是前端透過 "靜態網頁反向代理" 打進來的 API, <br>
-	 * 就不做記錄, 即不顯示在 "URI Status" 和 "即時 dashboard" 畫面中 <br>
-	 * [EN] Whether to record the high concurrent network traffic fast clearance dispatch device, <br>
-	 * If the http method is "OPTIONS", it is the API that the front-end calls through the "static webpage reverse proxy". <br>
-	 * Do not record, i.e. do not display in "URI Status" and "Real-time dashboard" screens <br>
-	 */
-	private static boolean isRecord(HttpServletRequest request) {
-		String method = request.getMethod();
-		if(method.equalsIgnoreCase("OPTIONS")) {
-			return false;
-		}
-		
-		return true;
+	private static String getUriKeyString(String method01, String uri) {
+        return "[" + method01 + "] (" + uri + ")";
 	}
 
 	/**
 	 * 
-	 * @param request
 	 * @param uri     可能包含有 /tsmpc/、/dgrc/、、、、等
-	 * @return
 	 */
 	private HttpServletRequest rewriteRequestURI(HttpServletRequest request, String uri) {
 		String kibanaPrefix = getTsmpSettingService().getVal_KIBANA_REPORTURL_PREFIX();
@@ -995,14 +657,8 @@ public class GatewayFilter extends OncePerRequestFilter {
 			 * completed calculation results are temporarily stored in
 			 * request.setAttribute(k,v)
 			 */
-			fetchUriHistoryRouterControl(request); 
-			
-			// [ZH]根據 request.getAttribute 判斷是否熔斷
-			// [EN]Determine circuit breaking based on request.getAttribute
-			Object cbAttrObj = request.getAttribute(GatewayFilter.SET_CIRCUIT_BREAKER);
-			if (cbAttrObj instanceof Boolean && (boolean) cbAttrObj) {// 熔斷 // Circuit break
-				return request;
-			}
+			fetchUriHistoryBefore(request);
+
 
 			// [ZH]不熔斷, 進行 controller 轉發
 			// [EN]No circuit break, proceed with controller forwarding
@@ -1011,7 +667,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			return request;
 			// [ZH]要同時符合 1. 是要走 /kibana2 以及url 內沒有 /kibana2 的才加入 預防/kibana2/login 被二次加入/kibana2
 			// [EN]Must simultaneously meet two conditions: 1. Should route to /kibana2 and URL doesn't contain /kibana2 - this prevents /kibana2/login from having /kibana2 added twice
-		} else if (isGCPkibana(request, kibanaPrefix) && !uri.contains("login")) {
+		} else if (!uri.contains("login") && isGCPkibana(request, kibanaPrefix)  ) {
 			// [ZH]導向 KibanaController.java "/kibana/**"
 			// [EN]Route to KibanaController.java "/kibana/**"
 			request = GatewayFilter.changeRequestURI(request, kibanaPrefix + uri);
@@ -1026,14 +682,13 @@ public class GatewayFilter extends OncePerRequestFilter {
 	/**
 	 * [ZH]開頭是 dgrc 或是 tsmpc 的 path
 	 * [EN]paths that start with 'dgrc' or 'tsmpc'
-	 * @param request uri
 	 */
 	private boolean isDGRCorTSMPC(String uri) {
-		boolean b1 = (uri.length() >= 6 && (uri.substring(0, 6).equals("/dgrc/")));
-		boolean b2 = (uri.length() >= 7 && (uri.substring(0, 7).equals("/tsmpc/")));
+		boolean b1 = ((uri.startsWith("/dgrc/")));
+		boolean b2 = ((uri.startsWith("/tsmpc/")));
 		// [ZH]因為v3的noAuth要用tsmpg
 		// [EN]Because v3's noAuth needs to use tsmpg
-		boolean b3 = (uri.length() >= 7 && (uri.substring(0, 7).equals("/tsmpg/")));
+		boolean b3 = ((uri.startsWith("/tsmpg/")));
 		return (b1 || b2 || b3);
 	}
 
@@ -1098,18 +753,16 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 */
 	private void responseFlush(HttpServletResponse httpResponse, ResponseEntity<?> respEntity) throws Exception {
 		Integer httpStatus = respEntity.getStatusCode().value();
-		String errorRespStr = null;
+
 		ObjectMapper mapper = new ObjectMapper();
 		Object bodyObj = respEntity.getBody();
-		if (bodyObj instanceof OAuthTokenErrorResp) {
-			OAuthTokenErrorResp errorResp = (OAuthTokenErrorResp) bodyObj;
-			errorRespStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(errorResp);
 
-		} else if (bodyObj instanceof OAuthTokenErrorResp2) {
-			OAuthTokenErrorResp2 errorResp = (OAuthTokenErrorResp2) bodyObj;
-			errorRespStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(errorResp);
-
-		}
+		String errorRespStr = switch (bodyObj) {
+			case OAuthTokenErrorResp oAuthTokenErrorResp -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oAuthTokenErrorResp);
+			case OAuthTokenErrorResp2 oAuthTokenErrorResp2 -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oAuthTokenErrorResp2);
+			case null -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(Map.of("msg", "bodyObj is null"));
+			default -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(bodyObj);
+		};
 
 		responseFlush(httpResponse, httpStatus, errorRespStr);
 	}
@@ -1119,17 +772,16 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * [EN]output the content
 	 */
 	private void responseFlush(HttpServletResponse httpResponse, Integer httpStatus, String errorRespStr) {
-		httpResponse.setHeader("Content-Type", "application/json; charset=utf-8");
+		httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		httpResponse.setCharacterEncoding(StandardCharsets.UTF_8.toString());
 		httpResponse.setStatus(httpStatus);
 		try {
 			// checkmarx, Missing HSTS Header
 			httpResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-			httpResponse.getWriter().append(errorRespStr);
+			httpResponse.getWriter().write(errorRespStr);
 			httpResponse.getWriter().flush();
-			httpResponse.flushBuffer();
-		} catch (JsonProcessingException e) {
-			logger.error(StackTraceUtil.logStackTrace(e));
-		} catch (IOException e) {
+			httpResponse.getWriter().close();
+		} catch (Exception e) {
 			logger.error(StackTraceUtil.logStackTrace(e));
 		}
 	}
@@ -1143,17 +795,13 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * before adding CSP header <br>
 	 */
 	private boolean isAddCsp(String reqURI) {
-		boolean isKibana = (reqURI.indexOf("/kibana") == 0) ? true : false;// 是否為 "/kibana" 開頭
-		boolean isDashboards = (reqURI.indexOf("/_dashboards") == 0) ? true : false;// 是否為 "/_dashboards" 開頭
-		boolean isWebsite = (reqURI.indexOf("/website") == 0) ? true : false;// 是否為 "/website" 開頭
-		boolean isKibana2 = (reqURI.indexOf("/kibana2") == 0) ? true : false;// 是否為 "/kibana" 開頭
+		boolean isKibana = reqURI.indexOf("/kibana") == 0;// 是否為 "/kibana" 開頭
+		boolean isDashboards = reqURI.indexOf("/_dashboards") == 0;// 是否為 "/_dashboards" 開頭
+		boolean isWebsite = reqURI.indexOf("/website") == 0;// 是否為 "/website" 開頭
+		boolean isKibana2 = reqURI.indexOf("/kibana2") == 0;// 是否為 "/kibana" 開頭
 
-		if (!isKibana && !isDashboards && !isWebsite && !isKibana2) {
-			return true;
-		}
-
-		return false;
-	}
+        return !isKibana && !isDashboards && !isWebsite && !isKibana2;
+    }
 
 	private String addDgrcToUri(String uri) {
 		return "/dgrc" + uri;
@@ -1170,23 +818,15 @@ public class GatewayFilter extends OncePerRequestFilter {
 		}
 
 		if (paths == DGRC_ROUTING) {
-			if (isComposerAPI) {
-				setModuleNameAndApiIdToReq(request, reqUrl, false);
-			} else {
-				setModuleNameAndApiIdToReq(request, reqUrl, true);
-			}
+            setModuleNameAndApiIdToReq(request, reqUrl, !isComposerAPI);
 		}
-
-		boolean isTsmpc = reqUrl.substring(0, 7).equals("/tsmpc/");
+		
+		boolean isTsmpc =   reqUrl.startsWith("/tsmpc/");
 		if (!isTsmpc) {
-			isTsmpc = reqUrl.substring(0, 7).equals("/tsmpg/");// 因為v3的noAuth要用tsmpg
+			isTsmpc = reqUrl.startsWith("/tsmpg/");// 因為v3的noAuth要用tsmpg
 		}
 		if (paths == TSMP_DGRCROUTING) {
-			if (isTsmpc) {
-				setModuleNameAndApiIdToReq(request, reqUrl, false);
-			} else {
-				setModuleNameAndApiIdToReq(request, reqUrl, true);
-			}
+            setModuleNameAndApiIdToReq(request, reqUrl, !isTsmpc);
 		}
 	}
 
@@ -1217,13 +857,11 @@ public class GatewayFilter extends OncePerRequestFilter {
 		apiId.setModuleName(moduleName);
 		Optional<TsmpApi> opt_tsmpApi = getTsmpApiCacheProxy().findById(apiId);
 
-		if (!opt_tsmpApi.isEmpty()) {
+		if (opt_tsmpApi.isPresent()) {
 			// 看TSMP_API的API_SRC是C ==> Composer
 			// 看TSMP_API的API_SRC是R ==> 註冊
 			TsmpApi tsmpApi = opt_tsmpApi.get();
-			if ("C".equals(tsmpApi.getApiSrc())) {
-				return true;
-			}
+            return "C".equals(tsmpApi.getApiSrc());
 		}
 
 		return false;
@@ -1238,7 +876,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			logger.error(StackTraceUtil.logStackTrace(e));
 		}
 
-		String stringBody = new String();
+		String stringBody = "";
 		String method = request.getMethod();
 		String contentType = request.getContentType() == null ? "" : request.getContentType().toLowerCase();
 
@@ -1249,11 +887,11 @@ public class GatewayFilter extends OncePerRequestFilter {
 		} else {
 
 			// 處理 QueryString + RAW
-			if (contentType.indexOf(MediaType.TEXT_PLAIN_VALUE.toLowerCase()) > -1
-					|| contentType.indexOf(MediaType.APPLICATION_JSON_VALUE.toLowerCase()) > -1
-					|| contentType.indexOf(MediaType.TEXT_HTML_VALUE.toLowerCase()) > -1
-					|| contentType.indexOf(MediaType.APPLICATION_XML_VALUE.toLowerCase()) > -1) {
-				if (byteBody.length != 0) {
+			if (contentType.contains(MediaType.TEXT_PLAIN_VALUE.toLowerCase())
+					|| contentType.contains(MediaType.APPLICATION_JSON_VALUE.toLowerCase())
+					|| contentType.contains(MediaType.TEXT_HTML_VALUE.toLowerCase())
+					|| contentType.contains(MediaType.APPLICATION_XML_VALUE.toLowerCase())) {
+				if (byteBody != null && byteBody.length != 0) {
 					stringBody = new String(byteBody);
 				}
 
@@ -1265,14 +903,14 @@ public class GatewayFilter extends OncePerRequestFilter {
 			}
 
 			// 處理 QueryString + FormData
-			if (contentType.indexOf(MediaType.MULTIPART_FORM_DATA_VALUE.toLowerCase()) > -1
-					|| contentType.indexOf(MediaType.APPLICATION_FORM_URLENCODED_VALUE.toLowerCase()) > -1) {
+			if (contentType.contains(MediaType.MULTIPART_FORM_DATA_VALUE.toLowerCase())
+					|| contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE.toLowerCase())) {
 				stringBody = getQueryStringAndFormData(request);
 			}
 
 			// 若沒有content Type，預設當作text處理
-			if ("".equals(contentType)) {
-				if (byteBody.length != 0) {
+			if (contentType.isEmpty()) {
+				if (byteBody !=null && byteBody.length != 0) {
 					stringBody = new String(byteBody);
 				}
 
@@ -1284,9 +922,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			}
 		}
 
-		String body = stringBody == null ? "" : stringBody;
-
-		return body;
+		return stringBody;
 	}
 
 	private OAuthTokenErrorResp checkList(HttpServletResponse response, HttpServletRequest request, String uri) {
@@ -1352,10 +988,9 @@ public class GatewayFilter extends OncePerRequestFilter {
 		TsmpApiRegId tsmpApiRegId = new TsmpApiRegId(apiId, moduleName);
 		Optional<TsmpApiReg> tsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId);
 		if (tsmpApiReg.isPresent()) {
-			String noAuth = tsmpApiReg.get().getNoOauth();
-			if ("1".equals(noAuth)) {
-				// 若有勾 no auth, 則不檢查
-			} else {
+			var isNoAuth = tsmpApiReg.get().getNoOauth().equals("1");
+			// 若有勾 no auth, 則不檢查
+			if (!isNoAuth) {
 				// 否則, 檢查
 				String cID = getCID(request); // 取得 client ID
 				if (StringUtils.hasText(cID) && trafficCheck.check(cID)) {
@@ -1399,9 +1034,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			response.getWriter().append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(vo));
 			response.getWriter().flush();
 			response.flushBuffer();
-		} catch (JsonProcessingException e) {
-			logger.error(StackTraceUtil.logStackTrace(e));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error(StackTraceUtil.logStackTrace(e));
 		}
 	}
@@ -1411,7 +1044,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 		for (Enumeration<?> e = request.getHeaderNames(); e.hasMoreElements();) {
 			String nextHeaderName = (String) e.nextElement();
 			String headerValue = request.getHeader(nextHeaderName);
-			if ("locale".toLowerCase().equals(nextHeaderName.toLowerCase())) {
+			if ("locale".equalsIgnoreCase(nextHeaderName)) {
 				locale = headerValue;
 				return locale;
 			}
@@ -1421,20 +1054,20 @@ public class GatewayFilter extends OncePerRequestFilter {
 
 	private String getQueryStringAndFormData(HttpServletRequest request) {
 		Enumeration<String> keys = request.getParameterNames();
-		StringBuffer strBuf = new StringBuffer();
+		StringBuilder strBuf = new StringBuilder();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
 			String[] valueArray = request.getParameterValues(key);
 			if (valueArray.length >= 2) {
-				for (int i = 0; valueArray.length > i; i++) {
-					strBuf.append(key + " " + valueArray[i] + " ");
-				}
+                for (String s : valueArray) {
+                    strBuf.append(key).append(" ").append(s).append(" ");
+                }
 			} else {
 				String value = request.getParameter(key);
-				strBuf.append(key + " " + value + " ");
+				strBuf.append(key).append(" ").append(value).append(" ");
 			}
 
-		}
+		};
 		return strBuf.toString();
 	}
 
@@ -1447,8 +1080,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 	private String getCID(HttpServletRequest httpReq) {
 		// 解析資料
 		String auth = httpReq.getHeader(CommForwardProcService.AUTHORIZATION);
-		String cid = tokenCheck.getCid(auth);
-		return cid;
+        return tokenCheck.getCid(auth);
 	}
 
 	private void setModuleNameAndApiIdToReq(HttpServletRequest request, String reqUrl, boolean paths) {
@@ -1507,21 +1139,16 @@ public class GatewayFilter extends OncePerRequestFilter {
 			return false;
 
 		String urlRid = tsmpApiReg.get().getUrlRid();
-		if ("1".equals(urlRid))
-			return true;
-
-		return false;
-	}
+        return "1".equals(urlRid);
+    }
 
 	boolean isTsmpcApiExist(String moduleName, String apiKey) {
 		TsmpApiId apiId = new TsmpApiId();
 		apiId.setApiKey(apiKey);
 		apiId.setModuleName(moduleName);
 		Optional<TsmpApi> tsmpApi = getTsmpApiCacheProxy().findById(apiId);
-		if (tsmpApi.isEmpty())
-			return false;
-		return true;
-	}
+        return tsmpApi.isPresent();
+    }
 
 	protected void writeLog(HttpServletRequest httpReq, HttpServletResponse httpResp, //
 			String entry) {
@@ -1580,47 +1207,30 @@ public class GatewayFilter extends OncePerRequestFilter {
 		return this.commForwardProcService;
 	}
 
-	public WebsiteService getWebsiteService() {
-		return websiteService;
-	}
-
 	public static void setApiRespThroughput() {
 		// [ZH]獲取目前秒數
 		// [EN]Get the current seconds
-		long currentTimeMillis = System.currentTimeMillis();
-		int currentSeconds = (int) (currentTimeMillis / 1000);
+		var currentSeconds = Instant.now().getEpochSecond();
+
 
 		// [ZH]檢查currentSeconds目前時間點有沒有資料，若沒有currentSeconds就初始值1，若有currentSeconds就累加1
 		// [EN]Check if there is data at the current time point of currentSeconds. If there is no currentSeconds, the initial value is 1. If there is currentSeconds, it is accumulated by 1
-		synchronized (GatewayFilter.throughputObjLock) {
-			if (GatewayFilter.apiRespThroughput.containsKey(currentSeconds)) {
-				Integer throughputSize = GatewayFilter.apiRespThroughput.get(currentSeconds);
-				GatewayFilter.apiRespThroughput.put(currentSeconds, throughputSize + 1);
-			} else {
-				GatewayFilter.apiRespThroughput.put(currentSeconds, 1);
-			}
+		synchronized (GatewayFilter.apiRespThroughputObjLock) {
+			var transactions = GatewayFilter.apiRespThroughput.getOrDefault(currentSeconds, 1L);
+			GatewayFilter.apiRespThroughput.put(currentSeconds, transactions + 1);
 		}
-	}
-
-	public static void setApiRespThroughput(HttpServletRequest httpReq) {
-		setApiRespThroughput();
 	}
 
 	public static void setApiReqThroughput() {
 		// [ZH]獲取目前秒數
 		// [EN]Get the current seconds
-		long currentTimeMillis = System.currentTimeMillis();
-		int currentSeconds = (int) (currentTimeMillis / 1000);
+		var currentSeconds = Instant.now().getEpochSecond();
 
 		// [ZH]檢查currentSeconds目前時間點有沒有資料，若沒有currentSeconds就初始值1，若有currentSeconds就累加1
 		// [EN]Check if there is data at the current time point of currentSeconds. If there is no currentSeconds, the initial value is 1. If there is currentSeconds, it is accumulated by 1
-		synchronized (GatewayFilter.throughputObjLock) {
-			if (apiReqThroughput.containsKey(currentSeconds)) {
-				Integer throughputSize = apiReqThroughput.get(currentSeconds);
-				apiReqThroughput.put(currentSeconds, throughputSize + 1);
-			} else {
-				apiReqThroughput.put(currentSeconds, 1);
-			}
+		synchronized (GatewayFilter.apiReqThroughputObjLock) {
+			var transactions = GatewayFilter.apiReqThroughput.getOrDefault(currentSeconds, 1L);
+			GatewayFilter.apiReqThroughput.put(currentSeconds, transactions + 1);
 		}
 	}
 
@@ -1649,26 +1259,9 @@ public class GatewayFilter extends OncePerRequestFilter {
 	 * 是否為 dgR AC API
 	 */
 	public static boolean isDgrUrl(String uri) {
-		boolean isDgrUrl = (uri.length() >= 10 && (uri.substring(0, 10).equals("/dgrv4/11/")));
-		isDgrUrl = isDgrUrl || (uri.length() >= 10 && (uri.substring(0, 10).equals("/dgrv4/17/")));
+		boolean isDgrUrl = ((uri.startsWith("/dgrv4/11/")));
+		isDgrUrl = isDgrUrl || ((uri.startsWith("/dgrv4/17/")));
 
 		return isDgrUrl;
 	}
-
-	/**
-	 * 兩個方法的作用和為什麼會在高併發時出現問題 當這兩個方法保持預設值（true）時，在高併發情況下可能會出現問題：
-	 * 
-	 * 1.請求進入系統，第一次經過 filter 2.開始非同步處理 3.因為 shouldNotFilterAsyncDispatch =
-	 * true，非同步分發時不會再次執行 filter 4.此時如果有其他 filter 或處理邏輯修改了 request 的屬性
-	 * 5.當非同步操作完成時，Spring 嘗試獲取 AsyncWebRequest，但可能已經被清除或變為 null
-	 */
-//    @Override
-//    protected boolean shouldNotFilterAsyncDispatch() {
-//        return false; //true, 在高併發時出現問題
-//    }
-//
-//    @Override
-//    protected boolean shouldNotFilterErrorDispatch() {
-//        return false; //true, 在高併發時出現問題
-//    }
 }

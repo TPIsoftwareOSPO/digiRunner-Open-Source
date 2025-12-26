@@ -76,13 +76,14 @@ public class DPB0231Service {
         boolean success;
         String requrl = "https://" + host + ":" + port;
         HttpUtil.HttpRespData resp = HttpUtil2.callApiByHttp2(requrl, "HEAD", new HashMap<String, String>(), null, false, true, mtlsMap,true ,null,false);
-        if (resp.statusCode > 0 && resp.statusCode < 500) {
+        resp.fetchByte();
+        if (resp.statusCode > 0 && resp.statusCode < 495) {
             success = true;
 
         } else {
             success = false;
-            TPILogger.tl.error("Connect fail  : " + resp.respStr);
         }
+        TPILogger.tl.debug(resp.getLogStr());
         return new Pair<>(success, resp.respStr);
     }
 

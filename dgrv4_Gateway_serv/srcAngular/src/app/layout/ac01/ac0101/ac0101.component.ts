@@ -68,7 +68,7 @@ export class Ac0101Component extends BaseComponent implements OnInit {
     private serverService: ServerService,
     private ngxService: NgxUiLoaderService,
     private api: ApiBaseService,
-    private alertService: AlertService
+    private alertService: AlertService,
   ) {
     super(route, tr);
     this.form = this.fb.group({

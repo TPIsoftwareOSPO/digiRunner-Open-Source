@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,11 +38,13 @@ import tpi.dgrv4.dpaa.vo.AA1212RespItem;
 import tpi.dgrv4.dpaa.vo.AA1212SuccessResp;
 import tpi.dgrv4.dpaa.vo.RealtimeDashboardAllNodeVo;
 import tpi.dgrv4.entity.entity.DgrAuditLogM;
+import tpi.dgrv4.entity.entity.TsmpRoleFunc;
 import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
+import tpi.dgrv4.entity.repository.TsmpRoleDao;
+import tpi.dgrv4.entity.repository.TsmpRoleFuncDao;
 import tpi.dgrv4.gateway.TCP.Packet.RequireAllClientListPacket;
 import tpi.dgrv4.gateway.TCP.Packet.RequireRealtimeDashboardInfosPacket;
 import tpi.dgrv4.gateway.TCP.Packet.RequireUrlStatusInfosPacket;
-import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.ClientKeeper;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -56,6 +58,8 @@ public class AA1212Service {
 
 	private int noKeeperServerNumber = 0;
 	private final DgrAuditLogMDao dgrAuditLogMDao;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final TsmpRoleFuncDao tsmpRoleFuncDao;
 	private long startTime = System.currentTimeMillis();
 
 	public AA1212Resp queryRealtimeDashboardData(TsmpAuthorization authorization) {
@@ -74,7 +78,19 @@ public class AA1212Service {
 			}).collect(Collectors.toList());		
 			resp.setLastLoginLogList(lastLoginLogList);
 			
-			if(!authorization.getAuthorities().contains("1000") && !authorization.getAuthorities().contains("1001")) {
+			//判斷是否可檢視儀表板
+			//Determine whether the dashboard can be viewed
+			boolean isViewDashboard = false;
+			List<String> authList = authorization.getAuthorities();
+			for(String roleId: authList) {
+				List<TsmpRoleFunc> roleFuncList =  this.getTsmpRoleFuncDao().findByRoleId(roleId);
+				List<String> funcList = roleFuncList.stream().map(vo->vo.getFuncCode()).toList();
+				isViewDashboard = funcList.contains("AC0511");//AC0511 is Home Dashboard
+				if(isViewDashboard) {
+					break;
+				}
+			}
+			if(isViewDashboard == false) {
 				return resp;
 			}
 			
@@ -539,5 +555,7 @@ public class AA1212Service {
 			}
 		}
 	}
+	
+	
 
 }

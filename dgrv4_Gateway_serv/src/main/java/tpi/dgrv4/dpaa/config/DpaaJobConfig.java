@@ -55,6 +55,8 @@ import tpi.dgrv4.dpaa.component.job.AA0001Job;
 import tpi.dgrv4.dpaa.component.job.AA0004Job;
 import tpi.dgrv4.dpaa.component.job.AA0201Job;
 import tpi.dgrv4.dpaa.component.job.AA0231Job;
+import tpi.dgrv4.dpaa.component.job.AA0550Job;
+import tpi.dgrv4.dpaa.component.job.AA0552Job;
 import tpi.dgrv4.dpaa.component.job.ComposerServiceJob;
 import tpi.dgrv4.dpaa.component.job.DPB0002Job;
 import tpi.dgrv4.dpaa.component.job.DPB0005Job;
@@ -103,48 +105,7 @@ import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
 import tpi.dgrv4.entity.daoService.SeqStoreService;
 import tpi.dgrv4.entity.entity.TsmpDpApptJob;
 import tpi.dgrv4.entity.entity.jpql.TsmpEvents;
-import tpi.dgrv4.entity.repository.DgrAcIdpAuthCodeDao;
-import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
-import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
-import tpi.dgrv4.entity.repository.DgrImportClientRelatedTempDao;
-import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
-import tpi.dgrv4.entity.repository.SeqStoreDao;
-import tpi.dgrv4.entity.repository.TsmpAlertDao;
-import tpi.dgrv4.entity.repository.TsmpApiDao;
-import tpi.dgrv4.entity.repository.TsmpApiExtDao;
-import tpi.dgrv4.entity.repository.TsmpAuthCodeDao;
-import tpi.dgrv4.entity.repository.TsmpClientCert2Dao;
-import tpi.dgrv4.entity.repository.TsmpClientCertDao;
-import tpi.dgrv4.entity.repository.TsmpClientDao;
-import tpi.dgrv4.entity.repository.TsmpClientGroupDao;
-import tpi.dgrv4.entity.repository.TsmpClientLogDao;
-import tpi.dgrv4.entity.repository.TsmpDpApiAuth2Dao;
-import tpi.dgrv4.entity.repository.TsmpDpApiThemeDao;
-import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
-import tpi.dgrv4.entity.repository.TsmpDpCallapiDao;
-import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
-import tpi.dgrv4.entity.repository.TsmpDpFileDao;
-import tpi.dgrv4.entity.repository.TsmpDpMailLogDao;
-import tpi.dgrv4.entity.repository.TsmpDpNewsDao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd1Dao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2Dao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd2dDao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd3Dao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd4Dao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5Dao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrderd5dDao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
-import tpi.dgrv4.entity.repository.TsmpEventsDao;
-import tpi.dgrv4.entity.repository.TsmpFuncDao;
-import tpi.dgrv4.entity.repository.TsmpGroupApiDao;
-import tpi.dgrv4.entity.repository.TsmpGroupDao;
-import tpi.dgrv4.entity.repository.TsmpNoticeLogDao;
-import tpi.dgrv4.entity.repository.TsmpOpenApiKeyDao;
-import tpi.dgrv4.entity.repository.TsmpOpenApiKeyMapDao;
-import tpi.dgrv4.entity.repository.TsmpRoleFuncDao;
-import tpi.dgrv4.entity.repository.TsmpSettingDao;
-import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
-import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.entity.repository.*;
 import tpi.dgrv4.escape.MailHelper;
 import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.ServiceConfig;
@@ -249,6 +210,7 @@ public class DpaaJobConfig {
     private final DpaaAlertNotifierLine dpaaAlertNotifierLine;
     private final DpaaAlertNotifierCustom dpaaAlertNotifierCustom;
     private final DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper;
+    private final DgrWebhookNotifyLogDao dgrWebhookNotifyLogDao;
     @Nullable
     private final DgrESService dgrESService;
 
@@ -301,6 +263,18 @@ public class DpaaJobConfig {
 	@Scope("prototype")
 	public AA0231Job aa0231Job(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime) {
 		return new AA0231Job(auth, mailEvents, sendTime, this.prepareMailService);
+	}
+	
+	@Bean
+	@Scope("prototype")
+	public AA0550Job aa0550Job(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime) {
+		return new AA0550Job(auth, mailEvents, sendTime, this.prepareMailService);
+	}
+	
+	@Bean
+	@Scope("prototype")
+	public AA0552Job aa0552Job(TsmpAuthorization auth, List<TsmpMailEvent> mailEvents, String sendTime) {
+		return new AA0552Job(auth, mailEvents, sendTime, this.prepareMailService);
 	}
 
 	@Bean
@@ -524,7 +498,7 @@ public class DpaaJobConfig {
 				this.tsmpDpItemsCacheProxy, this.dpReqServiceFactory, this.tsmpDpReqOrdermDao, this.tsmpNoticeLogDao,
 				this.tsmpDpFileDao, this.tsmpSettingDao, this.tsmpClientDao, this.tsmpTokenHistoryDao,
 				this.dgrAcIdpAuthCodeDao, this.dgrImportClientRelatedTempDao, this.trafficCheck, this.websiteService,
-				this.dgrWebsiteCacheProxy, this.tsmpSettingService, this.apptJobDispatcher,this.dgrAuditLogMDao,this.dgrAuditLogDDao);
+				this.dgrWebsiteCacheProxy, this.tsmpSettingService, this.apptJobDispatcher,this.dgrAuditLogMDao,this.dgrAuditLogDDao,this.dgrWebhookNotifyLogDao);
 	}
 	
 	@Bean

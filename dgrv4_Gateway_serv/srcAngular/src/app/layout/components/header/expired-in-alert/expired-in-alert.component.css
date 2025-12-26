@@ -1,0 +1,8 @@
+/* 讓數字等寬顯示，避免倒數時左右晃動 */
+.timer-font {
+  font-variant-numeric: tabular-nums;
+  /* 如果想要更像電子鐘的感覺，可以取消下面這行的註解 */
+  /* font-family: 'Courier New', Courier, monospace; */
+  line-height: 1;
+}
+

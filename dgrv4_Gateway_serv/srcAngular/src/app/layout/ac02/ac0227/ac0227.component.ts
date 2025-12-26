@@ -19,6 +19,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0166Req } from 'src/app/models/api/ServerService/dpb0166.interface';
 import { DPB0167Req } from 'src/app/models/api/ServerService/dpb0167.interface';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-ac0227',
@@ -58,6 +59,7 @@ export class Ac0227Component extends BaseComponent implements OnInit {
     private alertService: AlertService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
@@ -331,10 +333,8 @@ export class Ac0227Component extends BaseComponent implements OnInit {
         }
 
         this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
-
-        this._fileSrc = fileReader.result!;
-
-
+        
+        this._fileSrc = fileReader.result;
       }
       fileReader.readAsDataURL(files.item(0)!);
     }

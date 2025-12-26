@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
+import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
@@ -128,6 +129,8 @@ public class GtwIdPMockJSLoginUiController {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
+			//checkmarx, Reflected XSS All Clients 
+			reqUri = ESAPI.encoder().encodeForHTML(reqUri);
 			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 

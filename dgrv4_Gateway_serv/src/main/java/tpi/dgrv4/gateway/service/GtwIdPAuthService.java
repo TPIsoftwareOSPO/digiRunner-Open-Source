@@ -26,6 +26,7 @@ import tpi.dgrv4.entity.entity.DgrGtwIdpInfoO;
 import tpi.dgrv4.entity.repository.DgrGtwIdpAuthDDao;
 import tpi.dgrv4.entity.repository.DgrGtwIdpAuthMDao;
 import tpi.dgrv4.entity.repository.DgrGtwIdpInfoODao;
+import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.component.GtwIdPHelper;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.component.IdPWellKnownHelper;
@@ -139,6 +140,8 @@ public class GtwIdPAuthService {
 			String codeChallenge, String codeChallengeMethod, String codeVerifierForOauth2, String reqUri) throws Exception {
 
 		ResponseEntity<?> errRespEntity = null;
+		//checkmarx, Reflected XSS All Clients 
+		reqUri = ESAPI.encoder().encodeForHTML(reqUri);
 		
 		// 1.取得 dgR client 對應的 IdP 相關資料
 		// 取得狀態為 "Y",且建立時間最新的

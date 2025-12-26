@@ -3808,3 +3808,51 @@ ALTER TABLE TSMP_API_IMP ADD IS_CORS_ALLOW_HEADERS VARCHAR(1) DEFAULT 'N' NULL;
 ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_ORIGIN VARCHAR(1000) NULL;
 ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_METHODS VARCHAR(200) NULL;
 ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_HEADERS VARCHAR(1000) NULL;
+
+-- 20250908, 調整欄位長度, Kevin Cheng
+-- 刪除索引: index_dgr_ai_provider_ai_provider_name_ai_provider
+IF EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND name = N'index_dgr_ai_provider_ai_provider_name_ai_provider')
+BEGIN
+  DROP INDEX index_dgr_ai_provider_ai_provider_name_ai_provider ON dgr_ai_provider;
+END;
+
+-- 刪除索引: index_dgr_ai_provider_ai_provider_name_ai_model
+IF EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND name = N'index_dgr_ai_provider_ai_provider_name_ai_model')
+BEGIN
+  DROP INDEX index_dgr_ai_provider_ai_provider_name_ai_model ON dgr_ai_provider;
+END;
+
+-- 刪除唯一約束: UQ_dgr_ai_prompt_template_name
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = N'UQ_dgr_ai_prompt_template_name')
+BEGIN
+  ALTER TABLE dgr_ai_prompt_template DROP CONSTRAINT UQ_dgr_ai_prompt_template_name;
+END;
+
+ALTER TABLE dgr_ai_provider ALTER COLUMN ai_provider_name VARCHAR(1700) NOT NULL;  -- 從 NVARCHAR(1700) 改為 VARCHAR(1700)
+ALTER TABLE dgr_ai_provider ALTER COLUMN ai_model VARCHAR(1700) NOT NULL;          -- 從 NVARCHAR(1700) 改為 VARCHAR(1700)
+ALTER TABLE dgr_ai_prompt_template ALTER COLUMN ai_prompt_template_name VARCHAR(1700) NOT NULL; -- 從 NVARCHAR(1700) 改為 VARCHAR(1700)
+
+-- 添加索引: index_dgr_ai_provider_ai_provider_name_ai_provider
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND name = N'index_dgr_ai_provider_ai_provider_name_ai_provider')
+CREATE INDEX index_dgr_ai_provider_ai_provider_name_ai_provider ON dgr_ai_provider (ai_provider_name);
+
+-- 添加索引: index_dgr_ai_provider_ai_provider_name_ai_model
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[dgr_ai_provider]') AND name = N'index_dgr_ai_provider_ai_provider_name_ai_model')
+CREATE INDEX index_dgr_ai_provider_ai_provider_name_ai_model ON dgr_ai_provider (ai_model);
+
+-- 添加: UQ_dgr_ai_prompt_template_name
+ALTER TABLE dgr_ai_prompt_template ADD CONSTRAINT UQ_dgr_ai_prompt_template_name UNIQUE (ai_prompt_template_name);
+
+-- 20250825, dgr_otp, Tom
+CREATE TABLE dgr_otp (
+    otp_id          BIGINT        NOT NULL,                           -- ID
+    email           VARCHAR(100)  NOT NULL,                           -- email
+    otp_code        VARCHAR(10)   NOT NULL,                           -- 驗證碼
+    expire_key      VARCHAR(400)  NOT NULL,                           -- 到期key
+    error_limit     INT           NOT NULL DEFAULT 0,                 -- 錯誤上限
+    CONSTRAINT pk_dgr_otp PRIMARY KEY (otp_id),
+    CONSTRAINT uk_dgr_otp UNIQUE (email)
+);
+
+-- 20251003, v4, 加大欄位長度, Mini Lee
+ALTER TABLE TSMP_TOKEN_HISTORY ALTER COLUMN USER_NAME NVARCHAR(400);

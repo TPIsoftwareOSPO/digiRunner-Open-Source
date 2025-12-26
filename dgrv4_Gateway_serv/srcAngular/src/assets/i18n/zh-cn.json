@@ -187,7 +187,8 @@
     "searchByTags": "按标签搜索",
     "refresh": "重新整理",
     "label_reset": "重设标签",
-    "preview": "预览"
+    "preview": "预览",
+    "next": "下一步"
   },
   "calendar": {
     "day": "天",
@@ -1368,5 +1369,21 @@
   "org_reset": "设置组织",
   "recent_api_abnormal_each_node": "观测各节点最近一次异常响应的 API",
   "trustedCertsContent": "证书",
-  "cert": "证书"
+  "cert": "证书",
+  "changeMimaFirstLogin": "首次登录变更密码",
+  "forget_mima": "忘记密码",
+  "reset_mima": "重置密码",
+  "input_otp_code": "输入验证码",
+  "otp_valid_desc": "OTP 验证码已寄至 {{email}}。\n若未收到，请检查您的垃圾邮件箱。",
+  "reset_account_select": "请选取欲重置的帐号",
+  "newMima": "新密码",
+  "newUserBlock": "新密码",
+  "clientBlock": "密码",
+  "expired_in_alert": {
+    "title": "您即将退出登录",
+    "desc":"出于安全原因，系统将在倒计时结束后自动退出：",
+    "cfm": "您希望继续使用吗？"
+  },
+  "keeper_address": "Keeper 地址",
+  "change_keeper_address": "变更 Keeper 地址"
 }

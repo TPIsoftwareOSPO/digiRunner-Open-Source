@@ -1,5 +1,7 @@
 package tpi.dgrv4.dpaa.component.ai;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Setter;
@@ -21,19 +23,12 @@ import java.util.Optional;
 @Component
 public class AiEngineGoogleGemini implements AiEngine {
 
-
-    @Setter(onMethod_ = @Autowired)
-    AiEngineShareComponent shareComponent;
-
-
-
     @Override
     public Attempt<AiEngineDTO.Output> generateContent(AiEngineDTO.Input input) {
-
         DgrAiPromptTemplate template = input.template();
         DgrAiApiKey apiKey = input.apiKey();
         String prompt = input.inputPrompt();
-
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         var url = "%s?key=%s".formatted(
                 apiKey.getDgrAiProvider().getGenerateApi(),
                 apiKey.getAiApikeyCode()
@@ -55,7 +50,7 @@ public class AiEngineGoogleGemini implements AiEngine {
 
         try {
             var builder = AiEngineDTO.Output.builder();
-            var rawBody = shareComponent.gson().toJson(body);
+            var rawBody = gson.toJson(body);
             var resp = HttpUtil.httpReqByRawData(url, "POST", rawBody, Map.of("Content-Type", "application/json"), false);
             builder.respData(resp);
             var aiResponse = JsonParser.parseString(resp.respStr).getAsJsonObject();

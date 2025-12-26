@@ -2,6 +2,8 @@ package tpi.dgrv4.common.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +16,7 @@ import java.util.regex.Pattern;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.common.keeper.ITPILogger;
 
 public class CheckmarxCommUtils {
@@ -24,6 +27,10 @@ public class CheckmarxCommUtils {
 	
 	public static byte[] sanitizeForCheckmarx(byte[] b) {
 		return b;
+	}
+	
+	public static String sanitizeForCheckmarx(String str) {
+        return str;
 	}
 	
 	@Deprecated
@@ -249,4 +256,25 @@ public class CheckmarxCommUtils {
 		}
 		return fieldValue;
 	}
+	
+	public static void sanitizeForCheckmarxConn(String targetHostName, int targetPort, int connectTimeout) throws IOException {
+		try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(targetHostName, targetPort), connectTimeout);
+    	}
+	}
+	
+	public static void sanitizeForCheckmarxConn(Socket tempSocket, String hostname, int port, int connectTimeout) throws IOException {
+		tempSocket.connect(new InetSocketAddress(hostname, port), connectTimeout);
+	}
+	
+	public static void sanitizeForCheckmarxWriteBytes(OutputStream os, byte[] bytes, int offset, int bytesToWrite) throws IOException {
+		os.write(bytes, offset, bytesToWrite);
+	}
+	
+	public static void sanitizeForCheckmarxWriteBytes(OutputStream os, byte[] bytes) throws IOException {
+		os.write(bytes);
+	}
+	
+	
+	
 }

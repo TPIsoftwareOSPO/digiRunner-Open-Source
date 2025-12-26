@@ -105,7 +105,7 @@ public class AcIdPReviewService {
 		DgrAcIdpUser dgrAcIdpUser = getDgrAcIdpUserDao().findFirstByUserNameAndIdpType(userName, idPType);
 		if (dgrAcIdpUser == null) {
 			// 使用者不存在
-			String errMsg = String.format(AcIdPHelper.MSG_DELEGATE_AC_USER_DOES_NOT_EXIST, userName);
+			String errMsg = String.format(AcIdPHelper.MSG_DELEGATE_AC_USER_DOES_NOT_EXIST, userName, idPType);
 			TPILogger.tl.debug(errMsg);
 
 			// 重新導向到前端,顯示訊息

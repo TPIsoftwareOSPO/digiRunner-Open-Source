@@ -27,4 +27,6 @@ public interface DgrAcIdpUserDao extends JpaRepository<DgrAcIdpUser, Long>, DgrA
 	
 	public List<DgrAcIdpUser> queryAllByOrgList(List<String> orgDescList);
 	
+	public DgrAcIdpUser findFirstByUserNameOrderByCreateDateTime(String userName);
+	
 }

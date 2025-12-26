@@ -1,0 +1,30 @@
+<div class="custom-dialog p-3">
+  <div class="text-center">
+
+    <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
+      <i class="fas fa-exclamation-circle text-warning fa-2x"></i>
+      <h4 class="mb-0 fw-bold">{{'expired_in_alert.title'|translate}}</h4>
+    </div>
+
+    <p class="text-secondary ">
+      {{'expired_in_alert.desc'|translate}}
+    </p>
+
+    <div class="my-4">
+      <h1 class="display-3 fw-bold timer-font">
+        {{this.aliveStr}}
+      </h1>
+    </div>
+
+    <p class="fs-6 mb-2">
+      {{'expired_in_alert.cfm'|translate}}
+    </p>
+
+    <div class="d-grid col-8 mx-auto"> <button autofocus type="button" (click)="onAccept()"
+        class="btn tpi-btn tpi-primary shadow-sm">
+        {{'continue_proc'|translate}}
+      </button>
+    </div>
+
+  </div>
+</div>

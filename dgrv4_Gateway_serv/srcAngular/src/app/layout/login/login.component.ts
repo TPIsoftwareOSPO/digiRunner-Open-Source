@@ -29,6 +29,10 @@ import {
   SafeUrl,
 } from '@angular/platform-browser';
 import { SanitizerService } from 'src/app/shared/services/sanitizer.service';
+import { BaseComponent } from '../base-component';
+import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
+import * as ValidatorFns from '../../shared/validator-functions';
+import { AlertType } from 'src/app/models/common.enum';
 
 @Component({
   selector: 'app-login',
@@ -43,11 +47,16 @@ import { SanitizerService } from 'src/app/shared/services/sanitizer.service';
     UserService,
     FuncService,
     ApiBaseService,
-    SanitizerService
+    SanitizerService,
   ],
 })
-export class LoginComponent implements OnInit, AfterViewInit {
+export class LoginComponent
+  extends BaseComponent
+  implements OnInit, AfterViewInit
+{
   @ViewChild('username', { static: true }) username!: ElementRef;
+  @ViewChild('mima', { static: true }) mima!: ElementRef;
+  @ViewChild('usermail', { static: true }) usermail!: ElementRef;
 
   isReady: boolean = false;
 
@@ -57,9 +66,25 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   cusIdpLoginList: Array<{ acIdpInfoCusName: string; cusLoginUrl: string }> =
     [];
-  // [{"acIdpInfoCusName":"TEST","cusLoginUrl":"http://localhost:8080/index2.html"},{"acIdpInfoCusName":"第三方驗證登入","cusLoginUrl":"https://www.google.com/"}]
+
+  loginState: string = '';
+  validTime: number = 60;
+
+  userListData: Array<string> = [];
+  selectedUser: Array<string> = [];
+
+  mimatip?: string;
+  mimaPattern?: string;
+  // 登入流程遮罩
+  mimaMask: boolean = false;
+
+  // 忘記密碼流程遮罩
+  newMask: boolean = false;
+  cfmMask: boolean = false;
 
   constructor(
+    route: ActivatedRoute,
+    tr: TransformMenuNamePipe,
     private fb: FormBuilder,
     private router: Router,
     private ngxService: NgxUiLoaderService,
@@ -70,23 +95,29 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private util: UtilService,
     private userService: UserService,
     private funcService: FuncService,
-    protected route: ActivatedRoute,
     private httpClient: HttpClient,
     private translate: TranslateService,
     private sanitizerService: SanitizerService
   ) {
+    super(route, tr);
     this.form = this.fb.group({
       uname: new FormControl(''),
       pwd: new FormControl(''),
+      email: new FormControl(''),
+      expireKey: new FormControl(),
+      otpCode: new FormControl(''),
+      newMima: new FormControl(''),
+      confirmNewMima: new FormControl(''),
+      userList: new FormControl([]),
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.route.queryParams.subscribe((value) => {
       this.relogin = value['re'] == undefined;
     });
-    // console.log('login init')
-    // this.ngxService.start();
+
+    sessionStorage.clear();
     setTimeout(() => {
       this.isReady = true;
       setTimeout(() => {
@@ -99,6 +130,12 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.username.nativeElement.focus();
+  }
+
+  checkAndFocus() {
+    if (this.uname.value.trim()) {
+      this.mima.nativeElement.focus();
+    }
   }
 
   getCusLoginUrl() {
@@ -120,9 +157,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   goCusPage(tarUrl: string) {
-    const isMatch = this.cusIdpLoginList.some(item => item.cusLoginUrl === tarUrl);
+    const isMatch = this.cusIdpLoginList.some(
+      (item) => item.cusLoginUrl === tarUrl
+    );
     if (isMatch) {
-      this.sanitizerService.navigateUrl(tarUrl)
+      this.sanitizerService.navigateUrl(tarUrl);
     } else {
       this.translate.get('noCusInfo').subscribe((res) => {
         this.alertService.ok(res, '');
@@ -193,6 +232,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
                       } else {
                         this.toolService.setUserAlias('');
                       }
+                      if (r.RespBody.firstTimeLogin)
+                        sessionStorage.setItem(
+                          'firstTimeLogin',
+                          r.RespBody.firstTimeLogin ? 'true' : 'false'
+                        );
                       this.setFuncList()
                         .pipe(
                           tap((r) => {
@@ -296,4 +340,214 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/ldap'], options);
   }
 
+  getMimaLink() {
+    this.resetFormValidator(this.form);
+    this.userService.sendOtp_before().subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        this.addFormValidator(this.form, res.RespBody.constraints);
+        this.loginState = 'user_email';
+        setTimeout(() => {
+          this.usermail.nativeElement.focus();
+        }, 0);
+      }
+    });
+  }
+
+  backDefaultLogin() {
+    this.resetFormValidator(this.form);
+    this.selectedUser = this.userListData = [];
+    this.loginState = '';
+  }
+
+  // 重送倒數計時(60秒)
+  validTimeSub() {
+    setTimeout(() => {
+      if (this.validTime > 0) {
+        this.validTime--;
+        this.validTimeSub();
+      }
+    }, 1000);
+  }
+
+  procValidCode() {
+    this.ngxService.start();
+    this.userService.sendOtp({ email: this.email.value }).subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        this.expireKey.setValue(res.RespBody.expireKey);
+
+        // this.userService.validationOtp_before().subscribe((res) => {
+        //   if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        //     // this.addFormValidator
+        //   }
+        // });
+        if (this.loginState != 'otp_valid') this.loginState = 'otp_valid';
+        this.validTime = 60;
+        this.validTimeSub();
+      } else {
+        this.alertService.ok(res.ResHeader.rtnMsg, '');
+      }
+      this.ngxService.stop();
+    });
+  }
+
+  // 驗證OTP
+  validOTP() {
+    this.ngxService.start();
+    this.userService
+      .validationOtp({
+        email: this.email.value,
+        otpCode: this.otpCode.value,
+        expireKey: this.expireKey.value,
+      })
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.userService.changeMima_before().subscribe(async (resV) => {
+            if (this.toolService.checkDpSuccess(resV.ResHeader)) {
+              this.addFormValidator(this.form, resV.RespBody.constraints);
+
+              this.form
+                .get('newMima')
+                ?.addValidators([
+                  ValidatorFns.confirmPasswordValidator(
+                    this.form,
+                    'newMima',
+                    'confirmNewMima'
+                  ),
+                ]);
+              this.form
+                .get('confirmNewMima')
+                ?.addValidators([
+                  ValidatorFns.confirmPasswordValidator(
+                    this.form,
+                    'newMima',
+                    'confirmNewMima'
+                  ),
+                ]);
+
+              //預設全選
+              this.userListData = this.selectedUser = res.RespBody.userList;
+              this.userList.setValue(this.userListData);
+
+              this.userService.getMimaStrengthDesc().subscribe((res) => {
+                if (this.toolService.checkDpSuccess(res.ResHeader)) {
+                  this.mimatip = res.RespBody.acPwdStrengthDesc;
+                  this.mimaPattern = res.RespBody.acPwdStrength;
+
+                  if (this.mimaPattern) {
+                    this.newMima?.addValidators([
+                      ValidatorFns.patternValidator(
+                        this.mimaPattern,
+                        this.mimatip
+                      ),
+                    ]);
+                  }
+                }
+                this.loginState = 'chg_mima';
+              });
+            }
+          });
+        } else {
+          this.alertService.ok(res.ResHeader.rtnMsg, '');
+        }
+        this.ngxService.stop();
+      });
+  }
+
+  changeMima() {
+    this.ngxService.start();
+    this.userService
+      .changeMima({
+        email: this.email.value,
+        userList: this.userList.value,
+        expireKey: this.expireKey.value,
+        newMima: this.toolService.Base64Encoder(this.newMima.value),
+      })
+      .subscribe(async (res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          const codes = [
+            'message.update',
+            'message.success',
+            'plz_login_again',
+          ];
+
+          const dict = await this.toolService.getDict(codes);
+
+          this.alertService.ok(
+            `${dict['message.update']} ${dict['message.success']}!`,
+            `${dict['plz_login_again']}!`
+          );
+          this.backDefaultLogin();
+        } else {
+          let _rtnMsg = res.ResHeader.rtnMsg;
+          if (_rtnMsg.includes('{{') && _rtnMsg.includes('}}')) {
+            let _msg = _rtnMsg;
+            let formControlName = _msg.substring(
+              _msg.indexOf('{{') + 2,
+              _msg.indexOf('}}')
+            );
+            const codes = [formControlName];
+            this.translate.get(codes).subscribe((dict) => {
+              _rtnMsg = _msg.replace(
+                `{{${formControlName}}}`,
+                `${dict[formControlName]}`
+              );
+            });
+          }
+          this.alertService.ok(
+            _rtnMsg,
+            '',
+            AlertType.warning,
+            res.ResHeader.txDate + '<br>' + res.ResHeader.txID
+          );
+        }
+        this.ngxService.stop();
+      });
+  }
+
+  onSelectionChange() {
+    this.userList.setValue(this.selectedUser);
+  }
+
+  toggleMask(tar: string) {
+    switch (tar) {
+      case 'newMima':
+        this.newMask = !this.newMask;
+        break;
+      case 'cfmMima':
+        this.cfmMask = !this.cfmMask;
+        break;
+      case 'loginMima':
+        this.mimaMask = !this.mimaMask;
+        break;
+      default:
+        break;
+    }
+  }
+
+  public get email() {
+    return this.form.get('email')!;
+  }
+
+  public get uname() {
+    return this.form.get('uname')!;
+  }
+
+  public get expireKey() {
+    return this.form.get('expireKey')!;
+  }
+
+  public get newMima() {
+    return this.form.get('newMima')!;
+  }
+
+  public get confirmNewMima() {
+    return this.form.get('confirmNewMima')!;
+  }
+
+  public get userList() {
+    return this.form.get('userList')!;
+  }
+  public get otpCode() {
+    return this.form.get('otpCode')!;
+  }
 }

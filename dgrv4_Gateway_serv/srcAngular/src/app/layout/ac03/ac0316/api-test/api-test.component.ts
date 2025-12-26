@@ -25,7 +25,7 @@ import * as base64 from 'js-base64'
 // const crypto = require('libp2p-crypto');
 import CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
-import { StreamApiService, StreamResponse } from './steam-api.service';
+import { StreamApiService, StreamResponse } from './stream-api.service';
 
 
 @Component({

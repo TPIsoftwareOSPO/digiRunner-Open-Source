@@ -3133,3 +3133,17 @@ ALTER TABLE TSMP_API_IMP ADD IS_CORS_ALLOW_HEADERS VARCHAR2(1) DEFAULT 'N' NULL;
 ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_ORIGIN VARCHAR2(1000) NULL;
 ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_METHODS VARCHAR2(200) NULL;
 ALTER TABLE TSMP_API_IMP ADD CORS_ALLOW_HEADERS VARCHAR2(1000) NULL;
+
+-- 20250825, dgr_otp , Tom
+CREATE TABLE dgr_otp (
+    otp_id              NUMBER(19)      NOT NULL,       -- ID
+    email               VARCHAR(100)    NOT NULL,       -- email
+    otp_code            VARCHAR(10)     NOT NULL,       -- 驗證碼
+    expire_key          VARCHAR(400)    NOT NULL,       -- 到期key
+    error_limit         NUMBER(10)      DEFAULT 0 NOT NULL, -- 錯誤上限
+    CONSTRAINT pk_dgr_otp PRIMARY KEY (otp_id),
+    CONSTRAINT uk_dgr_otp UNIQUE (email)
+);
+
+-- 20251003, v4, 加大欄位長度, Mini Lee
+ALTER TABLE TSMP_TOKEN_HISTORY MODIFY USER_NAME NVARCHAR2(400);

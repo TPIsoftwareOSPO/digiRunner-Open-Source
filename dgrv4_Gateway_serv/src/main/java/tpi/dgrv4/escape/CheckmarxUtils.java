@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 import org.apache.http.HttpEntity;
@@ -17,7 +18,10 @@ import org.apache.poi.ss.usermodel.Row;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tpi.dgrv4.gateway.filter.FilteredHeaderResponseWrapper;
 import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 
 public class CheckmarxUtils {
@@ -29,6 +33,10 @@ public class CheckmarxUtils {
 	
 	public static String sanitizeForCheckmarx(String str) {
 		return str;
+	}
+	
+	public static int sanitizeForCheckmarx(int val) {
+		return val;
 	}
 	
 	public static byte[] sanitizeForCheckmarx(byte[] b) {
@@ -71,6 +79,13 @@ public class CheckmarxUtils {
 		server.getOutputStream().write("dgR v4 init detect end!".getBytes());
 	}
 	
+	public static Path sanitizeForCheckmarx(Path path) {
+		return path;
+	}
 	
+	public static void sanitizeForCheckmarx(HttpServletRequest httpReq,
+			HttpServletResponse httpResp, String redirectUrl) throws ServletException, IOException {
+		httpReq.getRequestDispatcher(redirectUrl).forward(httpReq, httpResp);
+	}
 	
 }

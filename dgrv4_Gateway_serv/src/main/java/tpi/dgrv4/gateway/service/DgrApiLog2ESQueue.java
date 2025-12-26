@@ -33,12 +33,12 @@ public class DgrApiLog2ESQueue {
 
     
     // 使用 Virtual Thread Executor
-    private static final ExecutorService virtualThreadExecutor = 
-        Executors.newVirtualThreadPerTaskExecutor();
+    private static final ExecutorService virtualThreadExecutor =
+        Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("V-Api-Log-executor").factory());
     
     // 定時任務執行器，使用平台線程
     private static final ScheduledExecutorService scheduledExecutor = 
-        Executors.newSingleThreadScheduledExecutor();
+        Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("V-Api-Log-schedule").factory());
     
     // 隊列
     public static final BlockingQueue<DgrApiLog2ESQueue> ES_LoggerQueue = 
@@ -123,7 +123,9 @@ public class DgrApiLog2ESQueue {
         }
     }
     
-    
+
+    private static final long PROCESS_QUEUE_INTERVAL = 5000;
+
     /**
      * 隊列處理協調器 - 使用單一虛擬線程來協調批次處理
      */
@@ -134,23 +136,26 @@ public class DgrApiLog2ESQueue {
                 if (activeTasks.get() < CONCURRENT_TASKS && !ES_LoggerQueue.isEmpty()) {
                     List<DgrApiLog2ESQueue> batch = new ArrayList<>(MAX_BATCH_SIZE);
                     StringBuilder bulkDatas = new StringBuilder(MAX_BULK_BYTES);
-                    
+
+                    try {
+                        Thread.sleep(PROCESS_QUEUE_INTERVAL);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
                     // 收集一批數據到 bulkDatas
                     collectBatch(batch, bulkDatas);
                     
                     if (!batch.isEmpty()) {
                         // 增加活躍任務計數
                         activeTasks.incrementAndGet();
-                        
-                        // 使用虛擬線程提交寫入任務
-                        virtualThreadExecutor.submit(() -> {
-                            try {
-                                writeBulkFile(batch, bulkDatas);
-                            } finally {
-                                // 任務完成，減少活躍任務計數
-                                activeTasks.decrementAndGet();
-                            }
-                        });
+
+                        try {
+                            writeBulkFile(batch, bulkDatas);
+                        } finally {
+                            // 任務完成，減少活躍任務計數
+                            activeTasks.decrementAndGet();
+                        }
                     }
                 } else {
                     // 等待一小段時間，避免CPU空轉
@@ -206,17 +211,15 @@ public class DgrApiLog2ESQueue {
         
         // 強制啟動一次處理
         if (startFlag.get()) {
-            virtualThreadExecutor.submit(() -> {
-                List<DgrApiLog2ESQueue> batch = new ArrayList<>();
-                StringBuilder bulkDatas = new StringBuilder();
-                
-                // 從隊列中收集一批數據
-                collectBatch(batch, bulkDatas);
-                
-                if (!batch.isEmpty()) {
-                    writeBulkFile(batch, bulkDatas);
-                }
-            });
+            List<DgrApiLog2ESQueue> batch = new ArrayList<>();
+            StringBuilder bulkDatas = new StringBuilder();
+
+            // 從隊列中收集一批數據
+            collectBatch(batch, bulkDatas);
+
+            if (!batch.isEmpty()) {
+                writeBulkFile(batch, bulkDatas);
+            }
         }
     }
     
@@ -233,11 +236,11 @@ public class DgrApiLog2ESQueue {
      * 寫入一批數據到ES File
      */
     private static void writeBulkFile(List<DgrApiLog2ESQueue> batch, StringBuilder bulkDatas) {
-        if (batch.isEmpty() || bulkDatas.length() == 0) return;
+        if (batch.isEmpty() || bulkDatas.isEmpty()) return;
         
         try {
             // 使用批次中的第一個元素進行寫入(因為 writeES 是物件方法, 雖然批次中有多個元素，但批量寫入只需要執行一次)
-            batch.get(0).writeES(bulkDatas.toString());
+            batch.getFirst().writeES(bulkDatas.toString());
             
             // 寫入成功日誌
             if (batch.size() > 1) {
@@ -289,27 +292,27 @@ public class DgrApiLog2ESQueue {
     /**
      * 優雅關閉方法
      */
-    public static void shutdown() {
-        // 設置標誌，不再接受新任務
-        startFlag.set(false);
-        
-        // 關閉調度器
-        scheduledExecutor.shutdown();
-        
-        // 關閉虛擬線程執行器
-        virtualThreadExecutor.shutdown();
-        try {
-            if (!virtualThreadExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
-                virtualThreadExecutor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            virtualThreadExecutor.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-        
-        TPILogger.tl.info("ES log queue shutdown completed. Remaining logs: " + 
-                         ES_LoggerQueue.size());
-    }
+//    public static void shutdown() {
+//        // 設置標誌，不再接受新任務
+////        startFlag.set(false);
+//
+//        // 關閉調度器
+//        scheduledExecutor.shutdown();
+//
+//        // 關閉虛擬線程執行器
+////        virtualThreadExecutor.shutdown();
+////        try {
+////            if (!virtualThreadExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+////                virtualThreadExecutor.shutdownNow();
+////            }
+////        } catch (InterruptedException e) {
+////            virtualThreadExecutor.shutdownNow();
+////            Thread.currentThread().interrupt();
+////        }
+//
+//        TPILogger.tl.info("ES log queue shutdown completed. Remaining logs: " +
+//                         ES_LoggerQueue.size());
+//    }
     
 		
 	private void writeES(String bulkBody) {

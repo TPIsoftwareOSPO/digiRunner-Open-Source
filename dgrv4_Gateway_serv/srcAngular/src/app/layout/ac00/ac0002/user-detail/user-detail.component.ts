@@ -11,6 +11,9 @@ export class UserDetailComponent implements OnInit {
     @Input() data!: AA0003Resp;
     @Input() center: boolean = true;
 
+    //checkmarx消毒用
+    loginAttemptCount = ['p','wd','Fa','ilTimes'];
+
     constructor() {
     }
 

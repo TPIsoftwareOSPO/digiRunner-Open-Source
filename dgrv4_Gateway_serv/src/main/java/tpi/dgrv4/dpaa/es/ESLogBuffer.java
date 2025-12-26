@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -66,45 +69,32 @@ public class ESLogBuffer {
         CONFIG_SUFFIX,
         COMPLETE_SUFFIX
     );
-    
-//    private static final ExecutorService writeExecutor = Executors.newSingleThreadExecutor(r -> {
-//        Thread thread = new Thread(r);
-//        thread.setName("ES-filelog-writer");
-//        thread.setPriority(Thread.NORM_PRIORITY);
-//        return thread;
-//    });
+
     // 修改調度執行器，增加延遲和間隔時間
-    private static final ScheduledExecutorService processExecutor = 
-        Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread thread = new Thread(r);
-            thread.setName("ES-log-schedule");
-            thread.setPriority(Thread.MIN_PRIORITY);  // 設置最低優先級
-            return thread;
-        }
-    );
+    private static final ScheduledExecutorService processExecutor =
+        Executors.newSingleThreadScheduledExecutor(
+                Thread.ofVirtual()
+                        .name("V-ES-Log-Schedule", 1)
+                        .factory()
+        );
+
     
     // Add this as a new field in the ESLogBuffer class, alongside the other executors
-    private static final ScheduledExecutorService cleanupExecutor = 
-    Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setName("ES-cleanup-schedule");
-        thread.setPriority(Thread.MIN_PRIORITY);
-        return thread;
-    });
+    private static final ScheduledExecutorService cleanupExecutor =
+        Executors.newSingleThreadScheduledExecutor(
+                Thread.ofVirtual()
+                        .name("V-ES-CleanUp-Schedule", 1)
+                        .factory()
+        );
+
     
     private void startFileProcessor() {
-        processExecutor.scheduleWithFixedDelay(() -> {
-            if (!isProcessing) {
-                processLogFiles();
-            }
-        }, 60L*2, 5, TimeUnit.SECONDS);
+        processExecutor.scheduleWithFixedDelay(this::processLogFiles, 10, 5, TimeUnit.SECONDS);
     }
     
     // Add this to the constructor (ESLogBuffer method), after startFileProcessor()
     private void startCleanupProcessor() {
-        cleanupExecutor.scheduleWithFixedDelay(() -> {
-            cleanupExpiredFiles();
-        }, 60L*2, 30, TimeUnit.SECONDS);
+        cleanupExecutor.scheduleWithFixedDelay(this::cleanUpExpiredFiles, 15, 30, TimeUnit.SECONDS);
     }
     
     // Add this as a constant in the class
@@ -113,7 +103,9 @@ public class ESLogBuffer {
     // [新增 1] 每批次處理的最大檔案數
     private static final int MAX_BATCH_SIZE = 1000;      // 正常負載時的批次大小
     private static final int MIN_BATCH_SIZE = 1;      // 高負載時的批次大小
-    
+
+    private static final long ES_RESPONSE_SHOW_LOG_THRESHOLD = 1000;
+
     // [新增 2] 批次間隔時間（毫秒）
     private static final int BATCH_INTERVAL = 100;
     // [新增 3] CPU 負載閾值，超過此值則暫停處理
@@ -132,7 +124,7 @@ public class ESLogBuffer {
 
     private static final AtomicInteger retryCount = new AtomicInteger(0);
     private static final int MAX_RETRIES = 2;
-    private volatile boolean isProcessing = false;
+    private AtomicBoolean isProcessing = new AtomicBoolean(false);
 
     // Add sysout proxy methods
     private static void systrace(String message) {
@@ -190,7 +182,7 @@ public class ESLogBuffer {
     }
     
     
-    private void cleanupExpiredFiles() {
+    private void cleanUpExpiredFiles() {
     	
     	if (! allowWriteElastic) {
             systrace("不允許寫入 Elastic，跳過本次處理");
@@ -244,7 +236,7 @@ public class ESLogBuffer {
                         LocalDateTime fileDate = extractDateFromFileName(path.getFileName().toString());
                         return fileDate != null && fileDate.isBefore(expirationTime);
                     })
-                    .collect(Collectors.toList());
+                    .toList();
             
             if (targetFiles.isEmpty()) {
                 systrace("沒有找到過期的成功或失敗檔案");
@@ -351,53 +343,45 @@ public class ESLogBuffer {
         String configFileName = baseFileName + CONFIG_SUFFIX;
         String markerFileName = baseFileName + COMPLETE_SUFFIX; // 新增完成標記檔案
 
-        if (checkStatusFromFile == true) {
+        if (checkStatusFromFile) {
         	// true , 表示 "PAUSE" 檔案已存在
-        	TPILogger.tl
-			.warn(String.format("DiskSpaceMonitor.checkStatusFromFile() is [%b]",
-					checkStatusFromFile));
+        	TPILogger.tl.warn(String.format("DiskSpaceMonitor.checkStatusFromFile() is [%b]", true));
         	return 202;
         }
         
         systrace("\n開始寫入日誌檔案: " + logFileName );
-        
-        // 使用虛擬線程執行 I/O 操作
-        try(ExecutorService executor = Executors.newFixedThreadPool(10)) {
-        	executor.submit(() -> {
-        		try {
-        			// 寫入日誌內容
-        			Path logPath = Paths.get(logFileName);
-        			Files.write(logPath, bulkBody.getBytes(), 
-        					StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        			
-        			systrace("日誌內容寫入完成: " + logFileName);
-        			// 寫入配置檔案
-        			Properties config = new Properties();
-        			config.setProperty("esUrl", esUrl);
-        			headers.forEach((key, value) -> config.setProperty("header." + key, value));
-        			
-        			try (OutputStream out = Files.newOutputStream(Paths.get(configFileName))) {
-        				config.store(out, "Log configuration");
-        			}
-        			systrace("配置檔案寫入完成: " + configFileName);
-        			sysoutRateLimited("Bulk size:" + bulkBody.getBytes().length + ", 寫入任務完成\n");
-        			
-        			//最後寫入標記檔案，表示所有檔案都已完成寫入
-        			try {
-        				Files.createFile(Paths.get(markerFileName));
-        			} catch (FileAlreadyExistsException e) {
-        				// 標記檔案已存在，這意味著另一個線程已經完成了相同的操作
-        				// 這種情況不常見但不必失敗
-        				sysout("標記檔案已存在 (不常見但可接受): " + markerFileName);
-        			}
-        		} catch (IOException e) {
-        			syserr("寫入檔案失敗: " + e.getMessage(), e);
-        		}
-        	});
-		} catch (Exception e) {
-		    TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-		    Thread.currentThread().interrupt();
-		}
+
+        try {
+            // 寫入日誌內容
+            Path logPath = Paths.get(logFileName);
+            Files.writeString(logPath, bulkBody,
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+
+            systrace("日誌內容寫入完成: " + logFileName);
+            // 寫入配置檔案
+            Properties config = new Properties();
+            config.setProperty("esUrl", esUrl);
+            headers.forEach((key, value) -> config.setProperty("header." + key, value));
+
+            try (OutputStream out = Files.newOutputStream(Paths.get(configFileName))) {
+                config.store(out, "Log configuration");
+            }
+            systrace("配置檔案寫入完成: " + configFileName);
+            sysoutRateLimited("Bulk size:" + bulkBody.getBytes().length + ", 寫入任務完成\n");
+
+            //最後寫入標記檔案，表示所有檔案都已完成寫入
+            try {
+                Files.createFile(Paths.get(markerFileName));
+            } catch (FileAlreadyExistsException e) {
+                // 標記檔案已存在，這意味著另一個線程已經完成了相同的操作
+                // 這種情況不常見但不必失敗
+                sysout("標記檔案已存在 (不常見但可接受): " + markerFileName);
+            }
+        } catch (Exception e) {
+            syserr("寫入檔案失敗: " + e.getMessage(), e);
+            TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+            Thread.currentThread().interrupt();
+        }
 
         // 立即返回，不等待虛擬線程完成
         return 202; // Accepted
@@ -411,11 +395,11 @@ public class ESLogBuffer {
      * 3.在各個層次都有適當的暫停，避免資源過度使用
      */
     private void processLogFiles() {
-        if (! allowWriteElastic) {
+        if (!allowWriteElastic) {
             systrace("不允許寫入 Elastic，跳過本次處理");
             return;
         }
-        if (isProcessing) {
+        if (isProcessing.get()) {
         	systrace("已有處理程序在執行中，跳過本次處理");
         	return;
         }
@@ -427,7 +411,7 @@ public class ESLogBuffer {
         		""", StackTraceUtil.getStackTraceAsString()), "ESLogBuffer.processLogFiles()", 180);
         
         try {
-            isProcessing = true;
+            isProcessing.set(true);
             Path logDirPath = Paths.get(LOG_DIR);
             if (!Files.exists(logDirPath)) {
                 sysout("日誌目錄不存在: " + LOG_DIR);
@@ -439,7 +423,9 @@ public class ESLogBuffer {
             systrace("開始掃描日誌檔案...");
             List<Path> pendingFiles = new ArrayList<>();
             try (Stream<Path> stream = Files.list(logDirPath)) {
-                stream.filter(path -> {
+                stream
+                        .filter(path -> path.toString().lastIndexOf(".") > 0)
+                        .filter(path -> {
                     String basePath = path.toString().substring(0, path.toString().lastIndexOf('.'));
                     return path.toString().endsWith(APPEND_SUFFIX) && 
                            Files.exists(Paths.get(basePath + COMPLETE_SUFFIX));
@@ -452,57 +438,55 @@ public class ESLogBuffer {
                 systrace("沒有待處理的檔案...");
                 return;
             }
-            
-            if (!pendingFiles.isEmpty()) {
-            	sysoutdebug("找到 " + pendingFiles.size() + " 個待處理檔案");
-                
-                                
-                Path lastFile = null;
-				// [外層迴圈：控制批次進度]
-                for (int i = 0; i < pendingFiles.size();) {  // 注意這裡沒有 i++，因為在內部控制進度
-                	// 根據系統負載動態調整批次大小
-                	int currentBatchSize = isSystemBusy() ? MIN_BATCH_SIZE : MAX_BATCH_SIZE;
-                	sysoutdebug("動態調整批次大小：" + currentBatchSize);
-                	int end = Math.min(i + currentBatchSize, pendingFiles.size());
-                
-                	// [內層迴圈：處理單個批次內的檔案]
-                    for (int j = i; j < end; j++) {
-                        Path file = pendingFiles.get(j);
-                        try {
-                        	sysoutdebug("處理檔案: " + file);
-                            processLogFile(file);
-                            lastFile  = file;
-                        } catch (Exception e) {
-                            syserr("處理檔案失敗: " + file, e);
-                            continue;
-                        }
-                        
-                        // [高負載時的等待間隔]
-                        if (isSystemBusy()) {
-                            try {
-                                Thread.sleep(BATCH_INTERVAL * 15L);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                return;
-                            }
-                        }
+
+            sysoutdebug("找到 " + pendingFiles.size() + " 個待處理檔案");
+
+
+            Path lastFile = null;
+            // [外層迴圈：控制批次進度]
+            for (int i = 0; i < pendingFiles.size();) {  // 注意這裡沒有 i++，因為在內部控制進度
+                // 根據系統負載動態調整批次大小
+                int currentBatchSize = isSystemBusy() ? MIN_BATCH_SIZE : MAX_BATCH_SIZE;
+                sysoutdebug("動態調整批次大小：" + currentBatchSize);
+                int end = Math.min(i + currentBatchSize, pendingFiles.size());
+
+                // [內層迴圈：處理單個批次內的檔案]
+                for (int j = i; j < end; j++) {
+                    Path file = pendingFiles.get(j);
+                    try {
+                        sysoutdebug("處理檔案: " + file);
+                        processLogFile(file);
+                        lastFile  = file;
+                    } catch (Exception e) {
+                        syserr("處理檔案失敗: " + file, e);
+                        continue;
                     }
-                    
-                    // [更新批次進度]
-                    i = end;
-                    
-                    // [批次間的等待間隔] && CPU 0.8
-                    if (i < pendingFiles.size() && isSystemBusy()) {
+
+                    // [高負載時的等待間隔]
+                    if (isSystemBusy()) {
                         try {
-                            Thread.sleep(BATCH_INTERVAL);
+                            Thread.sleep(BATCH_INTERVAL * 15L);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             return;
                         }
                     }
                 }
-                TPILogger.tl.info("處理程序完成，共處理 " + pendingFiles.size() + " 個檔案, 本次最後一個檔案: " + lastFile);
+
+                // [更新批次進度]
+                i = end;
+
+                // [批次間的等待間隔] && CPU 0.8
+                if (i < pendingFiles.size() && isSystemBusy()) {
+                    try {
+                        Thread.sleep(BATCH_INTERVAL);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
             }
+            TPILogger.tl.debug("處理程序完成，共處理 " + pendingFiles.size() + " 個檔案, 本次最後一個檔案: " + lastFile);
         } catch (NoSuchFileException e) {
         	syserr("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
         } catch (IOException e) {
@@ -511,7 +495,7 @@ public class ESLogBuffer {
             syserr("處理過程發生未預期的錯誤", e);
             Thread.currentThread().interrupt();
         } finally {
-            isProcessing = false;
+            isProcessing.set(false);
         }
     }
 
@@ -520,7 +504,7 @@ public class ESLogBuffer {
         String baseName = filePath.substring(0, filePath.lastIndexOf('.'));
         Path httpPath = Paths.get(baseName + HTTP_SUFFIX);
         Path configPath = Paths.get(baseName + CONFIG_SUFFIX);
-
+        long start = Instant.now().toEpochMilli();
         try {
             // 讀取配置檔案
         	sysoutdebug("[處理檔案] 開始處理: " + file);
@@ -541,48 +525,72 @@ public class ESLogBuffer {
             // 將日誌檔案移動到 HTTP 狀態
             sysoutdebug("[處理檔案] 移動到 HTTP 狀態: " + httpPath);
             Files.move(file, httpPath, StandardCopyOption.REPLACE_EXISTING);
-            
+
             // 讀取並驗證日誌內容
-            String content = new String(Files.readAllBytes(httpPath));
+            String content = Files.readString(httpPath);
             validateBulkContent(content);  // 新增的驗證方法
             
             // 發送到 Elastic
             //sysout("[處理檔案] 開始發送到 Elastic: " + esUrl);
             HttpPost post = new HttpPost(esUrl);
             headers.forEach(post::addHeader);
-            post.setEntity(new StringEntity(content, "UTF-8"));  // 明確指定編碼
+            post.setEntity(new StringEntity(content, StandardCharsets.UTF_8));  // 明確指定編碼
             
             // 增加請求超時設定
             post.setConfig(RequestConfig.custom()
                 .setConnectTimeout(5000)
                 .setSocketTimeout(30000)
                 .build());
-            
+
+            start = Instant.now().toEpochMilli();
+
+            TPILogger.tl.debug("[Elastic 處理檔案] 發送: " + esUrl + ", File:" + httpPath);
+
             // 執行請求並獲取完整回應
             String responseBody = httpClient.execute(post, response -> {
                 int statusCode = response.getStatusLine().getStatusCode();
-                sysoutRateLimited("[處理檔案] 開始發送到 Elastic: " + esUrl + ", \nHTTP code: " + statusCode);
                 String responseContent = EntityUtils.toString(response.getEntity());
-                sysoutdebug("[處理檔案] Elastic 回應內容: " + responseContent.substring(0,50) + "..." + responseContent.substring(responseContent.length()-20, responseContent.length()));
+
+                var contentLength = responseContent.length();
+                int oneThirdLength = contentLength / 3;
+
+                var contentFront = responseContent.substring(0,oneThirdLength);
+                var contentBack = responseContent.substring(oneThirdLength*2);
+
+                var msg = "[Elastic 處理檔案] 回應\n"
+                        + "\t File: "+ httpPath + "\n"
+                        + "\t HttpCode: "+ statusCode + "\n"
+                        + "\t ResponseContent: "+ contentFront + "..." + contentBack +"\n";
+                TPILogger.tl.debug(msg);
                 return responseContent;
             });
+
+            long done = Instant.now().toEpochMilli();
+            long duration = done - start;
+
+            if (duration > ES_RESPONSE_SHOW_LOG_THRESHOLD) {
+                TPILogger.tl.warn("[Elastic 處理檔案] 發送完成, 耗時: " + duration + " ms, File:" + httpPath);
+            }
 
             // 解析回應
             boolean hasErrors = responseBody.contains("\"errors\":true");
             if (hasErrors) {
-                syserr("[處理檔案] Bulk 請求含有錯誤: " + responseBody);
+                TPILogger.tl.warn("[Elastic 處理檔案] 失敗: 耗時: " + duration + " ms, File:" + httpPath + ", Response:" + responseBody);
+//                syserr("[處理檔案] Bulk 請求含有錯誤: " + responseBody);
                 throw new IOException("Bulk request contains errors");
             }
 
             // 成功後移動到 success 狀態
             Path successPath = Paths.get(baseName + SUCCESS_SUFFIX);
-            sysoutdebug("[處理檔案] 發送成功，移動到成功狀態: " + successPath + "\n\n");
+//            sysoutdebug("[處理檔案] 發送成功，移動到成功狀態: " + successPath + "\n\n");
             Files.move(httpPath, successPath, StandardCopyOption.REPLACE_EXISTING);
-            
+            TPILogger.tl.debug("[Elastic 處理檔案] 發送成功, 耗時: " + duration + ", File:" + httpPath + ", ToFile:" + successPath);
         } catch (NoSuchFileException e) {
         	systrace("找不到檔案, 可能被 clear 排程刪掉了, 所以不用處理它");
         } catch (IOException e) {
-            syserr("[處理檔案] 錯誤: " + e.getMessage() + ", File:" + filePath.toString(), e);
+            long done = Instant.now().toEpochMilli();
+            TPILogger.tl.warn("[Elastic 處理檔案] 錯誤: " + e.getMessage() + ", 耗時: " + (done - start) + " ms, File:" + httpPath);
+//            syserr("[處理檔案] 錯誤: " + e.getMessage() + ", File:" + filePath.toString(), e);
             handleProcessingError(filePath, e);
         }
     }
@@ -711,13 +719,13 @@ public class ESLogBuffer {
             	List<Path> filesToDelete = files
                         .filter(path -> {
                             String fileName = path.getFileName().toString();
-                            return LOG_SUFFIXES.stream().anyMatch(suffix -> fileName.endsWith(suffix));
+                            return LOG_SUFFIXES.stream().anyMatch(fileName::endsWith);
                         })
                         .filter(path -> {
                             LocalDateTime fileDate = extractDateFromFileName(path.getFileName().toString());
                             return fileDate != null && fileDate.isBefore(retentionDate);
                         })
-                        .collect(Collectors.toList());
+                        .toList();
 
                 for (Path file : filesToDelete) {
                     try {

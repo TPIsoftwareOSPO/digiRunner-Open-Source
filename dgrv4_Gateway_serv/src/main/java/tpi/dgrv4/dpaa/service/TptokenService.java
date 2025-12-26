@@ -43,6 +43,7 @@ import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.OAuthTokenService;
+import tpi.dgrv4.gateway.util.ClientIpUtil;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
@@ -110,11 +111,15 @@ public class TptokenService {
 			List<String> val = entry.getValue();
 			TPILogger.tl.trace(String.format("http key [%s] = %s", key, val.toString()));
 		}
-		String userIp = StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) 
-				? httpHeaders.getFirst("x-forwarded-for") : httpReq.getRemoteAddr();
+		
+
+		String trueClientIp = ClientIpUtil.getClientIp(httpReq);
+
+		TPILogger.tl.debug("Real Client IP: " + trueClientIp);
+		
 		String userHostname = httpReq.getRemoteHost();
 		
-		getTptoken(parameters, scheme, httpRes, userIp, userHostname, txnUid, 
+		getTptoken(parameters, scheme, httpRes, trueClientIp, userHostname, txnUid, 
 				reqHeader.getLocale(), localBaseUrl);
 	}
 	
@@ -376,7 +381,10 @@ public class TptokenService {
 			if (statusCode == 200) {
 				token_loginState = "SUCCESS";
 				user.setPwdFailTimes(0);
-				user.setLogonDate(new Date());
+				//Not updated for the first time login
+				if(user.getLogonDate() != null || false == this.getTsmpSettingService().getVal_FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED()) {
+					user.setLogonDate(new Date());
+				}
 				user.setUpdateTime(new Date());
 				user.setUpdateUser(userName);
 				

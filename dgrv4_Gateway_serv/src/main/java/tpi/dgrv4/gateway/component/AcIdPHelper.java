@@ -109,8 +109,11 @@ public class AcIdPHelper {
     // 訊息:Delegate AC User狀態為 '%s' 不能登入
     public static String MSG_DELEGATE_AC_USER_STATUS_CANNOT_LOG_IN = "Delegate AC user status is '%s', cannot log in.";
     
-    // 訊息:Delegate AC User '%s' 不存在,不能登入
-    public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN = "Delegate AC user '%s' does not exist, cannot log in.";
+	// 訊息:Delegate AC User '%s' 不存在,不能登入
+	public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN = "Delegate AC user '%s' and IdP type '%s' does not exist, cannot log in.";
+	
+	// 訊息:Delegate AC User '%s'(%s) 不存在,不能登入
+	public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN_2 = "Delegate AC user '%s'(%s) and IdP type '%s' does not exist, cannot log in.";
 
     // 訊息:驗證 ID Token 失敗
     public static String MSG_ID_TOKEN_VERIFICATION_FAILED = "ID token verification failed.";
@@ -129,7 +132,7 @@ public class AcIdPHelper {
     
     // Review 審核
     // 訊息:Delegate AC User '%s' 不存在,不能登入
-    public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST = "Delegate AC user '%s' does not exist.";
+    public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST = "Delegate AC user '%s' and IdP type '%s' does not exist.";
     
     // 訊息:使用者狀態為 '%s',已寄發email通知使用者
     public static String MSG_DELEGATE_AC_USER_STATUS_NOTIFY = "Delegate AC user status is '%s', "
@@ -172,7 +175,6 @@ public class AcIdPHelper {
      * 依 User 狀態,寄信通知審核者 或 建立 dgRcode 重新導向到前端,以登入AC <br>
      * 1.若查無 User 資料, 建立 DGR_AC_IDP_USER,並寄信給審核者,以執行同意/拒絕動作 <br>
      * 2.若 User 存在 & 狀態為 allow <br>
-     * 
      * (1).產生 dgRcode, 並儲存至 DGR_AC_IDP_AUTH_CODE <br>
      * (2).將 dgRcode(auth code) 重新導向到前端, 以登入AC <br>
      */
@@ -183,8 +185,14 @@ public class AcIdPHelper {
 		
 		boolean isReviewAndCreate = true;// 預設要寄發審核信流程及自動建立 User
 		
-		// 再依各別 IdP Type 來決定,是否要寄發審核信流程及自動建立 User
-		if (DgrIdPType.LDAP.equals(idPType) 
+		// 依各別 IdP Type 來決定,是否要寄發審核信流程及自動建立 User
+		if (DgrIdPType.GOOGLE.equals(idPType) 
+				|| DgrIdPType.MS.equals(idPType)
+				|| DgrIdPType.OIDC.equals(idPType)) {
+			// AC IdP OAUTH2(GOOGLE / MS / OIDC) 寄發審核信流程 及 自動建立 User 功能是否啟用
+			isReviewAndCreate = getTsmpSettingService().getVal_AC_IDP_OAUTH2_REVIEW_ENABLE();
+			
+		} else if (DgrIdPType.LDAP.equals(idPType) 
 				|| DgrIdPType.MLDAP.equals(idPType)) {
 			// AC IdP LDAP 寄發審核信流程 及 自動建立 User 功能是否啟用
 			isReviewAndCreate = getTsmpSettingService().getVal_AC_IDP_LDAP_REVIEW_ENABLE();
@@ -197,8 +205,29 @@ public class AcIdPHelper {
 			isReviewAndCreate = getTsmpSettingService().getVal_AC_IDP_CUS_REVIEW_ENABLE();
 		}
 		
-		// 1.取得 IdP User 的資料, 建立 或 更新
-    	DgrAcIdpUser dgrAcIdpUser = getDgrAcIdpUserDao().findFirstByUserNameAndIdpType(userName, idPType);
+    		// AC_IDP 登入時, 是否只檢查username, 忽略 IdP type; 預設為 false, 須檢查 username 和 type (true/false) 
+		boolean acIdpLoginIgnoreType = getTsmpSettingService().getVal_AC_IDP_LOGIN_IGNORE_TYPE();
+		
+		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+		boolean acIdpUsernameB64Encode = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+		if(!DgrIdPType.CUS.equals(idPType) && acIdpUsernameB64Encode) {// CUS 本來就有做編碼,不再處理
+			userName = ServiceUtil.encodeBase64URL(userName); // 編碼
+		}
+		
+		DgrAcIdpUser dgrAcIdpUser = null;
+		
+		if (acIdpLoginIgnoreType) {
+			// 只檢查 username, 忽略 IdP type, 以最先建立的user資料為準
+			dgrAcIdpUser = getDgrAcIdpUserDao().findFirstByUserNameOrderByCreateDateTime(userName);
+			if (dgrAcIdpUser != null) {
+				idPType = dgrAcIdpUser.getIdpType();// 若有查到已建立的,則以已建立的為準; 否則,仍以登入的IdP type 為準
+			}
+
+		} else {
+			// 取得 IdP User 的資料
+			dgrAcIdpUser = getDgrAcIdpUserDao().findFirstByUserNameAndIdpType(userName, idPType);
+		}
+    	
     	
 		if (dgrAcIdpUser == null) {
 			// 查無 User 資料
@@ -219,14 +248,19 @@ public class AcIdPHelper {
 			String userName, String userAlias, String userEmail, String acIdPMsgUrl, String idTokenJwtstr,
 			String accessTokenJwtstr, String refreshTokenJwtstr) throws Exception {
 
+		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+		String acIdpUsernameB64EncodeKey = getTsmpSettingService().getKey_AC_IDP_USERNAME_B64_ENCODE();
+		boolean acIdpUsernameB64EncodeValue = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+		TPILogger.tl.debug(acIdpUsernameB64EncodeKey + " : " + acIdpUsernameB64EncodeValue);
+		
 		String errMsg = null;
 		String showMsg = null;
 		String lineNumber = null;
 		String userStatusEn = DgrAcIdpUserStatus.REQUEST.text();
 		
 		String userNameForDec = userName;		
-		if (DgrIdPType.CUS.equalsIgnoreCase(idPType)) {
-			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 才要做解碼
+		if (DgrIdPType.CUS.equalsIgnoreCase(idPType) || acIdpUsernameB64EncodeValue) {
+			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 或 有設定做編碼, 才要做解碼
 		}
 		
 		if (isReviewAndCreate) { // 有 寄發審核信流程 及 自動建立 User
@@ -258,7 +292,7 @@ public class AcIdPHelper {
 					userHostname, txnUid);
 			long acIdpUserId = dgrAcIdpUser.getAcIdpUserId();
 	    	
-	    	// b.寄信給審核者,以執行同意/拒絕動作
+			// b.寄信給審核者,以執行同意/拒絕動作
 	        sendApplyMail(httpReq, userNameForDec, userEmail, acIdpUserId, idPType, reviewerEmails, code1, code2);
 
 			// User狀態為 'Request' 無法登入,已寄信給審核者,經審核後,將寄發Email通知您
@@ -273,9 +307,16 @@ public class AcIdPHelper {
 					userAlias);
 
 		} else { // 沒有 寄發審核信流程 及 不會自動建立 User
-			// Delegate AC User '%s' 不存在,不能登入
-			showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN, userNameForDec);
-			errMsg = showMsg;
+			if(DgrIdPType.CUS.equalsIgnoreCase(idPType) || acIdpUsernameB64EncodeValue) {
+				// Delegate AC User '%s'(%s) 不存在,不能登入
+				showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN_2, userNameForDec, userName, idPType);
+				errMsg = showMsg;
+				
+			} else {
+				// Delegate AC User '%s' 不存在,不能登入
+				showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN, userNameForDec, idPType);
+				errMsg = showMsg;
+			}
 			
 			// 寫入 Audit Log M,登入失敗
 			lineNumber = StackTraceUtil.getLineNumber();
@@ -296,14 +337,18 @@ public class AcIdPHelper {
 			boolean isReviewAndCreate, String reqUri, String userIp, String userHostname, String txnUid,
 			String idPType, String userName, String userAlias, String userEmail, String acIdPMsgUrl,
 			String idTokenJwtstr, String accessTokenJwtstr, String refreshTokenJwtstr, String apiResp) throws Exception {
+		
+		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+		boolean acIdpUsernameB64Encode = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+		
 		String errMsg = null;
 		String showMsg = null;
 		String userStatus = dgrAcIdpUser.getUserStatus();
 		Long acIdpUserId = dgrAcIdpUser.getAcIdpUserId();
 		
 		String userNameForDec = userName;
-		if (DgrIdPType.CUS.equalsIgnoreCase(idPType)) {
-			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 才要做解碼
+		if (DgrIdPType.CUS.equalsIgnoreCase(idPType) || acIdpUsernameB64Encode) {
+			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 或 有設定做編碼, 才要做解碼
 		}
 		
 		if (DgrAcIdpUserStatus.REQUEST.isValueEquals(userStatus)) {// User 狀態為 Request
@@ -413,9 +458,12 @@ public class AcIdPHelper {
 	 * 2.不同 IdP type 的 Delegate AC User <br>
 	 */
 	private String checkUserDuplicate(String userName, String newIdpType) {
+		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+		boolean acIdpUsernameB64Encode = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+		
 		String userNameForDec = userName;
-		if (DgrIdPType.CUS.equalsIgnoreCase(newIdpType)) {
-			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 才要做解碼
+		if (DgrIdPType.CUS.equalsIgnoreCase(newIdpType) || acIdpUsernameB64Encode) {
+			userNameForDec = ServiceUtil.decodeBase64URL(userName); // CUS 或 有設定做編碼, 才要做解碼
 		}
 		
 		String errMsg = null;
@@ -476,7 +524,7 @@ public class AcIdPHelper {
     /**
      * 重新導向到前端,以登入AC
      * 1.若 idPType 為 LDAP / MLDAP / API, 則 URL 改成相對路徑, 例如. "/dgrv4/ac4/idpsso/accallback"
-	 * 2.若 idPType 為 GOOGLE / MS / CUS, 則 URL 依 DB 的值為準
+	 * 2.若 idPType 為 GOOGLE / MS / OIDC / CUS, 則 URL 依 DB 的值為準
      */
 	public void redirectToAcCallback(HttpServletResponse httpResp, String dgRcode, String acIdPAccallbackUrl,
 			String idPType) throws Exception {
@@ -1004,7 +1052,7 @@ public class AcIdPHelper {
     }
     
     protected TsmpSettingService getTsmpSettingService() {
-    	return tsmpSettingService;
+    		return tsmpSettingService;
     }
     
     protected DgrAcIdpUserDao getDgrAcIdpUserDao() {

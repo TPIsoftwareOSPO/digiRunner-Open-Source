@@ -112,32 +112,6 @@
       </p-tabView>
     </div>
 
-    <!-- <div style="
-        width: 100%;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #e0e0e0;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.1);
-      ">
-      <div style="
-          display: flex;
-          width: 100%;
-          align-items: center;
-          justify-content: center;
-        ">
-        <div class="upload_reg_area" style="padding: 10px; cursor: pointer">
-          <a [routerLink]="['/ac03/ac0318/']" routerLinkActive="router-link-active" [style]="{
-              'text-decoration': 'none',
-              display: 'flex',
-              'align-items': 'center',
-              color: '#4F4F4F'
-            }"><img src="assets/images/vector.png" style="width: 16px; margin-right: 6.4px"
-              alt="import_or_compose_api" />{{ "upload_reg_comp_api_file" | translate }}</a>
-        </div>
-      </div>
-    </div> -->
-
     <p-overlayPanel #jwtSettingPanel [showCloseIcon]="true" [style]="{
         width: '450px',
         marginTop: '-70px',
@@ -772,7 +746,7 @@
                   [hidden]="apiDetail.pathType =='dgrc'">
                 </p-checkbox>
                 <label class="mb-0 ms-1" for="urlRID">
-                  {{ apiDetail.pathType =='dgrc' ? '' : "path_param" | translate }}
+                  {{ apiDetail.pathType =='dgrc' ? '' : ("path_param" | translate)+"(v3)" }}
                 </label>
               </div>
               <!-- ai gateway 沒有no auth-->

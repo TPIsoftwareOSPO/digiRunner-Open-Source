@@ -62,33 +62,54 @@
           <div class="form-group row">
             <div class="col-6">
               <label for="userBlock">{{'org_password' | translate}}</label>
-              <input type="password" class="form-control" id="userBlock" formControlName="userBlock"
-                placeholder="{{'org_password' | translate}}">
+              <div class="ui-inputgroup">
+                <input [type]="oriMask ? 'text' : 'password'" class="form-control" id="userBlock"
+                  formControlName="userBlock" placeholder="{{'org_password' | translate}}">
+                <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                  (click)="toggleMask('oriMima')"></button>
+              </div>
               <div *ngIf="userBlock?.invalid && (userBlock?.dirty || userBlock?.touched)" class="text-danger">
                 <small class="form-text">{{userBlock.errors.maxlength | translate:newUserBlockLimitChar}}</small>
+
               </div>
             </div>
           </div>
           <div class="form-group row">
             <div class="col-6">
-              <label for="newUserBlock">{{'new_password' | translate}}</label>
-              <input type="password" class="form-control" id="newUserBlock" formControlName="newUserBlock"
-                placeholder="{{'new_password' | translate}}">
+              <label for="newUserBlock">{{'new_password' | translate}}
+                <i *ngIf="mimatip" class="far fa-question-circle tip" [pTooltip]="mimatip" [escape]="false"></i>
+              </label>
+              <div class="ui-inputgroup">
+                <input [type]="newMask ? 'text' : 'password'" class="form-control" id="newUserBlock"
+                  formControlName="newUserBlock" placeholder="{{'new_password' | translate}}">
+                <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                  (click)="toggleMask('newMima')"></button>
+              </div>
               <div *ngIf="newUserBlock?.invalid && (newUserBlock?.dirty || newUserBlock?.touched)" class="text-danger">
                 <small class="form-text">{{newUserBlock.errors.maxlength | translate:newUserBlockLimitChar}}</small>
-                <small *ngIf="confirmUserBlock.value" class="form-text">{{newUserBlock.errors.confirm_mima | translate}}</small>
+                <small class="form-text">{{newUserBlock?.errors.pattern | translate}}</small>
+                <small class="form-text">{{newUserBlock.errors.minlength | translate:6 }}</small>
+                <div>
+                  <small *ngIf="confirmUserBlock.value" class="form-text">{{newUserBlock.errors.confirm_mima | translate}}</small>
+                </div>
               </div>
             </div>
           </div>
           <div class="form-group row">
             <div class="col-6">
               <label for="confirmUserBlock">{{'cfm_new_password' | translate}}</label>
-              <input type="password" class="form-control" id="confirmUserBlock" formControlName="confirmUserBlock"
-                placeholder="{{'cfm_new_password' | translate}}">
+              <div class="ui-inputgroup">
+                <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmUserBlock"
+                  formControlName="confirmUserBlock" placeholder="{{'cfm_new_password' | translate}}">
+                <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                  (click)="toggleMask('cfmMima')"></button>
+              </div>
               <div *ngIf="confirmUserBlock?.invalid && (confirmUserBlock?.dirty || confirmUserBlock?.touched)"
                 class="text-danger">
                 <small class="form-text">{{confirmUserBlock.errors.maxlength | translate:newUserBlockLimitChar}}</small>
-                <small class="form-text">{{confirmUserBlock.errors.confirm_mima | translate}}</small>
+                <div>
+                  <small class="form-text">{{confirmUserBlock.errors.confirm_mima | translate}}</small>
+                </div>
               </div>
             </div>
           </div>

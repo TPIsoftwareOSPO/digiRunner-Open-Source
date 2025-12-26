@@ -45,6 +45,13 @@ public class DgrJtiCheck {
 				isDgrUrl = false;
 			}
 			
+			//不驗証的API,例如:不驗証忘記密碼功能
+			if(uri.length() >= 16) {
+				if(uri.substring(0, 16).equals("/dgrv4/11/AA0550") || uri.substring(0, 16).equals("/dgrv4/11/AA0551")
+						|| uri.substring(0, 16).equals("/dgrv4/11/AA0552")|| uri.substring(0, 16).equals("/dgrv4/11/AA0553"))
+				isDgrUrl = false;
+			}
+			
 			if (isDgrUrl) {
 				// 用CApiKey就不驗token
 				String cuuid = request.getHeader("cuuid");

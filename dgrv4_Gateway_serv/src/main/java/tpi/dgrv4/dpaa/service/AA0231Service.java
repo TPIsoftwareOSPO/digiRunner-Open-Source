@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Setter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -37,6 +39,7 @@ import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpSetting;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpMailTplt;
 import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
+import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpDpMailTpltDao;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
@@ -64,7 +67,9 @@ public class AA0231Service {
 	private TsmpSettingDao tsmpSettingDao;
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
     private DaoGenericCacheService daoGenericCacheService;
-	
+    @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private TsmpSettingService tsmpSettingService;
+    
     @Autowired
 	public AA0231Service(TsmpClientDao tsmpClientDao, OauthClientDetailsDao oauthClientDetailsDao,
 			ApplicationContext ctx, JobHelper jobHelper, TsmpDpMailTpltDao tsmpDpMailTpltDao,
@@ -218,6 +223,9 @@ public class AA0231Service {
 					oldRowStr = getDgrAuditLogService().writeValueAsString(iip, tsmpClientVo); //舊資料統一轉成 String
 					
 					String newClientPwd = new String(ServiceUtil.base64Decode(newClientBlock));//Client PW,經過 Base64 Decode 的值
+					if(!newClientPwd.matches(this.getTsmpSettingService().getVal_CLIENT_PWD_STRENGTH())) {
+						throw TsmpDpAaRtnCode._1352.throwing("{{newClientBlock}}");
+					}
 					adminConsolePwd = newClientPwd;
 					String sha512Pwd = ServiceUtil.getSHA512ToBase64(newClientPwd);
 					tsmpClientVo.setClientSecret(sha512Pwd);
@@ -460,6 +468,10 @@ public class AA0231Service {
 
 	protected DaoGenericCacheService getDaoGenericCacheService() {
 		return daoGenericCacheService;
+	}
+
+	protected TsmpSettingService getTsmpSettingService() {
+		return tsmpSettingService;
 	}
 	
     

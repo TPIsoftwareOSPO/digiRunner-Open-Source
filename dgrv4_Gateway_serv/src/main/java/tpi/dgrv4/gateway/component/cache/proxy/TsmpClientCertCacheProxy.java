@@ -29,9 +29,11 @@ public class TsmpClientCertCacheProxy extends DaoCacheProxy {
 
 	public List<TsmpClientCert> findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, long nowLong) {
 		Supplier<List<TsmpClientCert>> supplier = () -> {
-			return getTsmpClientCertDao().findByClientIdAndExpiredAtAfterOrderByCreateDateTime(clientId, nowLong);
+//			return getTsmpClientCertDao().findByClientIdAndExpiredAtAfterOrderByCreateDateTime(clientId, nowLong);
+			return getTsmpClientCertDao().query_findByClientIdAndExpiredAtAfterOrderByCreateDateTime(clientId, nowLong);
 		};
-		return getList("findByClientIdAndExpiredAtAfterOrderByCreateDateTime", supplier, clientId, nowLong);
+//		return getList("findByClientIdAndExpiredAtAfterOrderByCreateDateTime", supplier, clientId, nowLong);
+		return getList("query_findByClientIdAndExpiredAtAfterOrderByCreateDateTime", supplier, clientId, nowLong);
 	}
 
 	@Override

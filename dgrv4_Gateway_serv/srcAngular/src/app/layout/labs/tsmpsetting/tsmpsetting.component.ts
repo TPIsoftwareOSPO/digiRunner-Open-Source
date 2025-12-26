@@ -89,6 +89,14 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
       encrptionType: new FormControl(),
     });
 
+    this.route.queryParams.subscribe((value) => {
+      if(value['keyword']){
+        this.form.get("keyword")?.setValue(value['keyword']);
+        this.queryTsmpSettingList();
+      }
+    })
+
+
     this.init();
   }
 

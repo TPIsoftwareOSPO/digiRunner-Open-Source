@@ -35,5 +35,9 @@ public interface TsmpUserDao extends JpaRepository<TsmpUser, String> {
 	public List<TsmpUser> queryByRoleAlert(Long alertId);
 	
 	public Long countByUserStatus(String userStatus);
+	
+	public TsmpUser findFirstByUserEmail(String email);
+	
+	public List<TsmpUser> findByUserEmail(String email);
 
 }

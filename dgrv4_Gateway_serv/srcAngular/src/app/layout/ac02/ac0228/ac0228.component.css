@@ -10,7 +10,15 @@
   background-color: #eee;
 }
 
-
 .keyValueContent label{
   background-color: #eee;
+}
+
+.noimg{
+  background-color: #ededed;
+  border: 2px solid #dedede;
+  border-radius: 5px;
+  margin-left: 20px;
+  width: 50px;
+  min-height: 50px;
 }

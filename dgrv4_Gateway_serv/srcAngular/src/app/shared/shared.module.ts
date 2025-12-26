@@ -1,3 +1,4 @@
+import { FirstTimeLoginComponent } from './first-time-login/first-time-login.component';
 import { KeyValueDetailComponent } from './key-value/key-value-detail/key-value-detail.component';
 import { KeyValueGridModule } from './key-value-grid/key-value-grid.module';
 import { KeyValueGridComponent } from './key-value-grid/key-value-grid.component';
@@ -75,6 +76,7 @@ import { UserDetailComponent } from '../layout/ac00/ac0002/user-detail/user-deta
 import { SearchInputComponent } from '../layout/components/search-input/search-input.component';
 import { NotifyListComponent } from './notify-list/notify-list.component';
 import { AiApikeyComponent } from '../layout/ac03/ac0311/ai-apikey/ai-apikey.component';
+import { ExpiredInAlertComponent } from '../layout/components/header/expired-in-alert/expired-in-alert.component';
 
 @NgModule({
   imports: [
@@ -146,7 +148,9 @@ import { AiApikeyComponent } from '../layout/ac03/ac0311/ai-apikey/ai-apikey.com
     UserDetailComponent,
     SearchInputComponent,
     NotifyListComponent,
-    AiApikeyComponent
+    AiApikeyComponent,
+    FirstTimeLoginComponent,
+    ExpiredInAlertComponent
   ],
   declarations: [
     ContainerComponent,
@@ -203,7 +207,9 @@ import { AiApikeyComponent } from '../layout/ac03/ac0311/ai-apikey/ai-apikey.com
     UserDetailComponent,
     SearchInputComponent,
     NotifyListComponent,
-    AiApikeyComponent
+    AiApikeyComponent,
+    FirstTimeLoginComponent,
+    ExpiredInAlertComponent
   ],
   providers: [ApiBaseService, MessageService],
 })

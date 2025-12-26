@@ -326,7 +326,7 @@
           </div>
         </div>
       </div>
-      <div class="form-group row">
+      <!-- <div class="form-group row">
         <div class="col-3 col-sm-3 pt-2">
           <input formControlName="cFlag" class="align-middle" type="checkbox">
           <span id="cFlag_label" class="control-label m-1 p-1 pt-2">{{'cuz_alert'|translate}}</span>
@@ -347,7 +347,7 @@
             <small class="form-text">{{imId.errors.maxlength}}</small>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="exType_label" class="control-label">{{'alert_settings'|translate}}</label>
@@ -382,7 +382,8 @@
         <div class="col-3 col-sm-3"></div>
         <div class="col-9 col-sm-9">
           <!-- <span class="mt-1">({{'exc_days_pl'|translate}})</span> -->
-          <span class="mt-1" [innerHTML]="exc_days_pl"></span>
+            <span class="form-control" [innerHtml]="exc_days_pl"
+              style="background-color: #e9ecef;opacity: 1;height: auto;overflow: auto;"></span>
         </div>
       </div>
       <div class="form-group row">
@@ -574,7 +575,7 @@
           </label>
         </div>
       </div>
-      <div class="form-group row">
+      <!-- <div class="form-group row">
         <div class="col-3 col-sm-3 pt-2">
           <input class="align-middle" type="checkbox" disabled [checked]="currentAlertDetail.cFlag == 'true'"
             style="cursor: default;">
@@ -589,7 +590,7 @@
           <label class="control-label">{{'line_token'|translate}}</label>
           <label class="form-control border-line">{{currentAlertDetail.imId}}</label>
         </div>
-      </div>
+      </div> -->
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label class="control-label">{{'alert_settings'|translate}}</label>
@@ -754,7 +755,7 @@
           </div>
         </div>
       </div>
-      <div class="form-group row">
+      <!-- <div class="form-group row">
         <div class="col-3 col-sm-3 pt-2">
           <input formControlName="cFlag" class="align-middle" type="checkbox">
           <span id="cFlag_label" class="control-label m-1 p-1 pt-2">{{'cuz_alert'|translate}}</span>
@@ -775,7 +776,7 @@
             <small class="form-text">{{imId.errors.maxlength}}</small>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="exType_label" class="control-label">{{'alert_settings'|translate}}</label>

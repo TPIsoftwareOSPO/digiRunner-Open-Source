@@ -38,6 +38,7 @@ import tpi.dgrv4.entity.repository.DgrGtwIdpAuthCodeDao;
 import tpi.dgrv4.entity.repository.DgrGtwIdpAuthMDao;
 import tpi.dgrv4.entity.repository.DgrGtwIdpInfoODao;
 import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
+import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.component.GtwIdPHelper;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.component.IdPTokenHelper;
@@ -161,6 +162,11 @@ public class GtwIdPCallbackService {
 	public ResponseEntity<?> gtwIdPCallback_oauth2(HttpServletResponse httpResp, String idPType, String state,
 			String idPAuthCode, String reqUri, String userIp, String userHostname, String codeVerifierForOauth2)
 			throws Exception {
+		
+		//checkmarx, Reflected XSS All Clients 
+		reqUri = ESAPI.encoder().encodeForHTML(reqUri);
+		idPType = ESAPI.encoder().encodeForHTML(idPType);
+		state = ESAPI.encoder().encodeForHTML(state);
 
 		// 1.檢查傳入的資料
 		ResponseEntity<?> errRespEntity = getGtwIdPHelper().checkCookieParam(state, reqUri);

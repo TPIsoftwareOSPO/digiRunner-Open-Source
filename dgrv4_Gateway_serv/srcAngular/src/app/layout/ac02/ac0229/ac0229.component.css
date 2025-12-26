@@ -24,3 +24,13 @@
   font-weight: 400;
   font-size: 0.8rem;
 }
+
+.noimg{
+  background-color: #ededed;
+  border: 2px solid #dedede;
+  border-radius: 5px;
+  margin-left: 20px;  
+  width: 50px;
+  min-height: 50px;
+}
+

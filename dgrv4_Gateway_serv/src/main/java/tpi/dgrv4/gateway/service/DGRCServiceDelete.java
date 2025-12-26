@@ -1,34 +1,21 @@
 package tpi.dgrv4.gateway.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
 import tpi.dgrv4.entity.entity.TsmpApiRegId;
 import tpi.dgrv4.gateway.component.DgrcRoutingHelper;
+import tpi.dgrv4.gateway.component.ResponseHandler;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
 import tpi.dgrv4.gateway.component.cache.proxy.ProxyMethodServiceCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiCacheProxy;
@@ -42,61 +29,39 @@ import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 
+import java.io.IOException;
+import java.util.*;
+
 
 @Service
 public class DGRCServiceDelete implements IApiCacheService {
 
+	@Setter(onMethod_ = @Autowired)
 	private CommForwardProcService commForwardProcService;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpApiCacheProxy tsmpApiCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private DgrcRoutingHelper dgrcRoutingHelper;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpSettingService tsmpSettingService;
+	@Setter(onMethod_ = @Autowired)
 	private ObjectMapper objectMapper;
+	@Setter(onMethod_ = @Autowired)
 	private MockApiTestService mockApiTestService;
+	@Setter(onMethod_ = @Autowired)
+	ResponseHandler responseHandler;
 
 	private  Map<String, String> maskInfo ;
 
 	private static final String LOGUUID = "【LOGUUID】";
 	private static final String END_DGRC = "【END_DGRC】";
 
-	@Autowired
-	public DGRCServiceDelete(CommForwardProcService commForwardProcService, TsmpApiCacheProxy tsmpApiCacheProxy,
-			ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy, DgrcRoutingHelper dgrcRoutingHelper,
-			TsmpApiRegCacheProxy tsmpApiRegCacheProxy, TsmpSettingService tsmpSettingService, ObjectMapper objectMapper,
-			MockApiTestService mockApiTestService) {
-		super();
-		this.commForwardProcService = commForwardProcService;
-		this.tsmpApiCacheProxy = tsmpApiCacheProxy;
-		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
-		this.dgrcRoutingHelper = dgrcRoutingHelper;
-		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
-		this.tsmpSettingService = tsmpSettingService;
-		this.objectMapper = objectMapper;
-		this.mockApiTestService = mockApiTestService;
-	}
 
-	@Async("async-workers-highway")
-	public CompletableFuture<ResponseEntity<?>> forwardToDeleteAsyncFast(HttpHeaders httpHeaders,
-			HttpServletRequest httpReq, HttpServletResponse httpRes,
-			String payload) throws Exception {
-		return dgrcService(httpHeaders, httpReq, httpRes, payload);
-	}
-
-	@Async("async-workers")
-	public CompletableFuture<ResponseEntity<?>> forwardToDeleteAsync(HttpHeaders httpHeaders,
-			HttpServletRequest httpReq, HttpServletResponse httpRes,
-			String payload) throws Exception {
-		return dgrcService(httpHeaders, httpReq, httpRes, payload);
-	}
-
-	private CompletableFuture<ResponseEntity<?>> dgrcService(HttpHeaders httpHeaders, HttpServletRequest httpReq,
-			HttpServletResponse httpRes, String payload) throws Exception {
-		var response = forwardToDelete(httpHeaders, httpReq, httpRes, payload);
-		return CompletableFuture.completedFuture(response);
-	}
-
-	public ResponseEntity<?> forwardToDelete(HttpHeaders httpHeaders, HttpServletRequest httpReq,
+	public void forwardToDelete(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes,
 			String payload) throws Exception {
 		try {
@@ -123,7 +88,11 @@ public class DGRCServiceDelete implements IApiCacheService {
 
 				ResponseEntity<?> allowMethodErrRespEntity = getCommForwardProcService().checkMethod(apiReg, httpReq);
 				if (allowMethodErrRespEntity != null) {
-					return allowMethodErrRespEntity;
+					responseHandler
+							.response(httpRes)
+							.handle(allowMethodErrRespEntity)
+							.write();
+					return;
 				}
 
 				maskInfo = new HashMap<>();
@@ -172,7 +141,11 @@ public class DGRCServiceDelete implements IApiCacheService {
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, dgrcDelDgrReqVo, respMbody);
 				getCommForwardProcService().addRdbTsmpApiLogResp1(errRespEntity, dgrcDelDgrReqVoRdb, respMbody);
-				return errRespEntity;
+				responseHandler
+						.response(httpRes)
+						.handle(errRespEntity)
+						.write();
+				return;
 			}
 
 			//轉換 Request Body 格式
@@ -185,7 +158,11 @@ public class DGRCServiceDelete implements IApiCacheService {
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, dgrcDelDgrReqVo, respMbody);
 				getCommForwardProcService().addRdbTsmpApiLogResp1(errRespEntity, dgrcDelDgrReqVoRdb, respMbody);
-				return errRespEntity;
+				responseHandler
+						.response(httpRes)
+						.handle(errRespEntity)
+						.write();
+				return;
 			}
 			payload = jwtPayloadData.payloadStr;
 
@@ -200,7 +177,11 @@ public class DGRCServiceDelete implements IApiCacheService {
 				String respMbody = getObjectMapper().writeValueAsString(srcUrlListErrResp.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(srcUrlListErrResp, dgrcDelDgrReqVo, respMbody);
 				getCommForwardProcService().addRdbTsmpApiLogResp1(srcUrlListErrResp, dgrcDelDgrReqVoRdb, respMbody);
-				return srcUrlListErrResp;
+				responseHandler
+						.response(httpRes)
+						.handle(srcUrlListErrResp)
+						.write();
+				return;
 			}
 
 			int tokenPayload = apiReg.getFunFlag();
@@ -211,8 +192,13 @@ public class DGRCServiceDelete implements IApiCacheService {
 				// Mock test 不做重試,只取第一個URL執行
 				String srcUrl = srcUrlList.get(0);
 				TPILogger.tl.debug("Src Url:" + srcUrl);
-				return mockForwardTo(httpReq, httpRes, httpHeaders, srcUrl, uuid, tokenPayload, dgrcDelDgrReqVo,
+				mockForwardTo(httpReq, httpRes, httpHeaders, srcUrl, uuid, tokenPayload, dgrcDelDgrReqVo,
 						dgrcDelDgrReqVoRdb, cApiKeySwitch, apiReg);
+//				responseHandler
+//						.response(httpRes)
+//						.handle(mockResp)
+//						.write();
+				return;
 			}
 
 			// 調用目標URL
@@ -220,34 +206,20 @@ public class DGRCServiceDelete implements IApiCacheService {
 					tokenPayload, cApiKeySwitch, dgrcDelDgrReqVo, srcUrlList, payload);
 
 			if (convertResponseBodyMap == null) {
-				// Response alread commited HTTP code : 503 --> null
-				// 不寫 ES , 不輸出 online console
-				return null;
+				throw new RuntimeException("forwardToByPolicy return null");
 			}
 
-			byte[] httpArray = null;
-			String httpRespStr = null;
-			if (convertResponseBodyMap != null) {
-				httpArray = (byte[]) convertResponseBodyMap.get("httpArray");
-				httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");
-			}
+			byte[] httpArray = (byte[]) convertResponseBodyMap.get("httpArray");;
+			String httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");;
+
 
 			int contentLength = 0;
 			if (httpArray != null) {
 				contentLength = httpArray.length;
-				// http InputStream copy into Array
-				try {
-					// 檢查非同步請求是否仍然有效
-					if (!httpRes.isCommitted()) {
-						IOUtils.copy(new ByteArrayInputStream(httpArray), httpRes.getOutputStream());
-					} else {
-						TPILogger.tl.warn("Response already committed or async completed");
-						return null;
-					}
-				} catch (AsyncRequestNotUsableException e) {
-					TPILogger.tl.warn(httpRes.getStatus() + ", " + StackTraceUtil.logStackTrace(e));
-					return null;
-				}
+				responseHandler
+						.response(httpRes)
+						.handle(httpArray)
+						.write();
 			}
 
 			// 印出第四道log
@@ -261,10 +233,7 @@ public class DGRCServiceDelete implements IApiCacheService {
 			getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, dgrcDelDgrReqVoRdb, httpRespStr,
 					contentLength);
 
-			return null;
-		} catch (AsyncRequestNotUsableException e) {
-			return null; // 不再拋出例外，避免影響其他請求
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw e;
 		}
@@ -453,7 +422,7 @@ public class DGRCServiceDelete implements IApiCacheService {
 		
 		// Must call respObj.getLogStr() first
 		// Threshhold > 10,000 => print warn msg.
-		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid, srcUrl, respObj.respStr)).ifPresent(TPILogger.tl::warn);
 		httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
 		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 		

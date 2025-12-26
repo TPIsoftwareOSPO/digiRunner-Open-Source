@@ -55,7 +55,7 @@ export class Ai0001Component extends BaseComponent implements OnInit {
   async ngOnInit() {
     const codes = [
       'status',
-      'name',
+      'ai.provider_alias',
       'ai.provider',
       'ai.llm_name',
       'ai.apikey_count',
@@ -64,7 +64,7 @@ export class Ai0001Component extends BaseComponent implements OnInit {
     this.cols = [
       { field: 'aiProviderEnable', header: dict['status'] },
       { field: 'aiProviderId', header: 'ID' },
-      { field: 'aiProviderAlias', header: dict['name'] },
+      { field: 'aiProviderAlias', header: dict['ai.provider_alias'] },
       { field: 'aiProviderName', header: dict['ai.provider'] },
       { field: 'aiModel', header: dict['ai.llm_name'] },
       { field: 'aiApiKeysCount', header: dict['ai.apikey_count'] },

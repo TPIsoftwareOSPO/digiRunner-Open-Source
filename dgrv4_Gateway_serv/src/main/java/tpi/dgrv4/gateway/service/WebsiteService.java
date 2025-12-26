@@ -14,14 +14,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.http.Cookie;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -35,6 +32,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import tpi.dgrv4.codec.utils.ExpireKeyUtil;
 import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.CheckmarxCommUtils;
@@ -62,7 +60,7 @@ import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 public class WebsiteService {
 
 	public static WebsiteInfo websiteInfo;
-	
+    private String EXPIRE_KEY = "composerExpireKey";
 	public Map<String, List<WebsiteTrafficVo>> trifficMap = new HashMap<String, List<WebsiteTrafficVo>>();
 	
 	//key由外到內,timestampSec->websiteName->targetUrl-->type(req,resp)
@@ -341,7 +339,7 @@ public class WebsiteService {
 					
 					// Must call respObj.getLogStr() first
 					// Threshhold > 10,000 => print warn msg.
-					Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+					Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid, completeURL, respObj.respStr)).ifPresent(TPILogger.tl::warn);
 					request.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
 					request.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 				}
@@ -749,21 +747,9 @@ public class WebsiteService {
 		}
 		return dgrcPostForm_boundary;
 	}
-    private void checkReferer(HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response)
-            throws Exception {
-        List<String> referer = httpHeaders.entrySet().stream()
-                .filter(e -> "referer".equalsIgnoreCase(e.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
 
-        if (CollectionUtils.isEmpty(referer)||!(referer.getFirst().contains("dgrv4")||referer.getFirst().contains("/website/composer"))){
-            TPILogger.tl.info("Composer`s  referer  is " + referer);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-        }
-    }
 	private void composerReq(HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response,
-			String websiteName, String payload) throws IOException {
+			String websiteName, String payload) throws Exception {
 
 		String resourceURL = null;
 
@@ -789,7 +775,36 @@ public class WebsiteService {
 		// DPB0143檢查IP
 		if (websiteName.equals("composer")) {
             try {
-                checkReferer(httpHeaders,request,response);
+
+                if (request.getCookies() == null) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "No cookies found");
+                    return;
+                }
+
+                Optional<Cookie> expireKeyCookie = Arrays.stream(request.getCookies())
+                        .filter(c -> EXPIRE_KEY.equals(c.getName()))
+                        .findFirst();
+
+                boolean hasValidReferer = Optional.ofNullable(httpHeaders.get(HttpHeaders.REFERER))
+                        .flatMap(refs -> refs.stream().findFirst())
+                        .map(ref -> ref.contains("dgrv4")|| ref.contains("/website/composer"))
+                        .orElse(false);
+
+                boolean isValidRequest = expireKeyCookie
+                        .map(cookie -> {
+                            try {
+                                return ExpireKeyUtil.verifyExpireKey(cookie.getValue()) || hasValidReferer;
+                            } catch (Exception e) {
+                                TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+                                return false;
+                            }
+                        })
+                        .orElse(hasValidReferer);
+
+                if (!isValidRequest) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
                 if (response.isCommitted()) {
                     return; // 權限失敗已回應，直接結束
                 }
@@ -863,7 +878,8 @@ public class WebsiteService {
 		}
 	}
 
-	public HttpServletResponse getConvertResponse(Map<String, List<String>> respHeader, int status,
+
+    public HttpServletResponse getConvertResponse(Map<String, List<String>> respHeader, int status,
 			HttpServletResponse httpRes) {
 
 		httpRes.setStatus(status);

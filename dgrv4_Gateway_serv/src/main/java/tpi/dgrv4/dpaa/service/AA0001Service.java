@@ -289,6 +289,12 @@ public class AA0001Service {
 	 * @param userName
 	 */
 	private void checkPassword(String decodePassword) {
+		//Check password strength
+		//檢查密碼強度
+		if(!decodePassword.matches(this.getTsmpSettingService().getVal_PWD_STRENGTH())) {
+			throw TsmpDpAaRtnCode._1352.throwing("{{userBlock}}");
+		}
+		
 		String aa0001_msg = "";
 		if(decodePassword.length() > 128) {
 			int aa0001_length = decodePassword.length();

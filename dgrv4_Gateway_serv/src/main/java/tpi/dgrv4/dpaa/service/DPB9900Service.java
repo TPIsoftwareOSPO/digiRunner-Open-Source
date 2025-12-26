@@ -23,6 +23,7 @@ import tpi.dgrv4.entity.repository.TsmpSettingDao;
 import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.IAllPropertiesService;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
@@ -37,14 +38,16 @@ public class DPB9900Service {
 	private ServiceConfig serviceConfig;
 
 	private Integer pageSize;
+    private TsmpSettingService tsmpSettingService;
  
 	@Autowired
 	public DPB9900Service(@Nullable IAllPropertiesService allPropertiesService, TsmpSettingDao tsmpSettingDao,
-			ServiceConfig serviceConfig) {
+			ServiceConfig serviceConfig , TsmpSettingService tsmpSettingService) {
 		super();
 		this.allPropertiesService = allPropertiesService;
 		this.tsmpSettingDao = tsmpSettingDao;
 		this.serviceConfig = serviceConfig;
+        this.tsmpSettingService = tsmpSettingService;
 	}
 
 	public DPB9900Resp queryTsmpSettingList(TsmpAuthorization auth, DPB9900Req req) {
@@ -58,13 +61,16 @@ public class DPB9900Service {
 		DPB9900Resp resp = new DPB9900Resp();
 		List<DPB9900Item> dataList = getDataList(settings);
 		resp.setDataList(dataList);
-		
-		Map<String, String> allProperties = new HashMap<>();
-		if (allPropertiesService != null) {
-			allProperties = getAllPropertiesService().getAllProperties();
-		}
-		resp.setAllProperties(allProperties);
 
+        boolean showAllProperties = false;
+        showAllProperties = getTsmpSettingService().getVal_SHOW_ALL_PROPERTIES();
+        if (showAllProperties) {
+            Map<String, String> allProperties = new HashMap<>();
+            if (allPropertiesService != null  ) {
+                allProperties = getAllPropertiesService().getAllProperties();
+            }
+            resp.setAllProperties(allProperties);
+        }
 		return resp;
 	}
 
@@ -125,4 +131,7 @@ public class DPB9900Service {
 	protected IAllPropertiesService getAllPropertiesService() {
 		return allPropertiesService;
 	}
+    protected TsmpSettingService getTsmpSettingService() {
+        return tsmpSettingService;
+    }
 }

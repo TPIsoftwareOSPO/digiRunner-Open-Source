@@ -6,7 +6,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -84,6 +86,7 @@ import tpi.dgrv4.gateway.constant.DgrTokenType;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
+import tpi.dgrv4.gateway.vo.BasicAuthCacheVo;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 
@@ -91,6 +94,8 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Getter(AccessLevel.PROTECTED)
 @Component
 public class TokenHelper {
+	
+	public static Map<String, BasicAuthCacheVo> basicAuthCacheVoMap = new HashMap<>();
 	
 	// Double-Checked Locking mode has been implemented, but SonarQube may not fully understand the context and issue a warning, so annotate
 	// 已經實作雙重檢查鎖定(Double-Checked Locking)模式,但SonarQube可能無法完全理解上下文發出警告,故加註解
@@ -442,12 +447,11 @@ public class TokenHelper {
 			TPILogger.tl.debug(errMsg);
 			return getUnauthorizedErrorResp(apiUrl, errMsg);// 401
 		}
-
-		String clientSecret = authClientDetails.getClientSecret();
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		boolean isMatch = passwordEncoder.matches(clientPw, clientSecret);// 比對密碼
+		
+		String clientSecret = authClientDetails.getClientSecret();// DB 中的密碼 BCrypt 值
+		
+		boolean isMatch = verifyClientPw(clientId, clientPw, clientSecret);
 		if (!isMatch) {// client 帳號或密碼不對
-
 			// 更新 tsmpClient 密碼錯誤次數
 			updateTsmpClinetPWDFailTimes(clientId);
 			String errMsg1 = TokenHelper.UNAUTHORIZED;
@@ -457,8 +461,89 @@ public class TokenHelper {
 					getOAuthTokenErrorResp(errMsg1, errMsg2, HttpStatus.UNAUTHORIZED.value(), apiUrl),
 					setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
 		}
-
+		
 		return null;
+	}
+	
+	/**
+	 * 檢查 client 密碼, 使用 cache,<br>
+	 * 因每次都要做密碼 hash 比對, 效能會太差, 改用 cache,<br>
+	 * 當 client 的密碼比對成功, 則將 clientSecret(DB 中密碼的 Bcrypt 值) 存入 cache,<br> 
+	 * 下次若 cache ID("client ID,密碼") 相同, 直接取出 cache 值和DB 中密碼的 Bcrypt 值比對,<br>
+	 * 若 client 改了密碼(DB 中的Bcrypt 值會變動), 但仍輸入舊的密碼, 則會比對失敗<br>
+	 * @param clientId - client帳號
+	 * @param clientPw - client輸入的密碼
+	 * @param clientSecret - DB 中密碼的 BCrypt 值
+	 * @return
+	 */
+	private boolean verifyClientPw(String clientId, String clientPw, String clientSecret) {
+		boolean isMatch = false;
+		String cacheId = getBasicAuthCacheId(clientId, clientPw);
+		
+		// 依 cache id, 取得 cache 資料
+		BasicAuthCacheVo cacheVo = basicAuthCacheVoMap.get(cacheId);
+		if (cacheVo != null) {// 走cache
+			boolean isCacheUpdate = isCacheUpdate(cacheVo);
+			
+			if (isCacheUpdate) {// 更新紀錄
+				// 執行 bcrypt 密碼比對
+				BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+				isMatch = passwordEncoder.matches(clientPw, clientSecret);// 比對密碼(做 bcrypt)
+				if(isMatch) {
+					// 如果比對成功,則更新cache紀錄
+					updateBasicAuthCache(cacheVo, clientSecret, cacheId);
+				}
+				
+			} else {// 取得cache資料
+				isMatch = clientSecret.equals(cacheVo.getHash());// 比對密碼(用 cache 的值比)
+				if (!isMatch) {// 表示 client 有改密碼, 移除舊資料
+					basicAuthCacheVoMap.remove(cacheId);
+				}
+			}
+			
+		} else {// 找不到 cache 資料, 則比對密碼(做 bcrypt)
+			BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+			isMatch = passwordEncoder.matches(clientPw, clientSecret);// 比對密碼(做 bcrypt)
+			if(isMatch) {
+				// 如果比對成功,則更新cache紀錄
+				updateBasicAuthCache(cacheVo, clientSecret, cacheId);
+			}
+		}
+		
+		return isMatch;
+	}
+	
+	/**
+	 * 取得  Basic auth 的 cache id,<br>
+	 * 資料格式為 "child id,clientPw"<br>
+	 */
+	private String getBasicAuthCacheId(String clientId, String clientPw) {
+		return clientId.toLowerCase() + "," + clientPw;
+	}
+	
+	/**
+	 * Cache 是否過期要更新
+	 */
+	public boolean isCacheUpdate(BasicAuthCacheVo cacheVo) {
+		int cacheTime = 10; // 快取多久後到期 (單位:分)
+		long cacheTimestamp = cacheVo.getDataTimestamp() + (cacheTime * 60 * 1000); // 分鐘轉成毫秒
+		long nowTimestamp = System.currentTimeMillis();
+
+		return nowTimestamp > cacheTimestamp;
+	}
+	
+	/**
+	 * 更新 Basic auth 的 cache 記錄
+	 */
+	private void updateBasicAuthCache(BasicAuthCacheVo cacheVo, String clientSecret, String cacheId) {
+		if (cacheVo == null) {
+			cacheVo = new BasicAuthCacheVo();
+		}
+		
+		cacheVo.setHash(clientSecret);
+		cacheVo.setDataTimestamp(System.currentTimeMillis());
+		
+		basicAuthCacheVoMap.put(cacheId, cacheVo);
 	}
 
 	/**

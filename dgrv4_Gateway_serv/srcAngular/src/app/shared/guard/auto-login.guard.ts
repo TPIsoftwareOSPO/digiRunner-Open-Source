@@ -56,6 +56,7 @@ export class AutoLoginGuard implements CanActivate {
                                                 else {
                                                     this.toolService.setUserAlias('');
                                                 }
+                                                if(r.RespBody.firstTimeLogin) sessionStorage.setItem('firstTimeLogin', r.RespBody.firstTimeLogin?'true':'false');
                                                 this.setFuncList().pipe(
                                                     tap(r => {
                                                         if (r) this.router.navigateByUrl('/dashboard');

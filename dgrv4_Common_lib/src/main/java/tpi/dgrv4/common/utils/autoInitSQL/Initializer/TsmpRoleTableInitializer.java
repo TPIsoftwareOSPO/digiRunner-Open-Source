@@ -20,7 +20,9 @@ public class TsmpRoleTableInitializer {
 			String roleAlias;
 			String createUser;
 			createTsmpRole((roleId = "1000"), (roleName = "ADMIN"), (roleAlias = "Administrator"), (createUser = "manager"));
-			createTsmpRole((roleId = "1001"), (roleName = "FrontPageDashboard"), (roleAlias = "FrontPageDashboard"), (createUser = "manager"));
+			//The ID may exist, so if it is processed in AutoInitSQL.insertTsmpRole, do not add it again.
+			//該ID可能會存在,所以有在AutoInitSQL.insertTsmpRole加工,就不要再增加了
+			//createTsmpRole((roleId = "1001"), (roleName = "FrontPageDashboard"), (roleAlias = "FrontPageDashboard"), (createUser = "manager"));
 			
 
 		} catch (Exception e) {

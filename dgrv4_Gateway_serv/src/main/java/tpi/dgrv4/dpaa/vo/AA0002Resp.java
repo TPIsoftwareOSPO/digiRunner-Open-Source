@@ -4,6 +4,7 @@ public class AA0002Resp {
 	private String userID;
 	private String userAlias;
 	private String idTokenJwtstr;
+	private boolean firstTimeLogin;
 
 	public String getUserID() {
 		return userID;
@@ -28,5 +29,15 @@ public class AA0002Resp {
 	public void setIdTokenJwtstr(String idTokenJwtstr) {
 		this.idTokenJwtstr = idTokenJwtstr;
 	}
+
+	public boolean isFirstTimeLogin() {
+		return firstTimeLogin;
+	}
+
+	public void setFirstTimeLogin(boolean firstTimeLogin) {
+		this.firstTimeLogin = firstTimeLogin;
+	}
+	
+	
 
 }

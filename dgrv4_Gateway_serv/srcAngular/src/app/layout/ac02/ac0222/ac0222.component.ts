@@ -230,7 +230,7 @@ export class Ac0222Component extends BaseComponent implements OnInit {
       { field: 'vgroupName', header: dict['virtul_group_name'], width: '15%', },
       { field: 'vgroupAlias', header: `${dict['virtul_group_alias']}`, width: '15%' },
       { field: 'vgroupDesc', header: dict['virtul_group_desc'], width: '20%' },
-      { field: 'vgroupAuthorities', header: dict['authorities'], width: '20%' },
+      { field: 'vgroupAuthorities', header: dict['authorities']+"(v3)", width: '20%' },
       { field: 'securityLevelName', header: dict['security_level'], width: '10%' },
       { field: 'createTime', header: dict['create_time'], width: '10%' }
     ];

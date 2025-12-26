@@ -37,12 +37,33 @@ public class AA0002Service {
 
 		try {
 			String idPType = auth.getIdpType();
+			boolean isAC = true;
+			boolean isGetIdpUserData = false;
+			
+			if (DgrIdPType.GOOGLE.equals(idPType) //
+					|| DgrIdPType.MS.equals(idPType) //
+					|| DgrIdPType.OIDC.equals(idPType)) { //
+				// 以 SSO AC IdP (GOOGLE / MS / OIDC)的方式登入
+				isAC = false;
+				
+				if (auth.getIdTokenJwtstr() == null) {
+					// 若 Delegate AC User 先建立 "OIDC" 使用者，再使用 其他 IdP 登入(AC_IDP_LOGIN_IGNORE_TYPE =
+					// true)，會沒有 Id Token 資料
+					isGetIdpUserData = true;
+
+				} else {
+					resp.setIdTokenJwtstr(auth.getIdTokenJwtstr());
+				}
+			}
+			
 			if (DgrIdPType.LDAP.equals(idPType) // LDAP
 					|| DgrIdPType.MLDAP.equals(idPType) // MLDAP
 					|| DgrIdPType.API.equals(idPType) // API
 					|| DgrIdPType.CUS.equals(idPType) // CUS
-			) {
-				// 1.以 SSO AC IdP (LDAP / MLDAP / API)的方式登入
+					|| isGetIdpUserData) {
+				// 以 SSO AC IdP (LDAP / MLDAP / API)的方式登入 
+				isAC = false;
+				
 				String userNameForQuery = auth.getUserNameForQuery();
 				DgrAcIdpUser dgrAcIdpUser = getDgrAcIdpUserDao()
 						.findFirstByUserNameAndIdpType(userNameForQuery, idPType);
@@ -55,20 +76,21 @@ public class AA0002Service {
 					// 沒有值則顯示 user name
 					resp.setUserAlias(userName);
 				}
+			}
 
-			} else if (DgrIdPType.GOOGLE.equals(idPType) //
-					|| DgrIdPType.MS.equals(idPType) //
-					|| DgrIdPType.OIDC.equals(idPType) //
-			) {
-				// 2.以 SSO AC IdP (GOOGLE / MS / OIDC)的方式登入
-				resp.setIdTokenJwtstr(auth.getIdTokenJwtstr());
-
-			} else {
-				// 3.以 AC 方式登入
+			if(isAC) {
+				// 以 AC 方式登入
 				TsmpUser user = getTsmpUserDao().findFirstByUserName(auth.getUserName());
 				if (user != null) {
 					resp.setUserID(user.getUserId());
 					resp.setUserAlias(user.getUserAlias());
+					//If the setting FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED=false, its LogonDate() will not be null. You can refer to TptokenService to search for LogonDate
+					//若setting的FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED=false,它LogonDate()不會是null,可參考TptokenService搜尋LogonDate
+					if(user.getLogonDate() != null) {
+						resp.setFirstTimeLogin(false);
+					}else {
+						resp.setFirstTimeLogin(true);
+					}
 				}
 			}
  

@@ -3,9 +3,11 @@ package tpi.dgrv4.gateway.config;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,11 +19,19 @@ import tpi.dgrv4.gateway.service.TsmpSettingService;
 public class WebMvcConfig implements WebMvcConfigurer {
 	
 	private TsmpSettingService tsmpSettingService;
-	
+
+//	@Value(value = "${spring.mvc.async.request-timeout:-1}")
+//	private Long asyncRequestTimeout;
+
 	@Autowired
 	public WebMvcConfig(TsmpSettingService tsmpSettingService) {
 		super();
 		this.tsmpSettingService = tsmpSettingService;
+	}
+
+	@Override
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		configurer.setDefaultTimeout(-1);
 	}
 
 	@Override

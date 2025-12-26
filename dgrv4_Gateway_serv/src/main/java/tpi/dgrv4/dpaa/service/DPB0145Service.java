@@ -1,23 +1,19 @@
 package tpi.dgrv4.dpaa.service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.constant.RandomLongTypeEnum;
-import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.IdTokenUtil;
 import tpi.dgrv4.codec.utils.IdTokenUtil.IdTokenData;
 import tpi.dgrv4.codec.utils.RandomSeqLongUtil;
@@ -29,34 +25,29 @@ import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0145Req;
 import tpi.dgrv4.dpaa.vo.DPB0145Resp;
 import tpi.dgrv4.dpaa.vo.DPB0145RespItem;
-import tpi.dgrv4.dpaa.vo.DPB0146Resp;
 import tpi.dgrv4.entity.entity.DgrAcIdpUser;
 import tpi.dgrv4.entity.entity.TsmpOrganization;
 import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
 import tpi.dgrv4.gateway.constant.DgrAcIdpUserStatus;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+/**
+ * 查詢 AC IdP 使用者所有資料	
+ */
+
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class DPB0145Service {
 
-	private TPILogger logger = TPILogger.tl;
-	
-	private DPB0146Service dPB0146Service;
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	private ObjectMapper objectMapper;
-	private TsmpOrganizationDao tsmpOrganizationDao;
-
-	@Autowired
-	public DPB0145Service(DPB0146Service dPB0146Service, DgrAcIdpUserDao dgrAcIdpUserDao, ObjectMapper objectMapper,
-			TsmpOrganizationDao tsmpOrganizationDao) {
-		super();
-		this.dPB0146Service = dPB0146Service;
-		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
-		this.objectMapper = objectMapper;
-		this.tsmpOrganizationDao = tsmpOrganizationDao;
-	}
+	private final DPB0146Service dPB0146Service;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final ObjectMapper objectMapper;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final TsmpSettingService tsmpSettingService;
 
 	public DPB0145Resp queryIdPUserList(TsmpAuthorization auth, DPB0145Req req) {
 		DPB0145Resp resp = new DPB0145Resp();
@@ -69,10 +60,17 @@ public class DPB0145Service {
 			if (CollectionUtils.isEmpty(list)) {
 				throw TsmpDpAaRtnCode._1298.throwing();
 			}
-
+			
+			// 核發 AC OAuth 2.0 IdP token, 其中 username 從 IdP ID token 的什麼參數取得 (預設: sub)
+			String acIdpOauth2UsernameVal = getTsmpSettingService().getVal_AC_IDP_OAUTH2_USERNAME();
+			
+			// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+			boolean acIdpUsernameB64EncodeValue = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+			
 			List<DPB0145RespItem> dataList = new ArrayList<>();
 			for (DgrAcIdpUser userVo : list) {
-				IdTokenData idTokenData = IdTokenUtil.getIdTokenData(userVo.getIdTokenJwtstr());
+				IdTokenData idTokenData = IdTokenUtil.getIdTokenDataForAcIdP(userVo.getIdTokenJwtstr(),
+						acIdpOauth2UsernameVal, acIdpUsernameB64EncodeValue);
 				String picture = idTokenData.userPicture;
 				String statusName = DgrAcIdpUserStatus.getText(userVo.getUserStatus());
 
@@ -110,41 +108,23 @@ public class DPB0145Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 	}
 
 	private void processingBeforeResponse(DPB0145RespItem resp) {
-
 		if (resp == null) {
 			return;
 		}
-
-		if (DgrIdPType.CUS.equalsIgnoreCase(resp.getIdpType())) {
+		
+		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+		boolean acIdpUsernameB64EncodeValue = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+		
+		if (DgrIdPType.CUS.equalsIgnoreCase(resp.getIdpType()) || acIdpUsernameB64EncodeValue) {
 			String userName = ServiceUtil.decodeBase64URL(resp.getUserName());
 			resp.setUserName(userName);
 		}
-
-	}
-
-	private String getIcon(String jwt) throws JsonMappingException, JsonProcessingException {
-		if (StringUtils.hasText(jwt)) {
-			String[] arrJwt = jwt.split("\\.");
-			if (arrJwt.length == 3) {
-				byte[] arrDecode = Base64Util.base64URLDecode(arrJwt[1]);
-				String strDecode = new String(arrDecode, StandardCharsets.UTF_8);
-				JsonNode rootNode = getObjectMapper().readTree(strDecode);
-				JsonNode pictureNode = rootNode.get("picture");
-				if (pictureNode != null) {
-					return pictureNode.asText();
-				} else {
-					return null;
-				}
-			}
-		}
-
-		return jwt;
 	}
 
 	protected TsmpOrganizationDao getTsmpOrganizationDao() {

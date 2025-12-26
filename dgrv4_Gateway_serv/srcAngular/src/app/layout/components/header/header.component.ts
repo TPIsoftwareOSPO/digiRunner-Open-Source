@@ -11,6 +11,10 @@ import * as dayjs from 'dayjs';
 import * as base64 from 'js-base64';
 import { MenuItem } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
+import { ExpiredInAlertComponent } from './expired-in-alert/expired-in-alert.component';
+import { BehaviorSubject } from 'rxjs';
+import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
+import { ServerService } from 'src/app/shared/services/api-server.service';
 
 @Component({
   selector: 'app-header',
@@ -38,6 +42,10 @@ export class HeaderComponent implements OnInit {
   userImg: string = 'assets/images/user.png';
   idTokenJwtstr: string = sessionStorage.getItem('idTokenJwtstr') ?? '';
 
+  // 閒置倒數提醒
+  expired_in_alert: number = 30;
+  aliveTimer$ = new BehaviorSubject<number>(this.aliveSec ?? 0);
+
   constructor(
     public router: Router,
     private siderbar: SidebarService,
@@ -45,7 +53,8 @@ export class HeaderComponent implements OnInit {
     private userService: UserService,
     private logoutService: LogoutService,
     private dialogService: DialogService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private serverService:ServerService
   ) {
     this.router.events.subscribe((val) => {
       if (
@@ -160,6 +169,8 @@ export class HeaderComponent implements OnInit {
         }
       }
     }
+
+    this.setCustomerExpiredAlert();
   }
 
   //閒置倒數歸零則登出
@@ -172,6 +183,21 @@ export class HeaderComponent implements OnInit {
         dayjs(nowTimestamp).diff(dayjs(this.lastTimestamp), 'millisecond') /
           1000
       );
+      this.aliveTimer$.next(this.aliveSec?this.aliveSec-1:0);
+      if (this.aliveSec == this.expired_in_alert) {
+        const ref = this.dialogService.open(ExpiredInAlertComponent, {
+          showHeader: false,
+          header: "You're about to be signed out",
+          width: '500px',
+          data: {
+            timerStream: this.aliveTimer$,
+          },
+        });
+
+        ref.onClose.subscribe((res) => {
+          this.toolService.setExpiredTime();
+        });
+      }
 
       if (
         this.aliveSec &&
@@ -191,7 +217,7 @@ export class HeaderComponent implements OnInit {
       this.secStr = ('0' + (this.aliveSec! % 60).toString()).slice(-2);
 
       // console.log(this.aliveSec)
-      this.aliveStr = this.formatTime(this.aliveSec)
+      this.aliveStr = this.formatTime(this.aliveSec);
     }, 1000);
   }
 
@@ -264,5 +290,18 @@ export class HeaderComponent implements OnInit {
       );
       window.location.href = redirectUrl;
     }
+  }
+
+  setCustomerExpiredAlert(){
+     let modeReq = {
+      id: 'AC_EXPIRED_ALERT',
+    } as DPB9901Req;
+
+    this.serverService.queryTsmpSettingDetail_ignore1298(modeReq).subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        const numValue = Number(res.RespBody.value);
+        this.expired_in_alert = !isNaN(numValue) ? numValue : 0;
+      }
+    });
   }
 }

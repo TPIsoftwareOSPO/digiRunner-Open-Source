@@ -3,13 +3,10 @@
     <form [formGroup]="form" (ngSubmit)="submitForm()">
       <div class="form-header">
         <h1 style="font-weight: bold">
-          <img [src]="imgSrc" />
+          <img [src]="imgSrc|safeUrl" />
           {{ title }}
         </h1>
       </div>
-      <!-- <div class="logo_top">
-        <img src="assets/images/DigiFusion_digiRunner_logo_horizontal.png" alt="" title="">
-      </div> -->
       <hr />
       <div class="form-body">
         <div class="line" [hidden]="idpType == 'API'">

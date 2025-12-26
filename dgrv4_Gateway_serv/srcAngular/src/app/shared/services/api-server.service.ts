@@ -722,6 +722,15 @@ export class ServerService {
     return this.api.excuteNpPost<RespDPB9901>(path, body);
   }
 
+  queryTsmpSettingDetail_ignore1298(ReqBody: DPB9901Req): Observable<RespDPB9901> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.queryTsmpSettingDetail),
+      ReqBody: ReqBody,
+    } as ReqDPB9902;
+    const path = `${this.basePath}/DPB9901`;
+    return this.api.excuteNpPost_ignore1298<RespDPB9901>(path, body);
+  }
+
   /**
    * before
    * DPB9902: create TSMP_SETTING

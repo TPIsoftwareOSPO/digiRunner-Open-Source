@@ -17,4 +17,5 @@ public interface DgrWebhookNotifyLogDao extends JpaRepository<DgrWebhookNotifyLo
 	List<DgrWebhookNotifyLog> findByCreateUser(String createUser);
 	
 	List<DgrWebhookNotifyLog> findByWebhookNotifyId(Long webhookNotifyId);
+    List<DgrWebhookNotifyLog> findByCreateDateTimeBefore(Date beforeDate);
 }

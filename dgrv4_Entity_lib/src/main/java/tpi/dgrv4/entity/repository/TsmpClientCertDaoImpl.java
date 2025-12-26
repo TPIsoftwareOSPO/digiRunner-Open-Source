@@ -38,6 +38,27 @@ public class TsmpClientCertDaoImpl extends BaseDao {
 		return doQuery(sb.toString(), params, TsmpClientCert.class, pageSize);
 	}
 
+	/**
+	 * 原 findByClientIdAndExpiredAtAfterOrderByCreateDateTime 改用此寫法 <br>
+	 * 不取出檔案(fileContent), 因為會太大, 只取要用的值
+	 */
+	public List<TsmpClientCert> query_findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, Long expiredAt) {
+		Map<String, Object> params = new HashMap<>();
+		StringBuffer sb = new StringBuffer();
+		sb.append(" SELECT new tpi.dgrv4.entity.entity.jpql.TsmpClientCert(");
+		sb.append("    CC.clientId, CC.pubKey, CC.certFileName");
+		sb.append(" )");
+		sb.append(" from TsmpClientCert CC");
+		sb.append(" WHERE CC.clientId = :clientId");
+		sb.append(" and CC.expiredAt > :expiredAt");
+		sb.append(" order by CC.createDateTime asc");
+		
+		params.put("clientId", clientId);
+		params.put("expiredAt", expiredAt);
+		
+		return doQuery(sb.toString(), params, TsmpClientCert.class);
+	}
+
 	/* 我覺得之後會改成這樣, 先備用
 	public List<TsmpClientCert> query_dpb0088Service(Date startDate, Date endDate, //
 			TsmpClientCert lastRecord, Integer pageSize) {

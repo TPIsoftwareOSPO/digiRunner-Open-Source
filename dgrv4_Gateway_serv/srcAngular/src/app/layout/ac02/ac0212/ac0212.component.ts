@@ -231,7 +231,7 @@ export class Ac0212Component extends BaseComponent implements OnInit {
             { field: 'groupID', header: dict['group_id'], width: '10%', },
             { field: 'groupName', header: `${dict['group_name']}(${dict['alias']})`, width: '20%' },
             { field: 'groupDesc', header: dict['group_desc'], width: '20%' },
-            { field: 'groupAuthorities', header: dict['authorities'], width: '20%' },
+            { field: 'groupAuthorities', header: dict['authorities']+"(v3)", width: '20%' },
             { field: 'securityLevelName', header: dict['security_level'], width: '10%' },
             { field: 'createTime', header: dict['create_time'], width: '10%' }
         ];

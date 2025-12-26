@@ -479,6 +479,11 @@ export enum TxID {
   exportWebhook = 'DPB0298',
   importWebhook = 'DPB0299',
   testConnGrpc = 'DPB0300',
+  updateNewMima = 'AA0549',
+  sendOtp = 'AA0550',
+  validationOtp = 'AA0551',
+  changeMima = 'AA0552',
+  getMimaStrengthDesc = 'AA0552',
 }
 
 export enum GrantType {

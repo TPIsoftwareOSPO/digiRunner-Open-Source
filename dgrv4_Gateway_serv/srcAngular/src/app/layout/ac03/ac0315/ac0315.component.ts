@@ -226,17 +226,19 @@ export class Ac0315Component extends BaseComponent implements OnInit {
     this.apiDetail = {} as AA0302Resp;
     this.clear();
     let detailReqBody = {
-      moduleName: this.copy_target.moduleName.t == false ? this.copy_target.moduleName.val : this.copy_target.moduleName.ori,
-      apiKey: this.copy_target.apiKey.t == false ? this.copy_target.apiKey.val : this.copy_target.apiKey.ori
+      moduleName: this.copy_target.moduleName.ori ? this.copy_target.moduleName.ori : this.copy_target.moduleName.val,
+      apiKey: this.copy_target.apiKey.ori ? this.copy_target.apiKey.ori : this.copy_target.apiKey.val
     } as AA0302Req;
     this.apiService.queryAPIDetail_v3(detailReqBody).subscribe(res => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-        // console.log(res.RespBody)
+        console.log(res.RespBody)
         this.apiDetail = res.RespBody;
+        const _moduleName = res.RespBody.moduleName.o ? res.RespBody.moduleName.o : res.RespBody.moduleName.v
+        const _apiKey = res.RespBody.apiKey.o ? res.RespBody.apiKey.o : res.RespBody.apiKey.v
         this.form.get('apiUUID')!.setValue(res.RespBody.apiUUID);
-        this.form.get("apiKey")!.setValue(res.RespBody.apiKey.v);
-        this.form.get("moduleName")!.setValue(res.RespBody.moduleName.v);
-        this.form.get("tsmpURL")!.setValue(`/${res.RespBody.moduleName.v}/${res.RespBody.apiKey.v}`);
+        this.form.get("apiKey")!.setValue(_apiKey);
+        this.form.get("moduleName")!.setValue(_moduleName);
+        this.form.get("tsmpURL")!.setValue(`/${_moduleName}/${_apiKey}`);
         this.form.get("methods")!.setValue(res.RespBody.methodOfJson);
         this.form.get("apiDesc")!.setValue(res.RespBody.apiDesc);
         this.form.get("jweFlag")!.setValue(res.RespBody.jweFlag.v);

@@ -833,11 +833,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
       }
       fileReader.readAsDataURL(files.item(0)!);
     }
-    else {
-      // this._fileData = null;
-      // this._fileName = null;
-      // this.isDisplayPreviewBlock=true;
-    }
+    
   }
 
   private udpateAPI(code, dict, tmpfileName: string | null) {

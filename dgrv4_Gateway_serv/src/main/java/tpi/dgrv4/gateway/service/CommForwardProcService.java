@@ -827,7 +827,7 @@ public class CommForwardProcService {
 		httpRes.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 		httpRes.setHeader("Cache-Control", "no-cache");
 		httpRes.setHeader("Pragma", "no-cache");
-		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+		//httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
 		// in the phase don't do this, then next phase will do copy RESPONSE header
 		// respObj.respHeader.forEach((k, vs)->{
@@ -841,18 +841,12 @@ public class CommForwardProcService {
 
 	public HttpServletResponse getConvertResponse(Map<String, List<String>> respHeader, int status,
 			HttpServletResponse httpRes, TsmpApiReg tsmpApiReg) {
-		// {
-		// System.out.println(TPILogInfo.getLineNumber2());
-		// List<String> headerName =
-		// httpRes.getHeaderNames().stream().collect(Collectors.toList());
-		// for (String k : headerName) {
-		// Collection<String> valueList = httpRes.getHeaders(k);
-		// String value = this.convertAuth(k, valueList.toString());
-		// System.out.println("\tKey: " + k + ", Value: " + value);
-		// }
-		// }
 
-		// 清空 retry 之前的 header
+
+		if (httpRes.isCommitted()) {
+			return null;
+		}
+
 		try {
 			httpRes.reset(); // code, headers
 		} catch (Exception e) {
@@ -908,7 +902,7 @@ public class CommForwardProcService {
 		httpRes.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 		httpRes.setHeader("Cache-Control", "no-cache");
 		httpRes.setHeader("Pragma", "no-cache");
-		httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+		//httpRes.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
 		respHeader.entrySet().stream().filter(e -> {
 			if (e.getKey() == null) {

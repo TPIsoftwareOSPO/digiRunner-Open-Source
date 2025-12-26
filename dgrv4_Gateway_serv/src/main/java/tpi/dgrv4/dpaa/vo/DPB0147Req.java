@@ -137,13 +137,13 @@ public class DPB0147Req extends ReqValidator {
 		this.newIdpType = newIdpType;
 	}
 
-	public void switchCusIdpTypeUserName() {
+	public void switchCusIdpTypeUserName(boolean acIdpUsernameB64EncodeValue) {
 
-		if (DgrIdPType.CUS.equalsIgnoreCase(this.idpType)) {
+		if (DgrIdPType.CUS.equalsIgnoreCase(this.idpType) || acIdpUsernameB64EncodeValue) {
 			this.userName = ServiceUtil.encodeBase64URL(this.userName);
 		}
 
-		if (DgrIdPType.CUS.equalsIgnoreCase(this.newIdpType)) {
+		if (DgrIdPType.CUS.equalsIgnoreCase(this.newIdpType) || acIdpUsernameB64EncodeValue) {
 			this.newUserName = ServiceUtil.encodeBase64URL(this.newUserName);
 		}
 	}

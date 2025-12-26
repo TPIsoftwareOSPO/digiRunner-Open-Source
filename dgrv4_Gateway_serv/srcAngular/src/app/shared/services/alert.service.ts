@@ -4,13 +4,17 @@ import { Observable, from, zip } from 'rxjs';
 import { Router } from '@angular/router';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { CustomAlertComponent } from '../custom-alert/custom-alert.component';
+import { ToolService } from './tool.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AlertService {
   private ref: DynamicDialogRef | null = null;
-  constructor(private router: Router, private dialogService: DialogService) {}
+  constructor(
+    private router: Router,
+    private dialogService: DialogService,
+  ) {}
 
   openDialog(data: any) {
     // 若對話框已存在，先銷毀它，避免重複開啟
@@ -31,7 +35,12 @@ export class AlertService {
     });
   }
 
-  ok(title: string, text: string, type: AlertType = AlertType.warning, html?: string) {
+  ok(
+    title: string,
+    text: string,
+    type: AlertType = AlertType.warning,
+    html?: string
+  ) {
     this.openDialog({ title, text, type, html });
   }
 
@@ -45,7 +54,20 @@ export class AlertService {
     // 監聽對話框關閉後，執行登出導頁
     if (this.ref) {
       this.ref.onClose.subscribe(() => {
-        this.router.navigateByUrl('/login');
+        const logoutUrl: string | undefined = sessionStorage.getItem('AcConf')
+      ? JSON.parse(sessionStorage.getItem('AcConf')!)
+      : '';
+        sessionStorage.clear();
+
+        if (logoutUrl && logoutUrl != '') {
+          window.location.href = logoutUrl;
+        } else {
+          if (this.router)
+            // 避免可以使用上一頁回復資訊及軟轉導路由未更新，改用replace刷新
+            this.router
+              .navigate(['/login'])
+              .finally(() => window.location.replace('ac4/login'));
+        }
       });
     }
   }

@@ -429,6 +429,9 @@ public class GtwIdPLoginService {
 			String reqUserName, String userMima, String codeChallenge, String codeChallengeMethod) throws Exception {
 
 		UserInfoData userInfoData = new UserInfoData();
+		//checkmarx, Reflected XSS All Clients 
+		reqUri = ESAPI.encoder().encodeForHTML(reqUri);
+		idPType = ESAPI.encoder().encodeForHTML(idPType);
 		try {
 			ResponseEntity<?> errRespEntity = null;
 
@@ -530,6 +533,8 @@ public class GtwIdPLoginService {
 			String reqUserName, String userMima, String codeChallenge, String codeChallengeMethod) throws Exception {
 
 		ResponseEntity<?> errRespEntity = null;
+		//checkmarx, Reflected XSS All Clients 
+		reqUri = ESAPI.encoder().encodeForHTML(reqUri);
 		try {
 
 			// 1.取得 dgR client 對應的 LDAP 連線資料
@@ -629,6 +634,8 @@ public class GtwIdPLoginService {
 			throws Exception {
 
 		ResponseEntity<?> errRespEntity = null;
+		//checkmarx, Reflected XSS All Clients 
+		reqUri = ESAPI.encoder().encodeForHTML(reqUri);
 		try {
 
 			// 1.取得 dgR client 對應的 API 連線資料

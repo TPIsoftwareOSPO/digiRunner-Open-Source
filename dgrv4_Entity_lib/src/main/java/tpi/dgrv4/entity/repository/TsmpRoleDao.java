@@ -15,6 +15,8 @@ public interface TsmpRoleDao extends JpaRepository<TsmpRole, String> {
 	
 	public TsmpRole findFirstByRoleName(String roleName);
 	
+	public boolean existsByRoleName(String roleName);
+	
 	public List<TsmpRole> findByRoleIdAndKeyword(String roleId, String[] words, Integer pageSize);
 	
 	public List<TsmpRole> findByRoleName(String roleName);

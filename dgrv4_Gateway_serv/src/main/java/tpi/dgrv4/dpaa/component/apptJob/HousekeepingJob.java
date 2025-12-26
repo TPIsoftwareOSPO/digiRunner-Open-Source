@@ -34,34 +34,12 @@ import tpi.dgrv4.dpaa.component.req.DpReqServiceFactory;
 import tpi.dgrv4.dpaa.component.req.DpReqServiceIfs;
 import tpi.dgrv4.dpaa.service.TsmpSettingService;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
-import tpi.dgrv4.entity.entity.DgrAcIdpAuthCode;
-import tpi.dgrv4.entity.entity.DgrAuditLogD;
-import tpi.dgrv4.entity.entity.DgrAuditLogM;
-import tpi.dgrv4.entity.entity.DgrImportClientRelatedTemp;
-import tpi.dgrv4.entity.entity.DgrWebsite;
-import tpi.dgrv4.entity.entity.TsmpClient;
-import tpi.dgrv4.entity.entity.TsmpDpApptJob;
-import tpi.dgrv4.entity.entity.TsmpDpFile;
-import tpi.dgrv4.entity.entity.TsmpDpItems;
-import tpi.dgrv4.entity.entity.TsmpSetting;
-import tpi.dgrv4.entity.entity.TsmpTokenHistory;
+import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientLog;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpReqOrderm;
 import tpi.dgrv4.entity.entity.jpql.TsmpEvents;
 import tpi.dgrv4.entity.entity.jpql.TsmpNoticeLog;
-import tpi.dgrv4.entity.repository.DgrAcIdpAuthCodeDao;
-import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
-import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
-import tpi.dgrv4.entity.repository.DgrImportClientRelatedTempDao;
-import tpi.dgrv4.entity.repository.TsmpClientDao;
-import tpi.dgrv4.entity.repository.TsmpClientLogDao;
-import tpi.dgrv4.entity.repository.TsmpDpApptJobDao;
-import tpi.dgrv4.entity.repository.TsmpDpFileDao;
-import tpi.dgrv4.entity.repository.TsmpDpReqOrdermDao;
-import tpi.dgrv4.entity.repository.TsmpEventsDao;
-import tpi.dgrv4.entity.repository.TsmpNoticeLogDao;
-import tpi.dgrv4.entity.repository.TsmpSettingDao;
-import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
+import tpi.dgrv4.entity.repository.*;
 import tpi.dgrv4.gateway.component.check.TrafficCheck;
 import tpi.dgrv4.gateway.component.job.appt.ApptJob;
 import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
@@ -97,6 +75,7 @@ public class HousekeepingJob extends ApptJob {
     private TsmpSettingService tsmpSettingService;
     private DgrAuditLogMDao dgrAuditLogMDao;
     private DgrAuditLogDDao dgrAuditLogDDao;
+    private DgrWebhookNotifyLogDao dgrWebhookNotifyLogDao;
 
     @Autowired
 	public HousekeepingJob(TsmpDpApptJob tsmpDpApptJob, TsmpEventsDao tsmpEventsDao, TsmpClientLogDao tsmpClientLogDao,
@@ -106,7 +85,8 @@ public class HousekeepingJob extends ApptJob {
 			TsmpClientDao tsmpClientDao, TsmpTokenHistoryDao tsmpTokenHistoryDao,
 			DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao, DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao,
 			TrafficCheck trafficCheck, WebsiteService websiteService, DgrWebsiteCacheProxy dgrWebsiteCacheProxy,
-			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher,DgrAuditLogMDao dgrAuditLogMDao ,DgrAuditLogDDao dgrAuditLogDDao) {
+			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher,DgrAuditLogMDao dgrAuditLogMDao ,
+                           DgrAuditLogDDao dgrAuditLogDDao, DgrWebhookNotifyLogDao dgrWebhookNotifyLogDao) {
 		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
 		this.tsmpEventsDao = tsmpEventsDao;
 		this.tsmpClientLogDao = tsmpClientLogDao;
@@ -127,6 +107,7 @@ public class HousekeepingJob extends ApptJob {
 		this.tsmpSettingService = tsmpSettingService;
 		this.dgrAuditLogMDao = dgrAuditLogMDao;
 		this.dgrAuditLogDDao = dgrAuditLogDDao;
+        this.dgrWebhookNotifyLogDao = dgrWebhookNotifyLogDao;
 	}
 
     @Override
@@ -219,8 +200,31 @@ public class HousekeepingJob extends ApptJob {
          */
         deleteExpiredAuditLog();
 
+        /**
+         * 第16部分: 刪除7天webhook log
+         */
+        deleteExpiredWebhookLog();
+
         return "SUCCESS";
 
+    }
+
+    public void deleteExpiredWebhookLog() {
+        int expDay = 7;
+        LocalDate ld = LocalDate.now().minusDays(expDay);
+        Date expDate = Date.from(ld.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        List<DgrWebhookNotifyLog> list = getDgrWebhookNotifyLogDao().findByCreateDateTimeBefore(expDate);
+        int totalCount = list.size();
+        if (totalCount == 0) {
+            step("16. 0/0");
+            return;
+        }
+        int currentIndex = 0;
+        for(DgrWebhookNotifyLog log : list){
+            currentIndex++;
+            step(String.format("16. %d/%d", currentIndex, totalCount));
+            getDgrWebhookNotifyLogDao().delete(log);
+        }
     }
 
     public void deleteExpiredAuditLog() {
@@ -545,8 +549,16 @@ public class HousekeepingJob extends ApptJob {
             tsmpSetting.setValue("false");
             getTsmpSettingDao().saveAndFlush(tsmpSetting);
         }
-
         step("6. 1/1");
+        Optional<TsmpSetting> show_all_properties = getTsmpSettingDao().findById("SHOW_ALL_PROPERTIES");
+
+        if (show_all_properties.isPresent()) {
+            TsmpSetting tsmpSetting = show_all_properties.get();
+            tsmpSetting.setValue("false");
+            getTsmpSettingDao().saveAndFlush(tsmpSetting);
+        }
+
+        step("6. 2/2");
     }
 
     public void deleteApiBatchModifyTemp() {
@@ -654,5 +666,9 @@ public class HousekeepingJob extends ApptJob {
 
     protected TsmpSettingService getTsmpSettingService() {
         return tsmpSettingService;
+    }
+
+    protected DgrWebhookNotifyLogDao getDgrWebhookNotifyLogDao(){
+        return dgrWebhookNotifyLogDao;
     }
 }

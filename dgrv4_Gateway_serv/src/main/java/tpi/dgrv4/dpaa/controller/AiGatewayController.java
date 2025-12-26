@@ -111,6 +111,7 @@ public class AiGatewayController {
                 .createUser(auth.getUserName())
                 .updateDateTime(DateTimeUtil.now())
                 .updateUser(auth.getUserName())
+                .aiProviderEnable(req.getBody().getAiProviderEnabled())
                 .build();
 
         var record = service.upsert(entity);

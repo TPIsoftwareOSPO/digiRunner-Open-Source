@@ -207,24 +207,42 @@
       </div>
       <div class="form-group row" *ngIf="currentAction == 'create'">
         <div class="col-12 col-lg-6">
-          <label id="userBlock_label" for="userBlock" class="required control-label">{{'password' | translate}}</label>
-          <input type="password" class="form-control" id="userBlock" formControlName="userBlock"
-            placeholder="{{'user_password' | translate}}">
+          <label id="userBlock_label" for="userBlock" class="required control-label">{{'password' | translate}}
+            <i *ngIf="mimatip" class="far fa-question-circle tip" [pTooltip]="mimatip" [escape]="false"></i>
+          </label>
+          <div class="ui-inputgroup">
+            <input [type]="newMask ? 'text' : 'password'" class="form-control" id="userBlock"
+              formControlName="userBlock" placeholder="{{'user_password' | translate}}">
+            <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="toggleMask('newMima')"></button>
+          </div>
           <div *ngIf="userBlock?.invalid && (userBlock?.dirty || userBlock?.touched)" class="text-danger">
             <small class="form-text">{{userBlock?.errors.maxlength | translate:userBlockLimitChar}}</small>
+            <small class="form-text">{{userBlock?.errors.minlength | translate}}</small>
             <small class="form-text">{{userBlock?.errors.required | translate}}</small>
-            <small *ngIf="confirmUserBlock.value" class="form-text">{{userBlock?.errors.confirm_mima | translate}}</small>
+            <small class="form-text">{{userBlock?.errors.pattern | translate}}</small>
+            <div>
+              <small *ngIf="confirmUserBlock.value" class="form-text">{{userBlock?.errors.confirm_mima |
+                translate}}</small>
+            </div>
           </div>
         </div>
         <div class="col-12 col-lg-6">
           <label for="confirmUserBlock" class="required control-label">{{'cfm_password' | translate}}</label>
-          <input type="password" class="form-control" id="confirmUserBlock" formControlName="confirmUserBlock"
-            placeholder="{{'cfm_password' | translate}}">
+          <div class="ui-inputgroup">
+
+            <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmUserBlock"
+              formControlName="confirmUserBlock" placeholder="{{'cfm_password' | translate}}">
+            <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+              (click)="toggleMask('cfmMima')"></button>
+          </div>
           <div *ngIf="confirmUserBlock?.invalid && (confirmUserBlock?.dirty || confirmUserBlock?.touched)"
             class="text-danger">
             <small class="form-text">{{confirmUserBlock?.errors.maxlength | translate:userBlockLimitChar}}</small>
             <small class="form-text">{{confirmUserBlock?.errors.required | translate}}</small>
-            <small class="form-text">{{confirmUserBlock?.errors.confirm_mima | translate}}</small>
+            <div>
+              <small class="form-text">{{confirmUserBlock?.errors.confirm_mima | translate}}</small>
+            </div>
           </div>
         </div>
       </div>
@@ -256,26 +274,27 @@
       <div class="form-group row">
         <div class="col-12 col-lg-12">
           <label id="encodeStatus_label" class="required control-label">{{'status' | translate}}</label>
-            <!-- <div class="form-check" *ngFor="let stat of createStatus"> -->
-              <!-- <label class="form-check-label">
+          <!-- <div class="form-check" *ngFor="let stat of createStatus"> -->
+          <!-- <label class="form-check-label">
                 <input type="radio" class="form-check-input" formControlName="encodeStatus" value={{stat.value}}>
                 {{stat.label}}
               </label> -->
-              <!-- <input class="form-check-input" type="radio" name="encodeStatus" [id]="stat.value" [value]="stat.value">
+          <!-- <input class="form-check-input" type="radio" name="encodeStatus" [id]="stat.value" [value]="stat.value">
                                   <label class="form-check-label" [for]="stat.value">
                                     {{stat.label}}
                                   </label> -->
-              <!-- <p-radioButton [inputId]="stat.value" name="encodeStatus" [value]="stat.value" [label]="stat.label" formControlName="encodeStatus" styleClass="cChkbox"></p-radioButton> -->
+          <!-- <p-radioButton [inputId]="stat.value" name="encodeStatus" [value]="stat.value" [label]="stat.label" formControlName="encodeStatus" styleClass="cChkbox"></p-radioButton> -->
 
-            <!-- </div> -->
-            <div class="p-form-check-line form-group">
-              <ng-container *ngFor="let stat of createStatus">
-                <div class="p-form-check">
-                  <p-radioButton formControlName="encodeStatus" value={{stat.value}}  inputId="encodeStatus{{stat.value}}"></p-radioButton>
-                  <label for="encodeStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
-                </div>
-              </ng-container>
-            </div>
+          <!-- </div> -->
+          <div class="p-form-check-line form-group">
+            <ng-container *ngFor="let stat of createStatus">
+              <div class="p-form-check">
+                <p-radioButton formControlName="encodeStatus" value={{stat.value}}
+                  inputId="encodeStatus{{stat.value}}"></p-radioButton>
+                <label for="encodeStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
+              </div>
+            </ng-container>
+          </div>
 
 
           <div *ngIf="encodeStatus?.invalid && (encodeStatus?.dirty || encodeStatus?.touched)" class="text-danger">
@@ -375,7 +394,8 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of updateStatus">
               <div class="p-form-check">
-                <p-radioButton formControlName="newStatus" value={{stat.value}}  inputId="status{{stat.value}}"></p-radioButton>
+                <p-radioButton formControlName="newStatus" value={{stat.value}}
+                  inputId="status{{stat.value}}"></p-radioButton>
                 <label for="status{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -390,11 +410,11 @@
           </div> -->
           <div class="p-form-check-line">
             <div class="p-form-check">
-              <p-checkbox [binary]="true" inputId="resetBlock" formControlName="resetBlock" ></p-checkbox>
+              <p-checkbox [binary]="true" inputId="resetBlock" formControlName="resetBlock"></p-checkbox>
               <label class="ms-2 mb-0" for="resetBlock">{{'reset_password' | translate}}</label>
             </div>
             <div class="p-form-check">
-              <p-checkbox [binary]="true" inputId="resetPwdFailTimes" formControlName="resetPwdFailTimes" ></p-checkbox>
+              <p-checkbox [binary]="true" inputId="resetPwdFailTimes" formControlName="resetPwdFailTimes"></p-checkbox>
               <label class="ms-2 mb-0" for="resetPwdFailTimes">{{'reset_pwd_attempts' | translate}}</label>
             </div>
           </div>

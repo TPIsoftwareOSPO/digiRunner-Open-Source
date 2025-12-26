@@ -48,7 +48,7 @@
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
               "node_modules/quill/dist/quill.js"
             ],
-            "allowedCommonJsDependencies": ["crypto-js","crypto","sha.js"]
+            "allowedCommonJsDependencies": ["crypto-js","crypto","sha.js","quill-delta"]
           },
           "configurations": {
             "production": {

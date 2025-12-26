@@ -10,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
@@ -28,27 +33,18 @@ import tpi.dgrv4.entity.repository.TsmpRoleDao;
 import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.constant.DgrAcIdpUserStatus;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
-
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class DPB0146Service {
 
-	private TPILogger logger = TPILogger.tl;
-
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	private AuthoritiesDao authoritiesDao;
-	private TsmpRoleDao tsmpRoleDao;
-
-	@Autowired
-	public DPB0146Service(DgrAcIdpUserDao dgrAcIdpUserDao, TsmpOrganizationDao tsmpOrganizationDao,
-			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao) {
-		super();
-		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
-		this.tsmpOrganizationDao = tsmpOrganizationDao;
-		this.authoritiesDao = authoritiesDao;
-		this.tsmpRoleDao = tsmpRoleDao;
-	}
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final AuthoritiesDao authoritiesDao;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final TsmpSettingService tsmpSettingService;
 
 	public DPB0146Resp queryIdPUserDetail(TsmpAuthorization auth, DPB0146Req req) {
 		DPB0146Resp resp = new DPB0146Resp();
@@ -94,7 +90,7 @@ public class DPB0146Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 	}
@@ -105,11 +101,14 @@ public class DPB0146Service {
 			return;
 		}
 
-		if (DgrIdPType.CUS.equalsIgnoreCase(resp.getIdpType())) {
+		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+		boolean acIdpUsernameB64EncodeValue = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+		TPILogger.tl.debug("AC_IDP_USERNAME_B64_ENCODE : " + acIdpUsernameB64EncodeValue);
+		
+		if (DgrIdPType.CUS.equalsIgnoreCase(resp.getIdpType()) || acIdpUsernameB64EncodeValue) {
 			String userName = ServiceUtil.decodeBase64URL(resp.getUserName());
 			resp.setUserName(userName);
 		}
-
 	}
 
 	public Map<String, List<String>> getRoleData(String userName) {

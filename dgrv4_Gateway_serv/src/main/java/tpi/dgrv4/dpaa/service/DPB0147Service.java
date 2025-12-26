@@ -4,19 +4,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.AuditLogEvent;
+import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.constant.TableAct;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.dpaa.util.ServiceUtil;
 import tpi.dgrv4.dpaa.vo.DPB0147Req;
 import tpi.dgrv4.dpaa.vo.DPB0147Resp;
 import tpi.dgrv4.entity.entity.Authorities;
@@ -33,49 +36,35 @@ import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.component.cache.proxy.AuthoritiesCacheProxy;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
-
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class DPB0147Service {
 
-	private TPILogger logger = TPILogger.tl;
-
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	private AuthoritiesDao authoritiesDao;
-	private TsmpRoleDao tsmpRoleDao;
-	private DgrAuditLogService dgrAuditLogService;
-	private TsmpUserDao tsmpUserDao;
-	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
-	private TsmpSettingService tsmpSettingService;
-	private DaoGenericCacheService daoGenericCacheService;
-	private AuthoritiesCacheProxy authoritiesCacheProxy;
-
-	@Autowired
-	public DPB0147Service(DgrAcIdpUserDao dgrAcIdpUserDao, TsmpOrganizationDao tsmpOrganizationDao,
-			AuthoritiesDao authoritiesDao, TsmpRoleDao tsmpRoleDao, DgrAuditLogService dgrAuditLogService,
-			TsmpUserDao tsmpUserDao, TsmpTokenHistoryDao tsmpTokenHistoryDao, TsmpSettingService tsmpSettingService,
-			DaoGenericCacheService daoGenericCacheService, AuthoritiesCacheProxy authoritiesCacheProxy) {
-		super();
-		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
-		this.tsmpOrganizationDao = tsmpOrganizationDao;
-		this.authoritiesDao = authoritiesDao;
-		this.tsmpRoleDao = tsmpRoleDao;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.tsmpUserDao = tsmpUserDao;
-		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
-		this.tsmpSettingService = tsmpSettingService;
-		this.daoGenericCacheService = daoGenericCacheService;
-		this.authoritiesCacheProxy = authoritiesCacheProxy;
-	}
-
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final AuthoritiesDao authoritiesDao;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final DgrAuditLogService dgrAuditLogService;
+	private final TsmpUserDao tsmpUserDao;
+	private final TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	private final TsmpSettingService tsmpSettingService;
+	private final DaoGenericCacheService daoGenericCacheService;
+	private final AuthoritiesCacheProxy authoritiesCacheProxy;
+	
 	@Transactional
 	public DPB0147Resp updateIdPUser(TsmpAuthorization auth, DPB0147Req req, InnerInvokeParam iip) {
 		DPB0147Resp resp = new DPB0147Resp();
 		try {
 
-			req.switchCusIdpTypeUserName();
+			// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
+			boolean acIdpUsernameB64EncodeVal = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
+			TPILogger.tl.debug("AC_IDP_USERNAME_B64_ENCODE : " + acIdpUsernameB64EncodeVal);
+			
+			req.switchCusIdpTypeUserName(acIdpUsernameB64EncodeVal);
 
 			// 寫入 Audit Log M
 			String lineNumber = StackTraceUtil.getLineNumber();
@@ -87,10 +76,12 @@ public class DPB0147Service {
 			if (userVo == null) {
 				throw TsmpDpAaRtnCode._1231.throwing();
 			}
+			
+			boolean isCus = DgrIdPType.CUS.equals(req.getIdpType());//是否為 "CUS" IdP type
 
 			String userName = req.getUserName();
 			String newUserName = req.getNewUserName();
-			boolean isUserNameDiffer = isUserNameDiffer(userName, newUserName);
+			boolean isUserNameDiffer = isUserNameDiffer(userName, newUserName, isCus, acIdpUsernameB64EncodeVal);
 			String newOrgId = req.getNewOrgId();
 			List<String> newRoleIdList = req.getNewRoleIdList();
 			String orgId = req.getOrgId();
@@ -136,7 +127,7 @@ public class DPB0147Service {
 		} catch (TsmpDpAaException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error(StackTraceUtil.logStackTrace(e));
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw TsmpDpAaRtnCode._1297.throwing();
 		}
 	}
@@ -224,10 +215,14 @@ public class DPB0147Service {
 
 	}
 
-	private boolean isUserNameDiffer(String userName, String newUserName) {
+	private boolean isUserNameDiffer(String userName, String newUserName, boolean isCus, boolean acIdpUsernameB64EncodeVal) {
 		if (!userName.equals(newUserName)) {
 			List<DgrAcIdpUser> list = getDgrAcIdpUserDao().findByUserName(newUserName);
 			if (list.size() > 0) {
+				if(isCus || acIdpUsernameB64EncodeVal){
+					newUserName = ServiceUtil.decodeBase64URL(newUserName);
+				}
+				
 				throw TsmpDpAaRtnCode._1353.throwing("{{userName}}", newUserName);
 			}
 			return true;

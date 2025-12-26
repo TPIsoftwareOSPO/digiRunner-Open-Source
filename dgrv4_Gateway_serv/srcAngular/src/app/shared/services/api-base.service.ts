@@ -427,15 +427,18 @@ export class ApiBaseService {
                   while (_rtnMsg.includes('{{') && _rtnMsg.includes('}}')) {
                     let _msg = _rtnMsg;
                     let formControlName = _msg.substring(_msg.indexOf('{{') + 2, _msg.indexOf('}}'));
-                    // console.log('form control name :', formControlName)
+
                     if (document.getElementById(`${formControlName}_label`)) {
-                      _rtnMsg = document.getElementById(`${formControlName}_label`) ? _msg.replace(`{{${formControlName}}}`, $(`#${formControlName}_label`).text()) : _msg;
+                      const safeLabelText =  this.parseElementLabel(`${formControlName}_label`, formControlName )
+                      _rtnMsg = _msg.replace(`{{${formControlName}}}`, safeLabelText);
                     }
                     else if (document.getElementById(`${formControlName}_page4_label`)) {
-                      _rtnMsg = document.getElementById(`${formControlName}_page4_label`) ? _msg.replace(`{{${formControlName}}}`, $(`#${formControlName}_page4_label`).text()) : _msg;
+                      const safeLabelText =  this.parseElementLabel(`${formControlName}_page4_label`, formControlName )
+                      _rtnMsg =  _msg.replace(`{{${formControlName}}}`, safeLabelText) ;
                     }
                     else if (document.getElementById(`${formControlName}_page9_label`)) {
-                      _rtnMsg = document.getElementById(`${formControlName}_page9_label`) ? _msg.replace(`{{${formControlName}}}`, $(`#${formControlName}_page9_label`).text()) : _msg;
+                      const safeLabelText =  this.parseElementLabel(`${formControlName}_page9_label`, formControlName )
+                      _rtnMsg = _msg.replace(`{{${formControlName}}}`, safeLabelText);
                     }
                     else { // 預防HTML沒有相對應的label
                       const code = [formControlName];
@@ -848,16 +851,19 @@ export class ApiBaseService {
                   while (_rtnMsg.includes('{{') && _rtnMsg.includes('}}')) {
                     let _msg = _rtnMsg;
                     let formControlName = _msg.substring(_msg.indexOf('{{') + 2, _msg.indexOf('}}'));
-                    console.log('form control name :', formControlName)
+                    // console.log('form control name :', formControlName)
 
                     if (document.getElementById(`${formControlName}_label`)) {
-                      _rtnMsg = document.getElementById(`${formControlName}_label`) ? _msg.replace(`{{${formControlName}}}`, $(`#${formControlName}_label`).text()) : _msg;
+                      const safeLabelText =  this.parseElementLabel(`${formControlName}_label`, formControlName )
+                      _rtnMsg =  _msg.replace(`{{${formControlName}}}`, safeLabelText);
                     }
                     else if (document.getElementById(`${formControlName}_page4_label`)) {
-                      _rtnMsg = document.getElementById(`${formControlName}_page4_label`) ? _msg.replace(`{{${formControlName}}}`, $(`#${formControlName}_page4_label`).text()) : _msg;
+                      const safeLabelText =  this.parseElementLabel(`${formControlName}_page4_label`, formControlName )
+                      _rtnMsg = _msg.replace(`{{${formControlName}}}`, safeLabelText);
                     }
                     else if (document.getElementById(`${formControlName}_page9_label`)) {
-                      _rtnMsg = document.getElementById(`${formControlName}_page9_label`) ? _msg.replace(`{{${formControlName}}}`, $(`#${formControlName}_page9_label`).text()) : _msg;
+                      const safeLabelText =  this.parseElementLabel(`${formControlName}_page9_label`, formControlName )
+                      _rtnMsg = _msg.replace(`{{${formControlName}}}`, safeLabelText);
                     }
                     else { // 預防HTML沒有相對應的label
                       const codes = [formControlName];
@@ -908,5 +914,34 @@ export class ApiBaseService {
       });
     });
   }
+
+  /**
+ * 對字串進行 HTML 編碼，以防止 XSS 攻擊。
+ * @param {string} str - 需要編碼的原始字串。
+ * @returns {string} - 編碼後的安全字串。
+ */
+  encodeHTML(str:string):string {
+    // 確保輸入是字串，如果不是則直接返回原值
+    if (typeof str !== 'string') {
+        return str;
+    }
+
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+  }
+
+  parseElementLabel(eleLabel:string, formControlName:string):string{
+    let _safeLabelText: string = '';
+    const labelElement = document.getElementById(eleLabel);
+    if(labelElement){
+      const labelText = labelElement.textContent ?? formControlName;
+      _safeLabelText = this.encodeHTML(labelText);
+    }
+    return _safeLabelText;
+  }
+
 
 }

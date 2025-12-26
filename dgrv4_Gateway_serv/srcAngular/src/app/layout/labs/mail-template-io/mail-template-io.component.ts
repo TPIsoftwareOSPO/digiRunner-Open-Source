@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -27,6 +27,7 @@ import * as FileSaver from 'file-saver';
   providers: [MessageService, ConfirmationService],
 })
 export class MailTemplateIoComponent extends BaseComponent implements OnInit {
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   currentTitle = this.title;
   pageNum: number = 1;
 
@@ -88,13 +89,20 @@ export class MailTemplateIoComponent extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+    this.fileInput?.nativeElement.click();
   }
 
-  changeFile(event) {
-    if (event.target.files.length != 0) {
-      this._file = event.target.files[0];
+  changeFile(event:Event) {
+    const element = event.target as HTMLInputElement;
+    if (element.files && element.files.length != 0) {
+      this._file = element.files[0];
     } else {
+       if (this.fileInput) {
+         this.fileInput.nativeElement.value = '';
+       }
       this._file = undefined;
     }
   }

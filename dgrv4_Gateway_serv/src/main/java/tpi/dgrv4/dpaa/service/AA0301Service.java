@@ -76,13 +76,8 @@ public class AA0301Service {
 	private TsmpOrganizationCacheProxy tsmpOrganizationCacheProxy;
 	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
 	private DpaaSystemInfoHelper dpaaSystemInfoHelper = DpaaSystemInfoHelper.getInstance();
-	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers"))
-	ThreadPoolTaskExecutor asyncWorkerPool;
 
-	@Setter(onMethod_ = @Autowired, onParam_ = @Qualifier("async-workers-highway"))
-	@Qualifier("async-workers-highway")
-	ThreadPoolTaskExecutor asyncWorkerHighwayPool;
-	
+
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ConfigurableApplicationContext applicationContext;
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
@@ -166,16 +161,16 @@ public class AA0301Service {
 		"...Memory(free/total/Max)" + "\n\t");
 		
 		// country road / highway status
-		Function<ThreadPoolTaskExecutor, String> poolInfoGen = (ThreadPoolTaskExecutor pool) -> {
-			var asyncWorkerInfoTpl = "%d threads....."+pool.getThreadNamePrefix()+"%s%n\t";
-			return "......................................................\n\t" +
-					String.format(asyncWorkerInfoTpl, pool.getActiveCount(), "activeCount") +
-					String.format(asyncWorkerInfoTpl, pool.getPoolSize(), "poolSize");
-		};
-		
-		// async worker pool
-		sb.append(poolInfoGen.apply(asyncWorkerPool));
-		sb.append(poolInfoGen.apply(asyncWorkerHighwayPool));
+//		Function<ThreadPoolTaskExecutor, String> poolInfoGen = (ThreadPoolTaskExecutor pool) -> {
+//			var asyncWorkerInfoTpl = "%d threads....."+pool.getThreadNamePrefix()+"%s%n\t";
+//			return "......................................................\n\t" +
+//					String.format(asyncWorkerInfoTpl, pool.getActiveCount(), "activeCount") +
+//					String.format(asyncWorkerInfoTpl, pool.getPoolSize(), "poolSize");
+//		};
+//
+//		// async worker pool
+//		sb.append(poolInfoGen.apply(asyncWorkerPool));
+//		sb.append(poolInfoGen.apply(asyncWorkerHighwayPool));
 		
 		// 取得 db connection 狀態
 		HikariDataSource hikaridataSource = 

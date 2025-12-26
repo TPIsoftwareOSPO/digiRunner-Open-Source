@@ -46,6 +46,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
     private fb: FormBuilder,
     private alertService: AlertService,
     private confirmationService: ConfirmationService,
+    private sanitizer: DomSanitizer
   ) {
     super(route, tr);
   }
@@ -181,8 +182,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
 
         this.messageService.add({ severity: 'success', summary: dict['upload_result'], detail: `${dict['message.success']}!` });
 
-        this._fileSrc = fileReader.result!;
-
+        this._fileSrc = fileReader.result;
 
       }
       fileReader.readAsDataURL(files.item(0)!);

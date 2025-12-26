@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { LoginRoutingModule } from './login.routing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RedirectComponent } from './redirect/redirect.component';
+import { PrimengModule } from 'src/app/shared/primeng.module';
 
 
 
@@ -15,7 +16,8 @@ import { RedirectComponent } from './redirect/redirect.component';
     LoginRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    SharedModule
+    SharedModule,
+    PrimengModule
   ],
   declarations: [LoginComponent],
 })

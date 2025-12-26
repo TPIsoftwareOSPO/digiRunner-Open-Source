@@ -2,9 +2,11 @@ package tpi.dgrv4.gateway.component;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.SQLTransientConnectionException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -55,11 +57,16 @@ public class ControllerExceptionHandler {
 		this.tsmpSettingService = tsmpSettingService;
 	}
 
+	public static Function<Throwable, ResponseEntity<String>> unTrackErrorResponse = (Throwable throwable) -> {
+		String errorStr = StackTraceUtil.logStackTrace(throwable);
+		return ResponseEntity.internalServerError().body(errorStr);
+	};
+
 	@ExceptionHandler(Throwable.class)
 	public ResponseEntity<String> handleUnTrackException(Throwable e) {
 		var stacktrace = StackTraceUtil.logStackTrace(e);
-		TPILogger.tl.error("UnTrackError: " + stacktrace);
-		return ResponseEntity.internalServerError().body(e.getMessage());
+		TPILogger.tl.error("UnTrackError:\n" + stacktrace);
+		return unTrackErrorResponse.apply(e);
 	}
 
 	@ExceptionHandler(DgrException.class)

@@ -169,8 +169,7 @@ public class AcIdPLoginService {
 			userEmail = ldapAdAuthData.mail;
 			
 		} else if (DgrIdPType.API.equals(idPType)) {// 調用 API 驗證
-			ApiUserInfoData apiUserInfoData = null;
-			apiUserInfoData = checkAuthByApi(httpReq, httpResp, idPType, userName, userMima, userIp);
+			ApiUserInfoData apiUserInfoData = checkAuthByApi(httpReq, httpResp, idPType, userName, userMima, userIp);
 			errMsg = apiUserInfoData.errMsg;
 			userAlias = apiUserInfoData.userName;
 			userEmail = apiUserInfoData.userEmail;

@@ -6,6 +6,7 @@ import {
   ViewChildren,
   QueryList,
   ElementRef,
+  OnDestroy,
 } from '@angular/core';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { AlertType } from 'src/app/models/common.enum';
@@ -36,25 +37,99 @@ import {
   AA1212RespItem,
 } from 'src/app/models/api/ReportService/aa1212.interface';
 import {
+  BehaviorSubject,
   catchError,
   delay,
   expand,
   of,
   Subject,
   Subscription,
+  switchMap,
+  take,
   takeUntil,
+  timer,
 } from 'rxjs';
 import { BadAttemptListComponent } from './bad-attempt-list/bad-attempt-list.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
+
+// tps
+interface tpsPoint {
+  time: string;
+  req: string;
+  resp: string;
+}
+// Total Request 圖表資料
+interface reqPoint {
+  time: string;
+  success: string;
+  fail: string;
+  total: string;
+}
+// db
+interface dbPoint {
+  time: string;
+  active: number;
+  waiting: number;
+  idle: number;
+  total: number;
+}
+
+// es
+interface esPoint {
+  time?: string;
+  current: string;
+  discarded: string;
+}
+
+//cpuUsage
+interface cpuUsagePoint {
+  time: string;
+  cpuUsage: string;
+}
+
+//mem
+interface memPoint {
+  time: string;
+  memFree: string;
+  memMax: string;
+  memTotal: string;
+}
+
+// thread
+interface threadPoint {
+  time: string;
+  countryRoadActvieCount: string;
+  highwayActvieCount: string;
+}
+
+// cache
+interface cachePoint {
+  time: string;
+  dao: string;
+  fixed: string;
+  rcd: string;
+}
+
+interface DataNode {
+  nodeName: string;
+  tpsSeries: tpsPoint[];
+  // reqSeries: reqPoint[];
+  dbSeries?: dbPoint[];
+  esSeries?: esPoint[];
+  cpuSeries?: cpuUsagePoint[];
+  memSeries?: memPoint[];
+  threadSeries?: threadPoint[];
+  cacheSeries?: cachePoint[];
+}
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard2.component.html',
   styleUrls: ['./dashboard2.component.scss'],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   versionInfo?: DPB0118Resp;
   title: string = '';
   edition: string = '';
@@ -82,23 +157,25 @@ export class DashboardComponent implements OnInit {
   isAsc: boolean = true;
   includeFail: boolean = false;
 
-  // badattempChart: any;
-  // medianChart: any;
-  // hotChart: any;
-  // apiCountChart: any;
-  // clientChart: any;
-
   zoom: number = 1;
-
   reloadDataRef: any;
-
   lastLoginLog: Array<AA1211LastLoginLog> = [];
 
   private apiSubscription!: Subscription;
   destroy$ = new Subject<void>();
 
-  // cardHeight: string = '700px'; // defalut
-  // @ViewChildren('allNodeCard') allNodeCards!: QueryList<ElementRef>;
+  dataPool: DataNode[] = [];
+  reqChart: any[] = [];
+  tpsChart: any[] = [];
+  dbChart: any[] = [];
+  esChart: any[] = [];
+  cpuChart: any[] = [];
+  memChart: any[] = [];
+  threadChart: any[] = [];
+  cacheChart: any[] = [];
+
+  keeperIP?: string;
+  keeperPort?: string;
 
   constructor(
     private alert: AlertService,
@@ -109,41 +186,41 @@ export class DashboardComponent implements OnInit {
     private ngxService: NgxUiLoaderService,
     private dialogService: DialogService,
     private messageService: MessageService,
-    private router: Router,
+    private router: Router
   ) {}
 
-  // resizeReport() {
-  // setTimeout(() => {
-  // if (this.badattempChart) this.badattempChart.resize();
-  // if (this.medianChart) this.medianChart.resize();
-  // if (this.hotChart) this.hotChart.resize();
-  // if (this.apiCountChart) this.apiCountChart.resize();
-  // if (this.clientChart) this.clientChart.resize();
-  // }, 0);
-  // }
-
   ngOnDestroy() {
-    // if (this.reloadDataRef) clearInterval(this.reloadDataRef);
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  // @HostListener('window:resize')
-  // onResize(event) {
-  //   // if (this.badattempChart) this.badattempChart.resize();
-  //   if (this.medianChart) this.medianChart.resize();
-  //   if (this.hotChart) this.hotChart.resize();
-  //   if (this.apiCountChart) this.apiCountChart.resize();
-  //   if (this.clientChart) this.clientChart.resize();
-  // }
-
-  // getDataReload() {
-  //   if (this.reloadDataRef) clearInterval(this.reloadDataRef);
-  //   this.getDashboardData();
-  //   this.reloadDataRef = setInterval(() => {
-  //     this.getDashboardData();
-  //   }, 1000 * 60 * 10);
-  // }
+  @HostListener('window:resize')
+  onResize() {
+    // this.reqChart.forEach((elm) => {
+    //   elm.nodeEle.resize();
+    // });
+    this.cacheChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+    this.tpsChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+    this.dbChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+    this.esChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+    this.cpuChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+    this.memChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+    this.threadChart.forEach((elm) => {
+      elm.nodeEle.resize();
+    });
+  }
 
   async ngOnInit() {
     const code = ['minute', 'calendar.day', 'calendar.month', 'calendar.year'];
@@ -220,34 +297,10 @@ export class DashboardComponent implements OnInit {
           });
       }
     });
-    // this.getDataReload();
     this.queryRealtimeDashboardData();
+
+    this.getKeeperInfo();
   }
-
-  // clearDashboardData() {
-  //   this.dataTime = ' - ';
-  //   this.request = undefined;
-  //   this.success = undefined;
-  //   this.fail = undefined;
-  //   this.badAttempt = undefined;
-  //   this.avg = undefined;
-  //   this.median = undefined;
-  //   this.clientUsagePercentage = [];
-  //   this.apiTrafficDistribution = [];
-  //   this.popular = [];
-  //   this.unpopular = [];
-
-  // if (this.badattempChart) this.badattempChart.dispose();
-  // if (this.medianChart) this.medianChart.dispose();
-  // if (this.hotChart) this.hotChart.dispose();
-  // if (this.apiCountChart) this.apiCountChart.dispose();
-  // if (this.clientChart) this.clientChart.dispose();
-  // }
-
-  // switchOption(evt) {
-  //   this.clearDashboardData();
-  //   this.getDataReload();
-  // }
 
   getDiffDays(sDate: string, eDate: string) {
     let startDate = new Date(sDate);
@@ -265,658 +318,21 @@ export class DashboardComponent implements OnInit {
       : '';
   }
 
-  badattempChart: { [key: string]: echarts.ECharts } = {};
-  // 產生BadAttempt圖表
-  generateBadAttemptReport(
-    nodeName: string = '',
-    badAttempt: AA1212BadAttemptResp
-  ) {
-    // console.log(nodeName)
-    // this.badAttempt = badAttempt;
-    let total: number =
-      Number(badAttempt.code401) +
-      Number(badAttempt.code403) +
-      Number(badAttempt.others);
-
-    setTimeout(() => {
-      //避免chart init 因container剛長出來還未有clientwidth,clientheight的警告
-      const elementId = 'badAttemptReport_' + nodeName;
-      const badAttemptEle = document.getElementById(elementId);
-      if (badAttemptEle) {
-        if (
-          !this.badattempChart[nodeName] ||
-          this.badattempChart[nodeName]?.getDom().id !== badAttemptEle.id
-        ) {
-          console.log('init');
-          this.badattempChart[nodeName]?.dispose();
-          this.badattempChart[nodeName] = echarts.init(badAttemptEle);
-        }
-        // console.log(this.badattempChart)
-        console.log(this.badattempChart[nodeName]);
-        this.badattempChart[nodeName].setOption({
-          // animation:false,
-          color: ['#F6D8CB', '#DA7A53', '#6E79ED'],
-          tooltip: {
-            trigger: 'item',
-          },
-          title: {
-            text: this.numberComma(total.toString()),
-            left: 'center',
-            top: 'center',
-          },
-          // legend: {
-          //   top: '0%',
-          //   left: 'center'
-          // },
-          series: [
-            {
-              type: 'pie',
-              radius: ['40%', '70%'],
-              avoidLabelOverlap: false,
-              itemStyle: {
-                borderRadius: 10,
-                borderColor: '#fff',
-                borderWidth: 1,
-              },
-              label: {
-                show: false,
-                position: 'center',
-              },
-              emphasis: {
-                label: {
-                  show: false,
-                  fontSize: 24,
-                  // fontWeight: 'bold'
-                },
-              },
-              labelLine: {
-                show: false,
-              },
-              data: [
-                { value: badAttempt.code401, name: '401' },
-                { value: badAttempt.code403, name: '403' },
-                { value: badAttempt.others, name: 'Others' },
-              ],
-            },
-          ],
-        });
-        this.badattempChart[nodeName].resize();
-        // this.badattempChart.setOption(option);
-      }
-    }, 100);
-  }
-  // 中位數圖表
-  // async generateMadianReport(median: AA1211MedianResp) {
-  //   this.median = median;
-  //   if (median.max == median.min) {
-  //     return;
-  //   }
-  //   const codes = ['normal', 'good', 'aberrant'];
-  //   const dict = await this.toolService.getDict(codes);
-  //   setTimeout(() => {
-  //     const medianEle = document.getElementById('medianReport');
-  //     if (medianEle) {
-  //       this.medianChart = echarts.init(medianEle);
-  //       let option = {
-  //         series: [
-  //           {
-  //             type: 'gauge',
-  //             startAngle: 180,
-  //             endAngle: 0,
-  //             center: ['50%', '50%'],
-  //             radius: '60%',
-  //             min: median.min,
-  //             max: median.max,
-  //             splitNumber: median.gap,
-  //             axisLine: {
-  //               lineStyle: {
-  //                 width: 15,
-  //                 color: [
-  //                   [0.1, '#6DEA38'],
-  //                   [0.2, '#ACE236'],
-  //                   [0.3, '#D8ED38'],
-  //                   [0.4, '#EDE438'],
-  //                   [0.5, '#edd538'],
-  //                   [0.6, '#F2B13A'],
-  //                   [0.7, '#EFA526'],
-  //                   [0.8, '#F28232'],
-  //                   [0.9, '#f7630e'],
-  //                   [1, '#f73d0e'],
-  //                 ],
-  //               },
-  //             },
-  //             pointer: {
-  //               icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
-  //               length: '55%',
-  //               width: 3,
-  //               offsetCenter: [0, '-10%'],
-  //               itemStyle: {
-  //                 color: 'auto',
-  //               },
-  //             },
-  //             axisTick: {
-  //               show: false,
-  //               // length: 0,
-  //               // lineStyle: {
-  //               //   color: 'auto',
-  //               //   width: 2
-  //               // }
-  //             },
-  //             splitLine: {
-  //               show: false,
-  //               // length: 0,
-  //               // lineStyle: {
-  //               //   color: 'auto',
-  //               //   width: 5
-  //               // }
-  //             },
-  //             axisLabel: {
-  //               padding: [-5, -15, 0, -15],
-  //               color: '#464646',
-  //               fontSize: 10,
-  //               distance: -30,
-  //               // rotate: 'tangential',
-  //               formatter: function (value) {
-  //                 if (value === median.max) {
-  //                   return dict['aberrant'];
-  //                 } else if (value === (median.min + median.max) / 2) {
-  //                   return dict['normal'];
-  //                 } else if (value === median.min) {
-  //                   return dict['good'];
-  //                 }
-
-  //                 return '';
-  //               },
-  //             },
-  //             // title: {
-  //             //   offsetCenter: [0, '-10%'],
-  //             //   fontSize: 20
-  //             // },
-  //             detail: {
-  //               fontSize: 0,
-  //               offsetCenter: [0, '-35%'],
-  //               valueAnimation: true,
-  //               // formatter: function (value) {
-  //               //   return Math.round(value * 100) + '';
-  //               // },
-  //               color: 'inherit',
-  //             },
-  //             data: [
-  //               {
-  //                 value: median.median,
-  //               },
-  //             ],
-  //           },
-  //         ],
-  //       };
-  //       this.medianChart.setOption(option);
-  //     }
-  //   }, 0);
-  // }
-
-  //top5熱門排行
-  // async generatePopularReport(popular: Array<AA1211PopularResp>) {
-  //   this.popular = popular;
-
-  //   const code = ['resp_avg_time'];
-  //   const dict = await this.toolService.getDict(code);
-
-  //   const popularRefactor = popular
-  //     .sort((a: AA1211PopularResp, b: AA1211PopularResp) => {
-  //       return b.rank - a.rank;
-  //     })
-  //     .map((item) => {
-  //       return {
-  //         apiName: item.apiName,
-  //         success: item.success.replace(',', ''),
-  //         fail: item.fail.replace(',', ''),
-  //         showFlag: 0,
-  //         avg: item.avg,
-  //       };
-  //     });
-  //   setTimeout(() => {
-  //     const popularEle = document.getElementById('popularReport');
-  //     if (popularEle) {
-  //       const _this = this;
-  //       this.hotChart = echarts.init(popularEle);
-
-  //       let option = {
-  //         dataset: {
-  //           source: popularRefactor,
-  //         },
-  //         tooltip: {
-  //           trigger: 'axis',
-  //           axisPointer: {
-  //             // Use axis to trigger tooltip
-  //             type: 'shadow', // 'shadow' as default; can also be 'line' or 'shadow'
-  //           },
-  //           formatter: (params) => {
-  //             // console.log(params)
-  //             let failTarIdx =
-  //               params.length > 1 ? params.length - 2 : params.length - 1;
-  //             return `
-  //                     ${params[0].name}<br />
-  //                     ${params[0].marker} ${
-  //               params[0].seriesName
-  //             }: ${this.toolService.numberComma(params[0].value.success)}<br />
-  //                     ${params[failTarIdx].marker} ${
-  //               params[failTarIdx].seriesName
-  //             }: ${this.toolService.numberComma(
-  //               params[failTarIdx].value.fail
-  //             )}<br />
-  //                     ${dict['resp_avg_time']}: ${this.toolService.numberComma(
-  //               params[0].value.avg
-  //             )}ms
-  //                     `;
-  //           },
-  //         },
-  //         // barWidth: '40%',
-  //         barCategoryGap: '20%',
-  //         legend: {},
-  //         grid: {
-  //           left: '3%',
-  //           right: '4%',
-  //           bottom: '3%',
-  //           containLabel: true,
-  //         },
-
-  //         xAxis: {
-  //           type: 'value',
-  //         },
-  //         yAxis: {
-  //           type: 'category',
-  //           // data: popular.map(item=>{ return item.apiName })
-  //         },
-  //         label: {
-  //           fontWeight: 'bold',
-  //           fontSize: 14,
-  //           color: '#000',
-  //         },
-  //         itemStyle: {
-  //           // borderRadius:[0,15,15,0]
-  //         },
-  //         series: [
-  //           {
-  //             name: 'Success',
-  //             type: 'bar',
-  //             stack: 'total',
-  //             label: {
-  //               show: false,
-  //             },
-  //             emphasis: {
-  //               focus: 'series',
-  //             },
-  //             // data: popular.map(item=>{return item.success}),
-  //             // color: '#F3B142',
-  //             color: {
-  //               type: 'linear',
-  //               x: 0,
-  //               y: 0,
-  //               x2: 1,
-  //               y2: 0,
-  //               colorStops: [
-  //                 {
-  //                   offset: 0,
-  //                   color: '#FCEDCC', // 0% 的颜色
-  //                 },
-  //                 {
-  //                   offset: 1,
-  //                   color: '#F3B041', // 100% 的颜色
-  //                 },
-  //               ],
-  //               global: false,
-  //             },
-  //           },
-  //           {
-  //             name: 'Fail',
-  //             type: 'bar',
-  //             stack: 'total',
-  //             label: {
-  //               show: false,
-  //             },
-
-  //             emphasis: {
-  //               focus: 'series',
-  //             },
-  //             color: '#DFDFDF',
-  //             // data: popular.map(item=>{return item.fail}),
-  //           },
-  //           {
-  //             name: 'Fail',
-  //             type: 'bar',
-  //             stack: 'total',
-  //             label: {
-  //               show: true,
-
-  //               formatter: function (params) {
-  //                 const total =
-  //                   Number(params.value.success.replace(',')) +
-  //                   Number(params.value.fail.replace(','));
-  //                 return _this.toolService.numberComma(total);
-  //               },
-  //               position: 'inside',
-  //             },
-  //           },
-  //         ],
-  //       };
-  //       this.hotChart.setOption(option);
-  //     }
-  //   }, 0);
-  // }
-
-  //api流量分佈
-  // generateApiTrafficDistributionReport(
-  //   apiTrafficDistribution: Array<AA1211ApiTrafficDistributionResp>
-  // ) {
-  //   if (apiTrafficDistribution.length == 0) return;
-  //   this.apiTrafficDistribution = apiTrafficDistribution;
-  //   // console.log(apiTrafficDistribution)
-  //   // console.log(Array.from({ length: 25}, (vlue, index) => (`0`+index).slice(-2)));
-  //   // let hhmmPool = Array.from({ length: 25 }, (vlue, index) => {
-  //   //   // console.log(index)
-  //   //   return (Array.from({ length: 6 }, (vlue, mIndex) => (`0` + index).slice(-2) + ":" + mIndex + "0"))
-  //   //   // return (`0`+index).slice(-2)+":00"
-  //   // }).reduce((prev, curr) => { //把陣列攤平
-  //   //   return prev.concat(curr);
-  //   // });
-
-  //   let hhmmPool = apiTrafficDistribution.map((item) => item.xLable);
-  //   let successPool = apiTrafficDistribution.map((item) => item.success);
-  //   let failPool = apiTrafficDistribution.map((item) => item.fail);
-  //   // for (let index = 0; index < 150; index++) {
-  //   //   successPool.push(Math.floor(Math.random() * 100) + 1);
-  //   //   failPool.push(Math.floor(Math.random() * 10));
-  //   // }
-  //   // console.log(hhmmPool)
-  //   // console.log(successPool)
-  //   // console.log(failPool)
-
-  //   let dataset = [
-  //     ['time', ...hhmmPool],
-  //     ['success', ...successPool],
-  //     ['fail', ...failPool],
-  //   ];
-  //   // console.log('dataset',dataset)
-  //   setTimeout(() => {
-  //     const targetEle = document.getElementById('apiTrafficDistributionReport');
-  //     if (targetEle) {
-  //       this.apiCountChart = echarts.init(targetEle);
-  //       // title: {
-  //       //   // text: 'api流量分佈'
-  //       // },
-  //       let option = {
-  //         zoom: 1,
-  //         tooltip: {
-  //           trigger: 'axis',
-  //           formatter: (params) => {
-  //             return `
-  //                     ${params[0].name} <br />
-  //                     ${params[0].marker} ${
-  //               params[0].seriesName
-  //             }: ${this.toolService.numberComma(params[0].value[1])}<br />
-  //                     ${params[1].marker} ${
-  //               params[1].seriesName
-  //             }: ${this.toolService.numberComma(params[1].value[2])}
-  //                     `;
-  //           },
-  //         },
-  //         legend: {
-  //           data: ['Success', 'Fail'],
-  //         },
-  //         grid: {
-  //           left: '3%',
-  //           right: '4%',
-  //           bottom: '3%',
-  //           containLabel: true,
-  //         },
-  //         dataset: {
-  //           source: dataset,
-  //         },
-  //         xAxis: {
-  //           type: 'category',
-  //           boundaryGap: false,
-  //           // data: hhmmPool
-  //         },
-  //         yAxis: {
-  //           type: 'value',
-  //         },
-
-  //         series: [
-  //           {
-  //             color: '#8dd6b7',
-  //             seriesLayoutBy: 'row',
-  //             name: 'Success',
-  //             type: 'line',
-  //             lineStyle: {
-  //               width: 3,
-  //             },
-  //             areaStyle: {
-  //               color: {
-  //                 type: 'linear',
-  //                 x: 0,
-  //                 y: 1,
-  //                 x2: 0,
-  //                 y2: 0,
-  //                 colorStops: [
-  //                   {
-  //                     offset: 1,
-  //                     color: 'rgba(135, 204, 14, 0.67)', // 0% 的颜色
-  //                   },
-  //                   {
-  //                     offset: 0,
-  //                     color: 'rgba(135, 204, 14, 0.03)', // 100% 的颜色
-  //                   },
-  //                 ],
-  //                 global: false,
-  //               },
-  //             },
-  //             // stack: 'Total',
-  //             showSymbol: false,
-  //             // data: successPool,
-  //           },
-  //           {
-  //             color: '#F6D8cb',
-  //             seriesLayoutBy: 'row',
-  //             name: 'Fail',
-  //             type: 'line',
-  //             lineStyle: {
-  //               width: 3,
-  //             },
-  //             // stack: 'Total',
-  //             showSymbol: false,
-  //             // data: failPool
-  //           },
-  //         ],
-  //       };
-  //       this.apiCountChart.setOption(option);
-  //     }
-  //   }, 0);
-  // }
-
-  // getRandomColor() {
-  //   var letters = '0123456789ABCDEF'.split('');
-  //   var color = '#';
-  //   for (var i = 0; i < 6; i++) {
-  //     color += letters[Math.floor(Math.random() * 16)];
-  //   }
-  //   return color;
-  // }
-
-  // generateClientReport(
-  //   clientUsagePercentage: Array<AA1211ClientUsagePercentageResp>
-  // ) {
-  //   if (clientUsagePercentage.length == 0) return;
-  //   this.clientUsagePercentage = clientUsagePercentage;
-  //   // this.clientData.forEach(item=>{
-  //   // item['color'] = this.getRandomColor();
-  //   // })
-  //   // console.log(this.clientData.map(item=>item['color']))
-
-  //   let clientData = clientUsagePercentage.map((item) => {
-  //     return {
-  //       value: item.request,
-  //       name: item.client,
-  //       percentage: item.percentage,
-  //     };
-  //   });
-  //   // console.log('clientUsagePercentage', clientUsagePercentage)
-  //   setTimeout(() => {
-  //     const targetEle = document.getElementById('clientReport');
-  //     if (targetEle) {
-  //       this.clientChart = echarts.init(targetEle);
-  //       let option = {
-  //         title: {
-  //           text: this.toolService.numberComma(clientUsagePercentage[0].total),
-  //           left: 'center',
-  //           top: 'center',
-  //         },
-  //         // color: this.clientData.map(item=>item['color']),
-  //         tooltip: {
-  //           trigger: 'item',
-  //           position: 'right',
-  //           formatter: (params) => {
-  //             return `
-  //                   <span style="font-weight:bold">${params.marker} ${
-  //               params.name
-  //             }</span> <br />
-  //                   Percentage:  ${params.data.percentage}%<br />
-  //                   Request: ${this.toolService.numberComma(params.value)}
-  //                     `;
-  //           },
-  //         },
-  //         // legend: {
-  //         //   top: '0%',
-  //         //   left: 'center'
-  //         // },
-  //         series: [
-  //           {
-  //             // name: 'Access From',
-  //             type: 'pie',
-  //             radius: ['30%', '50%'],
-  //             avoidLabelOverlap: false,
-  //             itemStyle: {
-  //               borderRadius: 10,
-  //               borderColor: '#fff',
-  //               borderWidth: 1,
-  //             },
-
-  //             label: {
-  //               show: false,
-  //               position: 'center',
-  //             },
-  //             // emphasis: {
-  //             //   label: {
-  //             //     show: false,
-  //             //     fontSize: 20,
-  //             //     // fontWeight: 'bold'
-  //             //   }
-  //             // },
-  //             labelLine: {
-  //               show: false,
-  //             },
-  //             data: clientData,
-  //             // data: [
-  //             //   { value: 341, name: 'clientA' },
-  //             //   { value: 1760, name: 'clientB' },
-  //             //   { value: 1363, name: 'clientC' },
-  //             //   { value: 1022, name: 'clientD' },
-  //             //   { value: 681, name: 'clientE' },
-  //             //   { value: 511, name: 'Others' },
-  //             // ]
-  //           },
-  //         ],
-  //       };
-  //       this.clientChart.setOption(option);
-  //       // console.log(this.clientChart.getOption().color)
-  //       // console.log(
-  //       //  this.clientChart.getModel().getSeries().map(s => {
-  //       //   console.log(s)
-  //       //   return {
-  //       //     seriesIndex: s.seriesIndex,
-  //       //     seriesColor: this.clientChart.getVisual({
-  //       //       seriesIndex: s.seriesIndex
-  //       //     }, 'color')
-  //       //   }
-  //       // })
-  //       // )
-
-  //       // )
-  //     }
-  //   }, 0);
-  // }
-  // getColor(idx) {
-  //   return this.clientChart?.getOption()?.color[idx];
-  // }
-
-  // const badattempEle = document.getElementById('charts-container');
-  //   if(badattempEle){
-  //     let myChart = echarts.init(badattempEle);
-  //     var option = {
-  //               xAxis: {
-  //                   type: 'category',
-  //                   data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  //               },
-  //               yAxis: {
-  //                   type: 'value'
-  //               },
-  //               series: [{
-  //                   data: [120, 200, 150, 80, 70, 110, 130],
-  //                   type: 'bar',
-  //                   showBackground: true,
-  //                   backgroundStyle: {
-  //                       color: 'rgba(180, 180, 180, 0.2)'
-  //                   }
-  //               }]
-  //           };
-  //           myChart.setOption(option);
-  //   }
   lastLoginLogList: Array<AA1212LastLoginLog> = [];
   dataList: Array<AA1212RespItem> = [];
   queryRealtimeDashboardData() {
-    // this.serverService.queryRealtimeDashboardData({}).subscribe((res) => {
-    //   if (this.toolService.checkDpSuccess(res.ResHeader)) {
-    //     this.dataList = res.RespBody?.dataList ?? [];
-    //     if (this.dataList.length > 0) {
-    //       this.dataList = this.dataList.map((item) => {
-    //         const cleanedItem = { ...item };
-    //         const urlContainingLists = [
-    //           'badAttemptList',
-    //           'inclundeFailFastList',
-    //           'inclundeFailSlowList',
-    //           'exclundeFailFastList',
-    //           'exclundeFailSlowList',
-    //         ];
-
-    //         urlContainingLists.forEach((listName) => {
-    //           if (
-    //             cleanedItem[listName] &&
-    //             Array.isArray(cleanedItem[listName])
-    //           ) {
-    //             cleanedItem[listName] = cleanedItem[listName].map((entry) => ({
-    //               ...entry,
-    //               uri: entry.uri ? entry.uri.replace(/\n/g, '') : entry.uri,
-    //             }));
-    //           }
-    //         });
-
-    //         return cleanedItem;
-    //       });
-    //     }
-    //     this.lastLoginLogList = res.RespBody.lastLoginLogList;
-    //   }
-    // });
-    // return;
-    this.apiSubscription = of(null)
+    this.apiSubscription = timer(0, 2000)
       .pipe(
-        expand(() =>
+        // take(10), //給予上限
+        switchMap(() =>
           this.serverService.queryRealtimeDashboardData({}).pipe(
-            delay(2000), // API 回傳後延遲2秒再繼續
             catchError((err) => {
               //   console.error('API 發生錯誤:', err);
               return of(null); // 錯誤處理，避免停止循環
             })
           )
         ),
+        // take(2),
         takeUntil(this.destroy$)
       )
       .subscribe((res) => {
@@ -939,84 +355,1215 @@ export class DashboardComponent implements OnInit {
                   cleanedItem[listName] &&
                   Array.isArray(cleanedItem[listName])
                 ) {
-                  cleanedItem[listName] = cleanedItem[listName].map((entry) => ({
-                    ...entry,
-                    uri: entry.uri ? entry.uri.replace(/\n/g, '') : entry.uri,
-                  }));
+                  cleanedItem[listName] = cleanedItem[listName].map(
+                    (entry) => ({
+                      ...entry,
+                      uri: entry.uri ? entry.uri.replace(/\n/g, '') : entry.uri,
+                    })
+                  );
                 }
               });
 
               return cleanedItem;
             });
+
+            this.dataList.forEach((node) => {
+              this.addData(this.dataPool, node);
+            });
+            this.checkChartStatus();
           }
+
           this.lastLoginLogList = res.RespBody.lastLoginLogList;
         }
       });
   }
 
-  // getDashboardData() {
-  //   let reqBody = {
-  //     timeType: this.timeType,
-  //   } as AA1211Req;
-  //   // console.log(reqBody)
-  //   // this.ngxService.start();
-  //   this.serverService.getDashboardData(reqBody).subscribe((res) => {
-  //     // console.log(res)
-  //     if (this.toolService.checkDpSuccess(res.ResHeader)) {
-  //       this.dataTime = res.RespBody.data.dataTime; //資料取回時間
-  //       this.request = res.RespBody.data.request;
-  //       this.success = res.RespBody.data.success;
-  //       this.fail = res.RespBody.data.fail;
-  //       if (res.RespBody.data.badAttempt)
-  //         this.generateBadAttemptReport(res.RespBody.data.badAttempt);
-  //       this.avg = this.numberComma(res.RespBody.data.avg.toString());
-  //       if (res.RespBody.data.median)
-  //         this.generateMadianReport(res.RespBody.data.median);
-  //       if (res.RespBody.data.popular)
-  //         this.generatePopularReport(res.RespBody.data.popular);
+  checkChartStatus() {
+    this.generateChart();
+  }
 
-  //       this.unpopular = res.RespBody.data.unpopular
-  //         ? res.RespBody.data.unpopular.sort(
-  //             (a: AA1211UnpopularResp, b: AA1211UnpopularResp) => {
-  //               return a.rank - b.rank;
-  //             }
-  //           )
-  //         : [];
-  //       if (res.RespBody.data.apiTrafficDistribution)
-  //         this.generateApiTrafficDistributionReport(
-  //           res.RespBody.data.apiTrafficDistribution
-  //         );
+  addData(pool: DataNode[], nodeData: AA1212RespItem) {
+    const existingNode = pool.find(
+      (node) => node.nodeName === nodeData.nodeName
+    );
+    // 產生資料的時間
+    const dataGenerateTime = this.toolService.setformate(
+      new Date(),
+      'HH:mm:ss'
+    );
 
-  //       if (res.RespBody.data.clientUsagePercentage)
-  //         this.generateClientReport(res.RespBody.data.clientUsagePercentage);
-  //       if (res.RespBody.data.lastLoginLog)
-  //         this.lastLoginLog = res.RespBody.data.lastLoginLog;
-  //     }
-  //     // else { //測試用
+    // Total Request 圖表資料
+    // let newReqPoint = {
+    //   time: dataGenerateTime,
+    //   success: nodeData.success?.success,
+    //   fail: nodeData.fail?.fail,
+    //   total: nodeData.success?.total
+    //     ? nodeData.success?.total
+    //     : nodeData.fail?.total,
+    // } as reqPoint;
 
-  //     // let aa1211RespItem = this.testData;
-  //     // this.dataTime = aa1211RespItem.dataTime;
-  //     // this.request = aa1211RespItem.request;
-  //     // this.success = aa1211RespItem.success;
-  //     // this.fail = aa1211RespItem.fail;
-  //     // if (aa1211RespItem.badAttempt) this.generateBadAttemptReport(aa1211RespItem.badAttempt);
-  //     // this.avg = aa1211RespItem.avg;
-  //     // if (aa1211RespItem.median) this.generateMadianReport(aa1211RespItem.median);
-  //     // if (aa1211RespItem.popular) this.generatePopularReport(aa1211RespItem.popular);
+    // Cache
+    let newCachePoint = {
+      time: dataGenerateTime,
+      dao: nodeData.cache?.dao,
+      fixed: nodeData.cache?.fixed,
+      rcd: nodeData.cache?.rcd,
+    } as cachePoint;
 
-  //     // this.unpopular = aa1211RespItem.unpopular.sort((a: AA1211UnpopularResp, b: AA1211UnpopularResp) => { return b.rank - a.rank });
-  //     // if (aa1211RespItem.apiTrafficDistribution) this.generateApiTrafficDistributionReport(aa1211RespItem.apiTrafficDistribution)
+    // TPS
+    let newTpsPoint = {
+      time: dataGenerateTime,
+      req: nodeData.reqTps?.replace('/s', ''),
+      resp: nodeData.respTps?.replace('/s', ''),
+    } as tpsPoint;
 
-  //     // if (aa1211RespItem.clientUsagePercentage) this.generateClientReport(aa1211RespItem.clientUsagePercentage);
-  //     // }
-  //     this.ngxService.stopAll();
-  //     // this.resizeReport();
-  //   });
-  // }
+    // DB connection
+    let newDbPoint = {
+      time: dataGenerateTime,
+      active: nodeData.db?.active,
+      waiting: nodeData.db?.waiting,
+      idle: nodeData.db?.idle,
+      total: nodeData.db?.total,
+    } as dbPoint;
+
+    //quene ES
+    const esQueneValue = this.parseQueneEsString(nodeData.queue?.es);
+    let newEsPoint = {
+      time: dataGenerateTime,
+      current: esQueneValue.current,
+      discarded: esQueneValue.discarded,
+    } as esPoint;
+
+    //cpuUsage
+    let newCpuUsagePoint = {
+      time: dataGenerateTime,
+      cpuUsage: nodeData.nodeInfo?.cpuUsage.replace('%', ''),
+    } as cpuUsagePoint;
+
+    //mem
+    let newMemPoint = {
+      time: dataGenerateTime,
+      memFree: nodeData.nodeInfo?.memFree?.replace(/[, MB]/g, ''),
+      memTotal: nodeData.nodeInfo?.memTotal?.replace(/[, MB]/g, ''),
+      memMax: nodeData.nodeInfo?.memMax?.replace(/[, MB]/g, ''),
+    } as memPoint;
+
+    //thread
+    let newThreadPoint = {
+      time: dataGenerateTime,
+      highwayActvieCount: nodeData.apiThreadStatus?.highwayActvieCount,
+      countryRoadActvieCount: nodeData.apiThreadStatus?.countryRoadActvieCount,
+    } as threadPoint;
+
+    if (existingNode) {
+      // 3.有新資料，就推進既有的dataSeries陣列
+      // existingNode.reqSeries.push(newReqPoint);
+      existingNode.tpsSeries.push(newTpsPoint);
+      existingNode.dbSeries?.push(newDbPoint);
+      existingNode.esSeries?.push(newEsPoint);
+      existingNode.cpuSeries?.push(newCpuUsagePoint);
+      existingNode.memSeries?.push(newMemPoint);
+      existingNode.threadSeries?.push(newThreadPoint);
+      existingNode.cacheSeries?.push(newCachePoint);
+
+      //控制每張圖節點資料資料上限
+      // if (existingNode.reqSeries.length > 30) existingNode.reqSeries.shift();
+      if (existingNode.cacheSeries && existingNode.cacheSeries.length > 30)
+        existingNode.cacheSeries.shift();
+      if (existingNode.tpsSeries.length > 30) existingNode.tpsSeries.shift();
+      if (existingNode.dbSeries && existingNode.dbSeries.length > 30)
+        existingNode.dbSeries.shift();
+      if (existingNode.esSeries && existingNode.esSeries.length > 30)
+        existingNode.esSeries.shift();
+      if (existingNode.cpuSeries && existingNode.cpuSeries.length > 30)
+        existingNode.cpuSeries.shift();
+      if (existingNode.memSeries && existingNode.memSeries.length > 30)
+        existingNode.memSeries.shift();
+      // console.log(`已更新節點 '${nodeData.nodeName}' 的資料。`);
+    } else {
+      // 4. 如果沒找到，就建立一個新物件並推進 pool 陣列
+      const newNode: DataNode = {
+        nodeName: nodeData.nodeName!,
+        // reqSeries: [newReqPoint],
+        tpsSeries: [newTpsPoint],
+        dbSeries: [newDbPoint],
+        esSeries: [newEsPoint],
+        cpuSeries: [newCpuUsagePoint],
+        memSeries: [newMemPoint],
+        threadSeries: [newThreadPoint],
+        cacheSeries: [newCachePoint],
+      };
+      pool.push(newNode);
+      // console.log(`已建立新節點 '${nodeData.nodeName}' 並加入資料。`);
+    }
+  }
+
+  trackByNodeName(index: number, item: any): string {
+    return item.nodeName;
+  }
+
+  generateChart() {
+    setTimeout(() => {});
+    this.dataPool.forEach((node) => {
+      this.procTpsChart(node);
+      // this.procReqChart(node);
+      this.procDbChart(node);
+      this.procEsChart(node);
+      this.procCPUChart(node);
+      this.procMemChart(node);
+      this.procThreadChart(node);
+      this.procCacheChart(node);
+    });
+  }
+
+  procCacheChart(node) {
+    // threadChart
+    const cacheChartItem = this.cacheChart.find(
+      (c) => c.nodeName === 'cacheChart_' + node.nodeName
+    );
+    if (cacheChartItem && cacheChartItem.nodeEle) {
+      //更新
+      cacheChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node.cacheSeries, // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      setTimeout(() => {
+        // threadChart
+        const targetEle = document.getElementById(
+          'cacheChart_' + node.nodeName
+        );
+        if (targetEle) {
+          let tarChart = echarts.init(targetEle);
+          this.cacheChart.push({
+            nodeName: 'cacheChart_' + node.nodeName,
+            nodeEle: tarChart,
+          });
+
+          let option = {
+            zoom: 1,
+            tooltip: {
+              trigger: 'axis',
+            },
+            legend: {
+              data: ['dao', 'fixed', 'rcd'],
+            },
+            grid: {
+              left: '3%',
+              right: '3%',
+              bottom: '3%',
+              containLabel: true,
+            },
+            dataset: {
+              source: node.cacheSeries,
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              axisLabel: {
+                fontSize: 8,
+              },
+            },
+            yAxis: {
+              type: 'value',
+            },
+            series: [
+              {
+                color: '#ff7f0e',
+                seriesLayoutBy: 'row',
+                name: 'dao',
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#2ca02c',
+                seriesLayoutBy: 'row',
+                name: 'fixed',
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#1f77b4',
+                seriesLayoutBy: 'row',
+                name: 'rcd',
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+            ],
+          };
+          tarChart.setOption(option);
+        }
+      }, 0);
+    }
+  }
+
+  procThreadChart(node) {
+    // threadChart
+    const threadChartItem = this.threadChart.find(
+      (c) => c.nodeName === 'threadChart_' + node.nodeName
+    );
+    if (threadChartItem && threadChartItem.nodeEle) {
+      //更新
+      threadChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node.threadSeries, // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      setTimeout(() => {
+        // threadChart
+        const targetEle = document.getElementById(
+          'threadChart_' + node.nodeName
+        );
+        if (targetEle) {
+          let tarChart = echarts.init(targetEle);
+          this.threadChart.push({
+            nodeName: 'threadChart_' + node.nodeName,
+            nodeEle: tarChart,
+          });
+
+          let option = {
+            zoom: 1,
+            tooltip: {
+              trigger: 'axis',
+            },
+            legend: {
+              data: ['Country road', 'Highway'],
+            },
+            grid: {
+              left: '3%',
+              right: '3%',
+              bottom: '3%',
+              containLabel: true,
+            },
+            dataset: {
+              source: node.threadSeries,
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              axisLabel: {
+                fontSize: 8,
+              },
+            },
+            yAxis: {
+              // type: 'value',
+            },
+
+            series: [
+              {
+                color: '#14c431',
+                seriesLayoutBy: 'row',
+                name: 'Country road',
+                data: node.threadSeries.countryRoadActvieCount,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#c93295',
+                seriesLayoutBy: 'row',
+                name: 'Highway',
+                data: node.threadSeries.highwayActvieCount,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+            ],
+          };
+          tarChart.setOption(option);
+        }
+      }, 0);
+    }
+  }
+
+  procMemChart(node) {
+    // memChart
+    const memChartItem = this.memChart.find(
+      (c) => c.nodeName === 'memChart_' + node.nodeName
+    );
+    if (memChartItem && memChartItem.nodeEle) {
+      //更新
+      memChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node.memSeries, // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      setTimeout(() => {
+        // memChart
+        const targetEle = document.getElementById('memChart_' + node.nodeName);
+        if (targetEle) {
+          let tarChart = echarts.init(targetEle);
+          this.memChart.push({
+            nodeName: 'memChart_' + node.nodeName,
+            nodeEle: tarChart,
+          });
+
+          let option = {
+            zoom: 1,
+            tooltip: {
+              trigger: 'axis',
+              formatter: (params) => {
+                let html = `<span>${params[0].name}</span><br/>`;
+                html += `<div>
+                      ${params[0].marker}
+                      <span style="margin-right: 16px;">${
+                        params[0].seriesName
+                      }</span>
+                      <span style="float: right; font-weight: bold;">${
+                        (this,
+                        this.toolService.numberComma(params[0].value.memFree))
+                      } MB</span>
+                    </div>
+                    <div>
+                      ${params[1].marker}
+                      <span style="margin-right: 16px;">${
+                        params[1].seriesName
+                      }</span>
+                      <span style="float: right; font-weight: bold;">${
+                        (this,
+                        this.toolService.numberComma(params[1].value.memTotal))
+                      } MB</span>
+                    </div>
+                    <div>
+                      ${params[2].marker}
+                      <span style="margin-right: 16px;">${
+                        params[2].seriesName
+                      }</span>
+                      <span style="float: right; font-weight: bold;">${
+                        (this,
+                        this.toolService.numberComma(params[2].value.memMax))
+                      } MB</span>
+                    </div>
+                 `;
+                return html;
+              },
+            },
+            legend: {
+              data: ['Free', 'Total', 'Max'],
+              // data: ['memFree', 'memTotal', 'memMax'],
+            },
+            grid: {
+              left: '3%',
+              right: '8%',
+              bottom: '3%',
+              containLabel: true,
+            },
+            dataset: {
+              source: node.memSeries,
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              axisLabel: {
+                fontSize: 8,
+              },
+            },
+            yAxis: {
+              // type: 'value',
+            },
+
+            series: [
+              {
+                color: '#28a745',
+                seriesLayoutBy: 'row',
+                name: 'Free',
+                // name: 'memFree',
+                data: node.memSeries.memFree,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                areaStyle: {
+                  color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 1,
+                    x2: 0,
+                    y2: 0,
+                    colorStops: [
+                      {
+                        offset: 1,
+                        color: 'rgba(40, 167, 69, 1)',
+                      },
+                      {
+                        offset: 0.7,
+                        color: 'rgba(40, 167, 69, 0.7)',
+                      },
+                      {
+                        offset: 0.4,
+                        color: 'rgba(40, 167, 69, 0.4)',
+                      },
+                      {
+                        offset: 0,
+                        color: 'rgba(40, 167, 69, 0.05)',
+                      },
+                    ],
+                    global: false,
+                  },
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#007bff',
+                seriesLayoutBy: 'row',
+                // name: 'memTotal',
+                name: 'Total',
+                data: node.memSeries.memTotal,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#dc3545',
+                seriesLayoutBy: 'row',
+                // name: 'memMax',
+                name: 'Max',
+                data: node.memSeries.memMax,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+            ],
+          };
+          tarChart.setOption(option);
+        }
+      }, 0);
+    }
+  }
+
+  //procCPUChart
+  procCPUChart(node) {
+    // cpuChart
+    const cpuChartItem = this.cpuChart.find(
+      (c) => c.nodeName === 'cpuChart_' + node.nodeName
+    );
+    if (cpuChartItem && cpuChartItem.nodeEle) {
+      //更新
+      cpuChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node.cpuSeries, // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      setTimeout(() => {
+        // cpuChart
+        const targetEle = document.getElementById('cpuChart_' + node.nodeName);
+        if (targetEle) {
+          let tarChart = echarts.init(targetEle);
+          this.cpuChart.push({
+            nodeName: 'cpuChart_' + node.nodeName,
+            nodeEle: tarChart,
+          });
+
+          let option = {
+            zoom: 1,
+            tooltip: {
+              trigger: 'axis',
+              formatter: (params) => {
+                let html = `<span>${params[0].name}</span><br/>`;
+                params.forEach((item) => {
+                  html += `
+                    <div>
+                      ${item.marker}
+                      <span style="margin-right: 16px;">${item.seriesName}</span>
+                      <span style="float: right; font-weight: bold;">${item.value.cpuUsage}%</span>
+                    </div>
+                  `;
+                });
+
+                return html;
+              },
+            },
+            legend: {
+              data: ['CPU Usage'],
+            },
+            grid: {
+              left: '3%',
+              right: '8%',
+              bottom: '3%',
+              containLabel: true,
+            },
+            dataset: {
+              source: node.cpuSeries,
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              axisLabel: {
+                fontSize: 8,
+              },
+              data: node.cpuSeries.time,
+            },
+            yAxis: {
+              // type: 'value',
+            },
+
+            series: [
+              {
+                color: '#14b8a6',
+                seriesLayoutBy: 'row',
+                name: 'CPU Usage',
+                data: node.cpuSeries.cpuUsage,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                areaStyle: {
+                  color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 1,
+                    x2: 0,
+                    y2: 0,
+                    colorStops: [
+                      {
+                        offset: 1,
+                        color: 'rgba(20, 184, 166, 1)',
+                      },
+                      {
+                        offset: 0.7,
+                        color: 'rgba(20, 184, 166, 0.7)',
+                      },
+                      {
+                        offset: 0.4,
+                        color: 'rgba(20, 184, 166, 0.4)',
+                      },
+                      {
+                        offset: 0,
+                        color: 'rgba(20, 184, 166, 0.05)',
+                      },
+                    ],
+                    global: false,
+                  },
+                },
+                showSymbol: false,
+                // markLine: {
+                //   symbol: 'none', // 標記線兩端不顯示符號
+                //   data: [
+                //     // 第一條標記線：數值 100 的實線
+                //     {
+                //       yAxis: 0.05,
+                //       name: '100%',
+                //       lineStyle: {
+                //         type: 'solid', // 類型：實線
+                //         color: '#d9534f', // 線條顏色
+                //       },
+                //       label: {
+                //         position: 'start',
+                //       },
+                //     },
+                //     // 第二條標記線：數值 80 的虛線
+                //     {
+                //       yAxis: 0.03,
+                //       name: '80%',
+                //       lineStyle: {
+                //         type: 'dashed', // 類型：虛線
+                //         color: '#f0ad4e', // 線條顏色
+                //       },
+                //       label: {
+                //         position: 'start',
+                //       },
+                //     },
+                //   ],
+                // },
+              },
+            ],
+          };
+          tarChart.setOption(option);
+        }
+      }, 0);
+    }
+  }
+  //reqChart
+  procReqChart(node) {
+    // reqChart
+    const reqChartItem = this.reqChart.find(
+      (c) => c.nodeName === 'reqChart_' + node.nodeName
+    );
+    if (reqChartItem && reqChartItem.nodeEle) {
+      //更新
+      reqChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node.reqSeries, // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      setTimeout(() => {
+        // ReqChart
+        const targetEle = document.getElementById('reqChart_' + node.nodeName);
+        if (targetEle) {
+          let tarChart = echarts.init(targetEle);
+          this.reqChart.push({
+            nodeName: 'reqChart_' + node.nodeName,
+            nodeEle: tarChart,
+          });
+
+          let option = {
+            zoom: 1,
+            tooltip: {
+              trigger: 'axis',
+              // formatter: (params) => {
+              //   return `
+              //         ${params[0].name} <br />
+              //         ${params[0].marker} ${params[0].seriesName}:   ${params[0].value.success} <br />
+              //         ${params[1].marker} ${params[1].seriesName}:   ${params[0].value.fail} <br />
+              //         ${params[2].marker} ${params[2].seriesName}:   ${params[1].value.total}
+              //         `;
+              // },
+            },
+            legend: {
+              data: ['Success', 'Fail', 'Total'],
+            },
+            grid: {
+              left: '3%',
+              right: '3%',
+              bottom: '3%',
+              containLabel: true,
+            },
+            dataset: {
+              source: node.reqSeries,
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              axisLabel: {
+                fontSize: 8,
+              },
+            },
+            yAxis: {
+              // type: 'value',
+            },
+
+            series: [
+              {
+                color: '#14b8a6',
+                seriesLayoutBy: 'row',
+                name: 'Success',
+                data: node.reqSeries.success,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                areaStyle: {
+                  color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 1,
+                    x2: 0,
+                    y2: 0,
+                    colorStops: [
+                      {
+                        offset: 1,
+                        color: 'rgba(20, 184, 166, 1)',
+                      },
+                      {
+                        offset: 0.7,
+                        color: 'rgba(20, 184, 166, 0.7)',
+                      },
+                      {
+                        offset: 0.4,
+                        color: 'rgba(20, 184, 166, 0.4)',
+                      },
+                      {
+                        offset: 0,
+                        color: 'rgba(20, 184, 166, 0.05)',
+                      },
+                    ],
+                    global: false,
+                  },
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#ff8780',
+                seriesLayoutBy: 'row',
+                name: 'Fail',
+                data: node.reqSeries.fail,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#7c9194',
+                seriesLayoutBy: 'row',
+                name: 'Total',
+                data: node.reqSeries.total,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+            ],
+          };
+          tarChart.setOption(option);
+        }
+      }, 0);
+    }
+  }
+
+  // tpsChart
+  procTpsChart(node) {
+    const tpsChartItem = this.tpsChart.find(
+      (c) => c.nodeName === 'tpsChart_' + node.nodeName
+    );
+    if (tpsChartItem && tpsChartItem.nodeEle) {
+      //更新
+      tpsChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node['tpsSeries'], // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      const targetEle = document.getElementById('tpsChart_' + node.nodeName);
+      if (targetEle) {
+        let tarChart = echarts.init(targetEle);
+        this.tpsChart.push({
+          nodeName: 'tpsChart_' + node.nodeName,
+          nodeEle: tarChart,
+        });
+
+        let option = {
+          zoom: 1,
+          tooltip: {
+            trigger: 'axis',
+            // formatter: (params) => {
+            //   return `
+            //           ${params[0].name} <br />
+            //           ${params[0].marker} ${params[0].seriesName}:   ${params[0].value.req}/s <br />
+            //           ${params[1].marker} ${params[1].seriesName}:   ${params[1].value.resp}/s
+            //           `;
+            // },
+          },
+          legend: {
+            data: ['req', 'resp'],
+          },
+          grid: {
+            left: '3%',
+            right: '8%',
+            bottom: '3%',
+            containLabel: true,
+          },
+          dataset: {
+            source: node.tpsSeries,
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            axisLabel: {
+              fontSize: 8,
+            },
+          },
+          yAxis: {
+            type: 'value',
+          },
+
+          series: [
+            {
+              color: '#3B82F6',
+              seriesLayoutBy: 'row',
+              name: 'req',
+              type: 'line',
+              lineStyle: {
+                width: 3,
+              },
+              areaStyle: {
+                color: {
+                  type: 'linear',
+                  x: 0,
+                  y: 1,
+                  x2: 0,
+                  y2: 0,
+                  colorStops: [
+                    {
+                      offset: 1,
+                      color: 'rgba(59, 130, 246, 0.7)',
+                    },
+                    {
+                      offset: 0.5,
+                      color: 'rgba(59, 130, 246, 0.3)',
+                    },
+                    {
+                      offset: 0,
+                      color: 'rgba(59, 130, 246, 0.05)',
+                    },
+                  ],
+                  global: false,
+                },
+              },
+
+              showSymbol: false,
+            },
+            {
+              color: '#10B981',
+              seriesLayoutBy: 'row',
+              name: 'resp',
+              type: 'line',
+              lineStyle: {
+                width: 3,
+              },
+              showSymbol: false,
+            },
+          ],
+        };
+        tarChart.setOption(option);
+      }
+    }
+  }
+  // DbChart
+  procDbChart(node) {
+    const dbChartItem = this.dbChart.find(
+      (c) => c.nodeName === 'dbChart_' + node.nodeName
+    );
+    if (dbChartItem && dbChartItem.nodeEle) {
+      //更新
+      dbChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node['dbSeries'], // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      const targetEle = document.getElementById('dbChart_' + node.nodeName);
+      if (targetEle) {
+        let tarChart = echarts.init(targetEle);
+        this.dbChart.push({
+          nodeName: 'dbChart_' + node.nodeName,
+          nodeEle: tarChart,
+        });
+
+        let option = {
+          zoom: 1,
+          tooltip: {
+            trigger: 'axis',
+            // formatter: (params) => {
+            //   return `
+            //           ${params[0]?.name} <br />
+            //           ${params[0]?.marker} ${params[0]?.seriesName}:   ${params[0]?.value.active} <br />
+            //           ${params[1]?.marker} ${params[1]?.seriesName}:   ${params[1]?.value.waiting} <br />
+            //           ${params[2]?.marker} ${params[2]?.seriesName}:   ${params[2]?.value.idle} <br />
+            //           ${params[3]?.marker} ${params[3]?.seriesName}:   ${params[3]?.value.total}
+            //           `;
+            // },
+          },
+          legend: {
+            data: ['active', 'waiting', 'idle', 'total'],
+          },
+          grid: {
+            left: '3%',
+            right: '3%',
+            bottom: '3%',
+            containLabel: true,
+          },
+          dataset: {
+            source: node.dbSeries,
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            axisLabel: {
+              fontSize: 8,
+            },
+          },
+          yAxis: {
+            type: 'value',
+          },
+
+          series: [
+            {
+              color: '#2ECC71',
+              seriesLayoutBy: 'row',
+              name: 'active',
+              type: 'line',
+              lineStyle: {
+                width: 3,
+              },
+              areaStyle: {
+                color: {
+                  type: 'linear',
+                  x: 0,
+                  y: 1,
+                  x2: 0,
+                  y2: 0,
+                  colorStops: [
+                    {
+                      offset: 1,
+                      color: 'rgba(46, 204, 113, 0.8)', // 100% 的顏色（濃）
+                    },
+                    {
+                      offset: 0.5,
+                      color: 'rgba(46, 204, 113, 0.3)', // 中間過渡
+                    },
+                    {
+                      offset: 0,
+                      color: 'rgba(46, 204, 113, 0.05)', // 0% 的顏色（淡）
+                    },
+                  ],
+                  global: false,
+                },
+              },
+              showSymbol: false,
+            },
+            {
+              color: '#F1C40F',
+              seriesLayoutBy: 'row',
+              name: 'waiting',
+              type: 'line',
+              lineStyle: {
+                width: 3,
+              },
+              showSymbol: false,
+            },
+            {
+              color: '#727687',
+              seriesLayoutBy: 'row',
+              name: 'idle',
+              type: 'line',
+              lineStyle: {
+                width: 3,
+              },
+              showSymbol: false,
+            },
+            {
+              color: '#a3a6b5',
+              seriesLayoutBy: 'row',
+              name: 'total',
+              type: 'line',
+              lineStyle: {
+                width: 3,
+              },
+              showSymbol: false,
+            },
+          ],
+        };
+        tarChart.setOption(option);
+      }
+    }
+  }
+
+  //esChart
+  procEsChart(node) {
+    // esChart
+    const esChartItem = this.esChart.find(
+      (c) => c.nodeName === 'esChart_' + node.nodeName
+    );
+    if (esChartItem && esChartItem.nodeEle) {
+      //更新
+      esChartItem.nodeEle.setOption(
+        {
+          dataset: {
+            source: node.esSeries, // ⚠️ 確保這裡資料格式正確
+          },
+        },
+        {
+          notMerge: false,
+          replaceMerge: ['dataset'], // 只替換 dataset，不重建整個 option
+        }
+      );
+    }
+    //建立
+    else {
+      setTimeout(() => {
+        // esChart
+        const targetEle = document.getElementById('esChart_' + node.nodeName);
+        if (targetEle) {
+          let tarChart = echarts.init(targetEle);
+          this.esChart.push({
+            nodeName: 'esChart_' + node.nodeName,
+            nodeEle: tarChart,
+          });
+
+          let option = {
+            zoom: 1,
+            tooltip: {
+              trigger: 'axis',
+              // formatter: (params) => {
+              //   return `
+              //         ${params[0].name} <br />
+              //         ${params[0].marker} ${params[0].seriesName}:   ${params[0].value.value1} <br />
+              //         ${params[1].marker} ${params[1].seriesName}:   ${params[0].value.value2} <br />
+              //         ${params[2].marker} ${params[2].seriesName}:   ${params[1].value.value3}
+              //         `;
+              // },
+            },
+            legend: {
+              data: ['Current', 'Discarded'],
+            },
+            grid: {
+              left: '3%',
+              right: '3%',
+              bottom: '3%',
+              containLabel: true,
+            },
+            dataset: {
+              source: node.esSeries,
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              axisLabel: {
+                fontSize: 8,
+              },
+            },
+            yAxis: {
+              // type: 'value',
+            },
+
+            series: [
+              {
+                color: '#4CC9F0',
+                seriesLayoutBy: 'row',
+                name: 'Current',
+                type: 'line',
+                data: node.esSeries.current,
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+              {
+                color: '#ff5714',
+                seriesLayoutBy: 'row',
+                name: 'Discarded',
+                data: node.esSeries.discarded,
+                type: 'line',
+                lineStyle: {
+                  width: 3,
+                },
+                showSymbol: false,
+              },
+            ],
+          };
+          tarChart.setOption(option);
+        }
+      }, 0);
+    }
+  }
+
+  /**
+   * 解析特定格式的字串 "v1(v2)(v3)"
+   * @param inputString - 要解析的輸入字串，例如 "0(-1)(1)"
+   * @returns - 回傳一個包含三個值的物件，如果格式不符則回傳 null
+   */
+  parseQueneEsString(inputString?: string): esPoint {
+    if (!inputString) {
+      return {
+        current: '',
+        discarded: '',
+      };
+    }
+
+    // 正規表示式：
+    // ^                  - 字串的開頭
+    // ([-\d.]+)          - 捕獲群組 1 (v1/current): 匹配一個或多個數字、負號或小數點
+    // \s*                - 匹配零個或多個空格 (space, tab, etc.)
+    // \(                 - 匹配一個字面上的左括號 "("
+    // ([-\d.]+)          - 捕獲群組 2 (v2/discarded): 匹配括號內的內容
+    // \)                 - 匹配一個字面上的右括號 ")"
+    // $                  - 字串的結尾
+
+    // 修正：正規表達式只匹配 v1(v2)
+    const regex = /^([-\d.]+)\s*\(([-\d.]+)\)$/;
+    const match = inputString.match(regex);
+
+    // 如果沒有匹配成功，match 會是 null
+    if (!match) {
+      return {
+        current: '',
+        discarded: '',
+      };
+    }
+
+    // match 陣列的結構如下：
+    // match[0] 是整個匹配到的字串，例如 "0 (-1)(1)"
+    // match[1] 是第一個捕獲群組的內容，例如 "0"
+    // match[2] 是第二個捕獲群組的內容，例如 "-1"
+    const result: esPoint = {
+      current: match[1],
+      discarded: match[2],
+    };
+
+    return result;
+  }
 
   numberComma(tar?: string) {
-    // console.log(tar)
-
     return tar ? this.toolService.numberComma(tar) : tar;
   }
 
@@ -1046,27 +1593,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // ngAfterViewChecked() {
-  //   setTimeout(() => {
-  //     const firstAllNodeCard = this.allNodeCards.find(el =>
-  //       el.nativeElement.classList.contains('all-node')
-  //     );
-  //     if (firstAllNodeCard) {
-  //       this.cardHeight = `${firstAllNodeCard.nativeElement.offsetHeight}px`;
-  //     }
-  //   });
-  // }
-
-  // setFlag(item,flagName:string){
-
-  //   if(item[flagName]== undefined)
-  //   {
-  //     item[flagName] = true;
-  //   }
-  //   else item[flagName] = !item[flagName];;
-
-  // }
-
   copyToClipboard(text: string): void {
     if (navigator.clipboard) {
       navigator.clipboard
@@ -1092,7 +1618,37 @@ export class DashboardComponent implements OnInit {
   }
 
   // api異常報表
-  navigateReport(){
+  navigateReport() {
     this.router.navigate(['/ac05/ac0503']);
+  }
+
+  navigateSetting() {
+    const options: NavigationExtras = {
+      queryParams: {
+        keyword: 'DGRKEEPER',
+      },
+    };
+    this.router.navigate(['/lb00/lb0001'], options);
+  }
+
+  getKeeperIP() {
+    this.serverService.queryTsmpSettingDetail({id:'DGRKEEPER_IP'}).subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+        this.keeperIP = res.RespBody.value;
+      }
+    });
+  }
+
+  getKeeperPort() {
+    this.serverService.queryTsmpSettingDetail({id:'DGRKEEPER_PORT'}).subscribe((res) => {
+      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.keeperPort = res.RespBody.value;
+      }
+    });
+  }
+
+  getKeeperInfo(){
+    this.getKeeperIP();
+    this.getKeeperPort();
   }
 }

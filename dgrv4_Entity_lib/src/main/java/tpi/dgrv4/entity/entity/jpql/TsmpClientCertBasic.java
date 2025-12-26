@@ -13,16 +13,16 @@ import tpi.dgrv4.common.utils.DateTimeUtil;
 public class TsmpClientCertBasic{
 	
 	@Column(name = "client_id")
-	private String clientId;
+	protected String clientId;
 
 	@Column(name = "cert_file_name")
-	private String certFileName;
+	protected String certFileName;
 
 	@Column(name = "file_content")
 	private byte[] fileContent;
 
 	@Column(name = "pub_Key")
-	private String pubKey;
+	protected String pubKey;
 
 	@Column(name = "cert_version")
 	private String certVersion;

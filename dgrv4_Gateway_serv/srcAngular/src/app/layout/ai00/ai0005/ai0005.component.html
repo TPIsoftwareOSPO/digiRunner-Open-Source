@@ -13,13 +13,13 @@
         <tr>
           <th>Consumer Type</th>
           <th style="width:20%;">Consumer ID</th>
-          <th>Template Name</th>
+          <th>{{'ai.template_name'|translate}}</th>
           <th style="width:120px;">{{'action'|translate}}</th>
         </tr>
       </ng-template>
        <ng-template pTemplate="body" let-rowData let-columns="columns">
         <tr>
-          
+
           <td>{{ rowData.aiApikeyConsumerType}}</td>
           <td>{{ rowData.aiApikeyConsumerId}}</td>
           <td>{{ rowData.dgrAiPromptTemplate?.aiPromptTemplateName}}</td>
@@ -51,7 +51,7 @@
     </p-table>
   </div>
   <div [hidden]="pageNum != 2">
-    <form [formGroup]="formE">      
+    <form [formGroup]="formE">
       <div class="form-group row">
         <div class="col-4">
           <label for="aiApiKeyConsumerId" class="control-label required">Consumer ID</label>
@@ -77,9 +77,9 @@
           </div>
         </div>
       </div>
-      <div class="form-group row">        
+      <div class="form-group row">
         <div class="col-4">
-          <label for="aiPromptTemplateId" class="required control-label">Template Name</label>
+          <label for="aiPromptTemplateId" class="required control-label">{{'ai.template_name'|translate}}</label>
           <p-dropdown [options]="aIPromptTemplateData" placeholder="{{'plz_chs' | translate}}"
             formControlName="aiPromptTemplateId" [style]="{'width':'100%'}">
           </p-dropdown>

@@ -8,7 +8,7 @@
                     <input type="text" class="form-control" id="groupkeyword" formControlName="groupkeyword"
                         placeholder="{{'virtul_group_name'|translate}}、{{'virtul_group_alias'|translate}}">
                 </div>
-                <div class="col-3 col-xl-3 col-lg-3">
+                <!-- <div class="col-3 col-xl-3 col-lg-3">
                     <label for="groupAuthoritiesID">{{'authorities'|translate}}</label>
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="groupAuthoritiesID"
@@ -16,7 +16,7 @@
                         <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
                             (click)="queryAuthoritiesList();"></button>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-3 col-xl-3 col-lg-3">
                     <label for="securityLevelID">{{'security_level'|translate}}</label>
                     <div style="display:block">
@@ -234,7 +234,7 @@
                     <label class="form-control border-line">{{form_page3.value.groupAccess}}</label>
                 </div> -->
                 <div class="col-sm-6">
-                    <label>{{'authorities'|translate}}</label>
+                    <label>{{'authorities'|translate}}(v3)</label>
                     <label class="form-control border-line">{{form_page3.value.groupAuthoritiesName}}</label>
                 </div>
                 <div class="col-sm-6">
@@ -393,7 +393,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-6">
+                <!-- <div class="col-6">
                     <label for="groupAuthorities" class="control-label">{{'authorities'|translate}}</label>
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="groupAuthoritiesName"
@@ -401,7 +401,7 @@
                         <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
                             (click)="queryAuthoritiesList_page4();"></button>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-6">
                     <label id="securityLevelName_page4_label" for="securityLevel"
                         class="control-label">{{'security_level'|translate}}</label>
@@ -855,7 +855,7 @@
                     <label class="form-control border-line">{{form_page8.value.groupAccess}}</label>
                 </div> -->
                 <div class="col-sm-6">
-                    <label>{{'authorities'|translate}}</label>
+                    <label>{{'authorities'|translate}}(v3)</label>
                     <label class="form-control border-line" readonly>{{form_page8.value.groupAuthoritiesName}}</label>
                 </div>
                 <div class="col-sm-6">
@@ -993,7 +993,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-6">
+                <!-- <div class="col-6">
                     <label for="groupAuthorities" class="control-label">{{'authorities'|translate}}</label>
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="groupAuthoritiesName"
@@ -1001,7 +1001,7 @@
                         <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
                             (click)="queryAuthoritiesList_page9();"></button>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-6">
                     <label id="securityLevelName_label" for="securityLevel"
                         class="control-label">{{'security_level'|translate}}</label>
@@ -1084,7 +1084,7 @@
 
             <div class="form-group row mt-2">
                 <div class="col-12 col-lg-12">
-                    <button type="submit" class="btn tpi-btn tpi-primary float-start me-3" [disabled]="form_page9.invalid">{{'button.create'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-second float-start me-3" [disabled]="form_page9.invalid">{{'button.create'|translate}}</button>
                     <button type="button" class="btn tpi-btn tpi-primary float-start"
                         (click)="return_to_list();">{{'button.return_to_list'|translate}}</button>
                 </div>

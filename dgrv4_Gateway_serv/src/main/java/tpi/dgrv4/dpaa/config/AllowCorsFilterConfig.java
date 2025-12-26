@@ -2,6 +2,12 @@ package tpi.dgrv4.dpaa.config;
 
 import java.io.IOException;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.StringUtils;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -10,13 +16,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.StringUtils;
-
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 @Configuration
@@ -101,11 +100,12 @@ public class AllowCorsFilterConfig implements Filter {
 
 		httpServletResponse.setHeader("X-Frame-Options", "sameorigin");
 		httpServletResponse.setHeader("X-Content-Type-Options", "nosniff");
-		//checkmarx, Missing HSTS Header,從preload; includeSubDomains改為includeSubDomains; preload, 已通過中風險
-		httpServletResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
 		httpServletResponse.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 		httpServletResponse.setHeader("Cache-Control", "no-cache");
 		httpServletResponse.setHeader("Pragma", "no-cache");
+		
+		//checkmarx, Missing HSTS Header,從preload; includeSubDomains改為includeSubDomains; preload, 已通過中風險
+		httpServletResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 	}
 
 	@Override

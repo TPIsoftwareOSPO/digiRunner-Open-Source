@@ -2,6 +2,7 @@ package tpi.dgrv4.gateway.keeper;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -81,7 +82,7 @@ import tpi.dgrv4.gateway.service.CommForwardProcService;
 import tpi.dgrv4.gateway.service.DPB0059Service;
 import tpi.dgrv4.gateway.service.DgrApiLog2ESQueue;
 import tpi.dgrv4.gateway.service.DgrApiLog2RdbQueue;
-import tpi.dgrv4.gateway.service.IUndertowMetricsService;
+import tpi.dgrv4.gateway.service.ITomcatMetricsService;
 import tpi.dgrv4.gateway.service.InMemoryGtwRefresh2LandingService;
 import tpi.dgrv4.gateway.service.MonitorHostService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
@@ -244,8 +245,8 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	private static long threadCreateTiem;
 	public static boolean dbConnByApi;
 	
-	@Value(value = "${tomcat.Graceful}")
-	private Boolean tomcatGraceful;
+//	@Value(value = "${tomcat.Graceful}")
+//	private Boolean tomcatGraceful;
 	
 	@Value("${check.sensitive.info.enable:false}")
 	public boolean sensitiveEnable;
@@ -257,7 +258,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	
 	
 //	@Autowired(required = false)
-	private IUndertowMetricsService undertowMetricsService;
+	private ITomcatMetricsService undertowMetricsService;
 //	@Autowired(required = false)
 	private LicenseUtilBase licenseUtilBase;
 	
@@ -285,7 +286,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 	private ServerConfigProperties serverConfigProperties;
 	
 	@Autowired
-	public void setTPILogger(@Nullable IUndertowMetricsService undertowMetricsService,
+	public void setTPILogger(@Nullable ITomcatMetricsService undertowMetricsService,
 			@Nullable LicenseUtilBase licenseUtilBase, CommunicationServerConfig communicationServerConfig,
 			TsmpSettingService tsmpSettingService, DgrDashboardEsLogDao dgrDashboardEsLogDao,
 			RealtimeDashboardService realtimeDashboardService, DPB0059Service dPB0059Service, JobHelper jobHelper,
@@ -321,15 +322,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		this.serverConfigProperties = serverConfigProperties;
 	}
 
-
-	@Value(value = "${httpClient.connection.timeout:0}")
-	private int connectTimeout;
-	@Value(value = "${http2.client.poolsize:0}")
-	private int poolsize;
-	@Value(value = "${mtls.certificate.verification.enabled:false}")
-	private Boolean mtlsVerifyEnabled;
-	@Value(value = "${http2.client.max.stream:0}")
-	private int maxStream;
 	static {
 		tl = new TPILogger();
 		ITPILogger.tl = tl;
@@ -350,18 +342,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		cusIpPortForBroadcast = cusIpPort;
 		cusSchemeForBroadcast = cusScheme;
 		PORT = serverConfigProperties.getPort();
-	}
-
-	private void setHttpUtil2TimeoutAndClientPoolAndMaxStream(int connectTimeout, int poolsize, int maxStream)  {
-			if (connectTimeout > 0 ) {
-				HttpUtil2.setThreadPoolAndTimeout(connectTimeout);
-			}
-			if (poolsize > 0) {
-				HttpUtil2.setClientPoolSize(poolsize);
-			}
-		if (maxStream > 0) {
-			HttpUtil2.setMaxStreame(maxStream);
-		}
 	}
 
 	public static void initLoggerLevel(String loggerLevel) {
@@ -783,9 +763,9 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		// Memory Role 不啟動
 		callAwsRegisterUsage();
 		
-		if (tomcatGraceful) {
-			startTomcat();
-		}
+//		if (tomcatGraceful) {
+//			startTomcat();
+//		}
 		
 		// In-Memory, 系統啟動時,初始化 Landing 的最後更新時間為現在時間, 以使 GTW(In-Memory) 做同步
 		initialLandingUpdateTime();
@@ -809,8 +789,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		}
 
 		updateESLogFlag();
-		setHttpUtil2TimeoutAndClientPoolAndMaxStream(connectTimeout, poolsize, maxStream);
-		HttpUtil2.setValidityCheck(mtlsVerifyEnabled);
 		initHttpUtil();
 	}
 	
@@ -971,113 +949,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		TPILogger.updateTime4InMemory(DgrDataType.CLIENT.value(), nowTime);
 		TPILogger.updateTime4InMemory(DgrDataType.SETTING.value(), nowTime);
 		TPILogger.updateTime4InMemory(DgrDataType.TOKEN.value(), nowTime);
-	}
-
-	private static Tomcat tomcat;
-
-	private void startTomcat() {
-
-		if (TPILogger.isFirstConnection == false) {
-			// 非首次連線
-			TPILogger.tl.info("\n...startTomcat()=" + Thread.currentThread().getName() + "...No re-start...");
-			return; //防止 keeper re-connection 產生新的 Thread
-		}
-
-		new Thread(() -> {
-			tomcat = new Tomcat();
-			tomcat.setPort(8081);
-
-			// HTTPS
-			Connector httpsConnector = createSslConnector();
-			tomcat.getService().addConnector(httpsConnector);
-
-			// 創建 Context
-			Context ctx = tomcat.addContext("", null);
-
-			// proxy
-			Tomcat.addServlet(ctx, "proxyServlet", new ProxyServlet());
-			ctx.addServletMappingDecoded("/", "proxyServlet");
-
-			// 啟動 Tomcat
-			try {
-				tomcat.start();
-			} catch (Exception e) {
-				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-				return;
-			}
-			System.out.printf("Tomcat started on ports  %s (HTTPS)\r\n", httpsConnector.getPort());
-
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				try {
-					stopTomcatGracefully();
-				} catch (Exception e) {
-					TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-				}
-			}));
-
-			tomcat.getServer().await();
-		}).start();
-
-	}
-
-	private static void stopTomcatGracefully() throws Exception {
-		if (tomcat != null) {
-			System.out.println("Stopping Tomcat gracefully...");
-
-			// 禁止新請求
-			for (Service service : tomcat.getServer().findServices()) {
-				for (Connector connector : service.findConnectors()) {
-					connector.pause();
-					connector.getProtocolHandler().closeServerSocketGraceful();
-				}
-			}
-			
-			awaitTomcatStop();
-			
-			System.out.println("Tomcat stopped.");
-		}
-	}
-
-	private static void awaitTomcatStop() throws InterruptedException {
-		try (ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
-		    Thread thread = new Thread(r);
-		    thread.setName("graceful-shutdown-Thread");
-		    return thread;
-		})) {
-			// 執行 executor 內容
-		    executor.submit(() -> {
-		        tomcat.getServer().await();
-		    });
-
-		    executor.shutdown();
-		    if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-		        executor.shutdownNow();
-		    }
-		    //當 try 區塊結束時，ExecutorService 會自動被關閉(自動執行shutdown)，即使發生異常也能確保資源被釋放
-		}
-	}
-
-	private Connector createSslConnector() {
-		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-		connector.setScheme("https");
-		connector.setSecure(true);
-		int sslport = PORT + 10;
-		connector.setPort(sslport);
-
-		Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
-		protocol.setSSLEnabled(serverConfigProperties.getSsl().isEnabled());
-		SSLHostConfig sslconfig = new SSLHostConfig();
-		SSLHostConfigCertificate shc = new SSLHostConfigCertificate(sslconfig, SSLHostConfigCertificate.Type.RSA);
-
-		String filepath = "../" + serverConfigProperties.getSsl().getKeyStore();
-		shc.setCertificateKeystoreFile(filepath);
-		shc.setCertificateKeystorePassword(serverConfigProperties.getSsl().getKeyStorePassword());
-		shc.setCertificateKeystoreType(serverConfigProperties.getSsl().getKeyStoreType());
-		shc.setCertificateKeyAlias(serverConfigProperties.getSsl().getKeyAlias());
-		sslconfig.addCertificate(shc);
-
-		connector.addSslHostConfig(sslconfig);
-		return connector;
 	}
 
 	private void callAwsRegisterUsage() {
@@ -1427,7 +1298,13 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		// 獲取目前秒數，因為有可能在GatewayFilter設定Api Req
 		// Throughput的秒數為28，在TPILogger取出的秒數是27會有秒差問題，
 		// 所以TPILogger取出秒數要減2秒。
-		getTps(nodeInfoPacket);
+//		getTps(nodeInfoPacket);
+		long currentSeconds = Instant.now().getEpochSecond() - 2;
+		var reqTps =  GatewayFilter.getReqTps(currentSeconds);
+		var respTps = GatewayFilter.getRespTps(currentSeconds);
+
+		nodeInfoPacket.api_ReqThroughputSize = String.valueOf(reqTps);
+		nodeInfoPacket.api_RespThroughputSize = String.valueOf(respTps);
 
 		nodeInfoPacket.main = main + "";
 		nodeInfoPacket.deferrable = deferrable + "";
@@ -1447,7 +1324,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 		nodeInfoPacket.fixedCacheSize = CommForwardProcService.fixedCacheMap.size() + "";
 		nodeInfoPacket.webLocalIP = lc.getLocalIpAdress();
 		nodeInfoPacket.fqdn = lc.getLocalIpFQDN();
-		nodeInfoPacket.ES_Queue = DgrApiLog2ESQueue.ES_LoggerQueue.size() + " (-" + DgrApiLog2ESQueue.abortNum + ")(-"+ ESLogBuffer.abortNum + ")";
+		nodeInfoPacket.ES_Queue = DgrApiLog2ESQueue.ES_LoggerQueue.size() + " (-" + DgrApiLog2ESQueue.abortNum.get() + ")";
 		nodeInfoPacket.RDB_Queue = DgrApiLog2RdbQueue.rdb_LoggerQueue.size() + " (-"+ DgrApiLog2RdbQueue.abortNum +")";
 
 		nodeInfoPacket.lastUpdateTimeAPI = String.valueOf(lastUpdateTimeAPI.get());
@@ -1471,24 +1348,16 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 //		lc.send(nodeInfoPacket);
 	}
 	
-	private void getTps(NodeInfoPacket nodeInfoPacket) {
-		
-		long currentTimeMillis = System.currentTimeMillis();
-		int currentSeconds = ((int) (currentTimeMillis / 1000)) - 2;
-
-		synchronized (GatewayFilter.throughputObjLock) {
-			// 重置API發吞吐量
-			nodeInfoPacket.api_ReqThroughputSize = 0 + "";
-			nodeInfoPacket.api_RespThroughputSize = 0 + "";
-			// 取得API發吞吐量
-			if (GatewayFilter.apiReqThroughput.containsKey(currentSeconds)) {
-				nodeInfoPacket.api_ReqThroughputSize = GatewayFilter.apiReqThroughput.get(currentSeconds) + "";
-			}
-			if (GatewayFilter.apiRespThroughput.containsKey(currentSeconds)) {
-				nodeInfoPacket.api_RespThroughputSize = GatewayFilter.apiRespThroughput.get(currentSeconds) + "";
-			}
-		}
-	}
+//	private void getTps(NodeInfoPacket nodeInfoPacket) {
+//
+//		long currentSeconds = Instant.now().getEpochSecond() - 2;
+//
+//		var reqTps =  GatewayFilter.getReqTps(currentSeconds);
+//		var respTps = GatewayFilter.getRespTps(currentSeconds);
+//
+//		nodeInfoPacket.api_ReqThroughputSize = String.valueOf(reqTps);
+//		nodeInfoPacket.api_RespThroughputSize = String.valueOf(respTps);
+//	}
 	
 	public String getReqTps() {
 		return nodeInfoPacket.api_ReqThroughputSize;

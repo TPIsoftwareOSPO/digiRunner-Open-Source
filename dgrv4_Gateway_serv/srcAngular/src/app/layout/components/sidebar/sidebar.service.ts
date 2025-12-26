@@ -214,7 +214,7 @@ export class SidebarService {
                 })
             }
 
-            //若為ac05的話 須納入ac0702(該節點沒父節點)
+            //若為ac05的話 須納入ac0702 ac0706 (該節點沒父節點)
             if (main.main == "AC05" && adjMenu) {
                 subs = tFuncDetail.filter(f => f.funcCode.includes(main.main) && f.funcCode != main.main || f.funcCode == "AC0701" || f.funcCode == "AC0702" || f.funcCode == "AC0703" || f.funcCode == "AC0704" || f.funcCode == "AC0705"|| f.funcCode == "AC0706").map(f => {
                     return {

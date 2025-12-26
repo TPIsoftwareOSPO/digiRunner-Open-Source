@@ -1075,6 +1075,10 @@ INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_d
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000047, 'body.oak-expi2.TD', 'border: 1px solid lightgray; font-family: Microsoft JhengHei, Arial, sans-serif; padding: 0.3em', '', current_timestamp, 'SYSTEM', 1);
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000048, 'subject.cert-exp', '憑證到期通知', 'NoticeExpCertJob', current_timestamp, 'SYSTEM', 1);
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000049, 'body.cert-exp', '<p style="font-family: Microsoft JhengHei, Arial, sans-serif;">親愛的&nbsp;digiRunner&nbsp;用戶您好：</p><p style="font-family: Microsoft JhengHei, Arial, sans-serif; padding-left: 2em">提醒您，<i>{{clientId}}</i>&nbsp;之&nbsp;{{certType}}&nbsp;憑證&nbsp;-&nbsp;<i>{{certFileName}}</i>&nbsp;將於&nbsp;<i><b style="color: red">{{expiredDate}}</b></i>&nbsp;到期。</p>', 'NoticeExpCertJob', current_timestamp, 'SYSTEM', 1);
+INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (20000028, 'subject.otp', '【digiRunner】驗證碼通知', 'ForgetMima,AA0550', current_timestamp, 'SYSTEM', 1);
+INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (20000029, 'body.otp', '<p>digiRunner&nbsp;用戶您好:</p><p>您的驗證碼是<b><font color=#ff0000>{{code}}</font></b></p> <p>請在<b><font color=#ff0000>{{minutes}}</font></b>分鐘內完成此流程。</p>', 'ForgetMima,AA0550', current_timestamp, 'SYSTEM', 1);
+INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (20000030, 'subject.changeMima', '【digiRunner】密碼修改成功通知', 'ForgetMima,AA0550', current_timestamp, 'SYSTEM', 1);
+INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (20000031, 'body.changeMima', '<p>{{tUser}}您好,</p><p>您的密碼在{{date}}變更成功。<br/>如果您沒有更改密碼，請通知系統管理員。</p>', 'ForgetMima,AA0550', current_timestamp, 'SYSTEM', 1);
 UPDATE tsmp_dp_mail_tplt SET keyword_search = code || '|' || template_txt || '|' || remark WHERE code IS NOT NULL;
 
 INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1101', 'en-US', 'No application instance classification', '');
@@ -2317,4 +2321,19 @@ INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME
 -- 20240812, 排程作業增加排程訊息 FAILED , Webber Luo
 INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME, SORT_BY, IS_DEFAULT, PARAM1, PARAM2, PARAM3, PARAM4, PARAM5, LOCALE) VALUES (313, 'SCHED_MSG', '排程訊息', 'FAILED', '失敗', 526, NULL, NULL, NULL, NULL, NULL, NULL, 'zh-TW');
 INSERT INTO TSMP_DP_ITEMS (ITEM_ID, ITEM_NO, ITEM_NAME, SUBITEM_NO, SUBITEM_NAME, SORT_BY, LOCALE, IS_DEFAULT, PARAM1, PARAM2, PARAM3, PARAM4, PARAM5) VALUES (313, 'SCHED_MSG', 'Scheduling message', 'FAILED', 'failed', 526, 'en-US', NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- 20250826, 忘記密碼訊息, Tom
+INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1567', 'zh-TW', '{{0}}驗證失敗', '');
+INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1567', 'en-US', '{{0}} verification failed', '');
+INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1568', 'zh-TW', '超過驗證有效時間{{0}}分鐘', '');
+INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1568', 'en-US', 'Verification validity period has exceeded {{0}} minutes', '');
+INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1569', 'zh-TW', '已達錯誤{{0}}次上限，請重新發送', '');
+INSERT INTO TSMP_RTN_CODE (TSMP_RTN_CODE, LOCALE, TSMP_RTN_MSG, TSMP_RTN_DESC) VALUES ('1569', 'en-US', 'The error limit of {{0}} has been reached. Please try again', '');
+
+-- 20250916, mima strength, Tom
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('PWD_STRENGTH', '^.{6,}$', 'Regular Expression for Password Strength');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('PWD_STRENGTH_DESC', 'The password must be at least 6 digits', 'Password strength description');
+-- 20251002, client mima strength, Tom
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_PWD_STRENGTH', '^.{6,}$', 'Regular Expression for Client Password Strength');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_PWD_STRENGTH_DESC', 'The password must be at least 6 digits', 'Client password strength description');
 

@@ -1,32 +1,18 @@
 package tpi.dgrv4.gateway.service;
 
-import java.io.*;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import oshi.util.tuples.Pair;
 import tpi.dgrv4.codec.utils.HexStringUtils;
 import tpi.dgrv4.codec.utils.SHA256Util;
@@ -35,6 +21,7 @@ import tpi.dgrv4.dpaa.component.DgrProtocol;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
 import tpi.dgrv4.entity.entity.TsmpApiRegId;
 import tpi.dgrv4.gateway.component.DgrcRoutingHelper;
+import tpi.dgrv4.gateway.component.ResponseHandler;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
 import tpi.dgrv4.gateway.component.cache.proxy.ProxyMethodServiceCacheProxy;
 import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiRegCacheProxy;
@@ -49,57 +36,39 @@ import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 import tpi.dgrv4.httpu.utils.HttpUtil2;
 
+import java.io.*;
+import java.util.*;
+
 @Service
 public class DGRCServicePostRaw implements IApiCacheService {
 
+	@Setter(onMethod_ = @Autowired)
 	private CommForwardProcService commForwardProcService;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private ObjectMapper objectMapper;
+	@Setter(onMethod_ = @Autowired)
 	private ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy;
+	@Setter(onMethod_ = @Autowired)
 	private TsmpSettingService tsmpSettingService;
+	@Setter(onMethod_ = @Autowired)
 	private MockApiTestService mockApiTestService;
+	@Setter(onMethod_ = @Autowired)
 	private DgrcRoutingHelper dgrcRoutingHelper;
+	@Setter(onMethod_ = @Autowired)
+	ResponseHandler responseHandler;
 
 	public Map<String, String> maskInfo;
 	private static final String IS_SSE = "isSse";
-
+    private  boolean isSse = false;
 	@Value("${server.ssl.enabled:false}")
 	private boolean sslEnabled;
 
 	@Value("${server.port:8080}")
 	private int serverPort;
-
-	@Autowired
-	public DGRCServicePostRaw(CommForwardProcService commForwardProcService, TsmpApiRegCacheProxy tsmpApiRegCacheProxy,
-			ObjectMapper objectMapper, ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy,
-			TsmpSettingService tsmpSettingService, MockApiTestService mockApiTestService,
-			DgrcRoutingHelper dgrcRoutingHelper) {
-		super();
-		this.commForwardProcService = commForwardProcService;
-		this.tsmpApiRegCacheProxy = tsmpApiRegCacheProxy;
-		this.objectMapper = objectMapper;
-		this.proxyMethodServiceCacheProxy = proxyMethodServiceCacheProxy;
-		this.tsmpSettingService = tsmpSettingService;
-		this.mockApiTestService = mockApiTestService;
-		this.dgrcRoutingHelper = dgrcRoutingHelper;
-	}
-
-	@Async("async-workers-highway")
-	public CompletableFuture<ResponseEntity<?>> forwardToPostRawDataAsyncFast(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes,
-																			  String payload) throws Exception {
-		var response = forwardToPostRawData(httpHeaders, httpReq, httpRes, payload);
-		return CompletableFuture.completedFuture(response);
-	}
-
-	@Async("async-workers")
-	public CompletableFuture<ResponseEntity<?>> forwardToPostRawDataAsync(HttpHeaders httpHeaders,
-			HttpServletRequest httpReq, HttpServletResponse httpRes,
-			String payload) throws Exception {
-		var response = forwardToPostRawData(httpHeaders, httpReq, httpRes, payload);
-		return CompletableFuture.completedFuture(response);
-	}
 	
-	public ResponseEntity<?> forwardToPostRawData(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes,
+	public void forwardToPostRawData(HttpHeaders httpHeaders, HttpServletRequest httpReq, HttpServletResponse httpRes,
 												  String payload) throws Exception {
 		try {
 
@@ -121,7 +90,11 @@ public class DGRCServicePostRaw implements IApiCacheService {
 				apiReg = opt_tsmpApiReg.get();
 				ResponseEntity<?> allowMethodErrRespEntity = getCommForwardProcService().checkMethod(apiReg, httpReq);
 				if (allowMethodErrRespEntity != null) {
-					return allowMethodErrRespEntity;
+					responseHandler
+							.response(httpRes)
+							.handle(allowMethodErrRespEntity)
+							.write();
+					return;
 				}
 				maskInfo = new HashMap<>();
 				maskInfo.put("bodyMaskPolicy", apiReg.getBodyMaskPolicy());
@@ -171,7 +144,12 @@ public class DGRCServicePostRaw implements IApiCacheService {
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, dgrcPostRawDgrReqVo, respMbody);
 				getCommForwardProcService().addRdbTsmpApiLogResp1(errRespEntity, dgrcPostRawDgrReqVo_rdb, respMbody);
-				return errRespEntity;
+				responseHandler
+						.response(httpRes)
+						.handle(errRespEntity)
+						.write();
+
+				return;
 			}
 
 			// 轉換 Request Body 格式
@@ -185,7 +163,11 @@ public class DGRCServicePostRaw implements IApiCacheService {
 				String respMbody = getObjectMapper().writeValueAsString(errRespEntity.getBody());
 				getCommForwardProcService().addEsTsmpApiLogResp1(errRespEntity, dgrcPostRawDgrReqVo, respMbody);
 				getCommForwardProcService().addRdbTsmpApiLogResp1(errRespEntity, dgrcPostRawDgrReqVo_rdb, respMbody);
-				return errRespEntity;
+				responseHandler
+						.response(httpRes)
+						.handle(errRespEntity)
+						.write();
+				return;
 			}
 
 			payload = jwtPayloadData.payloadStr;
@@ -202,7 +184,11 @@ public class DGRCServicePostRaw implements IApiCacheService {
 				getCommForwardProcService().addEsTsmpApiLogResp1(srcUrlListErrResp, dgrcPostRawDgrReqVo, respMbody);
 				getCommForwardProcService().addRdbTsmpApiLogResp1(srcUrlListErrResp, dgrcPostRawDgrReqVo_rdb,
 						respMbody);
-				return srcUrlListErrResp;
+				responseHandler
+						.response(httpRes)
+						.handle(srcUrlListErrResp)
+						.write();
+				return;
 			}
 
 			int tokenPayload = apiReg.getFunFlag();
@@ -213,59 +199,48 @@ public class DGRCServicePostRaw implements IApiCacheService {
 				// Mock test 不做重試,只取第一個URL執行
 				String srcUrl = srcUrlList.get(0);
 				TPILogger.tl.debug("Src Url:" + srcUrl);
-				return mockForwardTo(httpReq, httpRes, httpHeaders, srcUrl, uuid, tokenPayload, dgrcPostRawDgrReqVo,
+                mockForwardTo(httpReq, httpRes, httpHeaders, srcUrl, uuid, tokenPayload, dgrcPostRawDgrReqVo,
 						dgrcPostRawDgrReqVo_rdb, cApiKeySwitch, apiReg);
+//				responseHandler
+//						.response(httpRes)
+//						.handle(mockResp)
+//						.write();
+                return ;
 			}
 
 			// 調用目標URL
 			Map<String, Object> convertResponseBodyMap = forwardToByPolicy(httpHeaders, httpReq, httpRes, apiReg, uuid,
 					tokenPayload, cApiKeySwitch, dgrcPostRawDgrReqVo, dgrcPostRawDgrReqVo_rdb, srcUrlList, payload, apiReg);
-			if (convertResponseBodyMap == null) {
-				// Response alread commited HTTP code : 503 --> null
-				// 不寫 ES , 不輸出 online console
-				return null;
-			}
 
-			byte[] httpArray = null;
-			String httpRespStr = null;
-			if (convertResponseBodyMap != null) {
-				httpArray = (byte[]) convertResponseBodyMap.get("httpArray");
-				httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");
-			}
+            if (!isSse) {
+                if (convertResponseBodyMap == null) {
+                    throw new RuntimeException("forwardToByPolicy return null");
+                }
 
-			int content_Length = 0;
-			if (httpArray != null) {
-				content_Length = httpArray.length;
-				// http InputStream copy into Array
-				try {
-					// 檢查非同步請求是否仍然有效
-					if (!httpRes.isCommitted()) {
-						IOUtils.copy(new ByteArrayInputStream(httpArray), httpRes.getOutputStream());
-					} else {
-						TPILogger.tl.warn("Response already committed or async completed");
-						return null;
-					}
-				} catch (AsyncRequestNotUsableException e) {
-					TPILogger.tl.warn(httpRes.getStatus() + ", " + StackTraceUtil.logStackTrace(e));
-					return null;
-				}
-			}
+                byte[] httpArray = (byte[]) convertResponseBodyMap.get("httpArray");
+                String httpRespStr = (String) convertResponseBodyMap.get("httpRespStr");
 
-			// 印出第四道log
-			StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo,
-					httpReq);
-			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" + resLog.toString());
+                int content_Length = 0;
+                if (httpArray != null) {
+                    content_Length = httpArray.length;
+                    responseHandler
+                            .response(httpRes)
+                            .handle(httpArray)
+                            .write();
+                }
 
-			// 第一組ES RESP
-			getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, dgrcPostRawDgrReqVo, httpRespStr, content_Length);
-			// 第一組RDB RESP
-			getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, dgrcPostRawDgrReqVo_rdb, httpRespStr,
-					content_Length);
+                // 印出第四道log
+                StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, content_Length, maskInfo,
+                        httpReq);
+                TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End DGRC】--\n" + resLog.toString());
 
-			return null;
-		} catch (AsyncRequestNotUsableException e) {
-			return null; // 不再拋出例外，避免影響其他請求
-		} catch (Exception e) {
+                // 第一組ES RESP
+                getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, dgrcPostRawDgrReqVo, httpRespStr, content_Length);
+                // 第一組RDB RESP
+                getCommForwardProcService().addRdbTsmpApiLogResp1(httpRes, dgrcPostRawDgrReqVo_rdb, httpRespStr,
+                        content_Length);
+            }
+		} catch (Throwable e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw e;
 		}
@@ -466,9 +441,14 @@ public class DGRCServicePostRaw implements IApiCacheService {
 			httpRes.setHeader("Content-Type", "text/event-stream");
 		}
 		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, payload,httpReq,httpRes.getOutputStream());
-		boolean isSse = header.keySet().stream()
-				.anyMatch(key -> key.equalsIgnoreCase(IS_SSE));
-		respObj.fetchByte(maskInfo, isSse); // because Enable inputStream
+
+        if (respObj.statusCode >= 400) {
+            isSse = false;
+        }
+        else
+            isSse = header.keySet().stream()
+                    .anyMatch(key -> key.equalsIgnoreCase(IS_SSE));
+        respObj.fetchByte(maskInfo, isSse); // because Enable inputStream
 		// 若respObj.respStr為null帶表有檔案則寫入檔案sha256
 		// if (!StringUtils.hasLength(respObj.respStr)){
 		// respObj.respStr = getRespFileLog(respObj);
@@ -478,7 +458,7 @@ public class DGRCServicePostRaw implements IApiCacheService {
 		
 		// Must call respObj.getLogStr() first
 		// Threshhold > 10,000 => print warn msg.
-		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid)).ifPresent(TPILogger.tl::warn);
+		Optional.ofNullable(respObj.loggerElapsedTimeMsg(uuid , srcUrl, respObj.respStr)).ifPresent(TPILogger.tl::warn);
 		httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
 		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 		

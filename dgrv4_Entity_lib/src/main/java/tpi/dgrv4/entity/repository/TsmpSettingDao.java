@@ -146,6 +146,10 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String AC_IDP_LDAP_REVIEW_ENABLE = "AC_IDP_LDAP_REVIEW_ENABLE";
 		public static final String AC_IDP_API_REVIEW_ENABLE = "AC_IDP_API_REVIEW_ENABLE";
 		public static final String AC_IDP_CUS_REVIEW_ENABLE = "AC_IDP_CUS_REVIEW_ENABLE";
+		public static final String AC_IDP_OAUTH2_REVIEW_ENABLE = "AC_IDP_OAUTH2_REVIEW_ENABLE";
+		public static final String AC_IDP_OAUTH2_USERNAME = "AC_IDP_OAUTH2_USERNAME";
+		public static final String AC_IDP_LOGIN_IGNORE_TYPE = "AC_IDP_LOGIN_IGNORE_TYPE";
+		public static final String AC_IDP_USERNAME_B64_ENCODE = "AC_IDP_USERNAME_B64_ENCODE";
 
 		// Gateway IdP
 		public static final String GTW_IDP_JWK1 = "GTW_IDP_JWK1";
@@ -284,7 +288,20 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String AUDIT_LOG_RETENTION_DAYS = "AUDIT_LOG_RETENTION_DAYS";
 
 		public  static final String KIBANA_REFERER_ALLOWLIST = "KIBANA_REFERER_ALLOWLIST";
-	}
+		
+		public  static final String FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED = "FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED";
+		
+		public  static final String PWD_STRENGTH = "PWD_STRENGTH";
+		public  static final String PWD_STRENGTH_DESC = "PWD_STRENGTH_DESC";
+		public  static final String CLIENT_PWD_STRENGTH = "CLIENT_PWD_STRENGTH";
+		public  static final String CLIENT_PWD_STRENGTH_DESC = "CLIENT_PWD_STRENGTH_DESC";
+
+        public static final String SHOW_ALL_PROPERTIES = "SHOW_ALL_PROPERTIES";
+
+        public static final String HTTPUTIL_RESP_TIME_LOG = "HTTPUTIL_RESP_TIME_LOG";
+
+        public static final String PROPERTIES_MASK_LIST = "PROPERTIES_MASK_LIST";
+    }
 
 	public List<TsmpSetting> findByIdLike(String id);
 

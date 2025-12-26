@@ -14,6 +14,7 @@ import com.nimbusds.jose.jwk.JWK;
 
 import tpi.dgrv4.codec.utils.JWKcodec;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
@@ -39,12 +40,16 @@ public class GtwIdPJwksService {
 		ResponseEntity<?> respEntity = null;
 		try {
 			String respJsonStr = getJwksJsonStr();
+			//checkmarx, Reflected XSS All Clients 
+			respJsonStr = ESAPI.encoder().encodeForHTML(respJsonStr);
 			return new ResponseEntity<Object>(respJsonStr, HttpStatus.OK);
 
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
+			//checkmarx, Reflected XSS All Clients 
+			reqUri = ESAPI.encoder().encodeForHTML(reqUri);
 			respEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
 			return respEntity;
 		}

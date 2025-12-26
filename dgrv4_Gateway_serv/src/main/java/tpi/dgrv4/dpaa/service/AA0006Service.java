@@ -45,11 +45,12 @@ public class AA0006Service {
 	private TsmpUserDao tsmpUserDao;
 	private UsersDao usersDao;
 	private TsmpRoleDao tsmpRoleDao;
+	private final TsmpSettingService tsmpSettingService;
 	
 	@Autowired
 	public AA0006Service(TsmpOrganizationDao tsmpOrganizationDao, DgrAuditLogService dgrAuditLogService,
 			AuthoritiesDao authoritiesDao, BcryptParamHelper bcryptParamHelper, TsmpUserDao tsmpUserDao,
-			UsersDao usersDao, TsmpRoleDao tsmpRoleDao) {
+			UsersDao usersDao, TsmpRoleDao tsmpRoleDao, TsmpSettingService tsmpSettingService) {
 		super();
 		this.tsmpOrganizationDao = tsmpOrganizationDao;
 		this.dgrAuditLogService = dgrAuditLogService;
@@ -58,6 +59,7 @@ public class AA0006Service {
 		this.tsmpUserDao = tsmpUserDao;
 		this.usersDao = usersDao;
 		this.tsmpRoleDao = tsmpRoleDao;
+		this.tsmpSettingService = tsmpSettingService;
 	}
 
 	@Transactional
@@ -175,6 +177,8 @@ public class AA0006Service {
 			if (userBlock.equals(newUserBlock)) 
 				throw TsmpDpAaRtnCode._1235.throwing(); // 1235:新密碼與原密碼相同
 			
+			
+			
 			// 檢查新密碼長度
 			// Check new password length
 			String decodePassword = base64Decode(req.getNewUserBlock());
@@ -250,6 +254,12 @@ public class AA0006Service {
 	 * @param userName
 	 */
 	private void checkPassword(String decodePassword) {
+		//Check password strength
+		//檢查密碼強度
+		if(!decodePassword.matches(this.getTsmpSettingService().getVal_PWD_STRENGTH())) {
+			throw TsmpDpAaRtnCode._1352.throwing("{{newUserBlock}}");
+		}
+		
 		String aa0006_msg = "";
 		if(decodePassword.length() > 128) {
 			int aa0006_length = decodePassword.length();
@@ -491,5 +501,11 @@ public class AA0006Service {
 	protected DgrAuditLogService getDgrAuditLogService() {
 		return dgrAuditLogService;
 	}
+
+	protected TsmpSettingService getTsmpSettingService() {
+		return tsmpSettingService;
+	}
+	
+	
 
 }

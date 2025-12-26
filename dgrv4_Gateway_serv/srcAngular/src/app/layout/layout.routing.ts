@@ -64,10 +64,12 @@ const routes: Routes = [
       { path: 'ac05/ac0508', loadChildren: () => import('./ac05/ac0508/ac0508.module').then(m => m.Ac0508Module), data: { id: 'ac0508' } },
       { path: 'ac05/ac0509', loadChildren: () => import('./ac05/ac0509/ac0509.module').then(m => m.Ac0509Module), data: { id: 'ac0509' } },
       { path: 'ac05/ac0510', loadChildren: () => import('./ac05/ac0510/ac0510.module').then(m => m.Ac0510Module), data: { id: 'ac0510' } },
+      { path: 'ac05/ac0511', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule), data: { id: 'ac0511' } },
       // { path: 'ac05/ac0521', loadChildren: () => import('./ac05/ac0521/ac0521.module').then(m => m.Ac0521Module), data: { id: 'ac0521' } },
 
       { path: 'ac07/ac0702', loadChildren: () => import('./ac07/ac0702/ac0702.module').then(m => m.Ac0702Module), data: { id: 'ac0702' } },
       { path: 'ac07/ac0706', loadChildren: () => import('./ac07/ac0706/ac0706.module').then(m => m.Ac0706Module), data: { id: 'ac0706' } },
+
 
       // { path: 'ac09/ac0901', loadChildren: () => import('./ac09/ac0901/ac0901.module').then(m => m.Ac0901Module), data: { id: 'ac0901' } },
       // { path: 'ac09/ac0902', loadChildren: () => import('./ac09/ac0902/ac0902.module').then(m => m.Ac0902Module), data: { id: 'ac0902' } },

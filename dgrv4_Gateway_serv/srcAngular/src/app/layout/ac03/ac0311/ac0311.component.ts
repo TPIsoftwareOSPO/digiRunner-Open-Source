@@ -436,7 +436,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           ['0', '1'].includes(next) &&
           prev != next
         ) {
-          this.clearCustomizePageData(false);
+          this.c_apiType.setValue('HTTP_API');
         }
       });
   }
@@ -1153,8 +1153,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let _moduleName = this.selectedApi!.moduleName;
     let _apiKey = this.selectedApi!.apiKey;
     let ReqBody = {
-      moduleName: _moduleName.t ? _moduleName.ori : _moduleName.val,
-      apiKey: _apiKey.t ? _apiKey.ori : _apiKey.val,
+      moduleName: _moduleName?.ori ? _moduleName.ori : _moduleName.val,
+      apiKey: _apiKey?.ori ? _apiKey.ori : _apiKey.val,
     } as AA0302Req;
     this.apiService.queryAPIDetail_v3(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
@@ -1553,8 +1553,6 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
   c_type_sub?: Subscription;
   clearCustomizePageData(resetAll: boolean = true) {
-    // console.log('clear customize')
-
     let tmpType = this.c_type.value;
 
     if (resetAll) this.customForm.reset(); //清除所有資料

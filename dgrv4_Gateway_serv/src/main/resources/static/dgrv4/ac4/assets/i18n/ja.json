@@ -188,7 +188,8 @@
     "searchByTags": "タグで検索",
     "refresh": "リフレッシュ",
     "label_reset": "ラベルをリセット",
-    "preview": "プレビュー"
+    "preview": "プレビュー",
+    "next": "次へ"
   },
   "calendar": {
     "day": "天",
@@ -1377,5 +1378,21 @@
   "org_reset": "組織設定",
   "recent_api_abnormal_each_node": "各ノードで直近に異常応答を返したAPIを観測します",
   "trustedCertsContent": "証書",
-  "cert": "証書"
+  "cert": "証書",
+  "changeMimaFirstLogin": "初回ログイン時のパスワード変更",
+  "forget_mima": "パスワードをお忘れですか",
+  "reset_mima": "パスワードの再設定",
+  "input_otp_code": "認証コードを入力",
+  "otp_valid_desc": "OTP認証コードを{{email}}に送信しました。\n届かない場合は、迷惑メールフォルダをご確認ください。",
+  "reset_account_select": "リセットするアカウントを選択してください",
+  "newMima": "新パスワード",
+  "newUserBlock": "新パスワード",
+  "clientBlock": "パスワード",
+  "expired_in_alert": {
+    "title": "まもなくログアウトされます",
+    "desc":"セキュリティ保護のため、まもなく自動的にログアウトされます：",
+    "cfm": "作業を続けますか？"
+  },
+  "keeper_address": "Keeper アドレス",
+  "change_keeper_address": "Keeper アドレスの変更"
 }

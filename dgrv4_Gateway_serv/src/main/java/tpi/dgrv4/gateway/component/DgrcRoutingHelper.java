@@ -63,62 +63,68 @@ public class DgrcRoutingHelper {
 				logger.error(StackTraceUtil.logStackTrace(e));
 			}
 		}
-		
-		String keyword = "dgrc";
-		int flag = reqUrl.indexOf(keyword);
-		String requestURI = reqUrl.substring(flag + keyword.length());
-
-		List<TsmpApi> tsmpApiAllList = getTsmpApiCacheProxy().queryAll_APIkeyAndModuleNameAndSrcUrl();
-
-		TsmpApi targetTsmpApi = null;
-		TreeMap<Integer, TsmpApi> conformApiList_phase1 = new TreeMap<Integer, TsmpApi>();
-
-
-		for (TsmpApi tsmpApiTmp : tsmpApiAllList) {
-			
-			String proxyPath = "";
-			
-			proxyPath = tsmpApiTmp.getApiKey();			
-			
-			int point = 0;
-			String[] requestURIArr = endWithSalsh(requestURI);
-			String[]  proxyPathArr = endWithSalsh(proxyPath);
-//			String[] requestURIArr = requestURI.split("/");
-//			String[] proxyPathArr = proxyPath.split("/");
-			
-			
-			if (requestURIArr.length == proxyPathArr.length) {
+		TsmpApiRegId apiRegId = null;
+		if("/dgrc/".equals(reqUrl)) {
+			//只註冊/斜線
+			apiRegId = new TsmpApiRegId("/", "/");
+		}else {
+			String keyword = "dgrc";
+			int flag = reqUrl.indexOf(keyword);
+			String requestURI = reqUrl.substring(flag + keyword.length());
+	
+			List<TsmpApi> tsmpApiAllList = getTsmpApiCacheProxy().queryAll_APIkeyAndModuleNameAndSrcUrl();
+	
+			TsmpApi targetTsmpApi = null;
+			TreeMap<Integer, TsmpApi> conformApiList_phase1 = new TreeMap<Integer, TsmpApi>();
+	
+	
+			for (TsmpApi tsmpApiTmp : tsmpApiAllList) {
 				
-				for (int i = 0; i < proxyPathArr.length; i++) {
-					String requestURIArrPath = requestURIArr[i];
-					String decodeProxyPathArrPath = proxyPathArr[i];
-					if (!(requestURIArrPath.equals(decodeProxyPathArrPath) || "{p}".equals(decodeProxyPathArrPath))) {
-						point = -1;
-						break;
-					} else {
-						if (requestURIArrPath.equals(decodeProxyPathArrPath)) {
-							point = point + 1;
+				String proxyPath = "";
+				
+				proxyPath = tsmpApiTmp.getApiKey();			
+				
+				int point = 0;
+				String[] requestURIArr = endWithSalsh(requestURI);
+				String[]  proxyPathArr = endWithSalsh(proxyPath);
+//				String[] requestURIArr = requestURI.split("/");
+//				String[] proxyPathArr = proxyPath.split("/");
+				
+				
+				if (requestURIArr.length == proxyPathArr.length) {
+					
+					for (int i = 0; i < proxyPathArr.length; i++) {
+						String requestURIArrPath = requestURIArr[i];
+						String decodeProxyPathArrPath = proxyPathArr[i];
+						if (!(requestURIArrPath.equals(decodeProxyPathArrPath) || "{p}".equals(decodeProxyPathArrPath))) {
+							point = -1;
+							break;
+						} else {
+							if (requestURIArrPath.equals(decodeProxyPathArrPath)) {
+								point = point + 1;
+							}
+						}
+					}
+					if (point >= 0) {
+						if (conformApiList_phase1.containsKey(point) == false) {
+							conformApiList_phase1.put(point, tsmpApiTmp);
 						}
 					}
 				}
-				if (point >= 0) {
-					if (conformApiList_phase1.containsKey(point) == false) {
-						conformApiList_phase1.put(point, tsmpApiTmp);
-					}
-				}
 			}
-		}
-		
-		if (conformApiList_phase1.isEmpty()==false) {
-			targetTsmpApi = conformApiList_phase1.get(conformApiList_phase1.lastKey());
-		}
-
-		if (targetTsmpApi == null) {
-			return null;
+			
+			if (conformApiList_phase1.isEmpty()==false) {
+				targetTsmpApi = conformApiList_phase1.get(conformApiList_phase1.lastKey());
+			}
+	
+			if (targetTsmpApi == null) {
+				return null;
+			}
+			
+			apiRegId = new TsmpApiRegId(targetTsmpApi.getApiKey(), targetTsmpApi.getModuleName());
 		}
 
 		TsmpApiReg apiReg = null;
-		TsmpApiRegId apiRegId = new TsmpApiRegId(targetTsmpApi.getApiKey(), targetTsmpApi.getModuleName());
 		Optional<TsmpApiReg> opt_apiReg = getTsmpApiRegCacheProxy().findById(apiRegId);
 		if (!opt_apiReg.isPresent()) {
 			return null;

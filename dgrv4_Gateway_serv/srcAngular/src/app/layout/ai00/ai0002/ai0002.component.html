@@ -21,15 +21,20 @@
         <tr>
           <td *ngFor="let col of columns" [style.width]="col.width">
             <span *ngIf="col.field != 'aiApiKeyEnable'">
-              <!-- {{rowData[col.field]}} -->
-              <ng-container *ngIf="col.field === 'aiProviderName'">
-                {{ rowData.dgrAiProvider?.aiProviderName }}
-              </ng-container>
-              <ng-container *ngIf="col.field === 'aiModel'">
-                {{ rowData.dgrAiProvider?.aiModel }}
-              </ng-container>
-              <ng-container *ngIf="col.field !== 'provider' && col.field !== 'model'">
-                {{ rowData[col.field] }}
+              <ng-container [ngSwitch]="col.field">
+                <ng-container *ngSwitchCase="'aiProviderName'">
+                  {{ rowData.dgrAiProvider?.aiProviderName }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'aiModel'">
+                  {{ rowData.dgrAiProvider?.aiModel }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'usageLimitPolicy'">
+                  {{ rowData.usageLimitPolicy|aiUsageLimitPolicy | async}}
+                </ng-container>
+                <ng-container
+                  *ngSwitchDefault>
+                  {{ rowData[col.field] }}
+                </ng-container>
               </ng-container>
             </span>
             <div class="text-center" *ngIf="col.field == 'aiApiKeyEnable'">
@@ -87,7 +92,8 @@
           <label for="aiProviderId"
             class="required control-label">{{'ai.provider'|translate}}/{{'ai.model'|translate}}</label>
           <p-dropdown [options]="aiProviderList" placeholder="{{'plz_chs' | translate}}" formControlName="aiProviderId"
-            [style]="{'width':'100%'}" *ngIf="currentAction !=='detail'"  optionLabel="aiProviderAlias" optionValue="aiProviderId">
+            [style]="{'width':'100%'}" *ngIf="currentAction !=='detail'" optionLabel="aiProviderAlias"
+            optionValue="aiProviderId">
             <ng-template let-option pTemplate="item">
               {{ option.aiProviderAlias }}<br>
               <small class="text-muted">({{ option.aiProviderName }} - {{ option.aiModel }})</small>
@@ -126,7 +132,7 @@
       </div>
       <div class="form-group row">
         <div class="col-6">
-          <label for="usageLimitInputToken" class="control-label required">{{'ai.usage_limit_input'|translate}}</label>
+          <label for="usageLimitInputToken" class="control-label required">{{'ai.usage_limit_input'|translate}} (0: {{'unlimited'|translate}})</label>
           <input type="number" min="0" class="form-control" id="usageLimitInputToken"
             formControlName="usageLimitInputToken">
           <div *ngIf="usageLimitInputToken.invalid && (usageLimitInputToken.dirty || usageLimitInputToken.touched)"
@@ -136,7 +142,7 @@
         </div>
         <div class="col-6">
           <label for="usageLimitOutputToken"
-            class="control-label required">{{'ai.usage_limit_output'|translate}}</label>
+            class="control-label required">{{'ai.usage_limit_output'|translate}} (0: {{'unlimited'|translate}})</label>
           <input type="number" min="0" class="form-control" id="usageLimitOutputToken"
             formControlName="usageLimitOutputToken">
           <div *ngIf="usageLimitOutputToken.invalid && (usageLimitOutputToken.dirty || usageLimitOutputToken.touched)"
