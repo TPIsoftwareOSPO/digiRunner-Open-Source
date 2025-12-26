@@ -262,7 +262,7 @@ Enjoy your hands-on experience with digiRunner! 💡
 
 ### Pre-requisites
 
-- OpenJDK 21
+- OpenJDK 25
 
 ---
 
