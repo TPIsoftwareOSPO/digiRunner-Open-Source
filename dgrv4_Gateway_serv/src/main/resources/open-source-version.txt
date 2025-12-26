@@ -1,1 +1,1 @@
-release-rc-v4.7.3.5
+release-v4.7.3
