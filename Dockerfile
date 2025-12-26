@@ -2,6 +2,8 @@ FROM azul/zulu-openjdk-alpine:25
 
 RUN set -eux; \
     apk update; \
+	# Force upgrade Busybox and related components to fix CVE-2024-58251 and CVE-2025-46394
+	apk upgrade busybox ssl_client; \
     apk upgrade; \
     apk add --no-cache curl; \
     mkdir -p /app; \
