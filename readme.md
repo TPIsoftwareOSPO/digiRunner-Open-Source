@@ -2,7 +2,7 @@
 # digiRunner:The Unified Control Plane for APIs & AI Services
 Bridge your infrastructure to the AI revolution. Securely.
 An enterprise-grade API Gateway built to govern Microservices and orchestrate Large Language Models (LLMs) with precision.
-[TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog) | [Community](https://github.com/TPIsoftwareOSPO/digiRunner-Open-Source/discussions)
+[TPI.dev](https://tpi.dev) | [Documentation](https://docs.tpi.dev/) | [Blog](https://tpi.dev/blog) | [Community](https://github.com/TPIsoftwareOSPO/digiRunner-Open-Source/discussions)| [LinkedIn](https://www.linkedin.com/company/opentpi/)
 ## Table of contents
 - [Overview](#overview)
 - [Quick Start](#quick-start)
