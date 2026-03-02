@@ -832,7 +832,7 @@
                 <label id="authorizedGrantType_label" class="control-label">{{'oauth_grant_type'|translate}}</label>
                 <div style="display:block">
                   <p-multiSelect [options]="grantTypeOptions" [maxSelectedLabels]="grantTypeOptions.length"
-                    defaultLabel="{{'plz_chs' | translate}}" formControlName="authorizedGrantType"
+                    formControlName="authorizedGrantType" placeholder="{{'plz_chs' | translate}}"
                     [style]="{'width':'50%'}">
                   </p-multiSelect>
                   <div *ngIf="authorizedGrantType.invalid && (authorizedGrantType.dirty || authorizedGrantType.touched)"
@@ -1796,7 +1796,7 @@
 </p-toast> -->
 <p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center;">
+    <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
         [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
         label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>

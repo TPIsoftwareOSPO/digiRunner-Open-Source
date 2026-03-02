@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { AA0106ReqItem } from 'src/app/models/api/FuncService/aa0106.interface';
 import { DPB0181LdapDataItem } from 'src/app/models/api/ServerService/dpb0181.interface';
 import { DPB0182LdapDataItem } from 'src/app/models/api/ServerService/dpb0182.interface';
@@ -12,9 +12,10 @@ interface _AA0106ReqItem extends AA0106ReqItem {
 }
 
 @Component({
-  selector: 'app-locale-func-detail',
-  templateUrl: './locale-func-detail.component.html',
-  styleUrls: ['./locale-func-detail.component.css']
+    selector: 'app-locale-func-detail',
+    templateUrl: './locale-func-detail.component.html',
+    styleUrls: ['./locale-func-detail.component.css'],
+    standalone: false
 })
 export class LocaleFuncDetailComponent implements OnInit {
 
@@ -26,19 +27,19 @@ export class LocaleFuncDetailComponent implements OnInit {
   @Output() change: EventEmitter<_AA0106ReqItem> = new EventEmitter;
   @Output() remove: EventEmitter<number> = new EventEmitter;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService
   ) { }
 
 
   async ngOnInit() {
     this.form = this.fb.group({
-      locale: new FormControl('', [ValidatorFns.requiredValidator()]),
-      funcName: new FormControl('', [ValidatorFns.requiredValidator(),ValidatorFns.maxLengthValidator(50)]),
-      funcDesc: new FormControl('',[ValidatorFns.maxLengthValidator(300)]),
+      locale: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      funcName: new UntypedFormControl('', [ValidatorFns.requiredValidator(),ValidatorFns.maxLengthValidator(50)]),
+      funcDesc: new UntypedFormControl('',[ValidatorFns.maxLengthValidator(300)]),
     });
 
     this.form.valueChanges.subscribe((res: AA0106ReqItem) => {

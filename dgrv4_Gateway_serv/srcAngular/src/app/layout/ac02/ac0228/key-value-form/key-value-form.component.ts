@@ -9,14 +9,15 @@ interface _keyValueField {
 }
 
 @Component({
-  selector: 'app-key-value-form',
-  templateUrl: './key-value-form.component.html',
-  styleUrls: ['./key-value-form.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => KeyValueFormComponent),
-    multi: true
-  }]
+    selector: 'app-key-value-form',
+    templateUrl: './key-value-form.component.html',
+    styleUrls: ['./key-value-form.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => KeyValueFormComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class KeyValueFormComponent implements OnInit {
   @ViewChild('keyValue', { read: ViewContainerRef, static: true }) keyValueRef!: ViewContainerRef;

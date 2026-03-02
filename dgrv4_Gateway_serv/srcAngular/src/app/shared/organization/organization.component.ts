@@ -1,17 +1,18 @@
 import { Component, OnInit, Output, EventEmitter, Input, ViewEncapsulation, AfterViewInit } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { AA1002List } from 'src/app/models/api/OrgService/aa1002.interface';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from '../services/tool.service';
 import { Console } from 'console';
 import { DynamicDialogConfig,DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-organization',
-  templateUrl: './organization.component.html',
-  styleUrls: ['./organization.component.css'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-organization',
+    templateUrl: './organization.component.html',
+    styleUrls: ['./organization.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class OrganizationComponent implements OnInit, AfterViewInit {
 
@@ -23,7 +24,7 @@ export class OrganizationComponent implements OnInit, AfterViewInit {
   @Output() doCreate: EventEmitter<boolean> = new EventEmitter();
   @Output('selectedNode') _selectedNode = new EventEmitter();
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   orgs: TreeNode[] = [];
   currentHighlight: string = '';
   orgNameSuggestions: string[] = [];
@@ -31,7 +32,7 @@ export class OrganizationComponent implements OnInit, AfterViewInit {
   uuid: string = '';
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private config: DynamicDialogConfig,
     public ref: DynamicDialogRef,

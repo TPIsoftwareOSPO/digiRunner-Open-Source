@@ -12,14 +12,15 @@ export interface _AA0311RedirectByIpData extends AA0311RedirectByIpData {
 }
 
 @Component({
-  selector: 'app-source-ip-form',
-  templateUrl: './source-ip-form.component.html',
-  styleUrls: ['./source-ip-form.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => SourceIpFormComponent),
-    multi: true
-  }]
+    selector: 'app-source-ip-form',
+    templateUrl: './source-ip-form.component.html',
+    styleUrls: ['./source-ip-form.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SourceIpFormComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class SourceIpFormComponent implements OnInit {
 

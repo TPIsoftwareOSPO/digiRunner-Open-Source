@@ -1,5 +1,7 @@
 package tpi.dgrv4.dpaa.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DPB0118Resp {
 	private String majorVersionNo;
 	private String version;
@@ -12,6 +14,8 @@ public class DPB0118Resp {
 	private String env;
 	private String remoteAddr;
 	private String forwardResp;
+	@JsonProperty("isExpired")
+	private boolean isExpired;
 	
 	public Long getTimestamp() {
 		return timestamp;
@@ -55,10 +59,13 @@ public class DPB0118Resp {
 	public void setOverBufferDays(Long overBufferDays) {
 		this.overBufferDays = overBufferDays;
 	}
+	
 	@Override
 	public String toString() {
-		return "DPB0118Resp [majorVersionNo=" + majorVersionNo + ", version=" + version + ", edition=" + edition + ", expiryDate=" + expiryDate
-				+ ", timestamp=" + timestamp + ", nearWarnDays=" + nearWarnDays + ", overBufferDays=" + overBufferDays + ", account=" + account + "]";
+		return "DPB0118Resp [majorVersionNo=" + majorVersionNo + ", version=" + version + ", edition=" + edition
+				+ ", expiryDate=" + expiryDate + ", timestamp=" + timestamp + ", nearWarnDays=" + nearWarnDays
+				+ ", overBufferDays=" + overBufferDays + ", account=" + account + ", env=" + env + ", remoteAddr="
+				+ remoteAddr + ", forwardResp=" + forwardResp + ", isExpired=" + isExpired + "]";
 	}
 	public String getAccount() {
 		return account;
@@ -84,4 +91,13 @@ public class DPB0118Resp {
 	public void setForwardResp(String forwardResp) {
 		this.forwardResp = forwardResp;
 	}
+	public boolean isExpired() {
+		return isExpired;
+	}
+	
+	@JsonProperty("isExpired")
+	public void setExpired(boolean isExpired) {
+		this.isExpired = isExpired;
+	}
+	
 }

@@ -1085,7 +1085,7 @@
   "dashBoard": {
     "title": "ライセンス",
     "title1": "digiRunner「{{edition}}」認証キーは「{{expiryDate}}」に期限切れになります。すぐに期限を延長してください。",
-    "title2": "digiRunner \"{{edition}}\" は認証されていないか、有効期限が切れています。すぐにプロダクト キーを適用/延長してください。",
+    "title2": "digiRunner \"{{edition}}\" は認証されていないか、有効期限が切れています。<span class=\"text-danger\">まもなく一部の機能が利用できなくなります。</span> すぐにプロダクト キーを適用/延長してください。",
     "desc1": "問い合わせ先：<a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a> 、シンリ団体または担当営業にお問い合わせください。",
     "desc2": "Express ユーザーがダウンロードを完了すると、システムはキーを自動的に送信します。digiRunner の使用を開始するには、メールボックスにアクセスしてキーを受け取ります。<br>拡張機能やその他の質問については、<a href='service@tpisoftware. までお問い合わせください。 com' target ='_blank'>service@tpisoftware.com</a> Xinli チームまたは営業窓口にお問い合わせください。"
   },
@@ -1156,6 +1156,12 @@
     "body_before": "前 {{num}} 文字をマスクします。マスクは {{mask}} で表示されます。",
     "body_after": "後 {{num}} 文字をマスクします。マスクは {{mask}} で表示されます。",
     "body_after_regex": "後 {{num}} 文字をマスクします。マスクは {{mask}} で表示されます。",
+    "body_remain_before_after": "先頭と末尾の {{num}} 文字を残し、マスクを {{mask}} で表示",
+    "body_remain_before": "先頭の {{num}} 文字を残し、マスクを {{mask}} で表示",
+    "body_remain_after": "末尾の {{num}} 文字を残し、マスクを {{mask}} で表示",
+    "body_remain_before_after_exp": "\"name\":\"test\",\"id\":\"1\" => \"name###\":\"1\" (先頭と末尾の5文字を残し、###で置換)",
+    "body_remain_before_exp": "\"name\":\"test\",\"id\":\"1\" => \"name### (先頭の5文字を残し、###で置換)",
+    "body_remain_after_exp": "\"name\":\"test\",\"id\":\"1\" => ###\":\"1\" (末尾の5文字を残し、###で置換)",
     "word": "文字数",
     "mask": "マスク",
     "header_key_required": "ヘッダーマスクキーワードは空にできません",
@@ -1325,7 +1331,7 @@
   },
   "notify": {
     "name": "通知名",
-    "type": "通知タイプ",
+    "type": "プロキシタイプ",
     "sound": "通知効果音"
   },
   "status_code": "ステータスコード",

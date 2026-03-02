@@ -38,7 +38,8 @@ import { ActivatedRoute } from '@angular/router';
     selector: 'app-client-ca',
     templateUrl: './client-ca.component.html',
     styleUrls: ['./client-ca.component.css'],
-    providers: [ConfirmationService]
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class ClientCAComponent implements OnInit {
 

@@ -20,8 +20,19 @@
     </div>
     <div class="user-info">
       <img src="assets/images/user.png" class="rounded-circle" alt="user" />
-
-      <p-menu #menu [popup]="true" [model]="items">
+        <p-menu #menu [popup]="true" [model]="items">
+          <ng-template pTemplate="item" let-item>
+            <a *ngIf="item.routerLink" [routerLink]="item.routerLink" class="p-menuitem-link">
+              <span [class]="item.icon" class="p-menuitem-icon"></span>
+              <span class="p-menuitem-text ms-2">{{ item.label | translate }}</span>
+            </a>
+            <div *ngIf="!item.routerLink" class="p-menuitem-content">
+              <span [class]="item.icon" class="p-menuitem-icon"></span>
+              <span class="p-menuitem-text ms-2">{{ item.label | translate }}</span>
+            </div>
+          </ng-template>
+        </p-menu>
+      <!-- <p-menu #menu [popup]="true" [model]="items">
         <ng-template pTemplate="item" let-item>
           <ng-container *ngIf="item.route; else elseBlock">
             <a [routerLink]="item.route" class="p-menuitem-link">
@@ -34,7 +45,7 @@
             <span class="ms-2">{{ item.label | translate }}</span>
           </ng-template>
         </ng-template>
-      </p-menu>
+      </p-menu> -->
       <button
         type="button"
         class="p-button-text p-button-secondary header-info-btn"

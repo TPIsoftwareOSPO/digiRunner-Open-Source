@@ -9,14 +9,15 @@ interface _AA0424ReqSrcUrlList extends AA0424ReqSrcUrlList {
 }
 
 @Component({
-  selector: 'app-api-url-setting',
-  templateUrl: './api-url-setting.component.html',
-  styleUrls: ['./api-url-setting.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => ApiUrlSettingComponent),
-    multi: true
-  }]
+    selector: 'app-api-url-setting',
+    templateUrl: './api-url-setting.component.html',
+    styleUrls: ['./api-url-setting.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ApiUrlSettingComponent),
+            multi: true
+        }],
+    standalone: false
 })
 
 export class ApiUrlSettingComponent implements OnInit {

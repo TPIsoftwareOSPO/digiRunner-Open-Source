@@ -25,10 +25,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "node_modules/@fortawesome/fontawesome-free-webfonts/css/fontawesome.css",
@@ -38,17 +35,24 @@
               "node_modules/primeicons/primeicons.css",
               "node_modules/primeng/resources/themes/nova/theme.css",
               "node_modules/primeng/resources/primeng.min.css",
-              "node_modules/quill/dist/quill.core.css",
-              "node_modules/quill/dist/quill.snow.css",
               "src/styles/styles.scss"
             ],
 
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
-              "node_modules/quill/dist/quill.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
-            "allowedCommonJsDependencies": ["crypto-js","crypto","sha.js","quill-delta"]
+            "allowedCommonJsDependencies": [
+              "base64url",
+              "crypto-js",
+              "crypto",
+              "sha.js",
+              "dayjs",
+              "dayjs/plugin/utc",
+              "dayjs/plugin/timezone",
+              "file-saver",
+              "util"
+            ]
           },
           "configurations": {
             "production": {
@@ -87,10 +91,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "srcAngular:build:production"
+              "buildTarget": "srcAngular:build:production"
             },
             "development": {
-              "browserTarget": "srcAngular:build:development"
+              "buildTarget": "srcAngular:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -98,7 +102,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "srcAngular:build"
+            "buildTarget": "srcAngular:build"
           }
         },
         "test": {
@@ -108,10 +112,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles/styles.scss"
@@ -121,6 +122,5 @@
         }
       }
     }
-  },
-  "defaultProject": "srcAngular"
+  }
 }

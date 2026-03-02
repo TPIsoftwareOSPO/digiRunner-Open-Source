@@ -13,7 +13,7 @@ import {
 import { ApiService } from 'src/app/shared/services/api-api.service';
 import { FileService } from 'src/app/shared/services/api-file.service';
 
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
@@ -26,7 +26,7 @@ import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
 import { DPB9903Req } from 'src/app/models/api/ServerService/dpb9903.interface';
-import * as FileSaver from 'file-saver';
+import { saveAs } from 'file-saver';
 import * as dayjs from 'dayjs';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
@@ -34,15 +34,16 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ReportTestConnectionComponent } from './report-test-connection/report-test-connection.component';
 
 @Component({
-  selector: 'app-tsmpsetting',
-  templateUrl: './tsmpsetting.component.html',
-  styleUrls: ['./tsmpsetting.component.css'],
-  providers: [FileService, ApiService, ConfirmationService],
+    selector: 'app-tsmpsetting',
+    templateUrl: './tsmpsetting.component.html',
+    styleUrls: ['./tsmpsetting.component.css'],
+    providers: [FileService, ApiService, ConfirmationService],
+    standalone: false
 })
 export class TsmpsettingComponent extends BaseComponent implements OnInit {
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   toastValue: any;
   cols: { field: string; header: string }[] = [];
   tableData: Array<DPB9900Item> = [];
@@ -57,7 +58,7 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private translateService: TranslateService,
     private messageService: MessageService,
@@ -80,13 +81,13 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
     // this.checkOrgId();
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      id: new FormControl(''),
-      value: new FormControl(''),
-      memo: new FormControl(),
-      newVal: new FormControl(''),
-      fileData: new FormControl(),
-      encrptionType: new FormControl(),
+      keyword: new UntypedFormControl(''),
+      id: new UntypedFormControl(''),
+      value: new UntypedFormControl(''),
+      memo: new UntypedFormControl(),
+      newVal: new UntypedFormControl(''),
+      fileData: new UntypedFormControl(),
+      encrptionType: new UntypedFormControl(),
     });
 
     this.route.queryParams.subscribe((value) => {
@@ -95,7 +96,6 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
         this.queryTsmpSettingList();
       }
     })
-
 
     this.init();
   }
@@ -260,7 +260,7 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
 
             const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
             const ver = sessionStorage.getItem('majorVersionNo') ?? '';
-            FileSaver.saveAs(data, `Setting_${date}_${ver}.xlsx`);
+            saveAs(data, `Setting_${date}_${ver}.xlsx`);
           }
           this.ngxService.stop();
         });

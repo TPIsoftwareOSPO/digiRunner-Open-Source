@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import oshi.util.tuples.Pair;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.UrlCodecHelper;
@@ -209,7 +210,8 @@ public class DgrcRoutingHelper {
 	 */
 	private List<String> getSrcuUrlList(HttpServletRequest httpReq, TsmpApiReg apiReg) {
 		List<String> sortSrcUrlList = null;
-		String ip = ServiceUtil.getIpAddress(httpReq);
+//		String ip = ServiceUtil.getIpAddress(httpReq);
+        String ip = ClientIpUtil.getClientIp(httpReq);
 		String dn = ServiceUtil.getFQDN(httpReq);
 		HashMap<Integer, String> srcUrlMap = new HashMap<>();
 		srcUrlMap.put(1, apiReg.getIpSrcUrl1());
@@ -291,7 +293,8 @@ public class DgrcRoutingHelper {
 	 * 沒有目標URL資料時,要回覆的錯誤訊息
 	 */
 	public ResponseEntity<?> getSrcUrlListErrResp(HttpServletRequest httpReq, String apiId) {
-		String ip = ServiceUtil.getIpAddress(httpReq);
+//		String ip = ServiceUtil.getIpAddress(httpReq);
+        String ip = ClientIpUtil.getClientIp(httpReq);
 		String dn = ServiceUtil.getFQDN(httpReq);
 		OAuthTokenErrorResp resp = new OAuthTokenErrorResp();
 		resp.setTimestamp(System.currentTimeMillis() + "");

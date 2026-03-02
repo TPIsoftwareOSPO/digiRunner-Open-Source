@@ -1,7 +1,7 @@
 import {
   ValidatorFn,
   AbstractControl,
-  FormGroup,
+  UntypedFormGroup,
   ValidationErrors,
 } from '@angular/forms';
 // let ipRegex = require('ip-regex');
@@ -281,7 +281,7 @@ export function ipAddressValidator(): ValidatorFn {
 }
 
 export function confirmPasswordForUserValidator(
-  group: FormGroup,
+  group: UntypedFormGroup,
   useUpdate: boolean = false
 ): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -317,7 +317,7 @@ export function confirmPasswordForUserValidator(
 }
 
 export function confirmPasswordForClientValidator(
-  group: FormGroup,
+  group: UntypedFormGroup,
   useUpdate: boolean = false
 ): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -354,7 +354,7 @@ export function confirmPasswordForClientValidator(
 }
 
 export function confirmPasswordValidator(
-  group: FormGroup,
+  group: UntypedFormGroup,
   oriField: string = '',
   newField: string = ''
 ): ValidatorFn {

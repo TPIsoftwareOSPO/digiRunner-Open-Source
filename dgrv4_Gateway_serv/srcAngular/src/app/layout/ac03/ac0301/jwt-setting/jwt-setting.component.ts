@@ -1,16 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Subscription } from 'rxjs';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-jwt-setting',
-  templateUrl: './jwt-setting.component.html',
-  styleUrls: ['./jwt-setting.component.css'],
+    selector: 'app-jwt-setting',
+    templateUrl: './jwt-setting.component.html',
+    styleUrls: ['./jwt-setting.component.css'],
+    standalone: false
 })
 export class JwtSettingComponent implements OnInit {
-  form: FormGroup;
+  form: UntypedFormGroup;
   updateJwtSettingFlags: { label: string; value: string }[] = [];
 
   jweFlagRef?: Subscription;
@@ -21,12 +22,12 @@ export class JwtSettingComponent implements OnInit {
     // private translateService: TranslateService,
     private ref: DynamicDialogRef,
     private config: DynamicDialogConfig,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     this.form = this.fb.group({
-      jwtSetting: new FormControl('N'),
-      jweFlag: new FormControl({ value: '0', disabled: true }),
-      jweFlagResp: new FormControl({ value: '0', disabled: true }),
+      jwtSetting: new UntypedFormControl('N'),
+      jweFlag: new UntypedFormControl({ value: '0', disabled: true }),
+      jweFlagResp: new UntypedFormControl({ value: '0', disabled: true }),
     });
 
     this.form.get('jwtSetting')?.valueChanges.subscribe((value) => {

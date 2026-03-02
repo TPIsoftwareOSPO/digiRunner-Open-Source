@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { LovService } from 'src/app/shared/services/api-lov.service';
@@ -24,13 +24,14 @@ import { AlertService } from 'src/app/shared/services/alert.service';
     selector: 'app-ac1303',
     templateUrl: './ac1303.component.html',
     styleUrls: ['./ac1303.component.css'],
-    providers: [ApiService]
+    providers: [ApiService],
+    standalone: false
 })
 export class Ac1303Component extends BaseComponent implements OnInit {
 
     currentTitle: string = this.title;
     pageNum: number = 1;
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     canvas: any;
     ctx: any;
     timeTypes: { label: string; value: string }[] = [];
@@ -50,7 +51,7 @@ export class Ac1303Component extends BaseComponent implements OnInit {
     constructor(
         router: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private toolService: ToolService,
         private list: ListService,
         private lov: LovService,
@@ -67,14 +68,14 @@ export class Ac1303Component extends BaseComponent implements OnInit {
         this.canvas = document.getElementById('reportChart');
         this.ctx = this.canvas.getContext('2d');
         this.form = this.fb.group({
-            timeType: new FormControl('DAY'),
-            apiUidList: new FormControl([]),
-            apiNameList: new FormControl([]),
-            startDate: new FormControl(''),
-            endDate: new FormControl(''),
-            keyword: new FormControl(''),
-            startHour: new FormControl('00'),
-            endHour: new FormControl('23')
+            timeType: new UntypedFormControl('DAY'),
+            apiUidList: new UntypedFormControl([]),
+            apiNameList: new UntypedFormControl([]),
+            startDate: new UntypedFormControl(''),
+            endDate: new UntypedFormControl(''),
+            keyword: new UntypedFormControl(''),
+            startHour: new UntypedFormControl('00'),
+            endHour: new UntypedFormControl('23')
         });
         // 欄位檢查
         this.reportService.queryAPIAverageTime_before().subscribe(res => {

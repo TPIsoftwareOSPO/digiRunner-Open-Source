@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -24,16 +24,17 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { DPB0172Req } from 'src/app/models/api/ServerService/dpb0172.interface';
 
 @Component({
-  selector: 'app-ac0226',
-  templateUrl: './ac0226.component.html',
-  styleUrls: ['./ac0226.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ac0226',
+    templateUrl: './ac0226.component.html',
+    styleUrls: ['./ac0226.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0226Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
-  formEdit!: FormGroup;
+  form!: UntypedFormGroup;
+  formEdit!: UntypedFormGroup;
   clientListCols: { field: string; header: string }[] = [];
   clientList: Array<DPB0095Item> = [];
   currentClient?: DPB0095Item;
@@ -52,7 +53,7 @@ export class Ac0226Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private serverService: ServerService,
     private openApiService: OpenApiKeyService,
@@ -64,22 +65,22 @@ export class Ac0226Component extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     this.form = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
     this.formEdit = this.fb.group({
-      id: new FormControl({ value: '', disabled: true }),
-      clientId: new FormControl({ value: '', disabled: true }),
-      idpType: new FormControl(''),
-      status: new FormControl(''),
-      remark: new FormControl(''),
-      idpClientId: new FormControl(''),
-      idpClientMima: new FormControl(''),
-      idpClientName: new FormControl(''),
-      wellKnownUrl: new FormControl(''),
-      callbackUrl: new FormControl(''),
-      authUrl: new FormControl(''),
-      accessTokenUrl: new FormControl(''),
-      scope: new FormControl(''),
+      id: new UntypedFormControl({ value: '', disabled: true }),
+      clientId: new UntypedFormControl({ value: '', disabled: true }),
+      idpType: new UntypedFormControl(''),
+      status: new UntypedFormControl(''),
+      remark: new UntypedFormControl(''),
+      idpClientId: new UntypedFormControl(''),
+      idpClientMima: new UntypedFormControl(''),
+      idpClientName: new UntypedFormControl(''),
+      wellKnownUrl: new UntypedFormControl(''),
+      callbackUrl: new UntypedFormControl(''),
+      authUrl: new UntypedFormControl(''),
+      accessTokenUrl: new UntypedFormControl(''),
+      scope: new UntypedFormControl(''),
     });
 
     const codes = ['client_id', 'client_name', 'client_alias'];

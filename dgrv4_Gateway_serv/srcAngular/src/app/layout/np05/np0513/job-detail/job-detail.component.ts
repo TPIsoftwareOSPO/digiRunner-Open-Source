@@ -6,7 +6,8 @@ import { FileService } from 'src/app/shared/services/api-file.service';
 @Component({
     selector: 'app-job-detail',
     templateUrl: './job-detail.component.html',
-    styleUrls: ['./job-detail.component.css']
+    styleUrls: ['./job-detail.component.css'],
+    standalone: false
 })
 export class JobDetailComponent implements OnInit {
 

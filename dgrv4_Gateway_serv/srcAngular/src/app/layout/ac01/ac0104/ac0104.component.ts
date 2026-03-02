@@ -7,7 +7,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from '../../../shared/validator-functions';
 import * as dayjs from 'dayjs';
 import { MessageService } from 'primeng/api';
@@ -21,11 +21,12 @@ import { DPB0125Req } from 'src/app/models/api/ServerService/dpb0125.interface';
     selector: 'app-ac0104',
     templateUrl: './ac0104.component.html',
     styleUrls: ['./ac0104.component.css'],
-    providers: [IndexStatusPipe, UTCDatetimeFormatPipe]
+    providers: [IndexStatusPipe, UTCDatetimeFormatPipe],
+    standalone: false
 })
 export class Ac0104Component extends BaseComponent implements OnInit {
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     dateSmaxDate: Date = new Date();
     dateEminDate: Date = new Date();
     indexs: { label: string, value: string }[] = [];
@@ -37,7 +38,7 @@ export class Ac0104Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         // private searchService: SearchService,
         private idxStat: IndexStatusPipe,
@@ -49,11 +50,11 @@ export class Ac0104Component extends BaseComponent implements OnInit {
     ) {
         super(route, tr);
         this.form = this.fb.group({
-          dateS: new FormControl('', [ValidatorFns.requiredValidator()]),
-          timePickerS: new FormControl({ hour: 0, minute: 0 }),
-          dateE: new FormControl('', [ValidatorFns.requiredValidator()]),
-          timePickerE: new FormControl({ hour: 0, minute: 0 }),
-          indexName: new FormControl(null, [ValidatorFns.requiredValidator()])
+          dateS: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+          timePickerS: new UntypedFormControl({ hour: 0, minute: 0 }),
+          dateE: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+          timePickerE: new UntypedFormControl({ hour: 0, minute: 0 }),
+          indexName: new UntypedFormControl(null, [ValidatorFns.requiredValidator()])
       });
 
     }

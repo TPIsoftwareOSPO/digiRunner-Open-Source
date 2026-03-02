@@ -2,7 +2,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { DPB0149Item } from 'src/app/models/api/ServerService/dpb0149.interface';
@@ -14,14 +14,15 @@ import { DPB0152Req } from 'src/app/models/api/ServerService/dpb0152.interface';
 import * as dayjs from 'dayjs';
 
 @Component({
-  selector: 'app-ac0017',
-  templateUrl: './ac0017.component.html',
-  styleUrls: ['./ac0017.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ac0017',
+    templateUrl: './ac0017.component.html',
+    styleUrls: ['./ac0017.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0017Component extends BaseComponent implements OnInit {
   currentTitle: string = this.title;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   cols: { field: string; header: string }[] = [];
   pageNum: number = 1; // 1: 查詢、2: 詳細資料 & 刪除、3: 建立 & 更新
   currentAction: string = 'query';
@@ -44,7 +45,7 @@ export class Ac0017Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private serverService: ServerService,
     private messageService: MessageService,
@@ -74,16 +75,16 @@ export class Ac0017Component extends BaseComponent implements OnInit {
   ngOnInit(): void {
     // ,ValidatorFns.websiteAddressValidator()
     this.form = this.fb.group({
-      idpType: new FormControl('', [ValidatorFns.requiredValidator()]),
-      clientId: new FormControl('', [ValidatorFns.requiredValidator()]),
-      clientMima: new FormControl('', [ValidatorFns.requiredValidator()]),
-      clientName: new FormControl('', [ValidatorFns.requiredValidator()]),
-      idpWellKnownUrl: new FormControl('', [ValidatorFns.requiredValidator()]),
-      callbackUrl: new FormControl('', [ValidatorFns.requiredValidator()]),
-      clientStatus: new FormControl('', [ValidatorFns.requiredValidator()]),
-      authUrl: new FormControl(''),
-      accessTokenUrl: new FormControl(''),
-      scope: new FormControl(''),
+      idpType: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      clientId: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      clientMima: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      clientName: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      idpWellKnownUrl: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      callbackUrl: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      clientStatus: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      authUrl: new UntypedFormControl(''),
+      accessTokenUrl: new UntypedFormControl(''),
+      scope: new UntypedFormControl(''),
     });
 
     this.queryAcOauth();

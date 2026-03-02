@@ -6,9 +6,10 @@ import * as dayjs from 'dayjs';
 import { ServerService } from "../services/api-server.service";
 
 @Component({
-  selector: 'app-connection-info-list',
-  templateUrl: './connection-info-list.component.html',
-  styleUrls: ['./connection-info-list.component.css'],
+    selector: 'app-connection-info-list',
+    templateUrl: './connection-info-list.component.html',
+    styleUrls: ['./connection-info-list.component.css'],
+    standalone: false
 })
 export class ConnectionInfoListComponent implements OnInit {
 

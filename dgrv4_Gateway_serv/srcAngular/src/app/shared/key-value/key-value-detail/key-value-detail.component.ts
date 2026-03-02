@@ -1,18 +1,19 @@
 import { IKeyValue } from './../key-value.interface';
 
 import { Component, OnInit, Input, ComponentRef, AfterViewInit, SimpleChange, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
-import { NgModel, FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { NgModel, UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from './../../../shared/validator-functions';
 @Component({
-  selector: 'app-key-value-detail',
-  templateUrl: './key-value-detail.component.html',
-  styleUrls: ['./key-value-detail.component.css'],
-  changeDetection:ChangeDetectionStrategy.OnPush
+    selector: 'app-key-value-detail',
+    templateUrl: './key-value-detail.component.html',
+    styleUrls: ['./key-value-detail.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class KeyValueDetailComponent implements OnInit,AfterViewInit {
   changeLog = [];
   keyvalue :IKeyValue |undefined;
-  form:FormGroup;
+  form:UntypedFormGroup;
 
   ngAfterViewInit(): void {
 
@@ -25,11 +26,11 @@ export class KeyValueDetailComponent implements OnInit,AfterViewInit {
   keyLabel:string|undefined;
   valueLabel:string|undefined;
 
-  constructor(private fb:FormBuilder) {
+  constructor(private fb:UntypedFormBuilder) {
     this.form = this.fb.group({
-      selected:new FormControl(true),
-      key : new FormControl(this.data ? this.data.key : '',[ValidatorFns.maxLengthValidator(30)]),
-      value : new FormControl(this.data ? this.data.value : '')
+      selected:new UntypedFormControl(true),
+      key : new UntypedFormControl(this.data ? this.data.key : '',[ValidatorFns.maxLengthValidator(30)]),
+      value : new UntypedFormControl(this.data ? this.data.value : '')
     })
   }
 

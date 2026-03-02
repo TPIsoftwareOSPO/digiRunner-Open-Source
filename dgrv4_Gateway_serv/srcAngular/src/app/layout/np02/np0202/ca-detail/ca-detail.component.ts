@@ -5,7 +5,8 @@ import { FormParams } from 'src/app/models/api/form-params.interface';
 @Component({
     selector: 'app-ca-detail',
     templateUrl: './ca-detail.component.html',
-    styleUrls: ['./ca-detail.component.css']
+    styleUrls: ['./ca-detail.component.css'],
+    standalone: false
 })
 export class CADetailComponent implements OnInit {
 

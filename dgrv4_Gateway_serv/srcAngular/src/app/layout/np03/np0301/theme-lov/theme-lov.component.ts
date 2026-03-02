@@ -10,7 +10,8 @@ import { LovService } from 'src/app/shared/services/api-lov.service';
 @Component({
     selector: 'app-theme-lov',
     templateUrl: './theme-lov.component.html',
-    styleUrls: ['./theme-lov.component.css']
+    styleUrls: ['./theme-lov.component.css'],
+    standalone: false
 })
 export class ThemeLovComponent implements OnInit {
 

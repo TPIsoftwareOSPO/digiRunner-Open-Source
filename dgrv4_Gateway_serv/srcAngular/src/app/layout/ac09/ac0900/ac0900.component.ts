@@ -5,9 +5,10 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-ac0900',
-  templateUrl: './ac0900.component.html',
-  styleUrls: ['./ac0900.component.css'],
+    selector: 'app-ac0900',
+    templateUrl: './ac0900.component.html',
+    styleUrls: ['./ac0900.component.css'],
+    standalone: false
 })
 export class Ac0900Component extends BaseComponent implements OnInit {
   reportID: string = '';

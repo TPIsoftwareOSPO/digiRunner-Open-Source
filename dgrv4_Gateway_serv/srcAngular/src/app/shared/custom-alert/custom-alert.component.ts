@@ -4,9 +4,10 @@ import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 
 
 @Component({
-  selector: 'app-custom-alert',
-  templateUrl: './custom-alert.component.html',
-  styleUrls: ['./custom-alert.component.css'],
+    selector: 'app-custom-alert',
+    templateUrl: './custom-alert.component.html',
+    styleUrls: ['./custom-alert.component.css'],
+    standalone: false
 })
 export class CustomAlertComponent implements OnInit {
   constructor(

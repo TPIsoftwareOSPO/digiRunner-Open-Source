@@ -30,7 +30,7 @@ public class DGRCControllerPostRaw {
 	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
 	@ThroughputPoint
     @RequestMapping(value = "/dgrc/**",
-			consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE },
+			consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE, MediaType.TEXT_XML_VALUE },
 			produces = MediaType.ALL_VALUE)
 	public void dispatch(HttpServletRequest httpReq,
 														 HttpServletResponse httpRes,

@@ -5,9 +5,10 @@ import { FormOperate } from 'src/app/models/common.enum';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-org-detail',
-  templateUrl: './org-detail.component.html',
-  styleUrls: ['./org-detail.component.css']
+    selector: 'app-org-detail',
+    templateUrl: './org-detail.component.html',
+    styleUrls: ['./org-detail.component.css'],
+    standalone: false
 })
 export class OrgDetailComponent implements OnInit {
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DPB0064Items } from 'src/app/models/api/LayerService/dpb0064.interface';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -13,11 +13,12 @@ import { RoleService } from 'src/app/shared/services/api-role.service';
 @Component({
     selector: 'app-np0402',
     templateUrl: './np0402.component.html',
-    styleUrls: ['./np0402.component.css']
+    styleUrls: ['./np0402.component.css'],
+    standalone: false
 })
 export class Np0402Component extends BaseComponent implements OnInit {
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     roles: { label: string; value: string; }[] = [];
     dataMap: { API_APPLICATION: { 1: Array<DPB0064Items>; 2: Array<DPB0064Items>; }, API_ON_OFF: { 1: Array<DPB0064Items>; 2: Array<DPB0064Items>; }, CLIENT_REG: { 1: Array<DPB0064Items>; 2: Array<DPB0064Items>; }, OPEN_API_KEY: { 1: Array<DPB0064Items>; 2: Array<DPB0064Items>; } } = { API_APPLICATION: { 1: [], 2: [] }, API_ON_OFF: { 1: [], 2: [] }, CLIENT_REG: { 1: [], 2: [] }, OPEN_API_KEY: { 1: [], 2: [] } };
     layers: Array<{ label: string; value: string; }> = new Array<{ label: string; value: string; }>();
@@ -25,7 +26,7 @@ export class Np0402Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private layer: LayerService,
         private message: MessageService,
@@ -65,8 +66,8 @@ export class Np0402Component extends BaseComponent implements OnInit {
                 });
                 Object.keys(res.RespBody.dataMap).map(type => {
                     // if (Object.keys(res.RespBody.dataMap[type]).length == 0) {
-                    this.form.addControl(`${type}_1`, new FormControl(''));
-                    this.form.addControl(`${type}_2`, new FormControl(''));
+                    this.form.addControl(`${type}_1`, new UntypedFormControl(''));
+                    this.form.addControl(`${type}_2`, new UntypedFormControl(''));
                     // }
                     Object.keys(res.RespBody.dataMap[type]).map(layer => {
                         this.dataMap[type][layer] = res.RespBody.dataMap[type][layer];
@@ -98,8 +99,8 @@ export class Np0402Component extends BaseComponent implements OnInit {
                 });
                 Object.keys(res.RespBody.dataMap).map(type => {
                     // if (Object.keys(res.RespBody.dataMap[type]).length == 0) {
-                    this.form.addControl(`${type}_1`, new FormControl(''));
-                    this.form.addControl(`${type}_2`, new FormControl(''));
+                    this.form.addControl(`${type}_1`, new UntypedFormControl(''));
+                    this.form.addControl(`${type}_2`, new UntypedFormControl(''));
                     // }
                     Object.keys(res.RespBody.dataMap[type]).map(layer => {
                         this.dataMap[type][layer] = res.RespBody.dataMap[type][layer];

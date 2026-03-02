@@ -14,11 +14,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.Cookie;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -29,6 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
@@ -36,7 +42,6 @@ import tpi.dgrv4.codec.utils.ExpireKeyUtil;
 import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.CheckmarxCommUtils;
-import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.component.cache.proxy.DgrWebsiteCacheProxy;
 import tpi.dgrv4.dpaa.component.cache.proxy.DgrWebsiteDetailCacheProxy;
@@ -49,6 +54,7 @@ import tpi.dgrv4.gateway.component.check.XssCheck;
 import tpi.dgrv4.gateway.component.check.XxeCheck;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.WebsiteInfo;
@@ -301,6 +307,9 @@ public class WebsiteService {
 
 					//為了解決前端渲染404的問題，所以回目標URL的HTML資料
 					if (respObj.statusCode == HttpStatus.NOT_FOUND.value()) {
+						//You need to close the previous connection, otherwise it will keep occupying the connection.
+						//要將上一個連線關掉,否則會一直佔住連線
+						closeHttpResponse(respObj);
 						respObj = HttpUtil.httpReqByGetList(redirectedUrl, headers, true, false);
 					}
 					
@@ -356,8 +365,13 @@ public class WebsiteService {
 				// 將內容輸出
 				// String context = respObj.getLogStr();
 				if (respObj.httpRespArray != null) {
-					ByteArrayInputStream bi = new ByteArrayInputStream(respObj.httpRespArray);
-					IOUtils.copy(bi, response.getOutputStream());
+					if(respObj.statusCode >= 100 && respObj.statusCode < 400) {
+						ByteArrayInputStream bi = new ByteArrayInputStream(respObj.httpRespArray);
+						IOUtils.copy(bi, response.getOutputStream());
+					}else {
+						ByteArrayInputStream bi = new ByteArrayInputStream("error".getBytes());
+						IOUtils.copy(bi, response.getOutputStream());
+					}
 				}
 			} else {
 				ResponseEntity<?> respEntity = new ResponseEntity<OAuthTokenErrorResp>(
@@ -377,6 +391,18 @@ public class WebsiteService {
 		} catch (Exception e) {
 			TPILogger.tl.error("resourceURL=" + completeURL + "\n" + StackTraceUtil.logStackTrace(e));
 			throw e;
+		}
+	}
+	
+	private void closeHttpResponse(HttpRespData respObj) {
+		if (respObj != null && respObj.httpResponse != null 
+				&& respObj.httpResponse instanceof CloseableHttpResponse) {
+		    try {
+		    	EntityUtils.consume(respObj.httpResponse.getEntity());
+		        ((CloseableHttpResponse) respObj.httpResponse).close();
+		    } catch (Exception e) {
+		        TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		    }
 		}
 	}
 	
@@ -824,7 +850,8 @@ public class WebsiteService {
 				} else {
 					valueList = new ArrayList<>();
 				}
-				String ipAddress = ServiceUtil.getIpAddress(request);
+				String ipAddress = ClientIpUtil.getClientIp(request) ;
+//                ServiceUtil.getIpAddress(request);
 				if (!valueList.contains(ipAddress)) {
 					valueList.add(ipAddress);
 					headers.put("x-forwarded-for", valueList);

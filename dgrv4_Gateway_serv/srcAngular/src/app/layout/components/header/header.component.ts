@@ -17,9 +17,10 @@ import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss'],
+    standalone: false
 })
 export class HeaderComponent implements OnInit {
   items: MenuItem[] = [];

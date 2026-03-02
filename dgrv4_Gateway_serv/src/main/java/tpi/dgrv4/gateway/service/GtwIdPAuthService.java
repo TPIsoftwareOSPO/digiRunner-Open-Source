@@ -5,10 +5,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +13,11 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -34,32 +35,19 @@ import tpi.dgrv4.gateway.component.IdPWellKnownHelper.WellKnownData;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class GtwIdPAuthService {
 
-	private ObjectMapper objectMapper;
-	private TsmpSettingService tsmpSettingService;
-	private TokenHelper tokenHelper;
-	private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
-	private DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao;
-	private DgrGtwIdpInfoODao dgrGtwIdpInfoODao; 
-	private GtwIdPHelper gtwIdPHelper; 
-	private IdPWellKnownHelper idPWellKnownHelper;
-	
-	@Autowired
-	public GtwIdPAuthService(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService, TokenHelper tokenHelper,
-			DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao, DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao,
-			DgrGtwIdpInfoODao dgrGtwIdpInfoODao, GtwIdPHelper gtwIdPHelper, IdPWellKnownHelper idPWellKnownHelper) {
-		super();
-		this.objectMapper = objectMapper;
-		this.tsmpSettingService = tsmpSettingService;
-		this.tokenHelper = tokenHelper;
-		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
-		this.dgrGtwIdpAuthDDao = dgrGtwIdpAuthDDao;
-		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
-		this.gtwIdPHelper = gtwIdPHelper;
-		this.idPWellKnownHelper = idPWellKnownHelper;
-	}
+	private final ObjectMapper objectMapper;
+	private final TsmpSettingService tsmpSettingService;
+	private final TokenHelper tokenHelper;
+	private final DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
+	private final DgrGtwIdpAuthDDao dgrGtwIdpAuthDDao;
+	private final DgrGtwIdpInfoODao dgrGtwIdpInfoODao; 
+	private final GtwIdPHelper gtwIdPHelper; 
+	private final IdPWellKnownHelper idPWellKnownHelper;
 
 	public ResponseEntity<?> gtwIdPAuth(HttpHeaders headers, HttpServletRequest httpReq, HttpServletResponse httpResp, 
 			String idPType) throws Exception {
@@ -103,7 +91,7 @@ public class GtwIdPAuthService {
 						codeVerifierForOauth2, maxAge);
 				httpResp.addHeader(HttpHeaders.SET_COOKIE, codeVerifierCookie.toString());
 
-				errRespEntity = gtwIdPAuth_oauth2(httpResp, responseType, dgrClientRedirectUri, idPType, dgrClientId,
+				errRespEntity = gtwIdPAuthForOAuth2(httpResp, responseType, dgrClientRedirectUri, idPType, dgrClientId,
 						state, oidcScopeStr, codeChallenge, codeChallengeMethod, codeVerifierForOauth2, reqUri);
 				if (errRespEntity != null) {// 資料驗證有錯誤
 					return errRespEntity;
@@ -135,13 +123,14 @@ public class GtwIdPAuthService {
 	/**
 	 * for Oauth2.0 GOOGLE / MS IdP 流程
 	 */
-	public ResponseEntity<?> gtwIdPAuth_oauth2(HttpServletResponse httpResp, String responseType,
+	public ResponseEntity<?> gtwIdPAuthForOAuth2(HttpServletResponse httpResp, String responseType,
 			String dgrClientRedirectUri, String idPType, String dgrClientId, String state, String dgrScopeStr,
 			String codeChallenge, String codeChallengeMethod, String codeVerifierForOauth2, String reqUri) throws Exception {
 
 		ResponseEntity<?> errRespEntity = null;
 		//checkmarx, Reflected XSS All Clients 
 		reqUri = ESAPI.encoder().encodeForHTML(reqUri);
+		idPType = ESAPI.encoder().encodeForHTML(idPType);
 		
 		// 1.取得 dgR client 對應的 IdP 相關資料
 		// 取得狀態為 "Y",且建立時間最新的
@@ -154,7 +143,7 @@ public class GtwIdPAuthService {
 			TPILogger.tl.debug("Table [DGR_GTW_IDP_INFO_O] can't find data. dgrClientId: " + dgrClientId
 					+ ", idpType: " + idPType + ", status: " + status);
 			// 設定檔缺少參數
-			String errMsg = TokenHelper.THE_PROFILE_IS_MISSING_PARAMETERS + "GTW IdP Info";
+			String errMsg = TokenHelper.THE_PROFILE_IS_MISSING_PARAMETERS + "GTW IdP Info, idpType: " + idPType;
 			TPILogger.tl.debug(errMsg);
 			errRespEntity = getTokenHelper().getUnauthorizedErrorResp(reqUri, errMsg);// 401
 			return errRespEntity;

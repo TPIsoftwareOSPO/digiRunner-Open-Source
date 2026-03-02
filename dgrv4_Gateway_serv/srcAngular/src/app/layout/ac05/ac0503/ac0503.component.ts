@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { ReportService } from 'src/app/shared/services/api-report.service';
@@ -18,26 +18,27 @@ import { AlertType } from 'src/app/models/common.enum';
 import { AA1213RespItem } from 'src/app/models/api/ReportService/aa1213.interface';
 
 @Component({
-  selector: 'app-ac0503',
-  templateUrl: './ac0503.component.html',
-  styleUrls: ['./ac0503.component.css'],
-  providers: [ApiService],
+    selector: 'app-ac0503',
+    templateUrl: './ac0503.component.html',
+    styleUrls: ['./ac0503.component.css'],
+    providers: [ApiService],
+    standalone: false
 })
 export class Ac0503Component extends BaseComponent implements OnInit {
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   tableData: AA1213RespItem[] = [];
 
   constructor(
     router: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private reportService: ReportService
   ) {
     super(router, tr);
     this.form = this.fb.group({
-      rptMode: new FormControl('group'),
-      abnormalElapsedTime: new FormControl(30000),
+      rptMode: new UntypedFormControl('group'),
+      abnormalElapsedTime: new UntypedFormControl(30000),
     });
   }
 

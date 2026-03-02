@@ -63,8 +63,6 @@ public class DGRCServicePostForm implements IApiCacheService {
 	@Setter(onMethod_ = @Autowired)
 	ResponseHandler responseHandler;
 
-	private Map<String, String> maskInfo;
-
 
 	public void forwardToPostFormData(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes) throws Exception {
@@ -77,7 +75,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 			}
 			// 包含檔案的轉發
 			multipartRequest = toMultipartRequest(httpReq);
-			forwardTo(multipartRequest, httpRes, httpHeaders);
+			forwardTo2(multipartRequest, httpRes, httpHeaders);
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			throw e;
@@ -100,13 +98,14 @@ public class DGRCServicePostForm implements IApiCacheService {
 			String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
 			TsmpApiRegId tsmpApiRegId = new TsmpApiRegId(apiId, moduleName);
 			Optional<TsmpApiReg> opt_tsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId);
+			Map<String, String> maskInfo = new HashMap<>();
 			if (opt_tsmpApiReg.isPresent()) {
 				apiReg = opt_tsmpApiReg.get();
 				ResponseEntity<?> allowMethodErrRespEntity = getCommForwardProcService().checkMethod(apiReg, httpReq);
 				if (allowMethodErrRespEntity != null) {
 					return allowMethodErrRespEntity;
 				}
-				maskInfo = new HashMap<>();
+				
 				maskInfo.put("bodyMaskPolicy", apiReg.getBodyMaskPolicy());
 				maskInfo.put("bodyMaskPolicySymbol", apiReg.getBodyMaskPolicySymbol());
 				maskInfo.put("bodyMaskPolicyNum", String.valueOf(apiReg.getBodyMaskPolicyNum()));
@@ -116,6 +115,9 @@ public class DGRCServicePostForm implements IApiCacheService {
 				maskInfo.put("headerMaskPolicySymbol", apiReg.getHeaderMaskPolicySymbol());
 				maskInfo.put("headerMaskPolicyNum", String.valueOf(apiReg.getHeaderMaskPolicyNum()));
 				maskInfo.put("headerMaskKey", apiReg.getHeaderMaskKey());
+				
+				//Global masking
+				getCommForwardProcService().generateGlobalMaskParam(maskInfo);
 
 			} else {
 				throw new Exception("TSMP_API_REG not found, api_key:" + apiId + "\t,module_name:" + moduleName);
@@ -129,7 +131,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 			}
 
 			// 印出第一道log
-			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl);
+			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl, maskInfo);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start DGRC】--\n" + reqLog.toString());
 
 			// 檢查授權
@@ -137,12 +139,13 @@ public class DGRCServicePostForm implements IApiCacheService {
 
 			// 1. req header / body
 			String reqMbody = getCommForwardProcService().getReqMbody(httpReq);
+			String maskReqMbody = getCommForwardProcService().getReqMbody(httpReq, maskInfo);
 			// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
-			TsmpApiLogReq dgrcPostFormDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq, reqMbody,
+			TsmpApiLogReq dgrcPostFormDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq, maskReqMbody,
 					"dgrc", aType);
 			// 第一組 RDB Req
 			TsmpApiLogReq dgrcPostFormDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq,
-					reqMbody, "dgrc", aType);
+					maskReqMbody, "dgrc", aType);
 
 			// 授權錯誤,則回覆錯誤訊息
 			if (verifyResp != null) {
@@ -189,7 +192,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 			// 調用目標URL
 			Map<String, Object> convertResponseBodyMap = forwardToWithoutFileByPolicy(httpHeaders, httpReq, httpRes, apiReg,
 					uuid, tokenPayload, cApiKeySwitch, dgrcPostFormDgrReqVo, dgrcPostFormDgrReqVo_rdb, srcUrlList, reqMbody,
-					partContentTypes);
+					partContentTypes, maskInfo);
 
 			if (httpRes.isCommitted()) {
 				return ResponseEntity.status(httpRes.getStatus()).build();
@@ -236,7 +239,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	private Map<String, Object> forwardToWithoutFileByPolicy(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, TsmpApiReg apiReg, String uuid, int tokenPayload, boolean cApiKeySwitch,
 			TsmpApiLogReq dgrcPostFormDgrReqVo, TsmpApiLogReq dgrcPostFormDgrReqVo_rdb, List<String> srcUrlList,
-			String reqMbody, Map<String, String> partContentTypes) throws Exception {
+			String reqMbody, Map<String, String> partContentTypes, Map<String, String> maskInfo) throws Exception {
 		// 失敗判定策略
 		String failDiscoveryPolicy = apiReg.getFailDiscoveryPolicy();
 		// 失敗處置策略, 0: 無重試; 1: 當調用目標URL失敗時,自動重試下一個目標URL
@@ -251,7 +254,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 				TPILogger.tl.debug("Src Url(" + tryNumWord + "):" + srcUrl);
 				convertResponseBodyMap = forwardToWithoutFile(httpReq, httpRes, httpHeaders, reqMbody, srcUrl, uuid,
 						tokenPayload, dgrcPostFormDgrReqVo, dgrcPostFormDgrReqVo_rdb, cApiKeySwitch, partContentTypes,
-						tryNumWord, apiReg);
+						tryNumWord, apiReg, maskInfo);
 
 				int httpStatus = httpRes.getStatus();
 				boolean isStopReTry = getCommForwardProcService().isStopReTry(failDiscoveryPolicy, httpStatus);// 是否停止重試
@@ -265,7 +268,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 			TPILogger.tl.debug("Src Url:" + srcUrl);
 			convertResponseBodyMap = forwardToWithoutFile(httpReq, httpRes, httpHeaders, reqMbody, srcUrl, uuid,
 					tokenPayload, dgrcPostFormDgrReqVo, dgrcPostFormDgrReqVo_rdb, cApiKeySwitch, partContentTypes,
-					null, apiReg);
+					null, apiReg, maskInfo);
 		}
 
 		return convertResponseBodyMap; // Response alread commited HTTP code : 503 --> null
@@ -274,7 +277,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	protected Map<String, Object> forwardToWithoutFile(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders, String reqMbody, String srcUrl, String uuid, int tokenPayload,
 			TsmpApiLogReq dgrcPostFormDgrReqVo, TsmpApiLogReq dgrcPostFormDgrReqVo_rdb, Boolean cApiKeySwitch,
-			Map<String, String> partContentTypes, String tryNumWord, TsmpApiReg tsmpApiReg) throws Exception {
+			Map<String, String> partContentTypes, String tryNumWord, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo) throws Exception {
 		// 2. dgrc req header / body
 		// 3. dgrc resp header / body / code
 
@@ -299,14 +302,14 @@ public class DGRCServicePostForm implements IApiCacheService {
 			paramVo.setPartContentTypes(partContentTypes);
 			paramVo.setHttpReq(httpReq);
 			AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
-					paramVo);
+					paramVo, maskInfo);
 			if (apiCacheRespVo != null) {// 走cache
 				dgrcPostForm_respObj.setRespData(apiCacheRespVo.getStatusCode(), apiCacheRespVo.getRespStr(),
 						apiCacheRespVo.getHttpRespArray(), apiCacheRespVo.getRespHeader());
 				// 此行因為httpRes不能放在callback,所以移到外層
 			} else {// cache發生未知錯誤,call api
 				dgrcPostForm_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, dgrcPostFormDgrReqVo,
-						reqMbody, uuid, false, tryNumWord, tsmpApiReg);
+						reqMbody, uuid, false, tryNumWord, tsmpApiReg, maskInfo);
 			}
 		} else if (StringUtils.hasText(fixedCacheId)) {// 固定cache
 			FixedCacheVo cacheVo = CommForwardProcService.fixedCacheMap.get(fixedCacheId);
@@ -314,7 +317,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 				boolean isUpdate = getCommForwardProcService().isFixedCacheUpdate(cacheVo, dgrcPostFormDgrReqVo);
 				if (isUpdate) {// 更新紀錄
 					dgrcPostForm_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, dgrcPostFormDgrReqVo,
-							reqMbody, uuid, true, tryNumWord, tsmpApiReg);
+							reqMbody, uuid, true, tryNumWord, tsmpApiReg, maskInfo);
 					// statusCode大於等於200 且 小於400才更新紀錄
 					if (dgrcPostForm_respObj.statusCode >= 200 && dgrcPostForm_respObj.statusCode < 400) {
 						cacheVo.setData(dgrcPostForm_respObj.httpRespArray);
@@ -333,7 +336,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 				}
 			} else {// call api
 				dgrcPostForm_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, dgrcPostFormDgrReqVo,
-						reqMbody, uuid, true, tryNumWord, tsmpApiReg);
+						reqMbody, uuid, true, tryNumWord, tsmpApiReg, maskInfo);
 				// statusCode大於等於200 且 小於400才更新紀錄
 				if (dgrcPostForm_respObj.statusCode >= 200 && dgrcPostForm_respObj.statusCode < 400) {
 					cacheVo = new FixedCacheVo();
@@ -348,7 +351,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 
 		} else {// call api
 			dgrcPostForm_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, dgrcPostFormDgrReqVo, reqMbody,
-					uuid, false, tryNumWord, tsmpApiReg);
+					uuid, false, tryNumWord, tsmpApiReg, maskInfo);
 		}
 
 		httpRes = getCommForwardProcService().getConvertResponse(dgrcPostForm_respObj.respHeader,
@@ -363,7 +366,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 
 	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, String srcUrl, TsmpApiLogReq dgrReqVo, String reqMbody, String uuid,
-			boolean isFixedCache, String tryNumWord, TsmpApiReg tsmpApiReg) throws Exception {
+			boolean isFixedCache, String tryNumWord, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo) throws Exception {
 		String tryNumLog = "";// 當失敗處置策略有設定失敗時重試API時,印出這是第幾次嘗試打API;否則,空白
 		if (StringUtils.hasLength(tryNumWord)) {
 			tryNumLog = "【" + tryNumWord + "】";
@@ -382,10 +385,11 @@ public class DGRCServicePostForm implements IApiCacheService {
 		var partsInfo = getCommForwardProcService().fetchFormDataPartsInfo(httpReq);
 
 		// 第二組ES REQ
+		String maskReqMbody = getCommForwardProcService().getReqMbody(httpReq, maskInfo);
 		TsmpApiLogReq dgrcPostFormBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header,
-				srcUrl, reqMbody);
+				srcUrl, maskReqMbody);
 
-		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, partsInfo.getB(), srcUrl, partsInfo.getA());
+		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, partsInfo.getB(), srcUrl, partsInfo.getA(), maskInfo);
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(sb.toString());
@@ -408,19 +412,21 @@ public class DGRCServicePostForm implements IApiCacheService {
 		return respObj;
 	}
 
-	public HttpRespData callback(AutoCacheParamVo vo) {
+	public HttpRespData callback(AutoCacheParamVo vo, Map<String, String> maskInfo) {
 		try {
 			// 印出第二,三道log
 			StringBuffer sb = new StringBuffer();
 			sb.append("\n--【LOGUUID】【" + vo.getUuid() + "】【Start DGRC-to-Backend For Cache】--");
 			sb.append("\n--【LOGUUID】【" + vo.getUuid() + "】【End DGRC-from-Backend For Cache】--\n");
 
+			
 			// 第二組ES REQ
+			String maskReqMbody = getCommForwardProcService().getReqMbody(vo.getHttpReq(), maskInfo);
 			TsmpApiLogReq dgrcPostFormBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(),
-					vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
+					vo.getHeader(), vo.getSrcUrl(), maskReqMbody);
 
 			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getParamMap(), vo.getSrcUrl(),
-					vo.getPartContentTypes());
+					vo.getPartContentTypes(), maskInfo);
 			respObj.fetchByte(maskInfo); // because Enable inputStream
 			sb.append(respObj.getLogStr());
 			TPILogger.tl.debug(sb.toString());
@@ -441,7 +447,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	}
 
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders,
-			String reqUrl) throws IOException, ServletException {
+			String reqUrl, Map<String, String> maskInfo) throws IOException, ServletException {
 		StringBuffer dgrcPostFormLog_log = new StringBuffer();
 
 		// print
@@ -474,7 +480,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 		parts = httpReq.getParts();
 		for (Part part : parts) {
 			String name = part.getName();
-			String contentType = part.getContentType();
+			String contentType = part.getContentType() == null ? "" : part.getContentType();
 			String value = httpReq.getParameter(name);
 			writeLogger(dgrcPostFormLog_log,
 					"\tKey: " + name + ", Value: "
@@ -501,7 +507,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	}
 
 	protected HttpRespData getHttpRespData(String httpMethod, Map<String, List<String>> header,
-			Map<String, String[]> paramMap, String reqUrl, Map<String, String> partContentTypes) throws Exception {
+			Map<String, String[]> paramMap, String reqUrl, Map<String, String> partContentTypes, Map<String, String> maskInfo) throws Exception {
 
 		// form data
 		Map<String, List<String>> formData = new HashMap<>();
@@ -527,7 +533,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	/*
 	 * 包含檔案的轉發
 	 */
-	protected void forwardTo(MultipartHttpServletRequest httpReq, HttpServletResponse httpRes,
+	protected void forwardTo2(MultipartHttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders) throws Exception {
 		String reqUrl = httpReq.getRequestURI();
 		TsmpApiReg apiReg = null;
@@ -535,6 +541,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 		String apiId = httpReq.getAttribute(GatewayFilter.API_ID).toString();
 		TsmpApiRegId tsmpApiRegId = new TsmpApiRegId(apiId, moduleName);
 		Optional<TsmpApiReg> opt_tsmpApiReg = getTsmpApiRegCacheProxy().findById(tsmpApiRegId);
+		Map<String, String> maskInfo = new HashMap<>();
 		if (opt_tsmpApiReg.isPresent()) {
 			apiReg = opt_tsmpApiReg.get();
 			ResponseEntity<?> allowMethodErrRespEntity = getCommForwardProcService().checkMethod(apiReg, httpReq);
@@ -545,7 +552,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 						.write();
 				return;
 			}
-			maskInfo = new HashMap<>();
+			
 			maskInfo.put("bodyMaskPolicy", apiReg.getBodyMaskPolicy());
 			maskInfo.put("bodyMaskPolicySymbol", apiReg.getBodyMaskPolicySymbol());
 			maskInfo.put("bodyMaskPolicyNum", String.valueOf(apiReg.getBodyMaskPolicyNum()));
@@ -555,6 +562,9 @@ public class DGRCServicePostForm implements IApiCacheService {
 			maskInfo.put("headerMaskPolicySymbol", apiReg.getHeaderMaskPolicySymbol());
 			maskInfo.put("headerMaskPolicyNum", String.valueOf(apiReg.getHeaderMaskPolicyNum()));
 			maskInfo.put("headerMaskKey", apiReg.getHeaderMaskKey());
+			
+			//Global masking
+			getCommForwardProcService().generateGlobalMaskParam(maskInfo);
 
 		} else {
 			throw new Exception("TSMP_API_REG not found, api_key:" + apiId + "\t,module_name:" + moduleName);
@@ -728,7 +738,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 		// 調用目標URL
 		Map<String, Object> convertResponseBodyMap = forwardWithFileByPolicy(httpHeaders, httpReq, httpRes, apiReg,
 				uuid, tokenPayload, cApiKeySwitch, dgrReqVo, dgrReqVo_rdb, srcUrlList, reqMbody, boundary, formBody,
-				formBody2Hex);
+				formBody2Hex, maskInfo);
 
 		if (convertResponseBodyMap == null) {
 			throw new RuntimeException("forwardWithFileByPolicy return null");
@@ -765,7 +775,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	private Map<String, Object> forwardWithFileByPolicy(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, TsmpApiReg apiReg, String uuid, int tokenPayload, boolean cApiKeySwitch,
 			TsmpApiLogReq dgrReqVo, TsmpApiLogReq dgrReqVo_rdb, List<String> srcUrlList, String reqMbody,
-			String boundary, byte[] formBody, byte[] formBody2Hex) throws Exception {
+			String boundary, byte[] formBody, byte[] formBody2Hex, Map<String, String> maskInfo) throws Exception {
 		// 失敗判定策略
 		String failDiscoveryPolicy = apiReg.getFailDiscoveryPolicy();
 		// 失敗處置策略, 0: 無重試; 1: 當調用目標URL失敗時,自動重試下一個目標URL
@@ -780,7 +790,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 				TPILogger.tl.debug("Src Url(" + tryNumWord + "):" + srcUrl);
 				convertResponseBodyMap = forwardWithFile(httpReq, httpRes, httpHeaders, reqMbody, srcUrl, uuid,
 						tokenPayload, dgrReqVo, dgrReqVo_rdb, cApiKeySwitch, boundary, formBody, formBody2Hex,
-						tryNumWord, apiReg);
+						tryNumWord, apiReg, maskInfo);
 
 				int httpStatus = httpRes.getStatus();
 				boolean isStopReTry = getCommForwardProcService().isStopReTry(failDiscoveryPolicy, httpStatus);// 是否停止重試
@@ -793,7 +803,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 			String srcUrl = srcUrlList.get(0);// 只取第一個URL執行
 			TPILogger.tl.debug("Src Url:" + srcUrl);
 			convertResponseBodyMap = forwardWithFile(httpReq, httpRes, httpHeaders, reqMbody, srcUrl, uuid,
-					tokenPayload, dgrReqVo, dgrReqVo_rdb, cApiKeySwitch, boundary, formBody, formBody2Hex, null, apiReg);
+					tokenPayload, dgrReqVo, dgrReqVo_rdb, cApiKeySwitch, boundary, formBody, formBody2Hex, null, apiReg,maskInfo);
 		}
 
 		return convertResponseBodyMap; // Response alread commited HTTP code : 503 --> null
@@ -802,7 +812,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	protected Map<String, Object> forwardWithFile(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders, String reqMbody, String srcUrl, String uuid, int tokenPayload,
 			TsmpApiLogReq dgrReqVo, TsmpApiLogReq dgrReqVo_rdb, Boolean cApiKeySwitch, String boundary, byte[] formBody,
-			byte[] formBody2Hex, String tryNumWord, TsmpApiReg tsmpApiReg) throws Exception {
+			byte[] formBody2Hex, String tryNumWord, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo) throws Exception {
 
 		String tryNumLog = "";// 當失敗處置策略有設定失敗時重試API時,印出這是第幾次嘗試打API;否則,空白
 		if (StringUtils.hasLength(tryNumWord)) {
@@ -826,7 +836,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 		TsmpApiLogReq backendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header, srcUrl,
 				reqMbody);
 		// 7. 呼叫 backend API 的過程
-		HttpRespData dgrcPostForm_respObj = forwardWithFile(srcUrl, httpReq.getMethod(), header, boundary, formBody, formBody2Hex, httpReq);
+		HttpRespData dgrcPostForm_respObj = forwardWithFile(srcUrl, httpReq.getMethod(), header, boundary, formBody, formBody2Hex, httpReq, maskInfo);
 
 
 
@@ -865,7 +875,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 	}
 
 	private HttpRespData forwardWithFile(String reqUrl, String method, Map<String, List<String>> httpHeader, //
-										 String boundary, byte[] formBody, byte[] formBody2Hex ,HttpServletRequest httpReq) throws Exception {
+										 String boundary, byte[] formBody, byte[] formBody2Hex ,HttpServletRequest httpReq, Map<String, String> maskInfo) throws Exception {
 		boolean isEnableInputStream = true;
 		boolean dgrcPostForm_isRedirect = false;
 

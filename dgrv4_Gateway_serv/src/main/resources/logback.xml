@@ -109,10 +109,26 @@
 	</logger>
 	<logger name="tpi.dgrv4" level="INFO" additivity="false">
 		<appender-ref ref="fileloguuid" />
-	</logger>	
-		<logger name="tpi.dgrv4" level="TRACE" additivity="false">
+	</logger>
+	<!-- 印sql, 因為不知道Log檔,為何不印SQL,所以才有這段,但會造成spring.jpa.show-sql不論是true或false都會印
+	     The SQL is printed because it's unclear why the log file isn't printing SQL, hence this section.
+	     However, this will cause `spring.jpa.show-sql` to print SQL regardless of whether it's set to true or false.
+	-->
+	<!--<logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+	    <appender-ref ref="stdout" />
+	    <appender-ref ref="fileout" />
+	</logger>-->
+	<logger name="tpi.dgrv4" level="TRACE" additivity="false">
 	 	<appender-ref ref="fileout" />
-	</logger>	
+	</logger>
+	<!--
+		印sql參數值 
+	    print sql param 
+	-->	
+	<!--<logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+    	<appender-ref ref="stdout" />
+    	<appender-ref ref="fileout" />
+	</logger>-->
 	
 
 	

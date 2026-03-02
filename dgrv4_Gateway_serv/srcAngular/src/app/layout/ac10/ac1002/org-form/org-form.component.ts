@@ -1,7 +1,7 @@
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DialogService } from 'primeng/dynamicdialog';
 import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { FormOperate } from '../../../../models/common.enum';
@@ -16,10 +16,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { OrganizationComponent } from 'src/app/shared/organization/organization.component';
 
 @Component({
-  selector: 'app-org-form',
-  templateUrl: './org-form.component.html',
-  styleUrls: ['./org-form.component.css'],
-  providers: [MessageService]
+    selector: 'app-org-form',
+    templateUrl: './org-form.component.html',
+    styleUrls: ['./org-form.component.css'],
+    providers: [MessageService],
+    standalone: false
 })
 export class OrgFormComponent implements OnInit {
 
@@ -28,7 +29,7 @@ export class OrgFormComponent implements OnInit {
   // openDynamicDialogRefs: DynamicDialogRef[] = [];
 
 
-  form: FormGroup;
+  form: UntypedFormGroup;
   formOperate = FormOperate;
   displayOrgChart: boolean = false;
   submitBtnName: string = '';
@@ -43,7 +44,7 @@ export class OrgFormComponent implements OnInit {
   isManager: boolean = false;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private orgService: TOrgService,
     private toolService: ToolService,
     private ngxService: NgxUiLoaderService,
@@ -156,21 +157,21 @@ export class OrgFormComponent implements OnInit {
     switch (formOperate) {
       case FormOperate.create:
         return {
-          orgName: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.orgNameLimitChar.value)]),
-          parentId: new FormControl('', ValidatorFns.requiredValidator()),
-          orgCode: new FormControl('', ValidatorFns.stringNameValidator(this.orgCodeLimitChar.value)),
-          conName: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.conNameLimitChar.value)]),
-          conTEL: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(this.conTELLimitChar.value)]),
-          conMail: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.mailValidator(), ValidatorFns.maxLengthValidator(this.conMailLimitChar.value)])
+          orgName: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.orgNameLimitChar.value)]),
+          parentId: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          orgCode: new UntypedFormControl('', ValidatorFns.stringNameValidator(this.orgCodeLimitChar.value)),
+          conName: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.conNameLimitChar.value)]),
+          conTEL: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(this.conTELLimitChar.value)]),
+          conMail: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.mailValidator(), ValidatorFns.maxLengthValidator(this.conMailLimitChar.value)])
         }
       case FormOperate.update:
         return {
-          orgName: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.orgNameLimitChar.value)]),
-          parentId: new FormControl('', ValidatorFns.requiredValidator()),
-          orgCode: new FormControl('', ValidatorFns.stringNameValidator(this.orgCodeLimitChar.value)),
-          conName: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.conNameLimitChar.value)]),
-          conTEL: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(this.conTELLimitChar.value)]),
-          conMail: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.mailValidator(), ValidatorFns.maxLengthValidator(this.conMailLimitChar.value)])
+          orgName: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.orgNameLimitChar.value)]),
+          parentId: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          orgCode: new UntypedFormControl('', ValidatorFns.stringNameValidator(this.orgCodeLimitChar.value)),
+          conName: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.conNameLimitChar.value)]),
+          conTEL: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(this.conTELLimitChar.value)]),
+          conMail: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.mailValidator(), ValidatorFns.maxLengthValidator(this.conMailLimitChar.value)])
         };
       default:
         return {

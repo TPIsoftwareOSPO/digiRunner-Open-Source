@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 
 @Pipe({
-    name: 'module_status'
+    name: 'module_status',
+    standalone: false
 })
 export class ModuleStatusPipe implements PipeTransform {
 

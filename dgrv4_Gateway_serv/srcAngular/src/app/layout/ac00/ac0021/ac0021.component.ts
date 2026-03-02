@@ -1,7 +1,7 @@
 import { generate } from 'generate-password';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -18,16 +18,17 @@ import { DPB0221Req, DPB0221Resp } from 'src/app/models/api/ServerService/dpb022
 import { DPB0223Req } from 'src/app/models/api/ServerService/dpb0223.interface';
 
 @Component({
-  selector: 'app-ac0021',
-  templateUrl: './ac0021.component.html',
-  styleUrls: ['./ac0021.component.scss'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-ac0021',
+    templateUrl: './ac0021.component.html',
+    styleUrls: ['./ac0021.component.scss'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0021Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
-  formEdit!: FormGroup;
+  form!: UntypedFormGroup;
+  formEdit!: UntypedFormGroup;
 
   currentAction: string = '';
   cusInfo?: DPB0221Resp;
@@ -40,7 +41,7 @@ export class Ac0021Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -52,22 +53,22 @@ export class Ac0021Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      cusId: new FormControl(''),
-      keyword: new FormControl(''),
-      cusStatus: new FormControl(''),
+      cusId: new UntypedFormControl(''),
+      keyword: new UntypedFormControl(''),
+      cusStatus: new UntypedFormControl(''),
     });
 
     this.formEdit = this.fb.group({
-      cusId: new FormControl(''),
-      cusName: new FormControl(''),
-      cusStatus: new FormControl(''),
-      cusLoginUrl: new FormControl(''),
-      cusBackendLoginUrl: new FormControl(''),
-      cusUserDataUrl: new FormControl(''),
-      createDateTime: new FormControl(''),
-      createUser: new FormControl(''),
-      updateDateTime: new FormControl(''),
-      updateUser: new FormControl(''),
+      cusId: new UntypedFormControl(''),
+      cusName: new UntypedFormControl(''),
+      cusStatus: new UntypedFormControl(''),
+      cusLoginUrl: new UntypedFormControl(''),
+      cusBackendLoginUrl: new UntypedFormControl(''),
+      cusUserDataUrl: new UntypedFormControl(''),
+      createDateTime: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateDateTime: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
     });
   }
 

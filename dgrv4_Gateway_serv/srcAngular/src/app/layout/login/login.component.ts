@@ -16,7 +16,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ResToken } from 'src/app/models/api/TokenService/token.interface';
 import { ResHeader } from 'src/app/models/api/base.header.interface';
 import { Observable, tap } from 'rxjs';
@@ -35,20 +35,21 @@ import * as ValidatorFns from '../../shared/validator-functions';
 import { AlertType } from 'src/app/models/common.enum';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  providers: [
-    TokenService,
-    AlertService,
-    ToolService,
-    SignBlockService,
-    UtilService,
-    UserService,
-    FuncService,
-    ApiBaseService,
-    SanitizerService,
-  ],
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    providers: [
+        TokenService,
+        AlertService,
+        ToolService,
+        SignBlockService,
+        UtilService,
+        UserService,
+        FuncService,
+        ApiBaseService,
+        SanitizerService,
+    ],
+    standalone: false
 })
 export class LoginComponent
   extends BaseComponent
@@ -60,7 +61,7 @@ export class LoginComponent
 
   isReady: boolean = false;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   relogin: boolean = false;
 
@@ -85,7 +86,7 @@ export class LoginComponent
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private router: Router,
     private ngxService: NgxUiLoaderService,
     private tokenService: TokenService,
@@ -101,14 +102,14 @@ export class LoginComponent
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      uname: new FormControl(''),
-      pwd: new FormControl(''),
-      email: new FormControl(''),
-      expireKey: new FormControl(),
-      otpCode: new FormControl(''),
-      newMima: new FormControl(''),
-      confirmNewMima: new FormControl(''),
-      userList: new FormControl([]),
+      uname: new UntypedFormControl(''),
+      pwd: new UntypedFormControl(''),
+      email: new UntypedFormControl(''),
+      expireKey: new UntypedFormControl(),
+      otpCode: new UntypedFormControl(''),
+      newMima: new UntypedFormControl(''),
+      confirmNewMima: new UntypedFormControl(''),
+      userList: new UntypedFormControl([]),
     });
   }
 
@@ -147,7 +148,7 @@ export class LoginComponent
     }
     tarUrl += '/dgrv4/ssotoken/acCusIdp/login/getCusLoginUrl';
     // console.log(tarUrl);
-    this.httpClient.get(tarUrl, { responseType: 'text' }).subscribe((res) => {
+    this.httpClient.post(tarUrl,{} ,{ responseType: 'text' }).subscribe((res) => {
       if (res) {
         this.cusIdpLoginList = JSON.parse(res).map((obj) => {
           return obj;

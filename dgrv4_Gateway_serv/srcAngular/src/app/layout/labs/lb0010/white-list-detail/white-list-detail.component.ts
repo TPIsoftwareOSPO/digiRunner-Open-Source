@@ -1,4 +1,4 @@
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { DPB0233WhitelistItem } from 'src/app/models/api/ServerService/dpb0233.interface';
 
@@ -7,9 +7,10 @@ export interface _DPB0233WhitelistItem extends DPB0233WhitelistItem{
 }
 
 @Component({
-  selector: 'app-white-list-detail',
-  templateUrl: './white-list-detail.component.html',
-  styleUrls: ['./white-list-detail.component.css']
+    selector: 'app-white-list-detail',
+    templateUrl: './white-list-detail.component.html',
+    styleUrls: ['./white-list-detail.component.css'],
+    standalone: false
 })
 export class WhiteListDetailComponent implements OnInit {
 
@@ -21,17 +22,17 @@ export class WhiteListDetailComponent implements OnInit {
   @Output() change: EventEmitter<_DPB0233WhitelistItem> = new EventEmitter;
   @Output() remove: EventEmitter<number> = new EventEmitter;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) { }
 
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      id: new FormControl({value:this.data ? this.data.id : '',disabled: true}),
-      rule: new FormControl(this.data ? this.data.rule : ''),
+      id: new UntypedFormControl({value:this.data ? this.data.id : '',disabled: true}),
+      rule: new UntypedFormControl(this.data ? this.data.rule : ''),
     })
 
     this.form.valueChanges.subscribe(() => {

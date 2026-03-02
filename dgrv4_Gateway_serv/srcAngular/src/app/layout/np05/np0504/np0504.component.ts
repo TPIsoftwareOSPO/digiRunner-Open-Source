@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0094Req, DPB0094RespItem } from 'src/app/models/api/OpenApiService/dpb0094.interface';
 import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.service';
@@ -15,13 +15,14 @@ import { FileService } from 'src/app/shared/services/api-file.service';
 @Component({
     selector: 'app-np0504',
     templateUrl: './np0504.component.html',
-    styleUrls: ['./np0504.component.css']
+    styleUrls: ['./np0504.component.css'],
+    standalone: false
 })
 export class Np0504Component extends BaseComponent implements OnInit {
 
     currentTitle: string = this.title;
     pageNum: number = 1; // 1：open api key 列表、2：open api key detail
-    form: FormGroup;
+    form: UntypedFormGroup;
     clientOpenApiKeyListCols: { field: string; header: string; width: string; }[] = [];
     clientOpenApiKeyListData: Array<DPB0094RespItem> = new Array<DPB0094RespItem>();
     clientOpenApiKeyRowcount: number = 0;
@@ -33,7 +34,7 @@ export class Np0504Component extends BaseComponent implements OnInit {
     constructor(
          route: ActivatedRoute,
          tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private openApiService: OpenApiKeyService,
         private file: FileService
@@ -41,9 +42,9 @@ export class Np0504Component extends BaseComponent implements OnInit {
         super(route, tr);
 
         this.form = this.fb.group({
-          keyword: new FormControl(''),
-          startDate: new FormControl(''),
-          endDate: new FormControl('')
+          keyword: new UntypedFormControl(''),
+          startDate: new UntypedFormControl(''),
+          endDate: new UntypedFormControl('')
         });
     }
 

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'api_status'
+    name: 'api_status',
+    standalone: false
 })
 export class APIStatusPipe implements PipeTransform {
     transform(input: any, separator: string = ' ', limit?: number): any {

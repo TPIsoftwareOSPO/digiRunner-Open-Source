@@ -6,9 +6,10 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { marked, RendererObject } from 'marked';
 
 @Component({
-  selector: 'app-cert-info',
-  templateUrl: './cert-info.component.html',
-  styleUrls: ['./cert-info.component.scss'],
+    selector: 'app-cert-info',
+    templateUrl: './cert-info.component.html',
+    styleUrls: ['./cert-info.component.scss'],
+    standalone: false
 })
 export class CertInfoComponent implements OnInit {
   certinfo: string = '';

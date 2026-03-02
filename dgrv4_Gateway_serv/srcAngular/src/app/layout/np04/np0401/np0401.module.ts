@@ -21,7 +21,6 @@ import { RequisitionFormComponent } from './requisition-form/requisition-form.co
         FormsModule
     ],
     declarations: [Np0401Component, RequisitionFormComponent],
-    entryComponents: [RequisitionFormComponent],
     providers: [TokenExpiredGuard]
 })
 export class Np0401Module { }

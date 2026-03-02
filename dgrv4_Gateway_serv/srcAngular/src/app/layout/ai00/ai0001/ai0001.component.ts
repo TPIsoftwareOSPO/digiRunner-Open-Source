@@ -5,7 +5,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { AiService } from 'src/app/shared/services/api-ai.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { contentItem } from 'src/app/models/api/ServerService/dpb0250.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { DPB0251Req } from 'src/app/models/api/ServerService/dpb0251.interface';
@@ -14,10 +14,11 @@ import { DPB0253Req } from 'src/app/models/api/ServerService/dpb0253.interface';
 import * as ValidatorFns from '../../../shared/validator-functions';
 
 @Component({
-  selector: 'app-ai0001',
-  templateUrl: './ai0001.component.html',
-  styleUrls: ['./ai0001.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ai0001',
+    templateUrl: './ai0001.component.html',
+    styleUrls: ['./ai0001.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ai0001Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
@@ -25,7 +26,7 @@ export class Ai0001Component extends BaseComponent implements OnInit {
   currentAction: string = '';
   cols: { field: string; header: string }[] = [];
   tableData: Array<contentItem> = [];
-  formE!: FormGroup;
+  formE!: UntypedFormGroup;
   btnName: string = '';
 
   aiProviderDetail?: DPB0252Resp;
@@ -35,7 +36,7 @@ export class Ai0001Component extends BaseComponent implements OnInit {
     tr: TransformMenuNamePipe,
     private aiService: AiService,
     private toolService: ToolService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private ngxSrvice: NgxUiLoaderService
@@ -43,12 +44,12 @@ export class Ai0001Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.formE = this.fb.group({
-      aiProviderAlias: new FormControl(''),
-      aiProviderName: new FormControl(''),
-      aiModel: new FormControl(''),
-      generateAPI: new FormControl(''),
-      countTokenAPI: new FormControl(''),
-      aiProviderEnabled: new FormControl(''),
+      aiProviderAlias: new UntypedFormControl(''),
+      aiProviderName: new UntypedFormControl(''),
+      aiModel: new UntypedFormControl(''),
+      generateAPI: new UntypedFormControl(''),
+      countTokenAPI: new UntypedFormControl(''),
+      aiProviderEnabled: new UntypedFormControl(''),
     });
   }
 

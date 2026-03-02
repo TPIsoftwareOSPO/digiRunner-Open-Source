@@ -12,7 +12,7 @@ import { Req_0213 } from 'src/app/models/api/ClientService/aa0213.interface';
 import { AA0223Req } from 'src/app/models/api/ClientService/aa0223.interface';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { GroupAuthService } from 'src/app/shared/services/api-group-auth.service';
 import { DatetimeFormatPipe } from 'src/app/shared/pipes/datetime.format.pipe';
 import { SelectItem } from 'primeng/api';
@@ -26,10 +26,11 @@ import { AA0225Req } from 'src/app/models/api/ClientService/aa0225.interface';
 import { AA0221Req } from 'src/app/models/api/ClientService/aa0221.interface';
 
 @Component({
-  selector: 'app-ac0222',
-  templateUrl: './ac0222.component.html',
-  styleUrls: ['./ac0222.component.css'],
-  providers: [ClientService, MessageService, DatetimeFormatPipe]
+    selector: 'app-ac0222',
+    templateUrl: './ac0222.component.html',
+    styleUrls: ['./ac0222.component.css'],
+    providers: [ClientService, MessageService, DatetimeFormatPipe],
+    standalone: false
 })
 export class Ac0222Component extends BaseComponent implements OnInit {
 
@@ -62,18 +63,18 @@ export class Ac0222Component extends BaseComponent implements OnInit {
   rowcount_page12: number = 0;
   rowcount_page7: number = 0;
   rowcount_page11: number = 0;
-  form!: FormGroup;
-  form_page2!: FormGroup;
-  form_page3!: FormGroup;
-  form_page4!: FormGroup;
-  form_page5!: FormGroup;
-  form_page6!: FormGroup;
-  form_page7!: FormGroup;
-  form_page8!: FormGroup;
-  form_page9!: FormGroup;
-  form_page10!: FormGroup;
-  form_page11!: FormGroup;
-  form_page12!: FormGroup;
+  form!: UntypedFormGroup;
+  form_page2!: UntypedFormGroup;
+  form_page3!: UntypedFormGroup;
+  form_page4!: UntypedFormGroup;
+  form_page5!: UntypedFormGroup;
+  form_page6!: UntypedFormGroup;
+  form_page7!: UntypedFormGroup;
+  form_page8!: UntypedFormGroup;
+  form_page9!: UntypedFormGroup;
+  form_page10!: UntypedFormGroup;
+  form_page11!: UntypedFormGroup;
+  form_page12!: UntypedFormGroup;
   pageNum: number = 1;
   securityLevels: { label: string; value: string; }[] = [];
   new_securityLevels: { label: string; value: string; }[] = [];
@@ -111,7 +112,7 @@ export class Ac0222Component extends BaseComponent implements OnInit {
     private clientService: ClientService,
     private tool: ToolService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private groupAuthService: GroupAuthService,
     private toolService: ToolService,
     private list: ListService,
@@ -123,105 +124,109 @@ export class Ac0222Component extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     this.form = this.fb.group({
-      groupkeyword: new FormControl(''),
-      groupAuthoritiesID: new FormControl({ value: [], disabled: true }),
-      securityLevelID: new FormControl(''),
-      authoritieskeyword: new FormControl('')
+      groupkeyword: new UntypedFormControl(''),
+      groupAuthoritiesID: new UntypedFormControl({ value: [], disabled: true }),
+      securityLevelID: new UntypedFormControl(''),
+      authoritieskeyword: new UntypedFormControl('')
     });
     this.form_page2 = this.fb.group({
-      authoritieskeyword: new FormControl('')
+      authoritieskeyword: new UntypedFormControl('')
     });
     this.form_page3 = this.fb.group({
-      groupID: new FormControl(''),
-      groupName: new FormControl(''),
-      groupAlias: new FormControl(''),
-      groupDesc: new FormControl(''),
-      groupAccess: new FormControl(''),
-      securityLevelName: new FormControl(''),
-      allowAccessUseTimes: new FormControl(''),
-      createDate: new FormControl(''),
-      createUser: new FormControl(''),
-      updateDate: new FormControl(''),
-      updateUser: new FormControl(''),
-      _allowAccessDays: new FormControl(''),
-      groupAuthoritiesName: new FormControl('')
+      groupID: new UntypedFormControl(''),
+      groupName: new UntypedFormControl(''),
+      groupAlias: new UntypedFormControl(''),
+      groupDesc: new UntypedFormControl(''),
+      groupAccess: new UntypedFormControl(''),
+      securityLevelName: new UntypedFormControl(''),
+      allowAccessUseTimes: new UntypedFormControl(''),
+      createDate: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateDate: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      _allowAccessDays: new UntypedFormControl(''),
+      groupAuthoritiesName: new UntypedFormControl('')
     });
     this.form_page4 = this.fb.group({
-      groupID: new FormControl(''),
-      groupName_page4: new FormControl(''),
-      groupAlias_page4: new FormControl(''),
-      groupDesc_page4: new FormControl(''),
-      groupAccess: new FormControl(''),
-      securityLevelName_page4: new FormControl(''),
-      dayOptionsName_page4: new FormControl(''),
-      allowAccessUseTimes_page4: new FormControl(''),
-      createDate: new FormControl(''),
-      createUser: new FormControl(''),
-      updateDate: new FormControl(''),
-      updateUser: new FormControl(''),
-      allowAccessDays_page4: new FormControl(''),
-      groupAuthoritiesName: new FormControl({ value: [], disabled: true })
+      groupID: new UntypedFormControl(''),
+      groupName_page4: new UntypedFormControl(''),
+      groupAlias_page4: new UntypedFormControl(''),
+      groupDesc_page4: new UntypedFormControl(''),
+      groupAccess: new UntypedFormControl(''),
+      securityLevelName_page4: new UntypedFormControl(''),
+      dayOptionsName_page4: new UntypedFormControl(''),
+      allowAccessUseTimes_page4: new UntypedFormControl(''),
+      createDate: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateDate: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      allowAccessDays_page4: new UntypedFormControl(''),
+      groupAuthoritiesName: new UntypedFormControl({ value: [], disabled: true })
     });
     this.form_page5 = this.fb.group({
-      authoritieskeyword: new FormControl('')
+      authoritieskeyword: new UntypedFormControl('')
     });
     this.form_page6 = this.fb.group({
-      groupkeyword: new FormControl(''),
-      moduleName: new FormControl('')
+      groupkeyword: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl('')
     });
     this.form_page7 = this.fb.group({
-      groupkeyword: new FormControl('')
+      groupkeyword: new UntypedFormControl('')
     });
     this.form_page8 = this.fb.group({
-      groupID: new FormControl(''),
-      groupName: new FormControl(''),
-      groupAlias: new FormControl(''),
-      groupDesc: new FormControl(''),
-      groupAccess: new FormControl(''),
-      securityLevelName: new FormControl(''),
-      allowAccessUseTimes: new FormControl(''),
-      createDate: new FormControl(''),
-      createUser: new FormControl(''),
-      updateDate: new FormControl(''),
-      updateUser: new FormControl(''),
-      _allowAccessDays: new FormControl(''),
-      groupAuthoritiesName: new FormControl('')
+      groupID: new UntypedFormControl(''),
+      groupName: new UntypedFormControl(''),
+      groupAlias: new UntypedFormControl(''),
+      groupDesc: new UntypedFormControl(''),
+      groupAccess: new UntypedFormControl(''),
+      securityLevelName: new UntypedFormControl(''),
+      allowAccessUseTimes: new UntypedFormControl(''),
+      createDate: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateDate: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      _allowAccessDays: new UntypedFormControl(''),
+      groupAuthoritiesName: new UntypedFormControl('')
     });
     this.form_page9 = this.fb.group({
-      groupID: new FormControl(''),
-      groupName_page9: new FormControl(''),
-      groupAlias_page9: new FormControl(''),
-      groupDesc: new FormControl(''),
-      groupAccess: new FormControl(''),
-      securityLevelName: new FormControl(''),
-      dayOptionsName: new FormControl(''),
-      allowAccessUseTimes: new FormControl(''),
-      createDate: new FormControl(''),
-      createUser: new FormControl(''),
-      updateDate: new FormControl(''),
-      updateUser: new FormControl(''),
-      allowAccessDays: new FormControl(''),
-      groupAuthoritiesName: new FormControl({ value: [], disabled: true })
+      groupID: new UntypedFormControl(''),
+      groupName_page9: new UntypedFormControl(''),
+      groupAlias_page9: new UntypedFormControl(''),
+      groupDesc: new UntypedFormControl(''),
+      groupAccess: new UntypedFormControl(''),
+      securityLevelName: new UntypedFormControl(''),
+      dayOptionsName: new UntypedFormControl(''),
+      allowAccessUseTimes: new UntypedFormControl(''),
+      createDate: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateDate: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      allowAccessDays: new UntypedFormControl(''),
+      groupAuthoritiesName: new UntypedFormControl({ value: [], disabled: true })
     });
     this.form_page10 = this.fb.group({
-      authoritieskeyword: new FormControl('')
+      authoritieskeyword: new UntypedFormControl('')
     });
     this.form_page11 = this.fb.group({
-      groupkeyword: new FormControl('')
+      groupkeyword: new UntypedFormControl('')
     });
     this.form_page12 = this.fb.group({
-      groupkeyword: new FormControl(''),
-      moduleName: new FormControl('')
+      groupkeyword: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl('')
     });
 
     this.groupAuthService.queryTSecurityLV({}).subscribe(res => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
-
-        res.RespBody.securityLevelList?.map(slv => {
-          let _lbl = slv.securityLevelId == 'SYSTEM' ? slv.securityLevelName + ` (default)`: slv.securityLevelName;
-          this.securityLevels.push({ label: _lbl, value: slv.securityLevelId });
-          this.new_securityLevels.push({ label: _lbl, value: slv.securityLevelId });
-        });
+        if (res.RespBody.securityLevelList) {
+          this.securityLevels = this.new_securityLevels =
+            res.RespBody.securityLevelList.map((slv) => {
+              let _lbl =
+                slv.securityLevelId == 'SYSTEM'
+                  ? slv.securityLevelName + ` (default)`
+                  : slv.securityLevelName;
+              return { label: _lbl, value: slv.securityLevelId };
+            });
+        }
       }
     });
     const codes = ['virtul_group_name', 'virtul_group_alias', 'virtul_group_desc', 'group_id', 'group_name', 'alias', 'virtul_group_desc', 'authorities', 'security_level', 'create_time', 'group_auth_id', 'group_auth_name', 'group_auth_desc', 'token_exp_time_options.day', 'token_exp_time_options.hour', 'token_exp_time_options.minute', 'token_exp_time_options.second', 'module_list', 'api_list'];

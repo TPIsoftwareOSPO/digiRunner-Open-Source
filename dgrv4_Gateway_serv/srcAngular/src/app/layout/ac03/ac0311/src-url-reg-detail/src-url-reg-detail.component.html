@@ -11,7 +11,7 @@
   </button>
   <p-checkbox class="ms-2" [binary]="true" [inputId]="'isMtls_'+_uuid" formControlName="isMtls" [hidden]="pathTpye == 'tsmpc'"> </p-checkbox>
   <label class="mx-1" [for]="'isMtls_'+_uuid" [hidden]="pathTpye == 'tsmpc'">mtls</label>
-  <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)" style="border-radius: 50%" [hidden]="disabled">
+  <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)" style="border-radius: 50%" [hidden]="disabled || apiTpye == 'WEBHOOK'">
     <i class="fa fa-minus"></i>
   </button>
   <button type="button" class="btn tpi-btn tpi-primary mx-1" (click)="testApi();" [disabled]="url.value==''" *ngIf="apiTpye !== 'AI_GATEWAY'">

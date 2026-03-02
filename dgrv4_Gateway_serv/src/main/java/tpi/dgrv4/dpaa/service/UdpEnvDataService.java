@@ -21,6 +21,7 @@ import tpi.dgrv4.dpaa.vo.UdpEnvItem;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
@@ -48,8 +49,8 @@ public class UdpEnvDataService {
 				List<String> val = entry.getValue();
 				logger.debug(String.format("http key [{}] = {}", key, val.toString()));
 			}
-			String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
-			
+//			String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
+            String userIp = ClientIpUtil.getClientIp(httpReq);
 			resp = getUdpEnvData(userIp, udpParam, reqHeader.getLocale());
 		} catch (TsmpDpAaException e) {
 			throw e;

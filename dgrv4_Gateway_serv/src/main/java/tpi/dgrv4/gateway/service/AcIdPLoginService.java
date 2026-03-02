@@ -23,7 +23,6 @@ import tpi.dgrv4.entity.repository.DgrAcIdpInfoApiDao;
 import tpi.dgrv4.entity.repository.DgrAcIdpInfoLdapDao;
 import tpi.dgrv4.entity.repository.DgrAcIdpInfoMLdapDDao;
 import tpi.dgrv4.entity.repository.DgrAcIdpInfoMLdapMDao;
-import tpi.dgrv4.escape.CheckmarxUtils;
 import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.component.IdPApiHelper;
 import tpi.dgrv4.gateway.component.IdPApiHelper.ApiUserInfoData;
@@ -33,6 +32,7 @@ import tpi.dgrv4.gateway.component.LdapHelper.LdapAdAuthData;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.constant.DgrMLdapPolicy;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 
 @Service
 public class AcIdPLoginService {
@@ -76,8 +76,9 @@ public class AcIdPLoginService {
 		
 		String reqUri = httpReq.getRequestURI();
 		String txnUid = getDgrAuditLogService().getTxnUid();
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
+//		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
+//				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		String userHostname = httpReq.getRemoteHost();
 		String userName = httpReq.getParameter("username");
 		String userMima = httpReq.getParameter("password");

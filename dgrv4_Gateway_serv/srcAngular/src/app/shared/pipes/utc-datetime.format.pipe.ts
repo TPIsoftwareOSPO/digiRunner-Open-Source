@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import * as dayjs from 'dayjs';
 
 @Pipe({
-    name: 'utc_datetime_format'
+    name: 'utc_datetime_format',
+    standalone: false
 })
 export class UTCDatetimeFormatPipe implements PipeTransform {
     transform(input: any): any {

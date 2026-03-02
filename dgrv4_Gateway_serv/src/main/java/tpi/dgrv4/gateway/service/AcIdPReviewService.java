@@ -15,10 +15,10 @@ import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.entity.entity.DgrAcIdpUser;
 import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
-import tpi.dgrv4.escape.CheckmarxUtils;
 import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.constant.DgrAcIdpUserStatus;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 
 @Service
@@ -44,8 +44,9 @@ public class AcIdPReviewService {
  
 		String reqUri = httpReq.getRequestURI();
 		String txnUid = getDgrAuditLogService().getTxnUid();
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
+//		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
+//				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		String userHostname = httpReq.getRemoteHost();
 		String userName = httpReq.getParameter("userName");
 		String u = httpReq.getParameter("u");

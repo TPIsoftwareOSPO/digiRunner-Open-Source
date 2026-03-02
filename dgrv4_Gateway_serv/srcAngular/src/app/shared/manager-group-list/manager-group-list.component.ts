@@ -4,19 +4,20 @@ import { DynamicDialogRef } from "primeng/dynamicdialog";
 
 
 
-import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 
 import { ClientService } from "../services/api-client.service";
 import { AA0238Req, GroupInfo_0238 } from "src/app/models/api/ClientService/aa0238.interface";
 
 @Component({
-  selector: 'app-manager-group-list',
-  templateUrl: './manager-group-list.component.html',
-  styleUrls: ['./manager-group-list.component.css'],
+    selector: 'app-manager-group-list',
+    templateUrl: './manager-group-list.component.html',
+    styleUrls: ['./manager-group-list.component.css'],
+    standalone: false
 })
 export class ManagerGroupListComponent implements OnInit {
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   groupInfoListCols: { field: string; header: string; }[] = [];
   groupInfoList: Array<GroupInfo_0238> = [];
   selectedGroups: Array<GroupInfo_0238> = [];
@@ -30,13 +31,13 @@ export class ManagerGroupListComponent implements OnInit {
     private ref: DynamicDialogRef,
     // private config: DynamicDialogConfig,
     // private translate: TranslateService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private clientService: ClientService
   ) { }
 
   async ngOnInit() {
     this.form = this.fb.group({
-      keyword: new FormControl('')
+      keyword: new UntypedFormControl('')
     })
     const code = ['group_id', 'group_name', 'group_alias', 'group_desc', 'security_level']
     const dict = await this.toolService.getDict(code);

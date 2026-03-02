@@ -333,6 +333,24 @@
             'mask.body_after_regex'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
             mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
         </div>
+        <div class="p-form-check mb-2">
+          <p-radioButton value="5" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy5"></p-radioButton>
+          <label class="ms-2 mb-0">Policy 5: {{
+            'mask.body_remain_before_after'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
+            mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
+        </div>
+        <div class="p-form-check mb-2">
+          <p-radioButton value="6" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy6"></p-radioButton>
+          <label class="ms-2 mb-0">Policy 6: {{
+            'mask.body_remain_before'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
+            mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
+        </div>
+        <div class="p-form-check mb-2">
+          <p-radioButton value="7" [ngModel]="apiDetail.bodyMaskPolicy" disabled name="bodyMaskPolicy7"></p-radioButton>
+          <label class="ms-2 mb-0">Policy 7: {{
+            'mask.body_remain_after'|translate:{num:apiDetail.bodyMaskPolicyNum?apiDetail.bodyMaskPolicyNum:'1',
+            mask:apiDetail.bodyMaskPolicySymbol?apiDetail.bodyMaskPolicySymbol:'*'} }}</label>
+        </div>
         <div class="col-12 px-0 mt-2"
           *ngIf="apiDetail.bodyMaskPolicy == '1'||apiDetail.bodyMaskPolicy == '2'||apiDetail.bodyMaskPolicy == '3'||apiDetail.bodyMaskPolicy == '4'">
           <div class="col-12 px-0">

@@ -1,0 +1,7 @@
+-- 【dgRv4.7.7.0 - SQL 異動】
+-- 20260116, Webhook 改為 Al Proxy, tom
+UPDATE tsmp_func SET func_name='AI Proxy', func_name_en='AI Proxy'
+WHERE func_code='LB0011';  
+
+UPDATE tsmp_func SET func_name='AI Proxy Logs', func_name_en='AI Proxy Logs'
+WHERE func_code='LB0012'; 

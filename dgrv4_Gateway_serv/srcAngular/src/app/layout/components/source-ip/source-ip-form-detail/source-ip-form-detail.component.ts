@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { AA0311RedirectByIpData } from 'src/app/models/api/ApiService/aa0311_v3.interface';
 
 export interface _AA0311RedirectByIpData extends AA0311RedirectByIpData {
@@ -8,12 +8,13 @@ export interface _AA0311RedirectByIpData extends AA0311RedirectByIpData {
 }
 
 @Component({
-  selector: 'app-source-ip-form-detail',
-  templateUrl: './source-ip-form-detail.component.html',
-  styleUrls: ['./source-ip-form-detail.component.css'],
+    selector: 'app-source-ip-form-detail',
+    templateUrl: './source-ip-form-detail.component.html',
+    styleUrls: ['./source-ip-form-detail.component.css'],
+    standalone: false
 })
 export class SourceIpFormDetailComponent implements OnInit {
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   @Input() data?: _AA0311RedirectByIpData;
   @Input() ref: any;
@@ -27,15 +28,15 @@ export class SourceIpFormDetailComponent implements OnInit {
   }> = new EventEmitter();
   @Output() remove: EventEmitter<number> = new EventEmitter();
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      ipForRedirect: new FormControl({
+      ipForRedirect: new UntypedFormControl({
         value: this.data ? this.data.ipForRedirect : '',
         disabled: this?.data?.allowAll ?? false,
       }),
-      ipSrcUrl: new FormControl(this.data ? this.data.ipSrcUrl : ''),
+      ipSrcUrl: new UntypedFormControl(this.data ? this.data.ipSrcUrl : ''),
     });
 
     this.form.valueChanges.subscribe(

@@ -2,6 +2,8 @@ package tpi.dgrv4.dpaa.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import tpi.dgrv4.dpaa.vo.AA0316Func;
 import tpi.dgrv4.dpaa.vo.AA0316Item;
 import tpi.dgrv4.dpaa.vo.AA0316Req;
 import tpi.dgrv4.dpaa.vo.AA0316Resp;
+import tpi.dgrv4.dpaa.vo.DPB0118Resp;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegHost;
@@ -30,58 +33,42 @@ import tpi.dgrv4.gateway.component.FileHelper;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.CommForwardProcService;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 import java.util.*;
 
+@RequiredArgsConstructor
 @Service
 public class AA0316Service {
 
 	private TPILogger logger = TPILogger.tl;
 
-	private BcryptParamHelper bcryptParamHelper;
-	private FileHelper fileHelper;
-	private JobHelper jobHelper;
-	private TsmpUserDao tsmpUserDao;
-	private TsmpDpFileDao tsmpDpFileDao;
-	private TsmpRegHostDao tsmpRegHostDao;
-	private TsmpApiDao tsmpApiDao;
-	private TsmpRegModuleDao tsmpRegModuleDao;
-	private TsmpApiRegDao tsmpApiRegDao;
-	private ObjectMapper objectMapper;
-	private ApplicationContext ctx;
-	private DgrAuditLogService dgrAuditLogService;
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final BcryptParamHelper bcryptParamHelper;
+	private final FileHelper fileHelper;
+	private final JobHelper jobHelper;
+	private final TsmpUserDao tsmpUserDao;
+	private final TsmpDpFileDao tsmpDpFileDao;
+	private final TsmpRegHostDao tsmpRegHostDao;
+	private final TsmpApiDao tsmpApiDao;
+	private final TsmpRegModuleDao tsmpRegModuleDao;
+	private final TsmpApiRegDao tsmpApiRegDao;
+	private final ObjectMapper objectMapper;
+	private final ApplicationContext ctx;
+	private final DgrAuditLogService dgrAuditLogService;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final DPB0118Service dpb0118Service;
 
 	private enum Act {
 		CREATE,	// 新增
 		UPDATE;	// 更新
 	}
 
-	@Autowired
-	public AA0316Service(BcryptParamHelper bcryptParamHelper, FileHelper fileHelper, JobHelper jobHelper,
-			TsmpUserDao tsmpUserDao, TsmpDpFileDao tsmpDpFileDao, TsmpRegHostDao tsmpRegHostDao, TsmpApiDao tsmpApiDao,
-			TsmpRegModuleDao tsmpRegModuleDao, TsmpApiRegDao tsmpApiRegDao, ObjectMapper objectMapper,
-			ApplicationContext ctx, DgrAuditLogService dgrAuditLogService, DgrAcIdpUserDao dgrAcIdpUserDao) {
-		super();
-		this.bcryptParamHelper = bcryptParamHelper;
-		this.fileHelper = fileHelper;
-		this.jobHelper = jobHelper;
-		this.tsmpUserDao = tsmpUserDao;
-		this.tsmpDpFileDao = tsmpDpFileDao;
-		this.tsmpRegHostDao = tsmpRegHostDao;
-		this.tsmpApiDao = tsmpApiDao;
-		this.tsmpRegModuleDao = tsmpRegModuleDao;
-		this.tsmpApiRegDao = tsmpApiRegDao;
-		this.objectMapper = objectMapper;
-		this.ctx = ctx;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
-	}
-
 	@Transactional
 	public AA0316Resp registerAPIList(TsmpAuthorization auth, AA0316Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
+		checkLicenseExpired();
+		
 		AA0316Resp resp = new AA0316Resp();
 		
 		String userName = auth.getUserName();
@@ -144,6 +131,13 @@ public class AA0316Service {
 		}
 		
 		return resp;
+	}
+	
+	protected void checkLicenseExpired() {
+		DPB0118Resp dpb0118Resp = getDpb0118Service().queryModuleVersion();
+		if(dpb0118Resp.isExpired()) {
+			throw TsmpDpAaRtnCode._1559.throwing("The license has expired.");
+		}
 	}
 
 	protected void check_AA0316Req(String userNameForQuery, AA0316Req req, String idPType) {
@@ -742,4 +736,10 @@ public class AA0316Service {
 	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
 		return dgrAcIdpUserDao;
 	}
+
+	protected DPB0118Service getDpb0118Service() {
+		return dpb0118Service;
+	}
+	
+	
 }

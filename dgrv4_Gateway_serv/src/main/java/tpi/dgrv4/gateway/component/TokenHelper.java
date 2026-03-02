@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseCookie.ResponseCookieBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.copy.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,7 @@ import tpi.dgrv4.codec.utils.OpenApiKeyUtil;
 import tpi.dgrv4.codec.utils.SHA256Util;
 import tpi.dgrv4.codec.utils.TimeZoneUtil;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -95,7 +97,7 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 @Component
 public class TokenHelper {
 	
-	public static Map<String, BasicAuthCacheVo> basicAuthCacheVoMap = new HashMap<>();
+	private static Map<String, BasicAuthCacheVo> basicAuthCacheVoMap = new HashMap<>();
 	
 	// Double-Checked Locking mode has been implemented, but SonarQube may not fully understand the context and issue a warning, so annotate
 	// 已經實作雙重檢查鎖定(Double-Checked Locking)模式,但SonarQube可能無法完全理解上下文發出警告,故加註解
@@ -592,7 +594,8 @@ public class TokenHelper {
 				return null;
 			} else {
 				List<String> ipList = list.stream().map(vo -> vo.getHostIp()).collect(Collectors.toList());
-				String ip = ServiceUtil.getIpAddress(httpReq);
+//				String ip = ServiceUtil.getIpAddress(httpReq);
+                String ip = ClientIpUtil.getClientIp(httpReq);
 				String dn = ServiceUtil.getFQDN(httpReq);
 				if (ipList.contains(ip) || ipList.contains(dn)) {
 					return null;
@@ -637,8 +640,7 @@ public class TokenHelper {
 			// 因為最終要用findFirstByClientId的cache機制,所以沒用findById
 			TsmpClient tsmpClient = getTsmpClientCacheProxy().findFirstByClientId(clientId);
 			if (tsmpClient == null) {
-				ResponseEntity<?> errRespEntity = getFindTsmpClientError(clientId, reqUri);
-				return errRespEntity;
+				return getFindTsmpClientError(clientId, reqUri);
 			}
 
 			Long nowLong = System.currentTimeMillis();
@@ -874,7 +876,7 @@ public class TokenHelper {
 		}
 
 		// 1.Table [Users]
-		ResponseEntity<?> respEntity = checkUserStatusByUsers(userName, apiUrl);
+		ResponseEntity<?> respEntity = checkUserStatusByUsers(userName);
 		if (respEntity != null) {// 資料有錯誤
 			return respEntity;
 		}
@@ -891,10 +893,10 @@ public class TokenHelper {
 	/**
 	 * 檢查 user 狀態, Users
 	 */
-	private ResponseEntity<?> checkUserStatusByUsers(String userName, String apiUrl) {
-		Optional<Users> opt_users = getUsersCacheProxy().findById(userName);
+	private ResponseEntity<?> checkUserStatusByUsers(String userName) {
+		Optional<Users> optUsers = getUsersCacheProxy().findById(userName);
 		// 查無 users
-		if (!opt_users.isPresent()) {
+		if (!optUsers.isPresent()) {
 			// Table [Users] 查不到 user
 			TPILogger.tl.debug("Table [Users] can't find data, username:" + userName);
 			String errMsg = "Bad credentials";
@@ -903,7 +905,7 @@ public class TokenHelper {
 					setContentTypeHeader(), HttpStatus.BAD_REQUEST);// 400
 		}
 
-		Users users = opt_users.get();
+		Users users = optUsers.get();
 		int userStatus = users.getUserStatus();
 		if (userStatus == 0) {// 停用
 			// Table [Users] 狀態已停用
@@ -992,10 +994,10 @@ public class TokenHelper {
 	/**
 	 * 檢查 無 user 或 user 帳密不對
 	 */
-	public ResponseEntity<?> checkUserSecret(String userName, String userPw, String apiUrl) {
-		Optional<Users> opt_users = getUsersCacheProxy().findById(userName);
+	public ResponseEntity<?> checkUserSecret(String userName, String userPw) {
+		Optional<Users> optUsers = getUsersCacheProxy().findById(userName);
 		// 查無 users
-		if (!opt_users.isPresent()) {
+		if (!optUsers.isPresent()) {
 			// Table [Users] 查不到 user
 			TPILogger.tl.debug("Table [Users] can't find data, username:" + userName);
 			String errMsg = "Bad credentials";
@@ -1004,7 +1006,7 @@ public class TokenHelper {
 					setContentTypeHeader(), HttpStatus.BAD_REQUEST);// 400
 		}
 
-		Users users = opt_users.get();
+		Users users = optUsers.get();
 		String userSecret = users.getPassword();
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		boolean isMatch = passwordEncoder.matches(userPw, userSecret);// 比對密碼
@@ -1383,8 +1385,7 @@ public class TokenHelper {
 
 		if (isRevoked) {
 			// access_token 已撤銷
-			ResponseEntity<?> respEntity = getTokenRevokedError(jti);// 403
-			return respEntity;
+			return getTokenRevokedError(jti);// 403
 		}
 		return null;
 	}
@@ -2355,8 +2356,7 @@ public class TokenHelper {
 			// Table [TSMP_TOKEN_HISTORY] 查不到資料
 			TPILogger.tl.debug("Table [TSMP_TOKEN_HISTORY] can't find data, token_jti:" + jti);
 			// access_token 已撤銷
-			ResponseEntity<?> respEntity = getTokenRevokedError(jti);// 403
-			return respEntity;
+			return getTokenRevokedError(jti);// 403
 		}
 
 		Long tokenQuota = cache_tsmpTokenHistory.getTokenQuota() == null ? 0 : cache_tsmpTokenHistory.getTokenQuota();
@@ -2563,7 +2563,7 @@ public class TokenHelper {
 		return resp;
 	}
 
-	public OAuthTokenErrorResp2 getOAuthTokenErrorResp2(String error, String errDes) {
+	public static OAuthTokenErrorResp2 getOAuthTokenErrorResp2(String error, String errDes) {
 		OAuthTokenErrorResp2 resp = new OAuthTokenErrorResp2();
 		resp.setError(error);
 		resp.setErrorDescription(errDes);
@@ -2625,14 +2625,17 @@ public class TokenHelper {
 	 * 建立 cookie
 	 */
 	public static ResponseCookie createCookie(String cookieName, String cookieValue, long maxAge) {
-		ResponseCookie cookie = ResponseCookie.from(cookieName, cookieValue) // key & value
-				.maxAge(maxAge) // 以秒為單位
+		ResponseCookieBuilder cookieBuild = ResponseCookie.from(cookieName, cookieValue) // key & value
 				.path("/").httpOnly(true) // 禁止 JavaScript 存取 cookie, 防止 XSS Attack (Cross-Site Scripting，跨站腳本攻擊)
 				.secure(true) // 讓 cookie 只能透過 https 傳遞, 即只有 HTTPS 才能讀與寫
-				.sameSite(TokenHelper.getInstance().samesiteValue) // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
-				.build();
+				.sameSite(TokenHelper.getInstance().samesiteValue); // 防止 CSRF Attack (Cross-site request forgery，跨站請求偽造)
+		
+		//maxAge less than 0 indicates session cooke
+		if(maxAge >= 0) {
+			cookieBuild.maxAge(maxAge); // 以秒為單位
+		}
 
-		return cookie;
+		return cookieBuild.build();
 	}
 
 	/**

@@ -10,11 +10,13 @@ import { HttpClient } from '@angular/common/http';
 import { ToolService } from './../../shared/services/tool.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
+import * as base64 from 'js-base64';
 
 @Component({
-  selector: 'app-idpsso',
-  templateUrl: './idpsso.component.html',
-  styleUrls: ['./idpsso.component.scss']
+    selector: 'app-idpsso',
+    templateUrl: './idpsso.component.html',
+    styleUrls: ['./idpsso.component.scss'],
+    standalone: false
 })
 export class IdpssoComponent implements OnInit {
   msg: string = 'Loading...';
@@ -37,7 +39,7 @@ export class IdpssoComponent implements OnInit {
 
     this.route.queryParams.subscribe((value) => {
       if (value['msg'] && value['dgRcode']== undefined) {
-        this.msg = this.toolService.Base64Decoder(value['msg'])
+        this.msg = base64.Base64.decode(value['msg'])
         this.processShow = false;
       }
 

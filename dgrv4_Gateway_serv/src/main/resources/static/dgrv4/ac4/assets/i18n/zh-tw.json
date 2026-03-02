@@ -1086,7 +1086,7 @@
   "dashBoard": {
     "title": "License",
     "title1": "digiRunner \"{{edition}}\" 授權金鑰即將於\"{{expiryDate}}\"失效，請立即展延！",
-    "title2": "digiRunner \"{{edition}}\" 未獲授權或已失效，請立即申請/展延產品金鑰！",
+    "title2": "digiRunner \"{{edition}}\" 未獲授權或已失效，<span class=\"text-danger\">部分功能即將無法使用</span>，請立即申請/展延產品金鑰！</span>",
     "desc1": "請來信 <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a> 與昕力團隊或所屬業務窗口聯繫",
     "desc2": "Express用戶完成下載後，系統即主動寄出金鑰，敬請至信箱收取金鑰，以啟動使用 digiRunner;<br>展延使用及其他問題請來信 <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a> 與昕力團隊或所屬業務窗口聯繫。"
   },
@@ -1148,6 +1148,12 @@
     "body_before": "遮罩前 {{num}} 碼，遮罩以 {{mask}} 顯示",
     "body_after": "遮罩後 {{num}} 碼，遮罩以 {{mask}} 顯示",
     "body_after_regex": "遮罩後 {{num}} 碼，遮罩以 {{mask}} 顯示",
+    "body_remain_before_after": "留前後 {{num}} 碼，遮罩以 {{mask}} 顯示",
+    "body_remain_before": "留前 {{num}} 碼，遮罩以 {{mask}} 顯示",
+    "body_remain_after": "留後 {{num}} 碼，遮罩以 {{mask}} 顯示",
+    "body_remain_before_after_exp":"\"name\":\"test\",\"id\":\"1\" => \"name###\":\"1\" (保留前後5碼用###替換)",
+    "body_remain_before_exp":"\"name\":\"test\",\"id\":\"1\" => \"name### (保留前5碼用###替換)",
+    "body_remain_after_exp":"\"name\":\"test\",\"id\":\"1\" => ###\":\"1\" (保留後5碼用###替換)",
     "word": "字元數",
     "mask": "遮罩",
     "header_key_required": "Header遮罩關鍵字不可為空",
@@ -1319,7 +1325,7 @@
   },
   "notify": {
     "name": "通知名稱",
-    "type": "通知類型",
+    "type": "代理類型",
     "sound": "通知音效"
   },
   "status_code": "狀態碼",

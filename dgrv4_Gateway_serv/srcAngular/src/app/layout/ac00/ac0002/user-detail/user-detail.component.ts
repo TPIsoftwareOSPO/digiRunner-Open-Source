@@ -4,7 +4,8 @@ import { AA0003Resp } from '../../../../models/api/UserService/aa0003.interface'
 @Component({
     selector: 'app-user-detail',
     templateUrl: './user-detail.component.html',
-    styleUrls: ['./user-detail.component.css']
+    styleUrls: ['./user-detail.component.css'],
+    standalone: false
 })
 export class UserDetailComponent implements OnInit {
 

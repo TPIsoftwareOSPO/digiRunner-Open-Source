@@ -5,15 +5,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
 @Component({
-  selector: 'app-key-value-grid',
-  templateUrl: './key-value-grid.component.html',
-  styleUrls: ['./key-value-grid.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => KeyValueGridComponent),
-      multi: true
-    }]
+    selector: 'app-key-value-grid',
+    templateUrl: './key-value-grid.component.html',
+    styleUrls: ['./key-value-grid.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => KeyValueGridComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class KeyValueGridComponent implements OnInit, ControlValueAccessor {
 

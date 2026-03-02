@@ -9,7 +9,8 @@ import { Menu } from 'src/app/models/menu.model';
     selector: 'app-func-list',
     templateUrl: './func-list.component.html',
     styleUrls: ['./func-list.component.css'],
-    providers: [FuncService]
+    providers: [FuncService],
+    standalone: false
 })
 export class FuncListComponent implements OnInit {
 

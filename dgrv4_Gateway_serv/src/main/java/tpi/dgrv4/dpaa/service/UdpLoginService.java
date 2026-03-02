@@ -27,6 +27,7 @@ import tpi.dgrv4.dpaa.vo.UdpLoginResp;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.entity.TsmpDpItems;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 @Service
@@ -56,8 +57,9 @@ public class UdpLoginService {
 		});
 		
 		String locale = reqHeader.getLocale();
-		String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
-		resp = udpLogin(parameters, scheme, httpReq, httpRes, locale, userIp);
+//		String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
+        resp = udpLogin(parameters, scheme, httpReq, httpRes, locale, userIp);
 		return resp;
 	}
 	

@@ -3,7 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 
 @Pipe({
-  name: 'dataChangeStatus'
+    name: 'dataChangeStatus',
+    standalone: false
 })
 export class DataChangeStatusPipe implements PipeTransform {
 

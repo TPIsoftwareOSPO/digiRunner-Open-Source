@@ -54,6 +54,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { NavigationExtras, Router } from '@angular/router';
 
+
 // tps
 interface tpsPoint {
   time: string;
@@ -128,6 +129,7 @@ interface DataNode {
   selector: 'app-dashboard',
   templateUrl: './dashboard2.component.html',
   styleUrls: ['./dashboard2.component.scss'],
+  standalone: false,
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   versionInfo?: DPB0118Resp;
@@ -176,6 +178,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   keeperIP?: string;
   keeperPort?: string;
+  keeperShow:boolean = false; //該腳色有AC0511權限才呈現
 
   constructor(
     private alert: AlertService,
@@ -299,7 +302,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
     this.queryRealtimeDashboardData();
 
-    this.getKeeperInfo();
+    this.keeperShow = this.checkFunctionCode();
+    if(this.keeperShow){
+      this.getKeeperInfo();
+    }
+
   }
 
   getDiffDays(sDate: string, eDate: string) {
@@ -1632,23 +1639,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getKeeperIP() {
-    this.serverService.queryTsmpSettingDetail({id:'DGRKEEPER_IP'}).subscribe((res) => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        this.keeperIP = res.RespBody.value;
-      }
-    });
+    this.serverService
+      .queryTsmpSettingDetail({ id: 'DGRKEEPER_IP' })
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.keeperIP = res.RespBody.value;
+        }
+      });
   }
 
   getKeeperPort() {
-    this.serverService.queryTsmpSettingDetail({id:'DGRKEEPER_PORT'}).subscribe((res) => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
+    this.serverService
+      .queryTsmpSettingDetail({ id: 'DGRKEEPER_PORT' })
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
           this.keeperPort = res.RespBody.value;
-      }
-    });
+        }
+      });
   }
 
-  getKeeperInfo(){
+  getKeeperInfo() {
     this.getKeeperIP();
     this.getKeeperPort();
+  }
+
+  checkFunctionCode(): boolean {
+    const funcStr = sessionStorage.getItem("roleFuncCodeList");
+    const funcArr = funcStr ? funcStr.split(',') : [];
+    return funcArr.includes('AC0511');
   }
 }

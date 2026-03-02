@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB9906Item } from 'src/app/models/api/ServerService/dpb9906.interface';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
 
@@ -8,10 +8,11 @@ interface Subitems extends DPB9906Item {
 }
 
 @Component({
-  selector: 'app-subitems',
-  templateUrl: './subitems.component.html',
-  styleUrls: ['./subitems.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-subitems',
+    templateUrl: './subitems.component.html',
+    styleUrls: ['./subitems.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SubitemsComponent implements OnInit {
 
@@ -21,23 +22,23 @@ export class SubitemsComponent implements OnInit {
   @Input() paramSize: number = 0;
 
   paramSizeItem: any[] = [];
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
   ) { }
 
   ngOnInit(): void {
     this.paramSizeItem = Array.from({ length: this.paramSize }, (_, index) => index);
 
     this.form = this.fb.group({
-      version: new FormControl(),
-      locale: new FormControl(),
-      subitemName: new FormControl('', ValidatorFns.requiredValidator()),
+      version: new UntypedFormControl(),
+      locale: new UntypedFormControl(),
+      subitemName: new UntypedFormControl('', ValidatorFns.requiredValidator()),
     });
 
     for (let index = 0; index < this.paramSize; index++) {
-      this.form.addControl(`params${index}`, new FormControl(this.itemValue?.params[index]))
+      this.form.addControl(`params${index}`, new UntypedFormControl(this.itemValue?.params[index]))
     }
 
 

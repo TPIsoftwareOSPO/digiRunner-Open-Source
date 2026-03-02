@@ -22,7 +22,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-v4.7.3'
+	version = 'release-rc-v4.7.10.0-14-g81f406576'
 	apply plugin:  'io.spring.dependency-management'
 	
 	repositories {
@@ -59,22 +59,32 @@ subprojects {
     }
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.7.3.5-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.7.3.5-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.7.10.0-14-g81f406576-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.7.10.0-14-g81f406576-lib.jar")
 
 		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
 			//CVE-2025-41249
 			exclude group:'org.springframework', module:'spring-core'
-			//CVE-2025-11226
+			//CVE-2026-1225
 			exclude group:'ch.qos.logback', module:'logback-core'
+			//CVE-2026-1225
+			exclude group:'ch.qos.logback', module:'logback-classic'
 		}
 		
 		// Correct the above exclusions, CVE-2025-41249
 		implementation 'org.springframework:spring-core:6.2.11'
-		// Correct the above exclusions, CVE-2025-11226
-		implementation 'ch.qos.logback:logback-core:1.5.19'
+		// Correct the above exclusions, CVE-2026-1225
+		implementation 'ch.qos.logback:logback-core:1.5.25'
+		// Correct the above exclusions, CVE-2026-1225
+		implementation 'ch.qos.logback:logback-classic:1.5.25'
 		
-		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation ('org.springframework.boot:spring-boot-starter-web'){
+			//CVE-2025-66614, CVE-2026-24733
+			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
+		}
+		
+		// Correct the above exclusions, CVE-2025-66614, CVE-2026-24733
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.49'
 
 		implementation 'org.jboss.xnio:xnio-nio:3.8.16.Final'
 		implementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'

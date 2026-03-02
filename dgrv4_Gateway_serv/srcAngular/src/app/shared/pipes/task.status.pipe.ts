@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 
 @Pipe({
-    name: 'task_status'
+    name: 'task_status',
+    standalone: false
 })
 export class TaskStatusPipe implements PipeTransform {
 

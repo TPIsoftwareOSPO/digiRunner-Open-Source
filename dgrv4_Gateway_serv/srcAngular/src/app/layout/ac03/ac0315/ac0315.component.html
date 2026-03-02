@@ -149,6 +149,7 @@
     <div clas="row">
       <div class="col-auto d-flex justify-content-center mt-2 mb-4">
         <button type="button" class="btn tpi-btn tpi-primary float-start text-center me-2"
+        [disabled]="isExpired"
           (click)="composer()">{{'button.composer'|translate}}</button>
         <!-- <button type="button" class="btn btn-warning float-start text-center me-2"
                     [disabled]="!commonAPIFormIsValid"

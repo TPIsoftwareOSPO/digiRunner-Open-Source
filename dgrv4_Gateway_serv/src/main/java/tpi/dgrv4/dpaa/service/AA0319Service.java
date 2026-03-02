@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.TableAct;
@@ -36,8 +37,10 @@ import tpi.dgrv4.dpaa.vo.AA0319ReqItem;
 import tpi.dgrv4.dpaa.vo.AA0319Resp;
 import tpi.dgrv4.dpaa.vo.AA0319RespItem;
 import tpi.dgrv4.dpaa.vo.AA0319Trunc;
+import tpi.dgrv4.dpaa.vo.DPB0118Resp;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpDpItemsCacheProxy;
 import tpi.dgrv4.entity.component.cache.proxy.TsmpRtnCodeCacheProxy;
+import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
 import tpi.dgrv4.entity.entity.DgrWebhookNotify;
 import tpi.dgrv4.entity.entity.TsmpApi;
@@ -51,6 +54,7 @@ import tpi.dgrv4.entity.entity.jpql.DgrComposerFlow;
 import tpi.dgrv4.entity.entity.jpql.TsmpApiImp;
 import tpi.dgrv4.entity.entity.jpql.TsmpApiImpId;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
+import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
 import tpi.dgrv4.entity.repository.DgrAuditLogDDao;
 import tpi.dgrv4.entity.repository.DgrAuditLogMDao;
 import tpi.dgrv4.entity.repository.DgrComposerFlowDao;
@@ -60,72 +64,47 @@ import tpi.dgrv4.entity.repository.TsmpApiDao;
 import tpi.dgrv4.entity.repository.TsmpApiImpDao;
 import tpi.dgrv4.entity.repository.TsmpApiRegDao;
 import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpRegHostDao;
 import tpi.dgrv4.entity.repository.TsmpRegModuleDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.escape.MailHelper;
 import tpi.dgrv4.gateway.TCP.Packet.UpdateComposerTSPacket;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.CommForwardProcService;
 import tpi.dgrv4.gateway.util.DigiRunnerGtwDeployProperties;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;	
 
+@RequiredArgsConstructor
 @Service
 public class  AA0319Service {
 
-	private TsmpApiDao tsmpApiDao;
-	private TsmpApiRegDao tsmpApiRegDao;
-	private TsmpApiImpDao tsmpApiImpDao;
-	private TsmpRegModuleDao tsmpRegModuleDao;
-	private TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
-	private TsmpOrganizationDao tsmpOrganizationDao;
-	private TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
-	private ApplicationContext ctx;
-	private JobHelper jobHelper;
-	private ObjectMapper objectMapper;
-	private ComposerService composerService;
-	private DgrAuditLogService dgrAuditLogService;
-	private DgrAuditLogMDao dgrAuditLogMDao;
-	private DgrAuditLogDDao dgrAuditLogDDao;
-	private DaoGenericCacheService daoGenericCacheService;
-	private DgrComposerFlowDao dgrComposerFlowDao;
-	private DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
-	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
-	private DgrWebhookNotifyDao dgrWebhookNotifyDao;
+	private final TsmpApiDao tsmpApiDao;
+	private final TsmpApiRegDao tsmpApiRegDao;
+	private final TsmpApiImpDao tsmpApiImpDao;
+	private final TsmpRegModuleDao tsmpRegModuleDao;
+	private final TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy;
+	private final TsmpOrganizationDao tsmpOrganizationDao;
+	private final TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy;
+	private final ApplicationContext ctx;
+	private final JobHelper jobHelper;
+	private final ObjectMapper objectMapper;
+	private final ComposerService composerService;
+	private final DgrAuditLogService dgrAuditLogService;
+	private final DgrAuditLogMDao dgrAuditLogMDao;
+	private final DgrAuditLogDDao dgrAuditLogDDao;
+	private final DaoGenericCacheService daoGenericCacheService;
+	private final DgrComposerFlowDao dgrComposerFlowDao;
+	private final DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
+	private final DgrWebhookApiMapDao dgrWebhookApiMapDao;
+	private final DgrWebhookNotifyDao dgrWebhookNotifyDao;
+	private final DPB0118Service dpb0118Service;
 	
-	@Autowired
-	public AA0319Service(TsmpApiDao tsmpApiDao, TsmpApiRegDao tsmpApiRegDao, TsmpApiImpDao tsmpApiImpDao,
-			TsmpRegModuleDao tsmpRegModuleDao, TsmpRtnCodeCacheProxy tsmpRtnCodeCacheProxy,
-			TsmpOrganizationDao tsmpOrganizationDao, TsmpDpItemsCacheProxy tsmpDpItemsCacheProxy,
-			ApplicationContext ctx, JobHelper jobHelper, ObjectMapper objectMapper, ComposerService composerService,
-			DgrAuditLogService dgrAuditLogService, DgrAuditLogMDao dgrAuditLogMDao, DgrAuditLogDDao dgrAuditLogDDao,
-			DaoGenericCacheService daoGenericCacheService, DgrComposerFlowDao dgrComposerFlowDao,
-			DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties,DgrWebhookApiMapDao dgrWebhookApiMapDao,DgrWebhookNotifyDao dgrWebhookNotifyDao) {
-		super();
-		this.tsmpApiDao = tsmpApiDao;
-		this.tsmpApiRegDao = tsmpApiRegDao;
-		this.tsmpApiImpDao = tsmpApiImpDao;
-		this.tsmpRegModuleDao = tsmpRegModuleDao;
-		this.tsmpRtnCodeCacheProxy = tsmpRtnCodeCacheProxy;
-		this.tsmpOrganizationDao = tsmpOrganizationDao;
-		this.tsmpDpItemsCacheProxy = tsmpDpItemsCacheProxy;
-		this.ctx = ctx;
-		this.jobHelper = jobHelper;
-		this.objectMapper = objectMapper;
-		this.composerService = composerService;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.dgrAuditLogMDao = dgrAuditLogMDao;
-		this.dgrAuditLogDDao = dgrAuditLogDDao;
-		this.daoGenericCacheService = daoGenericCacheService;
-		this.dgrComposerFlowDao = dgrComposerFlowDao;
-		this.digiRunnerGtwDeployProperties = digiRunnerGtwDeployProperties;
-		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
-		this.dgrWebhookNotifyDao = dgrWebhookNotifyDao;
-
-	}
-
 	@Transactional
 	public AA0319Resp importRegCompAPIs(TsmpAuthorization auth, AA0319Req req, String locale, InnerInvokeParam iip) {
+		checkLicenseExpired();
 		String userName = auth.getUserName();
 		String orgId = auth.getOrgId();
 		List<String> userOrgIdList = new ArrayList<>();
@@ -202,6 +181,13 @@ public class  AA0319Service {
 		// in-memory, 用列舉的值傳入值
 		TPILogger.updateTime4InMemory(DgrDataType.API.value());
 		return resp;
+	}
+	
+	protected void checkLicenseExpired() {
+		DPB0118Resp dpb0118Resp = getDpb0118Service().queryModuleVersion();
+		if(dpb0118Resp.isExpired()) {
+			throw TsmpDpAaRtnCode._1559.throwing("The license has expired.");
+		}
 	}
 
 	/**
@@ -1140,4 +1126,9 @@ public class  AA0319Service {
 	protected  DgrWebhookNotifyDao getDgrWebhookNotifyDao(){
 		return  dgrWebhookNotifyDao;
 	}
+
+	protected DPB0118Service getDpb0118Service() {
+		return dpb0118Service;
+	}
+	
 }

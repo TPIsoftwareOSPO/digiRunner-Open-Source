@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { DPB0068D2, DPB0068D1 } from 'src/app/models/api/RequisitionService/dpb0068.interface';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { FormOperate } from '../../../../models/common.enum';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DPB0078Req } from 'src/app/models/api/FileService/dpb0078.interface';
 import { FileService } from 'src/app/shared/services/api-file.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -12,7 +12,8 @@ import { RequisitionService } from 'src/app/shared/services/api-requisition.serv
 @Component({
     selector: 'app-requisition-form',
     templateUrl: './requisition-form.component.html',
-    styleUrls: ['./requisition-form.component.css']
+    styleUrls: ['./requisition-form.component.css'],
+    standalone: false
 })
 export class RequisitionFormComponent implements OnInit {
 
@@ -24,11 +25,11 @@ export class RequisitionFormComponent implements OnInit {
     detailDataList: Array<DPB0068D2> | Array<DPB0068D1> = [];
     trakerDataList: Array<DPB0069Items> = [];
     formOperate = FormOperate;
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     rowcount: number = 0;
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private file: FileService,
         private tool: ToolService,
         private requisition: RequisitionService
@@ -36,7 +37,7 @@ export class RequisitionFormComponent implements OnInit {
 
     async ngOnInit() {
         this.form = this.fb.group({
-            reqComment: new FormControl('')
+            reqComment: new UntypedFormControl('')
         });
         const code = ['review_update_date', 'review_update_user', 'sign_off_layer', 'sign_off_status', 'sign_off_comment', 'api_name', 'api_desc', 'public_flag', 'dept', 'theme_name', 'api_doc'];
         const dict = await this.tool.getDict(code);

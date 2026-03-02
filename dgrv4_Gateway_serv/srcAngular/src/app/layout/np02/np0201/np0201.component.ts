@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import {
   DPB0088certItem,
   DPB0088Req,
@@ -22,13 +22,14 @@ import { AlertType, TxID } from 'src/app/models/common.enum';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 
 @Component({
-  selector: 'app-np0201',
-  templateUrl: './np0201.component.html',
-  styleUrls: ['./np0201.component.css'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-np0201',
+    templateUrl: './np0201.component.html',
+    styleUrls: ['./np0201.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Np0201Component extends BaseComponent implements OnInit {
-  form: FormGroup;
+  form: UntypedFormGroup;
   cols: { field: string; header: string }[] = [];
   certList: Array<DPB0088certItem> = new Array<DPB0088certItem>();
   selected: Array<DPB0088certItem> = new Array<DPB0088certItem>();
@@ -41,7 +42,7 @@ export class Np0201Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private messageService: MessageService,
     private clientCA: ClientCAService,
@@ -54,8 +55,8 @@ export class Np0201Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      startDate: new FormControl(''),
-      endDate: new FormControl(''),
+      startDate: new UntypedFormControl(''),
+      endDate: new UntypedFormControl(''),
     });
   }
 

@@ -10,9 +10,10 @@ import { RoleService } from '../services/api-role.service';
 import { ToolService } from '../services/tool.service';
 
 @Component({
-  selector: 'app-role-mapping-list-lov',
-  templateUrl: './role-mapping-list-lov.component.html',
-  styleUrls: ['./role-mapping-list-lov.component.css'],
+    selector: 'app-role-mapping-list-lov',
+    templateUrl: './role-mapping-list-lov.component.html',
+    styleUrls: ['./role-mapping-list-lov.component.css'],
+    standalone: false
 })
 export class RoleMappingListLovComponent implements OnInit {
   // @Input() data?: FormParams;

@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 
 @Pipe({
-    name: 'time_split'
+    name: 'time_split',
+    standalone: false
 })
 export class TimeSplitPipe implements PipeTransform {
 

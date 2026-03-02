@@ -4,7 +4,7 @@ import { BaseComponent } from 'src/app/layout/base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { UserService } from 'src/app/shared/services/api-user.service';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ApiAlterService } from 'src/app/shared/services/api-alert.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 // import { MessageService } from 'primeng/components/common/messageservice';
@@ -24,16 +24,17 @@ import { AA0704Req } from 'src/app/models/api/AlertService/aa0704.interface';
 
 
 @Component({
-  selector: 'app-ac0702',
-  templateUrl: './ac0702.component.html',
-  styleUrls: ['./ac0702.component.css'],
-  providers: [UserService, ApiAlterService, MessageService, ConfirmationService]
+    selector: 'app-ac0702',
+    templateUrl: './ac0702.component.html',
+    styleUrls: ['./ac0702.component.css'],
+    providers: [UserService, ApiAlterService, MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0702Component extends BaseComponent implements OnInit {
 
   @ViewChild('dialog') _dialog!: DialogComponent;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
   queryStatus: { label: string; value: string; }[] = [];
   createStatus: { label: string; value: string; }[] = [];
   updateStatus: { label: string; value: string; }[] = [];
@@ -57,12 +58,12 @@ export class Ac0702Component extends BaseComponent implements OnInit {
   page1_keyword: string = '';
   page1_alertEnabled: string = '-1';
   page1_roleAlias: string = '';
-  roleForm: FormGroup;
+  roleForm: UntypedFormGroup;
 
   constructor(
     protected router: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private messageService: MessageService,
     private alertService: ApiAlterService,
@@ -74,38 +75,38 @@ export class Ac0702Component extends BaseComponent implements OnInit {
     super(router, tr);
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      roleAlias: new FormControl({ value: '', disabled: true }),
-      roleName: new FormControl(''),
-      alertEnabled: new FormControl('-1'),
-      alertSys: new FormControl(''),
-      alertName: new FormControl(''),
-      alertType: new FormControl(''),
-      logField: new FormControl(''),
-      rtnValue: new FormControl(''),
-      moduleName: new FormControl(''),
-      txid: new FormControl(''),
-      alertMsg: new FormControl(''),
-      elapse: new FormControl(''),
-      threshold: new FormControl(''),
-      duration: new FormControl(''),
-      alertInterval: new FormControl(''),
-      cFlag: new FormControl(false),
-      imFlag: new FormControl(false),
-      imType: new FormControl(''),
-      imId: new FormControl(''),
-      exType: new FormControl('N'),
-      exDays: new FormControl(''),
-      exTimeS: new FormControl({ hour: 0, minute: 0 }),
-      exTimeE: new FormControl({ hour: 0, minute: 0 }),
-      exTime: new FormControl(''),
-      roleIDList: new FormControl([]),
-      alertDesc: new FormControl(''),
-      searchMapString: new FormControl(''),
-      alertId: new FormControl('')
+      keyword: new UntypedFormControl(''),
+      roleAlias: new UntypedFormControl({ value: '', disabled: true }),
+      roleName: new UntypedFormControl(''),
+      alertEnabled: new UntypedFormControl('-1'),
+      alertSys: new UntypedFormControl(''),
+      alertName: new UntypedFormControl(''),
+      alertType: new UntypedFormControl(''),
+      logField: new UntypedFormControl(''),
+      rtnValue: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl(''),
+      txid: new UntypedFormControl(''),
+      alertMsg: new UntypedFormControl(''),
+      elapse: new UntypedFormControl(''),
+      threshold: new UntypedFormControl(''),
+      duration: new UntypedFormControl(''),
+      alertInterval: new UntypedFormControl(''),
+      cFlag: new UntypedFormControl(false),
+      imFlag: new UntypedFormControl(false),
+      imType: new UntypedFormControl(''),
+      imId: new UntypedFormControl(''),
+      exType: new UntypedFormControl('N'),
+      exDays: new UntypedFormControl(''),
+      exTimeS: new UntypedFormControl({ hour: 0, minute: 0 }),
+      exTimeE: new UntypedFormControl({ hour: 0, minute: 0 }),
+      exTime: new UntypedFormControl(''),
+      roleIDList: new UntypedFormControl([]),
+      alertDesc: new UntypedFormControl(''),
+      searchMapString: new UntypedFormControl(''),
+      alertId: new UntypedFormControl('')
     });
     this.roleForm = this.fb.group({
-      keyword: new FormControl('')
+      keyword: new UntypedFormControl('')
     })
   }
 
@@ -172,13 +173,23 @@ export class Ac0702Component extends BaseComponent implements OnInit {
       { field: 'roleAlias', header: dict['role_alias'] }
     ];
     // alert 選單
-    this.alertTypes.push({ label: "Keyword", value: "keyword" });
-    this.alertTypes.push({ label: "Response Time", value: "responseTime" });
+    this.alertTypes = [
+      { label: 'Keyword', value: 'keyword' },
+      { label: 'Response Time', value: 'responseTime' },
+    ];
+    // this.alertTypes.push( { label: "Keyword", value: "keyword" });
+    // this.alertTypes.push({ label: "Response Time", value: "responseTime" });
     // exception 選單
-    this.exceptionTypes.push({ label: dict['none'], value: "N" });
-    this.exceptionTypes.push({ label: dict['daily'], value: "D" });
-    this.exceptionTypes.push({ label: dict['weekly'], value: "W" });
-    this.exceptionTypes.push({ label: dict['monthly'], value: "M" });
+    this.exceptionTypes = [
+      { label: dict['none'], value: "N" },
+      { label: dict['daily'], value: "D" },
+      { label: dict['weekly'], value: "W" },
+      { label: dict['monthly'], value: "M" }
+    ]
+    // this.exceptionTypes.push({ label: dict['none'], value: "N" });
+    // this.exceptionTypes.push({ label: dict['daily'], value: "D" });
+    // this.exceptionTypes.push({ label: dict['weekly'], value: "W" });
+    // this.exceptionTypes.push({ label: dict['monthly'], value: "M" });
     this.alertSettingList = [];
     this.alertSettingListRowcount = this.alertSettingList.length;
     let ReqBody = {

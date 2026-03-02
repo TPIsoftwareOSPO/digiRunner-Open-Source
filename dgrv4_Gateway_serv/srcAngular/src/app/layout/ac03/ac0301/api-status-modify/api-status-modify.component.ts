@@ -5,16 +5,17 @@ import {
   Input,
   OnInit,
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-api-status-modify',
-  templateUrl: './api-status-modify.component.html',
-  styleUrls: ['./api-status-modify.component.css'],
+    selector: 'app-api-status-modify',
+    templateUrl: './api-status-modify.component.html',
+    styleUrls: ['./api-status-modify.component.css'],
+    standalone: false
 })
 export class ApiStatusModifyComponent implements OnInit {
   @Input() type: string = '';
@@ -23,7 +24,7 @@ export class ApiStatusModifyComponent implements OnInit {
   apiStateLabel: string = '';
 
   enableFlagList: { label: string; value: string }[] = [];
-  form: FormGroup;
+  form: UntypedFormGroup;
   minDate: Date = new Date();
 
   constructor(
@@ -32,12 +33,12 @@ export class ApiStatusModifyComponent implements OnInit {
     private ref: DynamicDialogRef,
     private config: DynamicDialogConfig,
     private list: ListService,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     this.form = this.fb.group({
-      modifyDate: new FormControl(''),
-      apiStatus: new FormControl(''),
-      revokeFlag: new FormControl(''),
+      modifyDate: new UntypedFormControl(''),
+      apiStatus: new UntypedFormControl(''),
+      revokeFlag: new UntypedFormControl(''),
     });
   }
 

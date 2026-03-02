@@ -1087,7 +1087,7 @@
   "dashBoard": {
     "title": "License",
     "title1": "digiRunner \"{{edition}}\" license key is about to expire on \"{{expiryDate}}\". Please extend it immediately!",
-    "title2": "digiRunner \"{{edition}}\" is not authorized or has expired. Please apply for or extend the product key immediately!",
+    "title2": "digiRunner \"{{edition}}\" is not authorized or has expired. <span class=\"text-danger\">Some features will soon become unavailable.</span> Please apply for or extend the product key immediately!",
     "desc1": "Please contact the TPIsoftware team or your account manager at <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a>",
     "desc2": "Once Express users complete the download, the system will automatically send the key via email. Please check your inbox to activate digiRunner.<br>For extensions and other inquiries, please contact the TPIsoftware team or your account manager at <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a>."
   },
@@ -1148,6 +1148,12 @@
     "body_before": "Mask {{num}} characters before, mask with {{mask}}",
     "body_after": "Mask {{num}} characters after, mask with {{mask}}",
     "body_after_regex": "Mask {{num}} characters after, mask with {{mask}}",
+    "body_remain_before_after": "Keep the first and last {{num}} characters; mask is displayed as {{mask}}",
+    "body_remain_before": "Keep the first {{num}} characters; mask is displayed as {{mask}}",
+    "body_remain_after": "Keep the last {{num}} characters; mask is displayed as {{mask}}",
+    "body_remain_before_after_exp": "\"name\":\"test\",\"id\":\"1\" => \"name###\":\"1\" (Keep the first and last 5 chars, masked with ###)",
+    "body_remain_before_exp": "\"name\":\"test\",\"id\":\"1\" => \"name### (Keep the first 5 chars, masked with ###)",
+    "body_remain_after_exp": "\"name\":\"test\",\"id\":\"1\" => ###\":\"1\" (Keep the last 5 chars, masked with ###)",
     "word": "Number of Characters",
     "mask": "Mask",
     "header_key_required": "Header mask keyword cannot be empty",
@@ -1319,7 +1325,7 @@
   },
   "notify": {
     "name": "Notify Name",
-    "type": "Notify Type",
+    "type": "Proxy Type",
     "sound": "Notification Sound"
   },
   "status_code": "Status Code",

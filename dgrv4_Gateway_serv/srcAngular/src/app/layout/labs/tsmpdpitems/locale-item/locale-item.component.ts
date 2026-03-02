@@ -1,7 +1,7 @@
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB9909Item } from './../../../../models/api/ServerService/dpb9909.interface';
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
 import * as dayjs from 'dayjs';
 
@@ -11,7 +11,8 @@ import * as dayjs from 'dayjs';
     selector: 'app-logitem',
     templateUrl: './locale-item.component.html',
     styleUrls: ['./locale-item.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 
 export class LocaleItemComponent implements OnInit {
@@ -19,10 +20,10 @@ export class LocaleItemComponent implements OnInit {
     @Input() itemValue!: DPB9909Item;
     @Output() change: EventEmitter<DPB9909Item> = new EventEmitter;
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService
     ) {
 
@@ -30,9 +31,9 @@ export class LocaleItemComponent implements OnInit {
 
     ngOnInit() {
         this.form = this.fb.group({
-            version: new FormControl(null),
-            locale: new FormControl(null),
-            subitemName: new FormControl(null),
+            version: new UntypedFormControl(null),
+            locale: new UntypedFormControl(null),
+            subitemName: new UntypedFormControl(null),
         });
 
         if(this.itemValue)

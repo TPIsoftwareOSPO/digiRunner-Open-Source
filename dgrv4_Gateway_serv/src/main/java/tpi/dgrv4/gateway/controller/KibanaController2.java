@@ -15,7 +15,9 @@ import tpi.dgrv4.gateway.service.IKibanaService2;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,61 +49,110 @@ public class KibanaController2 {
     }
 
     @SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
-    @RequestMapping(value = "/kibana/**")
-    public void resource2(@RequestHeader HttpHeaders httpHeaders, HttpServletRequest request,
-                          HttpServletResponse response, @RequestBody(required = false) String payload) throws Throwable {
-        service.resource(httpHeaders, request, response, payload);
+    @RequestMapping(value = {"/kibana/**"})
+    public void dashboard(@RequestHeader HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response,
+                          @CookieValue(name = "kibanaExpireKey") String value,
+                          @RequestBody(required = false) String payload
+    ) throws Exception {
+        String requestUri = request.getRequestURI();
 
-    }
-    String allowlistStr;
-    @GetMapping(value = "/kibana/{path:.*}/{appName}")
-    public void dashboard(@RequestHeader HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response, //
-                          @CookieValue(name = "expireKey") String value,
-                          @PathVariable(name = "path") String path, @PathVariable(name = "appName") String appName
-    ) throws IOException, Exception {
-        List<String> allowedAppPaths = tsmpSettingService.getVal_KIBANA_REFERER_ALLOWLIST();
-        String fullPath = (path.isEmpty() ? "" : "/" + path) + "/" + appName;
-        // Check if the requested appName is in the allowed list
-        boolean isAllowed = allowedAppPaths.stream()
-                .anyMatch(allowedPath -> allowedPath.endsWith(fullPath) ||
-                        allowedPath.equals("/" + appName) ||
-                        allowedPath.equals(appName));
+        // --- Get relative path from request ---
+        String path = requestUri.substring("/kibana/".length());
+        if (path.startsWith("kibana/")) {
+            path = path.substring("kibana/".length());
+        }
+        final String finalPath = normalizePath(path); // finalPath is now normalized (no leading/trailing slashes)
+
+        // --- Check for cookie bypass ---
+        List<String> bypassPaths = tsmpSettingService.getVal_KIBANA_COOKIE_BYPASS_PATHS();
+        if (bypassPaths == null) {
+            bypassPaths = Collections.emptyList();
+        }
+        // Apply the same normalization to the bypass paths from settings
+        boolean isBypassRequest = bypassPaths.stream()
+                .map(this::normalizePath)
+                .anyMatch(finalPath::startsWith);
+
+        // --- Original 'isAllowed' logic for dashboard paths ---
+        List<String> allowedAppPaths = tsmpSettingService.getVal_KIBANA_REFERER_ALLOWLIST().stream()
+                .map(this::normalizePath)
+                .collect(Collectors.toList());
+        allowedAppPaths.add(normalizePath(tsmpSettingService.getVal_KIBANA_STATUS_URL()));
+
+        boolean isAllowed = allowedAppPaths.stream().anyMatch(finalPath::equals);
 
         if (!isAllowed) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            response.flushBuffer();
+            service.resource(httpHeaders, request, response, payload);
             return;
         }
-        // 檢核 效期
-        if(ExpireKeyUtil.verifyExpireKey(value) &&
-                checkSecFetchSite(httpHeaders.get("sec-fetch-site"), httpHeaders.get(HttpHeaders.REFERER), response)) {
-            service.resource(httpHeaders, request, response, "");
-        }else {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                response.flushBuffer();
+
+        // --- Main security check ---
+        // Proceed if the request is in the bypass list OR if the cookie is valid.
+        if (isBypassRequest || (ExpireKeyUtil.verifyExpireKey(value) &&
+                checkSecFetchSite(httpHeaders.get("sec-fetch-site"), httpHeaders.get(HttpHeaders.REFERER), response))) {
+            service.resource(httpHeaders, request, response, payload);
+        } else {
+            if (!response.isCommitted()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Kibana session expired or invalid.");
+            }
         }
     }
 
     private boolean checkSecFetchSite(List<String> secFetchSites, List<String> referers, HttpServletResponse response) {
-        List<String> allowList = tsmpSettingService.getVal_KIBANA_REFERER_ALLOWLIST().stream().map(String::trim).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(secFetchSites) || secFetchSites.stream().noneMatch("same-origin"::equals)) {
+            return sendForbidden(response, "Invalid sec-fetch-site header");
+        }
+
+        if (CollectionUtils.isEmpty(referers)) {
+            return sendForbidden(response, "Missing referer header");
+        }
+
+        List<String> allowList = tsmpSettingService.getVal_KIBANA_REFERER_ALLOWLIST().stream()
+                .map(String::trim)
+                .map(this::normalizePath)
+                .collect(Collectors.toList());
         allowList.add("dgrv4");
-            if (CollectionUtils.isEmpty(secFetchSites) ||
-                secFetchSites.stream().noneMatch("same-origin"::equals) ||
-                CollectionUtils.isEmpty(referers) ||
-                referers.stream().noneMatch(referer -> allowList.stream().anyMatch(referer::contains))
-        ) {
+//        allowList.add(normalizePath(tsmpSettingService.getVal_KIBANA_STATUS_URL()));
+
+        for (String referer : referers) {
             try {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                URI refererUri = new URI(referer);
+                String refererPath = normalizePath(refererUri.getPath());
+
+                if (allowList.stream().anyMatch(refererPath::contains)) {
+                    return true;
+                }
+            } catch (URISyntaxException e) {
+                TPILogger.tl.warn("Invalid referer URI: "+ referer);
+            }
+        }
+
+        return sendForbidden(response, "Referer not in allow list: " + referers);
+    }
+
+    private String normalizePath(String path) {
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+        String normalized = path;
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
+    }
+
+    private boolean sendForbidden(HttpServletResponse response, String logMessage) {
+        TPILogger.tl.warn(logMessage);
+        if (!response.isCommitted()) {
+            try {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                response.flushBuffer();
             } catch (IOException e) {
                 TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
             }
-            TPILogger.tl.warn("referer: " + referers);
-            return false;
         }
-        return true;
+        return false;
     }
 }

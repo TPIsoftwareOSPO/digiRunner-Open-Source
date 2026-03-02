@@ -5,14 +5,15 @@ import { DPB0201RespItem } from 'src/app/models/api/ServerService/dpb0201.interf
 
 
 @Component({
-  selector: 'app-website-setting',
-  templateUrl: './website-setting.component.html',
-  styleUrls: ['./website-setting.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => WebsiteSettingComponent),
-    multi: true
-  }]
+    selector: 'app-website-setting',
+    templateUrl: './website-setting.component.html',
+    styleUrls: ['./website-setting.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => WebsiteSettingComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class WebsiteSettingComponent implements OnInit {
 

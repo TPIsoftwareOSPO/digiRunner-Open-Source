@@ -1,14 +1,15 @@
 
 import { AA0201HostReq, AA0201HostReqAddNo } from '../../../../models/api/ClientService/aa0201.interface';
 import { Component, OnInit, Input, AfterViewInit, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
 import { ToolService } from 'src/app/shared/services/tool.service';
 @Component({
-  selector: 'app-host-input-detail',
-  templateUrl: './host-input-detail.component.html',
-  styleUrls: ['./host-input-detail.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-host-input-detail',
+    templateUrl: './host-input-detail.component.html',
+    styleUrls: ['./host-input-detail.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class HostInputDetailComponent implements OnInit, AfterViewInit {
 
@@ -24,10 +25,10 @@ export class HostInputDetailComponent implements OnInit, AfterViewInit {
   maxLength255 = { value: 255 };
   changeLog = [];
   host?: AA0201HostReqAddNo;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService
   ) {
 
@@ -38,8 +39,8 @@ export class HostInputDetailComponent implements OnInit, AfterViewInit {
 
 
     this.form = this.fb.group({
-      hostName: new FormControl(this.data ? this.data.hostName : '', [ValidatorFns.maxLengthValidator(this.maxLength30.value)]),
-      hostIP: new FormControl(this.data ? this.data.hostIP : '')
+      hostName: new UntypedFormControl(this.data ? this.data.hostName : '', [ValidatorFns.maxLengthValidator(this.maxLength30.value)]),
+      hostIP: new UntypedFormControl(this.data ? this.data.hostIP : '')
     })
 
     const code = ['validation.format'];

@@ -9,6 +9,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
     selector: 'app-paramitem',
     templateUrl: './param-item.component.html',
     styleUrls: ['./param-item.component.css'],
+    standalone: false
 })
 
 export class ParamItemComponent implements OnInit {

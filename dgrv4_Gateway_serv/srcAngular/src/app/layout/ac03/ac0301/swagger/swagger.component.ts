@@ -3,25 +3,26 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { HttpClient } from '@angular/common/http';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-swagger',
-  templateUrl: './swagger.component.html',
-  styleUrls: ['./swagger.component.css']
+    selector: 'app-swagger',
+    templateUrl: './swagger.component.html',
+    styleUrls: ['./swagger.component.css'],
+    standalone: false
 })
 export class SwaggerComponent implements OnInit {
 
   @Input() data?: object;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   // url: SafeResourceUrl = {};
   tarUrl: string = ''
   formatJson:string = '';
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public config: DynamicDialogConfig,
     private sanitizer: DomSanitizer,
 
@@ -32,7 +33,7 @@ export class SwaggerComponent implements OnInit {
   ) {
 
     this.form = this.fb.group({
-      swgUrl: new FormControl('')
+      swgUrl: new UntypedFormControl('')
     })
 
   }

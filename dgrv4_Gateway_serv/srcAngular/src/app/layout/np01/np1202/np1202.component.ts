@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -23,10 +23,11 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ApiDetailContentComponent } from './api-detail-content/api-detail-content.component';
 
 @Component({
-  selector: 'app-np1202',
-  templateUrl: './np1202.component.html',
-  styleUrls: ['./np1202.component.css'],
-  providers: [MessageService, ConfirmationService, ApiService],
+    selector: 'app-np1202',
+    templateUrl: './np1202.component.html',
+    styleUrls: ['./np1202.component.css'],
+    providers: [MessageService, ConfirmationService, ApiService],
+    standalone: false
 })
 export class Np1202Component extends BaseComponent implements OnInit {
   @ViewChild('keyWords', { static: true })
@@ -35,7 +36,7 @@ export class Np1202Component extends BaseComponent implements OnInit {
   xApiKeyRef!: ElementRef<HTMLInputElement>;
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   currentAction: string = '';
   dataList: Array<DPB0234RespItem> = [];
@@ -45,7 +46,7 @@ export class Np1202Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -59,9 +60,9 @@ export class Np1202Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      flag: new FormControl('keyWords'),
-      keyWords: new FormControl('', ValidatorFns.requiredValidator()),
-      xApiKey: new FormControl(''),
+      flag: new UntypedFormControl('keyWords'),
+      keyWords: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+      xApiKey: new UntypedFormControl(''),
     });
   }
 

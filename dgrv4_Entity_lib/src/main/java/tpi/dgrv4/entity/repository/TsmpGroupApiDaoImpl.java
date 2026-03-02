@@ -162,7 +162,7 @@ public class TsmpGroupApiDaoImpl extends BaseDao {
 
 		sb.append(
 				" SELECT new tpi.dgrv4.entity.entity.TsmpGroupApiTopN(tga.moduleName, tga.apiKey, COUNT(DISTINCT da.dpApplicationId)) ");
-		sb.append(" FROM TsmpGroupApi tga, TsmpClientGroup tcg, TsmpClient tc, DpApp da , TsmpApi ta");
+		sb.append(" FROM TsmpGroupApi tga, TsmpClientGroup tcg, TsmpClient tc, DpApp da");
 		sb.append(" WHERE 3 = 3 ");
 
 		if (StringUtils.hasText(apiKey) && StringUtils.hasText(moduleNmae)) {

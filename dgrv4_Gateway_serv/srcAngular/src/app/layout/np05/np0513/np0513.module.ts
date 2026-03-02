@@ -21,7 +21,6 @@ import { JobDetailComponent } from './job-detail/job-detail.component';
         FormsModule
     ],
     declarations: [Np0513Component, JobDetailComponent],
-    entryComponents: [JobDetailComponent],
     providers: [TokenExpiredGuard]
 })
 export class Np0513Module { }

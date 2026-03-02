@@ -9,10 +9,10 @@ import { SortEvent } from 'primeng/api';
 import { Table } from 'primeng/table';
 
 @Component({
-  selector: 'app-ai0003',
-  templateUrl: './ai0003.component.html',
-  styleUrls: ['./ai0003.component.css'],
-  // providers: [ConfirmationService],
+    selector: 'app-ai0003',
+    templateUrl: './ai0003.component.html',
+    styleUrls: ['./ai0003.component.css'],
+    standalone: false
 })
 export class Ai0003Component extends BaseComponent implements OnInit {
   @ViewChild('dt') table!: Table;

@@ -5,7 +5,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { DPB0179IdPInfoItem } from 'src/app/models/api/ServerService/dpb0179.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as dayjs from 'dayjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -15,10 +15,11 @@ import { DPB0182LdapDataItem, DPB0182Req } from 'src/app/models/api/ServerServic
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-ac0019',
-  templateUrl: './ac0019.component.html',
-  styleUrls: ['./ac0019.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-ac0019',
+    templateUrl: './ac0019.component.html',
+    styleUrls: ['./ac0019.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0019Component extends BaseComponent implements OnInit {
 
@@ -28,7 +29,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
   cols: { field: string; header: string; }[] = [];
   dataList: Array<DPB0179IdPInfoItem> = [];
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   _fileSrc: any = null;
 
   idpInfoDetail?: DPB0180Resp;
@@ -39,7 +40,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
     private toolService: ToolService,
     private serverService: ServerService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private alertService: AlertService,
     private confirmationService: ConfirmationService,
     private sanitizer: DomSanitizer
@@ -50,13 +51,13 @@ export class Ac0019Component extends BaseComponent implements OnInit {
   ngOnInit(): void {
 
     this.form = this.fb.group({
-      status: new FormControl(),
-      ldapTimeout: new FormControl(),
-      policy: new FormControl(),
-      approvalResultMail: new FormControl(),
-      iconFile: new FormControl(),
-      pageTitle: new FormControl(),
-      ldapDataList: new FormControl(),
+      status: new UntypedFormControl(),
+      ldapTimeout: new UntypedFormControl(),
+      policy: new UntypedFormControl(),
+      approvalResultMail: new UntypedFormControl(),
+      iconFile: new UntypedFormControl(),
+      pageTitle: new UntypedFormControl(),
+      ldapDataList: new UntypedFormControl(),
     });
 
     this.queryIdPInfoList_mldap();

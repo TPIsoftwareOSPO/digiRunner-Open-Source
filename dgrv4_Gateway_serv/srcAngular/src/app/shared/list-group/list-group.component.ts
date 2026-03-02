@@ -1,4 +1,4 @@
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import {
   Component,
   OnInit,
@@ -10,10 +10,11 @@ import {
 import { Menu } from 'src/app/models/menu.model';
 
 @Component({
-  selector: 'app-list-group',
-  templateUrl: './list-group.component.html',
-  styleUrls: ['./list-group.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-list-group',
+    templateUrl: './list-group.component.html',
+    styleUrls: ['./list-group.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ListGroupComponent implements OnInit {
   /**
@@ -28,10 +29,10 @@ export class ListGroupComponent implements OnInit {
   @Input() selected: any;
   @Output('updateHandler') updateHandler: EventEmitter<any> =
     new EventEmitter();
-  form: FormGroup;
+  form: UntypedFormGroup;
   newMenus: Menu[] = [];
 
-  constructor(protected fb: FormBuilder) {
+  constructor(protected fb: UntypedFormBuilder) {
     this.form = this.fb.group([]);
   }
 
@@ -42,13 +43,13 @@ export class ListGroupComponent implements OnInit {
       this.newMenus?.forEach((newMenu) => {
         this.form.addControl(
           newMenu.main,
-          new FormControl({ value: false, disabled: this.disableCheckbox })
+          new UntypedFormControl({ value: false, disabled: this.disableCheckbox })
         );
         newMenu.subs?.forEach((subMenu) => {
           let defaultChecked = this.selected.includes(subMenu.name);
           this.form.addControl(
             subMenu.name,
-            new FormControl({
+            new UntypedFormControl({
               value: defaultChecked,
               disabled: this.disableCheckbox,
             })

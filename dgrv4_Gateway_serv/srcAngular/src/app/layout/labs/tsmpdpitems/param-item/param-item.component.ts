@@ -1,7 +1,7 @@
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
 import * as dayjs from 'dayjs';
 
@@ -10,7 +10,8 @@ import * as dayjs from 'dayjs';
     selector: 'app-logitem',
     templateUrl: './param-item.component.html',
     styleUrls: ['./param-item.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 
 export class ParamItemComponent implements OnInit {
@@ -18,17 +19,17 @@ export class ParamItemComponent implements OnInit {
     @Input() itemValue!: {index:number, value:string};
     @Output() change: EventEmitter<{index:number, value:string}> = new EventEmitter;
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService
     ) {}
 
     ngOnInit() {
         this.form = this.fb.group({
-            index: new FormControl(null),
-            value: new FormControl(null),
+            index: new UntypedFormControl(null),
+            value: new UntypedFormControl(null),
         });
 
         if(this.itemValue)

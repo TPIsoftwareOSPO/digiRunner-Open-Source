@@ -1,7 +1,7 @@
 import { map } from 'rxjs/operators';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -15,20 +15,21 @@ import { DPB0232WhitelistItem } from 'src/app/models/api/ServerService/dpb0232.i
 import { DPB0233Req } from 'src/app/models/api/ServerService/dpb0233.interface';
 
 @Component({
-  selector: 'app-lb0010',
-  templateUrl: './lb0010.component.html',
-  styleUrls: ['./lb0010.component.css'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-lb0010',
+    templateUrl: './lb0010.component.html',
+    styleUrls: ['./lb0010.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Lb0010Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   currentAction: string = '';
 
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -40,8 +41,8 @@ export class Lb0010Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      status: new FormControl(''),
-      dataList: new FormControl([]),
+      status: new UntypedFormControl(''),
+      dataList: new UntypedFormControl([]),
     });
   }
 

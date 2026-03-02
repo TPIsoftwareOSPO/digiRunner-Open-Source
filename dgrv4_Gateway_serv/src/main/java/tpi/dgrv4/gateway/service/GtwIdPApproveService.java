@@ -1,6 +1,7 @@
 package tpi.dgrv4.gateway.service;
 
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.util.Date;
 import java.util.UUID;
 
@@ -12,16 +13,21 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.constant.I302;
+import tpi.dgrv4.codec.utils.JWEcodec;
 import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.entity.DgrGtwIdpAuthCode;
 import tpi.dgrv4.entity.entity.DgrGtwIdpAuthM;
 import tpi.dgrv4.entity.repository.DgrGtwIdpAuthCodeDao;
@@ -31,6 +37,7 @@ import tpi.dgrv4.gateway.component.GtwIdPHelper;
 import tpi.dgrv4.gateway.component.IdPHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.util.JsonNodeUtil;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 
 /**
@@ -54,21 +61,86 @@ public class GtwIdPApproveService {
 	private final OAuthAuthorizationService oAuthAuthorizationService;
 	private final DgrOauthApprovalsDao dgrOauthApprovalsDao; 
 	private final GtwIdPHelper gtwIdPHelper;
+	private final TsmpCoreTokenEntityHelper tsmpCoreTokenEntityHelper;
 	
 	@Autowired
 	public void setI302(@Nullable I302 i302) {
 		this.i302 = i302;
 	}
 	
+	public ResponseEntity<?> gtwIdPApproveV2(HttpHeaders headers, HttpServletRequest httpReq,
+			HttpServletResponse httpResp, String idPType) throws Exception {
+
+		String unjwe = httpReq.getParameter("unjwe");
+		if(StringUtils.hasText(unjwe)) {
+			// 取得 Private Key
+			PrivateKey privateKey = getTsmpCoreTokenEntityHelper().getKeyPair().getPrivate();
+			// JWE 解密
+			try {
+				String payloadJsonStr = JWEcodec.jweDecryption(privateKey, unjwe);
+				// 取得 JWE 解密後的值
+				JsonNode payloadJsonNode = new ObjectMapper().readTree(payloadJsonStr);
+				String userName = JsonNodeUtil.getNodeAsText(payloadJsonNode, "username");
+				
+				//Because users might stay on the agreement page for more than 15 seconds (e.g., considering which authorizations to grant), we do not check for expiration.
+				//因為使用者可能會停留在同意頁超過15秒(例如:思考要給那些授權),所以就不檢查到期
+				/*Long exp = JsonNodeUtil.getNodeAsLong(payloadJsonNode, "exp");
+				// 檢查 exp 到期時間
+				if (exp == null || exp == 0) {
+					// URL 的參數 'credential' JWE 解密成功, 但缺少 'exp' 值
+					String errMsg = "unjwe JWE decrypted successfully, but 'exp' value is missing.";
+					TPILogger.tl.debug(errMsg);
+					return new ResponseEntity<OAuthTokenErrorResp2>(
+							getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+							HttpStatus.BAD_REQUEST);// 400
+				}
+				
+				// 檢查exp是否過期
+				if (exp < System.currentTimeMillis()) {// 已過期
+					// URL 的參數 'credential' JWE 解密成功, 但 'exp' 已過期
+					String errMsg = "unjwe JWE decrypted successfully, but 'exp' has expired: " + exp;
+					TPILogger.tl.debug(errMsg);
+					return new ResponseEntity<OAuthTokenErrorResp2>(
+							getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+							HttpStatus.FORBIDDEN);// 403
+				}*/
+				
+				return gtwIdPApproveCommon(headers, httpReq, httpResp, idPType, userName);
+				
+			} catch (Exception e) {
+				TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+				// URL 參數 'credential' JWE解密失敗
+				String errMsg = "unjwe JWE decryption failed.";
+				TPILogger.tl.debug(errMsg);
+				return new ResponseEntity<OAuthTokenErrorResp2>(
+						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+						HttpStatus.BAD_REQUEST);// 400
+			}
+		}else {
+			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "unjwe";
+			TPILogger.tl.debug(errMsg);
+			return new ResponseEntity<OAuthTokenErrorResp2>(
+					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					HttpStatus.BAD_REQUEST);// 400
+		}
+
+	}
+	
 	public ResponseEntity<?> gtwIdPApprove(HttpHeaders headers, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
+		
+		String userName = httpReq.getParameter("username");
+		return this.gtwIdPApproveCommon(headers, httpReq, httpResp, idPType, userName);
+	}
+	
+	public ResponseEntity<?> gtwIdPApproveCommon(HttpHeaders headers, HttpServletRequest httpReq,
+			HttpServletResponse httpResp, String idPType, String userName) throws Exception {
 		
 		String reqUri = httpReq.getRequestURI();
 		String dgrClientRedirectUri = httpReq.getParameter("redirect_uri");
 		ResponseEntity<?> errRespEntity = null;
 		
 		try {
-			String userName = httpReq.getParameter("username");
 			String dgrVGroupScopeStr = httpReq.getParameter("scope");
 			String state = httpReq.getParameter("state");
 			

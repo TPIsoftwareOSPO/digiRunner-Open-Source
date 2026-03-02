@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 
 @Pipe({
-    name: 'user_status'
+    name: 'user_status',
+    standalone: false
 })
 export class UserStatusPipe implements PipeTransform {
 

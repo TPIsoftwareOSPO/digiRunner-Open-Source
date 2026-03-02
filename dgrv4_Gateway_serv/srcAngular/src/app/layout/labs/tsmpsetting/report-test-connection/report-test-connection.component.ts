@@ -7,9 +7,10 @@ type EsResponse = {
 };
 
 @Component({
-  selector: 'app-report-test-connection',
-  templateUrl: './report-test-connection.component.html',
-  styleUrls: ['./report-test-connection.component.css'],
+    selector: 'app-report-test-connection',
+    templateUrl: './report-test-connection.component.html',
+    styleUrls: ['./report-test-connection.component.css'],
+    standalone: false
 })
 export class ReportTestConnectionComponent implements OnInit {
   esRespArray: { resp: string; connection: boolean; url: string }[] = [];

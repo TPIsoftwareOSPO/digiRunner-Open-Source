@@ -1,5 +1,6 @@
 package tpi.dgrv4.gateway.component.cache.proxy;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,13 @@ public class ProxyMethodServiceCacheProxy extends AbstractCacheProxy {
 		this.traceCodeUtil = traceCodeUtil;
 	}
 
-	public AutoCacheRespVo queryByIdCallApi(String id, IApiCacheService service, AutoCacheParamVo vo) {
+	public AutoCacheRespVo queryByIdCallApi(String id, IApiCacheService service, AutoCacheParamVo vo, Map<String, String> maskInfo) {
 		Supplier<AutoCacheRespVo> supplier = () -> {
 			
 			// 說明 dgr-v4 流程使用
 			if (traceCodeUtil != null) traceCodeUtil.logger(this);
 			
-			HttpRespData respObj = service.callback(vo);
+			HttpRespData respObj = service.callback(vo, maskInfo);
 			if(respObj != null) {
 				AutoCacheRespVo rsVo = new AutoCacheRespVo();
 				rsVo.setId(id);

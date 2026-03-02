@@ -2,9 +2,9 @@ import { DPB0161Req } from './../../../models/api/ServerService/dpb0161.interfac
 import { AlertService } from './../../../shared/services/alert.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DPB0160Req } from './../../../models/api/ServerService/dpb0160.interface';
-import { FormControl } from '@angular/forms';
-import { FormBuilder } from '@angular/forms';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DPB0159Item } from './../../../models/api/ServerService/dpb0159.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
@@ -17,10 +17,11 @@ import * as dayjs from 'dayjs';
 import * as base64 from 'js-base64'
 
 @Component({
-  selector: 'app-ac0018',
-  templateUrl: './ac0018.component.html',
-  styleUrls: ['./ac0018.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-ac0018',
+    templateUrl: './ac0018.component.html',
+    styleUrls: ['./ac0018.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0018Component extends BaseComponent implements OnInit {
 
@@ -29,7 +30,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
   pageNum: number = 1;
   cols: { field: string; header: string; }[] = [];
   dataList: Array<DPB0159Item> = [];
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   // _fileData?: File | null;
   // _fileName: string | null = null;
@@ -43,7 +44,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
     private toolService: ToolService,
     private serverService: ServerService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private alertService: AlertService,
     private confirmationService: ConfirmationService,
     private sanitizer: DomSanitizer
@@ -53,14 +54,14 @@ export class Ac0018Component extends BaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      ldapUrl: new FormControl(''),
-      ldapBaseDn: new FormControl(''),
-      ldapDn: new FormControl(''),
-      ldapTimeout: new FormControl(0),
-      ldapStatus: new FormControl(),
-      approvalResultMail: new FormControl(''),
-      iconFile: new FormControl(''),
-      pageTitle: new FormControl(''),
+      ldapUrl: new UntypedFormControl(''),
+      ldapBaseDn: new UntypedFormControl(''),
+      ldapDn: new UntypedFormControl(''),
+      ldapTimeout: new UntypedFormControl(0),
+      ldapStatus: new UntypedFormControl(),
+      approvalResultMail: new UntypedFormControl(''),
+      iconFile: new UntypedFormControl(''),
+      pageTitle: new UntypedFormControl(''),
     });
 
     this.queryIdPInfoList_ldap();

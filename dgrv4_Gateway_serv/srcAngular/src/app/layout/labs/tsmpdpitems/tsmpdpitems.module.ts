@@ -15,16 +15,15 @@ import { SubitemsComponent } from './subitems/subitems.component';
 
 
 @NgModule({
-  imports: [
-    CommonModule,
-    PrimengModule,
-    SharedModule,
-    ReactiveFormsModule,
-    FormsModule,
-    TsmpdpitemsRoutingModule
-  ],
-  declarations: [TsmpdpitemsComponent, LocaleItemComponent, ParamItemComponent, LocaleComponent, SubitemsComponent],
-  entryComponents : [LocaleItemComponent, ParamItemComponent, LocaleComponent],
-  providers:[TokenExpiredGuard]
+    imports: [
+        CommonModule,
+        PrimengModule,
+        SharedModule,
+        ReactiveFormsModule,
+        FormsModule,
+        TsmpdpitemsRoutingModule
+    ],
+    declarations: [TsmpdpitemsComponent, LocaleItemComponent, ParamItemComponent, LocaleComponent, SubitemsComponent],
+    providers: [TokenExpiredGuard]
 })
 export class TsmpdpitemsModule { }

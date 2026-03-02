@@ -3,7 +3,7 @@ import { SelectItem } from 'primeng/api';
 import { ServerService } from './../../../shared/services/api-server.service';
 import { ReqDPB0127, DPB0127Req, DPB0127RespItem } from './../../../models/api/ServerService/dpb0127.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, UntypedFormBuilder } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
@@ -14,16 +14,17 @@ import { DPB0128Req, DPB0128RespItem } from 'src/app/models/api/ServerService/dp
 import { ParamItemComponent } from './param-item/param-item.component';
 
 @Component({
-  selector: 'app-ac0509',
-  templateUrl: './ac0509.component.html',
-  styleUrls: ['./ac0509.component.css']
+    selector: 'app-ac0509',
+    templateUrl: './ac0509.component.html',
+    styleUrls: ['./ac0509.component.css'],
+    standalone: false
 })
 export class Ac0509Component extends BaseComponent implements OnInit {
   @ViewChild('paramitem', { read: ViewContainerRef }) paramitemRef!: ViewContainerRef;
 
   currentTitle: string = this.title;
   pageType: string = 'default'
-  form: FormGroup;
+  form: UntypedFormGroup;
   dateSmaxDate: Date = new Date();
   dateEminDate: Date = new Date();
   currentDate: Date = new Date();
@@ -116,7 +117,7 @@ export class Ac0509Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private ngxService: NgxUiLoaderService,
     private serverService: ServerService,
@@ -124,9 +125,9 @@ export class Ac0509Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      startDate: new FormControl(''),
-      endDate: new FormControl(''),
-      keywords: new FormControl('')
+      startDate: new UntypedFormControl(''),
+      endDate: new UntypedFormControl(''),
+      keywords: new UntypedFormControl('')
     });
 
   }

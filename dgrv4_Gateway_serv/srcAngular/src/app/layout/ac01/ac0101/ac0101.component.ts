@@ -1,5 +1,5 @@
 import { ToolService } from './../../../shared/services/tool.service';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { FuncService } from './../../../shared/services/api-func.service';
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
@@ -31,13 +31,14 @@ import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Component({
-  selector: 'app-ac0101',
-  templateUrl: './ac0101.component.html',
-  styleUrls: ['./ac0101.component.css'],
+    selector: 'app-ac0101',
+    templateUrl: './ac0101.component.html',
+    styleUrls: ['./ac0101.component.css'],
+    standalone: false
 })
 export class Ac0101Component extends BaseComponent implements OnInit {
-  form: FormGroup;
-  detailForm: FormGroup;
+  form: UntypedFormGroup;
+  detailForm: UntypedFormGroup;
   dialogTitle: string = '';
   funcInfoList: Array<AA0103List> = [];
   funcInfoListCols: { field: string; header: string }[] = [];
@@ -60,7 +61,7 @@ export class Ac0101Component extends BaseComponent implements OnInit {
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
     private funcService: FuncService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private translate: TranslateService,
     private roleService: RoleService,
@@ -72,27 +73,27 @@ export class Ac0101Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      newFuncName: new FormControl(
+      keyword: new UntypedFormControl(''),
+      newFuncName: new UntypedFormControl(
         '',
         ValidatorFns.stringSpaceAliasValidator(this.newFunNameLimitChar.value)
       ),
-      newFuncNameEn: new FormControl(
+      newFuncNameEn: new UntypedFormControl(
         '',
         ValidatorFns.stringNameSpaceValidator(this.newFunNameLimitChar.value)
       ),
-      newDesc: new FormControl(
+      newDesc: new UntypedFormControl(
         '',
         ValidatorFns.maxLengthValidator(this.newFunDescLimitChar.value)
       ),
-      newReportUrl: new FormControl(
+      newReportUrl: new UntypedFormControl(
         '',
         ValidatorFns.maxLengthValidator(this.newReportUrlLimitChar.value)
       ),
     });
 
     this.detailForm = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
   }
 

@@ -2,20 +2,21 @@ import { MessageService } from 'primeng/api';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { IKeyValueGrid } from './../key-value-grid.interface';
 import { Component, OnInit, Input, ComponentRef, AfterViewInit, SimpleChange, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
-import { NgModel, FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { NgModel, UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from '../../validator-functions';
 
 
 @Component({
-  selector: 'app-key-value-grid-detail',
-  templateUrl: './key-value-grid-detail.component.html',
-  styleUrls: ['./key-value-grid-detail.component.css'],
-  changeDetection:ChangeDetectionStrategy.OnPush
+    selector: 'app-key-value-grid-detail',
+    templateUrl: './key-value-grid-detail.component.html',
+    styleUrls: ['./key-value-grid-detail.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
   changeLog = [];
   keyvalue :IKeyValueGrid |undefined;
-  form:FormGroup;
+  form:UntypedFormGroup;
 
   ngAfterViewInit(): void {
 
@@ -39,15 +40,15 @@ export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
 
 
   constructor(
-    private fb:FormBuilder,
+    private fb:UntypedFormBuilder,
     private toolService: ToolService,
     private messageService:MessageService
     ) {
     this.form = this.fb.group({
-      selected:new FormControl(true),
-      key : new FormControl(this.data ? this.data.key : '',[ValidatorFns.maxLengthValidator(30)]),
-      value : new FormControl(this.data ? this.data.value : ''),
-      valueType : new FormControl('text'),
+      selected:new UntypedFormControl(true),
+      key : new UntypedFormControl(this.data ? this.data.key : '',[ValidatorFns.maxLengthValidator(30)]),
+      value : new UntypedFormControl(this.data ? this.data.value : ''),
+      valueType : new UntypedFormControl('text'),
       file: [null],
     })
   }

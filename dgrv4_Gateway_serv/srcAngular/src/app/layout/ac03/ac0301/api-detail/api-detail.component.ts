@@ -9,13 +9,14 @@ import {
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as base64 from 'js-base64';
 import { AA0320Item } from 'src/app/models/api/ApiService/aa0320.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolServiceWebhoook } from 'src/app/shared/services/tool-webhook.service';
 
 @Component({
-  selector: 'app-api-detail',
-  templateUrl: './api-detail.component.html',
-  styleUrls: ['./api-detail.component.css'],
+    selector: 'app-api-detail',
+    templateUrl: './api-detail.component.html',
+    styleUrls: ['./api-detail.component.css'],
+    standalone: false
 })
 export class ApiDetailComponent implements OnInit {
   @Input() apiDetail!: AA0302Resp;
@@ -30,7 +31,7 @@ export class ApiDetailComponent implements OnInit {
 
   @Output() getApiGroupListEvt: EventEmitter<string> = new EventEmitter();
 
-  detailForm: FormGroup;
+  detailForm: UntypedFormGroup;
 
   isWebhook: boolean = false;
 
@@ -38,10 +39,10 @@ export class ApiDetailComponent implements OnInit {
     private toolServiceW: ToolServiceWebhoook,
     private translateService: TranslateService,
     private messageService: MessageService,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     this.detailForm = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
   }
 

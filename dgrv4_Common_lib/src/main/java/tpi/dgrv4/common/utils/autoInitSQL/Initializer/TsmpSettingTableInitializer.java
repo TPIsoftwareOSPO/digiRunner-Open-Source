@@ -72,10 +72,8 @@ public class TsmpSettingTableInitializer {
 			createTsmpSetting("LDAP_DN","uid={{0}},dc=tstpi,dc=com","ldap login user DN");
 			createTsmpSetting("LDAP_TIMEOUT","3000","Connection timeout for ldap login, in milliseconds(ms)");
 			createTsmpSetting("LDAP_CHECK_ACCT_ENABLE","false","LDAP check account function enablement - true/false");
-
 			createTsmpSetting("TSMP_AC_CLIENT_ID","YWRtaW5Db25zb2xl","Login AC account (do not modify)");
 			createTsmpSetting("TSMP_AC_CLIENT_PW","dHNtcDEyMw==","AC login password (do not modify)");
-
 			createTsmpSetting("TSMP_FAIL_THRESHOLD","6","Allowed \"User password\" fail THRESHOLD");
 			createTsmpSetting("SSO_PKCE","true","PKCE Level AuthCode verification enablement - true/false");
 			createTsmpSetting("SSO_DOUBLE_CHECK","true","Enablement of Double-check verification - true/false");
@@ -126,12 +124,12 @@ public class TsmpSettingTableInitializer {
 			createTsmpSetting((id = "ES_URL"), (value = "https://es.example.com:19200/"), (memo = "The URL of ES, there must be a / line at the end, multiple groups are separated by commas (,), EX: https://es.example.com:19200/, https://es.example.com:29200/"));
 			createTsmpSetting((id = "ES_ID_PWD"), (value = "ENC(cGxlYXNlIHNldCB5b3VyIGVzIGlkIGFuZCBwYXNzd29yZCwgU2V0dGluZyBpcyBFU19JRF9QV0Q=)"), (memo = "ES's ID:PWD is combined and encrypted with Base64; you can press the button\"ENC\" to encrypt with ENC. If you want to set for multiple URLs - Separated by commas before ENC encryption, EX:ENC(id1:pwd1,id2:pwd2)"));
 			createTsmpSetting((id = "ES_TEST_TIMEOUT"), (value = "3000"), (memo = "ES connection timeout setting for testing"));
-			createTsmpSetting((id = "ES_MBODY_MASK_FLAG"), (value = "false"), (memo = "Mask all mbody, true is masking, false is not masking"));
+			createTsmpSetting((id = "ES_MBODY_MASK_FLAG"), (value = "false"), (memo = "ES log and log, mask all mbody, true is masking, false is not masking"));
 			createTsmpSetting((id = "ES_IGNORE_API"), (value = ""), (memo = "Ignore the assigned API transation recording in the ES, API list can be list and separated by commas (,), and the value is moduleName/apiId"));
-			createTsmpSetting((id = "ES_MBODY_MASK_API"), (value = ""), (memo = "Do mbody mask for the API of tsmpc, API list can be separated by commas (,), and the value is moduleName/apiId"));
+			//createTsmpSetting((id = "ES_MBODY_MASK_API"), (value = ""), (memo = "Do mbody mask for the API of tsmpc, API list can be separated by commas (,), and the value is moduleName/apiId"));
 			createTsmpSetting((id = "ES_TOKEN_MASK_FLAG"), (value = "true"), (memo = "Mask token, true is masking, false is not masking"));
-			createTsmpSetting((id = "ES_MAX_SIZE_MBODY_MASK"), (value = "0"), (memo = "Auto mbody mask when the length exceeding the mbody content value byte, the unit is byte, and the value below 10 (inclusive) will not be masked"));
-			createTsmpSetting((id = "ES_DGRC_MBODY_MASK_URI"), (value = ""), (memo = "Make an mbody mask on the URI of dgrc (value contains /dgrc), URL lists are separate by commas, Value format / dgrc/aa/bb/cc"));
+			createTsmpSetting((id = "ES_MAX_SIZE_MBODY_MASK"), (value = "0"), (memo = "ES log and log, auto mbody mask when the length exceeding the mbody content value byte, the unit is byte, and the value below 10 (inclusive) will not be masked"));
+			//createTsmpSetting((id = "ES_DGRC_MBODY_MASK_URI"), (value = ""), (memo = "Make an mbody mask on the URI of dgrc (value contains /dgrc), URL lists are separate by commas, Value format / dgrc/aa/bb/cc"));
 			createTsmpSetting((id = "ES_DGRC_IGNORE_URI"), (value = ""), (memo = "ES does not record URIs for dgrc(Value contains /dgrc), URL lists are separate by commas (,),Value is /dgrc/aa/bb/cc"));
 			createTsmpSetting((id = "ES_LOG_DISABLE"), (value = "true"), (memo = "Whether to prohibit the recording of ES LOG, true means yes, false means no"));
 			createTsmpSetting((id = "DGR_PATHS_COMPATIBILITY"), (value = "2"), (memo = "URL Path compatibility, 0: tsmpc only, 1 : dgrc only, 2 : tsmpc dgrc Compatible"));
@@ -198,6 +196,7 @@ public class TsmpSettingTableInitializer {
 	        createTsmpSetting((id = "DGR_PUBLIC_DOMAIN"), (value = "localhost"), (memo = "Public domain name or IP, ex: www.tpisoftware.com"));
 	        //對外公開的Port
 	        createTsmpSetting((id = "DGR_PUBLIC_PORT"), (value = "18080"), (memo = "Public port, ex: 80"));
+
 
 //	      -- 20230421, v4 GTW IdP 的設定, Mini Lee
 			// 前端 GTW IdP errMsg 顯示訊息的URL
@@ -340,7 +339,22 @@ public class TsmpSettingTableInitializer {
   			// -- 2025/12/01, Mini Lee, AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false)
   			createTsmpSetting((id = "AC_IDP_USERNAME_B64_ENCODE"), (value = "false"), (memo = "When logging into AC_IDP, does the username use base64 encoding (true/false) (default: false)"));
   			
-		} catch (Exception e) {
+           // --2025/12/15, Session Cookie token, Tom
+            createTsmpSetting((id = "DGR_SESSION_COOKIE_TOKEN_ENABLE"),(value = "false"),(memo="Specifies whether the session cookie token is enabled. The default value is false (true/false)."));
+            
+            // -- 2025/12/22, Zoe Lee 對外公開的 scheme
+            createTsmpSetting("DGR_PUBLIC_SCHEME", "https", "Public scheme ex: http https");
+            
+            // --2026/1/13, Global masking preserves characters, Tom
+            createTsmpSetting((id = "ES_MBODY_MASK_RESERVED_CHAR"),(value = "5"),(memo="ES log and log, global mask reserved characters, minimum value is 5."));
+
+            // -- 2026/01/15 , Zoe Lee kibana cookie bypass path
+            createTsmpSetting("KIBANA_COOKIE_BYPASS_PATHS", "/api/monitoring/", "A list of Kibana's internal API paths that should bypass the one-minute cookie expiration check. Used for background polling APIs.");
+
+            // -- 2026/01/15, token的設定, Mini Lee, 核發 client_credentials token 是否使用 cache? (true/false) (預設為false)
+            createTsmpSetting("DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE", "false", "Does the client_credentials token use a cache? (true/false) (default: false)");
+            
+        } catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;
 		}

@@ -24,6 +24,7 @@ import tpi.dgrv4.dpaa.vo.AA0311Func;
 import tpi.dgrv4.dpaa.vo.AA0311RedirectByIpData;
 import tpi.dgrv4.dpaa.vo.AA0311Req;
 import tpi.dgrv4.dpaa.vo.AA0311Resp;
+import tpi.dgrv4.dpaa.vo.DPB0118Resp;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.entity.*;
 import tpi.dgrv4.entity.entity.jpql.TsmpRegModule;
@@ -63,9 +64,11 @@ public class AA0311Service {
 	private final DgrAcIdpUserDao dgrAcIdpUserDao;
 	private final DgrWebhookApiMapDao dgrWebhookApiMapDao;
 	private final DgrWebhookNotifyDao dgrWebhookNotifyDao;
+	private final DPB0118Service dpb0118Service;
 
 	@Transactional
 	public AA0311Resp registerAPI(TsmpAuthorization auth, AA0311Req req, ReqHeader reqHeader, InnerInvokeParam iip) {
+		checkLicenseExpired();
 		
 		//寫入 Audit Log M
 		String lineNumber = StackTraceUtil.getLineNumber();
@@ -122,6 +125,13 @@ public class AA0311Service {
 		}
 		
 		return new AA0311Resp();
+	}
+	
+	protected void checkLicenseExpired() {
+		DPB0118Resp dpb0118Resp = getDpb0118Service().queryModuleVersion();
+		if(dpb0118Resp.isExpired()) {
+			throw TsmpDpAaRtnCode._1559.throwing("The license has expired.");
+		}
 	}
 	
 	protected LinkedList<String[]> checkSrcUrl(String srcUrl) {
@@ -882,4 +892,6 @@ public class AA0311Service {
 	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
 		return dgrAcIdpUserDao;
 	}
+	
+	
 }

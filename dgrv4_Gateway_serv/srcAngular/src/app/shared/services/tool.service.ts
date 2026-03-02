@@ -5,20 +5,18 @@ import { from, Subject } from 'rxjs';
 import { TimeRange } from './../../models/common.enum';
 import { TokenService } from './api-token.service';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 // import { ResToken } from 'src/app/models/api/TokenService/token.interface';
 import { GrantType } from 'src/app/models/common.enum';
 import { concatMap, tap, catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 // import { ResHeader } from 'src/app/models/api/base.header.interface';
-// import * as dayjs from 'dayjs';
 import { FormGroup } from '@angular/forms';
 // import { AA0206Req } from 'src/app/models/api/ClientService/aa0206.interface';
 // import * as aesjs from "aes-js";
 import { isNumber } from 'util';
 import { environment } from 'src/environments/environment';
 import { ResToken } from 'src/app/models/api/TokenService/token.interface';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { AA0206Req } from 'src/app/models/api/ClientService/aa0206.interface';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
@@ -34,8 +32,10 @@ import { Menu } from 'src/app/models/menu.model';
 import * as base64 from 'js-base64';
 // import { AA0101func } from 'src/app/models/api/FuncService/aa0101.interface';
 // import { LdapEnvItem } from 'src/app/models/api/LoginService/ldaplogin.interface';
+import { routes } from 'src/app/layout/layout.routing';
 
 export const TOKEN = 'access_token';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable()
 export class ToolService {
@@ -53,15 +53,19 @@ export class ToolService {
   b64pad = '=';
 
   constructor(
-    private http: HttpClient,
-    private jwtHelper: JwtHelperService,
+    private injector: Injector,
     private tokenService: TokenService,
     private translate: TranslateService,
-    public router: Router
-  ) {
+  ) // private jwtHelper: JwtHelperService,
+  // public router: Router
+  {
     dayjs.extend(utc);
     dayjs.extend(timezone);
   }
+
+  // private get router():Router{
+  //     return this.injector.get(Router);
+  // }
 
   Base64Encoder(str: string) {
     return window.btoa(unescape(encodeURIComponent(str))); // For URL Encoder UTF-8 convert
@@ -237,17 +241,33 @@ export class ToolService {
   }
 
   decodeToken() {
-    return this.jwtHelper.decodeToken(sessionStorage.getItem(TOKEN)!);
+    return jwtDecode(sessionStorage.getItem(TOKEN)!);
   }
 
   isTokenExpired(token: string = TOKEN): boolean {
     let jwtStr = sessionStorage.getItem(token) ?? undefined;
     if (jwtStr) {
-      return this.jwtHelper.isTokenExpired(jwtStr); // token expired?
+      return this.checkTokenExpired(jwtStr); // token expired?
     } else {
       return true; // no token
     }
   }
+
+  checkTokenExpired(token: string): boolean {
+  try {
+    const decoded: any = jwtDecode(token);
+
+    // 如果 token 裡根本沒有 exp 欄位，通常視為永不過期或格式有誤
+    if (!decoded.exp) return false;
+
+    // 轉換成毫秒並與現在時間比較
+    // Date.now() / 1000 得到當前秒數
+    return decoded.exp < Date.now() / 1000;
+  } catch (err) {
+    // 解碼失敗（例如格式錯誤）通常視為已過期或無效
+    return true;
+  }
+}
 
   refreshToken() {
     return this.tokenService.auth('', '', GrantType.refresh_token).pipe(
@@ -327,9 +347,7 @@ export class ToolService {
   }
 
   getDecodeToken() {
-    return this.jwtHelper.decodeToken(
-      sessionStorage.getItem('access_token') ?? ''
-    );
+    return jwtDecode(sessionStorage.getItem('access_token') ?? '');
   }
 
   removeAll() {
@@ -801,23 +819,14 @@ export class ToolService {
    */
   validateMenusNFuncCode(menu: any) {
     let layoutRouteData = new Array(); // 用來記錄有在layout.routing.ts內註冊的頁面id
-    const config = this.router.config;
-
-    for (let i = 0; i < config.length; i++) {
-      if ('_loadedConfig' in config[i]) {
-        if (config[i]['_loadedConfig'].routes[0].children) {
-          config[i]['_loadedConfig'].routes[0].children.forEach(
-            (childRoute) => {
-              if ('data' in childRoute) {
-                layoutRouteData.push(childRoute.data.id.toUpperCase());
-              }
-            }
-          );
+    const regMenuData = routes[0]?.children;
+    if (regMenuData) {
+      for (let i = 0; i < regMenuData.length; i++) {
+        if (regMenuData[i].data && regMenuData[i].data!['id']) {
+          layoutRouteData.push(regMenuData[i].data!['id'].toUpperCase());
         }
       }
     }
-    // console.log(layoutRouteData);
-    // console.log(menu);
 
     menu.forEach((item: Menu) => {
       item.subs = item.subs?.filter((subitem) =>
@@ -884,7 +893,7 @@ export class ToolService {
 
   //判斷是否mtls來增加或移除url字樣
   toggleMtlsFlag(input: string, ismtls: boolean): string {
-    if(input=='') return ''
+    if (input == '') return '';
     const dgrPrefixRegex = /^dgr\+(.+?)##(.*)$/;
 
     const match = input.match(dgrPrefixRegex);

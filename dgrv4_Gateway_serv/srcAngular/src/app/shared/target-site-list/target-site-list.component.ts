@@ -7,11 +7,11 @@ import { ListService } from "../services/api-list.service";
 import { ApiService } from "../services/api-api.service";
 
 @Component({
-  selector: 'app-target-site-list',
-  templateUrl: './target-site-list.component.html',
-  styleUrls: ['./target-site-list.component.css'],
-  providers:[ApiService],
-
+    selector: 'app-target-site-list',
+    templateUrl: './target-site-list.component.html',
+    styleUrls: ['./target-site-list.component.css'],
+    providers: [ApiService],
+    standalone: false
 })
 export class TargetSiteListComponent implements OnInit {
 

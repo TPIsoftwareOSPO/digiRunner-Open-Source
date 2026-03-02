@@ -3,7 +3,8 @@ import { SidebarService } from './../../layout/components/sidebar/sidebar.servic
 import { Pipe, PipeTransform  } from '@angular/core';
 
 @Pipe({
-  name: 'transform_menu'
+    name: 'transform_menu',
+    standalone: false
 })
 export class TransformMenuNamePipe implements PipeTransform {
     constructor( private toolService:ToolService){

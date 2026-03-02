@@ -224,7 +224,7 @@
         <div class="row col-12 mb-2" *ngIf="
             this.form.get('requestBody')!.value == 'body' || this.form.get('requestBody')!.value == 'xml'"
           style="width: 100%;">
-          <textarea rows="5" class="form-control" formControlName="bodyText" style="resize: none;width:100%"></textarea>
+          <textarea rows="5" class="form-control mx-2" formControlName="bodyText" style="resize: none;width:100%"></textarea>
         </div>
 
         <div class="row col-12 px-0" *ngIf="this.form.get('requestBody')!.value == 'form'">

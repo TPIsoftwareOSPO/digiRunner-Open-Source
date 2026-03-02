@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -18,13 +18,14 @@ import {
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import * as FileSaver from 'file-saver';
+import { saveAs} from 'file-saver';
 
 @Component({
-  selector: 'app-mail-template-io',
-  templateUrl: './mail-template-io.component.html',
-  styleUrls: ['./mail-template-io.component.css'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-mail-template-io',
+    templateUrl: './mail-template-io.component.html',
+    styleUrls: ['./mail-template-io.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class MailTemplateIoComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
@@ -42,7 +43,7 @@ export class MailTemplateIoComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -82,7 +83,7 @@ export class MailTemplateIoComponent extends BaseComponent implements OnInit {
         });
 
         const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
-        FileSaver.saveAs(data, `MailTplt_${date}.xlsx`);
+        saveAs(data, `MailTplt_${date}.xlsx`);
       }
       this.ngxService.stop();
     });

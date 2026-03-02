@@ -57,7 +57,7 @@ public class CacheValueKryoAdapter implements CacheValueAdapter {
 
 	@Override
 	public byte[] serialize(Object obj) {
-		Output output = new Output(16, 1_048_576);	// 1MB max capacity
+		Output output = new Output(16, 10_485_760);	// 10MB max capacity
 		Kryo kryo = getKryo();
 		kryo.writeClassAndObject(output, obj);
 		output.close();

@@ -4,7 +4,7 @@ import { ClientService } from './../../../shared/services/api-client.service';
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import {
   AA0202List,
   AA0202Req,
@@ -69,13 +69,14 @@ import { DPB0208Req } from 'src/app/models/api/ServerService/dpb0208.interface';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
-  selector: 'app-ac0202',
-  templateUrl: './ac0202.component.html',
-  styleUrls: ['./ac0202.component.css'],
-  providers: [ClientService, UserService, ConfirmationService],
+    selector: 'app-ac0202',
+    templateUrl: './ac0202.component.html',
+    styleUrls: ['./ac0202.component.css'],
+    providers: [ClientService, UserService, ConfirmationService],
+    standalone: false
 })
 export class Ac0202Component extends BaseComponent implements OnInit {
-  form: FormGroup;
+  form: UntypedFormGroup;
   formOperate = FormOperate;
   queryStatusOpt: { label: string; value: string }[] = [];
   data: Array<AA0202List> = [];
@@ -140,7 +141,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
 
   xApiKeyList: Array<DPB0207RespItem> = [];
   xApiKeyCreate: boolean = false;
-  formX: FormGroup;
+  formX: UntypedFormGroup;
 
   minDateEff: Date = new Date();
   minDateExp: Date = new Date();
@@ -157,7 +158,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private clientService: ClientService,
     private toolService: ToolService,
     private messageService: MessageService,
@@ -177,78 +178,78 @@ export class Ac0202Component extends BaseComponent implements OnInit {
     dayjs.extend(utc);
 
     this.formX = this.fb.group({
-      clientId: new FormControl(''),
-      apiKeyAlias: new FormControl(''),
-      effectiveAt: new FormControl(''),
-      expiredAt: new FormControl(''),
-      groupIdList: new FormControl([]),
+      clientId: new UntypedFormControl(''),
+      apiKeyAlias: new UntypedFormControl(''),
+      effectiveAt: new UntypedFormControl(''),
+      expiredAt: new UntypedFormControl(''),
+      groupIdList: new UntypedFormControl([]),
     });
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      groupID: new FormControl(''),
-      groupName: new FormControl({ value: '', disabled: true }),
-      encodeStatus: new FormControl('-1'),
-      clientID: new FormControl(''),
-      clientName: new FormControl(''),
-      signupNum: new FormControl(''),
-      clientAlias: new FormControl(''),
-      clientBlock: new FormControl(''),
-      confirmClientBlock: new FormControl(''),
-      hostList: new FormControl([]),
-      clientStartDate: new FormControl(),
-      clientEndDate: new FormControl(),
-      svcST: new FormControl({ hour: 0, minute: 0 }),
-      svcET: new FormControl({ hour: 0, minute: 0 }),
-      apiQuota: new FormControl(0),
-      tps: new FormControl(10),
-      cPriority: new FormControl(5),
-      owner: new FormControl(''),
-      createStatus: new FormControl(''),
-      publicFlag: new FormControl('2'),
-      emails: new FormControl(''),
-      newClientName: new FormControl(''),
-      newClientAlias: new FormControl(''),
-      newSignupNum: new FormControl(''),
-      newHostList: new FormControl(''),
-      newClientStartDate: new FormControl(''),
-      newClientEndDate: new FormControl(''),
-      newSvcST: new FormControl({ hour: 0, minute: 0 }),
-      newSvcET: new FormControl({ hour: 0, minute: 0 }),
-      newApiQuota: new FormControl(0),
-      newTps: new FormControl(10),
-      newCPriority: new FormControl(5),
-      newOwner: new FormControl(''),
-      newEncodePublicFlag: new FormControl(''),
-      newEmails: new FormControl(''),
-      newSecurityID: new FormControl(''),
-      authorizedGrantType: new FormControl(),
-      accessTokenValidity: new FormControl(),
-      raccessTokenValidity: new FormControl(''),
-      webServerRedirectUri: new FormControl(''),
-      webServerRedirectUri1: new FormControl(''),
-      webServerRedirectUri2: new FormControl(''),
-      webServerRedirectUri3: new FormControl(''),
-      webServerRedirectUri4: new FormControl(''),
-      webServerRedirectUri5: new FormControl(''),
-      accessTokenValidityTimeUnit: new FormControl('s'),
-      raccessTokenValidityTimeUnit: new FormControl('s'),
-      updateStatus: new FormControl(''),
-      resetFailLoginTreshhold: new FormControl(''),
-      resetPwdFailTimes: new FormControl(false),
-      newClientBlock: new FormControl(''),
-      resetBlock: new FormControl(false),
-      confirmNewClientBlock: new FormControl(''),
-      accessTokenQuota: new FormControl(0),
-      refreshTokenQuota: new FormControl(0),
-      remark: new FormControl(''),
-      newRemark: new FormControl(''),
-      clientStartTimePerDay: new FormControl(),
-      newClientStartTimePerDay: new FormControl(),
-      clientEndTimePerDay: new FormControl(),
-      newClientEndTimePerDay: new FormControl(),
-      timeZone: new FormControl(),
-      newTimeZone: new FormControl(),
+      keyword: new UntypedFormControl(''),
+      groupID: new UntypedFormControl(''),
+      groupName: new UntypedFormControl({ value: '', disabled: true }),
+      encodeStatus: new UntypedFormControl('-1'),
+      clientID: new UntypedFormControl(''),
+      clientName: new UntypedFormControl(''),
+      signupNum: new UntypedFormControl(''),
+      clientAlias: new UntypedFormControl(''),
+      clientBlock: new UntypedFormControl(''),
+      confirmClientBlock: new UntypedFormControl(''),
+      hostList: new UntypedFormControl([]),
+      clientStartDate: new UntypedFormControl(),
+      clientEndDate: new UntypedFormControl(),
+      svcST: new UntypedFormControl({ hour: 0, minute: 0 }),
+      svcET: new UntypedFormControl({ hour: 0, minute: 0 }),
+      apiQuota: new UntypedFormControl(0),
+      tps: new UntypedFormControl(10),
+      cPriority: new UntypedFormControl(5),
+      owner: new UntypedFormControl(''),
+      createStatus: new UntypedFormControl(''),
+      publicFlag: new UntypedFormControl('2'),
+      emails: new UntypedFormControl(''),
+      newClientName: new UntypedFormControl(''),
+      newClientAlias: new UntypedFormControl(''),
+      newSignupNum: new UntypedFormControl(''),
+      newHostList: new UntypedFormControl(''),
+      newClientStartDate: new UntypedFormControl(''),
+      newClientEndDate: new UntypedFormControl(''),
+      newSvcST: new UntypedFormControl({ hour: 0, minute: 0 }),
+      newSvcET: new UntypedFormControl({ hour: 0, minute: 0 }),
+      newApiQuota: new UntypedFormControl(0),
+      newTps: new UntypedFormControl(10),
+      newCPriority: new UntypedFormControl(5),
+      newOwner: new UntypedFormControl(''),
+      newEncodePublicFlag: new UntypedFormControl(''),
+      newEmails: new UntypedFormControl(''),
+      newSecurityID: new UntypedFormControl(''),
+      authorizedGrantType: new UntypedFormControl(),
+      accessTokenValidity: new UntypedFormControl(),
+      raccessTokenValidity: new UntypedFormControl(''),
+      webServerRedirectUri: new UntypedFormControl(''),
+      webServerRedirectUri1: new UntypedFormControl(''),
+      webServerRedirectUri2: new UntypedFormControl(''),
+      webServerRedirectUri3: new UntypedFormControl(''),
+      webServerRedirectUri4: new UntypedFormControl(''),
+      webServerRedirectUri5: new UntypedFormControl(''),
+      accessTokenValidityTimeUnit: new UntypedFormControl('s'),
+      raccessTokenValidityTimeUnit: new UntypedFormControl('s'),
+      updateStatus: new UntypedFormControl(''),
+      resetFailLoginTreshhold: new UntypedFormControl(''),
+      resetPwdFailTimes: new UntypedFormControl(false),
+      newClientBlock: new UntypedFormControl(''),
+      resetBlock: new UntypedFormControl(false),
+      confirmNewClientBlock: new UntypedFormControl(''),
+      accessTokenQuota: new UntypedFormControl(0),
+      refreshTokenQuota: new UntypedFormControl(0),
+      remark: new UntypedFormControl(''),
+      newRemark: new UntypedFormControl(''),
+      clientStartTimePerDay: new UntypedFormControl(),
+      newClientStartTimePerDay: new UntypedFormControl(),
+      clientEndTimePerDay: new UntypedFormControl(),
+      newClientEndTimePerDay: new UntypedFormControl(),
+      timeZone: new UntypedFormControl(),
+      newTimeZone: new UntypedFormControl(),
     });
   }
 

@@ -13,10 +13,11 @@ import { event } from 'jquery';
 
 
 @Component({
-  selector: 'app-frame',
-  templateUrl: './frame.component.html',
-  styleUrls: ['./frame.component.css'],
-  providers: [UtilService],
+    selector: 'app-frame',
+    templateUrl: './frame.component.html',
+    styleUrls: ['./frame.component.css'],
+    providers: [UtilService],
+    standalone: false
 })
 export class FrameComponent implements OnInit {
   @Input('reportID') reportID: string = '';

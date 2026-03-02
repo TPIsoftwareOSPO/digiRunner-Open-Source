@@ -557,6 +557,15 @@ public class TsmpSettingService {
 		return getBooleanVal(key, false);
 	}
 	
+	public String getKey_DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE() {
+		return TsmpSettingDao.Key.DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE;
+	}
+	
+	public boolean getVal_DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE() {
+		String key = getKey_DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE();
+		return getBooleanVal(key, false);
+	}
+	
 	public String getKey_ES_DGRC_MBODY_MASK_URI() {
 		return TsmpSettingDao.Key.ES_DGRC_MBODY_MASK_URI;
 	}
@@ -1282,6 +1291,14 @@ public class TsmpSettingService {
 		String key = getKey_DGR_PUBLIC_PORT();
 		return getStringVal(key);
 	}
+    public String getKey_DGR_PUBLIC_SCHEME() {
+        return TsmpSettingDao.Key.DGR_PUBLIC_SCHEME;
+    }
+
+    public String getVal_DGR_PUBLIC_SCHEME() {
+        String key = getKey_DGR_PUBLIC_SCHEME();
+        return getStringVal(key);
+    }
 	
 	public String getKey_DGR_HOST_HEADER() {
 		return TsmpSettingDao.Key.DGR_HOST_HEADER;
@@ -1551,4 +1568,33 @@ public class TsmpSettingService {
 		String key = getKey_USER_UPDATE_BY_SELF();
 		return getBooleanVal(key, false);
 	}
+    
+    public String getKey_DGR_SESSION_COOKIE_TOKEN_ENABLE(){
+		return  TsmpSettingDao.Key.DGR_SESSION_COOKIE_TOKEN_ENABLE;
+	}
+
+	public  boolean getVal_DGR_SESSION_COOKIE_TOKEN_ENABLE(){
+		String key = getKey_DGR_SESSION_COOKIE_TOKEN_ENABLE();
+		return getBooleanVal(key, Boolean.FALSE);
+	}
+	
+	public String getKey_ES_MBODY_MASK_RESERVED_CHAR() {
+		return TsmpSettingDao.Key.ES_MBODY_MASK_RESERVED_CHAR;
+	}
+		
+	public int getVal_ES_MBODY_MASK_RESERVED_CHAR() {
+		String key = getKey_ES_MBODY_MASK_RESERVED_CHAR();
+		return getIntVal(key, 5);
+	}
+
+    public String getKey_KIBANA_COOKIE_BYPASS_PATHS() {
+        return  TsmpSettingDao.Key.KIBANA_COOKIE_BYPASS_PATHS ;
+    }
+
+
+
+    public List<String> getVal_KIBANA_COOKIE_BYPASS_PATHS() {
+        String key = getKey_KIBANA_COOKIE_BYPASS_PATHS();
+        return getListVal(key, ",", String::valueOf);
+    }
 }

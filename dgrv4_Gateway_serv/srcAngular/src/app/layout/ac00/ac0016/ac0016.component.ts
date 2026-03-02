@@ -12,7 +12,7 @@ import { OrganizationComponent } from 'src/app/shared/organization/organization.
 import { RoleMappingListLovComponent } from 'src/app/shared/role-mapping-list-lov/role-mapping-list-lov.component';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogService } from 'primeng/dynamicdialog';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
@@ -20,10 +20,11 @@ import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-ac0016',
-  templateUrl: './ac0016.component.html',
-  styleUrls: ['./ac0016.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-ac0016',
+    templateUrl: './ac0016.component.html',
+    styleUrls: ['./ac0016.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0016Component extends BaseComponent implements OnInit {
 
@@ -31,8 +32,8 @@ export class Ac0016Component extends BaseComponent implements OnInit {
   pageNum: number = 1;
   cols: { field: string; header: string }[] = [];
   tableData: Array<any> = new Array();
-  form!: FormGroup;
-  formU!: FormGroup;
+  form!: UntypedFormGroup;
+  formU!: UntypedFormGroup;
   orgList: AA1002List[] = [];
   userInfo?:DPB0145RespItem;
   currentAction:string = 'create';
@@ -61,7 +62,7 @@ export class Ac0016Component extends BaseComponent implements OnInit {
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
     private toolService: ToolService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private dialogService: DialogService,
     private translate: TranslateService,
     private orgService: TOrgService,
@@ -87,37 +88,37 @@ export class Ac0016Component extends BaseComponent implements OnInit {
     ];
 
     this.form = this.fb.group({
-      userName: new FormControl(''),
-      userAlias: new FormControl(''),
-      status: new FormControl(''),
-      userEmail: new FormControl(''),
-      idpType: new FormControl(''),
+      userName: new UntypedFormControl(''),
+      userAlias: new UntypedFormControl(''),
+      status: new UntypedFormControl(''),
+      userEmail: new UntypedFormControl(''),
+      idpType: new UntypedFormControl(''),
 
-      longId: new FormControl(),
-      roleIdList: new FormControl([]),
+      longId: new UntypedFormControl(),
+      roleIdList: new UntypedFormControl([]),
       // newRoleIdList: new FormControl([]),
-      roleAliasList: new FormControl([]),//呈現用
-      orgId: new FormControl(),
-      orgName: new FormControl(),
+      roleAliasList: new UntypedFormControl([]),//呈現用
+      orgId: new UntypedFormControl(),
+      orgName: new UntypedFormControl(),
       // newOrgId: new FormControl(),
       // newOrgName: new FormControl(),//呈現用
     })
 
     this.formU = this.fb.group({
-      longId: new FormControl(''),
-      userName: new FormControl(''),
-      newUserName: new FormControl(''),
-      newUserAlias: new FormControl(''),
-      newStatus: new FormControl(''),
-      newUserEmail: new FormControl(''),
-      newIdpType: new FormControl(''),
+      longId: new UntypedFormControl(''),
+      userName: new UntypedFormControl(''),
+      newUserName: new UntypedFormControl(''),
+      newUserAlias: new UntypedFormControl(''),
+      newStatus: new UntypedFormControl(''),
+      newUserEmail: new UntypedFormControl(''),
+      newIdpType: new UntypedFormControl(''),
 
-      roleIdList: new FormControl([]),
-      newRoleIdList: new FormControl([]),
-      newRoleAliasList: new FormControl([]),//呈現用
-      orgId: new FormControl(),
-      newOrgId: new FormControl(),
-      newOrgName: new FormControl(),//呈現用
+      roleIdList: new UntypedFormControl([]),
+      newRoleIdList: new UntypedFormControl([]),
+      newRoleAliasList: new UntypedFormControl([]),//呈現用
+      orgId: new UntypedFormControl(),
+      newOrgId: new UntypedFormControl(),
+      newOrgName: new UntypedFormControl(),//呈現用
     })
 
     this.getOrgList();

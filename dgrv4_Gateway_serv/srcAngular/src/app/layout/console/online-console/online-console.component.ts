@@ -3,9 +3,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-online-console',
-  templateUrl: './online-console.component.html',
-  styleUrls: ['./online-console.component.css']
+    selector: 'app-online-console',
+    templateUrl: './online-console.component.html',
+    styleUrls: ['./online-console.component.css'],
+    standalone: false
 })
 export class OnlineConsoleComponent implements OnInit {
 

@@ -12,9 +12,9 @@ import {
 } from '@angular/core';
 import {
   ControlValueAccessor,
-  FormBuilder,
+  UntypedFormBuilder,
   FormControl,
-  FormGroup,
+  UntypedFormGroup,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { KeyValueFieldComponent } from '../key-value-field/key-value-field.component';
@@ -32,16 +32,17 @@ interface _keyValueField {
 }
 
 @Component({
-  selector: 'app-key-value-form',
-  templateUrl: './key-value-form.component.html',
-  styleUrls: ['./key-value-form.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => KeyValueFormComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-key-value-form',
+    templateUrl: './key-value-form.component.html',
+    styleUrls: ['./key-value-form.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => KeyValueFormComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class KeyValueFormComponent extends BaseComponent implements OnInit {
   // @ViewChild('keyValue', { read: ViewContainerRef, static: false }) keyValueRef!: ViewContainerRef;
@@ -61,7 +62,7 @@ export class KeyValueFormComponent extends BaseComponent implements OnInit {
   fieldValueList: Array<_keyValueField> = [];
   fieldNo: number = 0;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   formSubscription: Subscription | undefined;
   private _webhookType: string = '';
   @Input()
@@ -79,7 +80,7 @@ export class KeyValueFormComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     super(route, tr);
   }

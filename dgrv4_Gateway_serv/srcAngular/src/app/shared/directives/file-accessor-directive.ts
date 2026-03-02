@@ -4,13 +4,14 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from "@angular/forms";
 @Directive({
     selector: 'input[type=file]',
     providers: [
-      {
-        provide: NG_VALUE_ACCESSOR,
-        useExisting: FileAccessorDirective,
-        multi: true
-      }
-    ]
-  })
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: FileAccessorDirective,
+            multi: true
+        }
+    ],
+    standalone: false
+})
   export class FileAccessorDirective implements ControlValueAccessor {
     onChange;
   

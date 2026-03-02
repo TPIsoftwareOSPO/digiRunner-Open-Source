@@ -4,14 +4,15 @@ import { ScheduleContentFormComponent } from '../schedule-content-form/schedule-
 import { DPB0101ItemsAddNo, DPB0101Items } from 'src/app/models/api/CycleScheduleService/dpb0101.interface';
 
 @Component({
-  selector: 'app-schedule-content',
-  templateUrl: './schedule-content.component.html',
-  styleUrls: ['./schedule-content.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => ScheduleContentComponent),
-    multi: true
-  }]
+    selector: 'app-schedule-content',
+    templateUrl: './schedule-content.component.html',
+    styleUrls: ['./schedule-content.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ScheduleContentComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class ScheduleContentComponent implements OnInit {
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DPB0072RespItem, DPB0072Req } from 'src/app/models/api/ApiSignOffService/dpb0072.interface';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as ValidatorFns from '../../../shared/validator-functions';
 import { ApiSignOffService } from 'src/app/shared/services/api-api-sign-off.service';
@@ -19,11 +19,12 @@ import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
     selector: 'app-np0512',
     templateUrl: './np0512.component.html',
     styleUrls: ['./np0512.component.css'],
-    providers: [MessageService]
+    providers: [MessageService],
+    standalone: false
 })
 export class Np0512Component extends BaseComponent implements OnInit {
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     dataList: Array<DPB0072RespItem> = [];
     cols: { field: string; header: string }[] = [];
     rowcount: number = 0;
@@ -35,7 +36,7 @@ export class Np0512Component extends BaseComponent implements OnInit {
     constructor(
          route: ActivatedRoute,
          tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private signOffService: ApiSignOffService,
         private message: MessageService,
@@ -45,10 +46,10 @@ export class Np0512Component extends BaseComponent implements OnInit {
         super(route, tr);
 
         this.form = this.fb.group({
-          keyword: new FormControl(''),
-          startDate: new FormControl('', ValidatorFns.requiredValidator()),
-          endDate: new FormControl('', ValidatorFns.requiredValidator()),
-          orgFlag: new FormControl('0')
+          keyword: new UntypedFormControl(''),
+          startDate: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          endDate: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          orgFlag: new UntypedFormControl('0')
       });
     }
 

@@ -23,6 +23,7 @@ import tpi.dgrv4.gateway.component.IdPWellKnownHelper;
 import tpi.dgrv4.gateway.component.IdPWellKnownHelper.WellKnownData;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 
 @Service
 public class AcIdPAuthService {
@@ -50,8 +51,9 @@ public class AcIdPAuthService {
 		
 		String reqUri = httpReq.getRequestURI();
 		String txnUid = getDgrAuditLogService().getTxnUid();
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
+//		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
+//				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		String userHostname = httpReq.getRemoteHost();
 		
 		try {

@@ -3,7 +3,7 @@ import { BaseComponent } from '../../base-component';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -24,7 +24,7 @@ import { AA0102Req } from 'src/app/models/api/FuncService/aa0102.interface';
 import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import * as FileSaver from 'file-saver';
+import { saveAs } from 'file-saver';
 import * as dayjs from 'dayjs';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
@@ -32,16 +32,17 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-ac0105',
-  templateUrl: './ac0105.component.html',
-  styleUrls: ['./ac0105.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ac0105',
+    templateUrl: './ac0105.component.html',
+    styleUrls: ['./ac0105.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0105Component extends BaseComponent implements OnInit {
   funcInfoList: Array<AA0103List> = [];
-  form!: FormGroup;
-  detailForm!: FormGroup;
-  editForm!: FormGroup;
+  form!: UntypedFormGroup;
+  detailForm!: UntypedFormGroup;
+  editForm!: UntypedFormGroup;
   currentTitle: string = this.title;
   pageNum: number = 1;
 
@@ -73,7 +74,7 @@ export class Ac0105Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private translate: TranslateService,
     private messageService: MessageService,
@@ -89,35 +90,35 @@ export class Ac0105Component extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      newFuncName: new FormControl(
+      keyword: new UntypedFormControl(''),
+      newFuncName: new UntypedFormControl(
         '',
         ValidatorFns.stringSpaceAliasValidator(this.newFunNameLimitChar.value)
       ),
-      newFuncNameEn: new FormControl(
+      newFuncNameEn: new UntypedFormControl(
         '',
         ValidatorFns.stringNameSpaceValidator(this.newFunNameLimitChar.value)
       ),
-      newDesc: new FormControl(
+      newDesc: new UntypedFormControl(
         '',
         ValidatorFns.maxLengthValidator(this.newFunDescLimitChar.value)
       ),
-      newReportUrl: new FormControl(
+      newReportUrl: new UntypedFormControl(
         '',
         ValidatorFns.maxLengthValidator(this.newReportUrlLimitChar.value)
       ),
     });
 
     this.detailForm = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
 
     this.editForm = this.fb.group({
-      embeddedUrl: new FormControl(''),
-      funcList: new FormControl(),
-      type: new FormControl(0),
-      masterFuncCode: new FormControl(''),
-      isKibana: new  FormControl(false),
+      embeddedUrl: new UntypedFormControl(''),
+      funcList: new UntypedFormControl(),
+      type: new UntypedFormControl(0),
+      masterFuncCode: new UntypedFormControl(''),
+      isKibana: new  UntypedFormControl(false),
     });
 
     const code = [
@@ -483,7 +484,7 @@ export class Ac0105Component extends BaseComponent implements OnInit {
           });
 
           const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
-          FileSaver.saveAs(data, `EmbededFunc_${date}.xlsx`);
+          saveAs(data, `EmbededFunc_${date}.xlsx`);
         }
         this.ngxService.stop();
       });

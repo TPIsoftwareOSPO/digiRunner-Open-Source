@@ -6,30 +6,31 @@ import {
   DPB0280Req,
   DPB0280WebhookNotify,
 } from 'src/app/models/api/ServerService/dpb0280.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'app-notify-list',
-  templateUrl: './notify-list.component.html',
-  styleUrls: ['./notify-list.component.css'],
+    selector: 'app-notify-list',
+    templateUrl: './notify-list.component.html',
+    styleUrls: ['./notify-list.component.css'],
+    standalone: false
 })
 export class NotifyListComponent implements OnInit {
   @Input() close?: Function;
 
   tableData: Array<DPB0280WebhookNotify> = [];
   selectedItems: Array<DPB0280WebhookNotify> = [];
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   constructor(
     private toolService: ToolService,
     private ref: DynamicDialogRef,
     private serverService: ServerService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private config: DynamicDialogConfig
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
     this.queryWebhookNotify();
   }
@@ -45,7 +46,7 @@ export class NotifyListComponent implements OnInit {
     this.serverService.queryWebhookNotify(req).subscribe((res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.tableData = res.RespBody.webhookNotifyList;
-        if (this.config.data.notifyNameList)
+        if (this.config.data && this.config.data.notifyNameList)
           this.selectedItems = this.tableData.filter((rowdata) => {
             return this.config.data.notifyNameList.includes(rowdata.notifyName);
           });

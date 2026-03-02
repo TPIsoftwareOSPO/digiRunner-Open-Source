@@ -4,9 +4,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-api-status',
-  templateUrl: './api-status.component.html',
-  styleUrls: ['./api-status.component.css']
+    selector: 'app-api-status',
+    templateUrl: './api-status.component.html',
+    styleUrls: ['./api-status.component.css'],
+    standalone: false
 })
 export class ApiStatusComponent implements OnInit {
 

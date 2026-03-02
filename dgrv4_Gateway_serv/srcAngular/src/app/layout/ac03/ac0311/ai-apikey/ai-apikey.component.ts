@@ -5,9 +5,10 @@ import { AiService } from 'src/app/shared/services/api-ai.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-ai-apikey',
-  templateUrl: './ai-apikey.component.html',
-  styleUrls: ['./ai-apikey.component.css'],
+    selector: 'app-ai-apikey',
+    templateUrl: './ai-apikey.component.html',
+    styleUrls: ['./ai-apikey.component.css'],
+    standalone: false
 })
 export class AiApikeyComponent implements OnInit {
   cols: { field: string; header: string }[] = [];

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0083RespItem } from 'src/app/models/api/CertificateAuthorityService/dpb0083.interface';
 import { DPB0095Item, DPB0095Req } from 'src/app/models/api/OpenApiService/dpb0095.interface';
@@ -22,17 +22,18 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-ac0227',
-  templateUrl: './ac0227.component.html',
-  styleUrls: ['./ac0227.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-ac0227',
+    templateUrl: './ac0227.component.html',
+    styleUrls: ['./ac0227.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0227Component extends BaseComponent implements OnInit {
 
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
-  formIndex!: FormGroup;
+  form!: UntypedFormGroup;
+  formIndex!: UntypedFormGroup;
   clientListCols: { field: string; header: string; }[] = [];
   clientList: Array<DPB0083RespItem> = [];
   selected: Array<DPB0083RespItem> = [];
@@ -52,7 +53,7 @@ export class Ac0227Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private serverService: ServerService,
@@ -66,19 +67,19 @@ export class Ac0227Component extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     this.formIndex = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
     this.form = this.fb.group({
-      id: new FormControl({ value: '', disabled: true }),
-      clientId: new FormControl({ value: '', disabled: true }),
-      status: new FormControl(''),
-      remark: new FormControl(''),
-      ldapUrl: new FormControl(''),
-      ldapBaseDn: new FormControl(''),
-      ldapDn: new FormControl(''),
-      ldapTimeout: new FormControl(''),
-      iconFile: new FormControl(''),
-      pageTitle: new FormControl(''),
+      id: new UntypedFormControl({ value: '', disabled: true }),
+      clientId: new UntypedFormControl({ value: '', disabled: true }),
+      status: new UntypedFormControl(''),
+      remark: new UntypedFormControl(''),
+      ldapUrl: new UntypedFormControl(''),
+      ldapBaseDn: new UntypedFormControl(''),
+      ldapDn: new UntypedFormControl(''),
+      ldapTimeout: new UntypedFormControl(''),
+      iconFile: new UntypedFormControl(''),
+      pageTitle: new UntypedFormControl(''),
     });
 
     const codes = ['client_id', 'client_name', 'client_alias'];

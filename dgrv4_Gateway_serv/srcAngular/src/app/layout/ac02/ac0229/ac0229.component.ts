@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -21,17 +21,18 @@ import { DPB0205Req } from 'src/app/models/api/ServerService/dpb0205.interface';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-ac0229',
-  templateUrl: './ac0229.component.html',
-  styleUrls: ['./ac0229.component.css'],
-  providers: [MessageService, ConfirmationService]
+    selector: 'app-ac0229',
+    templateUrl: './ac0229.component.html',
+    styleUrls: ['./ac0229.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0229Component extends BaseComponent implements OnInit {
 
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
-  formEdit!: FormGroup;
+  form!: UntypedFormGroup;
+  formEdit!: UntypedFormGroup;
   clientListCols: { field: string; header: string; }[] = [];
   clientList: Array<DPB0095Item> = [];
   currentClient?: DPB0095Item;
@@ -78,7 +79,7 @@ select * from users u, tsmp_user ts where upper(u.username) = upper('tspuser') a
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -94,32 +95,32 @@ select * from users u, tsmp_user ts where upper(u.username) = upper('tspuser') a
   async ngOnInit() {
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
     this.formEdit = this.fb.group({
-      id: new FormControl({ value: '', disabled: true }),
-      clientId: new FormControl({ value: '', disabled: true }),
-      status: new FormControl(''),
-      remark: new FormControl(''),
+      id: new UntypedFormControl({ value: '', disabled: true }),
+      clientId: new UntypedFormControl({ value: '', disabled: true }),
+      status: new UntypedFormControl(''),
+      remark: new UntypedFormControl(''),
 
-      connectionName: new FormControl(''),
-      sqlPtmt: new FormControl(''),
-      sqlParams: new FormControl(''),
-      userMimaAlg: new FormControl(''),
-      userMimaColName: new FormControl(''),
+      connectionName: new UntypedFormControl(''),
+      sqlPtmt: new UntypedFormControl(''),
+      sqlParams: new UntypedFormControl(''),
+      userMimaAlg: new UntypedFormControl(''),
+      userMimaColName: new UntypedFormControl(''),
 
-      idtSub: new FormControl(''),
-      idtName: new FormControl(''),
-      idtEmail: new FormControl(''),
-      idtPicture: new FormControl(''),
+      idtSub: new UntypedFormControl(''),
+      idtName: new UntypedFormControl(''),
+      idtEmail: new UntypedFormControl(''),
+      idtPicture: new UntypedFormControl(''),
 
-      iconFile: new FormControl(''),
-      pageTitle: new FormControl(''),
+      iconFile: new UntypedFormControl(''),
+      pageTitle: new UntypedFormControl(''),
 
-      createUser: new FormControl(''),
-      createDateTime: new FormControl(''),
-      updateUser: new FormControl(''),
-      updateDateTime: new FormControl('')
+      createUser: new UntypedFormControl(''),
+      createDateTime: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      updateDateTime: new UntypedFormControl('')
     });
 
     const codes = ['client_id', 'client_name', 'client_alias'];

@@ -6,21 +6,21 @@ import { ServerService } from "../services/api-server.service";
 import { ListService } from "../services/api-list.service";
 import { ApiService } from "../services/api-api.service";
 import { AA0423RespItem } from "src/app/models/api/ApiService/aa0423.interface";
-import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { ConfirmationService } from "primeng/api";
 
 @Component({
-  selector: 'app-label-reset',
-  templateUrl: './label-reset.component.html',
-  styleUrls: ['./label-reset.component.css'],
-  providers: [ApiService, ConfirmationService],
-
+    selector: 'app-label-reset',
+    templateUrl: './label-reset.component.html',
+    styleUrls: ['./label-reset.component.css'],
+    providers: [ApiService, ConfirmationService],
+    standalone: false
 })
 export class LabelResetComponent implements OnInit {
 
   selected: Array<AA0423RespItem> = [];
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   showLabelList_tip: boolean = false;
 
   constructor(
@@ -29,14 +29,14 @@ export class LabelResetComponent implements OnInit {
     private serverService: ServerService,
     private ref: DynamicDialogRef,
     private config: DynamicDialogConfig,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private confirmationService: ConfirmationService,
   ) { }
 
   ngOnInit(): void {
     this.selected = this.config?.data?.data ? this.config?.data?.data : [];
     this.form = this.fb.group({
-      labelList: new FormControl([]),
+      labelList: new UntypedFormControl([]),
 
     })
 

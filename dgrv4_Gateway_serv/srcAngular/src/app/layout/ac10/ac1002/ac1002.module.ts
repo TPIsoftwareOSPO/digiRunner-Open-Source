@@ -18,7 +18,6 @@ import { OrgDetailComponent } from './org-detail/org-detail.component';
         Ac1002RoutingModule
     ],
     declarations: [Ac1002Component, OrgDetailComponent],
-    providers: [TokenExpiredGuard],
-    entryComponents: [OrgDetailComponent]
+    providers: [TokenExpiredGuard]
 })
 export class Ac1002Module { }

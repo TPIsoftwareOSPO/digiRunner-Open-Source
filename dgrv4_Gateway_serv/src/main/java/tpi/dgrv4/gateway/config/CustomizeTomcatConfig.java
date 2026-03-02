@@ -26,6 +26,8 @@ public class CustomizeTomcatConfig implements WebServerFactoryCustomizer<TomcatS
     Boolean serverHttp2Enabled;
 
     private ExecutorService virtualThreadExecutor;
+    
+    public String serverInfo;
 
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
@@ -79,7 +81,7 @@ public class CustomizeTomcatConfig implements WebServerFactoryCustomizer<TomcatS
         String totalMemory = Runtime.getRuntime().totalMemory() / 1024 / 1024 + "MB";
         String maxMemory = Runtime.getRuntime().maxMemory() / 1024 / 1024 + "MB";
 
-        var serverInfo = """
+        serverInfo = """
                 Customized Tomcat configuration:
                     - HTTP/2 Enabled: %b (set via server.http2.enable)
                     - SSL Enabled: %b

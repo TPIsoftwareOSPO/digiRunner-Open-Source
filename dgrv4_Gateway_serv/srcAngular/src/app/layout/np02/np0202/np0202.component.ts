@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { EmApptJobStatus, FormOperate } from 'src/app/models/common.enum';
@@ -24,14 +24,15 @@ import { ResCUS0003 as ResponseResult } from 'src/app/models/api/CertificateAuth
     selector: 'app-np0202',
     templateUrl: './np0202.component.html',
     styleUrls: ['./np0202.component.css'],
-    providers: [ClientService]
+    providers: [ClientService],
+    standalone: false
 })
 export class Np0202Component extends BaseComponent implements OnInit {
 
     @ViewChild('dialog') _dialog!: DialogComponent;
     @ViewChild('error_messages') error_messages!: ElementRef<any>;
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     formOperate = FormOperate;
     cols: { field: string; header: string; }[] = [];
     rowcount: number = 0;
@@ -55,7 +56,7 @@ export class Np0202Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private clientCA: ClientCAService,
         private clientService: ClientService,
@@ -64,8 +65,8 @@ export class Np0202Component extends BaseComponent implements OnInit {
         super(route, tr);
 
         this.form = this.fb.group({
-          keyword: new FormControl(''),
-          interface_keyword: new FormControl(''),
+          keyword: new UntypedFormControl(''),
+          interface_keyword: new UntypedFormControl(''),
         });
     }
 

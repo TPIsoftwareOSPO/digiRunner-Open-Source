@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0280Req } from 'src/app/models/api/ServerService/dpb0280.interface';
@@ -14,15 +14,16 @@ import { ListService } from 'src/app/shared/services/api-list.service';
 import { DPB0285Req } from 'src/app/models/api/ServerService/dpb0285.interface';
 
 @Component({
-  selector: 'app-lb0012',
-  templateUrl: './lb0012.component.html',
-  styleUrls: ['./lb0012.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-lb0012',
+    templateUrl: './lb0012.component.html',
+    styleUrls: ['./lb0012.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Lb0012Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   tableData: Array<DPB0285WebhookLogItem> = [];
   statusList: { label: string; value: string }[] = [];
   statusListIgnoreAll: { label: string; value: string }[] = [];
@@ -33,7 +34,7 @@ export class Lb0012Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private listService: ListService,
     private messageService: MessageService,
@@ -47,11 +48,11 @@ export class Lb0012Component extends BaseComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      webhookNotifyId: new FormControl(''),
-      keyword: new FormControl(''),
-      startDate: new FormControl(),
-      endDate: new FormControl(),
-      paging: new FormControl(''),
+      webhookNotifyId: new UntypedFormControl(''),
+      keyword: new UntypedFormControl(''),
+      startDate: new UntypedFormControl(),
+      endDate: new UntypedFormControl(),
+      paging: new UntypedFormControl(''),
     });
 
     let date = new Date();

@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0083RespItem } from 'src/app/models/api/CertificateAuthorityService/dpb0083.interface';
 import { DPB0090Req, DPB0090RespItem } from 'src/app/models/api/OpenApiService/dpb0090.interface';
@@ -22,7 +22,8 @@ import { DPB0095Item, DPB0095Req } from 'src/app/models/api/OpenApiService/dpb00
 @Component({
     selector: 'app-np0304',
     templateUrl: './np0304.component.html',
-    styleUrls: ['./np0304.component.css']
+    styleUrls: ['./np0304.component.css'],
+    standalone: false
 })
 export class Np0304Component extends BaseComponent implements OnInit {
 
@@ -30,7 +31,7 @@ export class Np0304Component extends BaseComponent implements OnInit {
 
     currentTitle = this.title;
     pageNum: number = 1; // 1: 用戶列表、2: Open API Key 列表、3: Open API Key Detail、
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     clientListCols: { field: string; header: string; }[] = [];
     clientList: Array<DPB0083RespItem> = new Array<DPB0083RespItem>();
     clientListRowcount: number = 0;
@@ -52,7 +53,7 @@ export class Np0304Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private openApiService: OpenApiKeyService,
         private file: FileService,
@@ -64,7 +65,7 @@ export class Np0304Component extends BaseComponent implements OnInit {
 
     ngOnInit() {
         this.form = this.fb.group({
-            keyword: new FormControl('')
+            keyword: new UntypedFormControl('')
         });
         this.roleService.queryRTMapByUk({ txIdList: ['DPB0092'] } as DPB0115Req).subscribe(res => {
             if (this.tool.checkDpSuccess(res.ResHeader)) {

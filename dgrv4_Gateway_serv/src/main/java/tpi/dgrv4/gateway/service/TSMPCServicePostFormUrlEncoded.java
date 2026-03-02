@@ -45,8 +45,6 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 	private TsmpSettingService tsmpSettingService;
 	private MockApiTestService mockApiTestService;
 
-	private Map<String, String> maskInfo;
-
 	@Autowired
 	public TSMPCServicePostFormUrlEncoded(ObjectMapper objectMapper,
 			ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy, CommForwardProcService commForwardProcService,
@@ -82,7 +80,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 			if (allowMethodErrRespEntity != null) {
 				return allowMethodErrRespEntity;
 			}
-			maskInfo = new HashMap<>();
+			Map<String, String> maskInfo = new HashMap<>();
 			maskInfo.put("bodyMaskPolicy", apiReg.getBodyMaskPolicy());
 			maskInfo.put("bodyMaskPolicySymbol", apiReg.getBodyMaskPolicySymbol());
 			maskInfo.put("bodyMaskPolicyNum", String.valueOf(apiReg.getBodyMaskPolicyNum()));
@@ -92,19 +90,24 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 			maskInfo.put("headerMaskPolicySymbol", apiReg.getHeaderMaskPolicySymbol());
 			maskInfo.put("headerMaskPolicyNum", String.valueOf(apiReg.getHeaderMaskPolicyNum()));
 			maskInfo.put("headerMaskKey", apiReg.getHeaderMaskKey());
-			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl);
+			
+			//Global masking
+			getCommForwardProcService().generateGlobalMaskParam(maskInfo);
+			
+			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl, maskInfo);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC】--\n" + reqLog.toString());
 
 			ResponseEntity<?> verifyResp = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders,
 					apiReg);
 
 			// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
-			String reqMbody = getCommForwardProcService().getReqMbody(httpReq);
+			//String reqMbody = getCommForwardProcService().getReqMbody(httpReq);
+			String maskReqMbody = getCommForwardProcService().getReqMbody(httpReq, maskInfo);
 			TsmpApiLogReq tsmpcUrlEncodedDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq,
-					reqMbody, "tsmpc", aType);
+					maskReqMbody, "tsmpc", aType);
 			// 第一組 RDB Req
 			TsmpApiLogReq tsmpcUrlEncodedDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq,
-					reqMbody, "tsmpc", aType);
+					maskReqMbody, "tsmpc", aType);
 
 			// JWT 資料驗證有錯誤
 			if (verifyResp != null) {
@@ -139,7 +142,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 						tsmpcUrlEncodedDgrReqVo, tsmpcUrlEncodedDgrReqVo_rdb, cApiKeySwitch, apiReg);
 			} else {
 				return forwardTo(httpReq, httpRes, httpHeaders, tsmpcUrlEncoded_srcUrl, values, uuid, tokenPayload,
-						tsmpcUrlEncodedDgrReqVo, tsmpcUrlEncodedDgrReqVo_rdb, cApiKeySwitch, apiReg);
+						tsmpcUrlEncodedDgrReqVo, tsmpcUrlEncodedDgrReqVo_rdb, cApiKeySwitch, apiReg, maskInfo);
 			}
 
 		} catch (Exception e) {
@@ -151,7 +154,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 	protected ResponseEntity<?> forwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders, String srcUrl, MultiValueMap<String, String> values, String uuid,
 			int tokenPayload, TsmpApiLogReq tsmpcUrlEncodedDgrReqVo, //
-			TsmpApiLogReq tsmpcUrlEncodedDgrReqVo_rdb, Boolean cApiKeySwitch, TsmpApiReg tsmpApiReg) throws Exception {
+			TsmpApiLogReq tsmpcUrlEncodedDgrReqVo_rdb, Boolean cApiKeySwitch, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo) throws Exception {
 
 		// 2. tsmpc req header / body
 		// 3. tsmpc resp header / body / code
@@ -178,7 +181,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 			paramVo.setHttpMethod(httpReq.getMethod());
 			paramVo.setValues(values);
 			AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
-					paramVo);
+					paramVo, maskInfo);
 			if (apiCacheRespVo != null) {// 走cache
 				tsmpcUrlEncoded_respObj.setRespData(apiCacheRespVo.getStatusCode(), apiCacheRespVo.getRespStr(),
 						apiCacheRespVo.getHttpRespArray(), apiCacheRespVo.getRespHeader());
@@ -187,7 +190,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 						apiCacheRespVo.getStatusCode(), httpRes, tsmpApiReg);
 			} else {// cache發生未知錯誤,call api
 				tsmpcUrlEncoded_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcUrlEncodedDgrReqVo,
-						reqMbody, uuid, values, false, tsmpApiReg);
+						reqMbody, uuid, values, false, tsmpApiReg, maskInfo);
 			}
 		} else if (StringUtils.hasText(fixedCacheId)) {// 固定cache
 			FixedCacheVo cacheVo = CommForwardProcService.fixedCacheMap.get(fixedCacheId);
@@ -195,7 +198,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 				boolean isUpdate = getCommForwardProcService().isFixedCacheUpdate(cacheVo, tsmpcUrlEncodedDgrReqVo);
 				if (isUpdate) {// 更新紀錄
 					tsmpcUrlEncoded_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl,
-							tsmpcUrlEncodedDgrReqVo, reqMbody, uuid, values, true, tsmpApiReg);
+							tsmpcUrlEncodedDgrReqVo, reqMbody, uuid, values, true, tsmpApiReg, maskInfo);
 					// statusCode小於400才更新紀錄
 					if (tsmpcUrlEncoded_respObj.statusCode < 400) {
 						cacheVo.setData(tsmpcUrlEncoded_respObj.httpRespArray);
@@ -214,7 +217,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 				}
 			} else {// call api
 				tsmpcUrlEncoded_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcUrlEncodedDgrReqVo,
-						reqMbody, uuid, values, true, tsmpApiReg);
+						reqMbody, uuid, values, true, tsmpApiReg, maskInfo);
 				// statusCode小於400才紀錄
 				if (tsmpcUrlEncoded_respObj.statusCode < 400) {
 					cacheVo = new FixedCacheVo();
@@ -229,7 +232,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 
 		} else {// call api
 			tsmpcUrlEncoded_respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcUrlEncodedDgrReqVo,
-					reqMbody, uuid, values, false, tsmpApiReg);
+					reqMbody, uuid, values, false, tsmpApiReg, maskInfo);
 		}
 		// 不論是 cache , 直接call, 統一在這裡 set RESPONSE HEADER
 		httpRes = getCommForwardProcService().getConvertResponse(tsmpcUrlEncoded_respObj.respHeader,
@@ -264,17 +267,18 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 		return null;
 	}
 
-	public HttpRespData callback(AutoCacheParamVo vo) {
+	public HttpRespData callback(AutoCacheParamVo vo, Map<String, String> maskInfo) {
 		try {
 			StringBuffer sb = new StringBuffer();
 			sb.append("\n--【LOGUUID】【" + vo.getUuid() + "】【Start TSMPC-to-Backend For Cache】--");
 			sb.append("\n--【LOGUUID】【" + vo.getUuid() + "】【End TSMPC-from-Backend For Cache】--\n");
 
 			// 第二組ES REQ
+			String maskReqMbody = HttpUtil.getDataString(vo.getValues(),maskInfo);
 			TsmpApiLogReq tsmpcUrlEncodedBackendReqVo = getCommForwardProcService()
-					.addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
+					.addEsTsmpApiLogReq2(vo.getDgrReqVo(), vo.getHeader(), vo.getSrcUrl(), maskReqMbody);
 
-			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getSrcUrl(), vo.getValues());
+			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getSrcUrl(), vo.getValues(), maskInfo);
 			respObj.fetchByte(maskInfo); // because Enable inputStream
 			sb.append(respObj.getLogStr());
 			TPILogger.tl.debug(sb.toString());
@@ -296,7 +300,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 
 	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, String srcUrl, TsmpApiLogReq dgrReqVo, String reqMbody, String uuid,
-			MultiValueMap<String, String> values, boolean isFixedCache, TsmpApiReg tsmpApiReg) throws Exception {
+			MultiValueMap<String, String> values, boolean isFixedCache, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo) throws Exception {
 
 		StringBuffer sb = new StringBuffer();
 		if (isFixedCache) {
@@ -308,9 +312,10 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 		}
 
 		// 第二組ES REQ
+		String maskReqMbody = HttpUtil.getDataString(values, maskInfo);
 		TsmpApiLogReq tsmpcUrlEncodedBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header,
-				srcUrl, reqMbody);
-		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, values);
+				srcUrl, maskReqMbody);
+		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, values, maskInfo);
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(sb.toString());
@@ -333,7 +338,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 		return respObj;
 	}
 
-	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String reqUrl)
+	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String reqUrl, Map<String, String> maskInfo)
 			throws IOException {
 		StringBuffer tsmpcUrlEncoded_log = new StringBuffer();
 
@@ -376,7 +381,7 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 	}
 
 	protected HttpRespData getHttpRespData(String httpMethod, Map<String, List<String>> header, String srcUrl,
-			MultiValueMap<String, String> values) throws Exception {
+			MultiValueMap<String, String> values, Map<String, String> maskInfo) throws Exception {
 
 		Map<String, List<String>> formData = values;
 

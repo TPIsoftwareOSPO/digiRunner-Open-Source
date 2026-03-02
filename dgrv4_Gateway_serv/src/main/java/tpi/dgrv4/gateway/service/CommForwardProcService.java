@@ -1,18 +1,30 @@
 package tpi.dgrv4.gateway.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JWSAlgorithm;
-import jakarta.annotation.PreDestroy;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.http.entity.ContentType;
 import org.apache.tomcat.util.buf.HexUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +38,36 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSAlgorithm;
+
+import jakarta.annotation.PreDestroy;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import oshi.util.tuples.Pair;
-import tpi.dgrv4.codec.utils.*;
+import tpi.dgrv4.codec.utils.Base64Util;
+import tpi.dgrv4.codec.utils.CApiKeyUtils;
+import tpi.dgrv4.codec.utils.ExpireKeyUtil;
+import tpi.dgrv4.codec.utils.HexStringUtils;
+import tpi.dgrv4.codec.utils.JWEcodec;
+import tpi.dgrv4.codec.utils.JWScodec;
+import tpi.dgrv4.codec.utils.MaskUtil;
+import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
+import tpi.dgrv4.codec.utils.RandomUtil;
+import tpi.dgrv4.codec.utils.SHA256Util;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.ifs.TraceCodeUtilIfs;
-import tpi.dgrv4.common.utils.CheckmarxCommUtils;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -39,14 +75,20 @@ import tpi.dgrv4.dpaa.component.DgrProtocol;
 import tpi.dgrv4.dpaa.es.DiskSpaceMonitor;
 import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
 import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
-import tpi.dgrv4.entity.entity.*;
-import tpi.dgrv4.entity.entity.jpql.TsmpClientCert;
+import tpi.dgrv4.entity.entity.DgrWebhookApiMap;
+import tpi.dgrv4.entity.entity.TsmpApi;
+import tpi.dgrv4.entity.entity.TsmpApiId;
+import tpi.dgrv4.entity.entity.TsmpApiReg;
+import tpi.dgrv4.entity.entity.TsmpApiRegId;
+import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.jpql.TsmpReqLog;
 import tpi.dgrv4.entity.entity.jpql.TsmpResLog;
 import tpi.dgrv4.entity.repository.DgrWebhookApiMapDao;
 import tpi.dgrv4.entity.repository.TsmpReqLogDao;
 import tpi.dgrv4.entity.repository.TsmpResLogDao;
 import tpi.dgrv4.escape.CheckmarxUtils;
+import tpi.dgrv4.gateway.component.ClientPublicKeyHelper;
+import tpi.dgrv4.gateway.component.ClientPublicKeyHelper.ClientPublicKeyData;
 import tpi.dgrv4.gateway.component.DgrcRoutingHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
@@ -61,24 +103,21 @@ import tpi.dgrv4.gateway.constant.DgrHeader;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
-import tpi.dgrv4.gateway.vo.*;
+import tpi.dgrv4.gateway.vo.FixedCacheVo;
+import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
+import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
+import tpi.dgrv4.gateway.vo.TWHeader;
+import tpi.dgrv4.gateway.vo.TWReqRespJwe;
+import tpi.dgrv4.gateway.vo.TWReqRespJweRecipients;
+import tpi.dgrv4.gateway.vo.TWReqRespJws;
+import tpi.dgrv4.gateway.vo.TWReqRespJwsSignatures;
+import tpi.dgrv4.gateway.vo.TWResponse;
+import tpi.dgrv4.gateway.vo.TWResponseBody;
+import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
+import tpi.dgrv4.gateway.vo.TsmpApiLogResp;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
 import tpi.dgrv4.httpu.utils.HttpsConnectionChecker;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
@@ -94,12 +133,8 @@ public class CommForwardProcService {
 	public static final String AUTHORIZATION = "authorization";
 	public static final String TOKENPAYLOAD = "tokenpayload";
 	public static final String BACKAUTH = "backauth";
-
-	
 	public static final String API_TYPE = "apiType";
-
 	public static final String NOTIFY = "notify";
-
 	private static final String MODULE_NAME = "moduleName";
 
 	private static final List<String> MASK_TOKEN_LIST = new ArrayList<>();
@@ -138,27 +173,7 @@ public class CommForwardProcService {
 	private TsmpTAEASKHelper tsmpTAEASKHelper;
 
 	private DgrWebhookApiMapDao dgrWebhookApiMapDao;
-
-	public static class ClientPublicKeyData {
-		private ResponseEntity<?> errRespEntity;
-		private PublicKey clientPublicKey;
-
-		public ResponseEntity<?> getErrRespEntity() {
-			return errRespEntity;
-		}
-
-		public void setErrRespEntity(ResponseEntity<?> errRespEntity) {
-			this.errRespEntity = errRespEntity;
-		}
-
-		public PublicKey getClientPublicKey() {
-			return clientPublicKey;
-		}
-
-		public void setClientPublicKey(PublicKey clientPublicKey) {
-			this.clientPublicKey = clientPublicKey;
-		}
-	}
+	private ClientPublicKeyHelper clientPublicKeyHelper;
 
 	@Autowired
 	public void setCommForwardProcService(@Nullable TraceCodeUtilIfs traceCodeUtil, DgrcRoutingHelper dgrcRoutingHelper,
@@ -168,7 +183,7 @@ public class CommForwardProcService {
 			TsmpSettingService tsmpSettingService, TokenCheck tokenCheck, TsmpReqLogDao tsmpReqLogDao,
 			TsmpResLogDao tsmpResLogDao, TsmpClientCacheProxy tsmpClientCacheProxy,
 			TsmpClientCertCacheProxy tsmpClientCertCacheProxy, TsmpTAEASKHelper tsmpTAEASKHelper,
-			DgrWebhookApiMapDao dgrWebhookApiMapDao) {
+			DgrWebhookApiMapDao dgrWebhookApiMapDao, ClientPublicKeyHelper clientPublicKeyHelper) {
 		this.executor = Executors.newCachedThreadPool(new CustomizableThreadFactory("CommForwardProcService"));
 		this.traceCodeUtil = traceCodeUtil;
 
@@ -186,6 +201,7 @@ public class CommForwardProcService {
 		this.tsmpClientCertCacheProxy = tsmpClientCertCacheProxy;
 		this.tsmpTAEASKHelper = tsmpTAEASKHelper;
 		this.dgrWebhookApiMapDao = dgrWebhookApiMapDao;
+		this.clientPublicKeyHelper = clientPublicKeyHelper;
 
 		// Because using constructor injection will cause a circular dependency, use
 		// method injection instead
@@ -199,15 +215,6 @@ public class CommForwardProcService {
 			this.executor.shutdown();
 		}
 	}
-
-	// No Auth 找不到有效的憑證
-	public static final String NO_AUTH_NO_VALID_CREDENTIALS_FOUND = "'No Auth' no valid credentials found.";
-	// 沒有 client ID 找不到有效的憑證
-	public static final String MISSING_CLIENT_ID_NO_VALID_CERTIFICATE_FOUND = "Missing client ID, no valid certificate found.";
-	// 找不到有效的憑證
-	public static final String NO_VALID_CERTIFICATE_FOUND = "No valid certificate found, client_id: ";
-	// 產生公鑰失敗
-	public static final String FAILED_TO_GENERATE_PUBLIC_KEY = "Failed to generate public key, client_id: ";
 
 	/**
 	 *
@@ -784,7 +791,8 @@ public class CommForwardProcService {
 			return httpRes;
 		}
 		httpRes.setStatus(respObj.statusCode);
-		respObj.respHeader.remove("Transfer-Encoding"); // 它不能回傳
+		//respObj.respHeader.remove("Transfer-Encoding"); // 它不能回傳
+		respObj.respHeader.keySet().removeIf(key -> key != null && key.equalsIgnoreCase("Transfer-Encoding"));// 它不能回傳
 		respObj.respHeader.remove("Content-Length"); // 需自動計算
 		// 大寫
 		respObj.respHeader.remove("Access-Control-Allow-Origin"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
@@ -859,7 +867,8 @@ public class CommForwardProcService {
 		}
 
 		httpRes.setStatus(status);
-		respHeader.remove("Transfer-Encoding"); // 它不能回傳
+		//respHeader.remove("Transfer-Encoding"); // 它不能回傳
+		respHeader.keySet().removeIf(key -> key != null && key.equalsIgnoreCase("Transfer-Encoding"));// 它不能回傳
 		respHeader.remove("Content-Length"); // 需自動計算
 		// 大寫
 		respHeader.remove("Access-Control-Allow-Origin"); // 經過 APIM 一定要能解決 CORS, 所以原來的 API header 要移除
@@ -1071,10 +1080,10 @@ public class CommForwardProcService {
 			String value = this.convertAuth(k, tmpValue, maskInfo);
 			writeLogger(cfp_log, "\tKey: " + k + ", Value: " + value);
 		}
-		writeLogger(cfp_log, "\tKey: " + "getStatus" + ", Value: " + httpRes.getStatus());
-		writeLogger(cfp_log, "\tKey: " + "Content-Length" + ", Value: " + contentLength);
+		//writeLogger(cfp_log, "\tKey: " + "getStatus" + ", Value: " + httpRes.getStatus());
+		//writeLogger(cfp_log, "\tKey: " + "Content-Length" + ", Value: " + contentLength);
 		writeLogger(cfp_log, "\tKey: " + "getCharacterEncoding" + ", Value: " + httpRes.getCharacterEncoding());
-		writeLogger(cfp_log, "\tKey: " + "getContentType" + ", Value: " + httpRes.getContentType());
+		//writeLogger(cfp_log, "\tKey: " + "getContentType" + ", Value: " + httpRes.getContentType());
 		writeLogger(cfp_log, "\tKey: " + "getLocale" + ", Value: " + httpRes.getLocale());
 
 		writeLogger(cfp_log, "--【End】--\r\n");
@@ -1135,7 +1144,8 @@ public class CommForwardProcService {
 
 	public String maskBodyFromFormData(Map<String, String> maskInfo, String key, String value) {
 		if (maskInfo != null) {
-
+			//Policy 5, 6, and 7 reserve characters; keywords are not included, so they will not be processed for now.
+			//policy5,6,7保留字元,沒有keyword所以暫不處理
 			String bodyMaskPolicySymbol = maskInfo.get("bodyMaskPolicySymbol");
 			String bodyMaskKeyword = maskInfo.get("bodyMaskKeyword");
 			if (StringUtils.hasLength(bodyMaskKeyword)) {
@@ -1156,7 +1166,7 @@ public class CommForwardProcService {
 
 	public String maskBody(Map<String, String> maskInfo, String mbody) {
 		// checkmarx, Unchecked Input for Loop Condition
-		return CheckmarxCommUtils.sanitizeForCheckmarx(maskInfo, mbody);
+		return CheckmarxUtils.sanitizeForCheckmarx(maskInfo, mbody);
 	}
 
 	public Map<String, List<String>> getEsHeaderMap(HttpServletRequest request) {
@@ -1192,8 +1202,7 @@ public class CommForwardProcService {
 		logParams.put("clientId", httpReq.getAttribute(TokenHelper.CLIENT_ID) == null ? ""
 				: ((String) httpReq.getAttribute(TokenHelper.CLIENT_ID)));
 		logParams.put("cip",
-				StringUtils.hasText(httpReq.getHeader("x-forwarded-for")) ? httpReq.getHeader("x-forwarded-for")
-						: httpReq.getRemoteAddr());
+                 ClientIpUtil.getClientIp(httpReq));
 		logParams.put("contentLength", httpReq.getHeader(HttpHeaders.CONTENT_LENGTH));
 
 		Map<String, List<String>> esHeaderMap = getEsHeaderMap(httpReq);
@@ -1330,8 +1339,8 @@ public class CommForwardProcService {
 		// StandardCharsets.UTF_8);
 		Long createTimestamp = nowDate.getTime();
 		// mbody遮罩
-		String contentLength = logParams.get("contentLength");
-		mbody = this.convertMbody(mbody, reqVo, contentLength);
+		//String contentLength = logParams.get("contentLength");
+		//mbody = this.convertMbody(mbody, reqVo, contentLength);
 
 		reqVo.setaType(aType);
 		reqVo.setCid(cid);
@@ -1497,11 +1506,11 @@ public class CommForwardProcService {
 		if (CollectionUtils.isEmpty(contentLengthList)) {
 			contentLengthList = esHeaderMap.get(HttpHeaders.CONTENT_LENGTH);
 		}
-		if (CollectionUtils.isEmpty(contentLengthList)) {
-			mbody = this.convertMbody(mbody, reqVo2, "0");
-		} else {
-			mbody = this.convertMbody(mbody, reqVo2, contentLengthList.get(0));
-		}
+//		if (CollectionUtils.isEmpty(contentLengthList)) {
+//			mbody = this.convertMbody(mbody, reqVo2, "0");
+//		} else {
+//			mbody = this.convertMbody(mbody, reqVo2, contentLengthList.get(0));
+//		}
 
 		// respHeader會有null的KEY,這個也照常辦理
 		esHeaderMap.remove(null);
@@ -1601,7 +1610,7 @@ public class CommForwardProcService {
 			mbody = respObj.respStr;// 可能回傳是gzip,但有呼叫respObj.fetchByte()就有值
 		}
 		// mbody遮罩
-		mbody = this.convertMbody(mbody, reqVo, String.valueOf(contentLength));
+		//mbody = this.convertMbody(mbody, reqVo, String.valueOf(contentLength));
 
 		String entry = reqVo.getEntry();
 		Long createTimestamp = reqVo.getCreateTimestamp();
@@ -1724,7 +1733,7 @@ public class CommForwardProcService {
 		String ts = reqVo.getTs();
 		String entry = reqVo.getEntry();
 		Long createTimestamp = reqVo.getCreateTimestamp();
-		mbody = this.convertMbody(mbody, reqVo, String.valueOf(contentLength));
+		//mbody = this.convertMbody(mbody, reqVo, String.valueOf(contentLength));
 
 		Map<String, List<String>> esHeaderMap = new HashMap<>(headerMap);
 		// respHeader會有null的KEY,這個也照常辦理
@@ -1789,8 +1798,17 @@ public class CommForwardProcService {
 		// }
 		// });
 	}
+	
+	public void generateGlobalMaskParam(Map<String, String> maskInfo) {
+		boolean globalMaskFlag = getTsmpSettingService().getVal_ES_MBODY_MASK_FLAG();
+		int globalMaskBySize = getTsmpSettingService().getVal_ES_MAX_SIZE_MBODY_MASK();
+		int globalReservedChar = getTsmpSettingService().getVal_ES_MBODY_MASK_RESERVED_CHAR();
+		maskInfo.put("globalMaskFlag", String.valueOf(globalMaskFlag));
+		maskInfo.put("globalMaskBySize", String.valueOf(globalMaskBySize));
+		maskInfo.put("globalReservedChar", String.valueOf(globalReservedChar));
+	}
 
-	public String convertMbody(String mbody, TsmpApiLogReq reqVo, String strContentLength)
+	/*public String convertMbody(String mbody, TsmpApiLogReq reqVo, String strContentLength)
 			throws UnsupportedEncodingException {
 		if (mbody == null) {
 			return "";
@@ -1859,7 +1877,7 @@ public class CommForwardProcService {
 		} else {
 			return mbody;
 		}
-	}
+	}*/
 
 	public List<String> convertAuth(List<String> authList) {
 		if (CollectionUtils.isEmpty(authList)) {
@@ -1948,10 +1966,10 @@ public class CommForwardProcService {
 		Map<String, String> partContentTypes = new HashMap<>();
 
 		// httpReq.getContentType() 可能為 null
-		String contentType = httpReq.getContentType();
-		if (contentType == null) {
-			contentType = "";
-		}
+//		String contentType = httpReq.getContentType();
+//		if (contentType == null) {
+//			contentType = "";
+//		}
 
 		if (ContentType.MULTIPART_FORM_DATA.toString().equals(httpReq.getContentType())) {
 			for (Part part : httpReq.getParts()) {
@@ -1962,7 +1980,8 @@ public class CommForwardProcService {
 		StringBuilder sb = new StringBuilder();
 		httpReq.getParameterMap().forEach((k, vs) -> {
 			if (vs.length != 0) {
-				sb.append("{" + k + ":" + Arrays.asList(vs) + "Content Type :　" + partContentTypes.get(k) + "　},");
+				String value = partContentTypes.get(k) == null ? "" : partContentTypes.get(k); 
+				sb.append("{" + k + ":" + Arrays.asList(vs) + " Content Type :　" + value + "　},");
 			}
 		});
 		String str = sb.toString();
@@ -1971,6 +1990,35 @@ public class CommForwardProcService {
 		}
 
 		return str;
+	}
+	
+	public String getReqMbody(HttpServletRequest httpReq, Map<String, String> maskInfo) throws IOException, ServletException {
+
+		if(maskInfo == null) {
+			return getReqMbody(httpReq);
+		}else {
+			Map<String, String> partContentTypes = new HashMap<>();
+	
+			if (ContentType.MULTIPART_FORM_DATA.toString().equals(httpReq.getContentType())) {
+				for (Part part : httpReq.getParts()) {
+					partContentTypes.put(part.getName(), part.getContentType());
+				}
+			}
+	
+			StringBuilder sb = new StringBuilder();
+			httpReq.getParameterMap().forEach((k, vs) -> {
+				if (vs.length != 0) {
+					String partContentTypesValue = partContentTypes.get(k) == null ? "" : partContentTypes.get(k); 
+					sb.append("{" + k + ":" +this.maskBodyFromFormData(maskInfo, k, Arrays.asList(vs).toString())  + " Content Type :　" + partContentTypesValue + "　},");
+				}
+			});
+			String str = sb.toString();
+			if (StringUtils.hasText(str)) {
+				str = str.substring(0, str.length() - 1);
+			}
+	
+			return str;
+		}
 	}
 
 	public boolean existIndex(String url, String indexName, String idPwd) throws IOException {
@@ -2119,15 +2167,15 @@ public class CommForwardProcService {
 				/* JWS 驗章, 使用 client(客戶) 的公鑰驗章 */
 
 				// 1.取得 client 憑證中的公鑰
-				ClientPublicKeyData clientPublicKeyData = getClientPublicKeyData(clientId, noAuth);
-				ResponseEntity<?> responseEntity = clientPublicKeyData.errRespEntity;
+				ClientPublicKeyData clientPublicKeyData = getClientPublicKeyHelper().getClientPublicKeyData(clientId, noAuth);
+				ResponseEntity<?> responseEntity = clientPublicKeyData.getErrRespEntity();
 				if (responseEntity != null) {
 					jwtPayloadData.errRespEntity = responseEntity;
 					return jwtPayloadData;
 				}
 
 				// 取得公鑰
-				PublicKey publicKey = clientPublicKeyData.clientPublicKey;
+				PublicKey publicKey = clientPublicKeyData.getClientPublicKey();
 
 				// 2.JWS 驗章
 				boolean verify = JWScodec.jwsVerifyByRS(publicKey, jwtStr);
@@ -2135,7 +2183,7 @@ public class CommForwardProcService {
 					String errMsg = "API request JWS verify error.";
 					TPILogger.tl.debug(errMsg);
 					responseEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-							getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+							TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 							HttpStatus.BAD_REQUEST);// 400
 					jwtPayloadData.errRespEntity = responseEntity;
 				}
@@ -2179,95 +2227,6 @@ public class CommForwardProcService {
 		}
 
 		return jwtPayloadData;
-	}
-
-	/**
-	 * 取得 Client(客戶) 憑證中的公鑰
-	 */
-	public ClientPublicKeyData getClientPublicKeyData(String clientId, String noAuth) {
-		ClientPublicKeyData clientPublicKeyData = new ClientPublicKeyData();
-
-		// 1.是否為 No Auth
-		if ("1".equals(noAuth)) {// No Auth,沒有驗證,就沒有 client
-			// No Auth 找不到有效的憑證
-			String errMsg = NO_AUTH_NO_VALID_CREDENTIALS_FOUND;
-			TPILogger.tl.debug(errMsg);
-			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
-					HttpStatus.BAD_REQUEST);// 400
-			clientPublicKeyData.errRespEntity = errResEntity;// 400
-			return clientPublicKeyData;
-		}
-
-		// 2.沒有 client ID
-		if (!StringUtils.hasLength(clientId)) {
-			// 沒有 client ID 找不到有效的憑證
-			String errMsg = MISSING_CLIENT_ID_NO_VALID_CERTIFICATE_FOUND;
-			TPILogger.tl.debug(errMsg);
-			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
-					HttpStatus.BAD_REQUEST);// 400
-			clientPublicKeyData.errRespEntity = errResEntity;// 400
-			return clientPublicKeyData;
-		}
-
-		// 3.取得 client 的有效憑證
-		TsmpClientCert tsmpClientCert = getClientCert(clientId);
-		if (tsmpClientCert == null) {
-			// Table [TSMP_CLIENT_CERT] 查不到 client
-			TPILogger.tl.debug("Table [TSMP_CLIENT_CERT] can't find valid certificate, client_id:" + clientId);
-			// 找不到有效的憑證
-			String errMsg = NO_VALID_CERTIFICATE_FOUND + clientId;
-			TPILogger.tl.debug(errMsg);
-			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
-					HttpStatus.BAD_REQUEST);// 400
-			clientPublicKeyData.errRespEntity = errResEntity;// 400
-			return clientPublicKeyData;
-		}
-
-		// 4.產生 client 的公鑰
-		try {
-			String pubKeyStr = tsmpClientCert.getPubKey();
-			PublicKey publicKey = PEMUtil.readPublicKey(pubKeyStr);
-			clientPublicKeyData.clientPublicKey = publicKey;
-		} catch (Exception e) {
-			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
-			// 產生公鑰失敗
-			String errMsg = FAILED_TO_GENERATE_PUBLIC_KEY + clientId;
-			TPILogger.tl.debug(errMsg);
-			ResponseEntity<?> errResEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
-					HttpStatus.BAD_REQUEST);// 400
-			clientPublicKeyData.errRespEntity = errResEntity;// 400
-			return clientPublicKeyData;
-		}
-
-		return clientPublicKeyData;
-	}
-
-	/**
-	 * 取得 client 的有效憑證, <br>
-	 * 即過期時間 > 今天的日期,並依建立時間由小到大排序,取第一個 <br>
-	 */
-	public TsmpClientCert getClientCert(String clientId) {
-		// 取得今天的日期,去掉時分秒,例如:2023/7/1
-		Date dt = new Date();
-		String dtStr = DateTimeUtil.dateTimeToString(dt, DateTimeFormatEnum.西元年月日_2)
-				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
-		Date nowDate = DateTimeUtil.stringToDateTime(dtStr, DateTimeFormatEnum.西元年月日_2)
-				.orElseThrow(TsmpDpAaRtnCode._1295::throwing);
-		long nowLong = nowDate.getTime();
-
-		// 找有效的憑證(過期時間 > 今天的日期),並依建立時間由小到大排序
-		List<TsmpClientCert> certList = getTsmpClientCertCacheProxy()
-				.findByClientIdAndExpiredAtAfterOrderByCreateDateTime(clientId, nowLong);
-
-		if (CollectionUtils.isEmpty(certList)) {
-			return null;
-		} else {
-			return certList.get(0);// 取第一個
-		}
 	}
 
 	/**
@@ -2468,8 +2427,8 @@ public class CommForwardProcService {
 		PublicKey publicKey = null;
 		if ("1".equals(jweFlagResp)) {// JWE
 			// 取得 client 憑證中的公鑰
-			ClientPublicKeyData clientPublicKeyData = getClientPublicKeyData(clientId, noAuth);
-			ResponseEntity<?> responseEntity = clientPublicKeyData.errRespEntity;
+			ClientPublicKeyData clientPublicKeyData = getClientPublicKeyHelper().getClientPublicKeyData(clientId, noAuth);
+			ResponseEntity<?> responseEntity = clientPublicKeyData.getErrRespEntity();
 			if (responseEntity != null) {
 				// 錯誤訊息直接顯示,不處理壓縮,不轉JWE/JWS
 				httpRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);// 400
@@ -2488,7 +2447,7 @@ public class CommForwardProcService {
 				return convertResponseBodyMap;
 			}
 
-			publicKey = clientPublicKeyData.clientPublicKey;
+			publicKey = clientPublicKeyData.getClientPublicKey();
 		}
 
 		// 將 response 轉成 1:JWE, 2:JWS 或 0:NONE
@@ -2911,7 +2870,7 @@ public class CommForwardProcService {
 		respVo.setHttpStatus(httpStatus);
 
 		// mBody
-		mbody = this.convertMbody(mbody, reqVo, String.valueOf(contentLength));
+		//mbody = this.convertMbody(mbody, reqVo, String.valueOf(contentLength));
 		respVo.setMbody(mbody);
 
 		// elapse

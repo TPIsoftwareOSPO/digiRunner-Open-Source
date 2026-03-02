@@ -1,6 +1,6 @@
 import { DialogService } from 'primeng/dynamicdialog';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -23,10 +23,11 @@ import { Observable } from 'rxjs';
 import { DPB0114Req } from 'src/app/models/api/RoleService/dpb0114.interface';
 
 @Component({
-  selector: 'app-ac1202',
-  templateUrl: './ac1202.component.html',
-  styleUrls: ['./ac1202.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-ac1202',
+    templateUrl: './ac1202.component.html',
+    styleUrls: ['./ac1202.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac1202Component extends BaseComponent implements OnInit {
 
@@ -34,7 +35,7 @@ export class Ac1202Component extends BaseComponent implements OnInit {
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立、3：更新
-  form: FormGroup;
+  form: UntypedFormGroup;
   listTypeOptionForQuery: { label: string; value: string; }[] = [];
   listTypeOptionNotQuery: { label: string; value: string; }[] = [];
   rtMappingCols: { field: string; header: string }[] = [];
@@ -49,7 +50,7 @@ export class Ac1202Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private list: ListService,
     private roleService: RoleService,
@@ -60,18 +61,18 @@ export class Ac1202Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      listType: new FormControl('all'),
-      roleId: new FormControl(''),
-      roleAlias: new FormControl({ value: '', disabled: true }),
-      txId: new FormControl(''),
-      newListType: new FormControl(''),
-      newRoleId: new FormControl(''),
-      newRoleAlias: new FormControl({ value: '', disabled: true }),
-      newTxId: new FormControl(''),
-      oriRoleId: new FormControl(''),
-      oriListType: new FormControl(''),
-      oriTxIdList: new FormControl('')
+      keyword: new UntypedFormControl(''),
+      listType: new UntypedFormControl('all'),
+      roleId: new UntypedFormControl(''),
+      roleAlias: new UntypedFormControl({ value: '', disabled: true }),
+      txId: new UntypedFormControl(''),
+      newListType: new UntypedFormControl(''),
+      newRoleId: new UntypedFormControl(''),
+      newRoleAlias: new UntypedFormControl({ value: '', disabled: true }),
+      newTxId: new UntypedFormControl(''),
+      oriRoleId: new UntypedFormControl(''),
+      oriListType: new UntypedFormControl(''),
+      oriTxIdList: new UntypedFormControl('')
     });
   }
 

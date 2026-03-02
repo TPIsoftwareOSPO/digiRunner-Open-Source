@@ -4,9 +4,10 @@ import { Subscription } from 'rxjs';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-expired-in-alert',
-  templateUrl: './expired-in-alert.component.html',
-  styleUrls: ['./expired-in-alert.component.css'],
+    selector: 'app-expired-in-alert',
+    templateUrl: './expired-in-alert.component.html',
+    styleUrls: ['./expired-in-alert.component.css'],
+    standalone: false
 })
 export class ExpiredInAlertComponent implements OnInit {
   aliveSec: number = 0;

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import tpi.dgrv4.codec.utils.ExpireKeyUtil;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.vo.BeforeControllerReq;
 import tpi.dgrv4.common.vo.BeforeControllerResp;
@@ -67,8 +68,11 @@ public class DPB0142Controller {
 			
 			ControllerUtil.validateRequest(tsmpHttpHeader.getAuthorization(), req);
 			
-			String userIP = ServiceUtil.getIpAddress(request);
-			String authorization = headers.getFirst("authorization");
+//			String userIP = ServiceUtil.getIpAddress(request);
+            String userIP = ClientIpUtil.getClientIp(request);
+
+			String authorization = headers.getFirst(
+                    "authorization");
 
 //            List<String> cookies = headers.get("cookie");
             String expireKey = ExpireKeyUtil.getExpireKey_60sec();

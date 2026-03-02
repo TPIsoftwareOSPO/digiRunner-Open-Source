@@ -12,9 +12,10 @@ import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AA0023Req, AA0023RoleInfo } from 'src/app/models/api/RoleService/aa0023.interface';
 
 @Component({
-  selector: 'app-role-list-lov',
-  templateUrl: './role-list-lov.component.html',
-  styleUrls: ['./role-list-lov.component.css'],
+    selector: 'app-role-list-lov',
+    templateUrl: './role-list-lov.component.html',
+    styleUrls: ['./role-list-lov.component.css'],
+    standalone: false
 })
 export class RoleListLovComponent implements OnInit {
   @Input() data?: FormParams;

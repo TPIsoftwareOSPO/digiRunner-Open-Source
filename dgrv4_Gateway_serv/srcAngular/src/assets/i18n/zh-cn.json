@@ -1083,7 +1083,7 @@
   "dashBoard": {
     "title": "授权许可",
     "title1": "digiRunner \"{{edition}}\" 授权密钥将在 \"{{expiryDate}}\" 失效，请立刻延期！",
-    "title2": "digiRunner \"{{edition}}\" 未获授权或已失效，请立即申请/进行产品密钥延期！",
+    "title2": "digiRunner \"{{edition}}\" 未获授权或已失效，<span class=\"text-danger\">部分功能即將无法使用</span>, 请立即申请/进行产品密钥延期！",
     "desc1": "请向 <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a> 发送邮件与昕力团队或所属业务窗口联系",
     "desc2": "Express 用户完成下载后，系统将自动发送密钥，敬请从收件箱获取密钥以开始使用 digiRunner；<br>有关延期使用及其他问题，请向 <a href='service@tpisoftware.com' target='_blank'>service@tpisoftware.com</a> 发送邮件与昕力团队或所属业务窗口联系。"
   },
@@ -1145,6 +1145,12 @@
     "body_before": "掩码前 {{num}} 位，掩码以 {{mask}} 显示",
     "body_after": "掩码后 {{num}} 位，掩码以 {{mask}} 显示",
     "body_after_regex": "掩码后 {{num}} 位，掩码以 {{mask}} 显示",
+    "body_remain_before_after": "保留前后 {{num}} 位，遮罩以 {{mask}} 显示",
+    "body_remain_before": "保留前 {{num}} 位，遮罩以 {{mask}} 显示",
+    "body_remain_after": "保留后 {{num}} 位，遮罩以 {{mask}} 显示",
+    "body_remain_before_after_exp": "\"name\":\"test\",\"id\":\"1\" => \"name###\":\"1\" (保留前后5位，用###替换)",
+    "body_remain_before_exp": "\"name\":\"test\",\"id\":\"1\" => \"name### (保留前5位，用###替换)",
+    "body_remain_after_exp": "\"name\":\"test\",\"id\":\"1\" => ###\":\"1\" (保留后5位，用###替换)",
     "word": "字符数",
     "mask": "掩码",
     "header_key_required": "Header 掩码关键字不能为空",
@@ -1316,7 +1322,7 @@
   },
   "notify": {
     "name": "通知名称",
-    "type": "通知类型",
+    "type": "代理类型",
     "sound": "通知音效"
   },
   "status_code": "状态码",

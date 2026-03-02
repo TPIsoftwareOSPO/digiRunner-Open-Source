@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
 import * as dayjs from 'dayjs';
 import { DPB9907Item } from 'src/app/models/api/ServerService/dpb9907.interface';
@@ -12,7 +12,8 @@ interface localeItem extends DPB9907Item {
     selector: 'app-logitem',
     templateUrl: './locale.component.html',
     styleUrls: ['./locale.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 
 export class LocaleComponent implements OnInit {
@@ -20,18 +21,18 @@ export class LocaleComponent implements OnInit {
     @Input() itemValue!: DPB9907Item;
     @Output() change: EventEmitter<localeItem> = new EventEmitter;
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
     ) {
 
     }
 
     ngOnInit() {
         this.form = this.fb.group({
-            locale: new FormControl(''),
-            itemName: new FormControl('',ValidatorFns.requiredValidator()),
+            locale: new UntypedFormControl(''),
+            itemName: new UntypedFormControl('',ValidatorFns.requiredValidator()),
         });
 
         if(this.itemValue)

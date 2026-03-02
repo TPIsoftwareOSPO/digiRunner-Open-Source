@@ -46,8 +46,6 @@ public class TSMPCServicePut implements IApiCacheService {
 	private CommForwardProcService commForwardProcService;
 	private TsmpSettingService tsmpSettingService;
 
-	private HashMap<String, String> maskInfo;
-
 	@Autowired
 	public TSMPCServicePut(ObjectMapper objectMapper, ProxyMethodServiceCacheProxy proxyMethodServiceCacheProxy,
 			MockApiTestService mockApiTestService, CommForwardProcService commForwardProcService,
@@ -88,7 +86,7 @@ public class TSMPCServicePut implements IApiCacheService {
 			if (allowMethodErrRespEntity != null) {
 				return allowMethodErrRespEntity;
 			}
-			maskInfo = new HashMap<>();
+			Map<String, String> maskInfo = new HashMap<>();
 			maskInfo.put("bodyMaskPolicy", apiReg.getBodyMaskPolicy());
 			maskInfo.put("bodyMaskPolicySymbol", apiReg.getBodyMaskPolicySymbol());
 			maskInfo.put("bodyMaskPolicyNum", String.valueOf(apiReg.getBodyMaskPolicyNum()));
@@ -98,18 +96,23 @@ public class TSMPCServicePut implements IApiCacheService {
 			maskInfo.put("headerMaskPolicySymbol", apiReg.getHeaderMaskPolicySymbol());
 			maskInfo.put("headerMaskPolicyNum", String.valueOf(apiReg.getHeaderMaskPolicyNum()));
 			maskInfo.put("headerMaskKey", apiReg.getHeaderMaskKey());
-			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, payload, reqUrl);
+			
+			//Global masking
+			getCommForwardProcService().generateGlobalMaskParam(maskInfo);
+			
+			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, payload, reqUrl, maskInfo);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC】--\n" + reqLog.toString());
 
 			ResponseEntity<?> errRespEntity = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders,
 					apiReg, payload, false);
 
 			// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
-			TsmpApiLogReq tsmpcPutDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq, payload,
+			String maskPayload = getCommForwardProcService().maskBody(maskInfo, payload);
+			TsmpApiLogReq tsmpcPutDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq, maskPayload,
 					"tsmpc", aType);
 			// 第一組 RDB Req
 			TsmpApiLogReq tsmpcPutDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq,
-					payload, "tsmpc", aType);
+					maskPayload, "tsmpc", aType);
 
 			// JWT 資料驗證有錯誤
 			if (errRespEntity != null) {
@@ -158,7 +161,7 @@ public class TSMPCServicePut implements IApiCacheService {
 						tsmpcPutDgrReqVo, tsmpcPutDgrReqVo_rdb, cApiKeySwitch, apiReg);
 			} else {
 				return forwardTo(httpReq, httpRes, httpHeaders, tsmpcPut_srcUrl, payload, uuid, tokenPayload,
-						tsmpcPutDgrReqVo, tsmpcPutDgrReqVo_rdb, cApiKeySwitch, apiReg);
+						tsmpcPutDgrReqVo, tsmpcPutDgrReqVo_rdb, cApiKeySwitch, apiReg, maskInfo);
 			}
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
@@ -168,7 +171,8 @@ public class TSMPCServicePut implements IApiCacheService {
 
 	protected ResponseEntity<?> forwardTo(HttpServletRequest httpReq, HttpServletResponse httpRes,
 			@RequestHeader HttpHeaders httpHeaders, String srcUrl, String reqMbody, String uuid, int tokenPayload //
-			, TsmpApiLogReq tsmpcPutDgrReqVo, TsmpApiLogReq tsmpcPutDgrReqVo_rdb, Boolean cApiKeySwitch, TsmpApiReg tsmpApiReg)
+			, TsmpApiLogReq tsmpcPutDgrReqVo, TsmpApiLogReq tsmpcPutDgrReqVo_rdb, Boolean cApiKeySwitch
+			, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo)
 			throws Exception {
 
 		// 2. tsmpc req header / body
@@ -193,14 +197,14 @@ public class TSMPCServicePut implements IApiCacheService {
 			paramVo.setUuid(uuid);
 			paramVo.setHttpMethod(httpReq.getMethod());
 			AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
-					paramVo);
+					paramVo, maskInfo);
 			if (apiCacheRespVo != null) {// 走cache
 				respObj.setRespData(apiCacheRespVo.getStatusCode(), apiCacheRespVo.getRespStr(),
 						apiCacheRespVo.getHttpRespArray(), apiCacheRespVo.getRespHeader());
 				// 此行因為httpRes不能放在callback,所以移到外層
 			} else {// cache發生未知錯誤,call api
 				respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPutDgrReqVo, reqMbody, uuid,
-						false, tsmpApiReg);
+						false, tsmpApiReg, maskInfo);
 			}
 		} else if (StringUtils.hasText(fixedCacheId)) {// 固定cache
 			FixedCacheVo cacheVo = CommForwardProcService.fixedCacheMap.get(fixedCacheId);
@@ -208,7 +212,7 @@ public class TSMPCServicePut implements IApiCacheService {
 				boolean isUpdate = getCommForwardProcService().isFixedCacheUpdate(cacheVo, tsmpcPutDgrReqVo);
 				if (isUpdate) {// 更新紀錄
 					respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPutDgrReqVo, reqMbody, uuid,
-							true, tsmpApiReg);
+							true, tsmpApiReg, maskInfo);
 					// statusCode小於400才更新紀錄
 					if (respObj.statusCode < 400) {
 						cacheVo.setData(respObj.httpRespArray);
@@ -226,7 +230,7 @@ public class TSMPCServicePut implements IApiCacheService {
 							cacheVo.getRespHeader());
 				}
 			} else {// call api
-				respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPutDgrReqVo, reqMbody, uuid, true, tsmpApiReg);
+				respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPutDgrReqVo, reqMbody, uuid, true, tsmpApiReg, maskInfo);
 				// statusCode小於400才紀錄
 				if (respObj.statusCode < 400) {
 					cacheVo = new FixedCacheVo();
@@ -240,7 +244,7 @@ public class TSMPCServicePut implements IApiCacheService {
 			}
 
 		} else {// call api
-			respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPutDgrReqVo, reqMbody, uuid, false, tsmpApiReg);
+			respObj = this.callForwardApi(header, httpReq, httpRes, srcUrl, tsmpcPutDgrReqVo, reqMbody, uuid, false, tsmpApiReg, maskInfo);
 		}
 		// 不論是 cache , 直接call, 統一在這裡 set RESPONSE HEADER
 		httpRes = getCommForwardProcService().getConvertResponse(respObj.respHeader, respObj.statusCode, httpRes, tsmpApiReg);
@@ -272,17 +276,18 @@ public class TSMPCServicePut implements IApiCacheService {
 		return null;
 	}
 
-	public HttpRespData callback(AutoCacheParamVo vo) {
+	public HttpRespData callback(AutoCacheParamVo vo, Map<String, String> maskInfo) {
 		try {
 			StringBuffer sb = new StringBuffer();
 			sb.append("\n--【LOGUUID】【" + vo.getUuid() + "】【Start TSMPC-to-Backend For Cache】--");
 			sb.append("\n--【LOGUUID】【" + vo.getUuid() + "】【End TSMPC-from-Backend For Cache】--\n");
 
 			// 第二組ES REQ
+			String maskPayload = getCommForwardProcService().maskBody(maskInfo, vo.getReqMbody());
 			TsmpApiLogReq tsmpcPutBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(vo.getDgrReqVo(),
-					vo.getHeader(), vo.getSrcUrl(), vo.getReqMbody());
+					vo.getHeader(), vo.getSrcUrl(), maskPayload);
 			HttpRespData respObj = getHttpRespData(vo.getHttpMethod(), vo.getHeader(), vo.getSrcUrl(),
-					vo.getReqMbody());
+					vo.getReqMbody(), maskInfo);
 			respObj.fetchByte(maskInfo); // because Enable inputStream
 			sb.append(respObj.getLogStr());
 			TPILogger.tl.trace(sb.toString());
@@ -304,7 +309,7 @@ public class TSMPCServicePut implements IApiCacheService {
 
 	private HttpRespData callForwardApi(Map<String, List<String>> header, HttpServletRequest httpReq,
 			HttpServletResponse httpRes, String srcUrl, TsmpApiLogReq dgrReqVo, String reqMbody, String uuid,
-			boolean isFixedCache, TsmpApiReg tsmpApiReg) throws Exception {
+			boolean isFixedCache, TsmpApiReg tsmpApiReg, Map<String, String> maskInfo) throws Exception {
 
 		StringBuffer tsmpcPut_sb = new StringBuffer();
 		if (isFixedCache) {
@@ -316,9 +321,10 @@ public class TSMPCServicePut implements IApiCacheService {
 		}
 
 		// 第二組ES REQ
+		String maskPayload = getCommForwardProcService().maskBody(maskInfo, reqMbody);
 		TsmpApiLogReq tsmpcPutBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(dgrReqVo, header, srcUrl,
-				reqMbody);
-		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, reqMbody);
+				maskPayload);
+		HttpRespData respObj = getHttpRespData(httpReq.getMethod(), header, srcUrl, reqMbody, maskInfo);
 		respObj.fetchByte(maskInfo); // because Enable inputStream
 		tsmpcPut_sb.append(respObj.getLogStr());
 		TPILogger.tl.debug(tsmpcPut_sb.toString());
@@ -342,7 +348,7 @@ public class TSMPCServicePut implements IApiCacheService {
 
 	}
 
-	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl)
+	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl, Map<String, String> maskInfo)
 			throws IOException {
 		StringBuffer tsmpcPut_log = new StringBuffer();
 
@@ -383,10 +389,10 @@ public class TSMPCServicePut implements IApiCacheService {
 	}
 
 	protected HttpRespData getHttpRespData(String httpMethod, Map<String, List<String>> header, String reqUrl,
-			String payload) throws Exception {
+			String payload, Map<String, String> maskInfo) throws Exception {
 
 		HttpRespData httpRespData = HttpUtil.httpReqByRawDataList(reqUrl, httpMethod, payload, header, true, false,
-				maskInfo);
+				maskInfo, null);
 		// HttpRespData httpRespData = HttpUtil.httpReqByPut(reqUrl, httpMethod,
 		// payload, header, false, false);
 		return httpRespData;

@@ -17,7 +17,12 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
 } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import {
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  UntypedFormArray,
+  UntypedFormControl,
+} from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
@@ -85,6 +90,7 @@ import { TOrgService } from 'src/app/shared/services/org.service';
 import { OrganizationComponent } from 'src/app/shared/organization/organization.component';
 import { Subscription } from 'rxjs';
 import * as ValidatorFns from '../../../shared/validator-functions';
+import { AboutService } from 'src/app/shared/services/api-about.service';
 
 @Component({
   selector: 'app-ac0301',
@@ -99,13 +105,14 @@ import * as ValidatorFns from '../../../shared/validator-functions';
     ConfirmationService,
     MultiSelect,
   ],
+  standalone: false,
 })
 export class Ac0301Component extends BaseComponent implements OnInit {
   @ViewChild('dialog') _dialog!: DialogComponent;
   @ViewChild('labelFilter')
-  lableFilter!: MultiSelect;
-  form!: FormGroup;
-  queryForm: FormGroup;
+  labelFilter!: MultiSelect;
+  form!: UntypedFormGroup;
+  queryForm: UntypedFormGroup;
   dialogTitle: string = '';
   formOperate = FormOperate;
   selected: Array<AA0301Item> = new Array<AA0301Item>();
@@ -134,11 +141,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   lastRowdata?: AA0301Item;
   apiDetail?: AA0302Resp;
   tokenPayloadFlag: boolean = false;
-  detailForm: FormGroup;
+  detailForm: UntypedFormGroup;
   detailCols: { field: string; header: string }[] = [];
   apiGroupList: Array<AA0320Item> = [];
   apiGroupListRowcount: number = 0;
-  updateForm: FormGroup;
+  updateForm: UntypedFormGroup;
   protocols: { label: string; value: string }[] = [];
   methodOfJsons: { label: string; value: string }[] = [];
   dataFormats: { label: string; value: string }[] = [];
@@ -193,12 +200,13 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   reloadFlag: boolean = false;
 
   jwtSettingSub?: Subscription;
+  isExpired:boolean = false;
 
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private apiService: ApiService,
     private messageService: MessageService,
     private stat: APIStatusPipe,
@@ -215,75 +223,76 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     private fileService: FileService,
     private cdRef: ChangeDetectorRef,
     private toolServiceW: ToolServiceWebhoook,
-    private orgService: TOrgService
+    private orgService: TOrgService,
+    private aboutService: AboutService,
   ) {
     super(route, tr);
 
     this.queryForm = this.fb.group({
-      apiKey: new FormControl(''),
-      apiName: new FormControl(''),
-      moduleName: new FormControl(''),
-      apiStatus: new FormControl('null'),
-      apiSrc: new FormArray([]),
-      jwtSetting: new FormControl(false),
-      jweFlag: new FormControl({ value: '0', disabled: true }),
-      jweFlagResp: new FormControl({ value: '0', disabled: true }),
-      keyword: new FormControl(''),
-      publicFlag: new FormControl('0'),
-      queryJweFlag: new FormControl('null'),
-      queryJweFlagResp: new FormControl('null'),
+      apiKey: new UntypedFormControl(''),
+      apiName: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl(''),
+      apiStatus: new UntypedFormControl('null'),
+      apiSrc: new UntypedFormArray([]),
+      jwtSetting: new UntypedFormControl(false),
+      jweFlag: new UntypedFormControl({ value: '0', disabled: true }),
+      jweFlagResp: new UntypedFormControl({ value: '0', disabled: true }),
+      keyword: new UntypedFormControl(''),
+      publicFlag: new UntypedFormControl('0'),
+      queryJweFlag: new UntypedFormControl('null'),
+      queryJweFlagResp: new UntypedFormControl('null'),
     });
 
     this.detailForm = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
 
     this.updateForm = this.fb.group({
-      apiKey: new FormControl(''),
-      moduleName: new FormControl(''),
-      apiName: new FormControl(''),
-      apiStatus: new FormControl(false),
-      jwtSetting: new FormControl(false),
-      jweFlag: new FormControl({ value: '0', disabled: true }),
-      jweFlagResp: new FormControl({ value: '0', disabled: true }),
-      protocol: new FormControl(''),
-      srcUrl: new FormControl(''),
-      urlRID: new FormControl(false),
-      noOAuth: new FormControl(false),
-      tokenPayload: new FormControl(false),
-      methodOfJson: new FormControl(''),
-      dataFormat: new FormControl(null),
-      reghostId: new FormControl(null),
-      apiDesc: new FormControl(''),
-      apiCacheFlag: new FormControl(''),
-      mockStatusCode: new FormControl(null),
-      mockHeaders: new FormControl(null),
-      mockBody: new FormControl(null),
+      apiKey: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl(''),
+      apiName: new UntypedFormControl(''),
+      apiStatus: new UntypedFormControl(false),
+      jwtSetting: new UntypedFormControl(false),
+      jweFlag: new UntypedFormControl({ value: '0', disabled: true }),
+      jweFlagResp: new UntypedFormControl({ value: '0', disabled: true }),
+      protocol: new UntypedFormControl(''),
+      srcUrl: new UntypedFormControl(''),
+      urlRID: new UntypedFormControl(false),
+      noOAuth: new UntypedFormControl(false),
+      tokenPayload: new UntypedFormControl(false),
+      methodOfJson: new UntypedFormControl(''),
+      dataFormat: new UntypedFormControl(null),
+      reghostId: new UntypedFormControl(null),
+      apiDesc: new UntypedFormControl(''),
+      apiCacheFlag: new UntypedFormControl(''),
+      mockStatusCode: new UntypedFormControl(null),
+      mockHeaders: new UntypedFormControl(null),
+      mockBody: new UntypedFormControl(null),
 
-      redirectByIp: new FormControl(false),
-      redirectByIpDataList: new FormControl([]),
+      redirectByIp: new UntypedFormControl(false),
+      redirectByIpDataList: new UntypedFormControl([]),
 
-      headerMaskPolicy: new FormControl(0), //; 0,1,2,3
-      headerMaskPolicyNum: new FormControl(1), //; 1~9999
-      headerMaskPolicySymbol: new FormControl('*'), //;   1 ~10
-      headerMaskKey: new FormControl(''), //;  XXXX,XXXXXX,XXXXX
+      headerMaskPolicy: new UntypedFormControl(0), //; 0,1,2,3
+      headerMaskPolicyNum: new UntypedFormControl(1), //; 1~9999
+      headerMaskPolicySymbol: new UntypedFormControl('*'), //;   1 ~10
+      headerMaskKey: new UntypedFormControl(''), //;  XXXX,XXXXXX,XXXXX
 
-      bodyMaskPolicy: new FormControl(0), //; 0,1,2,3
-      bodyMaskPolicyNum: new FormControl(1), //; 1~9999
-      bodyMaskPolicySymbol: new FormControl('*'), //;   1 ~10
-      bodyMaskKeyword: new FormControl(''), //;  XXXX,XXXXXX,XXXX
+      bodyMaskPolicy: new UntypedFormControl(0), //; 0,1,2,3
+      bodyMaskPolicyNum: new UntypedFormControl(1), //; 1~9999
+      bodyMaskPolicySymbol: new UntypedFormControl('*'), //;   1 ~10
+      bodyMaskKeyword: new UntypedFormControl(''), //;  XXXX,XXXXXX,XXXX
 
-      labelList: new FormControl([]),
-      fixedCacheTime: new FormControl(0),
-      failDiscoveryPolicy: new FormControl(''),
-      failHandlePolicy: new FormControl(''),
-      notifyNameList: new FormControl(),
-      isCorsAllowOrigin: new FormControl(),
-      isCorsAllowMethods: new FormControl(),
-      isCorsAllowHeaders: new FormControl(),
-      corsAllowOrigin: new FormControl(),
-      corsAllowMethods: new FormControl(),
-      corsAllowHeaders: new FormControl(),
+      labelList: new UntypedFormControl([]),
+      fixedCacheTime: new UntypedFormControl(0),
+      failDiscoveryPolicy: new UntypedFormControl(''),
+      failHandlePolicy: new UntypedFormControl(''),
+      notifyNameList: new UntypedFormControl(),
+      isCorsAllowOrigin: new UntypedFormControl(),
+      isCorsAllowMethods: new UntypedFormControl(),
+      isCorsAllowHeaders: new UntypedFormControl(),
+      corsAllowOrigin: new UntypedFormControl(),
+      corsAllowMethods: new UntypedFormControl(),
+      corsAllowHeaders: new UntypedFormControl(),
     });
 
     //取得acConf
@@ -292,10 +301,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.isExpired = sessionStorage.getItem('isExpired') === 'true' ? true : false;
+
     this.form = this.fb.group({
-      file: new FormControl(),
-      fileName: new FormControl({ value: '', disabled: true }),
-      fileSize: new FormControl(''),
+      file: new UntypedFormControl(),
+      fileName: new UntypedFormControl({ value: '', disabled: true }),
+      fileSize: new UntypedFormControl(''),
     });
     this.route.params.subscribe((res: any) => {
       if (res && res.apiSrc) {
@@ -336,7 +347,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           }
         }
         this.apiSrcOpt = _apiSrcOpt;
-        const arrayApiSrc = <FormArray>this.queryForm.get('apiSrc');
+        const arrayApiSrc = <UntypedFormArray>this.queryForm.get('apiSrc');
         for (let item of this.apiSrcOpt) {
           if (this.acConf.edition == 'Express') {
             arrayApiSrc.push(
@@ -344,7 +355,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 name: item.label,
                 value: item.value,
                 selected: true,
-              })
+              }),
             );
             this.queryForm.get('apiSrc')!.disable();
           } else {
@@ -353,7 +364,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 name: item.label,
                 value: item.value,
                 selected: false,
-              })
+              }),
             );
           }
         }
@@ -474,31 +485,31 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       .subscribe((res) => {
         if (this.tool.checkDpSuccess(res.ResHeader)) {
           this.canDetail = res.RespBody.dataList.find(
-            (item) => item.txId === 'AA0302'
+            (item) => item.txId === 'AA0302',
           )
             ? res.RespBody.dataList.find((item) => item.txId === 'AA0302')!
                 .available
             : false;
           this.canStatusUpdate = res.RespBody.dataList.find(
-            (item) => item.txId === 'AA0303'
+            (item) => item.txId === 'AA0303',
           )
             ? res.RespBody.dataList.find((item) => item.txId === 'AA0303')!
                 .available
             : false;
           this.canUpdate = res.RespBody.dataList.find(
-            (item) => item.txId === 'AA0304'
+            (item) => item.txId === 'AA0304',
           )
             ? res.RespBody.dataList.find((item) => item.txId === 'AA0304')!
                 .available
             : false;
           this.canDelete = res.RespBody.dataList.find(
-            (item) => item.txId === 'AA0305'
+            (item) => item.txId === 'AA0305',
           )
             ? res.RespBody.dataList.find((item) => item.txId === 'AA0305')!
                 .available
             : false;
           this.canImport = res.RespBody.dataList.find(
-            (item) => item.txId === 'AA0318'
+            (item) => item.txId === 'AA0318',
           )
             ? res.RespBody.dataList.find((item) => item.txId === 'AA0318')!
                 .available
@@ -507,7 +518,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
             this.tool.getAcConf().edition === 'Enterprise' ? true : false;
 
           this.canAPITest = res.RespBody.dataList.find(
-            (item) => item.txId === 'AA0312'
+            (item) => item.txId === 'AA0312',
           )
             ? res.RespBody.dataList.find((item) => item.txId === 'AA0312')!
                 .available
@@ -556,16 +567,19 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.bodyMaskPolicy.valueChanges
       .pipe(pairwise())
       .subscribe(([prev, next]) => {
-        if (!['1', '2', '3', '4'].find((item) => item === prev)) {
+        if (
+          !['1', '2', '3', '4', '5', '6', '7'].find((item) => item === prev)
+        ) {
           this.bodyMaskPolicyNum.setValue(1);
           this.bodyMaskPolicySymbol.setValue('*');
         }
+        this.bodyMaskKeyword.setValue('');
       });
 
     this.labelList.valueChanges.subscribe((res) => {
       this.labelList.setValue(
         Array.isArray(res) ? res.map((item) => item.toLowerCase()) : [],
-        { emitEvent: false }
+        { emitEvent: false },
       );
     });
 
@@ -685,7 +699,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.dataList = [];
     this.rowcount = this.dataList.length;
     let apisrc = new Array();
-    const arrayApiSrc = <FormArray>this.queryForm.get('apiSrc');
+    const arrayApiSrc = <UntypedFormArray>this.queryForm.get('apiSrc');
     for (let i = 0; i < arrayApiSrc.controls.length; i++) {
       var src = arrayApiSrc.controls[i];
       if (src.get('selected')!.value == false) {
@@ -698,43 +712,43 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       apiSrc: apisrc,
       publicFlag:
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.publicFlag!.value)
+          this.tool.BcryptEncoder(this.publicFlag!.value),
         ) +
         ',' +
         this.publicFlags.findIndex(
-          (item) => item.value == this.publicFlag!.value
+          (item) => item.value == this.publicFlag!.value,
         ),
       paging: 'Y',
     } as AA0301Req;
     if (this.apiStatus!.value != 'null') {
       ReqBody.apiStatus =
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.apiStatus!.value)
+          this.tool.BcryptEncoder(this.apiStatus!.value),
         ) +
         ',' +
         this.apiStatusOpt.findIndex(
-          (item) => item.value == this.apiStatus!.value
+          (item) => item.value == this.apiStatus!.value,
         );
     }
     if (this.q_queryJweFlag!.value != 'null') {
       ReqBody.jweFlag =
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.q_queryJweFlag!.value)
+          this.tool.BcryptEncoder(this.q_queryJweFlag!.value),
         ) +
         ',' +
         (this.queryJwtSettingFlags.findIndex(
-          (item) => item.value == this.q_queryJweFlag!.value
+          (item) => item.value == this.q_queryJweFlag!.value,
         ) -
           1);
     }
     if (this.q_queryJweFlagResp!.value != 'null') {
       ReqBody.jweFlagResp =
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.q_queryJweFlagResp!.value)
+          this.tool.BcryptEncoder(this.q_queryJweFlagResp!.value),
         ) +
         ',' +
         (this.queryJwtSettingFlags.findIndex(
-          (item) => item.value == this.q_queryJweFlagResp!.value
+          (item) => item.value == this.q_queryJweFlagResp!.value,
         ) -
           1);
     }
@@ -770,7 +784,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       });
     } else {
       let apisrc = new Array();
-      const arrayApiSrc = <FormArray>this.queryForm.get('apiSrc');
+      const arrayApiSrc = <UntypedFormArray>this.queryForm.get('apiSrc');
       for (let i = 0; i < arrayApiSrc.controls.length; i++) {
         var src = arrayApiSrc.controls[i];
         if (src.get('selected')!.value == false) {
@@ -791,43 +805,43 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         apiSrc: apisrc,
         publicFlag:
           this.tool.Base64Encoder(
-            this.tool.BcryptEncoder(this.publicFlag!.value)
+            this.tool.BcryptEncoder(this.publicFlag!.value),
           ) +
           ',' +
           this.publicFlags.findIndex(
-            (item) => item.value == this.publicFlag!.value
+            (item) => item.value == this.publicFlag!.value,
           ),
         paging: 'Y',
       } as AA0301Req;
       if (this.apiStatus!.value != 'null') {
         ReqBody.apiStatus =
           this.tool.Base64Encoder(
-            this.tool.BcryptEncoder(this.apiStatus!.value)
+            this.tool.BcryptEncoder(this.apiStatus!.value),
           ) +
           ',' +
           this.apiStatusOpt.findIndex(
-            (item) => item.value == this.apiStatus!.value
+            (item) => item.value == this.apiStatus!.value,
           );
       }
       if (this.q_queryJweFlag!.value != 'null') {
         ReqBody.jweFlag =
           this.tool.Base64Encoder(
-            this.tool.BcryptEncoder(this.q_queryJweFlag!.value)
+            this.tool.BcryptEncoder(this.q_queryJweFlag!.value),
           ) +
           ',' +
           (this.queryJwtSettingFlags.findIndex(
-            (item) => item.value == this.q_queryJweFlag!.value
+            (item) => item.value == this.q_queryJweFlag!.value,
           ) -
             1);
       }
       if (this.q_queryJweFlagResp!.value != 'null') {
         ReqBody.jweFlagResp =
           this.tool.Base64Encoder(
-            this.tool.BcryptEncoder(this.q_queryJweFlagResp!.value)
+            this.tool.BcryptEncoder(this.q_queryJweFlagResp!.value),
           ) +
           ',' +
           (this.queryJwtSettingFlags.findIndex(
-            (item) => item.value == this.q_queryJweFlagResp!.value
+            (item) => item.value == this.q_queryJweFlagResp!.value,
           ) -
             1);
       }
@@ -924,6 +938,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               ? dict['apiStatus.scheduledLaunchDate']
               : dict['apiStatus.scheduledDiscontinuationDate'],
           width: '400px',
+          focusOnShow: false,
           data: {
             status: this.currentUpdateStatusAction,
           },
@@ -950,6 +965,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         const ref2 = this.dialogService.open(ApiStatusModifyComponent, {
           header: dictC['apiStatus.cancelScheduledDate'],
           width: '600px',
+          focusOnShow: false,
           data: {
             status: this.currentUpdateStatusAction,
             revokeFlag: revokeFlag ? revokeFlag : 'revokeAll',
@@ -1157,7 +1173,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           } as AA0301Item;
         });
         let apisrc = new Array();
-        const arrayApiSrc = <FormArray>this.queryForm.get('apiSrc');
+        const arrayApiSrc = <UntypedFormArray>this.queryForm.get('apiSrc');
         for (let i = 0; i < arrayApiSrc.controls.length; i++) {
           var src = arrayApiSrc.controls[i];
           if (src.get('selected')!.value == false) {
@@ -1170,42 +1186,42 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           apiSrc: apisrc,
           publicFlag:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.publicFlag!.value)
+              this.tool.BcryptEncoder(this.publicFlag!.value),
             ) +
             ',' +
             this.publicFlags.findIndex(
-              (item) => item.value == this.publicFlag!.value
+              (item) => item.value == this.publicFlag!.value,
             ),
           paging: 'Y',
         } as AA0301Req;
         if (this.apiStatus!.value != 'null') {
           ReqBody.apiStatus =
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.apiStatus!.value)
+              this.tool.BcryptEncoder(this.apiStatus!.value),
             ) +
             ',' +
             this.apiStatusOpt.findIndex(
-              (item) => item.value == this.apiStatus!.value
+              (item) => item.value == this.apiStatus!.value,
             );
         }
         if (this.q_queryJweFlag!.value != 'null') {
           ReqBody.jweFlag =
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.q_jweFlag!.value)
+              this.tool.BcryptEncoder(this.q_jweFlag!.value),
             ) +
             ',' +
             this.updateJwtSettingFlags.findIndex(
-              (item) => item.value == this.q_jweFlag!.value
+              (item) => item.value == this.q_jweFlag!.value,
             );
         }
         if (this.q_queryJweFlagResp!.value != 'null') {
           ReqBody.jweFlagResp =
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.q_jweFlagResp!.value)
+              this.tool.BcryptEncoder(this.q_jweFlagResp!.value),
             ) +
             ',' +
             this.updateJwtSettingFlags.findIndex(
-              (item) => item.value == this.q_jweFlagResp!.value
+              (item) => item.value == this.q_jweFlagResp!.value,
             );
         }
         this.apiService.queryAPIList_v3(ReqBody).subscribe((res) => {
@@ -1221,7 +1237,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                   (d.moduleName.t ? d.moduleName.ori : d.moduleName.val) ==
                     (item.moduleName.t
                       ? item.moduleName.ori
-                      : item.moduleName.val)
+                      : item.moduleName.val),
               );
               if (tmp) this.selected.push(tmp);
             });
@@ -1271,7 +1287,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   async showDialog(
     rowData: AA0301Item,
     operation: FormOperate,
-    type: string = ''
+    type: string = '',
   ) {
     const codes = [
       'dialog.detail_query',
@@ -1575,21 +1591,23 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           apiStatus: this.u_apiStatus!.value ? '1' : '2',
           jweFlag:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.u_jweFlag!.value)
+              this.tool.BcryptEncoder(this.u_jweFlag!.value),
             ) +
             ',' +
             this.updateJwtSettingFlags.findIndex(
-              (item) => item.value == this.u_jweFlag!.value
+              (item) => item.value == this.u_jweFlag!.value,
             ),
           jweFlagResp:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.u_jweFlagResp!.value)
+              this.tool.BcryptEncoder(this.u_jweFlagResp!.value),
             ) +
             ',' +
             this.updateJwtSettingFlags.findIndex(
-              (item) => item.value == this.u_jweFlagResp!.value
+              (item) => item.value == this.u_jweFlagResp!.value,
             ),
-          srcUrl: this.u_srcUrl!.value,
+          srcUrl: this.isWebhook
+            ? this.showAiProxyString(false)
+            : this.u_srcUrl!.value,
           urlRID: this.u_urlRID!.value,
           noOAuth: this.u_noOAuth!.value,
           funFlag: {
@@ -1601,21 +1619,21 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               : this.u_methodOfJson!.value,
           dataFormat:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.u_dataFormat!.value)
+              this.tool.BcryptEncoder(this.u_dataFormat!.value),
             ) +
             ',' +
             this.dataFormats.findIndex(
-              (item) => item.value == this.u_dataFormat!.value
+              (item) => item.value == this.u_dataFormat!.value,
             ),
           // reghostId: this.u_regHostId!.value,
           apiDesc: this.u_apiDesc!.value,
           apiCacheFlag:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.apiCacheFlag!.value)
+              this.tool.BcryptEncoder(this.apiCacheFlag!.value),
             ) +
             ',' +
             this.apiCacheFlags.findIndex(
-              (item) => item.value == this.apiCacheFlag!.value
+              (item) => item.value == this.apiCacheFlag!.value,
             ),
           mockStatusCode: this.u_mockStatusCode.value,
           mockBody: this.u_mockBody.value,
@@ -1674,17 +1692,24 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           updateRCapiReqBody.bodyMaskPolicyNum = this.bodyMaskPolicyNum.value;
           updateRCapiReqBody.bodyMaskPolicySymbol =
             this.bodyMaskPolicySymbol.value;
-
           if (
-            !this.bodyMaskKeyword.value ||
-            this.bodyMaskKeyword.value.trim() == ''
+            this.bodyMaskPolicy.value != '5' &&
+            this.bodyMaskPolicy.value != '6' &&
+            this.bodyMaskPolicy.value != '7' &&
+            (!this.bodyMaskKeyword.value ||
+              this.bodyMaskKeyword.value.trim() == '')
           ) {
             const code = ['mask.body_key_required'];
             const dict = await this.tool.getDict(code);
             this.alert.ok(dict['mask.body_key_required'], '');
             return;
           }
-          updateRCapiReqBody.bodyMaskKeyword = this.bodyMaskKeyword.value;
+          updateRCapiReqBody.bodyMaskKeyword =
+            this.bodyMaskPolicy.value == '5' ||
+            this.bodyMaskPolicy.value == '6' ||
+            this.bodyMaskPolicy.value == '7'
+              ? 'N/A'
+              : this.bodyMaskKeyword.value;
         }
 
         updateRCapiReqBody.labelList = this.labelList.value;
@@ -1734,7 +1759,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                   });
 
                   this.selLabelList = this.selLabelList.filter((selItem) =>
-                    this.lblList.map((x) => x.label).includes(selItem)
+                    this.lblList.map((x) => x.label).includes(selItem),
                   );
                   this.clearFilter();
 
@@ -1767,19 +1792,19 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           apiStatus: this.u_apiStatus!.value ? '1' : '2',
           jweFlag:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.u_jweFlag!.value)
+              this.tool.BcryptEncoder(this.u_jweFlag!.value),
             ) +
             ',' +
             this.updateJwtSettingFlags.findIndex(
-              (item) => item.value == this.u_jweFlag!.value
+              (item) => item.value == this.u_jweFlag!.value,
             ),
           jweFlagResp:
             this.tool.Base64Encoder(
-              this.tool.BcryptEncoder(this.u_jweFlagResp!.value)
+              this.tool.BcryptEncoder(this.u_jweFlagResp!.value),
             ) +
             ',' +
             this.updateJwtSettingFlags.findIndex(
-              (item) => item.value == this.u_jweFlagResp!.value
+              (item) => item.value == this.u_jweFlagResp!.value,
             ),
           apiDesc: this.u_apiDesc!.value,
         } as AA0304Req;
@@ -1806,7 +1831,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                   });
 
                   this.selLabelList = this.selLabelList.filter((selItem) =>
-                    this.lblList.map((x) => x.label).includes(selItem)
+                    this.lblList.map((x) => x.label).includes(selItem),
                   );
                   this.clearFilter();
 
@@ -1924,6 +1949,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
             this.funFlagTransform();
             this.apiGroupList = [];
             this.apiGroupListRowcount = this.apiGroupList.length;
+            this.isWebhook = this.tool.checkSrcUrlisWebhook(
+              this.apiDetail?.srcUrl?.o
+                ? this.apiDetail.srcUrl.o
+                : this.apiDetail?.srcUrl!.v,
+            );
             this.procSrcUrl(this.apiDetail.srcUrl);
             // console.log(this.apiDetail.redirectByIpDataList)
             if (this.apiDetail.isRedirectByIp) {
@@ -1963,7 +1993,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 if (res.ResHeader.rtnCode != '1298') {
                   this.alert.ok(
                     `Return code : ${res.ResHeader.rtnCode}`,
-                    res.ResHeader.rtnMsg
+                    res.ResHeader.rtnMsg,
                   ); // 判斷後兩碼如不為00 , show rtnMsg
                 }
               }
@@ -2016,20 +2046,20 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               this.u_apiKey!.setValue(
                 this.apiDetail.apiKey.t
                   ? this.apiDetail.apiKey.o
-                  : this.apiDetail.apiKey.v
+                  : this.apiDetail.apiKey.v,
               );
               this.u_moduleName!.setValue(
                 this.apiDetail.moduleName.t
                   ? this.apiDetail.moduleName.o
-                  : this.apiDetail.moduleName.v
+                  : this.apiDetail.moduleName.v,
               );
               this.u_apiName!.setValue(
                 this.apiDetail.apiName.t
                   ? this.apiDetail.apiName.o
-                  : this.apiDetail.apiName.v
+                  : this.apiDetail.apiName.v,
               );
               this.u_apiStatus!.setValue(
-                this.apiDetail.apiStatus.v == '1' ? true : false
+                this.apiDetail.apiStatus.v == '1' ? true : false,
               );
               this.u_jweFlag!.setValue(this.apiDetail.jweFlag.v);
               this.u_jweFlagResp!.setValue(this.apiDetail.jweFlagResp.v);
@@ -2077,7 +2107,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                     this.u_jweFlagResp!.setValue('0');
                     this.u_jweFlagResp!.disable();
                   }
-                }
+                },
               );
 
               if (
@@ -2085,13 +2115,13 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 this.apiDetail.apiSrc.v == 'C'
               ) {
                 this.u_urlRID!.setValue(
-                  this.apiDetail.urlRID == '1' ? true : false
+                  this.apiDetail.urlRID == '1' ? true : false,
                 );
                 this.u_noOAuth!.setValue(
-                  this.apiDetail.noOAuth == '1' ? true : false
+                  this.apiDetail.noOAuth == '1' ? true : false,
                 );
                 this.u_tokenPayload!.setValue(
-                  this.apiDetail.funFlag == 1 ? true : false
+                  this.apiDetail.funFlag == 1 ? true : false,
                 );
                 if (this.apiDetail.protocol) {
                   let _protocol = this.apiDetail.protocol.split('://')[0];
@@ -2117,11 +2147,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 //     this.u_srcUrl!.setValue(this.apiDetail?.srcUrl?.v);
                 //   }
                 // }
-                if (this.apiDetail?.srcUrl?.o) {
-                  this.u_srcUrl?.setValue(this.apiDetail?.srcUrl?.o);
-                } else {
-                  this.u_srcUrl?.setValue(this.apiDetail?.srcUrl?.v);
-                }
+
                 /** 用來切換輸入元件，若srcUrl為b64開頭則切換為批次輸入元件*/
                 // if(this.u_srcUrl?.value.substring(0,3)=='b64'){
                 //   this.srcUrlB64Proc = true;
@@ -2150,7 +2176,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                     if (this.tool.checkDpSuccess(res.ResHeader)) {
                       this.addFormValidator(
                         this.updateForm,
-                        res.RespBody.constraints
+                        res.RespBody.constraints,
                       );
                     }
                   });
@@ -2162,7 +2188,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                     if (this.tool.checkDpSuccess(res.ResHeader)) {
                       this.addFormValidator(
                         this.updateForm,
-                        res.RespBody.constraints
+                        res.RespBody.constraints,
                       );
                     }
                   });
@@ -2183,36 +2209,39 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                           : row.ipSrcUrl.v,
                       };
                     })
-                  : []
+                  : [],
               );
               this.headerMaskPolicy.setValue(
                 res.RespBody.headerMaskPolicy
                   ? res.RespBody.headerMaskPolicy
-                  : '0'
+                  : '0',
               );
               this.headerMaskPolicyNum.setValue(
-                res.RespBody.headerMaskPolicyNum
+                res.RespBody.headerMaskPolicyNum,
               );
               this.headerMaskPolicySymbol.setValue(
-                res.RespBody.headerMaskPolicySymbol
+                res.RespBody.headerMaskPolicySymbol,
               );
               this.headerMaskKey.setValue(res.RespBody.headerMaskKey);
               this.bodyMaskPolicy.setValue(
-                res.RespBody.bodyMaskPolicy ? res.RespBody.bodyMaskPolicy : '0'
+                res.RespBody.bodyMaskPolicy ? res.RespBody.bodyMaskPolicy : '0',
               );
               this.bodyMaskPolicyNum.setValue(res.RespBody.bodyMaskPolicyNum);
               this.bodyMaskPolicySymbol.setValue(
-                res.RespBody.bodyMaskPolicySymbol
+                res.RespBody.bodyMaskPolicySymbol,
               );
               this.bodyMaskKeyword.setValue(res.RespBody.bodyMaskKeyword);
               // console.log(this.redirectByIpDataList.value)
               this.labelList.setValue(this.apiDetail.labelList);
 
               this.failDiscoveryPolicy.setValue(
-                this.apiDetail.failDiscoveryPolicy
+                this.apiDetail.failDiscoveryPolicy,
               );
               this.failHandlePolicy.setValue(this.apiDetail.failHandlePolicy);
-              if(this.apiDetail.notifyNameList) this.notifyNameList.setValue([...this.apiDetail.notifyNameList]);
+              if (this.apiDetail.notifyNameList)
+                this.notifyNameList.setValue([
+                  ...this.apiDetail.notifyNameList,
+                ]);
 
               const _srcURl = this.apiDetail?.srcUrl?.o
                 ? this.apiDetail.srcUrl.o
@@ -2229,16 +2258,26 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 this.u_srcUrl?.enable();
               }
 
+              this.u_srcUrl?.setValue(
+                this.isWebhook ? this.showAiProxyString(true) : _srcURl,
+              );
+
+              // if (this.apiDetail?.srcUrl?.o) {
+              //     this.u_srcUrl?.setValue(this.apiDetail?.srcUrl?.o);
+              //   } else {
+              //     this.u_srcUrl?.setValue(this.apiDetail?.srcUrl?.v);
+              //   }
+
               this.isCorsAllowOrigin.setValue(res.RespBody.isCorsAllowOrigin);
               if (this.isCorsAllowOrigin.value == 'Y') {
                 this.corsAllowOrigin!.setValidators(
-                  ValidatorFns.requiredValidator()
+                  ValidatorFns.requiredValidator(),
                 );
               }
               this.isCorsAllowOrigin.valueChanges.subscribe((res) => {
                 if (res == 'Y') {
                   this.corsAllowOrigin!.setValidators(
-                    ValidatorFns.requiredValidator()
+                    ValidatorFns.requiredValidator(),
                   );
                 } else {
                   this.corsAllowOrigin.clearValidators();
@@ -2249,13 +2288,13 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               this.isCorsAllowMethods.setValue(res.RespBody.isCorsAllowMethods);
               if (this.isCorsAllowMethods.value == 'Y') {
                 this.corsAllowMethods!.setValidators(
-                  ValidatorFns.requiredValidator()
+                  ValidatorFns.requiredValidator(),
                 );
               }
               this.isCorsAllowMethods.valueChanges.subscribe((res) => {
                 if (res == 'Y') {
                   this.corsAllowMethods!.setValidators(
-                    ValidatorFns.requiredValidator()
+                    ValidatorFns.requiredValidator(),
                   );
                 } else {
                   this.corsAllowMethods.clearValidators();
@@ -2266,13 +2305,13 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               this.isCorsAllowHeaders.setValue(res.RespBody.isCorsAllowHeaders);
               if (this.isCorsAllowHeaders.value == 'Y') {
                 this.corsAllowHeaders!.setValidators(
-                  ValidatorFns.requiredValidator()
+                  ValidatorFns.requiredValidator(),
                 );
               }
               this.isCorsAllowHeaders.valueChanges.subscribe((res) => {
                 if (res == 'Y') {
                   this.corsAllowHeaders!.setValidators(
-                    ValidatorFns.requiredValidator()
+                    ValidatorFns.requiredValidator(),
                   );
                 } else {
                   this.corsAllowHeaders.clearValidators();
@@ -2283,7 +2322,6 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               this.corsAllowHeaders.setValue(res.RespBody.corsAllowHeaders);
               this.corsAllowMethods.setValue(res.RespBody.corsAllowMethods);
               this.corsAllowOrigin.setValue(res.RespBody.corsAllowOrigin);
-
             }
           });
         break;
@@ -2407,7 +2445,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         }
       }
     } else {
-      this.srcUrlPool.push({ percent: '100', url: srcUrl });
+      if (this.isWebhook) {
+        this.srcUrlPool.push({
+          percent: '100',
+          url: this.showAiProxyString(true),
+        });
+      } else this.srcUrlPool.push({ percent: '100', url: srcUrl });
     }
   }
 
@@ -2510,10 +2553,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   clearFilter() {
-    if (this.lableFilter) {
-      this.lableFilter.filterValue = '';
-      this.lableFilter.updateFilledState();
-    }
+    this.selLabelList = [];
+    // if (this.lableFilter) {
+    //   this.lableFilter.filterValue = '';
+    //   this.lableFilter.updateFilledState();
+    // }
   }
 
   openFileBrowser() {
@@ -2597,7 +2641,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       for (let i = 0; i < srcUrlArr.length; i++) {
         if (i % 2 == 0) {
           srcUrlArrEdit.push(
-            srcUrlArr[i] + '%, ' + base64.Base64.decode(srcUrlArr[i + 1])
+            srcUrlArr[i] + '%, ' + base64.Base64.decode(srcUrlArr[i + 1]),
           );
         }
       }
@@ -2748,7 +2792,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
   selectAll(evn) {
     this.import_selected = this.import_selected.filter(
-      (item) => item.checkAct.v != 'N'
+      (item) => item.checkAct.v != 'N',
     );
   }
 
@@ -2796,7 +2840,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
   updateMenuItems(mode: number) {
     this.ModeItems.forEach(
-      (x, i) => (x.styleClass = String(mode) === x.id ? 'active' : '')
+      (x, i) => (x.styleClass = String(mode) === x.id ? 'active' : ''),
     );
   }
 
@@ -2826,12 +2870,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       header: 'Notify Name',
       width: '700px',
       data: {
-        notifyNameList: this.notifyNameList.value
-      }
+        notifyNameList: this.notifyNameList.value,
+      },
     });
 
     ref.onClose.subscribe((res) => {
-     if(res)  this.notifyNameList.setValue(res);
+      if (res) this.notifyNameList.setValue(res);
     });
   }
 
@@ -2891,6 +2935,15 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         }
       });
   }
+
+  showAiProxyString(toShow: boolean = false) {
+    if (toShow) {
+      return 'dgr+aiproxy##dgrv4/aiproxy';
+    } else {
+      return 'dgr+webhook##dgrv4/webhook';
+    }
+  }
+
   public get q_jwtSetting() {
     return this.queryForm.get('jwtSetting');
   }

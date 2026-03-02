@@ -11,14 +11,15 @@ interface _ldapDataListDetail extends DPB0181LdapDataItem {
 }
 
 @Component({
-  selector: 'app-ldap-data-list',
-  templateUrl: './ldap-data-list.component.html',
-  styleUrls: ['./ldap-data-list.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => LdapDataListComponent),
-    multi: true
-  }]
+    selector: 'app-ldap-data-list',
+    templateUrl: './ldap-data-list.component.html',
+    styleUrls: ['./ldap-data-list.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => LdapDataListComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class LdapDataListComponent implements OnInit {
   @ViewChild('ldapData', { read: ViewContainerRef, static: true }) ldapDataRef!: ViewContainerRef;

@@ -1,7 +1,12 @@
-// @font-face {
-//   font-family: "Inter";
-//   src: url(assets/fonts/Inter.ttf);
-// }
+@use "./layout/login" as *;
+@use "./layout/login-center" as *;
+@use "./layout/layout" as *;
+@use "./custom/custom-bootstrap" as *;
+@use "./custom/custom-prime" as *;
+@use "./custom/button" as *;
+
+@use "./custom/form-element" as *;
+@use "./custom/swal2" as *;
 
 :root {
   --tpi-primary:#EA7448;
@@ -81,15 +86,7 @@ body {
   font-size: 1.4rem;
   margin-bottom: 0;
 }
-@import "./layout/_login";
-@import "./layout/login-center";
-@import "./layout/layout";
-@import "./custom/custom-bootstrap";
-@import "./custom/custom-prime";
-@import "./custom/button";
 
-@import "./custom/form-element";
-@import "./custom/swal2";
 
 
 .field-flex-end {
@@ -1287,15 +1284,15 @@ color: #f94949;
 }
 
 .tpi-detail{
-  padding: 1px 3px;  
+  padding: 1px 3px;
   color: #666666;
 }
 
 .tpi-detail:hover{
-  
+
   color: #EA7448!important;
   background: #FCD8CA!important;
-  
+
 }
 
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
@@ -1424,6 +1421,12 @@ p-inputswitch{
 
   .p-chips .p-chips-multiple-container .p-chips-token {
     background-color: #EA7448!important;
+    color:#fff;
+  }
+
+  .p-chips .p-chips-multiple-container {
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;;
   }
 
   /* .p-datatable .p-datatable-tbody > tr.p-highlight  {
@@ -1479,6 +1482,7 @@ p-inputswitch{
 
 .p-multiselect.p-multiselect-chip .p-multiselect-token {
   background: #EA7448!important;
+  color: #fff;
 }
 
 .tooltip-custom-w.p-tooltip .p-tooltip-text {

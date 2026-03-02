@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit, Input, ViewChild, Output, EventEmitter } from '@angular/core';
 import { FormParams } from 'src/app/models/api/form-params.interface';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as dayjs from 'dayjs';
@@ -24,9 +24,10 @@ import { RoleService } from 'src/app/shared/services/api-role.service';
 import { DPB0115Req } from 'src/app/models/api/RoleService/dpb0115.interface';
 
 @Component({
-  selector: 'app-open-api-key-form',
-  templateUrl: './open-api-key-form.component.html',
-  styleUrls: ['./open-api-key-form.component.css']
+    selector: 'app-open-api-key-form',
+    templateUrl: './open-api-key-form.component.html',
+    styleUrls: ['./open-api-key-form.component.css'],
+    standalone: false
 })
 export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
 
@@ -35,7 +36,7 @@ export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
   @Output() refresh: EventEmitter<boolean> = new EventEmitter;
   @Output() close!: Function;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   formOperate = FormOperate;
   cols: { field: string; header: string; }[] = [];
   btnName: string = '';
@@ -49,7 +50,7 @@ export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private file: FileService,
     private ngxService: NgxUiLoaderService,
@@ -300,23 +301,23 @@ export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
     switch (formOperate) {
       case FormOperate.create:
         return {
-          keyword: new FormControl(''),
-          effectiveDate: new FormControl(dayjs(new Date()).format('YYYY/MM/DD'), ValidatorFns.requiredValidator()),
-          openApiKeyAlias: new FormControl(this.data.data.openApiKeyAlias, ValidatorFns.requiredValidator()),
-          expiredAt: new FormControl(this.data.data.expiredAt != '' ? dayjs(this.data.data.expiredAt).format('YYYY/MM/DD') : '', ValidatorFns.requiredValidator()),
-          timesThreshold: new FormControl(this.data.data.timesThreshold, ValidatorFns.requiredValidator()),
-          reqDesc: new FormControl('', ValidatorFns.requiredValidator())
+          keyword: new UntypedFormControl(''),
+          effectiveDate: new UntypedFormControl(dayjs(new Date()).format('YYYY/MM/DD'), ValidatorFns.requiredValidator()),
+          openApiKeyAlias: new UntypedFormControl(this.data.data.openApiKeyAlias, ValidatorFns.requiredValidator()),
+          expiredAt: new UntypedFormControl(this.data.data.expiredAt != '' ? dayjs(this.data.data.expiredAt).format('YYYY/MM/DD') : '', ValidatorFns.requiredValidator()),
+          timesThreshold: new UntypedFormControl(this.data.data.timesThreshold, ValidatorFns.requiredValidator()),
+          reqDesc: new UntypedFormControl('', ValidatorFns.requiredValidator())
         }
       case FormOperate.update:
       case FormOperate.resend:
         let detailData = this.data.data as DPB0068Resp;
         return {
-          keyword: new FormControl(''),
-          effectiveDate: new FormControl(detailData.effectiveDate, ValidatorFns.requiredValidator()),
-          openApiKeyAlias: new FormControl(detailData.openApiKey!.openApiKeyAlias, ValidatorFns.requiredValidator()),
-          expiredAt: new FormControl(detailData.openApiKey!.expiredAt, ValidatorFns.requiredValidator()),
-          timesThreshold: new FormControl(detailData.openApiKey!.timesThreshold, ValidatorFns.requiredValidator()),
-          reqDesc: new FormControl(detailData.reqDesc, ValidatorFns.requiredValidator())
+          keyword: new UntypedFormControl(''),
+          effectiveDate: new UntypedFormControl(detailData.effectiveDate, ValidatorFns.requiredValidator()),
+          openApiKeyAlias: new UntypedFormControl(detailData.openApiKey!.openApiKeyAlias, ValidatorFns.requiredValidator()),
+          expiredAt: new UntypedFormControl(detailData.openApiKey!.expiredAt, ValidatorFns.requiredValidator()),
+          timesThreshold: new UntypedFormControl(detailData.openApiKey!.timesThreshold, ValidatorFns.requiredValidator()),
+          reqDesc: new UntypedFormControl(detailData.reqDesc, ValidatorFns.requiredValidator())
         }
       default:
         return {

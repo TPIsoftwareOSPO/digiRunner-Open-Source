@@ -4,7 +4,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ActivatedRoute } from '@angular/router';
 import { AiService } from 'src/app/shared/services/api-ai.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB0256Req } from 'src/app/models/api/ServerService/dpb0256.interface';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DPB0255RespItem } from 'src/app/models/api/ServerService/dpb0255.interface';
@@ -14,10 +14,11 @@ import * as ValidatorFns from '../../../shared/validator-functions';
 import { filter, map } from 'rxjs';
 
 @Component({
-  selector: 'app-ai0002',
-  templateUrl: './ai0002.component.html',
-  styleUrls: ['./ai0002.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ai0002',
+    templateUrl: './ai0002.component.html',
+    styleUrls: ['./ai0002.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ai0002Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
@@ -29,7 +30,7 @@ export class Ai0002Component extends BaseComponent implements OnInit {
   aiProviderList: { [key:string]:any }[] = [];
   apikeyDetail?: DPB0257Resp;
 
-  formE!: FormGroup;
+  formE!: UntypedFormGroup;
   btnName: string = '';
 
   constructor(
@@ -37,7 +38,7 @@ export class Ai0002Component extends BaseComponent implements OnInit {
     tr: TransformMenuNamePipe,
     private aiService: AiService,
     private toolService: ToolService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private ngxSrvice: NgxUiLoaderService
@@ -45,15 +46,15 @@ export class Ai0002Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.formE = this.fb.group({
-      aiApiKeyName: new FormControl(''),
-      aiProviderId: new FormControl(''),
-      aiProviderAlias: new FormControl(''),
-      aiApiKeyCode: new FormControl(''),
-      usageLimitInputToken: new FormControl(''),
-      usageLimitOutputToken: new FormControl(''),
-      usageLimitPolicy: new FormControl(''),
-      backupKeyId: new FormControl(''),
-      aiApiKeyEnable: new FormControl(''),
+      aiApiKeyName: new UntypedFormControl(''),
+      aiProviderId: new UntypedFormControl(''),
+      aiProviderAlias: new UntypedFormControl(''),
+      aiApiKeyCode: new UntypedFormControl(''),
+      usageLimitInputToken: new UntypedFormControl(''),
+      usageLimitOutputToken: new UntypedFormControl(''),
+      usageLimitPolicy: new UntypedFormControl(''),
+      backupKeyId: new UntypedFormControl(''),
+      aiApiKeyEnable: new UntypedFormControl(''),
     });
   }
 

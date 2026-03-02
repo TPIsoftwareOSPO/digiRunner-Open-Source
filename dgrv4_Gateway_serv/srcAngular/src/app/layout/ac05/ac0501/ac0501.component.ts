@@ -7,7 +7,7 @@ import { UtilService } from 'src/app/shared/services/api-util.service';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { MessageService } from 'primeng/api';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { FormGroup, UntypedFormBuilder, FormControl } from '@angular/forms';
 import { RoleService } from 'src/app/shared/services/api-role.service';
 import { DPB0115Req } from 'src/app/models/api/RoleService/dpb0115.interface';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
@@ -20,9 +20,10 @@ import {  DPB0118Resp } from 'src/app/models/api/AboutService/dpb0118.interface'
 import * as dayjs from 'dayjs';
 
 @Component({
-  selector: 'app-ac0501',
-  templateUrl: './ac0501.component.html',
-  styleUrls: ['./ac0501.component.scss']
+    selector: 'app-ac0501',
+    templateUrl: './ac0501.component.html',
+    styleUrls: ['./ac0501.component.scss'],
+    standalone: false
 })
 export class Ac0501Component extends BaseComponent implements OnInit {
 
@@ -49,7 +50,7 @@ export class Ac0501Component extends BaseComponent implements OnInit {
     private util: UtilService,
     private tool: ToolService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private roleService: RoleService,
     private list: ListService,
     private severService: ServerService,

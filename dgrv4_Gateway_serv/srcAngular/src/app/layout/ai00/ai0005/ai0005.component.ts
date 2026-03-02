@@ -6,7 +6,7 @@ import { AiService } from 'src/app/shared/services/api-ai.service';
 import { filter, map, tap } from 'rxjs';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB02671RespItem } from 'src/app/models/api/ServerService/dpb02671.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { DPB0262RespItem } from 'src/app/models/api/ServerService/dpb0262.interface';
@@ -14,17 +14,18 @@ import * as ValidatorFns from '../../../shared/validator-functions';
 import { DPB0267Req } from 'src/app/models/api/ServerService/dpb0267.interface';
 
 @Component({
-  selector: 'app-ai0005',
-  templateUrl: './ai0005.component.html',
-  styleUrls: ['./ai0005.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ai0005',
+    templateUrl: './ai0005.component.html',
+    styleUrls: ['./ai0005.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ai0005Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
   pageNum: number = 1;
   currentAction: string = '';
   tableData: DPB02671RespItem[] = [];
-  formE!: FormGroup;
+  formE!: UntypedFormGroup;
   btnName: string = '';
   aIPromptTemplateData: { label: string; value: string }[] = [];
 
@@ -33,7 +34,7 @@ export class Ai0005Component extends BaseComponent implements OnInit {
     tr: TransformMenuNamePipe,
     private aiService: AiService,
     private toolService: ToolService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private ngxSrvice: NgxUiLoaderService
@@ -41,9 +42,9 @@ export class Ai0005Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.formE = this.fb.group({
-      aiApiKeyConsumerType: new FormControl(''),
-      aiApiKeyConsumerId: new FormControl(''),
-      aiPromptTemplateId: new FormControl(''),
+      aiApiKeyConsumerType: new UntypedFormControl(''),
+      aiApiKeyConsumerId: new UntypedFormControl(''),
+      aiPromptTemplateId: new UntypedFormControl(''),
     });
   }
 

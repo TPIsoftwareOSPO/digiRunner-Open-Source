@@ -32,3 +32,10 @@
   border-color:rgb(237, 75, 6);
   box-shadow: 0 0 0 0.15rem rgba(231, 84, 51, 0.68);
 }
+
+dl, ol, ul {
+    margin-bottom: 0;
+}
+ol, ul {
+  padding-left: 0;
+}

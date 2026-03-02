@@ -13,14 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.CApiKeyUtils;
 import tpi.dgrv4.codec.utils.RandomSeqLongUtil;
@@ -72,104 +73,76 @@ import tpi.dgrv4.gateway.vo.TsmpAuthorization;
  * @author Mini
  */
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class AcIdPHelper {
 	
-    private TsmpSettingService tsmpSettingService;
-    private DgrAcIdpUserDao dgrAcIdpUserDao;
-    private DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao;
-    private PrepareMailService prepareMailService;
-    private MailHelper mailHelper;
-	private DgrAuditLogService dgrAuditLogService;
-	private OAuthTokenService oAuthTokenService;
-    private SsotokenService ssotokenService;
-    private TsmpRoleDao tsmpRoleDao;
-    private AuthoritiesDao authoritiesDao;
-    private AA0011Service aa0011Service;
-    private DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao;
-	private TsmpUserDao tsmpUserDao;
-	private DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
-	private DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
+	private final TsmpSettingService tsmpSettingService;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao;
+	private final PrepareMailService prepareMailService;
+	private final MailHelper mailHelper;
+	private final DgrAuditLogService dgrAuditLogService;
+	private final OAuthTokenService oAuthTokenService;
+	private final SsotokenService ssotokenService;
+	private final TsmpRoleDao tsmpRoleDao;
+	private final AuthoritiesDao authoritiesDao;
+	private final AA0011Service aa0011Service;
+	private final DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao;
+	private final TsmpUserDao tsmpUserDao;
+	private final DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao;
+	private final DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao;
 
 	// Audit Log使用
 	private String eventNo = AuditLogEvent.LOGIN.value(); 
     
     private String sendTime;
     
-    private String mailCreateUser = "SYS(AC IdP)";
+    private static final String CREATE_UPDATE_NAME = "SYS(AC IdP)";
+    private static final String MAIL_CREATE_USER = "SYS(AC IdP)";
     
     // 訊息:User狀態為 '%s' 無法登入,已寄信給審核者,經審核後,將寄發Email通知您
-    public static String MSG_WAITING_FOR_REVIEW_MSG = "Delegate AC user status is '%s', cannot log in. "
+    public static final String MSG_WAITING_FOR_REVIEW_MSG = "Delegate AC user status is '%s', cannot log in. "
     		+ "A letter has been sent to the reviewer. After the review, "
     		+ "an email will be sent to notify you.";
     
-    public static String MSG_EMAIL_WILL_BE_SENT_TO_NOTIFY_YOU = "Delegate AC user status is '%s', cannot log in. "
+    public static final String MSG_EMAIL_WILL_BE_SENT_TO_NOTIFY_YOU = "Delegate AC user status is '%s', cannot log in. "
     		+ "An email will be sent to notify you.";
  
     // 訊息:Delegate AC User狀態為 '%s' 不能登入
-    public static String MSG_DELEGATE_AC_USER_STATUS_CANNOT_LOG_IN = "Delegate AC user status is '%s', cannot log in.";
-    
-	// 訊息:Delegate AC User '%s' 不存在,不能登入
-	public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN = "Delegate AC user '%s' and IdP type '%s' does not exist, cannot log in.";
-	
-	// 訊息:Delegate AC User '%s'(%s) 不存在,不能登入
-	public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN_2 = "Delegate AC user '%s'(%s) and IdP type '%s' does not exist, cannot log in.";
+    public static final String MSG_DELEGATE_AC_USER_STATUS_CANNOT_LOG_IN = "Delegate AC user status is '%s', cannot log in.";
 
     // 訊息:驗證 ID Token 失敗
-    public static String MSG_ID_TOKEN_VERIFICATION_FAILED = "ID token verification failed.";
+    public static final String MSG_ID_TOKEN_VERIFICATION_FAILED = "ID token verification failed.";
     
     // 訊息:缺少必填參數 '%s'
-    public static String MSG_MISSING_REQUIRED_PARAMETER = "Missing required parameter '%s'.";
+    public static final String MSG_MISSING_REQUIRED_PARAMETER = "Missing required parameter '%s'.";
     
     // 訊息:設定檔缺少參數 '%s'
-    public static String MSG_THE_PROFILE_IS_MISSING_PARAMETERS = "The profile is missing parameters '%s'.";
+    public static final String MSG_THE_PROFILE_IS_MISSING_PARAMETERS = "The profile is missing parameters '%s'.";
     
     // 訊息:此 URL 無效或已過期
-    public static String MSG_THIS_URL_IS_INVALIDATE_OR_EXPIRED = "This URL is invalidate or expired.";
+    public static final String MSG_THIS_URL_IS_INVALIDATE_OR_EXPIRED = "This URL is invalidate or expired.";
     
     // 訊息:參數錯誤 '%s'
-    public static String MSG_PARAMETER_ERROR = "Parameter error '%s'.";
+    public static final String MSG_PARAMETER_ERROR = "Parameter error '%s'.";
     
     // Review 審核
-    // 訊息:Delegate AC User '%s' 不存在,不能登入
-    public static String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST = "Delegate AC user '%s' and IdP type '%s' does not exist.";
+	// 訊息:Delegate AC User '%s' 不存在,不能登入
+	public static final String MSG_DELEGATE_AC_USER_DOES_NOT_EXIST = "Delegate AC user '%s' and IdP type '%s' does not exist.";
     
     // 訊息:使用者狀態為 '%s',已寄發email通知使用者
-    public static String MSG_DELEGATE_AC_USER_STATUS_NOTIFY = "Delegate AC user status is '%s', "
+    public static final String MSG_DELEGATE_AC_USER_STATUS_NOTIFY = "Delegate AC user status is '%s', "
     		+ "and an email has been sent to notify the user.";
     
 	// 訊息:已寄信給審核者,經審核後,將寄發Email通知您
-    public static String MSG_SENT_TO_THE_REVIEWER = "A letter has been sent to the reviewer, "
+    public static final String MSG_SENT_TO_THE_REVIEWER = "A letter has been sent to the reviewer, "
     		+ "and an email will be sent to notify you after review.";
     
 	// Audit log
     // 訊息:User 狀態不正確
-    public static String MSG_DELEGATE_AC_USER_STATUS_IS_INCORRECT = "Delegate AC User status '%s' is incorrect.";
-	
-	@Autowired
-	public AcIdPHelper(TsmpSettingService tsmpSettingService, DgrAcIdpUserDao dgrAcIdpUserDao,
-			DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao, PrepareMailService prepareMailService, MailHelper mailHelper,
-			DgrAuditLogService dgrAuditLogService, OAuthTokenService oAuthTokenService, SsotokenService ssotokenService,
-			TsmpRoleDao tsmpRoleDao, AuthoritiesDao authoritiesDao, AA0011Service aa0011Service,
-			DgrAcIdpInfoLdapDao dgrAcIdpInfoLdapDao, TsmpUserDao tsmpUserDao,
-			DgrAcIdpInfoMLdapMDao dgrAcIdpInfoMLdapMDao, DgrAcIdpInfoApiDao dgrAcIdpInfoApiDao) {
-		super();
-		this.tsmpSettingService = tsmpSettingService;
-		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
-		this.dgrAcIdpAuthCodeDao = dgrAcIdpAuthCodeDao;
-		this.prepareMailService = prepareMailService;
-		this.mailHelper = mailHelper;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.oAuthTokenService = oAuthTokenService;
-		this.ssotokenService = ssotokenService;
-		this.tsmpRoleDao = tsmpRoleDao;
-		this.authoritiesDao = authoritiesDao;
-		this.aa0011Service = aa0011Service;
-		this.dgrAcIdpInfoLdapDao = dgrAcIdpInfoLdapDao;
-		this.tsmpUserDao = tsmpUserDao;
-		this.dgrAcIdpInfoMLdapMDao = dgrAcIdpInfoMLdapMDao;
-		this.dgrAcIdpInfoApiDao = dgrAcIdpInfoApiDao;
-	}
+    public static final String MSG_DELEGATE_AC_USER_STATUS_IS_INCORRECT = "Delegate AC User status '%s' is incorrect.";
     
     /**
      * 依 User 狀態,寄信通知審核者 或 建立 dgRcode 重新導向到前端,以登入AC <br>
@@ -207,6 +180,7 @@ public class AcIdPHelper {
 		
     		// AC_IDP 登入時, 是否只檢查username, 忽略 IdP type; 預設為 false, 須檢查 username 和 type (true/false) 
 		boolean acIdpLoginIgnoreType = getTsmpSettingService().getVal_AC_IDP_LOGIN_IGNORE_TYPE();
+		TPILogger.tl.debug("AC_IDP_LOGIN_IGNORE_TYPE : " + acIdpLoginIgnoreType);
 		
 		// AC_IDP 登入時, username 是否做 base64 編碼 (true/false)(default: false) 
 		boolean acIdpUsernameB64Encode = getTsmpSettingService().getVal_AC_IDP_USERNAME_B64_ENCODE();
@@ -227,7 +201,6 @@ public class AcIdPHelper {
 			// 取得 IdP User 的資料
 			dgrAcIdpUser = getDgrAcIdpUserDao().findFirstByUserNameAndIdpType(userName, idPType);
 		}
-    	
     	
 		if (dgrAcIdpUser == null) {
 			// 查無 User 資料
@@ -270,7 +243,7 @@ public class AcIdPHelper {
 			if (showMsg != null) {
 				// 寫入 Audit Log M,登入失敗
 				lineNumber = StackTraceUtil.getLineNumber();
-				createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec, userAlias);
+				createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userName, userAlias);
 
 				// 重新導向到前端,顯示訊息
 				TPILogger.tl.debug(showMsg);
@@ -297,35 +270,36 @@ public class AcIdPHelper {
 
 			// User狀態為 'Request' 無法登入,已寄信給審核者,經審核後,將寄發Email通知您
 			showMsg = String.format(MSG_WAITING_FOR_REVIEW_MSG, userStatusEn);
+			TPILogger.tl.debug(showMsg);
 			
 			// Delegate AC User狀態為 'Request' 不能登入
 			errMsg = String.format(MSG_DELEGATE_AC_USER_STATUS_CANNOT_LOG_IN, userStatusEn);
-			
 			// 寫入 Audit Log M,登入失敗
 			lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userName,
 					userAlias);
 
 		} else { // 沒有 寄發審核信流程 及 不會自動建立 User
-			if(DgrIdPType.CUS.equalsIgnoreCase(idPType) || acIdpUsernameB64EncodeValue) {
+			if (DgrIdPType.CUS.equalsIgnoreCase(idPType) || acIdpUsernameB64EncodeValue) {
 				// Delegate AC User '%s'(%s) 不存在,不能登入
-				showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN_2, userNameForDec, userName, idPType);
+				showMsg = String.format("Delegate AC user '%s'(%s) does not exist, cannot log in.", userNameForDec,
+						userName);
+				TPILogger.tl.debug(showMsg);
 				errMsg = showMsg;
-				
 			} else {
 				// Delegate AC User '%s' 不存在,不能登入
-				showMsg = String.format(MSG_DELEGATE_AC_USER_DOES_NOT_EXIST_CANNOT_LOG_IN, userNameForDec, idPType);
+				showMsg = String.format("Delegate AC user '%s' does not exist, cannot log in.", userNameForDec);
+				TPILogger.tl.debug(showMsg);
 				errMsg = showMsg;
 			}
 			
 			// 寫入 Audit Log M,登入失敗
 			lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userName,
 					userAlias);
 		}
 		
 		// 重新導向到前端,顯示訊息
-		TPILogger.tl.debug(showMsg);
 		redirectToShowMsg(httpResp, showMsg, acIdPMsgUrl, idPType);
 		return;
 	}
@@ -381,7 +355,7 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			String lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userName,
 					userAlias);
 
 			// 重新導向到前端,顯示訊息
@@ -428,7 +402,7 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			String lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userName,
 					userAlias);
 
 			// 重新導向到前端,顯示訊息
@@ -443,7 +417,7 @@ public class AcIdPHelper {
 			
 			// 寫入 Audit Log M,登入失敗
 			String lineNumber = StackTraceUtil.getLineNumber();
-			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userNameForDec,
+			createAuditLogMForLoginFailed(reqUri, lineNumber, userIp, userHostname, txnUid, errMsg, idPType, userName,
 					userAlias);
 
 			// 重新導向到前端,顯示訊息
@@ -510,15 +484,15 @@ public class AcIdPHelper {
 			acIdPMsgUrl = urlObj.getPath();// 使用相對路徑
 		}
 
-    	String msg_en = Base64Util.base64URLEncode(msg.getBytes());//訊息做 Base64Url Encode
-    	String redirect = String.format(
+		String msg_en = Base64Util.base64URLEncode(msg.getBytes());// 訊息做 Base64Url Encode
+		String redirect = String.format(
     			"%s"
     			+ "?msg=%s", 
     			acIdPMsgUrl,
     			msg_en);
     	
-    	TPILogger.tl.debug("RedirectToShowMsg Url (dgR front-end): " + redirect);
-    	httpResp.sendRedirect(redirect);
+		TPILogger.tl.debug("RedirectToShowMsg Url (dgR front-end): " + redirect);
+		httpResp.sendRedirect(redirect);
     }
     
     /**
@@ -560,24 +534,23 @@ public class AcIdPHelper {
     public void sendApplyMail(HttpServletRequest httpReq, String userName, String userEmail, Long acIdpUserId, String idPType, String reviewerEmails,
             long code1, long code2) throws Exception{
     	
-    	// AC IdP Review審核的URL
-    	String acIdPReviewUrl = getTsmpSettingService().getVal_AC_IDP_REVIEW_URL();
-    				
-    	List<TsmpMailEvent> mailEvents = new ArrayList<>();
-    	TsmpMailEvent tsmpMailEvent = getApplyMail(userName, userEmail, acIdpUserId, idPType, reviewerEmails, code1,
-    			code2, acIdPReviewUrl);
-    	mailEvents.add(tsmpMailEvent);
+		// AC IdP Review審核的URL
+		String acIdPReviewUrl = getTsmpSettingService().getVal_AC_IDP_REVIEW_URL();
+
+		List<TsmpMailEvent> mailEvents = new ArrayList<>();
+		TsmpMailEvent tsmpMailEvent = getApplyMail(userName, userEmail, acIdpUserId, idPType, reviewerEmails, code1,
+				code2, acIdPReviewUrl);
+		mailEvents.add(tsmpMailEvent);
     	
-    	String identif = String.format( "userName=%s"
-    			+ ",　actType=%s"
-    			+ ",　idPType=%s", 
-    			userName,
-    			"SSOLoginApply",
-    			idPType);
+		String identif = String.format( "userName=%s"
+				+ ",　actType=%s"
+				+ ",　idPType=%s", 
+				userName,
+				"SSOLoginApply",
+				idPType);
     	
-    	getPrepareMailService().createMailSchedule(mailEvents, identif, TsmpDpMailType.SAME.text(),
-    			getSendTime());
-    }
+		getPrepareMailService().createMailSchedule(mailEvents, identif, TsmpDpMailType.SAME.text(), getSendTime());
+	}
     
     /*
      * 寄信給 IdP User,通知審核結果為 Allow,
@@ -608,8 +581,8 @@ public class AcIdPHelper {
 	 * @throws MalformedURLException 
 	 */
     public void sendDenyMail(HttpServletRequest httpReq, String userName, String userEmail, Long acIdpUserId, String idPType) throws Exception {
-    	// AC IdP Review審核的URL
-    	String acIdPReviewUrl = getTsmpSettingService().getVal_AC_IDP_REVIEW_URL();
+		// AC IdP Review審核的URL
+		String acIdPReviewUrl = getTsmpSettingService().getVal_AC_IDP_REVIEW_URL();
     	
 		List<TsmpMailEvent> mailEvents = new ArrayList<>();
 		TsmpMailEvent tsmpMailEvent = getDenyMail(idPType, userName, userEmail, acIdpUserId, acIdPReviewUrl);
@@ -635,35 +608,35 @@ public class AcIdPHelper {
      */
     private TsmpMailEvent getApplyMail(String userName, String userMail, long acIdpUserId, String idPType,
     		String reviewerEmails, long code1, long code2, String acIdPReviewUrl) throws Exception {
-    	String subjTpltCode = "subject.sso-review";
-    	String bodyTpltCode = "body.sso-review";
+		String subjTpltCode = "subject.sso-review";
+		String bodyTpltCode = "body.sso-review";
     	
     	// 主旨
     	String subject = getMailHelper().buildNestedContent(subjTpltCode, null);
     	
-    	// 內文
-    	String allowUrlStr = getAllowUrlStr(userName, idPType, code1, acIdPReviewUrl);
-    	String denyUrlStr = getDenyUrlStr(userName, idPType, code2, acIdPReviewUrl);
+		// 內文
+		String allowUrlStr = getAllowUrlStr(userName, idPType, code1, acIdPReviewUrl);
+		String denyUrlStr = getDenyUrlStr(userName, idPType, code2, acIdPReviewUrl);
     	
 		String userNameMail = (StringUtils.hasLength(userMail)) ? (userName + "/" + userMail) : userName;
-    	Map<String, Object> bodyParams = new HashMap<>();
-    	bodyParams.put("userNameMail", userNameMail);
-    	bodyParams.put("idPType", idPType);
-    	bodyParams.put("allowUrl", allowUrlStr);
-    	bodyParams.put("denyUrl", denyUrlStr);
-    	bodyParams.put("applyTime", DateTimeUtil.dateTimeToString(new Date(), DateTimeFormatEnum.西元年月日時分).orElse(null));
-    	String content = getMailHelper().buildNestedContent(bodyTpltCode, bodyParams);
+		Map<String, Object> bodyParams = new HashMap<>();
+		bodyParams.put("userNameMail", userNameMail);
+		bodyParams.put("idPType", idPType);
+		bodyParams.put("allowUrl", allowUrlStr);
+		bodyParams.put("denyUrl", denyUrlStr);
+		bodyParams.put("applyTime", DateTimeUtil.dateTimeToString(new Date(), DateTimeFormatEnum.西元年月日時分).orElse(null));
+		String content = getMailHelper().buildNestedContent(bodyTpltCode, bodyParams);
     	
-    	// 收件者
+		// 收件者
 		String recipients = reviewerEmails;// 審核者Email清單,多筆以","分隔
     	
-    	return new TsmpMailEventBuilder() //
-    			.setSubject(subject)
-    			.setContent(content)
-    			.setRecipients(recipients)
-    			.setCreateUser(mailCreateUser)
-    			.setRefCode(bodyTpltCode)
-    			.build();
+		return new TsmpMailEventBuilder() //
+				.setSubject(subject)
+				.setContent(content)
+				.setRecipients(recipients)
+				.setCreateUser(MAIL_CREATE_USER)
+				.setRefCode(bodyTpltCode)
+				.build();
     }
     
     /**
@@ -702,7 +675,7 @@ public class AcIdPHelper {
                 .setSubject(subject)
                 .setContent(content)
                 .setRecipients(recipients)
-                .setCreateUser(mailCreateUser)
+                .setCreateUser(MAIL_CREATE_USER)
                 .setRefCode(bodyTpltCode)
                 .build();
     }
@@ -808,7 +781,7 @@ public class AcIdPHelper {
                 .setSubject(subject)
                 .setContent(content)
                 .setRecipients(recipients)
-                .setCreateUser(mailCreateUser)
+                .setCreateUser(MAIL_CREATE_USER)
                 .setRefCode(bodyTpltCode)
                 .build();
     }
@@ -837,7 +810,7 @@ public class AcIdPHelper {
 		} catch (UnsupportedEncodingException e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 		}
-    	return allowUrlStr;
+		return allowUrlStr;
     }
     
     /**
@@ -865,7 +838,7 @@ public class AcIdPHelper {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 		}
 
-    	return denyUrlStr;
+		return denyUrlStr;
     }
     
     /**
@@ -916,45 +889,44 @@ public class AcIdPHelper {
 		String oldRowStr = null;
 		InnerInvokeParam iip = null;
 		String roleId = null;
-		String createUpdateName = "SYS(AC IdP)";
-		if(dgrAcIdpUser == null) {// 若為 null, 則為建立
+		if (dgrAcIdpUser == null) {// 若為 null, 則為建立
 			// 取得 Role ID, 或建立角色 SSO
 			roleId = getRoleIdOrCreate(reqUri, userIp, userHostname, txnUid, idPType);
-			
+
 			auditLogEvent = AuditLogEvent.ADD_IDP_USER.value();
 			tableAct = TableAct.C.value();
-			iip = getDgrAuditLogService().getInnerInvokeParam(reqUri, createUpdateName, createUpdateName, userIp, 
-					userHostname, txnUid+"_cUser", null, null);
-			
-			String rootOrgId = getSsotokenService().getRootOrgId();// 取得根組織單位 ID
-    		dgrAcIdpUser = new DgrAcIdpUser();
-    		dgrAcIdpUser.setOrgId(rootOrgId);
-        	dgrAcIdpUser.setCreateUser(createUpdateName);
-        	dgrAcIdpUser.setCreateDateTime(DateTimeUtil.now());
-        	
-    	}else {//更新
-    		auditLogEvent = AuditLogEvent.UPDATE_IDP_USER.value();
-    		tableAct = TableAct.U.value();
-    		iip = getDgrAuditLogService().getInnerInvokeParam(reqUri, createUpdateName, createUpdateName, userIp, 
-    				userHostname, txnUid+"_uUser", null, null);
-    		oldRowStr = getDgrAuditLogService().writeValueAsString(iip, dgrAcIdpUser); //舊資料統一轉成 String
-    		
-        	dgrAcIdpUser.setUpdateUser(createUpdateName);
-        	dgrAcIdpUser.setUpdateDateTime(DateTimeUtil.now());
-    	}
-    	
-    	dgrAcIdpUser.setUserName(userName);
-    	dgrAcIdpUser.setUserAlias(userAlias);
-    	dgrAcIdpUser.setUserStatus(userStatus);
-    	dgrAcIdpUser.setUserEmail(userEmail);
-    	dgrAcIdpUser.setIdpType(idPType);
-    	dgrAcIdpUser.setCode1(code1);
-    	dgrAcIdpUser.setCode2(code2);
-    	dgrAcIdpUser.setIdTokenJwtstr(idTokenJwtstr);
-    	dgrAcIdpUser.setAccessTokenJwtstr(accessTokenJwtstr);
-    	dgrAcIdpUser.setRefreshTokenJwtstr(refreshTokenJwtstr);
+			iip = getDgrAuditLogService().getInnerInvokeParam(reqUri, CREATE_UPDATE_NAME, CREATE_UPDATE_NAME, userIp,
+					userHostname, txnUid + "_cUser", null, null);
 
-    	getDgrAcIdpUserDao().save(dgrAcIdpUser);
+			String rootOrgId = getSsotokenService().getRootOrgId();// 取得根組織單位 ID
+			dgrAcIdpUser = new DgrAcIdpUser();
+			dgrAcIdpUser.setOrgId(rootOrgId);
+			dgrAcIdpUser.setCreateUser(CREATE_UPDATE_NAME);
+			dgrAcIdpUser.setCreateDateTime(DateTimeUtil.now());
+        	
+		} else {// 更新
+			auditLogEvent = AuditLogEvent.UPDATE_IDP_USER.value();
+			tableAct = TableAct.U.value();
+			iip = getDgrAuditLogService().getInnerInvokeParam(reqUri, CREATE_UPDATE_NAME, CREATE_UPDATE_NAME, userIp,
+					userHostname, txnUid + "_uUser", null, null);
+			oldRowStr = getDgrAuditLogService().writeValueAsString(iip, dgrAcIdpUser); // 舊資料統一轉成 String
+
+			dgrAcIdpUser.setUpdateUser(CREATE_UPDATE_NAME);
+			dgrAcIdpUser.setUpdateDateTime(DateTimeUtil.now());
+		}
+    	
+		dgrAcIdpUser.setUserName(userName);
+		dgrAcIdpUser.setUserAlias(userAlias);
+		dgrAcIdpUser.setUserStatus(userStatus);
+		dgrAcIdpUser.setUserEmail(userEmail);
+		dgrAcIdpUser.setIdpType(idPType);
+		dgrAcIdpUser.setCode1(code1);
+		dgrAcIdpUser.setCode2(code2);
+		dgrAcIdpUser.setIdTokenJwtstr(idTokenJwtstr);
+		dgrAcIdpUser.setAccessTokenJwtstr(accessTokenJwtstr);
+		dgrAcIdpUser.setRefreshTokenJwtstr(refreshTokenJwtstr);
+
+		getDgrAcIdpUserDao().save(dgrAcIdpUser);
  
 		//寫入 Audit Log M
 		String lineNumber = StackTraceUtil.getLineNumber();
@@ -976,9 +948,9 @@ public class AcIdPHelper {
 			getDgrAuditLogService().createAuditLogD(iip, lineNumber, Authorities.class.getSimpleName(),
 					TableAct.C.value(), null, authorities);// C
 		}
-    	
-    	return dgrAcIdpUser;
-    }
+
+		return dgrAcIdpUser;
+	}
  
 	/**
 	 * 判斷是否有 "SSO" 的角色, 若查無資料, 則新增使用者角色
@@ -986,43 +958,42 @@ public class AcIdPHelper {
 	private String getRoleIdOrCreate(String reqUri, String userIp, String userHostname, String txnUid, String idPType) {
 		String ssoRoleId = null;
 		String roleName = "SSO";
-		
+
 		TsmpRole tsmpRole = getTsmpRoleDao().findFirstByRoleName(roleName);
-		if(tsmpRole != null) {
+		if (tsmpRole != null) {
 			ssoRoleId = tsmpRole.getRoleId();
-			
-		}else{//沒有 "SSO" 角色
-			// 建立 "SSO" 角色
-			AA0011Req ssotoken_req = new AA0011Req();
-			ssotoken_req.setRoleName("SSO");
-			ssotoken_req.setRoleAlias("SSO");
-			
-			//功能清單:角色維護 (AC0012)
-			ssotoken_req.setFuncCodeList(Arrays.asList("AC0012"));
-			
-			//寫入 Audit Log
-			String createUpdateName = "SYS(AC IdP)";
-			InnerInvokeParam iip = getDgrAuditLogService().getInnerInvokeParam(reqUri, createUpdateName,
-					createUpdateName, userIp, userHostname, txnUid + "_cRole", null, idPType);
-			
+
+		} else {// 沒有 "SSO" 角色
+				// 建立 "SSO" 角色
+			AA0011Req ssotokenReq = new AA0011Req();
+			ssotokenReq.setRoleName("SSO");
+			ssotokenReq.setRoleAlias("SSO");
+
+			// 功能清單:角色維護 (AC0012)
+			ssotokenReq.setFuncCodeList(Arrays.asList("AC0012"));
+
+			// 寫入 Audit Log
+			InnerInvokeParam iip = getDgrAuditLogService().getInnerInvokeParam(reqUri, CREATE_UPDATE_NAME,
+					CREATE_UPDATE_NAME, userIp, userHostname, txnUid + "_cRole", null, idPType);
+
 			TsmpAuthorization auth = new TsmpAuthorization();
-			auth.setUserName(createUpdateName);
-			AA0011Resp resp = getAA0011Service().addTRole(auth, ssotoken_req, iip);
+			auth.setUserName(CREATE_UPDATE_NAME);
+			AA0011Resp resp = getAA0011Service().addTRole(auth, ssotokenReq, iip);
 			ssoRoleId = resp.getRoleId();
 		}
 		return ssoRoleId;
-	} 
+	}
 	
-    /**
-     * 建立 DGR_AC_IDP_AUTH_CODE (SSO IdP授權碼記錄檔)
-     */
+	/**
+	 * 建立 DGR_AC_IDP_AUTH_CODE (SSO IdP授權碼記錄檔)
+	 */
 	public DgrAcIdpAuthCode createDgrAcIdpAuthCode(String userName, String idPType, String apiResp) {
-		String dgRcode = UUID64Util.UUID64(UUID.randomUUID());//產生 dgRcode(UUID 64位元)
+		String dgRcode = UUID64Util.UUID64(UUID.randomUUID());// 產生 dgRcode(UUID 64位元)
 		String codeStatus = TsmpAuthCodeStatus2.AVAILABLE.value();// 可用
-		
+
 		Date expiredTime = IdPHelper.getAuthCodeExpiredTime();// 授權碼的到期時間
 		Long expireDateTime = expiredTime.getTime();
-		
+
 		DgrAcIdpAuthCode dgrAcIdpAuthCode = new DgrAcIdpAuthCode();
 		dgrAcIdpAuthCode.setAuthCode(dgRcode);
 		dgrAcIdpAuthCode.setExpireDateTime(expireDateTime);
@@ -1036,29 +1007,29 @@ public class AcIdPHelper {
 		return dgrAcIdpAuthCode;
 	}
 	
-    /**
-     * 寫入 Audit Log M,登入失敗
-     */
-	public void createAuditLogMForLoginFailed(String reqUri, String lineNumber, String userIp, String userHostname, String txnUid,
-			String errMsg, String idPType, String userName, String userAlias) {
-		//寫入 Audit Log M,登入失敗
-    	String token_loginState = "FAILED";
+	/**
+	 * 寫入 Audit Log M,登入失敗
+	 */
+	public void createAuditLogMForLoginFailed(String reqUri, String lineNumber, String userIp, String userHostname,
+			String txnUid, String errMsg, String idPType, String userName, String userAlias) {
+		// 寫入 Audit Log M,登入失敗
+		String tokenLoginState = "FAILED";
 		String auditClientId = "N/A";
-		
-		String userName_b64 = OAuthTokenService.getUserName_b64(userName, userAlias, idPType);
-		
-		getDgrAuditLogService().createAuditLogMForLogin(lineNumber, eventNo, reqUri, userName_b64, auditClientId,
-				userIp, userHostname, token_loginState, errMsg, txnUid, null, idPType);
-    }
+
+		String userNameB64 = OAuthTokenService.getUserNameB64(userName, userAlias, idPType);
+
+		getDgrAuditLogService().createAuditLogMForLogin(lineNumber, eventNo, reqUri, userNameB64, auditClientId,
+				userIp, userHostname, tokenLoginState, errMsg, txnUid, null, idPType);
+	}
     
-    protected TsmpSettingService getTsmpSettingService() {
-    		return tsmpSettingService;
-    }
-    
-    protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
-        return dgrAcIdpUserDao;
-    }
-    
+	protected TsmpSettingService getTsmpSettingService() {
+		return tsmpSettingService;
+	}
+
+	protected DgrAcIdpUserDao getDgrAcIdpUserDao() {
+		return dgrAcIdpUserDao;
+	}
+
 	protected DgrAcIdpAuthCodeDao getDgrAcIdpAuthCodeDao() {
 		return dgrAcIdpAuthCodeDao;
 	}
@@ -1090,23 +1061,24 @@ public class AcIdPHelper {
 	protected AuthoritiesDao getAuthoritiesDao() {
 		return authoritiesDao;
 	}
-    
-    protected AA0011Service getAA0011Service() {
-    	return aa0011Service;
-    }
-    
+
+	protected AA0011Service getAA0011Service() {
+		return aa0011Service;
+	}
+
 	protected DgrAcIdpInfoLdapDao getDgrAcIdpInfoLdapDao() {
 		return dgrAcIdpInfoLdapDao;
 	}
-	
+
 	protected TsmpUserDao getTsmpUserDao() {
 		return tsmpUserDao;
 	}
-	
+
 	protected DgrAcIdpInfoMLdapMDao getDgrAcIdpInfoMLdapMDao() {
 		return dgrAcIdpInfoMLdapMDao;
 	}
-protected DgrAcIdpInfoApiDao getDgrAcIdpInfoApiDao() {
+
+	protected DgrAcIdpInfoApiDao getDgrAcIdpInfoApiDao() {
 		return dgrAcIdpInfoApiDao;
 	}
 }

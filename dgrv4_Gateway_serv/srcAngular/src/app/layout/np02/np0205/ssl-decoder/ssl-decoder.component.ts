@@ -4,9 +4,10 @@ import { SSLDecoderResp } from 'src/app/models/api/ServerService/ssl-decoder.int
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-ssl-decoder',
-  templateUrl: './ssl-decoder.component.html',
-  styleUrls: ['./ssl-decoder.component.css'],
+    selector: 'app-ssl-decoder',
+    templateUrl: './ssl-decoder.component.html',
+    styleUrls: ['./ssl-decoder.component.css'],
+    standalone: false
 })
 export class SslDecoderComponent implements OnInit {
   decodeData?: SSLDecoderResp;

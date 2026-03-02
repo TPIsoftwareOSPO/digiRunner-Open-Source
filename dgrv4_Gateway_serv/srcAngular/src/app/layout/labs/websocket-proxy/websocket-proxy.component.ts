@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB0174Req, DPB0174RespItem } from 'src/app/models/api/ServerService/dpb0174.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -20,16 +20,17 @@ import * as FileSaver from 'file-saver';
 import * as dayjs from 'dayjs';
 
 @Component({
-  selector: 'app-websocket-proxy',
-  templateUrl: './websocket-proxy.component.html',
-  styleUrls: ['./websocket-proxy.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-websocket-proxy',
+    templateUrl: './websocket-proxy.component.html',
+    styleUrls: ['./websocket-proxy.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class WebsocketProxyComponent extends BaseComponent implements OnInit {
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   cols: { field: string; header: string }[] = [];
   tableData: Array<DPB0174RespItem> = [];
   currentAction: string = '';
@@ -41,7 +42,7 @@ export class WebsocketProxyComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private serverService: ServerService,
     private toolService: ToolService,
     private messageService: MessageService,
@@ -56,11 +57,11 @@ export class WebsocketProxyComponent extends BaseComponent implements OnInit {
   async ngOnInit() {
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      siteName: new FormControl(''),
-      targetWs: new FormControl(''),
-      memo: new FormControl(''),
-      auth: new FormControl('N'),
+      keyword: new UntypedFormControl(''),
+      siteName: new UntypedFormControl(''),
+      targetWs: new UntypedFormControl(''),
+      memo: new UntypedFormControl(''),
+      auth: new UntypedFormControl('N'),
     })
 
     const code = ['ID', 'site_name', 'target_ws', 'last_update_user', 'last_update_datetime'];

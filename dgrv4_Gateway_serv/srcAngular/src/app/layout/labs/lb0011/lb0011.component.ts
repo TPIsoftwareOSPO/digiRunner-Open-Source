@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import {
@@ -23,20 +23,21 @@ import { DPB0282Resp } from 'src/app/models/api/ServerService/dpb0282.interface'
 import { DPB0284Req } from 'src/app/models/api/ServerService/dpb0284.interface';
 import { Subscription } from 'rxjs';
 import { AlertType } from 'src/app/models/common.enum';
-import * as FileSaver from 'file-saver';
+import { saveAs} from 'file-saver';
 import * as dayjs from 'dayjs';
 
 @Component({
-  selector: 'app-lb0011',
-  templateUrl: './lb0011.component.html',
-  styleUrls: ['./lb0011.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-lb0011',
+    templateUrl: './lb0011.component.html',
+    styleUrls: ['./lb0011.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Lb0011Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
-  formE!: FormGroup;
+  form!: UntypedFormGroup;
+  formE!: UntypedFormGroup;
   tableData: Array<DPB0280WebhookNotify> = [];
   statusList: { label: string; value: string }[] = [];
   statusListIgnoreAll: { label: string; value: string }[] = [];
@@ -63,7 +64,7 @@ export class Lb0011Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private listService: ListService,
     private messageService: MessageService,
@@ -77,19 +78,19 @@ export class Lb0011Component extends BaseComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      webhookNotifyId: new FormControl(''),
-      keyword: new FormControl(''),
-      enable: new FormControl('-1'),
-      paging: new FormControl(''),
+      webhookNotifyId: new UntypedFormControl(''),
+      keyword: new UntypedFormControl(''),
+      enable: new UntypedFormControl('-1'),
+      paging: new UntypedFormControl(''),
     });
     this.formE = this.fb.group({
-      notifyName: new FormControl(''),
-      notifyType: new FormControl(''),
-      enable: new FormControl(''),
-      message: new FormControl(''),
-      payloadFlag: new FormControl('0'),
-      fieldList: new FormControl(''),
-      url: new FormControl(''),
+      notifyName: new UntypedFormControl(''),
+      notifyType: new UntypedFormControl(''),
+      enable: new UntypedFormControl(''),
+      message: new UntypedFormControl(''),
+      payloadFlag: new UntypedFormControl('0'),
+      fieldList: new UntypedFormControl(''),
+      url: new UntypedFormControl(''),
     });
 
     this.notifyTypeE.valueChanges.subscribe((res) => {
@@ -493,7 +494,7 @@ export class Lb0011Component extends BaseComponent implements OnInit {
         });
 
         const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
-        FileSaver.saveAs(data, `Webhook_${date}.xlsx`);
+        saveAs(data, `Webhook_${date}.xlsx`);
       }
       this.ngxService.stop();
     });

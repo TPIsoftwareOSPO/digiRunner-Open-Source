@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'string_length'
+    name: 'string_length',
+    standalone: false
 })
 export class StringLengthPipe implements PipeTransform {
     transform(str: string, length: number): string {

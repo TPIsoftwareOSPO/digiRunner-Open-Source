@@ -5,14 +5,15 @@ import * as base64 from 'js-base64'
 import { SrcUrlRegDetailComponent } from '../src-url-reg-detail/src-url-reg-detail.component';
 
 @Component({
-  selector: 'app-src-url-reg',
-  templateUrl: './src-url-reg.component.html',
-  styleUrls: ['./src-url-reg.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => SrcUrlRegComponent),
-    multi: true
-  }]
+    selector: 'app-src-url-reg',
+    templateUrl: './src-url-reg.component.html',
+    styleUrls: ['./src-url-reg.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SrcUrlRegComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class SrcUrlRegComponent implements OnInit {
 

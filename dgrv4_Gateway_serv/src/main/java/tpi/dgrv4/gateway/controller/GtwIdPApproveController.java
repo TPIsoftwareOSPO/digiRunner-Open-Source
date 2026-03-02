@@ -47,6 +47,25 @@ public class GtwIdPApproveController {
 		}
 	}
 	
+	// 前端使用
+		@GetMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/v2/approve", 
+				produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> gtwIdPApproveV2_get(@RequestHeader HttpHeaders httpHeaders, 
+			HttpServletRequest httpReq,
+			HttpServletResponse httpResp, 
+			@PathVariable("idPType") String idPType) {
+		
+		TPILogger.tl.info("\n--【" + httpReq.getRequestURL().toString() + "】--");
+		
+		try {
+			ResponseEntity<?> respEntity = service.gtwIdPApproveV2(httpHeaders, httpReq, httpResp, idPType);
+			return respEntity;
+
+		} catch (Exception e) {
+			throw new TsmpDpAaException(e, null);
+		}
+	}
+	
 	@PostMapping(value = "/dgrv4/ssotoken/gtwidp/{idPType}/approve", 
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, // 使用 Form Urlencoded 格式
 			produces = MediaType.APPLICATION_JSON_VALUE)

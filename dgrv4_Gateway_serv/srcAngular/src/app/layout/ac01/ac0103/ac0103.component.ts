@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -34,15 +34,16 @@ import { ServerService } from 'src/app/shared/services/api-server.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Component({
-  selector: 'app-ac0103',
-  templateUrl: './ac0103.component.html',
-  styleUrls: ['./ac0103.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ac0103',
+    templateUrl: './ac0103.component.html',
+    styleUrls: ['./ac0103.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0103Component extends BaseComponent implements OnInit {
   @ViewChild('dialog') _dialog!: DialogComponent;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
   localies: { label: string; value: string }[] = [];
   cols: { field: string; header: string; width: string }[] = [];
   dialogTitle: string = '';
@@ -61,7 +62,7 @@ export class Ac0103Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private list: ListService,
     private translate: TranslateService,
@@ -77,12 +78,12 @@ export class Ac0103Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      tsmpRtnCode: new FormControl(''),
-      locale: new FormControl(''),
-      tsmpRtnMsg: new FormControl(''),
-      oldMsg: new FormControl(''),
-      tsmpRtnDesc: new FormControl(''),
+      keyword: new UntypedFormControl(''),
+      tsmpRtnCode: new UntypedFormControl(''),
+      locale: new UntypedFormControl(''),
+      tsmpRtnMsg: new UntypedFormControl(''),
+      oldMsg: new UntypedFormControl(''),
+      tsmpRtnDesc: new UntypedFormControl(''),
     });
   }
 

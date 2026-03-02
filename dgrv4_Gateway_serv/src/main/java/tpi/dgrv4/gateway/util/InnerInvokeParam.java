@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.codec.utils.UUID64Util;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
 public class InnerInvokeParam {
@@ -55,13 +56,13 @@ public class InnerInvokeParam {
 		if (!StringUtils.hasLength(acToken) || !StringUtils.hasLength(txnUid)) {//直接調用產品的API
 			tsmpAuthorization = auth;
 			txnUid = UUID64Util.UUID64(UUID.randomUUID());
-			userIp = servletReq == null ? "127.0.0.1" : servletReq.getRemoteAddr();//null例如排程程式
+//			userIp = servletReq == null ? "127.0.0.1" : servletReq.getRemoteAddr();//null例如排程程式
 		} else {//透過客製包調用產品的API
 			tsmpAuthorization = ControllerUtil.parserAuthorization(acToken);
-			userIp = headers.getFirst("x-forwarded-for");
+//			userIp = headers.getFirst("x-forwarded-for");
 			origApiUrl = headers.getFirst("origApiUrl");//客製包API URL
 		}
-
+        userIp = ClientIpUtil.getClientIp(servletReq);
 		userHostname = servletReq == null ? "localhost" : servletReq.getRemoteHost();//null,例如排程程式
 		apiUrl = servletReq == null ? "" : servletReq.getRequestURI();//null,例如排程程式
 	}

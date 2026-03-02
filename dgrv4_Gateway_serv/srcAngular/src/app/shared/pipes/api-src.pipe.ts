@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 
 @Pipe({
-    name: 'apisrc'
+    name: 'apisrc',
+    standalone: false
 })
 export class APISrcPipe implements PipeTransform {
 

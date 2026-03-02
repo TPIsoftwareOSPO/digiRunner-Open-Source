@@ -2,7 +2,6 @@ package tpi.dgrv4.gateway.service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +16,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tpi.dgrv4.common.constant.AuditLogEvent;
-import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.dpaa.service.TptokenService;
@@ -28,6 +26,7 @@ import tpi.dgrv4.gateway.component.authorization.TsmpAuthorizationParser;
 import tpi.dgrv4.gateway.component.authorization.TsmpAuthorizationParserFactory;
 import tpi.dgrv4.gateway.constant.DgrTokenGrantType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
@@ -68,8 +67,9 @@ public class AcIdPService {
 			HttpServletResponse httpRes, String dgRcode) throws Exception {
 		
 		String txnUid = getDgrAuditLogService().getTxnUid();
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
+//		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
+//				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		String userHostname = httpReq.getRemoteHost();
 		String apiUrl = httpReq.getRequestURI();
 

@@ -101,9 +101,9 @@
       <div class="form-group row">
         <div class="col-6">
           <div class="field-flex-space-between">
-            <div class="d-flex">            
-              <label id="rootCa_label" class="control-label font-weight-bold">Root CA</label>              
-              <i class="far fa-question-circle btn-cert ms-2" (click)="showCertInfo()"></i>              
+            <div class="d-flex">
+              <label id="rootCa_label" class="control-label font-weight-bold">Root CA</label>
+              <i class="far fa-question-circle btn-cert ms-2" (click)="showCertInfo()"></i>
             </div>
             <button type="button" class="btn tpi-detail" (click)="procSSLDecoder(rootCa?.value, 'Root CA')">
               [ {{ "button.detail" | translate }} ]
@@ -321,7 +321,7 @@
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
 <p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center;">
+    <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
         [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
         label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>

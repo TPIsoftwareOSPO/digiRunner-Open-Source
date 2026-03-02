@@ -6,9 +6,9 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.codec.utils.UUID64Util;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 
 public class OuterInvokeParam {
 
@@ -46,7 +46,7 @@ public class OuterInvokeParam {
 		// UUID64
 		invokeHttpHeader = new HashMap<>();
 		invokeHttpHeader.put("UUID64", uuid64);
-		invokeHttpHeader.put("x-forwarded-for", StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? servletReq.getRemoteAddr() : headers.getFirst("x-forwarded-for") );
+		invokeHttpHeader.put("x-forwarded-for", ClientIpUtil.getClientIp(servletReq) );
 		invokeHttpHeader.put("acToken", headers.getFirst("authorization"));
 		invokeHttpHeader.put("origApiUrl", origApiUrl);
 		this.origApiUrl = origApiUrl;

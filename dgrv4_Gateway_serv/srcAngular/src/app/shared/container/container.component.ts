@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-container',
-  templateUrl: './container.component.html',
-  styleUrls: ['./container.component.css']
+    selector: 'app-container',
+    templateUrl: './container.component.html',
+    styleUrls: ['./container.component.css'],
+    standalone: false
 })
 export class ContainerComponent implements OnInit {
   @Input('title') title: string= '';

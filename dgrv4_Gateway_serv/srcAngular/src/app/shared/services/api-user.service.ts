@@ -47,7 +47,7 @@ import {
 import { ToolService } from './tool.service';
 import { ApiBaseService } from './api-base.service';
 import { Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { TxID } from 'src/app/models/common.enum';
 import {
   AA0001Req,
@@ -67,8 +67,20 @@ import {
   ResAA0550,
   ResAA0550Before,
 } from 'src/app/models/api/UserService/aa0550.interface';
-import { AA0551Req, ReqAA0551, ResAA0551, ResAA0551Before } from 'src/app/models/api/UserService/aa0551.interface';
-import { AA0552Req, AA0552Resp, ReqAA0552, ResAA0552, ResAA0552Before, ResAA0552RespBefore } from 'src/app/models/api/UserService/aa0552.interface';
+import {
+  AA0551Req,
+  ReqAA0551,
+  ResAA0551,
+  ResAA0551Before,
+} from 'src/app/models/api/UserService/aa0551.interface';
+import {
+  AA0552Req,
+  AA0552Resp,
+  ReqAA0552,
+  ResAA0552,
+  ResAA0552Before,
+  ResAA0552RespBefore,
+} from 'src/app/models/api/UserService/aa0552.interface';
 import { ResAA0553 } from 'src/app/models/api/UserService/aa0553.interface';
 
 @Injectable()
@@ -77,7 +89,19 @@ export class UserService {
     return environment.isv4 ? 'dgrv4/11' : 'tsmpdpaa/11';
   }
 
-  constructor(private api: ApiBaseService, private toolService: ToolService, private httpClient: HttpClient) {}
+  constructor(
+    private injector: Injector,
+    // private api: ApiBaseService,
+    // private toolService: ToolService,
+    private httpClient: HttpClient
+  ) {}
+
+  private get toolService():ToolService{
+     return this.injector.get(ToolService);
+  }
+  private get api():ApiBaseService{
+     return this.injector.get(ApiBaseService);
+  }
 
   /**
    * AA0001: 新增TUser
@@ -349,7 +373,7 @@ export class UserService {
     return this.httpClient.post<ResAA0552Before>(path, body);
   }
 
-  getMimaStrengthDesc(){
+  getMimaStrengthDesc() {
     const path = `${this.npBasePath}/AA0553`;
     return this.api.excuteDpGet<ResAA0553>(path, TxID.getMimaStrengthDesc);
   }

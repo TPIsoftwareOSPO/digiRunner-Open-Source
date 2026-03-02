@@ -1,6 +1,6 @@
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DPB0101Items, DPB0101ItemsAddNo } from 'src/app/models/api/CycleScheduleService/dpb0101.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ListService } from 'src/app/shared/services/api-list.service';
@@ -14,7 +14,8 @@ import { CycleScheduleService } from 'src/app/shared/services/api-cycle-schedule
     selector: 'app-schedule-content-form',
     templateUrl: './schedule-content-form.component.html',
     styleUrls: ['./schedule-content-form.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ScheduleContentFormComponent extends BaseComponent implements OnInit {
 
@@ -27,14 +28,14 @@ export class ScheduleContentFormComponent extends BaseComponent implements OnIni
     @Output() change: EventEmitter<DPB0101ItemsAddNo> = new EventEmitter;
     // @Output() valueChange = new EventEmitter;
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     refItemNoOption: { label: string; value: {subitemNo:string, subitemName:string, param1:string|undefined, index:number  } }[] = [];
     refSubitemNoOption: { label: string; value: {subitemNo:string, index:number} }[] = [];
 
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private list: ListService,
         private scheduleService: CycleScheduleService,
@@ -42,12 +43,12 @@ export class ScheduleContentFormComponent extends BaseComponent implements OnIni
         super(route, tr);
 
         this.form = this.fb.group({
-          sortBy: new FormControl(0),
+          sortBy: new UntypedFormControl(0),
           // 0, ValidatorFns.requiredValidator()
-          refItemNo: new FormControl('', ValidatorFns.requiredValidator()),
-          refSubitemNo: new FormControl({ value: '', disabled: true }),
-          inParams: new FormControl(''),
-          identifData: new FormControl('')
+          refItemNo: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          refSubitemNo: new UntypedFormControl({ value: '', disabled: true }),
+          inParams: new UntypedFormControl(''),
+          identifData: new UntypedFormControl('')
       });
     }
 

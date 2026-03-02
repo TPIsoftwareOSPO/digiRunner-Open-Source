@@ -114,6 +114,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 
 	public static final String API_ID = "apiId";
 	public static final String MODULE_NAME = "moduleName";
+	private static final String IS_KIBANA_REQUEST_ATTR = "isKibanaRequest";
 	
 	// [ZH]高併發網路流量快速通關分派裝置(控制旗標)	
 	// [EN]High concurrent network traffic fast clearance dispatch device (control flag)
@@ -177,6 +178,11 @@ public class GatewayFilter extends OncePerRequestFilter {
 		String entry = ""; // uri 的第一個 path, 與 String uri 為同一組
 		try {
 			request = new CusContentCachingRequestWrapper(request);
+			
+			String kibanaPrefix = getTsmpSettingService().getVal_KIBANA_REPORTURL_PREFIX();
+			boolean isKibana = isGCPkibana(request, kibanaPrefix);
+			request.setAttribute(IS_KIBANA_REQUEST_ATTR, isKibana);
+
 			// [ZH]為了可以強制更改DB帳號密碼所以保留了傳參數的方式，以防當API取不到正確的值
 			// [EN]uri 只會異動為 "dgrc"、"tsmpc"
 			String uri = request.getRequestURI();
@@ -237,7 +243,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			// [ZH]取出 "路由" 模式, ex: tsmc、dgrc、mixed
 			// [EN]Remove "routing" mode, ex: tsmc, dgrc, mixed
 			int compatibilityPaths = tsmpSettingService.getVal_DGR_PATHS_COMPATIBILITY();
-			String kibanaPrefix = getTsmpSettingService().getVal_KIBANA_REPORTURL_PREFIX();
+			
 			// [ZH]判斷不包含特定 path 的路由
 			// [EN]Determines routes that do not contain a specific path
 
@@ -265,8 +271,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			// [EN]true dgr system routing
 			boolean isDgrManagedRoute = dgrManagedRoute.stream()
 					.anyMatch(uri::startsWith)
-					|| isGCPkibana(request, kibanaPrefix) // [ZH]判斷是不是走/kibana2的GCP 相關URL // [EN]Determine whether to use the GCP related URL of /kibana2
-					;
+					|| (boolean) request.getAttribute(IS_KIBANA_REQUEST_ATTR);
 
 			// [ZH] 如果不是 dgr 系統管控路由，則添加 path
 			// [EN] add path if not dgr system routing
@@ -383,8 +388,8 @@ public class GatewayFilter extends OncePerRequestFilter {
 		// TPILogger.tl.debug("\n--【LOGUUID】【" + "No" + "】【before end】--\n");
 
 		// add Last Resp Header
-
-		var responseWrapper = new FilteredHeaderResponseWrapper(response);
+		boolean isKibana = (boolean) request.getAttribute(IS_KIBANA_REQUEST_ATTR);
+		var responseWrapper = new FilteredHeaderResponseWrapper(response, request, isKibana);
 
 //		String cspVal = String.format(cspDefaultVal, dgrCspVal);
 		// [ZH]加上 CSP 標題, 例如: 
@@ -449,7 +454,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 		}
 
 		try {
-			filterChain.doFilter(request, response);
+			filterChain.doFilter(request, responseWrapper);
 	    } catch (Exception e) {
 	    	if (response.getStatus() == 200) {
 	    		// [ZH]為了解決高併發時, 2個 worker thread 搶 filter 的問題
@@ -667,7 +672,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			return request;
 			// [ZH]要同時符合 1. 是要走 /kibana2 以及url 內沒有 /kibana2 的才加入 預防/kibana2/login 被二次加入/kibana2
 			// [EN]Must simultaneously meet two conditions: 1. Should route to /kibana2 and URL doesn't contain /kibana2 - this prevents /kibana2/login from having /kibana2 added twice
-		} else if (!uri.contains("login") && isGCPkibana(request, kibanaPrefix)  ) {
+		} else if (!uri.contains("login") && (boolean) request.getAttribute(IS_KIBANA_REQUEST_ATTR)  ) {
 			// [ZH]導向 KibanaController.java "/kibana/**"
 			// [EN]Route to KibanaController.java "/kibana/**"
 			request = GatewayFilter.changeRequestURI(request, kibanaPrefix + uri);
@@ -693,11 +698,13 @@ public class GatewayFilter extends OncePerRequestFilter {
 	}
 
 	private boolean isGCPkibana(HttpServletRequest request, String kibanaPrefix) {
-
+        String statuspi = getTsmpSettingService().getVal_KIBANA_STATUS_URL();
 		String uri = request.getRequestURI();
 		// 先確認是不是路由2在決跑判斷
 		if (GCP_ROUTING.equals(kibanaPrefix)) {
-
+            if (uri.contains(statuspi)) {
+                return true;
+            }
 			// 因第一次轉導不能再進入前就加入kibana 所以寫死
 			if (uri.contains("/app/dashboards")) {
 				return true;

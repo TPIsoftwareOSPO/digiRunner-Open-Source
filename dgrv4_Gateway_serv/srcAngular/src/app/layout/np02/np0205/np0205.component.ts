@@ -1,13 +1,9 @@
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpResponse,
-} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ClientCAService } from 'src/app/shared/services/api-certificate-authority.service';
 import { DPB0229RespItem } from 'src/app/models/api/ServerService/dpb0229.interface';
@@ -29,13 +25,14 @@ import { catchError, map, of } from 'rxjs';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
-  selector: 'app-np0205',
-  templateUrl: './np0205.component.html',
-  styleUrls: ['./np0205.component.scss'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-np0205',
+    templateUrl: './np0205.component.html',
+    styleUrls: ['./np0205.component.scss'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Np0205Component extends BaseComponent implements OnInit {
-  form: FormGroup;
+  form: UntypedFormGroup;
   cols: { field: string; header: string; width?: string }[] = [];
   dataList: Array<DPB0229RespItem> = [];
   selected: Array<DPB0229RespItem> = [];
@@ -49,7 +46,7 @@ export class Np0205Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private clientCA: ClientCAService,
     private confirmationService: ConfirmationService,
@@ -61,13 +58,13 @@ export class Np0205Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      host: new FormControl(''),
-      port: new FormControl(''),
-      rootCa: new FormControl(''),
-      clientCert: new FormControl(''),
-      clientKey: new FormControl(''),
-      keyMima: new FormControl(''),
-      remark: new FormControl(''),
+      host: new UntypedFormControl(''),
+      port: new UntypedFormControl(''),
+      rootCa: new UntypedFormControl(''),
+      clientCert: new UntypedFormControl(''),
+      clientKey: new UntypedFormControl(''),
+      keyMima: new UntypedFormControl(''),
+      remark: new UntypedFormControl(''),
     });
   }
 

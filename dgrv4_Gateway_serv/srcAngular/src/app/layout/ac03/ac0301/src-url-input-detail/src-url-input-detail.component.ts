@@ -1,13 +1,14 @@
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AiApikeyComponent } from '../../ac0311/ai-apikey/ai-apikey.component';
 
 @Component({
-  selector: 'app-src-url-input-detail',
-  templateUrl: './src-url-input-detail.component.html',
-  styleUrls: ['./src-url-input-detail.component.css'],
+    selector: 'app-src-url-input-detail',
+    templateUrl: './src-url-input-detail.component.html',
+    styleUrls: ['./src-url-input-detail.component.css'],
+    standalone: false
 })
 export class SrcUrlInputDetailComponent implements OnInit {
   @Input() data?: { percent: string; url: string; no: number; isMtls: boolean };
@@ -26,11 +27,11 @@ export class SrcUrlInputDetailComponent implements OnInit {
   }> = new EventEmitter();
   @Output() remove: EventEmitter<number> = new EventEmitter();
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   _uuid: string = '';
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private dialogService: DialogService
   ) {
@@ -42,9 +43,9 @@ export class SrcUrlInputDetailComponent implements OnInit {
     // let _url = this.data?.isMtls == true ? dgrProtocol_match[dgrProtocol_match.length-1] : this.data?.url;
 
     this.form = this.fb.group({
-      percent: new FormControl(this.data ? this.data.percent : ''),
-      url: new FormControl(this.data ? this.data.url : ''),
-      isMtls: new FormControl(this.data ? this.data.isMtls : false),
+      percent: new UntypedFormControl(this.data ? this.data.percent : ''),
+      url: new UntypedFormControl(this.data ? this.data.url : ''),
+      isMtls: new UntypedFormControl(this.data ? this.data.isMtls : false),
     });
 
     const dgrProtocol_match = this.toolService.dgrProtocol_match(

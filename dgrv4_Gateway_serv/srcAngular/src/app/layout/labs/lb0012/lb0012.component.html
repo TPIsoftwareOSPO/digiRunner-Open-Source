@@ -45,7 +45,7 @@
         <ng-template pTemplate="header" let-columns>
           <tr>
             <th style="width:50px;">{{"status"|translate}}</th>
-            <th style="width:15%;">Webhook Name</th>
+            <th style="width:15%;">AI Proxy Name</th>
             <th style="width:5%;">Notify type</th>
             <th>Client Id</th>
             <th>Remark</th>
@@ -101,7 +101,7 @@
     <div class="form-group row">
       <div class="form-group row">
         <div class="col-sm-4">
-          <label>Webhook Name</label>
+          <label>AI Proxy Name</label>
           <label class="form-control border-line">{{selectedItem?.notifyName}}</label>
         </div>
         <div class="col-sm-4">
@@ -138,7 +138,7 @@
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
 <p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center;">
+    <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
         [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
         label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>

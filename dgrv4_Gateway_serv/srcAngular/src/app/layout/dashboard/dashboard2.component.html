@@ -2,8 +2,10 @@
   <ng-container *ngFor="let item of dataList; let i = index; trackBy: trackByNodeName">
     <ng-container *ngIf="item.nodeName === 'All Node'">
       <div class="first-col">
-        <ng-container *ngTemplateOutlet="dashboardCard; context: { $implicit: item }"></ng-container>        
-        <ng-container *ngTemplateOutlet="keeperCard"></ng-container>
+        <ng-container *ngTemplateOutlet="dashboardCard; context: { $implicit: item }"></ng-container>
+        <div *ngIf="keeperShow">
+          <ng-container *ngTemplateOutlet="keeperCard"></ng-container>
+        </div>
         <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
       </div>
     </ng-container>
@@ -13,9 +15,10 @@
     </ng-container>
   </ng-container>
 
-
   <div *ngIf="dataList.length==0" class="first-col">
-    <ng-container *ngTemplateOutlet="keeperCard"></ng-container>
+    <div *ngIf="keeperShow">
+      <ng-container *ngTemplateOutlet="keeperCard"></ng-container>
+    </div>
     <div *ngIf="lastLoginLogList.length>0">
       <ng-container *ngTemplateOutlet="lastLoginLogCard"></ng-container>
     </div>
@@ -23,18 +26,18 @@
 </div>
 <!-- keeper位址 -->
 <ng-template #keeperCard>
-<div class="dashboard-card fixed-card">
-  <div class="dashboard-card-title" style="margin-top: 1rem; height: unset;">
+  <div class="dashboard-card fixed-card">
+    <div class="dashboard-card-title" style="margin-top: 1rem; height: unset;">
       <h5>{{ "keeper_address" | translate }}
         <i class="fas fa-cog navicon" (click)="navigateSetting()" [pTooltip]="'change_keeper_address' | translate"></i>
       </h5>
       <span>
         <img alt="keeper site" style="width: 20px; height: 20px"
-              [src]=" dataList.length > 0 ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+          [src]=" dataList.length > 0 ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
         {{keeperIP}} {{ (keeperPort && keeperIP!='')? ': '+keeperPort :''}}
       </span>
+    </div>
   </div>
-</div>
 </ng-template>
 <ng-template #lastLoginLogCard>
   <!-- 歷史登入紀錄 -->
@@ -100,18 +103,18 @@
         <ng-container *ngTemplateOutlet="averageTime; context: { $implicit: item }"></ng-container>
       </div>
 
-       <ng-container *ngIf="item.queue != null">
-          <ng-container *ngTemplateOutlet="Queue; context: { $implicit: item }"></ng-container>
-        </ng-container>
+      <ng-container *ngIf="item.queue != null">
+        <ng-container *ngTemplateOutlet="Queue; context: { $implicit: item }"></ng-container>
+      </ng-container>
     </div>
     <ng-container *ngIf="item.nodeName !== 'All Node'">
       <div class="dashboard-card-body-row" style="--columns: 2">
         <ng-container *ngIf="item.db != null">
           <ng-container *ngTemplateOutlet="DBConnection; context: { $implicit: item }"></ng-container>
         </ng-container>
-      <ng-container *ngIf="item.cache != null">
-        <ng-container *ngTemplateOutlet="Cache; context: { $implicit: item }"></ng-container>
-      </ng-container>
+        <ng-container *ngIf="item.cache != null">
+          <ng-container *ngTemplateOutlet="Cache; context: { $implicit: item }"></ng-container>
+        </ng-container>
       </div>
       <div class="dashboard-card-body-row" style="--columns: 2">
         <ng-container *ngIf="item.nodeInfo != null">

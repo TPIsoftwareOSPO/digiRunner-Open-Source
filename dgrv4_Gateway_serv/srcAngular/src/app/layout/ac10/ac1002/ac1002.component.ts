@@ -21,10 +21,11 @@ import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 
 @Component({
-  selector: 'app-ac1002',
-  templateUrl: './ac1002.component.html',
-  styleUrls: ['./ac1002.component.css'],
-  providers: [MessageService, ConfirmationService, DynamicDialogRef]
+    selector: 'app-ac1002',
+    templateUrl: './ac1002.component.html',
+    styleUrls: ['./ac1002.component.css'],
+    providers: [MessageService, ConfirmationService, DynamicDialogRef],
+    standalone: false
 })
 export class Ac1002Component extends BaseComponent implements OnInit {
 

@@ -1,7 +1,7 @@
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { CommonAPI } from '../../../shared/register-api/common-api.class';
@@ -26,10 +26,11 @@ import { ModuleService } from 'src/app/shared/services/api-module.service';
 import { DCService } from 'src/app/shared/services/api-dc.service';
 
 @Component({
-  selector: 'app-ac0316',
-  templateUrl: './ac0316.component.html',
-  styleUrls: ['./ac0316.component.css'],
-  providers: [ApiService, ModuleService, DCService]
+    selector: 'app-ac0316',
+    templateUrl: './ac0316.component.html',
+    styleUrls: ['./ac0316.component.css'],
+    providers: [ApiService, ModuleService, DCService],
+    standalone: false
 })
 export class Ac0316Component extends BaseComponent implements OnInit {
 
@@ -39,7 +40,7 @@ export class Ac0316Component extends BaseComponent implements OnInit {
   apiKey: string = '';
   moduleName: string = '';
   apiSrc: string = '';
-  form: FormGroup;
+  form: UntypedFormGroup;
   methods: { label: string; value: string; }[] = [];
   dcs: { label: string; value: string; }[] = [];
   sites: { label: string; value: string; }[] = [];
@@ -53,7 +54,7 @@ export class Ac0316Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tokenService: TokenService,
     private toolService: ToolService,
     private api: ApiService,
@@ -70,26 +71,26 @@ export class Ac0316Component extends BaseComponent implements OnInit {
     this.acConf = this.tool.getAcConf();
 
     this.form = this.fb.group({
-      enableClientAuth: new FormControl(true),
-      enableUserAuth: new FormControl(false),
-      userName: new FormControl({ value: '', disabled: true }),
-      passwd: new FormControl({ value: '', disabled: true }),
-      clientId: new FormControl(""),
-      clientPasswd: new FormControl(""),
-      tsmpUrl: new FormControl(""),
-      method: new FormControl('POST'),
-      requestHeader: new FormControl,
-      ContentType: new FormControl("application/json"),
-      requestBody: new FormControl('none'),
-      keyValueRequest: new FormControl(""),
-      keyValueForm: new FormControl(""),
-      bodyText: new FormControl(""),
-      resBody: new FormControl({ value: '', disabled: false }),
-      resStatus: new FormControl({ value: '', disabled: false }),
-      headerList: new FormControl({ value: '', disabled: false }),
-      dc: new FormControl(''),
-      siteCode: new FormControl(''),
-      baseUrl: new FormControl(location.hostname + (location.port ? ':' + location.port : ''))
+      enableClientAuth: new UntypedFormControl(true),
+      enableUserAuth: new UntypedFormControl(false),
+      userName: new UntypedFormControl({ value: '', disabled: true }),
+      passwd: new UntypedFormControl({ value: '', disabled: true }),
+      clientId: new UntypedFormControl(""),
+      clientPasswd: new UntypedFormControl(""),
+      tsmpUrl: new UntypedFormControl(""),
+      method: new UntypedFormControl('POST'),
+      requestHeader: new UntypedFormControl,
+      ContentType: new UntypedFormControl("application/json"),
+      requestBody: new UntypedFormControl('none'),
+      keyValueRequest: new UntypedFormControl(""),
+      keyValueForm: new UntypedFormControl(""),
+      bodyText: new UntypedFormControl(""),
+      resBody: new UntypedFormControl({ value: '', disabled: false }),
+      resStatus: new UntypedFormControl({ value: '', disabled: false }),
+      headerList: new UntypedFormControl({ value: '', disabled: false }),
+      dc: new UntypedFormControl(''),
+      siteCode: new UntypedFormControl(''),
+      baseUrl: new UntypedFormControl(location.hostname + (location.port ? ':' + location.port : ''))
     });
   }
 

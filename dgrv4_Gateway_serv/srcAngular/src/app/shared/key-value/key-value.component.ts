@@ -4,15 +4,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { IKeyValue } from './key-value.interface';
 
 @Component({
-  selector: 'app-key-value',
-  templateUrl: './key-value.component.html',
-  styleUrls: ['./key-value.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => KeyValueComponent),
-      multi: true
-    }]
+    selector: 'app-key-value',
+    templateUrl: './key-value.component.html',
+    styleUrls: ['./key-value.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => KeyValueComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class KeyValueComponent implements OnInit, ControlValueAccessor {
 

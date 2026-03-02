@@ -9,9 +9,9 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormControl,
+  UntypedFormGroup,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { DPB0281Field } from 'src/app/models/api/ServerService/dpb0281.interface';
@@ -24,16 +24,17 @@ interface _keyValueField extends DPB0281Field {
 }
 
 @Component({
-  selector: 'app-mapping-url-field',
-  templateUrl: './mapping-url-field.component.html',
-  styleUrls: ['./mapping-url-field.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => MappingUrlFieldComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-mapping-url-field',
+    templateUrl: './mapping-url-field.component.html',
+    styleUrls: ['./mapping-url-field.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MappingUrlFieldComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class MappingUrlFieldComponent implements OnInit {
   @ViewChild('headerValue', { read: ViewContainerRef, static: false })
@@ -52,18 +53,18 @@ export class MappingUrlFieldComponent implements OnInit {
   @Output() change: EventEmitter<any> = new EventEmitter();
   @Output() remove: EventEmitter<number> = new EventEmitter();
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   headerValueList: Array<_keyValueField> = [];
   headerNo: number = 0;
   fieldValueList: Array<_keyValueField> = [];
   fieldNo: number = 0;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      url: new FormControl(''),
-      percent: new FormControl(0),
+      url: new UntypedFormControl(''),
+      percent: new UntypedFormControl(0),
     });
 
     this.disabled? this.form.disable(): this.form.enable();

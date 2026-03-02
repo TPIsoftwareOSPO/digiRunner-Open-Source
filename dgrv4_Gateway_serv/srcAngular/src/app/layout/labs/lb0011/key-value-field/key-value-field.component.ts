@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
 
@@ -11,9 +11,10 @@ interface _keyValueField {
 }
 
 @Component({
-  selector: 'app-key-value-field',
-  templateUrl: './key-value-field.component.html',
-  styleUrls: ['./key-value-field.component.css'],
+    selector: 'app-key-value-field',
+    templateUrl: './key-value-field.component.html',
+    styleUrls: ['./key-value-field.component.css'],
+    standalone: false
 })
 export class KeyValueFieldComponent implements OnInit {
   @Input() _ref: any;
@@ -27,14 +28,14 @@ export class KeyValueFieldComponent implements OnInit {
   @Output() change: EventEmitter<_keyValueField> = new EventEmitter();
   @Output() remove: EventEmitter<number> = new EventEmitter();
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
-  constructor(private fb: FormBuilder, private toolService: ToolService) {}
+  constructor(private fb: UntypedFormBuilder, private toolService: ToolService) {}
 
   ngOnInit() {
     this.form = this.fb.group({
-      key: new FormControl(this.data ? this.data.key : ''),
-      value: new FormControl(this.data ? this.data.value : ''),
+      key: new UntypedFormControl(this.data ? this.data.key : ''),
+      value: new UntypedFormControl(this.data ? this.data.value : ''),
     });
     if (this._disabled) {
       this.form.disable();

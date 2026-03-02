@@ -2,9 +2,9 @@ import { Component, OnInit, forwardRef, Input } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
-  FormGroup,
-  FormBuilder,
-  FormControl,
+  UntypedFormGroup,
+  UntypedFormBuilder,
+  UntypedFormControl,
 } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -16,16 +16,17 @@ interface checkbox {
   indeterminate: boolean;
 }
 @Component({
-  selector: 'app-datepicker',
-  templateUrl: './datepicker.component.html',
-  styleUrls: ['./datepicker.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DatepickerComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-datepicker',
+    templateUrl: './datepicker.component.html',
+    styleUrls: ['./datepicker.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => DatepickerComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class DatepickerComponent implements OnInit, ControlValueAccessor {
   dateList: checkbox[] = [];
@@ -128,15 +129,15 @@ export class DatepickerComponent implements OnInit, ControlValueAccessor {
   onChange!: (value: any) => void;
 
   disabled?: boolean;
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private translate: TranslateService
   ) {
     this.form = this.fb.group({
-      date: new FormControl([]),
+      date: new UntypedFormControl([]),
     });
   }
 

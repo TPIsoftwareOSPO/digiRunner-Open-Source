@@ -1,448 +1,432 @@
 package tpi.dgrv4.tcp.utils.communication;
 
-
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.KryoBufferUnderflowException;
+import com.esotericsoftware.kryo.io.Output;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tpi.dgrv4.tcp.utils.packets.DoSetUserName;
+import tpi.dgrv4.tcp.utils.packets.sys.ExitThread;
+import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoException;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.KryoBufferUnderflowException;
-import com.esotericsoftware.kryo.io.Output;
-
-import tpi.dgrv4.tcp.utils.packets.DoSetUserName;
-import tpi.dgrv4.tcp.utils.packets.sys.ExitThread;
-import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
-
 public class LinkerClient implements Runnable {
-	private static Logger logger = LoggerFactory.getLogger(LinkerClient.class);
-	
-	private int bufferSize = 999;
-	private BlockingQueue<Packet_i> rev = new ArrayBlockingQueue<Packet_i>(
-			bufferSize);
-	private BlockingQueue<Packet_i> snd = new ArrayBlockingQueue<Packet_i>(
-			bufferSize);
-	public HashMap<String, String> param = new HashMap<String, String>();
-	public HashMap<String, Object> paramObj = new HashMap<String, Object>();
-	
-	public List<ClinetNotifier> cnf;
 
-	private final String keeperHeaerByte = "_|__K_e_E_p_er__H_ea_d_er__|_(";
-	private final String keeperFooterByte = ")_|__digi_9999__|_";
-	
-	Socket socket;
-//	Input in;
-//	java.io.OutputStream out;
-	public String serverIP;
-	public int port;
-	// 使用者身分
-	public Role identity;
-	public String userName;
-	
-	// private boolean isExit;
-	private boolean isExitThread = false;
+    private static Logger logger = LoggerFactory.getLogger(LinkerClient.class);
+    public int bufferSize = 999;
+    private BlockingQueue<Packet_i> rev;
+    @Getter
+    private BlockingQueue<Packet_i> snd;
+    public HashMap<String, String> param = new HashMap<>();
+    public HashMap<String, Object> paramObj = new HashMap<>();
 
-	public void addListner(ClinetNotifier c) {
-		if (cnf == null) {
-			cnf = new ArrayList<ClinetNotifier>();
-		}
-		if (c != null) {
-			cnf.add(c);
-		}
-	}
+    public List<ClinetNotifier> cnf;
 
-	public LinkerClient(String ip, int port, Role identity)
-			throws UnknownHostException, IOException {
-		this(ip, port, identity, null);
-	}
+    private final String keeperHeaerByte = "_|__K_e_E_p_er__H_ea_d_er__|_(";
+    private final String keeperFooterByte = ")_|__digi_9999__|_";
 
-	public LinkerClient(String ip, int port, Role identity, ClinetNotifier c)
-			throws UnknownHostException, IOException {
-		this.serverIP = ip;
-		this.port = port;
-		this.identity = identity;
-		// this.isExit = isExit;
-		socket = new Socket(serverIP, port);
-		
-//        out = new OutputStream(socket.getOutputStream());
-//		in = new Input(socket.getInputStream());
-		addListner(c);
-		for (ClinetNotifier cn : cnf) {
-			cn.runConnection(this);
-		}
+    Socket socket;
+    public String serverIP;
+    public int port;
+    // 使用者身分
+    public Role identity;
+    public String userName;
 
-//		TcpIdentity p = new TcpIdentity();
-//		p.f_identity = this.identity;
-//		this.send(p);
 
-		Thread t = new Thread(this);
-		t.start();
 
-		new Thread() {
-			public void run() {
-				while (true) {
-					if (isExitThread)
-						break;
-					sendObject();
-				}
-			}
-		}.start();
+    private boolean isExitThread = false;
 
-		new Thread() {
-			public void run() {
-				while (true) {
-					if (isExitThread)
-						break;
-					processPacket();
-				}
-			}
-		}.start();
-	}
+    public void addListner(ClinetNotifier c) {
+        if (cnf == null) {
+            cnf = new ArrayList<>();
+        }
+        if (c != null) {
+            cnf.add(c);
+        }
+    }
 
-	private byte[] socket_read_buffer = new byte[1024*1024*10]; // 10MB
-	private Input kryoInput = new Input(socket_read_buffer.length);
-	private ByteArrayOutputStream baos_4_readObj = new ByteArrayOutputStream();
-	public void run() {
-		try {
-			Kryo kryo = CommunicationServer.kryoLocal.get();
-	        while (true) {
-	            int bytesRead = socket.getInputStream().read(socket_read_buffer);
-	            if(bytesRead == -1) {
-	            	break; //socket close
-	            }
-	            
-	            // 只處理實際讀到的資料
-	            byte[] actualData = Arrays.copyOf(socket_read_buffer, bytesRead);
-	            
-	            // copy to ByteArrayOS
-	            baos_4_readObj.write(actualData, 0, actualData.length);
-	            baos_4_readObj.flush();
+    public LinkerClient(String ip, int port, Role identity, int bufferSize)
+            throws  IOException {
+        this(ip, port, identity, null, bufferSize);
+    }
 
-	            // Kryo object
-				boolean endFlag = procKyroPacket(kryo);
-				
-				// false 表示收到 exit 封包, true表示已處理或續傳
-				if (endFlag == true) {
-					break; // 收到 'ExitThread' 就要離開
-				}
-	        }
-		} catch (Exception e) {
-			logger.error(LinkerServer.logTpiShortStackTrace(e));
-		} finally {
-			isExitThread = true;
-			doExitThread();
-		}
-	}
-	
-	// 續傳使用
-	private ByteArrayOutputStream bigContinue = null;
-	private boolean procKyroPacket(Kryo kryo) throws Exception {
-		byte arr[] = baos_4_readObj.toByteArray();
-//		logger.info("\n...開始 deserialize 封包...size:"+arr.length);
-//		logger.info("\n...封包值:"+new String(arr));
-		
-		boolean hasDoneToPack = hasDone(arr); // 是否收到'尾'資料了
-		
-		if(hasDoneToPack == false) {
-			return false; //未到'尾', 只收集, 不做反序列化
-		} 
-		
-		arr = bigContinue.toByteArray();
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(arr);
-		kryoInput.setInputStream(bais);
-		try {
-			Object inputObj = kryo.readClassAndObject(kryoInput);
-			kryoInput.close();
-			kryoInput.reset();
-			baos_4_readObj.reset();
-			if (inputObj instanceof Packet_i) {
-				Packet_i obj = (Packet_i) inputObj;
-				if (obj instanceof ExitThread) {
-					this.isExitThread = true;
-					return true;
-				}
-				rev.put(obj);
-//System.err.print(">.");
-				bigContinue = null; //因為累加的資料能跑到這裡表示已經用完了, 所以清空
-			}
-		} catch (KryoBufferUnderflowException e) {
+    public LinkerClient(String ip, int port, Role identity, ClinetNotifier c, int bufferSize)
+            throws  IOException {
+        this.serverIP = ip;
+        this.port = port;
+        this.identity = identity;
+        this.bufferSize = bufferSize;
+        this.rev = new java.util.concurrent.ArrayBlockingQueue<>(this.bufferSize);
+        this.snd = new java.util.concurrent.ArrayBlockingQueue<>(this.bufferSize);
 
-			// 若是 Buffer Underflow 則啟動續傳
-			continueFile(arr);
-			
-			StringBuffer sb = new StringBuffer();
-			sb.append("\n無法解析 LC 封包 (Kryo Buffer Underflow)..."); // + LinkerServer.logTpiShortStackTrace(e)
-			sb.append("byte[] length: " + arr.length);
-//			sb.append("\nbyte[] to String: " + getSubstring(arr));
-			sb.append("\n 略過不處理, 進行續傳" );
-			sb.append("\n");
-			logger.debug(sb.toString());
-		} catch (KryoException e) {
-			baos_4_readObj.reset(); //如果出錯了就要 reset 以免資料一直留存
-			StringBuffer sb = new StringBuffer();
-			sb.append("\n無法解析 LC 封包:" + LinkerServer.logTpiShortStackTrace(e));
-			sb.append("byte[] length: " + arr.length);
-			sb.append("\nbyte[] to String: " + getSubstring(arr));
-//			sb.append("\nbyte[] b64 string: " + Base64Utils.encodeToUrlSafeString(arr));
-			sb.append("\n");
-			logger.error(sb.toString());
-		}
-		return false;
-	}
-	
-	private boolean hasDone(byte[] arr) throws IOException {
-		// 檢查 keeper header
-		boolean hasKH = hasKeeperHeader(arr);
-		boolean hasFoot = hasDigiFooter(arr);
-		byte keperHeader[] = keeperHeaerByte.getBytes();
-		if (hasFoot && hasKH ) {
-			// 單獨完整一包
-			bigContinue = new ByteArrayOutputStream(bufferSize);
-			// ** 去頭,去尾
-			bigContinue.write(arr, keperHeader.length, arr.length - keeperFooterByte.getBytes().length - keperHeader.length);
-			return true;
-		} else if (hasKH) {
-			// start 啟用續傳
-			bigContinue = new ByteArrayOutputStream(bufferSize);
-			int len = arr.length - keperHeader.length;
-			// ** 去頭
-			bigContinue.write(arr, keperHeader.length, len);
-			return false;
-		} else if (hasFoot) {
-			// end 
-			// ** 去尾
-			bigContinue.write(arr, 0, arr.length - keeperFooterByte.getBytes().length);
-			return true;
-		} else {
-			// body
-			if (bigContinue == null) {
-				bigContinue = new ByteArrayOutputStream(bufferSize);
-			}
-			bigContinue.write(arr);
-			return false;
-		}
-		
-		// 回傳累加資料
-		// return bigContinue.toByteArray();
-	}
-	
-	private boolean hasDigiFooter(byte[] arr) {
-		byte[] foo = keeperFooterByte.getBytes();
-		boolean hasFoo = true;
-		// data 一定要大於 footer 
-		if (arr.length >= keeperFooterByte.getBytes().length ) {
-			// 只比對後方的 foo 之 byte 內容
-			for (int i = arr.length-1; i >= (arr.length - foo.length); i--) {
-				hasFoo &= arr[i] == foo[i - ((arr.length - foo.length))];
-			}
-			return hasFoo;
-		}
-		
-		return false;
-	}
-	
-	private boolean hasKeeperHeader(byte[] arr) {
-		byte keperHeader[] = keeperHeaerByte.getBytes();
-		boolean hasHeader = true;
-		//長度至少要相等
-		if (arr.length >= keperHeader.length) {
-			for (int i = 0; i < keperHeader.length; i++) {
-				// 要全部相等才行
-				hasHeader &= keperHeader[i] == arr[i];
-			}
-			return hasHeader;
-		}
-		return false;
-	}
+        socket = new Socket(serverIP, port);
+        addListner(c);
+        if (cnf != null) {
+            for (ClinetNotifier cn : cnf) {
+                cn.runConnection(this);
+            }
+        }
 
-	private void continueFile(byte[] arr) throws IOException {
-		baos_4_readObj.reset(); //如果出錯了就要 reset 以免資料一直留存
-		if (bigContinue == null) {
-			bigContinue = new ByteArrayOutputStream(bufferSize);
-		}
-		bigContinue.write(arr);
-	}
+        Thread t = new Thread(this);
+        t.start();
 
-	private String getSubstring(byte[] arr) {
-		String tmpStr = null;
-		if (arr.length <= 200) {
-			tmpStr = new String(arr);
-		} else {
-			tmpStr = new String(arr, 0, 200);
-		}
-		return tmpStr;
-	}
+        new Thread() {
+            public void run() {
+                while (true) {
+                    if (isExitThread)
+                        break;
+                    sendObject();
+                }
+            }
+        }.start();
 
-	private void doExitThread() {
-		ExitThread ex = new ExitThread();
-		try {
-			rev.put(ex);
-			snd.put(ex);
-			socket.close();
-			for (ClinetNotifier cn : cnf) {
-				cn.runDisconnect(this);
-			}
-		} catch (Exception e) {
-			//e.printStackTrace();
-			logger.error(LinkerServer.logTpiShortStackTrace(e));
-			Thread.currentThread().interrupt();
-		}
-	}
+        new Thread() {
+            public void run() {
+                while (true) {
+                    if (isExitThread)
+                        break;
+                    processPacket();
+                }
+            }
+        }.start();
+    }
 
-	/**
-	 * 此方法不需要去修改它
-	 */
-	public void send(Packet_i obj) {
-		try {
-			snd.put(obj);
-		} catch (InterruptedException e) {
-			logger.error("", e);
-			Thread.currentThread().interrupt();
-		}
-	}
+    private final byte[] socketReadBuffer = new byte[1024 * 1024 * 10]; // 10MB
+    private Input kryoInput = new Input(socketReadBuffer.length);
+    private ByteArrayOutputStream baos4ReadObj = new ByteArrayOutputStream();
 
-	ByteArrayOutputStream baos_sendObj = new ByteArrayOutputStream();
-	Output kryoOutput = new Output(baos_sendObj, socket_read_buffer.length); 
+    public void run() {
+        try {
+            Kryo kryo = CommunicationServer.kryoLocal.get();
+            while (true) {
+                int bytesRead = socket.getInputStream().read(socketReadBuffer);
+                if (bytesRead == -1) {
+                    break; //socket close
+                }
 
-	private void sendObject() {
-		try {
-			Kryo kryo = CommunicationServer.kryoLocal.get();
-	        Packet_i obj = snd.take();
-	        if (obj instanceof ExitThread) {
-	            this.isExitThread = true;
-	            return;
-	        }
-	        
-//	        baos_sendObj = new ByteArrayOutputStream(); // 每次都 new 避免前後封包混肴
-//	        kryoOutput = new Output(baos_sendObj, socket_read_buffer.length); // 每次都 new 避免前後封包混肴
-	        
-	        // header added
-	        baos_sendObj.write(keeperHeaerByte.getBytes());
-	        
-	        // BODY
-	        kryo.writeClassAndObject(kryoOutput, obj);
-	        kryoOutput.flush();
-	        kryoOutput.close();
-	        
-	        // footer added
-	        baos_sendObj.write(keeperFooterByte.getBytes());
-	        
-	        byte[] data = baos_sendObj.toByteArray(); //網上說這是錯誤用法, 這是 kryo 與Java原生框架的區別
-	        
-//	        logger.info("暫時印出來看(Client)\n..." + new String(data, "UTF-8") + "... 暫時印出來看(Client)\n");
+                byte[] actualData = Arrays.copyOf(socketReadBuffer, bytesRead);
 
-	        socket.getOutputStream().write(data);
-	        socket.getOutputStream().flush();
-	        logger.trace("\n...socket狀態: " + socket.isClosed() + "," + socket.isConnected() + "," + socket.isOutputShutdown());	        
-	        kryoOutput.reset();
-	        baos_sendObj.reset();
-	        kryo.reset();
-	        
-//	        Thread.sleep(0,2000);
-	        
-		} catch (Exception e) {
-			//e.printStackTrace();
-			logger.error(LinkerServer.logTpiShortStackTrace(e));
-			Thread.currentThread().interrupt();
-		}
-	}
-	
-	public static String logStackTrace(Throwable e) {
-		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		e.printStackTrace(new java.io.PrintWriter(buf, true));
-		String msg = buf.toString();
-		try {
-			buf.close();
-		} catch (Exception t) {
-			return e.getMessage();
-		}
-		return msg;
-	}
+                baos4ReadObj.write(actualData, 0, actualData.length);
+                baos4ReadObj.flush();
 
-	private void processPacket() {
-		try {
-			Packet_i o = rev.take();
-			if (o instanceof ExitThread) {
-				this.isExitThread = true;
-				return;
-			}
-			o.runOnClient(this);
-			
-			// 不要每次都印出來, 偶數秒才印, 觀察使用量
-//			if (System.currentTimeMillis() / 1000 % 5 == 0) {
-//				System.out.println("Linker CLIENT REV Queue size:" + rev.size());
-//			}
-		} catch (Exception e) {
-			logger.error("", e);
-			Thread.currentThread().interrupt();
-		}
-	}
+                boolean endFlag = procKyroPacket(kryo);
 
-	public void close() {
-		try {
-//			in.close();
-//			out.close();
-			socket.close();
-		} catch (Exception e) {
-			//e.printStackTrace();
-			logger.error(LinkerServer.logTpiShortStackTrace(e));
-		}
-	}
+                if (endFlag) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.error(LinkerServer.logTpiShortStackTrace(e));
+        } finally {
+            isExitThread = true;
+            doExitThread();
+        }
+    }
 
-	public String getServerIP() {
-		return this.socket.getInetAddress().getHostAddress();
-	}
+    private Deque<ByteArrayOutputStream> bigContinueDeque = null;
 
-	public String getLocalIP() {
-		return this.socket.getLocalAddress().getHostAddress();
-	}
+    private boolean procKyroPacket(Kryo kryo) {
+        byte[] arr = baos4ReadObj.toByteArray();
 
-	public int getServerPort() {
-		return this.socket.getPort();
-	}
+        if (arr.length == 0) {
+            return false;
+        }
 
-	public int getLocalPort() {
-		return this.socket.getLocalPort();
-	}
+        byte[] headerBytes = keeperHeaerByte.getBytes();
+        byte[] footerBytes = keeperFooterByte.getBytes();
+        int headerCount = countOccurrencesInBytes(arr, headerBytes);
+        int footerCount = countOccurrencesInBytes(arr, footerBytes);
 
-	/**
-	 * 是否還有連線
-	 * 
-	 * @return
-	 */
-	public boolean isConnected() {
-		return !socket.isClosed();
-	}
-	
-	public void removeMonitor(ClinetNotifier o){
-		cnf.remove(o);
-	}
-	
-	public void setUserName(String userName){
-		this.userName = userName;
-		DoSetUserName john = new DoSetUserName(userName);
-		this.send(john);
-	}
-	
-	public String getLocalIpAdress() {
-		return socket.getLocalAddress().getHostAddress();
-	}
-	
-	public String getLocalIpFQDN() {
-		return socket.getLocalAddress().getCanonicalHostName();
-	}
+        if (headerCount == 0 || footerCount == 0) {
+            return false;
+        }
+
+        int processedPackets = 0;
+        int remainingStart = 0;
+
+        while (remainingStart < arr.length) {
+            int headerPos = indexOf(arr, headerBytes, remainingStart);
+            if (headerPos == -1) break;
+
+            int footerPos = indexOf(arr, footerBytes, headerPos);
+            if (footerPos == -1) break;
+
+            int packetStart = headerPos;
+            int packetEnd = footerPos + footerBytes.length;
+            byte[] singlePacket = Arrays.copyOfRange(arr, packetStart, packetEnd);
+
+            try {
+                processSinglePacket(singlePacket, kryo);
+                processedPackets++;
+            } catch (Exception e) {
+                logger.error("[CLIENT-DESERIALIZE] ✗ 處理第 {} 個封包失敗", processedPackets + 1, e);
+            }
+
+            remainingStart = packetEnd;
+        }
+
+        if (remainingStart < arr.length) {
+            byte[] remaining = Arrays.copyOfRange(arr, remainingStart, arr.length);
+            baos4ReadObj.reset();
+            try {
+                baos4ReadObj.write(remaining);
+            } catch (IOException e) {
+                logger.error("[CLIENT-PROC] 寫入剩餘位元組時出錯", e);
+            }
+        } else {
+            baos4ReadObj.reset();
+        }
+
+        return false;
+    }
+
+    private void processSinglePacket(byte[] singlePacket, Kryo kryo) {
+        byte[] headerBytes = keeperHeaerByte.getBytes();
+        byte[] footerBytes = keeperFooterByte.getBytes();
+
+        byte[] payload = Arrays.copyOfRange(singlePacket, headerBytes.length,
+                singlePacket.length - footerBytes.length);
+
+        Object obj = null;
+
+        try (Input input = new Input(new ByteArrayInputStream(payload))) {
+            obj = kryo.readClassAndObject(input);
+        } catch (KryoBufferUnderflowException e) {
+            if (bigContinueDeque == null) {
+                bigContinueDeque = new ArrayDeque<>();
+            }
+
+            ByteArrayOutputStream baosBigContinue = new ByteArrayOutputStream();
+            baosBigContinue.write(payload, 0, payload.length);
+            bigContinueDeque.addLast(baosBigContinue);
+            return;
+        } catch (Exception e) {
+            logger.error("[CLIENT-DESERIALIZE] ✗ Kryo 反序列化失敗", e);
+            return;
+        } finally {
+            kryo.reset();
+        }
+
+        if (obj == null) {
+            return;
+        }
+        if (!(obj instanceof Packet_i)) {
+            logger.error("[CLIENT-DESERIALIZE] ✗ 物件不是 Packet_i 類型: {}", obj.getClass().getName());
+            return;
+        }
+
+        Packet_i packet = (Packet_i) obj;
+        if (!rev.offer(packet)) {
+            logger.warn("[CLIENT-PROCESS] 接收佇列已滿，封包 {} 被捨棄", packet.getClass().getSimpleName());
+        }
+
+    }
+
+    private int countOccurrencesInBytes(byte[] data, byte[] pattern) {
+        int count = 0;
+        for (int i = 0; i <= data.length - pattern.length; i++) {
+            boolean found = true;
+            for (int j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                count++;
+                i += pattern.length - 1;
+            }
+        }
+        return count;
+    }
+
+    private int indexOf(byte[] data, byte[] pattern, int start) {
+        for (int i = start; i <= data.length - pattern.length; i++) {
+            boolean found = true;
+            for (int j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) return i;
+        }
+        return -1;
+    }
+
+    private void doExitThread() {
+        logger.info("[CLIENT-EXIT] 開始清理資源");
+        ExitThread ex = new ExitThread();
+        try {
+            if (rev.size() >= (bufferSize - 100)) logger.error("[CLIENT-EXIT] rev 快滿了");
+            if (snd.size() >= (bufferSize - 100)) logger.error("[CLIENT-EXIT] snd 快滿了");
+
+            // 嘗試放入 ExitThread，如果不成功也不強求
+            if (!rev.offer(ex)) {
+                logger.warn("[CLIENT-EXIT] 接收佇列已滿，無法加入 ExitThread");
+            }
+            if (!snd.offer(ex)) {
+                logger.warn("[CLIENT-EXIT] 發送佇列已滿，無法加入 ExitThread");
+            }
+
+            socket.close();
+            logger.info("[CLIENT-EXIT] Socket 已關閉");
+            if (cnf != null) {
+                for (ClinetNotifier cn : cnf) {
+                    cn.runDisconnect(this);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("[CLIENT-EXIT] 清理資源時發生異常", e);
+        }
+    }
+
+    public void send(Packet_i obj) {
+        try {
+
+            if (snd.size() >= (bufferSize - 100)) {
+                logger.error("[CLIENT-SEND] ⚠ 發送佇列快滿了！當前: {} / {}", snd.size(), bufferSize);
+            }
+            snd.put(obj);
+
+        } catch (InterruptedException e) {
+            logger.error("[CLIENT-SEND] ✗ 加入發送佇列時被中斷", e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private final Object sendLock = new Object();
+
+    // ===== 關鍵修改：發送物件 (加入 Log 過濾) =====
+    private void sendObject() {
+        Packet_i obj = null;
+        try {
+            obj = snd.take();
+
+            if (obj instanceof ExitThread) {
+                logger.info("[CLIENT-SENDOBJ] 收到 ExitThread，停止發送");
+                this.isExitThread = true;
+                return;
+            }
+
+            synchronized (sendLock) {
+                Kryo kryo = CommunicationServer.kryoLocal.get();
+                try (ByteArrayOutputStream baosSendObj = new ByteArrayOutputStream(socketReadBuffer.length);
+                     Output kryoOutput = new Output(baosSendObj, socketReadBuffer.length)) {
+
+                    baosSendObj.write(keeperHeaerByte.getBytes());
+                    kryo.writeClassAndObject(kryoOutput, obj);
+                    kryoOutput.flush();
+                    baosSendObj.write(keeperFooterByte.getBytes());
+
+                    byte[] data = baosSendObj.toByteArray();
+
+
+                    socket.getOutputStream().write(data);
+                    socket.getOutputStream().flush();
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("socket狀態: {},{},{}", socket.isClosed(), socket.isConnected(), socket.isOutputShutdown());
+                    }
+
+                } finally {
+                    kryo.reset();
+                }
+            }
+
+        } catch (InterruptedException e) {
+            logger.info("[CLIENT-SENDOBJ] 發送執行緒被中斷");
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            logger.error("[CLIENT-SENDOBJ] ✗ 發送封包時發生異常", e);
+            logger.error(LinkerServer.logTpiShortStackTrace(e));
+        }
+    }
+
+    // ===== 關鍵修改：處理封包 (加入 Log 過濾) =====
+    private void processPacket() {
+        logger.debug("[CLIENT-PROCESS] 封包處理執行緒已啟動");
+        try {
+            while (!isExitThread) {
+                try {
+                    Packet_i o = rev.take();
+
+                    if (o instanceof ExitThread) {
+                        logger.info("[CLIENT-PROCESS] 收到 ExitThread，停止處理");
+                        this.isExitThread = true;
+                        break;
+                    }
+                    o.runOnClient(this);
+
+                } catch (InterruptedException e) {
+                    logger.info("[CLIENT-PROCESS] 處理執行緒收到中斷訊號", e);
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    logger.error("[CLIENT-PROCESS] ✗ 處理封包時發生錯誤", e);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("[CLIENT-PROCESS] ✗ 處理執行緒發生嚴重錯誤", e);
+        }
+        logger.debug("[CLIENT-PROCESS] 封包處理執行緒已結束");
+    }
+
+    public void close() {
+        logger.info("[CLIENT-CLOSE] 關閉連接");
+        try {
+            socket.close();
+            logger.info("[CLIENT-CLOSE] Socket 已關閉");
+        } catch (Exception e) {
+            logger.error("[CLIENT-CLOSE] 關閉時發生異常", e);
+            logger.error(LinkerServer.logTpiShortStackTrace(e));
+        }
+    }
+
+    public String getServerIP() {
+        return this.socket.getInetAddress().getHostAddress();
+    }
+
+    public String getLocalIP() {
+        return this.socket.getLocalAddress().getHostAddress();
+    }
+
+    public int getServerPort() {
+        return this.socket.getPort();
+    }
+
+    public int getLocalPort() {
+        return this.socket.getLocalPort();
+    }
+
+    public boolean isConnected() {
+        return !socket.isClosed();
+    }
+
+    public void removeMonitor(ClinetNotifier o) {
+        if (cnf != null) {
+            cnf.remove(o);
+        }
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+        DoSetUserName john = new DoSetUserName(userName);
+        this.send(john);
+    }
+
+    public String getLocalIpAdress() {
+        return socket.getLocalAddress().getHostAddress();
+    }
+
+    public String getLocalIpFQDN() {
+        return socket.getLocalAddress().getCanonicalHostName();
+    }
 }

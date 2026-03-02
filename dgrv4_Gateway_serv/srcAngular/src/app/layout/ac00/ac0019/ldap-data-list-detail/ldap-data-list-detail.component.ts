@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB0181LdapDataItem } from 'src/app/models/api/ServerService/dpb0181.interface';
 import { DPB0182LdapDataItem } from 'src/app/models/api/ServerService/dpb0182.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -11,9 +11,10 @@ interface _ldapDataListDetail extends DPB0181LdapDataItem {
 }
 
 @Component({
-  selector: 'app-ldap-data-list-detail',
-  templateUrl: './ldap-data-list-detail.component.html',
-  styleUrls: ['./ldap-data-list-detail.component.css']
+    selector: 'app-ldap-data-list-detail',
+    templateUrl: './ldap-data-list-detail.component.html',
+    styleUrls: ['./ldap-data-list-detail.component.css'],
+    standalone: false
 })
 export class LdapDataListDetailComponent implements OnInit {
 
@@ -29,10 +30,10 @@ export class LdapDataListDetailComponent implements OnInit {
   // ldapPattern: string = '^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]';
   ldapPattern: string = '^(ldaps?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]';
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService
   ) { }
 
@@ -41,10 +42,10 @@ export class LdapDataListDetailComponent implements OnInit {
     // console.log('action',this.action)
 
     this.form = this.fb.group({
-      orderNo: new FormControl(this.data ? this.data.orderNo : (this.no) + 1, [ValidatorFns.requiredValidator()]),
-      ldapUrl: new FormControl(this.data ? this.data.ldapUrl : '', [ValidatorFns.requiredValidator()]),
-      ldapBaseDn: new FormControl(this.data ? this.data.ldapBaseDn : '', [ValidatorFns.requiredValidator()]),
-      ldapDn: new FormControl(this.data ? this.data.ldapDn : '', [ValidatorFns.requiredValidator()]),
+      orderNo: new UntypedFormControl(this.data ? this.data.orderNo : (this.no) + 1, [ValidatorFns.requiredValidator()]),
+      ldapUrl: new UntypedFormControl(this.data ? this.data.ldapUrl : '', [ValidatorFns.requiredValidator()]),
+      ldapBaseDn: new UntypedFormControl(this.data ? this.data.ldapBaseDn : '', [ValidatorFns.requiredValidator()]),
+      ldapDn: new UntypedFormControl(this.data ? this.data.ldapDn : '', [ValidatorFns.requiredValidator()]),
     });
 
     const code = ['validation.format'];

@@ -5,16 +5,17 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import * as base64 from 'js-base64'
 
 @Component({
-  selector: 'app-src-url-input',
-  templateUrl: './src-url-input.component.html',
-  styleUrls: ['./src-url-input.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SrcUrlInputComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-src-url-input',
+    templateUrl: './src-url-input.component.html',
+    styleUrls: ['./src-url-input.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SrcUrlInputComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class SrcUrlInputComponent implements OnInit {
   onTouched!: () => void;

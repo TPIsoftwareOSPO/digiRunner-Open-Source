@@ -10,7 +10,7 @@ import {
   DPB0153Req,
   DPB0153WebsiteItem,
 } from 'src/app/models/api/ServerService/dpb0153.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { DPB0157Req } from 'src/app/models/api/ServerService/dpb0157.interface';
@@ -32,15 +32,16 @@ import { AlertType, TxID } from 'src/app/models/common.enum';
 import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Component({
-  selector: 'app-website-proxy',
-  templateUrl: './website-proxy.component.html',
-  styleUrls: ['./website-proxy.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-website-proxy',
+    templateUrl: './website-proxy.component.html',
+    styleUrls: ['./website-proxy.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class WebsiteProxyComponent extends BaseComponent implements OnInit {
   currentTitle: string = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   cols: { field: string; header: string }[] = [];
   tableData: Array<DPB0153WebsiteItem> = [];
   currentAction: string = '';
@@ -50,7 +51,7 @@ export class WebsiteProxyComponent extends BaseComponent implements OnInit {
   statusListIgnoreAll: { label: string; value: string }[] = [];
   websiteInfo?: DPB0158Resp;
 
-  formC!: FormGroup;
+  formC!: UntypedFormGroup;
   _formValid: boolean = false;
 
   timeOut: any;
@@ -63,7 +64,7 @@ export class WebsiteProxyComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private serverService: ServerService,
     private toolService: ToolService,
     private list: ListService,
@@ -78,24 +79,24 @@ export class WebsiteProxyComponent extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     this.form = this.fb.group({
-      id: new FormControl(''),
-      keyword: new FormControl(''),
-      websiteStatus: new FormControl('null'),
+      id: new UntypedFormControl(''),
+      keyword: new UntypedFormControl(''),
+      websiteStatus: new UntypedFormControl('null'),
     });
 
     this.formC = this.fb.group({
-      websiteStatus: new FormControl(''),
-      websiteName: new FormControl(''),
-      webSiteList: new FormControl(),
-      remark: new FormControl(),
-      auth: new FormControl(),
-      sqlInjection: new FormControl(),
-      traffic: new FormControl(),
-      xss: new FormControl(),
-      xxe: new FormControl(),
-      tps: new FormControl(),
-      ignoreApi: new FormControl(),
-      showLog: new FormControl(),
+      websiteStatus: new UntypedFormControl(''),
+      websiteName: new UntypedFormControl(''),
+      webSiteList: new UntypedFormControl(),
+      remark: new UntypedFormControl(),
+      auth: new UntypedFormControl(),
+      sqlInjection: new UntypedFormControl(),
+      traffic: new UntypedFormControl(),
+      xss: new UntypedFormControl(),
+      xxe: new UntypedFormControl(),
+      tps: new UntypedFormControl(),
+      ignoreApi: new UntypedFormControl(),
+      showLog: new UntypedFormControl(),
     });
 
     const code = ['website_name', 'status', 'remark'];

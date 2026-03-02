@@ -3,7 +3,7 @@ import { DPB0142Req } from './../../../models/api/ServerService/dpb0142.interfac
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { ApiService } from 'src/app/shared/services/api-api.service';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, UntypedFormBuilder } from '@angular/forms';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -20,16 +20,17 @@ import { ListService } from 'src/app/shared/services/api-list.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 
 @Component({
-  selector: 'app-ac0315',
-  templateUrl: './ac0315.component.html',
-  styleUrls: ['./ac0315.component.css'],
-  providers: [ApiService, UtilService]
+    selector: 'app-ac0315',
+    templateUrl: './ac0315.component.html',
+    styleUrls: ['./ac0315.component.css'],
+    providers: [ApiService, UtilService],
+    standalone: false
 })
 export class Ac0315Component extends BaseComponent implements OnInit {
 
   pageNum: number = 1;
-  form: FormGroup;
-  form_page2: FormGroup;
+  form: UntypedFormGroup;
+  form_page2: UntypedFormGroup;
   apilist: { field: string; header: string; width: string; }[] = [];
   apilist_data: Array<AA0301Item> = [];
   rowcount: number = 0;
@@ -40,6 +41,7 @@ export class Ac0315Component extends BaseComponent implements OnInit {
   jwtSettingFlags: { label: string; value: string; }[] = [];
   maxLength255 = { value: 255 };
   apiDetail?: AA0302Resp;
+  isExpired:boolean = false;
 
   constructor(
     route: ActivatedRoute,
@@ -49,7 +51,7 @@ export class Ac0315Component extends BaseComponent implements OnInit {
     private util: UtilService,
     private alert: AlertService,
     private list: ListService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private serverService: ServerService,
     private messageService: MessageService
 
@@ -57,33 +59,33 @@ export class Ac0315Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      apiUUID: new FormControl(''),
-      copy_target: new FormControl(''),
-      moduleName: new FormControl('', ValidatorFns.requiredValidator()),
-      apiKey: new FormControl('', ValidatorFns.requiredValidator()),
-      urlRID: new FormControl(false),
-      no_oauth: new FormControl(false),
-      tokenPayload: new FormControl(false),
-      tsmpURL: new FormControl({ value: '', disabled: true }),
-      methods: new FormControl('', [ValidatorFns.requiredValidator()]),
-      jwtSetting: new FormControl(false),
-      jweFlag: new FormControl({ value: '0', disabled: true }),
-      jweFlagResp: new FormControl({ value: '0', disabled: true }),
-      apiDesc: new FormControl(''),
-      dataFormat: new FormControl('1'),
-      apiSrc: new FormControl(''),
-      protocol: new FormControl(''),
-      srcUrl: new FormControl(''),
-      regHostId: new FormControl("None"),
-      labelList: new FormControl([]),
+      apiUUID: new UntypedFormControl(''),
+      copy_target: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+      apiKey: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+      urlRID: new UntypedFormControl(false),
+      no_oauth: new UntypedFormControl(false),
+      tokenPayload: new UntypedFormControl(false),
+      tsmpURL: new UntypedFormControl({ value: '', disabled: true }),
+      methods: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      jwtSetting: new UntypedFormControl(false),
+      jweFlag: new UntypedFormControl({ value: '0', disabled: true }),
+      jweFlagResp: new UntypedFormControl({ value: '0', disabled: true }),
+      apiDesc: new UntypedFormControl(''),
+      dataFormat: new UntypedFormControl('1'),
+      apiSrc: new UntypedFormControl(''),
+      protocol: new UntypedFormControl(''),
+      srcUrl: new UntypedFormControl(''),
+      regHostId: new UntypedFormControl("None"),
+      labelList: new UntypedFormControl([]),
     });
     this.form_page2 = this.fb.group({
-      keyword: new FormControl('')
+      keyword: new UntypedFormControl('')
     });
   }
 
   async ngOnInit() {
-
+    this.isExpired = sessionStorage.getItem('isExpired') === 'true' ? true : false;
     const code = ['api_key', 'module_name', 'api_name', 'api_desc', 'not_use'];
     const dict = await this.tool.getDict(code);
     this.apilist = [

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AA1212BadAttemptItemResp } from 'src/app/models/api/ReportService/aa1212.interface';
@@ -12,12 +12,13 @@ import * as ValidatorFns from '../../shared/validator-functions';
 import { MessageService } from 'primeng/api';
 
 @Component({
-  selector: 'app-first-time-login',
-  templateUrl: './first-time-login.component.html',
-  styleUrls: ['./first-time-login.component.css'],
+    selector: 'app-first-time-login',
+    templateUrl: './first-time-login.component.html',
+    styleUrls: ['./first-time-login.component.css'],
+    standalone: false
 })
 export class FirstTimeLoginComponent extends BaseComponent implements OnInit {
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   oriMask: boolean = false;
   newMask: boolean = false;
@@ -29,7 +30,7 @@ export class FirstTimeLoginComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private ngxSrvice: NgxUiLoaderService,
     private userService: UserService,
@@ -40,9 +41,9 @@ export class FirstTimeLoginComponent extends BaseComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      oriMima: new FormControl(''),
-      newMima: new FormControl(''),
-      confirmNewMima: new FormControl(''),
+      oriMima: new UntypedFormControl(''),
+      newMima: new UntypedFormControl(''),
+      confirmNewMima: new UntypedFormControl(''),
     });
 
     this.userService.updateNewMima_before().subscribe((res) => {

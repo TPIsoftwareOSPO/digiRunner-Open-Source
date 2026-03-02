@@ -9,7 +9,7 @@ import { Chart } from 'chart.js/auto'
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { AA1201Req } from 'src/app/models/api/ReportService/aa1201.interface';
 import * as dayjs from 'dayjs';
 
@@ -24,14 +24,14 @@ import { AA0321Req, AA0321RespItem } from 'src/app/models/api/ApiService/aa0321.
     selector: 'app-ac1301',
     templateUrl: './ac1301.component.html',
     styleUrls: ['./ac1301.component.css'],
-    providers:[ApiService]
-
+    providers: [ApiService],
+    standalone: false
 })
 export class Ac1301Component extends BaseComponent implements OnInit {
     canvas: any;
     ctx: any;
     timeTypes: { label: string; value: string }[] = [];
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     pageNum: number = 1;
     currentTitle: string = this.title;
     apiListCols: { field: string; header: string }[] = [];
@@ -56,7 +56,7 @@ export class Ac1301Component extends BaseComponent implements OnInit {
         tr: TransformMenuNamePipe,
         private list: ListService,
         private toolService: ToolService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private reportService: ReportService,
         private apiService: ApiService,
         private message: MessageService,
@@ -71,14 +71,14 @@ export class Ac1301Component extends BaseComponent implements OnInit {
         this.canvas = document.getElementById('reportChart');
         this.ctx = this.canvas.getContext('2d');
         this.form = this.fb.group({
-            timeType: new FormControl('DAY'),
-            apiUidList: new FormControl([]),
-            apiNameList: new FormControl([]),
-            startDate: new FormControl(),
-            endDate: new FormControl(''),
-            keyword: new FormControl(''),
-            startHour: new FormControl('00'),
-            endHour: new FormControl('23')
+            timeType: new UntypedFormControl('DAY'),
+            apiUidList: new UntypedFormControl([]),
+            apiNameList: new UntypedFormControl([]),
+            startDate: new UntypedFormControl(),
+            endDate: new UntypedFormControl(''),
+            keyword: new UntypedFormControl(''),
+            startHour: new UntypedFormControl('00'),
+            endHour: new UntypedFormControl('23')
         });
         // 欄位檢查
         this.reportService.queryApiUsageStatistics_before().subscribe(res => {

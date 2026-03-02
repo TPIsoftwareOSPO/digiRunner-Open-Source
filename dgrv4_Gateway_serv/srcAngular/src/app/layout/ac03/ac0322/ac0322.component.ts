@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -21,10 +21,11 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 import * as FileSaver from 'file-saver';
 
 @Component({
-  selector: 'app-ac0322',
-  templateUrl: './ac0322.component.html',
-  styleUrls: ['./ac0322.component.css'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-ac0322',
+    templateUrl: './ac0322.component.html',
+    styleUrls: ['./ac0322.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0322Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
@@ -63,7 +64,7 @@ export class Ac0322Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,

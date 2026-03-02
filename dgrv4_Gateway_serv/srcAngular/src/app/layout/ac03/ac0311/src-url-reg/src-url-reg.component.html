@@ -4,7 +4,7 @@
       <div style="color:red" [hidden]="_equal100">
         <small>{{'equal100'| translate}}</small>
       </div>
-      <button type="button" class="btn tpi-second" (click)="addSrcUrlReg()" [hidden]="disabled"
+      <button type="button" class="btn tpi-second" (click)="addSrcUrlReg()" [hidden]="disabled || apiType=='WEBHOOK'"
           style="border-radius: 50%;">
       <i class="fa fa-plus"></i>
   </button>

@@ -56,7 +56,7 @@
                 <div class="cus_label" style="text-align:left;display: table;">
                     <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
                         selectedItemsLabel="{{'cols_selected'|translate:selectedColumns.length}}"
-                        [style]="{minWidth: '200px','z-index':'999'}" defaultLabel="{{'chs_cols'|translate}}">
+                        [style]="{minWidth: '200px','z-index':'999'}" placeholder="{{'chs_cols'|translate}}">
                     </p-multiSelect>
                     <div class="ps-1" style="display:table-cell;vertical-align: middle">
                         <button *ngIf="auditLogList" class="btn tpi-btn tpi-primary float-end p-1 ms-2"

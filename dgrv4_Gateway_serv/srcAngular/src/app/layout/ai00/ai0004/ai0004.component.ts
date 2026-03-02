@@ -4,7 +4,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ActivatedRoute } from '@angular/router';
 import { AiService } from 'src/app/shared/services/api-ai.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB0262RespItem } from 'src/app/models/api/ServerService/dpb0262.interface';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DPB0263Req } from 'src/app/models/api/ServerService/dpb0263.interface';
@@ -13,17 +13,18 @@ import { DPB0265Req } from 'src/app/models/api/ServerService/dpb0265.interface';
 import * as ValidatorFns from '../../../shared/validator-functions';
 
 @Component({
-  selector: 'app-ai0004',
-  templateUrl: './ai0004.component.html',
-  styleUrls: ['./ai0004.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ai0004',
+    templateUrl: './ai0004.component.html',
+    styleUrls: ['./ai0004.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ai0004Component extends BaseComponent implements OnInit {
   currentTitle = this.title;
   pageNum: number = 1;
   currentAction: string = '';
-  form!: FormGroup;
-  formE!: FormGroup;
+  form!: UntypedFormGroup;
+  formE!: UntypedFormGroup;
   tableData: DPB0262RespItem[] = [];
   btnName: string = '';
 
@@ -35,20 +36,20 @@ export class Ai0004Component extends BaseComponent implements OnInit {
     private aiService: AiService,
     private toolService: ToolService,
     private confirmationService: ConfirmationService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private messageService: MessageService // private confirmationService: ConfirmationService, // private ngxSrvice: NgxUiLoaderService
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      aiPromptTemplateName: new FormControl(''),
-      aiPromptTemplateEnable: new FormControl(''),
+      aiPromptTemplateName: new UntypedFormControl(''),
+      aiPromptTemplateEnable: new UntypedFormControl(''),
     });
 
     this.formE = this.fb.group({
-      aiPromptTemplateName: new FormControl(''),
-      aiPromptTemplateEnable: new FormControl(''),
-      aiPromptTemplateContent: new FormControl(''),
-      aiPromptTemplateRemark: new FormControl(''),
+      aiPromptTemplateName: new UntypedFormControl(''),
+      aiPromptTemplateEnable: new UntypedFormControl(''),
+      aiPromptTemplateContent: new UntypedFormControl(''),
+      aiPromptTemplateRemark: new UntypedFormControl(''),
     });
   }
 

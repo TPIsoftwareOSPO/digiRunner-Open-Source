@@ -9,7 +9,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ApiService } from 'src/app/shared/services/api-api.service';
 import { FileService } from 'src/app/shared/services/api-file.service';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 // import { ModuleService } from 'srcAngular/app/shared/services/api-module.service';
@@ -19,17 +19,18 @@ import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 
 @Component({
-  selector: 'app-cussetting',
-  templateUrl: './cussetting.component.html',
-  styleUrls: ['./cussetting.component.css'],
-  providers: [FileService, ApiService, ConfirmationService]
+    selector: 'app-cussetting',
+    templateUrl: './cussetting.component.html',
+    styleUrls: ['./cussetting.component.css'],
+    providers: [FileService, ApiService, ConfirmationService],
+    standalone: false
 })
 export class CussettingComponent extends BaseComponent implements OnInit {
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
-  form!: FormGroup;
-  formUpdate!: FormGroup;
+  form!: UntypedFormGroup;
+  formUpdate!: UntypedFormGroup;
   toastValue: any;
   cols: { field: string; header: string }[] = [];
   tableData: Array<DPB9910Item> = [];
@@ -41,7 +42,7 @@ export class CussettingComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private translateService: TranslateService,
     private messageService: MessageService,
@@ -61,19 +62,19 @@ export class CussettingComponent extends BaseComponent implements OnInit {
     // this.checkOrgId();
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      settingNo: new FormControl(''),
-      settingName: new FormControl(''),
-      subsettingNo: new FormControl(''),
-      subsettingName: new FormControl(''),
-      sortBy: new FormControl(''),
-      isDefault: new FormControl(''),
-      param1: new FormControl(''),
-      param2: new FormControl(''),
-      param3: new FormControl(''),
-      param4: new FormControl(''),
-      param5: new FormControl(''),
-      version: new FormControl(''),
+      keyword: new UntypedFormControl(''),
+      settingNo: new UntypedFormControl(''),
+      settingName: new UntypedFormControl(''),
+      subsettingNo: new UntypedFormControl(''),
+      subsettingName: new UntypedFormControl(''),
+      sortBy: new UntypedFormControl(''),
+      isDefault: new UntypedFormControl(''),
+      param1: new UntypedFormControl(''),
+      param2: new UntypedFormControl(''),
+      param3: new UntypedFormControl(''),
+      param4: new UntypedFormControl(''),
+      param5: new UntypedFormControl(''),
+      version: new UntypedFormControl(''),
     });
 
     this.init();

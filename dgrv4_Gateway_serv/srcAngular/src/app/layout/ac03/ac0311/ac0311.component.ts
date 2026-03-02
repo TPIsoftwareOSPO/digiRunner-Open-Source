@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import {
   AA0315Item,
   AA0315Req,
@@ -46,10 +46,11 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { NotifyListComponent } from 'src/app/shared/notify-list/notify-list.component';
 
 @Component({
-  selector: 'app-ac0311',
-  templateUrl: './ac0311.component.html',
-  styleUrls: ['./ac0311.component.css'],
-  providers: [ApiService, MessageService, ConfirmationService],
+    selector: 'app-ac0311',
+    templateUrl: './ac0311.component.html',
+    styleUrls: ['./ac0311.component.css'],
+    providers: [ApiService, MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0311Component extends BaseComponent implements OnInit {
   @ViewChild('upload_file') upload_file!: ElementRef;
@@ -58,9 +59,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
   pageNum: number = 1; // 1：註冊、2：Copy API
   currentTitle: string = this.title;
-  oasForm!: FormGroup;
-  customForm!: FormGroup;
-  testForm!: FormGroup;
+  oasForm!: UntypedFormGroup;
+  customForm!: UntypedFormGroup;
+  testForm!: UntypedFormGroup;
   openApiCols: { field: string; header: string }[] = [];
   openApiList: Array<AA0315Item> = [];
   openApiListRowcount: number = 0;
@@ -76,7 +77,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   httpmethods: { label: string; value: string }[] = [];
   disabledReqBody: boolean = true;
   apiListCols: { field: string; header: string }[] = [];
-  apiForm!: FormGroup;
+  apiForm!: UntypedFormGroup;
   apiList: Array<AA0301Item> = [];
   selectedApi?: AA0301Item;
   apiListRowcount: number = 0;
@@ -108,12 +109,13 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       value: 'AI_GATEWAY',
     },
     {
-      label: 'Webhook',
+      label: 'AI Proxy',
       value: 'WEBHOOK',
     },
   ];
 
   jwtSettingSub?: Subscription;
+  isExpired:boolean = false;
 
   constructor(
     route: ActivatedRoute,
@@ -121,7 +123,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     private apiService: ApiService,
     private tool: ToolService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private list: ListService,
     private fileService: FileService,
     private regHostService: RegHostService,
@@ -133,78 +135,78 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.oasForm = this.fb.group({
-      apiSrc: new FormControl(''),
-      moduleSrc: new FormControl(''),
-      uploadDoc: new FormControl('0'),
-      filename: new FormControl({ value: '', disabled: false }),
-      docUrl: new FormControl({ value: '', disabled: true }),
-      uploadfile: new FormControl(''),
-      moduleName: new FormControl(''),
-      regHostId: new FormControl(''),
-      moduleVersion: new FormControl(''),
-      regApiList: new FormControl([]),
-      tempFileName: new FormControl(''),
-      hostUrl: new FormControl(''),
-      type: new FormControl(''),
-      targetUrl: new FormControl(''),
+      apiSrc: new UntypedFormControl(''),
+      moduleSrc: new UntypedFormControl(''),
+      uploadDoc: new UntypedFormControl('0'),
+      filename: new UntypedFormControl({ value: '', disabled: false }),
+      docUrl: new UntypedFormControl({ value: '', disabled: true }),
+      uploadfile: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl(''),
+      regHostId: new UntypedFormControl(''),
+      moduleVersion: new UntypedFormControl(''),
+      regApiList: new UntypedFormControl([]),
+      tempFileName: new UntypedFormControl(''),
+      hostUrl: new UntypedFormControl(''),
+      type: new UntypedFormControl(''),
+      targetUrl: new UntypedFormControl(''),
     });
     this.customForm = this.fb.group({
-      apiSrc: new FormControl(''),
-      apiId: new FormControl(''),
-      apiAlias: new FormControl(''),
-      protocol: new FormControl('https'),
-      srcUrl: new FormControl(''),
-      moduleName: new FormControl(''),
-      tsmpUrl: new FormControl(''),
-      urlRID: new FormControl(false),
-      noOAuth: new FormControl(false),
-      tokenPayload: new FormControl(false),
-      methods: new FormControl([]),
-      dataFormat: new FormControl('1'),
-      jwtSetting: new FormControl(false),
-      jweFlag: new FormControl({ value: '0', disabled: true }),
-      jweFlagResp: new FormControl({ value: '0', disabled: true }),
+      apiSrc: new UntypedFormControl(''),
+      apiId: new UntypedFormControl(''),
+      apiAlias: new UntypedFormControl(''),
+      protocol: new UntypedFormControl('https'),
+      srcUrl: new UntypedFormControl(''),
+      moduleName: new UntypedFormControl(''),
+      tsmpUrl: new UntypedFormControl(''),
+      urlRID: new UntypedFormControl(false),
+      noOAuth: new UntypedFormControl(false),
+      tokenPayload: new UntypedFormControl(false),
+      methods: new UntypedFormControl([]),
+      dataFormat: new UntypedFormControl('1'),
+      jwtSetting: new UntypedFormControl(false),
+      jweFlag: new UntypedFormControl({ value: '0', disabled: true }),
+      jweFlagResp: new UntypedFormControl({ value: '0', disabled: true }),
       // regHostId: new FormControl(''),
-      apiDesc: new FormControl(''),
-      type: new FormControl(''),
-      apiName: new FormControl(''),
-      dgrPath: new FormControl(''),
-      redirectByIp: new FormControl(false),
-      redirectByIpDataList: new FormControl([]),
-      headerMaskPolicy: new FormControl(0), //; 0,1,2,3
-      headerMaskPolicyNum: new FormControl(1), //; 1~9999
-      headerMaskPolicySymbol: new FormControl('*'), //;   1 ~10
-      headerMaskKey: new FormControl(''), //;  XXXX,XXXXXX,XXXXX
+      apiDesc: new UntypedFormControl(''),
+      type: new UntypedFormControl(''),
+      apiName: new UntypedFormControl(''),
+      dgrPath: new UntypedFormControl(''),
+      redirectByIp: new UntypedFormControl(false),
+      redirectByIpDataList: new UntypedFormControl([]),
+      headerMaskPolicy: new UntypedFormControl(0), //; 0,1,2,3
+      headerMaskPolicyNum: new UntypedFormControl(1), //; 1~9999
+      headerMaskPolicySymbol: new UntypedFormControl('*'), //;   1 ~10
+      headerMaskKey: new UntypedFormControl(''), //;  XXXX,XXXXXX,XXXXX
       // headerPolicy: new FormControl(0),
       // headerMaskCharNum: new FormControl(1),
       // headerMaskValue: new FormControl('*'),
       // fields: new FormControl(''),
       // maskBodyKeyword: new FormControl(''),
-      bodyMaskPolicy: new FormControl(0), //; 0,1,2,3
-      bodyMaskPolicyNum: new FormControl(1), //; 1~9999
-      bodyMaskPolicySymbol: new FormControl('*'), //;   1 ~10
-      bodyMaskKeyword: new FormControl(''), //;  XXXX,XXXXXX,XXXX
-      labelList: new FormControl([]),
-      failDiscoveryPolicy: new FormControl('0'),
-      failHandlePolicy: new FormControl('0'),
-      apiType: new FormControl('HTTP_API'),
-      notifyNameList: new FormControl([]),
+      bodyMaskPolicy: new UntypedFormControl(0), //; 0,1,2,3
+      bodyMaskPolicyNum: new UntypedFormControl(1), //; 1~9999
+      bodyMaskPolicySymbol: new UntypedFormControl('*'), //;   1 ~10
+      bodyMaskKeyword: new UntypedFormControl(''), //;  XXXX,XXXXXX,XXXX
+      labelList: new UntypedFormControl([]),
+      failDiscoveryPolicy: new UntypedFormControl('0'),
+      failHandlePolicy: new UntypedFormControl('0'),
+      apiType: new UntypedFormControl('HTTP_API'),
+      notifyNameList: new UntypedFormControl([]),
     });
     this.testForm = this.fb.group({
-      method: new FormControl('POST'),
-      testURL: new FormControl(''),
-      basicAuth: new FormControl(false),
-      userName: new FormControl({ value: '', disabled: true }),
-      passwd: new FormControl({ value: '', disabled: true }),
-      requestHeader: new FormControl(false),
-      keyValueRequest: new FormControl({ value: '', disabled: true }),
-      requestBodyCheck: new FormControl(false),
-      requestBody: new FormControl({ value: '', disabled: true }),
-      bodyText: new FormControl(''),
-      keyValueForm: new FormControl({ value: '', disabled: true }),
+      method: new UntypedFormControl('POST'),
+      testURL: new UntypedFormControl(''),
+      basicAuth: new UntypedFormControl(false),
+      userName: new UntypedFormControl({ value: '', disabled: true }),
+      passwd: new UntypedFormControl({ value: '', disabled: true }),
+      requestHeader: new UntypedFormControl(false),
+      keyValueRequest: new UntypedFormControl({ value: '', disabled: true }),
+      requestBodyCheck: new UntypedFormControl(false),
+      requestBody: new UntypedFormControl({ value: '', disabled: true }),
+      bodyText: new UntypedFormControl(''),
+      keyValueForm: new UntypedFormControl({ value: '', disabled: true }),
     });
     this.apiForm = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
 
     this.labelList.valueChanges.subscribe((res) => {
@@ -229,6 +231,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.isExpired = sessionStorage.getItem('isExpired') === 'true' ? true : false;
     //mode
     let modeReq = {
       id: 'DGR_PATHS_COMPATIBILITY',
@@ -419,7 +422,8 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.c_apiType.valueChanges.subscribe((res) => {
       this.clearCustomizePageData(false);
       if (res == 'WEBHOOK') {
-        this.srcUrl?.setValue('dgr+webhook##dgrv4/webhook');
+        // this.srcUrl?.setValue('dgr+webhook##dgrv4/webhook');
+        this.srcUrl?.setValue(this.aiProxySwitch(true)); //Frontend UI update only; backend still relies on dgr+webhook##dgrv4/webhook logic. 20260113
         // this.srcUrl?.disable();
       } else if (res == 'AI_GATEWAY') {
         this.redirectByIp.setValue(false);
@@ -580,35 +584,35 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           //     item.duplicateFlag = true;
           // }
           // 動態產生各個rowdata的jwe設定相關control name
-          this.oasForm.addControl(`jwtSetting_${idx}`, new FormControl(false));
+          this.oasForm.addControl(`jwtSetting_${idx}`, new UntypedFormControl(false));
           this.oasForm.addControl(
             `jweFlag_${idx}`,
-            new FormControl({ value: '0', disabled: true })
+            new UntypedFormControl({ value: '0', disabled: true })
           );
           this.oasForm.addControl(
             `jweFlagResp_${idx}`,
-            new FormControl({ value: '0', disabled: true })
+            new UntypedFormControl({ value: '0', disabled: true })
           );
           // 動態產生各個rowdata的功能設定相關control name
-          this.oasForm.addControl(`urlRID_${idx}`, new FormControl(false));
-          this.oasForm.addControl(`noOAuth_${idx}`, new FormControl(false));
+          this.oasForm.addControl(`urlRID_${idx}`, new UntypedFormControl(false));
+          this.oasForm.addControl(`noOAuth_${idx}`, new UntypedFormControl(false));
           this.oasForm.addControl(
             `tokenPayload_${idx}`,
-            new FormControl(false)
+            new UntypedFormControl(false)
           );
           // 動態產生各個rowdata的資料格式control name
-          this.oasForm.addControl(`dataFormat_${idx}`, new FormControl(''));
+          this.oasForm.addControl(`dataFormat_${idx}`, new UntypedFormControl(''));
           if (this.openApiDocData?.moduleSrc == '1') {
             this.oasForm.get(`dataFormat_${idx}`)!.setValue('0');
           } else {
             this.oasForm.get(`dataFormat_${idx}`)!.setValue('1');
           }
           // 動態產生各個rowdata的API說明control name
-          this.oasForm.addControl(`apiDesc_${idx}`, new FormControl(''));
+          this.oasForm.addControl(`apiDesc_${idx}`, new UntypedFormControl(''));
           // 動態產生各個rowdata的API ID control name
           this.oasForm.addControl(
             `apiId_${idx}`,
-            new FormControl(item.rearPath)
+            new UntypedFormControl(item.rearPath)
           );
           if (this.o_type.value == '0') {
             this.oasForm.get(`apiId_${idx}`)?.valueChanges.subscribe((res) => {
@@ -620,7 +624,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           if (this.o_type.value == '0') {
             this.oasForm.addControl(
               `srcUrl_${idx}`,
-              new FormControl(item.srcUrl)
+              new UntypedFormControl(item.srcUrl)
             );
           } else {
             const compTarURl =
@@ -632,7 +636,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
                 : this.o_tarUrl.value + item.path;
             this.oasForm.addControl(
               `srcUrl_${idx}`,
-              new FormControl(compTarURl)
+              new UntypedFormControl(compTarURl)
             );
           }
 
@@ -642,7 +646,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
           this.oasForm.addControl(
             `summary_${idx}`,
-            new FormControl(item.summary)
+            new UntypedFormControl(item.summary)
           );
           if (this.o_type.value == '1') {
             this.oasForm
@@ -1177,7 +1181,11 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         }
         else this.clearCustomizePageData();
 
-        this.srcUrl!.setValue(_srcURl);
+        if(isWebhook) {
+          this.srcUrl!.setValue(this.aiProxySwitch(true));
+        }else{
+          this.srcUrl!.setValue(_srcURl);
+        }
 
         this.c_moduleName!.setValue(
           res.RespBody.moduleName.t
@@ -1275,6 +1283,15 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     });
   }
 
+  aiProxySwitch(toShow:boolean=false){
+    if(toShow){
+      return 'dgr+aiproxy##dgrv4/aiproxy';
+    }
+    else{
+      return 'dgr+webhook##dgrv4/webhook';
+    }
+  }
+
   testAPI() {
     this.ngxService.start();
     let ReqBody = {
@@ -1347,7 +1364,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let reqBody = {
       apiSrc: 'R',
       protocol: this.protocol!.value,
-      srcUrl: this.srcUrl!.value,
+      srcUrl: this.c_apiType.value == 'WEBHOOK' ? this.aiProxySwitch(false):  this.srcUrl!.value,
       moduleName:
         this.c_type.value == '0'
           ? this.c_moduleName!.value
@@ -1464,13 +1481,14 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       reqBody.bodyMaskPolicyNum = this.bodyMaskPolicyNum.value;
       reqBody.bodyMaskPolicySymbol = this.bodyMaskPolicySymbol.value;
 
-      if (this.bodyMaskKeyword.value.trim() == '') {
+      if ((this.bodyMaskPolicy.value != '5' && this.bodyMaskPolicy.value != '6' && this.bodyMaskPolicy.value != '7') && this.bodyMaskKeyword.value.trim() == '') {
         const code = ['mask.body_key_required'];
         const dict = await this.tool.getDict(code);
         this.alertService.ok(dict['mask.body_key_required'], '');
         return;
       }
-      reqBody.bodyMaskKeyword = this.bodyMaskKeyword.value;
+
+      reqBody.bodyMaskKeyword = (this.bodyMaskPolicy.value == '5'||this.bodyMaskPolicy.value=='6'||this.bodyMaskPolicy.value=='7') ? 'N/A': this.bodyMaskKeyword.value;
     }
 
     reqBody.labelList = this.labelList.value;

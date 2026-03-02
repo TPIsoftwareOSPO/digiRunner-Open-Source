@@ -4,9 +4,10 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { BaseComponent } from '../../base-component';
 
 @Component({
-  selector: 'app-ac0508',
-  templateUrl: './ac0508.component.html',
-  styleUrls: ['./ac0508.component.css']
+    selector: 'app-ac0508',
+    templateUrl: './ac0508.component.html',
+    styleUrls: ['./ac0508.component.css'],
+    standalone: false
 })
 export class Ac0508Component extends BaseComponent implements OnInit {
 

@@ -10,6 +10,7 @@ const routes: Routes = [
   { path: 'idpsso/errMsg', loadChildren: () => import('./layout/idpsso/idpsso.module').then(m => m.IdpssoModule)},
   { path: 'idpsso/accallback', loadChildren: () => import('./layout/idpsso/idpsso.module').then(m => m.IdpssoModule)},
   { path: 'ldap', loadChildren: () => import('./layout/login/ldap/ldap.module').then(m => m.LdapModule)},
+  { path: 'gtwidp/:type/:ver/:action', loadChildren: () => import('./layout/login/gtwidp/gtwidp.module').then(m => m.GtwidpModule)},
   { path: 'gtwidp/:type/:action', loadChildren: () => import('./layout/login/gtwidp/gtwidp.module').then(m => m.GtwidpModule)},
   { path: 'gtwidp/:type', loadChildren: () => import('./layout/login/gtwidp/gtwidp.module').then(m => m.GtwidpModule)},
   { path: '', loadChildren: () => import('./layout/layout.module').then(m => m.LayoutModule)},

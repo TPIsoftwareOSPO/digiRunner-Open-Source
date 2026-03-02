@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,6 +16,7 @@ import tpi.dgrv4.dpaa.service.UdpLdapService;
 import tpi.dgrv4.dpaa.util.ControllerUtil;
 import tpi.dgrv4.dpaa.vo.UdpLdapReq;
 import tpi.dgrv4.dpaa.vo.UdpLdapResp;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.vo.TsmpBaseReq;
 import tpi.dgrv4.gateway.vo.TsmpBaseResp;
 import tpi.dgrv4.gateway.vo.TsmpHttpHeader;
@@ -52,7 +51,8 @@ public class UdpLdapController {
 		    String serverPort = httpReq.getServerPort() == 80 ? "" : ":" + httpReq.getServerPort();
 		    String contextPath = httpReq.getContextPath();
 		    String localBaseUrl = scheme + serverName + serverPort + contextPath;
-		    String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
+//		    String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
+            String userIp = ClientIpUtil.getClientIp(httpReq);
 			resp = service.udpCheckAccountByLdap(userIp, httpReq, tsmpHttpHeader.getAuthorization(), req.getBody(), localBaseUrl);
 		} catch (Exception e) {
 			throw new TsmpDpAaException(e, req.getReqHeader());

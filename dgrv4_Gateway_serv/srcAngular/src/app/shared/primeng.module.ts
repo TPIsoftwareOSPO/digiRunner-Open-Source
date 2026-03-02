@@ -16,7 +16,6 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TreeModule } from 'primeng/tree';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { CheckboxModule } from 'primeng/checkbox';
-import { EditorModule } from 'primeng/editor';
 import { TabViewModule } from 'primeng/tabview';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
@@ -52,7 +51,6 @@ const sharedModules: any[] = [
     TreeModule,
     AutoCompleteModule,
     CheckboxModule,
-    EditorModule,
     TabViewModule,
     InputSwitchModule,
     OverlayPanelModule,

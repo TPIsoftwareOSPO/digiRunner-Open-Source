@@ -3,7 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 @Pipe({
-  name: 'aiUsageLimitPolicy',
+    name: 'aiUsageLimitPolicy',
+    standalone: false
 })
 export class AiUsageLimitPolicyPipe implements PipeTransform {
   constructor(private translateService: TranslateService) {}

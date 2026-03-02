@@ -1,4 +1,4 @@
-import { FormBuilder, FormControl, FormGroup, FormGroupDirective } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, FormGroupDirective } from '@angular/forms';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { FormParams } from '../../../../models/api/form-params.interface';
 import { ListGroupsComponent } from 'src/app/shared/list-group/list-groups.component';
@@ -13,7 +13,8 @@ import { RoleService } from 'src/app/shared/services/api-role.service';
 @Component({
     selector: 'app-role-form',
     templateUrl: './role-form.component.html',
-    styleUrls: ['./role-form.component.css']
+    styleUrls: ['./role-form.component.css'],
+    standalone: false
 })
 export class RoleFormComponent implements OnInit {
 
@@ -21,14 +22,14 @@ export class RoleFormComponent implements OnInit {
     @Input() data?: FormParams;
     @Input() close?: Function;
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     selected: any = [];
     menus: Menu[] = [];
     roleNameLimitChar = { value: 30 };
     roleAliasLimitChar = { value: 30 };
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private roleService: RoleService,
         private toolService: ToolService,
         private translate: TranslateService,
@@ -43,9 +44,9 @@ export class RoleFormComponent implements OnInit {
 
     ngOnInit() {
         this.form = this.fb.group({
-            roleName: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringNameValidator(this.roleNameLimitChar.value)]),
-            roleAlias: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.roleAliasLimitChar.value)]),
-            funcCodeList: new FormControl('', [ValidatorFns.requiredValidator()])
+            roleName: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringNameValidator(this.roleNameLimitChar.value)]),
+            roleAlias: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.roleAliasLimitChar.value)]),
+            funcCodeList: new UntypedFormControl('', [ValidatorFns.requiredValidator()])
         });
         // this.form.statusChanges.subscribe(r => console.log(this.form.value))
         //預埋api

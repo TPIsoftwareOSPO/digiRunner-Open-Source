@@ -4,9 +4,10 @@ import { Component, ViewChild, ViewContainerRef, ComponentFactoryResolver, Input
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
-  selector: 'app-dialog',
-  templateUrl: './dialog.component.html',
-  styleUrls: ['./dialog.component.css']
+    selector: 'app-dialog',
+    templateUrl: './dialog.component.html',
+    styleUrls: ['./dialog.component.css'],
+    standalone: false
 })
 export class DialogComponent {
 

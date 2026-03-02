@@ -3,14 +3,15 @@ import { FieldsFormDetailComponent } from '../fields-form-detail/fields-form-det
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
-  selector: 'app-fields-form',
-  templateUrl: './fields-form.component.html',
-  styleUrls: ['./fields-form.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => FieldsFormComponent),
-    multi: true
-  }]
+    selector: 'app-fields-form',
+    templateUrl: './fields-form.component.html',
+    styleUrls: ['./fields-form.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => FieldsFormComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class FieldsFormComponent implements OnInit {
 

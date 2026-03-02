@@ -1,6 +1,6 @@
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Component, OnInit, ViewChild, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
@@ -18,11 +18,11 @@ import { MessageService } from 'primeng/api';
 import { DPB0076Req } from 'src/app/models/api/LovService/dpb0076.interface';
 
 @Component({
-  selector: 'app-api-shelves',
-  templateUrl: './api-shelves.component.html',
-  styleUrls: ['./api-shelves.component.css'],
-  providers: [MessageService, DynamicDialogRef],
-  // changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-api-shelves',
+    templateUrl: './api-shelves.component.html',
+    styleUrls: ['./api-shelves.component.css'],
+    providers: [MessageService, DynamicDialogRef],
+    standalone: false
 })
 export class ApiShelvesComponent implements OnInit {
 
@@ -35,13 +35,13 @@ export class ApiShelvesComponent implements OnInit {
   @Output() remove: EventEmitter<number> = new EventEmitter;
   @Output() isInvalid: EventEmitter<boolean> = new EventEmitter;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   dialogTitle: string = '';
   selectedApis?: DPB0075RespItem;
   selectedThemes: Array<DPB0055Themes> = new Array();
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private lov: LovService,
     private tool: ToolService,
     private alert: AlertService,
@@ -56,12 +56,12 @@ export class ApiShelvesComponent implements OnInit {
   ngOnInit() {
 
     this.form = this.fb.group({
-      apiUid: new FormControl(this.data ? this.data.apiUid : ''),
-      apiName: new FormControl(this.data ? this.data.apiName : '', ValidatorFns.requiredValidator()),
-      themeId: new FormControl(this.data ? this.data.refThemeId : []),
-      themeName: new FormControl(this.data ? this.data.refThemeName : [], ValidatorFns.requiredValidator()),
-      fileName: new FormControl({ value: this.data ? this.data.fileName : null, disabled: true }),
-      tempFileName: new FormControl({ value: this.data ? this.data.tempFileName : null, disabled: true })
+      apiUid: new UntypedFormControl(this.data ? this.data.apiUid : ''),
+      apiName: new UntypedFormControl(this.data ? this.data.apiName : '', ValidatorFns.requiredValidator()),
+      themeId: new UntypedFormControl(this.data ? this.data.refThemeId : []),
+      themeName: new UntypedFormControl(this.data ? this.data.refThemeName : [], ValidatorFns.requiredValidator()),
+      fileName: new UntypedFormControl({ value: this.data ? this.data.fileName : null, disabled: true }),
+      tempFileName: new UntypedFormControl({ value: this.data ? this.data.tempFileName : null, disabled: true })
     });
 
     this.form.valueChanges.subscribe((res: newApiOnOff) => {

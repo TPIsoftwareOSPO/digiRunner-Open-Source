@@ -3,7 +3,8 @@ import * as dayjs from 'dayjs';
 
 
 @Pipe({
-    name: 'datetime_format'
+    name: 'datetime_format',
+    standalone: false
 })
 export class DatetimeFormatPipe implements PipeTransform {
 

@@ -1,6 +1,6 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TxID } from 'src/app/models/common.enum';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
@@ -9,13 +9,14 @@ import { environment } from 'src/environments/environment';
 
 
 @Component({
-  selector: 'app-gtwidp',
-  templateUrl: './gtwidp.component.html',
-  styleUrls: ['./gtwidp.component.scss']
+    selector: 'app-gtwidp',
+    templateUrl: './gtwidp.component.html',
+    styleUrls: ['./gtwidp.component.scss'],
+    standalone: false
 })
 export class GtwidpComponent implements OnInit {
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   title: string = '';
   imgSrc: string = '';
   idpType: string = 'LDAP';
@@ -27,15 +28,16 @@ export class GtwidpComponent implements OnInit {
 
   timeUnit: { label: string, value: string }[] = [];
 
-  formApi!: FormGroup;
+  formApi!: UntypedFormGroup;
   msg: string = 'Loading...';
   btnDisabled: boolean = true;
   processShow: boolean = true;
   isCollapsed:boolean = true;
   show:boolean = false;
+  isV2:boolean = false;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private httpClient: HttpClient,
     private route: ActivatedRoute,
     private toolService: ToolService,
@@ -46,15 +48,15 @@ export class GtwidpComponent implements OnInit {
     this.show = false;
     this.formApi = this.fb.group([]);
     this.form = this.fb.group({
-      'uname': new FormControl(''),
-      'mima': new FormControl(''),
-      'timeUnit': new FormControl(),
-      'validityTime': new FormControl({ value: '', disabled: true }),
+      'uname': new UntypedFormControl(''),
+      'mima': new UntypedFormControl(''),
+      'timeUnit': new UntypedFormControl(),
+      'validityTime': new UntypedFormControl({ value: '', disabled: true }),
     });
 
     this.route.params.subscribe(params => {
-      // console.log(params)
       this.path = params;
+      // console.log(params)
     })
 
     this.route.queryParams.subscribe((value) => {
@@ -70,6 +72,9 @@ export class GtwidpComponent implements OnInit {
       { label: dict['token_exp_time_options.minute'], value: '60' },
       { label: dict['token_exp_time_options.second'], value: '1' },
     ]
+
+
+    if(this.path['ver']) this.isV2 = true;
 
     if (this.path['type'] != 'errMsg') {
       this.idpType = this.path['type'];
@@ -133,12 +138,18 @@ export class GtwidpComponent implements OnInit {
     else {
       tarUrl = `${location.protocol}//${location.hostname}:${location.port}`;
     }
-    // https://hostname:port/dgrv4/ssotoken/gtwidp/{idPType}/getVgroupList?client_id={client_id}&redirect_uri={redirect_uri}
-    tarUrl += `/dgrv4/ssotoken/gtwidp/${this.idpType}/getVgroupList?client_id=${this.paramsObj['client_id']}&redirect_uri=${this.paramsObj['redirect_uri']}`;
 
-    let headers = new HttpHeaders()
+    tarUrl += `/dgrv4/ssotoken/gtwidp/${this.idpType}/getVgroupList`;
 
-    this.httpClient.get(`${tarUrl}`, { headers: headers, observe: 'response', responseType: 'text' }).subscribe(res => {
+    const body = new HttpParams()
+      .set('client_id', this.paramsObj['client_id'])
+      .set('redirect_uri', this.paramsObj['redirect_uri']);
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+
+    this.httpClient.post(`${tarUrl}`, body ,{ headers: headers, observe: 'response', responseType: 'text' }).subscribe(res => {
       try {
 
         this.vgroupList = JSON.parse(JSON.parse(JSON.stringify(res.body)));
@@ -146,11 +157,11 @@ export class GtwidpComponent implements OnInit {
 
         this.apiNodes = this.apiNodes.map((item, index) => {
           item.key = `p.${index}`
-          this.formApi.addControl(item.key, new FormControl(false));
+          this.formApi.addControl(item.key, new UntypedFormControl(false));
           item.apiDataList.forEach((sub, index) => {
             sub.parentId = item.key;
             sub.key = `${item.key}_${index}`
-            this.formApi.addControl(sub.key, new FormControl(false));
+            this.formApi.addControl(sub.key, new UntypedFormControl(false));
           })
           return item
         })
@@ -164,7 +175,7 @@ export class GtwidpComponent implements OnInit {
         })
 
         this.form.get("timeUnit")?.setValue("86400");
-        
+
         // 增加條件: 當為dp_開頭且無子項目時自動跳轉 => Tom 提出需求 for dp
         if (this.apiNodes.length == 0 || (this.apiNodes.length == 1 &&  this.isValidStringStartWith_dp_(this.apiNodes[0].vgroupAliasShowUi) && this.apiNodes[0].apiDataList.length == 0)) {
           this.apiConfirm();
@@ -216,7 +227,6 @@ export class GtwidpComponent implements OnInit {
       observe: 'response',
       headers: { 'Content-Type': `application/json`, 'digiRunner': 'ldap process' }
     }).subscribe(res => {
-      // console.log(res)
       if (res?.body && res?.body !== '') {
         const credential = res.body!['RespBody'].ciphertext;
         // console.log('mimaEncryption',mimaEncryption)
@@ -251,7 +261,6 @@ export class GtwidpComponent implements OnInit {
 
   menuChange(evt, item) {
     if (item.apiDataList) {
-      // console.log('first',item.apiDataList)
       item.apiDataList.forEach(sub => {
         this.formApi.controls[sub.key].setValue(evt.target.checked);
       });
@@ -282,21 +291,21 @@ export class GtwidpComponent implements OnInit {
     // let body = new URLSearchParams();
     // body.set('username', this.paramsObj['username']);
     // body.set('redirect_uri', this.paramsObj['redirect_uri']);
-    // body.set('state', this.paramsObj['state']);    
+    // body.set('state', this.paramsObj['state']);
     let scope = new Array<string>();
     Object.keys(this.formApi.controls).filter(ctl => {
       if (ctl.indexOf('_') > -1 && this.formApi.controls[ctl].value == true) {
 
 
         this.apiNodes.forEach(item => {
-          item.apiDataList.forEach(sub => {            
+          item.apiDataList.forEach(sub => {
             if (sub.key === ctl) scope.push(sub.groupId);
           });
         })
 
       }
     })
-    
+
     // body.set('scope', scope.join(' '));
 
     // let url = `${environment.apiUrl}/dgrv4/ssotoken/gtwidp/LDAP/approve`
@@ -310,8 +319,15 @@ export class GtwidpComponent implements OnInit {
     // ).subscribe(res => {
     //   // window.location.href = res.url!;
     // });
-
-    let url = `${environment.apiUrl}/dgrv4/ssotoken/gtwidp/${this.idpType}/approve?username=${this.paramsObj['username']}&redirect_uri=${this.paramsObj['redirect_uri']}&state=${this.paramsObj['state']}&scope=${scope.join('%20')}`
+    // console.log('路由是否含/v2=>',this.isV2)
+    let url = '';
+    if(this.isV2){
+      url = `${environment.apiUrl}/dgrv4/ssotoken/gtwidp/${this.idpType}/v2/approve?unjwe=${this.paramsObj['unjwe']}&redirect_uri=${this.paramsObj['redirect_uri']}&state=${this.paramsObj['state']}&scope=${scope.join('%20')}`
+    }
+    else{
+      url = `${environment.apiUrl}/dgrv4/ssotoken/gtwidp/${this.idpType}/approve?username=${this.paramsObj['username']}&redirect_uri=${this.paramsObj['redirect_uri']}&state=${this.paramsObj['state']}&scope=${scope.join('%20')}`
+    }
+    // console.log(url)
     window.location.href = url;
   }
 

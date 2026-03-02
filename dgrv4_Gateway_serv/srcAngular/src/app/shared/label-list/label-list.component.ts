@@ -7,11 +7,11 @@ import { ListService } from "../services/api-list.service";
 import { ApiService } from "../services/api-api.service";
 
 @Component({
-  selector: 'app-label-list',
-  templateUrl: './label-list.component.html',
-  styleUrls: ['./label-list.component.css'],
-  providers:[ApiService],
-
+    selector: 'app-label-list',
+    templateUrl: './label-list.component.html',
+    styleUrls: ['./label-list.component.css'],
+    providers: [ApiService],
+    standalone: false
 })
 export class LabelListComponent implements OnInit {
 

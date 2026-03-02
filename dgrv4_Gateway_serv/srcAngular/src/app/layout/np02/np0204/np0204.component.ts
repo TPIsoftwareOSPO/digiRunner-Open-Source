@@ -3,7 +3,7 @@ import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { FormOperate } from 'src/app/models/common.enum';
 import { DPB0083RespItem, DPB0083Req } from 'src/app/models/api/CertificateAuthorityService/dpb0083.interface';
@@ -16,14 +16,14 @@ import { ClientService } from 'src/app/shared/services/api-client.service';
     selector: 'app-np0204',
     templateUrl: './np0204.component.html',
     styleUrls: ['./np0204.component.css'],
-    providers: [ClientService]
-
+    providers: [ClientService],
+    standalone: false
 })
 export class Np0204Component extends BaseComponent implements OnInit {
 
     @ViewChild('dialog') _dialog!: DialogComponent;
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     dialogTitle: string = '';
     cols: { field: string; header: string; }[] = [];
     dataList: Array<DPB0083RespItem> = new Array<DPB0083RespItem>();
@@ -40,14 +40,14 @@ export class Np0204Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private clientCA: ClientCAService,
         private clientService: ClientService
     ) {
         super(route, tr);
         this.form = this.fb.group({
-          keyword: new FormControl('')
+          keyword: new UntypedFormControl('')
       });
     }
 

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -17,10 +17,11 @@ import { KeyValueFormComponent } from '../../ac02/ac0228/key-value-form/key-valu
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-ac0020',
-  templateUrl: './ac0020.component.html',
-  styleUrls: ['./ac0020.component.css'],
-  providers: [MessageService, ConfirmationService]
+    selector: 'app-ac0020',
+    templateUrl: './ac0020.component.html',
+    styleUrls: ['./ac0020.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0020Component extends BaseComponent implements OnInit {
 
@@ -28,7 +29,7 @@ export class Ac0020Component extends BaseComponent implements OnInit {
 
   currentTitle = this.title;
   pageNum: number = 1;
-  formEdit!: FormGroup;
+  formEdit!: UntypedFormGroup;
   dataList: Array<DPB0195RespItem> = [];
   currentAction: string = '';
   apiInfo?: DPB0196Resp;
@@ -73,7 +74,7 @@ export class Ac0020Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -88,27 +89,27 @@ export class Ac0020Component extends BaseComponent implements OnInit {
   ngOnInit(): void {
 
     this.formEdit = this.fb.group({
-      id: new FormControl({ value: '', disabled: true }),
+      id: new UntypedFormControl({ value: '', disabled: true }),
       // clientId: new FormControl({ value: '', disabled: true }),
-      status: new FormControl(''),
-      approvalResultMail: new FormControl(''),
-      apiMethod: new FormControl(''),
-      apiUrl: new FormControl(''),
-      reqHeader: new FormControl(''),
-      reqBodyType: new FormControl(''),
-      reqBody: new FormControl(''),
-      sucByType: new FormControl(''),
-      sucByField: new FormControl(''),
-      sucByValue: new FormControl(''),
-      idtName: new FormControl(''),
-      idtEmail: new FormControl(''),
-      idtPicture: new FormControl(''),
-      iconFile: new FormControl(''),
-      pageTitle: new FormControl(''),
-      createUser: new FormControl(''),
-      createDateTime: new FormControl(''),
-      updateUser: new FormControl(''),
-      updateDateTime: new FormControl('')
+      status: new UntypedFormControl(''),
+      approvalResultMail: new UntypedFormControl(''),
+      apiMethod: new UntypedFormControl(''),
+      apiUrl: new UntypedFormControl(''),
+      reqHeader: new UntypedFormControl(''),
+      reqBodyType: new UntypedFormControl(''),
+      reqBody: new UntypedFormControl(''),
+      sucByType: new UntypedFormControl(''),
+      sucByField: new UntypedFormControl(''),
+      sucByValue: new UntypedFormControl(''),
+      idtName: new UntypedFormControl(''),
+      idtEmail: new UntypedFormControl(''),
+      idtPicture: new UntypedFormControl(''),
+      iconFile: new UntypedFormControl(''),
+      pageTitle: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      createDateTime: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      updateDateTime: new UntypedFormControl('')
     });
 
     this.axios_queryIdPInfoList_api();

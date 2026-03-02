@@ -1,13 +1,20 @@
 import { environment } from './../../../environments/environment.prod';
 import { ToolService } from './tool.service';
 import { NavigationExtras, Router } from '@angular/router';
-import { Injectable } from '@angular/core';
-import { PlatformLocation } from '@angular/common';
+import { Injectable, Injector } from '@angular/core';
+
 
 @Injectable()
 export class LogoutService {
   options?: NavigationExtras;
-  constructor(private router: Router, private toolService: ToolService, private platformLocation: PlatformLocation ) {}
+  constructor(
+    private injector: Injector,
+    private router: Router,
+  ) {}
+
+  private get toolService(): ToolService {
+    return this.injector.get(ToolService);
+  }
 
   // AA0510取回 ac config時內若有logoutUrl欄位則 登出時需導引回此欄位內容 .20220630
   logout(re?: boolean) {
@@ -26,11 +33,9 @@ export class LogoutService {
       );
       sessionStorage.clear();
       if (this.router) {
-        this.router
-          .navigate(['/login'], this.options)
-          .finally(() => {
-           window.location.replace('ac4/login')
-          });
+        this.router.navigate(['/login'], this.options).finally(() => {
+          window.location.replace('ac4/login');
+        });
       }
 
       return;
@@ -48,8 +53,9 @@ export class LogoutService {
     } else {
       if (this.router)
         // 避免可以使用上一頁回復資訊及軟轉導路由未更新，改用replace刷新
-        this.router.navigate(['/login'], this.options)
-        .finally(()=> window.location.replace('ac4/login'))
+        this.router
+          .navigate(['/login'], this.options)
+          .finally(() => window.location.replace('ac4/login'));
     }
   }
 }

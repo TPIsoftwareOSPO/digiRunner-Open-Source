@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, ValidatorFn } from '@angular/forms';
 import { DPB0201RespItem } from 'src/app/models/api/ServerService/dpb0201.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
@@ -7,9 +7,10 @@ import * as ValidatorFns from 'src/app/shared/validator-functions';
 
 
 @Component({
-  selector: 'app-website-setting-row',
-  templateUrl: './website-setting-row.component.html',
-  styleUrls: ['./website-setting-row.component.css']
+    selector: 'app-website-setting-row',
+    templateUrl: './website-setting-row.component.html',
+    styleUrls: ['./website-setting-row.component.css'],
+    standalone: false
 })
 export class WebsiteSettingRowComponent implements OnInit {
 
@@ -22,21 +23,21 @@ export class WebsiteSettingRowComponent implements OnInit {
   @Output() remove: EventEmitter<number> = new EventEmitter;
   @Output() validate: EventEmitter<boolean> = new EventEmitter;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   req:number = 0;
   resp:number = 0;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService
   ) { }
 
   async ngOnInit() {
 
     this.form = this.fb.group({
-      probability: new FormControl(this.data ? this.data.probability : 0,),
-      url: new FormControl(this.data ? this.data.url : '', [ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(100)]),
+      probability: new UntypedFormControl(this.data ? this.data.probability : 0,),
+      url: new UntypedFormControl(this.data ? this.data.url : '', [ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(100)]),
     })
 
     if(this.data?.targetThroughPut){

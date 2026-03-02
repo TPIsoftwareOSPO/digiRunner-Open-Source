@@ -57,21 +57,27 @@ public class DPB0118Service {
 			resp.setEdition(edition);
 			
 			//有效期限
-			LocalDate expiryDateLd = util.getExpiryDate(getTsmpSettingService().getVal_TSMP_LICENSE_KEY());	
+			LocalDate expiryDateLd = util.getExpiryDate(key);	
 			String expiryDate = DateTimeUtil.dateTimeToString(expiryDateLd, DateTimeFormatEnum.西元年月日_2).orElse(null);
 			resp.setExpiryDate(expiryDate);
 			
 			//到期資訊
-			Long nearWarnDays = util.getNearWarnDays(getTsmpSettingService().getVal_TSMP_LICENSE_KEY());
+			Long nearWarnDays = util.getNearWarnDays(key);
 			resp.setNearWarnDays(nearWarnDays);
 			
-			Long overBufferDays = util.getOverBufferDays(getTsmpSettingService().getVal_TSMP_LICENSE_KEY());
+			Long overBufferDays = util.getOverBufferDays(key);
 			resp.setOverBufferDays(overBufferDays);
 			
-			String account = util.getAccount(getTsmpSettingService().getVal_TSMP_LICENSE_KEY());
+			//isExpired
+			LocalDate futureDate = expiryDateLd.plusDays(overBufferDays);
+			LocalDate nowLd = LocalDate.now();
+			boolean isExpired = futureDate.isBefore(nowLd);
+			resp.setExpired(isExpired);
+			
+			String account = util.getAccount(key);
 			resp.setAccount(account);
 			
-			String env = util.getEnv(getTsmpSettingService().getVal_TSMP_LICENSE_KEY());
+			String env = util.getEnv(key);
 			resp.setEnv(env);
 			
 			VersionInfo v = versionService.getVersion();

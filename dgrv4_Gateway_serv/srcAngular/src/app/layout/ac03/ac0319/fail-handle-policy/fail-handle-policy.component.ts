@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ConfirmationService } from 'primeng/api';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AA0423RespItem } from 'src/app/models/api/ApiService/aa0423.interface';
@@ -7,19 +7,20 @@ import { AA0432Req } from 'src/app/models/api/ApiService/aa0432.interfcae';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-fail-handle-policy',
-  templateUrl: './fail-handle-policy.component.html',
-  styleUrls: ['./fail-handle-policy.component.css'],
-  providers: [ConfirmationService]
+    selector: 'app-fail-handle-policy',
+    templateUrl: './fail-handle-policy.component.html',
+    styleUrls: ['./fail-handle-policy.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class FailHandlePolicyComponent implements OnInit {
   selected: Array<AA0423RespItem> = [];
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
     private ref: DynamicDialogRef,
     private config: DynamicDialogConfig,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private confirmationService: ConfirmationService,
     private toolService: ToolService,
   ) {}
@@ -27,8 +28,8 @@ export class FailHandlePolicyComponent implements OnInit {
   ngOnInit(): void {
     this.selected = this.config?.data?.data ? this.config?.data?.data : [];
     this.form = this.fb.group({
-      failDiscoveryPolicy: new FormControl("0"),
-      failHandlePolicy: new FormControl("0"),
+      failDiscoveryPolicy: new UntypedFormControl("0"),
+      failHandlePolicy: new UntypedFormControl("0"),
     })
   }
 

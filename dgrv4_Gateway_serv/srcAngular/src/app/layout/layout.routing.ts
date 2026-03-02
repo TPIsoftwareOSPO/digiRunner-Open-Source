@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
@@ -143,8 +143,8 @@ const routes: Routes = [
       { path: 'lb00/lb0008', loadChildren: () => import('./labs/rdb-connection/rdb-connection.module').then(m => m.RdbConnectionModule), data: { id: 'lb0008' } },
       { path: 'lb00/lb0009', loadChildren: () => import('./labs/mail-template-io/mail-template-io.module').then(m => m.MailTemplateIoModule), data: { id: 'lb0009' } },
       { path: 'lb00/lb0010', loadChildren: () => import('./labs/lb0010/lb0010.module').then(m => m.Lb0010Module), data: { id: 'lb0010' } }, //Bot Detection
-      { path: 'lb00/lb0011', loadChildren: () => import('./labs/lb0011/lb0011.module').then(m => m.Lb0011Module), data: { id: 'lb0011' } }, //webhook
-      { path: 'lb00/lb0012', loadChildren: () => import('./labs/lb0012/lb0012.module').then(m => m.Lb0012Module), data: { id: 'lb0012' } }, //webhook logs
+      { path: 'lb00/lb0011', loadChildren: () => import('./labs/lb0011/lb0011.module').then(m => m.Lb0011Module), data: { id: 'lb0011' } }, //webhook => 20260113更名為 AI Proxy
+      { path: 'lb00/lb0012', loadChildren: () => import('./labs/lb0012/lb0012.module').then(m => m.Lb0012Module), data: { id: 'lb0012' } }, //webhook logs => 20260113更名為 AI Proxy Logs
 
        //ai gateway
       { path: 'ai00/ai0001', loadChildren: () => import('./ai00/ai0001/ai0001.module').then(m => m.Ai0001Module), data: { id: 'ai0001' } }, //ai provider

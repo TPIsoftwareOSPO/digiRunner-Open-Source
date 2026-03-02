@@ -26,7 +26,7 @@ import { FileService } from 'src/app/shared/services/api-file.service';
 import { LocaleComponent } from './locale/locale.component';
 import { ParamItemComponent } from './param-item/param-item.component';
 import { LocaleItemComponent } from './locale-item/locale-item.component';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { MessageService, SelectItem, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
@@ -68,10 +68,11 @@ interface localeItem extends DPB9907Item {
 }
 
 @Component({
-  selector: 'app-tsmpdpitems',
-  templateUrl: './tsmpdpitems.component.html',
-  styleUrls: ['./tsmpdpitems.component.css'],
-  providers: [FileService, ApiService, ConfirmationService],
+    selector: 'app-tsmpdpitems',
+    templateUrl: './tsmpdpitems.component.html',
+    styleUrls: ['./tsmpdpitems.component.css'],
+    providers: [FileService, ApiService, ConfirmationService],
+    standalone: false
 })
 export class TsmpdpitemsComponent extends BaseComponent implements OnInit {
   onChange: (value: any) => void = (_: any) => {};
@@ -85,10 +86,10 @@ export class TsmpdpitemsComponent extends BaseComponent implements OnInit {
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
-  form!: FormGroup;
-  subitemForm!: FormGroup;
-  detailForm!: FormGroup;
-  itemForm!: FormGroup;
+  form!: UntypedFormGroup;
+  subitemForm!: UntypedFormGroup;
+  detailForm!: UntypedFormGroup;
+  itemForm!: UntypedFormGroup;
   toastValue: any;
   cols: { field: string; header: string }[] = [];
   tableData: Array<DPB9905Item> = [];
@@ -146,7 +147,7 @@ export class TsmpdpitemsComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private translateService: TranslateService,
     private messageService: MessageService,
@@ -168,25 +169,25 @@ export class TsmpdpitemsComponent extends BaseComponent implements OnInit {
     // this.checkOrgId();
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      locale: new FormControl(''),
+      keyword: new UntypedFormControl(''),
+      locale: new UntypedFormControl(''),
     });
 
     this.subitemForm = this.fb.group({
-      keyword: new FormControl(''),
-      locale: new FormControl(''),
+      keyword: new UntypedFormControl(''),
+      locale: new UntypedFormControl(''),
     });
 
     this.detailForm = this.fb.group({
-      locale: new FormControl(''),
-      subitemNo: new FormControl(''),
-      itemNo: new FormControl(''),
-      subitemNameList: new FormControl([]),
-      isDefault: new FormControl(null),
+      locale: new UntypedFormControl(''),
+      subitemNo: new UntypedFormControl(''),
+      itemNo: new UntypedFormControl(''),
+      subitemNameList: new UntypedFormControl([]),
+      isDefault: new UntypedFormControl(null),
     });
 
     this.itemForm = this.fb.group({
-      itemNo: new FormControl('', ValidatorFns.requiredValidator()),
+      itemNo: new UntypedFormControl('', ValidatorFns.requiredValidator()),
     });
 
     let ReqBody = {

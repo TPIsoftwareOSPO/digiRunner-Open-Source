@@ -2,7 +2,7 @@ import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dy
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { FormParams } from 'src/app/models/api/form-params.interface';
-import { FormBuilder, NgForm, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, NgForm, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import * as dayjs from 'dayjs';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
@@ -25,9 +25,10 @@ import { BaseComponent } from 'src/app/layout/base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 
 @Component({
-  selector: 'app-client-authorize-api',
-  templateUrl: './client-authorize-api.component.html',
-  styleUrls: ['./client-authorize-api.component.css']
+    selector: 'app-client-authorize-api',
+    templateUrl: './client-authorize-api.component.html',
+    styleUrls: ['./client-authorize-api.component.css'],
+    standalone: false
 })
 export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit {
 
@@ -35,7 +36,7 @@ export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit
   @Input() data!: FormParams;
   @Input() close!: Function;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   minDateValue: Date = new Date();
   createDateTime: string = '';
   btnName: string = '';
@@ -51,7 +52,7 @@ export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private lov: LovService,
     private file: FileService,
@@ -338,23 +339,23 @@ export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit
     switch (formOperate) {
       case FormOperate.create:
         return {
-          reqDesc: new FormControl('', ValidatorFns.requiredValidator()),
-          effectiveDate: new FormControl(dayjs(new Date()).format('YYYY/MM/DD'), ValidatorFns.requiredValidator()),
-          fileData: new FormControl(null),
-          oriFileName: new FormControl(''),
-          tmpFileName: new FormControl(''),
-          keyword: new FormControl('')
+          reqDesc: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          effectiveDate: new UntypedFormControl(dayjs(new Date()).format('YYYY/MM/DD'), ValidatorFns.requiredValidator()),
+          fileData: new UntypedFormControl(null),
+          oriFileName: new UntypedFormControl(''),
+          tmpFileName: new UntypedFormControl(''),
+          keyword: new UntypedFormControl('')
         }
       case FormOperate.update:
       case FormOperate.resend:
         let detailData = this.config.data.data as DPB0068Resp;
         return {
-          reqDesc: new FormControl(detailData.reqDesc, ValidatorFns.requiredValidator()),
-          effectiveDate: new FormControl(detailData.effectiveDate, ValidatorFns.requiredValidator()),
-          fileData: new FormControl(null),
-          oriFileName: new FormControl(detailData.apiUserApply!.fileName),
-          tmpFileName: new FormControl(''),
-          keyword: new FormControl('')
+          reqDesc: new UntypedFormControl(detailData.reqDesc, ValidatorFns.requiredValidator()),
+          effectiveDate: new UntypedFormControl(detailData.effectiveDate, ValidatorFns.requiredValidator()),
+          fileData: new UntypedFormControl(null),
+          oriFileName: new UntypedFormControl(detailData.apiUserApply!.fileName),
+          tmpFileName: new UntypedFormControl(''),
+          keyword: new UntypedFormControl('')
         };
       default:
         return {

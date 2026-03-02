@@ -56,6 +56,9 @@ public class DpUser implements Serializable, DgrSequenced {
 	@Column(name = "dp_user_name")
 	private String dpUserName;
 
+	@Column(name = "status")
+	private String status;
+	
 	public Long getDpUserId() {
 		return dpUserId;
 	}
@@ -152,13 +155,21 @@ public class DpUser implements Serializable, DgrSequenced {
 		this.dpUserName = dpUserName;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	@Override
 	public String toString() {
-		return "DpUser [dpUserId=" + dpUserId + ", userAlias=" + userAlias
-				+ ", idTokenJwtstr=" + idTokenJwtstr + ", userIdentity=" + userIdentity + ", createDateTime="
-				+ createDateTime + ", createUser=" + createUser + ", updateDateTime=" + updateDateTime + ", updateUser="
-				+ updateUser + ", version=" + version + ", keywordSearch=" + keywordSearch + ", iss=" + iss
-				+ ", dpUserName=" + dpUserName + "]";
+		return "DpUser [dpUserId=" + dpUserId + ", userAlias=" + userAlias + ", idTokenJwtstr=" + idTokenJwtstr
+				+ ", userIdentity=" + userIdentity + ", createDateTime=" + createDateTime + ", createUser=" + createUser
+				+ ", updateDateTime=" + updateDateTime + ", updateUser=" + updateUser + ", version=" + version
+				+ ", keywordSearch=" + keywordSearch + ", iss=" + iss + ", dpUserName=" + dpUserName + ", status="
+				+ status + "]";
 	}
 
 	@Override

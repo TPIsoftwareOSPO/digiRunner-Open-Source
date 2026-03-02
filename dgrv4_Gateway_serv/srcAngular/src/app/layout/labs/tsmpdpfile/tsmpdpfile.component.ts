@@ -8,7 +8,7 @@ import { DPB9900Item, DPB9900Req } from './../../../models/api/ServerService/dpb
 import { ApiService } from 'src/app/shared/services/api-api.service';
 import { FileService } from 'src/app/shared/services/api-file.service';
 
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
@@ -37,19 +37,20 @@ import { HttpHeaders } from '@angular/common/http';
 import { AlertType } from 'src/app/models/common.enum';
 
 @Component({
-  selector: 'app-tsmpsetting',
-  templateUrl: './tsmpdpfile.component.html',
-  styleUrls: ['./tsmpdpfile.component.css'],
-  providers: [FileService, ApiService, ConfirmationService]
+    selector: 'app-tsmpsetting',
+    templateUrl: './tsmpdpfile.component.html',
+    styleUrls: ['./tsmpdpfile.component.css'],
+    providers: [FileService, ApiService, ConfirmationService],
+    standalone: false
 })
 export class TsmpdpFileComponent extends BaseComponent implements OnInit {
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
-  form!: FormGroup;
-  formAdd!: FormGroup;
-  formBucket!: FormGroup;
-  formUpdate!: FormGroup;
+  form!: UntypedFormGroup;
+  formAdd!: UntypedFormGroup;
+  formBucket!: UntypedFormGroup;
+  formUpdate!: UntypedFormGroup;
   toastValue: any;
   cols: { field: string; header: string }[] = [];
   tableData: Array<DPB9915Item> = [];
@@ -77,7 +78,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private translateService: TranslateService,
     private messageService: MessageService,
@@ -102,43 +103,43 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
     // this.checkOrgId();
 
     this.form = this.fb.group({
-      startDate: new FormControl('', [ValidatorFns.requiredValidator()]),
-      endDate: new FormControl('', [ValidatorFns.requiredValidator()]),
-      fileClassification: new FormControl(''),
-      refId: new FormControl(''),
-      keyword: new FormControl('')
+      startDate: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      endDate: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      fileClassification: new UntypedFormControl(''),
+      refId: new UntypedFormControl(''),
+      keyword: new UntypedFormControl('')
     });
 
     this.formAdd = this.fb.group({
-      refFileCateCode: new FormControl(''),
-      refId: new FormControl(''),
-      isTmpfile: new FormControl(''),
-      fileName: new FormControl(''),
-      tmpfileName: new FormControl(''),
+      refFileCateCode: new UntypedFormControl(''),
+      refId: new UntypedFormControl(''),
+      isTmpfile: new UntypedFormControl(''),
+      fileName: new UntypedFormControl(''),
+      tmpfileName: new UntypedFormControl(''),
     });
 
     this.formBucket = this.fb.group({
-      startDate: new FormControl('', [ValidatorFns.requiredValidator()]),
-      endDate: new FormControl('', [ValidatorFns.requiredValidator()]),
-      fileClassification: new FormControl(''),
-      refId: new FormControl(''),
-      keyword: new FormControl('')
+      startDate: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      endDate: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
+      fileClassification: new UntypedFormControl(''),
+      refId: new UntypedFormControl(''),
+      keyword: new UntypedFormControl('')
     });
 
     this.formUpdate = this.fb.group({
-      fileId: new FormControl(''),
-      fileName: new FormControl(''),
-      refFileCateCode: new FormControl(''),
-      refId: new FormControl(''),
-      filePath: new FormControl(''),
-      isBlob: new FormControl(''),
-      createDateTime: new FormControl(''),
-      createUser: new FormControl(''),
-      updateUser: new FormControl(''),
-      updateDateTime: new FormControl(''),
-      blobData: new FormControl(''),
-      version: new FormControl(''),
-      tmpfileName: new FormControl(''),
+      fileId: new UntypedFormControl(''),
+      fileName: new UntypedFormControl(''),
+      refFileCateCode: new UntypedFormControl(''),
+      refId: new UntypedFormControl(''),
+      filePath: new UntypedFormControl(''),
+      isBlob: new UntypedFormControl(''),
+      createDateTime: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      updateDateTime: new UntypedFormControl(''),
+      blobData: new UntypedFormControl(''),
+      version: new UntypedFormControl(''),
+      tmpfileName: new UntypedFormControl(''),
     });
 
     this.converDateInit();

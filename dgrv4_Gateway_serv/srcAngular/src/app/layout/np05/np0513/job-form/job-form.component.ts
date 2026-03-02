@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormParams } from 'src/app/models/api/form-params.interface';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import * as ValidatorFns from '../../../../shared/validator-functions';
 import { ListService } from 'src/app/shared/services/api-list.service';
@@ -13,7 +13,8 @@ import { JobService } from 'src/app/shared/services/api-job.service';
 @Component({
     selector: 'app-job-form',
     templateUrl: './job-form.component.html',
-    styleUrls: ['./job-form.component.css']
+    styleUrls: ['./job-form.component.css'],
+    standalone: false
 })
 export class JobFormComponent implements OnInit {
 
@@ -21,12 +22,12 @@ export class JobFormComponent implements OnInit {
     @Output() close?: Function;
     @Output() changePage:EventEmitter<any> = new EventEmitter();
 
-    form?: FormGroup;
+    form?: UntypedFormGroup;
     refItemNos: { label: string; value: object; }[] = [];
     refSubitemNos: { label: string; value: string; }[] = [];
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private list: ListService,
         private tool: ToolService,
         private job: JobService
@@ -117,11 +118,11 @@ export class JobFormComponent implements OnInit {
         switch (formOperate) {
             case FormOperate.create:
                 return {
-                    refItemNo: new FormControl('', ValidatorFns.requiredValidator()),
-                    refSubitemNo: new FormControl({ value: '', disabled: true }),
-                    startDateTime: new FormControl('', ValidatorFns.requiredValidator()),
-                    inParams: new FormControl(''),
-                    identifData: new FormControl('')
+                    refItemNo: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+                    refSubitemNo: new UntypedFormControl({ value: '', disabled: true }),
+                    startDateTime: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+                    inParams: new UntypedFormControl(''),
+                    identifData: new UntypedFormControl('')
                 }
                 default:
                   return {

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'client_public_status'
+    name: 'client_public_status',
+    standalone: false
 })
 export class ClientPublicStatusPipe implements PipeTransform {
 

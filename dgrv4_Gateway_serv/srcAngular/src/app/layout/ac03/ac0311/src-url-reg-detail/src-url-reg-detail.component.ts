@@ -1,13 +1,14 @@
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AiApikeyComponent } from '../ai-apikey/ai-apikey.component';
 
 @Component({
-  selector: 'app-src-url-reg-detail',
-  templateUrl: './src-url-reg-detail.component.html',
-  styleUrls: ['./src-url-reg-detail.component.css'],
+    selector: 'app-src-url-reg-detail',
+    templateUrl: './src-url-reg-detail.component.html',
+    styleUrls: ['./src-url-reg-detail.component.css'],
+    standalone: false
 })
 export class SrcUrlRegDetailComponent implements OnInit {
   @Input() data?: { percent: string; url: string; no: number; isMtls: boolean };
@@ -28,10 +29,10 @@ export class SrcUrlRegDetailComponent implements OnInit {
 
   _uuid: string = '';
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private dialogService: DialogService,
     private toolService: ToolService
   ) {
@@ -40,9 +41,9 @@ export class SrcUrlRegDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      percent: new FormControl(this.data ? this.data.percent : 0),
-      url: new FormControl(this.data ? this.data.url : ''),
-      isMtls: new FormControl(this.data ? this.data?.isMtls ?? false : false),
+      percent: new UntypedFormControl(this.data ? this.data.percent : 0),
+      url: new UntypedFormControl(this.data ? this.data.url : ''),
+      isMtls: new UntypedFormControl(this.data ? this.data?.isMtls ?? false : false),
     });
 
     if (this.disabled) {

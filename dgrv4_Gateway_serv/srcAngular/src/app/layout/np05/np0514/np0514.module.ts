@@ -23,7 +23,6 @@ import {MenuModule} from 'primeng/menu';
         MenuModule
     ],
     declarations: [Np0514Component, ScheduleContentComponent, ScheduleContentFormComponent],
-    entryComponents: [ScheduleContentComponent, ScheduleContentFormComponent],
     providers: [TokenExpiredGuard]
 })
 export class Np0514Module { }

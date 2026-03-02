@@ -354,10 +354,10 @@ public class TsmpFuncTableInitializer {
 			createTsmpFunc("AI0005","User AI Prompt Template","User AI Prompt Template","userAiPromptTemplateSetting","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("AI0005","使用者 AI 提示詞樣板設定","使用者預設 AI 提示詞樣板設定","userAiPromptTemplateSetting","","zh-TW","manager",DateTimeUtil.now());
 			
-			createTsmpFunc("LB0011","Webhook","Webhook","Real time event notification mechanism","","en-US","manager",DateTimeUtil.now());
-			createTsmpFunc("LB0011","Webhook","Webhook","即時事件通知推送機制","","zh-TW","manager",DateTimeUtil.now());
-			createTsmpFunc("LB0012","Webhook Logs","Webhook Logs","Real time event notification logs","","en-US","manager",DateTimeUtil.now());
-			createTsmpFunc("LB0012","Webhook Logs","Webhook Logs","即時事件通知推送紀錄","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("LB0011","AI Proxy","AI Proxy","Real time event notification mechanism","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("LB0011","AI Proxy","AI Proxy","即時事件通知推送機制","","zh-TW","manager",DateTimeUtil.now());
+			createTsmpFunc("LB0012","AI Proxy Logs","AI Proxy Logs","Real time event notification logs","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("LB0012","AI Proxy Logs","AI Proxy Logs","即時事件通知推送紀錄","","zh-TW","manager",DateTimeUtil.now());
 
 			createTsmpFunc("AC0322","API List Export","API List Export","apiListExport","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("AC0322","API列表匯出","API List Export","apiListExport","","zh-TW","manager",DateTimeUtil.now());

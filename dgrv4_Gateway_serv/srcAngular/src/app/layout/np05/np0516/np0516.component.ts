@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { DPB0116Data, DPB0116Req } from 'src/app/models/api/MailService/dpb0116.interface';
@@ -14,15 +14,16 @@ import { DPB0117Req, DPB0117Resp } from 'src/app/models/api/MailService/dpb0117.
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
-  selector: 'app-np0516',
-  templateUrl: './np0516.component.html',
-  styleUrls: ['./np0516.component.css']
+    selector: 'app-np0516',
+    templateUrl: './np0516.component.html',
+    styleUrls: ['./np0516.component.css'],
+    standalone: false
 })
 export class Np0516Component extends BaseComponent implements OnInit {
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：open api key 列表、2：open api key detail
-  form: FormGroup;
+  form: UntypedFormGroup;
   resultOption: { label: string; value: string; }[] = [];
   cols: { field: string; header: string; width: string; }[] = [];
   dataList: Array<DPB0116Data> = [];
@@ -32,7 +33,7 @@ export class Np0516Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private listService: ListService,
     private toolService: ToolService,
     private mailService: MailService,
@@ -42,10 +43,10 @@ export class Np0516Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      startDate: new FormControl(''),
-      endDate: new FormControl(''),
-      keyword: new FormControl(''),
-      result: new FormControl('-1')
+      startDate: new UntypedFormControl(''),
+      endDate: new UntypedFormControl(''),
+      keyword: new UntypedFormControl(''),
+      result: new UntypedFormControl('-1')
     });
   }
 

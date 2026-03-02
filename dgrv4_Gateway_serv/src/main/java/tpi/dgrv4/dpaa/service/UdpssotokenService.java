@@ -73,6 +73,7 @@ import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.OAuthTokenService;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.OAuthTokenResp;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -260,8 +261,9 @@ public class UdpssotokenService{
 			List<String> val = entry.getValue();
 			logger.debug(String.format("http key [%s] = %s", key, val.toString()));
 		}
-		String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
-		String userHostname = httpReq.getRemoteHost();
+//		String userIp = StringUtils.isEmpty(headers.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr() : headers.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
+        String userHostname = httpReq.getRemoteHost();
 		getUdpssotoken(parameters, scheme, res, userIp, reqHeader.getLocale(), userHostname, txnUid);
 	}
 	

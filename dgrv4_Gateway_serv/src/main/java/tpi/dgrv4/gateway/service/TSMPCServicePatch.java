@@ -91,6 +91,10 @@ public class TSMPCServicePatch {
 		maskInfo.put("headerMaskPolicySymbol", apiReg.getHeaderMaskPolicySymbol());
 		maskInfo.put("headerMaskPolicyNum", String.valueOf(apiReg.getHeaderMaskPolicyNum()));
 		maskInfo.put("headerMaskKey", apiReg.getHeaderMaskKey());
+		
+		//Global masking
+		getCommForwardProcService().generateGlobalMaskParam(maskInfo);
+		
 		StringBuffer reqLog = getLogReq(httpReq, httpHeaders, payload, reqUrl);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC】--\n" + reqLog.toString());
 
@@ -98,11 +102,12 @@ public class TSMPCServicePatch {
 				payload, false);
 
 		// 第一組ES REQ (一定要在 CommForwardProcService.verifyData 之後才能記 Log)
-		TsmpApiLogReq tsmpcPatchDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq, payload,
+		String maskPayload = getCommForwardProcService().maskBody(maskInfo, payload);
+		TsmpApiLogReq tsmpcPatchDgrReqVo = getCommForwardProcService().addEsTsmpApiLogReq1(uuid, httpReq, maskPayload,
 				"tsmpc", aType);
 
 		// 第一組 RDB Req
-		TsmpApiLogReq tsmpcPatchDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq, payload,
+		TsmpApiLogReq tsmpcPatchDgrReqVo_rdb = getCommForwardProcService().addRdbTsmpApiLogReq1(uuid, httpReq, maskPayload,
 				"tsmpc", aType);
 
 		// JWT 資料驗證有錯誤
@@ -175,6 +180,11 @@ public class TSMPCServicePatch {
 
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC-to-Backend】--"
 				+ "\n--【LOGUUID】【" + uuid + "】【End TSMPC-from-Backend】--\n");
+		
+		// 第二組ES REQ, 20260126補上
+		String maskPayload = getCommForwardProcService().maskBody(maskInfo, payload);
+		TsmpApiLogReq tsmpcPatchBackendReqVo = getCommForwardProcService().addEsTsmpApiLogReq2(tsmpcPatchDgrReqVo, header, reqUrl,
+						maskPayload);
 
 		HttpRespData respObj = getHttpRespData(httpReq, header, reqUrl, payload);
 		respObj.fetchByte(maskInfo);
@@ -188,7 +198,8 @@ public class TSMPCServicePatch {
 		httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 
 		httpRes.setStatus(respObj.statusCode);
-		respObj.respHeader.remove("Transfer-Encoding"); // 它不能回傳
+		//respObj.respHeader.remove("Transfer-Encoding"); // 它不能回傳
+		respObj.respHeader.keySet().removeIf(key -> key != null && key.equalsIgnoreCase("Transfer-Encoding"));// 它不能回傳
 		// respObj.respHeader.forEach((k, vs)->{
 		// vs.forEach((v)->{
 		// httpRes.addHeader(k, v);
@@ -208,11 +219,18 @@ public class TSMPCServicePatch {
 		IOUtils.copy(bi, httpRes.getOutputStream());
 		// String httpRespStr = new String(httpArray , StandardCharsets.UTF_8);
 		int contentLength = (httpArray == null) ? 0 : httpArray.length;
+		
+		// 第二組ES RESP, 20260126補上
+		getCommForwardProcService().addEsTsmpApiLogResp2(respObj, tsmpcPatchBackendReqVo, contentLength);
+		
 		// print
 		StringBuffer resLog = getCommForwardProcService().getLogResp(httpRes, httpRespStr, contentLength,
 				new HashMap<>(), httpReq);
 		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【End TSMPC】--\n" + resLog.toString());
 
+		//第一組ES RESP, 20260126補上
+		getCommForwardProcService().addEsTsmpApiLogResp1(httpRes, tsmpcPatchDgrReqVo, httpRespStr, contentLength);
+		
 		return null;
 	}
 
@@ -298,7 +316,7 @@ public class TSMPCServicePatch {
 		String httpMethod = req.getMethod();
 
 		HttpRespData httpRespData = HttpUtil.httpReqByRawDataList(reqUrl, httpMethod, payload, header, true, false,
-				maskInfo);
+				maskInfo, null);
 
 		return httpRespData;
 	}

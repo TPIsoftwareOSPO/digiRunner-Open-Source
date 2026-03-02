@@ -3,7 +3,7 @@ import { SidebarService } from 'src/app/layout/components/sidebar/sidebar.servic
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl, FormGroupDirective } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl, FormGroupDirective } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { FormOperate } from 'src/app/models/common.enum';
@@ -24,14 +24,15 @@ import { AA0013Req } from 'src/app/models/api/UserService/aa0013.interface';
     selector: 'app-ac0012',
     templateUrl: './ac0012.component.html',
     styleUrls: ['./ac0012.component.css'],
-    providers: [MessageService, ConfirmationService]
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0012Component extends BaseComponent implements OnInit {
 
     @ViewChild('dialog') _dialog!: DialogComponent;
     @ViewChild('listgroup') listGroup!: ListGroupsComponent;
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     formOperate = FormOperate;
     cols: ({ field: string; header: string; display?: undefined; } | { field: string; header: string; display: string; })[] = [];
     rowcount: number = 0;
@@ -44,7 +45,7 @@ export class Ac0012Component extends BaseComponent implements OnInit {
     display: boolean;
     dialogTitle: string = '';
     pageNum: number = 1;
-    form_page2: FormGroup;
+    form_page2: UntypedFormGroup;
     selected: any = [];
     menus?: Menu[];
     roleNameLimitChar = { value: 30 };
@@ -58,7 +59,7 @@ export class Ac0012Component extends BaseComponent implements OnInit {
     roleName_page3: string = '';
     roleAlias_page3: string = '';
 
-    form_page4: FormGroup;
+    form_page4: UntypedFormGroup;
     data_page4?: AA0020List;
     selectedFuncList: any = [];
     newRoleAliasLimitChar = { value: 255 };
@@ -70,7 +71,7 @@ export class Ac0012Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private messageService: MessageService,
         private tool: ToolService,
         private siderbar: SidebarService,
@@ -81,7 +82,7 @@ export class Ac0012Component extends BaseComponent implements OnInit {
         super(route, tr);
         this.display = false;
         this.form = this.fb.group({
-            keyword: new FormControl('')
+            keyword: new UntypedFormControl('')
         });
         this.form_page2 = this.fb.group({
             roleName: '',
@@ -124,9 +125,9 @@ export class Ac0012Component extends BaseComponent implements OnInit {
         const codes = ['dialog.create', 'message.role', 'message.create', 'message.success'];
         const dict = await this.tool.getDict(codes);
         this.form_page2 = this.fb.group({
-            roleName: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringNameValidator(this.roleNameLimitChar.value)]),
-            roleAlias: new FormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.roleAliasLimitChar.value)]),
-            funcCodeList: new FormControl([], [ValidatorFns.requiredValidator()])
+            roleName: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringNameValidator(this.roleNameLimitChar.value)]),
+            roleAlias: new UntypedFormControl('', [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.roleAliasLimitChar.value)]),
+            funcCodeList: new UntypedFormControl([], [ValidatorFns.requiredValidator()])
         });
         // this.form.statusChanges.subscribe(r => console.log(this.form.value))
         this.selected = [];
@@ -212,8 +213,8 @@ export class Ac0012Component extends BaseComponent implements OnInit {
 
 
                     this.form_page4 = this.fb.group({
-                        newRoleAlias: new FormControl(this.data_page4.roleAlias, [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.newRoleAliasLimitChar.value)]),
-                        funcCodeList: new FormControl([],ValidatorFns.requiredValidator())
+                        newRoleAlias: new UntypedFormControl(this.data_page4.roleAlias, [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.newRoleAliasLimitChar.value)]),
+                        funcCodeList: new UntypedFormControl([],ValidatorFns.requiredValidator())
                     });
                     this.update_page4(_funcCheckbox);
                     this.translate.get(codes_update).subscribe(dicts => {

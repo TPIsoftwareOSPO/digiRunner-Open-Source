@@ -10,9 +10,9 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormControl,
+  UntypedFormGroup,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { MappingUrlFieldComponent } from '../mapping-url-field/mapping-url-field.component';
@@ -31,16 +31,17 @@ interface _DPB0281ReqBlock extends DPB0281ReqBlock {
 }
 
 @Component({
-  selector: 'app-mapping-url-form',
-  templateUrl: './mapping-url-form.component.html',
-  styleUrls: ['./mapping-url-form.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => MappingUrlFormComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-mapping-url-form',
+    templateUrl: './mapping-url-form.component.html',
+    styleUrls: ['./mapping-url-form.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MappingUrlFormComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class MappingUrlFormComponent extends BaseComponent implements OnInit {
   onTouched!: () => void;
@@ -55,7 +56,7 @@ export class MappingUrlFormComponent extends BaseComponent implements OnInit {
   _equal100: boolean = false;
   @Output() percentValid: EventEmitter<boolean> = new EventEmitter();
   @Output() formValid: EventEmitter<boolean> = new EventEmitter();
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   formSubscription: Subscription | undefined;
 
   private _webhookType: string = '';
@@ -73,23 +74,23 @@ export class MappingUrlFormComponent extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     super(route, tr);
   }
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      authorization: new FormControl(),
-      to: new FormControl(),
-      notificationDisabled: new FormControl(),
-      subject: new FormControl(),
-      recipients: new FormControl(),
-      url: new FormControl(),
-      username: new FormControl(),
-      icon_emoji: new FormControl(),
-      channel: new FormControl(),
-      avatar_url: new FormControl(),
+      authorization: new UntypedFormControl(),
+      to: new UntypedFormControl(),
+      notificationDisabled: new UntypedFormControl(),
+      subject: new UntypedFormControl(),
+      recipients: new UntypedFormControl(),
+      url: new UntypedFormControl(),
+      username: new UntypedFormControl(),
+      icon_emoji: new UntypedFormControl(),
+      channel: new UntypedFormControl(),
+      avatar_url: new UntypedFormControl(),
     });
   }
 

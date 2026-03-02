@@ -4,6 +4,8 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
+import tpi.dgrv4.escape.CheckmarxUtils;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +50,8 @@ public class DisallowedMethodsHandlerFactory {
             
             if (DISALLOWED_METHODS.contains(method.toUpperCase())) {
                 httpResponse.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-                httpResponse.getWriter().write("Method Not Allowed");
+                //checkmarx, Missing HSTS Header
+                CheckmarxUtils.sanitizeForCheckmarx(httpResponse);
                 return;
             }
             

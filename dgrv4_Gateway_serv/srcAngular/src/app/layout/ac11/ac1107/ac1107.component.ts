@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { GroupAuthService } from 'src/app/shared/services/api-group-auth.service';
@@ -19,11 +19,12 @@ import { AA1108Req } from 'src/app/models/api/GroupAuthService/aa1108.interface'
     selector: 'app-ac1107',
     templateUrl: './ac1107.component.html',
     styleUrls: ['./ac1107.component.css'],
-    providers: [MessageService, ConfirmationService]
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac1107Component extends BaseComponent implements OnInit {
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     cols: { field: string; header: string; }[] = [];
     groupAuthoritiesList: Array<AA1115GroupAuthorities> = [];
     groupAuthoritiesListRowCount: number = 0;
@@ -38,7 +39,7 @@ export class Ac1107Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private translate: TranslateService,
         private groupAuthService: GroupAuthService,
         private tool: ToolService,
@@ -52,15 +53,15 @@ export class Ac1107Component extends BaseComponent implements OnInit {
 
     ngOnInit() {
         this.form = this.fb.group({
-            keyword: new FormControl(''),
-            groupAuthoritieId: new FormControl(''),
-            groupAuthoritieName: new FormControl(''),
-            groupAuthoritieDesc: new FormControl(''),
-            groupAuthoritieLevel: new FormControl(''),
-            oriGroupAuthoritieName: new FormControl(''),
-            newGroupAuthoritieName: new FormControl(''),
-            newGroupAuthoritieDesc: new FormControl(''),
-            newGroupAuthoritieLevel: new FormControl('')
+            keyword: new UntypedFormControl(''),
+            groupAuthoritieId: new UntypedFormControl(''),
+            groupAuthoritieName: new UntypedFormControl(''),
+            groupAuthoritieDesc: new UntypedFormControl(''),
+            groupAuthoritieLevel: new UntypedFormControl(''),
+            oriGroupAuthoritieName: new UntypedFormControl(''),
+            newGroupAuthoritieName: new UntypedFormControl(''),
+            newGroupAuthoritieDesc: new UntypedFormControl(''),
+            newGroupAuthoritieLevel: new UntypedFormControl('')
         });
         this.roleService.queryRTMapByUk({ txIdList: ['AA1106', 'AA1108', 'AA1109', 'AA1110'] } as DPB0115Req).subscribe(res => {
             if (this.tool.checkDpSuccess(res.ResHeader)) {

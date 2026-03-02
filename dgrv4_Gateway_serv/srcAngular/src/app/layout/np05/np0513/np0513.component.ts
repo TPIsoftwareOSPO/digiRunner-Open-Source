@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DPB0058RespItem, DPB0058Req } from 'src/app/models/api/JobService/dpb0058.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { JobService } from 'src/app/shared/services/api-job.service';
@@ -33,16 +33,17 @@ import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 // import { AjaxResponse } from 'rxjs/internal/observable/dom/AjaxObservable';
 
 @Component({
-  selector: 'app-np0513',
-  templateUrl: './np0513.component.html',
-  styleUrls: ['./np0513.component.css'],
-  providers: [StringLengthPipe, ConfirmationService]
+    selector: 'app-np0513',
+    templateUrl: './np0513.component.html',
+    styleUrls: ['./np0513.component.css'],
+    providers: [StringLengthPipe, ConfirmationService],
+    standalone: false
 })
 export class Np0513Component extends BaseComponent implements OnInit {
 
   @ViewChild('dialog') _dialog!: DialogComponent;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
   cols: { field: string; header: string; width?: string; type?: StringLengthPipe; }[] = [];
   dataList: Array<DPB0058RespItem> = [];
   rowcount: number = 0;
@@ -61,7 +62,7 @@ export class Np0513Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private job: JobService,
     private message: MessageService,
@@ -77,10 +78,10 @@ export class Np0513Component extends BaseComponent implements OnInit {
     this.sourceTitle = this.title;
 
     this.form = this.fb.group({
-      startDate: new FormControl('', ValidatorFns.requiredValidator()),
-      endDate: new FormControl('', ValidatorFns.requiredValidator()),
-      keyword: new FormControl(''),
-      status: new FormControl('')
+      startDate: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+      endDate: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+      keyword: new UntypedFormControl(''),
+      status: new UntypedFormControl('')
     });
   }
 

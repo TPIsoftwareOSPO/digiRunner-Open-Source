@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'api_status'
+    name: 'api_status',
+    standalone: false
 })
 export class IndexStatusPipe implements PipeTransform {
     transform(input: string): string {

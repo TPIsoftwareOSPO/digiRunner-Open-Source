@@ -18,6 +18,7 @@ import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.constant.DgrCusAcIdpLogin;
 import tpi.dgrv4.gateway.funcInterFace.CusLoginFailedHandler;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.gateway.util.CusAcLoginStateStore;
 import tpi.dgrv4.httpu.utils.HttpUtil;
 import tpi.dgrv4.httpu.utils.HttpUtil.HttpRespData;
@@ -107,9 +108,9 @@ public class AcCusIdPCallbackService extends CusIdPService {
 		String txnUid = CusAcLoginStateStore.INSTANCE.getState();
 
 		// 獲取 IP 地址，優先使用 X-Forwarded-For 標頭，如果沒有則使用遠端地址
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
-
+//		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
+//				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		// 獲取主機名稱
 		String userHostname = httpReq.getRemoteHost();
 

@@ -3,7 +3,8 @@ import { Pipe, PipeTransform  } from '@angular/core';
 
 
 @Pipe({
-  name: 'listbox_array_split'
+    name: 'listbox_array_split',
+    standalone: false
 })
 export class ListboxArraySplitPipe implements PipeTransform {
   

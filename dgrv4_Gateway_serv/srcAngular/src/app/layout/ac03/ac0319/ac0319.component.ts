@@ -29,10 +29,11 @@ import { TOrgService } from 'src/app/shared/services/org.service';
 
 
 @Component({
-  selector: 'app-ac0319',
-  templateUrl: './ac0319.component.html',
-  styleUrls: ['./ac0319.component.css'],
-  providers: [MessageService, ConfirmationService, ApiService],
+    selector: 'app-ac0319',
+    templateUrl: './ac0319.component.html',
+    styleUrls: ['./ac0319.component.css'],
+    providers: [MessageService, ConfirmationService, ApiService],
+    standalone: false
 })
 export class Ac0319Component extends BaseComponent implements OnInit {
   pageNum: number = 1;

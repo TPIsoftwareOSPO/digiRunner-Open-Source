@@ -1,5 +1,11 @@
 package tpi.dgrv4.tcp.utils.communication;
 
+import com.esotericsoftware.kryo.Kryo;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,13 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.esotericsoftware.kryo.Kryo;
-
-import tpi.dgrv4.tcp.utils.packets.sys.Packet_i;
 
 public class CommunicationServer implements Runnable {
 	private static Logger logger = LoggerFactory.getLogger(CommunicationServer.class);
@@ -41,9 +40,11 @@ public class CommunicationServer implements Runnable {
 	public UndertowMetricsInfoMap undertowMetricsInfos = new UndertowMetricsInfoMap();
 	public UrlStatusInfoMap urlStatusInfos = new UrlStatusInfoMap();
 	public RealtimeDashboardInfoMap realtimeDashboardInfos = new RealtimeDashboardInfoMap();
-
+    @Setter
+    private int packetQueueSize = 999;
 	public CommunicationServer(int port) {
 		this(port, null);
+        this.setPacketQueueSize(this.packetQueueSize);
 	}
 
 	public CommunicationServer(int port, Notifier notifier) {
@@ -104,7 +105,7 @@ public class CommunicationServer implements Runnable {
 			}
 		}
 
-		LinkerServer con = new LinkerServer(user, notifiers);
+		LinkerServer con = new LinkerServer(user, notifiers,this.packetQueueSize);
 		synchronized (connClinet) {
 			connClinet.add(con);
 			String remoteIp = con.getRemoteIP();

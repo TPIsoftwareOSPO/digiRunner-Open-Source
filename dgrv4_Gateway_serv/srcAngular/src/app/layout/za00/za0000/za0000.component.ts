@@ -14,9 +14,10 @@ import { filter } from 'rxjs';
 import { FrameComponent } from '../../components/frame/frame.component';
 
 @Component({
-  selector: 'app-za0000',
-  templateUrl: './za0000.component.html',
-  styleUrls: ['./za0000.component.css'],
+    selector: 'app-za0000',
+    templateUrl: './za0000.component.html',
+    styleUrls: ['./za0000.component.css'],
+    standalone: false
 })
 export class za0000Component extends BaseComponent implements OnInit {
   @ViewChild('frameRef', { read: ViewContainerRef, static: true })

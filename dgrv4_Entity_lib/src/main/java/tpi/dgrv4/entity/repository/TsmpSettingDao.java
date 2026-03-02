@@ -60,13 +60,14 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String ES_LOG_DISABLE = "ES_LOG_DISABLE";
 		public static final String ES_SYS_TYPE = "ES_SYS_TYPE";
 		public static final String ES_MONITOR_DISABLE = "ES_MONITOR_DISABLE";
-
+		public static final String ES_MBODY_MASK_RESERVED_CHAR = "ES_MBODY_MASK_RESERVED_CHAR";
 		// COMPOSER_ADDRESS
 		public static final String TSMP_COMPOSER_ADDRESS = "TSMP_COMPOSER_ADDRESS";
 
 		// Token
 		public static final String DGR_TOKEN_JWE_ENABLE = "DGR_TOKEN_JWE_ENABLE";
 		public static final String DGR_TOKEN_WHITELIST_ENABLE = "DGR_TOKEN_WHITELIST_ENABLE";
+		public static final String DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE = "DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE";
 
 		// API
 		public static final String DGR_TW_FAPI_ENABLE = "DGR_TW_FAPI_ENABLE";
@@ -160,8 +161,10 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 
 		public static final String DGR_PUBLIC_DOMAIN = "DGR_PUBLIC_DOMAIN";
 		public static final String DGR_PUBLIC_PORT = "DGR_PUBLIC_PORT";
+        public static final String DGR_PUBLIC_SCHEME = "DGR_PUBLIC_SCHEME";
 
 		public static final String DGR_COOKIE_TOKEN_ENABLE = "DGR_COOKIE_TOKEN_ENABLE";
+		public static final String DGR_SESSION_COOKIE_TOKEN_ENABLE = "DGR_SESSION_COOKIE_TOKEN_ENABLE";
 
 		public static final String DELETEMODULE_ALERT = "TSMP_DELETEMODULE_ALERT";
 
@@ -226,6 +229,7 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String KIBANA_LOGIN_URL = "KIBANA_LOGIN_URL";
 		public static final String KIBANA_LOGIN_REQUESTBODY = "KIBANA_LOGIN_REQUESTBODY";
 		public static final String KIBANA_STATUS_URL = "KIBANA_STATUS_URL";
+        public static final String KIBANA_COOKIE_BYPASS_PATHS = "KIBANA_COOKIE_BYPASS_PATHS";
 
 		public static final String DGR_AC_LOGIN_PAGE = "DGR_AC_LOGIN_PAGE";
 
@@ -301,6 +305,7 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
         public static final String HTTPUTIL_RESP_TIME_LOG = "HTTPUTIL_RESP_TIME_LOG";
 
         public static final String PROPERTIES_MASK_LIST = "PROPERTIES_MASK_LIST";
+
     }
 
 	public List<TsmpSetting> findByIdLike(String id);

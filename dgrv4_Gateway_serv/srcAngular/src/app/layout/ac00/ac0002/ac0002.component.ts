@@ -3,7 +3,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { UserService } from './../../../shared/services/api-user.service';
 import { DialogComponent } from './../../../shared/dialog/dialog.component';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormParams } from '../../../models/api/form-params.interface';
@@ -40,16 +40,17 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { OrganizationComponent } from 'src/app/shared/organization/organization.component';
 
 @Component({
-  selector: 'app-ac0002',
-  templateUrl: './ac0002.component.html',
-  styleUrls: ['./ac0002.component.css'],
-  providers: [ConfirmationService],
+    selector: 'app-ac0002',
+    templateUrl: './ac0002.component.html',
+    styleUrls: ['./ac0002.component.css'],
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Ac0002Component extends BaseComponent implements OnInit {
   @ViewChild('dialog') _dialog!: DialogComponent;
 
   orgList: AA1002List[] = [];
-  form: FormGroup;
+  form: UntypedFormGroup;
   roles: { label: string; value: string }[] = [];
   displayOrgChart: boolean = false;
   dialogTitle: string = '';
@@ -84,7 +85,7 @@ export class Ac0002Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private userService: UserService,
     private toolService: ToolService,
     private messageService: MessageService,
@@ -100,27 +101,27 @@ export class Ac0002Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      roleAlias: new FormControl({ value: '', disabled: true }),
-      roleName: new FormControl(''),
-      orgName: new FormControl({ value: '', disabled: true }),
-      keyword: new FormControl(''),
-      userName: new FormControl(''),
-      userAlias: new FormControl(''),
-      userBlock: new FormControl(''),
-      confirmUserBlock: new FormControl(''),
-      userMail: new FormControl(''),
-      encodeStatus: new FormControl(''),
-      orgID: new FormControl(''),
-      roleIDList: new FormControl([]),
-      newUserName: new FormControl(''),
-      newUserMail: new FormControl(''),
-      newUserAlias: new FormControl(''),
-      newStatus: new FormControl(''),
-      newRoleIDList: new FormControl([]),
-      newOrgID: new FormControl(''),
-      newOrgName: new FormControl({ value: '', disabled: true }),
-      resetBlock: new FormControl(false),
-      resetPwdFailTimes: new FormControl(false),
+      roleAlias: new UntypedFormControl({ value: '', disabled: true }),
+      roleName: new UntypedFormControl(''),
+      orgName: new UntypedFormControl({ value: '', disabled: true }),
+      keyword: new UntypedFormControl(''),
+      userName: new UntypedFormControl(''),
+      userAlias: new UntypedFormControl(''),
+      userBlock: new UntypedFormControl(''),
+      confirmUserBlock: new UntypedFormControl(''),
+      userMail: new UntypedFormControl(''),
+      encodeStatus: new UntypedFormControl(''),
+      orgID: new UntypedFormControl(''),
+      roleIDList: new UntypedFormControl([]),
+      newUserName: new UntypedFormControl(''),
+      newUserMail: new UntypedFormControl(''),
+      newUserAlias: new UntypedFormControl(''),
+      newStatus: new UntypedFormControl(''),
+      newRoleIDList: new UntypedFormControl([]),
+      newOrgID: new UntypedFormControl(''),
+      newOrgName: new UntypedFormControl({ value: '', disabled: true }),
+      resetBlock: new UntypedFormControl(false),
+      resetPwdFailTimes: new UntypedFormControl(false),
     });
     const codes = [
       'user_id',

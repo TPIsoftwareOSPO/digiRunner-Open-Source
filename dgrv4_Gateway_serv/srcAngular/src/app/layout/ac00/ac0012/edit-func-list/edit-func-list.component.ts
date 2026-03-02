@@ -5,15 +5,16 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { AA0013Req } from 'src/app/models/api/UserService/aa0013.interface';
 import { SidebarService } from 'src/app/layout/components/sidebar/sidebar.service';
 import { Menu } from 'src/app/models/menu.model';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
 import { RoleService } from 'src/app/shared/services/api-role.service';
 
 @Component({
-  selector: 'app-edit-func-list',
-  templateUrl: './edit-func-list.component.html',
-  styleUrls: ['./edit-func-list.component.css'],
-  providers: [FuncService]
+    selector: 'app-edit-func-list',
+    templateUrl: './edit-func-list.component.html',
+    styleUrls: ['./edit-func-list.component.css'],
+    providers: [FuncService],
+    standalone: false
 })
 export class EditFuncListComponent implements OnInit {
   @Input() data?: FormParams;
@@ -25,7 +26,7 @@ export class EditFuncListComponent implements OnInit {
   selecteds: { name: string; code: string; }[] = [];
   funcs: { name: string; code: string; }[] = [];
   menus: Menu[] = [];
-  form: FormGroup;
+  form: UntypedFormGroup;
   newRoleAliasLimitChar = { value: 30 };
   selectedFuncList: any = [];
 
@@ -33,10 +34,10 @@ export class EditFuncListComponent implements OnInit {
     private roleService: RoleService,
     private toolService: ToolService,
     private sidebarService: SidebarService,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     this.form = this.fb.group({
-      newRoleAlias: new FormControl(this.data?.data.roleAlias, [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.newRoleAliasLimitChar.value)])
+      newRoleAlias: new UntypedFormControl(this.data?.data.roleAlias, [ValidatorFns.requiredValidator(), ValidatorFns.stringAliasValidator(this.newRoleAliasLimitChar.value)])
     });
   }
 

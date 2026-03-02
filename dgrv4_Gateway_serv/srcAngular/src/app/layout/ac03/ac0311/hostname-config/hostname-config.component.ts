@@ -13,14 +13,15 @@ export interface _AA0311RedirectByIpData extends AA0311RedirectByIpData {
 }
 
 @Component({
-  selector: 'app-hostname-config',
-  templateUrl: './hostname-config.component.html',
-  styleUrls: ['./hostname-config.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => HostnameConfigComponent),
-    multi: true
-  }]
+    selector: 'app-hostname-config',
+    templateUrl: './hostname-config.component.html',
+    styleUrls: ['./hostname-config.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => HostnameConfigComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class HostnameConfigComponent implements OnInit {
 

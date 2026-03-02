@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { AA1101Req } from 'src/app/models/api/SecurityService/aa1101.interface';
@@ -16,28 +16,29 @@ import { BaseComponent } from '../../base-component';
 @Component({
     selector: 'app-ac1116',
     templateUrl: './ac1116.component.html',
-    styleUrls: ['./ac1116.component.css']
+    styleUrls: ['./ac1116.component.css'],
+    standalone: false
 })
 export class Ac1116Component extends BaseComponent implements OnInit {
 
     currentTitle: string = this.title;
     pageNum: number = 1; // 1: 查詢、2: 建立、3: 更新、4: 刪除
-    queryForm!: FormGroup;
+    queryForm!: UntypedFormGroup;
     canCreate: boolean = false;
     canUpdate: boolean = false;
     canDelete: boolean = false;
     cols: { field: string; header: string; }[] = [];
     dataList: Array<AA1116Item> = [];
     rowcount: number = 0;
-    createForm!: FormGroup;
-    updateForm!: FormGroup;
+    createForm!: UntypedFormGroup;
+    updateForm!: UntypedFormGroup;
     securityLevelDetail?: AA1105Resp;
-    deleteForm!: FormGroup;
+    deleteForm!: UntypedFormGroup;
 
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private roleService: RoleService,
         private toolSerive: ToolService,
         private securityService: SecurityService,
@@ -48,22 +49,22 @@ export class Ac1116Component extends BaseComponent implements OnInit {
 
     ngOnInit() {
         this.queryForm = this.fb.group({
-            keyword: new FormControl('')
+            keyword: new UntypedFormControl('')
         });
         this.createForm = this.fb.group({
-            securityLevelId: new FormControl(''),
-            securityLevelName: new FormControl(''),
-            securityLevelDesc: new FormControl('')
+            securityLevelId: new UntypedFormControl(''),
+            securityLevelName: new UntypedFormControl(''),
+            securityLevelDesc: new UntypedFormControl('')
         });
         this.updateForm = this.fb.group({
-            securityLevelId: new FormControl(''),
-            newSecurityLevelName: new FormControl(''),
-            newSecurityLevelDesc: new FormControl('')
+            securityLevelId: new UntypedFormControl(''),
+            newSecurityLevelName: new UntypedFormControl(''),
+            newSecurityLevelDesc: new UntypedFormControl('')
         });
         this.deleteForm = this.fb.group({
-            securityLevelId: new FormControl(''),
-            securityLevelName: new FormControl(''),
-            securityLevelDesc: new FormControl('')
+            securityLevelId: new UntypedFormControl(''),
+            securityLevelName: new UntypedFormControl(''),
+            securityLevelDesc: new UntypedFormControl('')
         });
         // 功能權限
         this.roleService.queryRTMapByUk({ txIdList: ['AA1101', 'AA1103', 'AA1104'] }).subscribe(res => {

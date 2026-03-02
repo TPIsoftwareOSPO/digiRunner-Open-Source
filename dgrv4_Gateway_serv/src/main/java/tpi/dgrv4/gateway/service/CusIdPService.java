@@ -3,7 +3,6 @@ package tpi.dgrv4.gateway.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +11,7 @@ import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.gateway.component.AcIdPHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 
 @Service
 public class CusIdPService {
@@ -68,8 +68,9 @@ public class CusIdPService {
 		// 取得 UID
 		String txnUid = getDgrAuditLogService().getTxnUid();
 		// 取得使用者 IP
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
+//		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
+//				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		// 取得使用者主機名
 		String userHostname = httpReq.getRemoteHost();
 

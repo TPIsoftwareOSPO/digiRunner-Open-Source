@@ -87,7 +87,8 @@
               <label class="control-label">{{'labelList'|translate}}</label>
               <div style="display:block">
                 <p-multiSelect #labelFilter [options]="lblList" [(ngModel)]="selLabelList" appendTo="body"
-                  [emptyFilterMessage]="'no_data_result'|translate" defaultLabel="{{'plz_chs' | translate}}"
+                  [emptyFilterMessage]="'no_data_result'|translate"
+                  placeholder="{{'plz_chs' | translate}}"
                   showClear="true" display="chip" [emptyMessage]="'no_data_result'|translate"
                   [style]="{'width':'100%'}">
                 </p-multiSelect>
@@ -139,7 +140,7 @@
         </div>
       </form>
     </p-overlayPanel>
-    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" [(selection)]="selected" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" [(selection)]="selected" styleClass="p-datatable-gridlines p-datatable-striped"
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="caption">
         <div class="field-flex-space-between">
@@ -180,7 +181,7 @@
           <div class="field-flex-center">
 
             <button type="button" *ngIf="canImport" title="{{ 'upload_reg_comp_api_file' | translate }}"
-              class="btn tpi-primary tpi-btn me-1" (click)="changePage('import')">
+              class="btn tpi-primary tpi-btn me-1" (click)="changePage('import')" [disabled]="isExpired">
               {{ "upload_reg_comp_api_file" | translate }}
             </button>
             <p-menu styleClass="view-mode-menu" #menu [popup]="true" appendTo="body" [model]="ModeItems"></p-menu>
@@ -710,7 +711,7 @@
             <div style="display: block">
 
               <p-multiSelect [options]="methodOfJsons" formControlName="methodOfJson"
-                defaultLabel="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }"
+                placeholder="{{ 'plz_chs' | translate }}" [style]="{ width: '100%' }"
                 [hidden]="apiDetail.apiSrc.v==='C'">
               </p-multiSelect>
               <p-dropdown [options]="methodOfJsons" formControlName="methodOfJson" [hidden]="apiDetail.apiSrc.v!=='C'"
@@ -801,7 +802,7 @@
       </div>
       <div class="form-group row" *ngIf="apiDetail.apiSrc.v !='C' && isWebhook">
         <div class="col-6">
-          <label id="headerMask_label" class="control-label">Webhook Notify Name</label>
+          <label id="headerMask_label" class="control-label">AI Proxy Notify Name</label>
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="notifyNameList" readonly>
             <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
@@ -923,7 +924,7 @@
                 'mask.body_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label> -->
             </div>
-            <div class="p-form-check">
+            <div class="p-form-check mb-2">
               <p-radioButton formControlName="bodyMaskPolicy" value="4" inputId="bodyMaskPolicy4"></p-radioButton>
               <label for="bodyMaskPolicy4" class="ms-2 mb-0">Policy 4: {{
                 'mask.body_after_regex'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
@@ -934,8 +935,25 @@
                 'mask.body_after_regex'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label> -->
             </div>
-            <div class="mt-1"
-              *ngIf="bodyMaskPolicy.value=='1'||bodyMaskPolicy.value=='2'||bodyMaskPolicy.value=='3'||bodyMaskPolicy.value=='4'">
+            <div class="p-form-check mb-2">
+              <p-radioButton formControlName="bodyMaskPolicy" value="5" inputId="bodyMaskPolicy5"></p-radioButton>
+              <label for="bodyMaskPolicy5" class="ms-2 mb-0">Policy 5: {{
+                'mask.body_remain_before_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
+                mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+            </div>
+            <div class="p-form-check mb-2">
+              <p-radioButton formControlName="bodyMaskPolicy" value="6" inputId="bodyMaskPolicy6"></p-radioButton>
+              <label for="bodyMaskPolicy6" class="ms-2 mb-0">Policy 6: {{
+                'mask.body_remain_before'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
+                mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+            </div>
+            <div class="p-form-check mb-2">
+              <p-radioButton formControlName="bodyMaskPolicy" value="7" inputId="bodyMaskPolicy7"></p-radioButton>
+              <label for="bodyMaskPolicy7" class="ms-2 mb-0">Policy 7: {{
+                'mask.body_remain_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
+                mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
+            </div>
+            <div class="mt-1" *ngIf="bodyMaskPolicy.value!=='0'">
               <label class="control-label required me-1" style="font-weight: 400;">{{'mask.word'|translate}}</label>
               <input type="number" [min]="1" [max]="9999" class="form-control me-2" formControlName="bodyMaskPolicyNum"
                 style="display: inline;width: 75px;" />
@@ -944,18 +962,28 @@
                 [minlength]="1" [maxlength]="10" (focusout)="checkbodyMaskPolicySymbol()" />
             </div>
           </div>
-          <div class="col-12 pe-0"
-            *ngIf="bodyMaskPolicy.value=='1'||bodyMaskPolicy.value=='2'||bodyMaskPolicy.value=='3'||bodyMaskPolicy.value=='4'">
-            <div class="col-12 px-0 form-group" style="align-items: center;display: flex;">
+          <div class="col-12 pe-0">
+            <div class="col-12 px-0 form-group" style="align-items: center;display: flex;"
+              *ngIf="bodyMaskPolicy.value=='1'||bodyMaskPolicy.value=='2'||bodyMaskPolicy.value=='3'||bodyMaskPolicy.value=='4'">
               <label class="control-label required me-1" style="white-space: nowrap;">{{ bodyMaskPolicy.value=='4'?
                 'Regular expression':'keyword'|translate }}</label>
               <input type="text" class="form-control" formControlName="bodyMaskKeyword"
                 [placeholder]="bodyMaskPolicy.value=='4'?'':('input_example.text' | translate)">
             </div>
-            <div class="col-12 px-0">
+            <div class="col-12 px-0"
+              [hidden]="bodyMaskPolicy.value=='5'||bodyMaskPolicy.value=='6'||bodyMaskPolicy.value=='7'">
               <label class="control-label">Example: {{ bodyMaskPolicy.value=='4'?
                 ("mask.body_example_regex"|translate):
                 ("mask.body_example"|translate) }}</label>
+            </div>
+            <div class="col-12 px-0"
+              [hidden]="bodyMaskPolicy.value!='5'&&bodyMaskPolicy.value!='6'&&bodyMaskPolicy.value!='7'">
+              <label *ngIf="bodyMaskPolicy.value=='5'" class="control-label">Example:
+                {{"mask.body_remain_before_after_exp"|translate}}</label>
+              <label *ngIf="bodyMaskPolicy.value=='6'" class="control-label">Example:
+                {{"mask.body_remain_before_after_exp"|translate}}</label>
+              <label *ngIf="bodyMaskPolicy.value=='7'" class="control-label">Example:
+                {{"mask.body_remain_before_after_exp"|translate}}</label>
             </div>
           </div>
         </div>
@@ -1356,7 +1384,7 @@
 <p-confirmDialog key="cd" #cd [style]="{ width: '50vw' }" icon="pi pi-exclamation-triangle"
   styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center">
+    <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check" [ngStyle]="{
           backgroundColor: 'var(--red-300)',
           'border-color': 'var(--red-300)'
@@ -1370,7 +1398,7 @@
 <p-confirmDialog key="del" #del [style]="{ width: '50vw' }" icon="pi pi-exclamation-triangle"
   styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center">
+    <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check" [ngStyle]="{
           backgroundColor: 'var(--red-300)',
           'border-color': 'var(--red-300)'

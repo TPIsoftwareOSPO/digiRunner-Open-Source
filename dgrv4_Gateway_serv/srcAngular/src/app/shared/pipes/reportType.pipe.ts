@@ -3,7 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 @Pipe({
-  name: 'reportType',
+    name: 'reportType',
+    standalone: false
 })
 export class ReportTypePipe implements PipeTransform {
   constructor(private translateService: TranslateService) {}

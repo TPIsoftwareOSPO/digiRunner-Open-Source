@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ServerService } from 'src/app/shared/services/api-server.service';
@@ -18,17 +18,18 @@ export enum RDBinit {
 }
 
 @Component({
-  selector: 'app-rdb-connection',
-  templateUrl: './rdb-connection.component.html',
-  styleUrls: ['./rdb-connection.component.css'],
-  providers: [MessageService, ConfirmationService]
+    selector: 'app-rdb-connection',
+    templateUrl: './rdb-connection.component.html',
+    styleUrls: ['./rdb-connection.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class RdbConnectionComponent extends BaseComponent implements OnInit {
 
   currentTitle = this.title;
   pageNum: number = 1;
 
-  formEdit!: FormGroup;
+  formEdit!: UntypedFormGroup;
   currentAction: string = '';
   tableData: Array<DPB0190RespItem> = [];
 
@@ -39,12 +40,14 @@ jdbc:postgresql://{{hostname}}:{{port}}/{{databaseName}}
 Oracle:
 jdbc:oracle:thin:@{{hostname}}:{{port}}:{{databaseName}}
 SQL Server:
-jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServerCertificate=true`
+jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServerCertificate=true
+Informix:
+jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{serverName}}`
 
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private confirmationService: ConfirmationService,
     private serverService: ServerService,
@@ -57,19 +60,19 @@ jdbc:sqlserver://{{hostname}}:{{port}};databaseName={{databaseName}}; trustServe
   ngOnInit(): void {
 
     this.formEdit = this.fb.group({
-      connectionName: new FormControl(''),
-      jdbcUrl: new FormControl(''),
-      userName: new FormControl(''),
-      mima: new FormControl(''),
-      maxPoolSize: new FormControl(''),
-      connectionTimeout: new FormControl(''),
-      idleTimeout: new FormControl(''),
-      maxLifetime: new FormControl(''),
-      dataSourceProperty: new FormControl([]),
-      createDateTime: new FormControl(''),
-      createUser: new FormControl(''),
-      updateDateTime: new FormControl(''),
-      updateUser: new FormControl(''),
+      connectionName: new UntypedFormControl(''),
+      jdbcUrl: new UntypedFormControl(''),
+      userName: new UntypedFormControl(''),
+      mima: new UntypedFormControl(''),
+      maxPoolSize: new UntypedFormControl(''),
+      connectionTimeout: new UntypedFormControl(''),
+      idleTimeout: new UntypedFormControl(''),
+      maxLifetime: new UntypedFormControl(''),
+      dataSourceProperty: new UntypedFormControl([]),
+      createDateTime: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      updateDateTime: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
     });
 
     this.serverService.queryRdbConnectionInfoList_ignore1298().subscribe(res => {

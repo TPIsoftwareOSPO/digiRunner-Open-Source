@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { ListService } from 'src/app/shared/services/api-list.service';
@@ -22,13 +22,14 @@ import { AA0321Req, AA0321RespItem } from 'src/app/models/api/ApiService/aa0321.
     selector: 'app-ac1302',
     templateUrl: './ac1302.component.html',
     styleUrls: ['./ac1302.component.css'],
-    providers:[ApiService]
+    providers: [ApiService],
+    standalone: false
 })
 export class Ac1302Component extends BaseComponent implements OnInit {
 
     currentTitle: string = this.title;
     pageNum: number = 1;
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     canvas: any;
     ctx: any;
     timeTypes: { label: string; value: string }[] = [];
@@ -48,7 +49,7 @@ export class Ac1302Component extends BaseComponent implements OnInit {
     constructor(
         router: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private toolService: ToolService,
         private list: ListService,
         private apiService: ApiService,
@@ -59,14 +60,14 @@ export class Ac1302Component extends BaseComponent implements OnInit {
         super(router, tr);
 
         this.form = this.fb.group({
-          timeType: new FormControl('DAY'),
-          apiUidList: new FormControl([]),
-          apiNameList: new FormControl([]),
-          startDate: new FormControl(''),
-          endDate: new FormControl(''),
-          keyword: new FormControl(''),
-          startHour: new FormControl('00'),
-          endHour: new FormControl('23')
+          timeType: new UntypedFormControl('DAY'),
+          apiUidList: new UntypedFormControl([]),
+          apiNameList: new UntypedFormControl([]),
+          startDate: new UntypedFormControl(''),
+          endDate: new UntypedFormControl(''),
+          keyword: new UntypedFormControl(''),
+          startHour: new UntypedFormControl('00'),
+          endHour: new UntypedFormControl('23')
       });
     }
 

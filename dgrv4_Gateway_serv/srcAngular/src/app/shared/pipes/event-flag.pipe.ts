@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'event_flag'
+    name: 'event_flag',
+    standalone: false
 })
 export class EventFlagPipe implements PipeTransform {
     transform(input: any, separator: string = ' ', limit?: number): any {

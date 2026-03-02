@@ -1,4 +1,4 @@
-import { FormGroup, FormBuilder, FormControl, FormArray } from '@angular/forms';
+import { FormGroup, UntypedFormBuilder, UntypedFormControl, FormArray } from '@angular/forms';
 import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectionStrategy, SimpleChange, OnChanges, AfterViewInit } from '@angular/core';
 import { Menu } from 'src/app/models/menu.model';
 import { ListGroupComponent } from './list-group.component';
@@ -7,7 +7,7 @@ import { ListGroupComponent } from './list-group.component';
     selector: 'app-list-groups',
     templateUrl: './list-groups.component.html',
     styleUrls: ['./list-group.component.css'],
-    // changeDetection: ChangeDetectionStrategy.OnPush
+    standalone: false
 })
 export class ListGroupsComponent extends ListGroupComponent implements OnInit, OnChanges, AfterViewInit {
 
@@ -19,7 +19,7 @@ export class ListGroupsComponent extends ListGroupComponent implements OnInit, O
     @Input() override disableCheckbox: boolean = false;
 
     constructor(
-         fb: FormBuilder
+         fb: UntypedFormBuilder
     ) {
         super(fb);
         this.form = this.fb.group([]);
@@ -45,10 +45,10 @@ export class ListGroupsComponent extends ListGroupComponent implements OnInit, O
         if (this.menus) {
             this.newMenus = JSON.parse(JSON.stringify(this.menus));
             this.newMenus?.forEach((newMenu, i) => {
-                this.form.addControl(newMenu.main.replace(/-/g, '|'), new FormControl({ value: false, disabled: this.disableCheckbox }));
+                this.form.addControl(newMenu.main.replace(/-/g, '|'), new UntypedFormControl({ value: false, disabled: this.disableCheckbox }));
                 newMenu.subs?.forEach((subMenu, j) => {
                     let defaultChecked = this.selected.findIndex(sel => sel.moduleName === newMenu.main && sel.apiKey === subMenu.value) != -1;
-                    this.form.addControl(newMenu.main.replace(/-/g, '|') + '-' + j, new FormControl({ value: defaultChecked, disabled: this.disableCheckbox }));
+                    this.form.addControl(newMenu.main.replace(/-/g, '|') + '-' + j, new UntypedFormControl({ value: defaultChecked, disabled: this.disableCheckbox }));
                 })
             });
             Object.keys(this.form.controls).filter(ctl => ctl.split('-').length == 1).forEach(m => {

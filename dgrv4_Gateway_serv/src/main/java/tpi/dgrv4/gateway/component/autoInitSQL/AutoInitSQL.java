@@ -212,11 +212,13 @@ public class AutoInitSQL {
 			insertAuthorities();
 			TPILogger.tl.info("Insert Authorities Finish ");
 			deleteTheOldTsmpDpItem();
-			TPILogger.tl.info("delete TsmpDpItem Finish ");
+			TPILogger.tl.info("Delete TsmpDpItem Finish ");
 			insertTsmpDpItems();
 			TPILogger.tl.info("Insert TsmpDpItems Finish ");
 			insertTsmpRtnCode();
 			TPILogger.tl.info("Insert TsmpRtnCode Finish ");
+			updateTsmpSettingByMemo();
+			TPILogger.tl.info("Update TsmpSetting by memo Finish ");
 			insertTsmpSetting();
 			TPILogger.tl.info("Insert TsmpSetting Finish ");
 			insertTsmpClient();
@@ -597,6 +599,25 @@ public class AutoInitSQL {
 		LicenseEditionTypeVo licenseEditionTypeVo = LicenseEditionTypeVo.resolve(licenseEdition.name());
 
 		return licenseEditionTypeVo;
+	}
+	
+	private void updateTsmpSettingByMemo() {
+		 String str = "Obsolete and change the method: Please edit the API Log Body Mask Policy for these APIs. ";
+		 TsmpSetting vo = getTsmpSettingDao().findById("ES_MBODY_MASK_API").orElse(null);
+		 if(vo != null && vo.getMemo()!= null) {
+			 if(!vo.getMemo().startsWith(str)) {
+				 vo.setMemo(str + vo.getMemo());
+				 getTsmpSettingDao().save(vo);
+			 }
+		 }
+		 
+		 vo = getTsmpSettingDao().findById("ES_DGRC_MBODY_MASK_URI").orElse(null);
+		 if(vo != null && vo.getMemo()!= null) {
+			 if(!vo.getMemo().startsWith(str)) {
+				 vo.setMemo(str + vo.getMemo());
+				 getTsmpSettingDao().save(vo);
+			 }
+		 }
 	}
 
 	private void insertTsmpSetting() {

@@ -1023,6 +1023,7 @@ INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CUS_MODULE_NAME1', '', 'Cust
 -- Different settings for each server
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('UDPSSO_LOGIN_NETWORK', '192.168.0.0/23,192.168.0.0/24,127.0.0.0/24', 'Network segments that can be logged in, multiple CIDRs are separated by commas');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_CREDENTIALS_DEFAULT_USERNAME', 'true', 'client_credentials get token "default userName" enablement (true/false)');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_SESSION_COOKIE_TOKEN_ENABLE', 'false', 'Specifies whether the session cookie token is enabled. The default value is false (true/false).');
 
 DELETE FROM tsmp_dp_mail_tplt WHERE mailtplt_id BETWEEN 10000000 AND 10000050;
 INSERT INTO tsmp_dp_mail_tplt (mailtplt_id, code, template_txt, remark, create_date_time, create_user, version) VALUES (10000000, 'subject.member-pass', 'API Portal - User Account Application Notification', 'DPB0005', current_timestamp, 'SYSTEM', 1);

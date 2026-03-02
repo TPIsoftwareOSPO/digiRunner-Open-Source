@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.JWEcodec;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.constant.DgrIdPType;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
@@ -44,6 +45,7 @@ import tpi.dgrv4.gateway.component.LdapHelper.LdapAdAuthData;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
+import tpi.dgrv4.gateway.vo.JweEncryptionResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 
 /**
@@ -71,6 +73,7 @@ public class GtwIdPLoginService {
 	private IdPApiHelper idPApiHelper;
 	private DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao;	
 	private TsmpCoreTokenEntityHelper tsmpCoreTokenEntityHelper;
+	private JweEncryptionService jweEncryptionService;
 	
 	@Value("${digi.url.prefix:}")
     private String urlPrefix;
@@ -88,7 +91,7 @@ public class GtwIdPLoginService {
 			LdapHelper ldapHelper, DgrGtwIdpInfoLDao dgrGtwIdpInfoLDao, DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJDao,
 			DgrGtwIdpInfoADao dgrGtwIdpInfoADao, GtwIdPHelper gtwIdPHelper, TsmpTAEASKHelper tsmpTAEASKHelper,
 			IdPJdbcHelper idPJdbcHelper, IdPApiHelper idPApiHelper, DgrGtwIdpInfoJdbcDao dgrGtwIdpInfoJdbcDao,
-			TsmpCoreTokenEntityHelper tsmpCoreTokenEntityHelper) {
+			TsmpCoreTokenEntityHelper tsmpCoreTokenEntityHelper,JweEncryptionService jweEncryptionService) {
 		super();
 		this.objectMapper = objectMapper;
 		this.tsmpSettingService = tsmpSettingService;
@@ -106,6 +109,7 @@ public class GtwIdPLoginService {
 		this.idPApiHelper = idPApiHelper;
 		this.dgrGtwIdpInfoJdbcDao = dgrGtwIdpInfoJdbcDao;
 		this.tsmpCoreTokenEntityHelper = tsmpCoreTokenEntityHelper;
+		this.jweEncryptionService = jweEncryptionService;
 	}
 
 	public ResponseEntity<?> gtwIdPLogin(HttpHeaders httpHeaders, HttpServletRequest httpReq,
@@ -126,8 +130,10 @@ public class GtwIdPLoginService {
 
 		String reqUri = httpReq.getRequestURI();
 		String dgrClientRedirectUri = httpReq.getParameter("redirect_uri");
-		String userIp = ServiceUtil.getIpAddress(httpReq);
-		
+//		String userIp = ServiceUtil.getIpAddress(httpReq);
+		String userIp = ClientIpUtil.getClientIp(httpReq);
+
+
 		//checkmarx, Frameable Login Page, 已通過中風險
 		httpResp.setHeader("X-Frame-Options", "sameorigin");
 		//checkmarx, Missing HSTS Header
@@ -748,16 +754,38 @@ public class GtwIdPLoginService {
 		URL urlObj = new URL(dgrConsentUiUrl);
 		dgrConsentUiUrl = urlObj.getPath();// 使用相對路徑
 		
-		 if(StringUtils.hasText(urlPrefix)) {
-			 dgrConsentUiUrl = urlPrefix + dgrConsentUiUrl;
-		 }
+		boolean isUnjwe = false;
+		if(dgrConsentUiUrl.indexOf("/v2/") > -1) {
+			isUnjwe = true;
+		}
+		
+		if(StringUtils.hasText(urlPrefix)) {
+			dgrConsentUiUrl = urlPrefix + dgrConsentUiUrl;
+		}
 
-		String redirectUrl = String.format(
-				"%s" + "?response_type=%s" + "&client_id=%s" + "&scope=%s" + "&redirect_uri=%s" + "&state=%s"
-						+ "&username=%s",
-				dgrConsentUiUrl, IdPHelper.getUrlEncode(responseType), IdPHelper.getUrlEncode(dgrClientId),
-				IdPHelper.getUrlEncode(openIdScopeStr), IdPHelper.getUrlEncode(dgrClientRedirectUri),
-				IdPHelper.getUrlEncode(state), IdPHelper.getUrlEncode(reqUserName));
+		
+		String redirectUrl = null;
+		
+		if(isUnjwe) {
+			Map<String, String> paramMap = new HashMap<>();
+			paramMap.put("username", reqUserName);
+			JweEncryptionResp unjweResp = this.getJweEncryptionService().jweEncryption(paramMap);
+			String strUnjwe = unjweResp.getText();
+			redirectUrl = String.format(
+					"%s" + "?response_type=%s" + "&client_id=%s" + "&scope=%s" + "&redirect_uri=%s" + "&state=%s"
+							+ "&unjwe=%s",
+					dgrConsentUiUrl, IdPHelper.getUrlEncode(responseType), IdPHelper.getUrlEncode(dgrClientId),
+					IdPHelper.getUrlEncode(openIdScopeStr), IdPHelper.getUrlEncode(dgrClientRedirectUri),
+					IdPHelper.getUrlEncode(state), strUnjwe);
+		}else {
+			redirectUrl = String.format(
+					"%s" + "?response_type=%s" + "&client_id=%s" + "&scope=%s" + "&redirect_uri=%s" + "&state=%s"
+							+ "&username=%s",
+					dgrConsentUiUrl, IdPHelper.getUrlEncode(responseType), IdPHelper.getUrlEncode(dgrClientId),
+					IdPHelper.getUrlEncode(openIdScopeStr), IdPHelper.getUrlEncode(dgrClientRedirectUri),
+					IdPHelper.getUrlEncode(state), IdPHelper.getUrlEncode(reqUserName));
+		}
+		
 		return redirectUrl;
 	}
 
@@ -824,4 +852,10 @@ public class GtwIdPLoginService {
 	protected TsmpCoreTokenEntityHelper getTsmpCoreTokenEntityHelper() {
 		return tsmpCoreTokenEntityHelper;
 	}
+
+	protected JweEncryptionService getJweEncryptionService() {
+		return jweEncryptionService;
+	}
+	
+	
 }

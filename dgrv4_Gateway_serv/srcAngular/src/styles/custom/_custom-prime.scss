@@ -185,15 +185,29 @@
     }
   }
 }
-.p-menu .p-menuitem-link {
+.p-menu .p-menuitem-link,
+.p-menu .p-menuitem-content {
+  padding: 0.325rem;
   &:not(.p-disabled):hover {
     background: #fcf0d3;
+
+    /* 注意：因為 icon 和 text 已經在您自定義的結構中，
+       它們的父層是 .p-menuitem-link 或 .p-menuitem-content */
     .p-menuitem-icon,
     .p-menuitem-text {
       color: var(--tpi-primary);
     }
   }
 }
+// .p-menu .p-menuitem-link {
+//   &:not(.p-disabled):hover {
+//     background: #fcf0d3;
+//     .p-menuitem-icon,
+//     .p-menuitem-text {
+//       color: var(--tpi-primary);
+//     }
+//   }
+// }
 .p-listbox {
   border: 1px solid #ced4da;
   .p-listbox-filter-container {
@@ -261,6 +275,45 @@
 .p-datatable .p-sortable-column.p-highlight{
     &:hover {
         background-color: var(--tpi-orange);
-     }  
+     }
   background-color: var(--tpi-primary);
+}
+
+p-table .p-datatable {
+    // 確保整個表格有單一的外圍邊框
+    // border: 0px solid var(--surface-d, #dee2e6) !important;
+
+    .p-datatable-wrapper > table {
+        border-collapse: collapse !important;
+    }
+
+    .p-datatable-tbody > tr > td,
+    .p-datatable-thead > tr > th,
+    .p-datatable-tfoot > tr > td {
+        border: 1px solid var(--surface-d, #dee2e6) !important;
+    }
+}
+
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+    background: #EA7448;
+    border-color: #ea7448;
+    color:#fff;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    color:#333;
+    text-decoration: none;
+}
+
+.p-menu .p-menuitem > .p-menuitem-content .p-menuitem-link {
+  text-decoration: none;
+}
+
+.p-menu .p-menuitem > .p-menuitem-content {
+  // padding: 0.657rem;
+  // &:hover {
+  //   background: #fcf0d3;
+  //   color: var(--tpi-primary);
+  // }
 }

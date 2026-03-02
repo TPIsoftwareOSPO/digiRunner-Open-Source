@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder } from "@angular/forms";
+import { UntypedFormBuilder } from "@angular/forms";
 import { TranslateService } from "@ngx-translate/core";
 import { MessageService } from "primeng/api";
 import { DynamicDialogConfig, DynamicDialogRef } from "primeng/dynamicdialog";
@@ -10,10 +10,11 @@ import * as base64 from 'js-base64';
 import { ApiService } from "src/app/shared/services/api-api.service";
 
 @Component({
-  selector: 'app-api-detail-content',
-  templateUrl: './api-detail-content.component.html',
-  styleUrls: ['./api-detail-content.component.css'],
-  providers:[ApiService]
+    selector: 'app-api-detail-content',
+    templateUrl: './api-detail-content.component.html',
+    styleUrls: ['./api-detail-content.component.css'],
+    providers: [ApiService],
+    standalone: false
 })
 export class ApiDetailContentComponent implements OnInit {
   apiDetail!: AA0302Resp;
@@ -29,7 +30,7 @@ export class ApiDetailContentComponent implements OnInit {
     private toolService: ToolService,
     private translateService: TranslateService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private ref: DynamicDialogRef,
     private config: DynamicDialogConfig,
     private apiService: ApiService,

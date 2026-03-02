@@ -12,16 +12,15 @@ import { ParamItemComponent } from './param-item/param-item.component';
 
 
 @NgModule({
-  imports: [
-    CommonModule,
-    Ac0509RoutingModule,
-    PrimengModule,
-    SharedModule,
-    ReactiveFormsModule,
-    FormsModule
-  ],
-  declarations: [Ac0509Component,ParamItemComponent],
-  providers:[UserService,TokenExpiredGuard],
-  entryComponents:[ParamItemComponent]
+    imports: [
+        CommonModule,
+        Ac0509RoutingModule,
+        PrimengModule,
+        SharedModule,
+        ReactiveFormsModule,
+        FormsModule
+    ],
+    declarations: [Ac0509Component, ParamItemComponent],
+    providers: [UserService, TokenExpiredGuard]
 })
 export class Ac0509Module { }

@@ -1,26 +1,27 @@
 package tpi.dgrv4.dpaa.component;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.LinkedList;
+
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.dpaa.vo.UndertowConfigInfo;
 import tpi.dgrv4.entity.component.ITsmpCoreTokenInitializerInit;
 import tpi.dgrv4.entity.component.IVersionService;
+import tpi.dgrv4.gateway.config.CustomizeTomcatConfig;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
-import java.util.LinkedList;
-
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Component
 public class TsmpCoreTokenInitializerInit implements ITsmpCoreTokenInitializerInit {
 
-	private IVersionService versionService;
-
-	@Autowired
-	public TsmpCoreTokenInitializerInit(IVersionService versionService) {
-		super();
-		this.versionService = versionService;
-	}
+	private final IVersionService versionService;
+	private final CustomizeTomcatConfig customizeTomcatConfig;
 
 	@Override
 	public StringBuffer init(ContextRefreshedEvent e, StringBuffer info) {
@@ -45,6 +46,7 @@ public class TsmpCoreTokenInitializerInit implements ITsmpCoreTokenInitializerIn
 		info.append("\n ...server.servlet.context-path = " + context_path);
 		info.append("\n ...spring.profiles.active = " + env.getProperty("spring.profiles.active"));
 		info.append("\n ...NodeName = " + TPILogger.lc.userName);
+		info.append("\n ...Tomcat = \n" + customizeTomcatConfig.serverInfo);
 		TPILogger.lc.param.put("server.port", webServerPort);
 		TPILogger.lc.param.put("server.servlet.context-path", context_path);
 		TPILogger.lc.param.put("server.ssl.enabled", sslFlag);

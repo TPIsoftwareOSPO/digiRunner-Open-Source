@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { ToolService } from 'src/app/shared/services/tool.service';
@@ -28,18 +28,19 @@ import { KeyValueFormComponent } from './key-value-form/key-value-form.component
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-ac0228',
-  templateUrl: './ac0228.component.html',
-  styleUrls: ['./ac0228.component.css'],
-  providers: [MessageService, ConfirmationService],
+    selector: 'app-ac0228',
+    templateUrl: './ac0228.component.html',
+    styleUrls: ['./ac0228.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0228Component extends BaseComponent implements OnInit {
   @ViewChild('keyValueComp') keyValueComp!: KeyValueFormComponent;
 
   currentTitle = this.title;
   pageNum: number = 1;
-  form!: FormGroup;
-  formEdit!: FormGroup;
+  form!: UntypedFormGroup;
+  formEdit!: UntypedFormGroup;
   clientListCols: { field: string; header: string }[] = [];
   clientList: Array<DPB0095Item> = [];
   currentClient?: DPB0095Item;
@@ -88,7 +89,7 @@ export class Ac0228Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService: ToolService,
     private openApiService: OpenApiKeyService,
     private messageService: MessageService,
@@ -102,32 +103,32 @@ export class Ac0228Component extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     this.form = this.fb.group({
-      keyword: new FormControl(''),
+      keyword: new UntypedFormControl(''),
     });
     this.formEdit = this.fb.group({
-      id: new FormControl({ value: '', disabled: true }),
-      clientId: new FormControl({ value: '', disabled: true }),
-      status: new FormControl(''),
-      remark: new FormControl(''),
-      apiMethod: new FormControl(''),
-      apiUrl: new FormControl(''),
-      reqHeader: new FormControl(''),
-      reqBodyType: new FormControl(''),
-      reqBody: new FormControl(''),
-      sucByType: new FormControl(''),
-      sucByField: new FormControl(''),
-      sucByValue: new FormControl(''),
-      idtName: new FormControl(''),
-      idtEmail: new FormControl(''),
-      idtPicture: new FormControl(''),
-      iconFile: new FormControl(''),
-      pageTitle: new FormControl(''),
-      createUser: new FormControl(''),
-      createDateTime: new FormControl(''),
-      updateUser: new FormControl(''),
-      updateDateTime: new FormControl(''),
-      idtLightId: new FormControl(''),
-      idtRoleName: new FormControl(''),
+      id: new UntypedFormControl({ value: '', disabled: true }),
+      clientId: new UntypedFormControl({ value: '', disabled: true }),
+      status: new UntypedFormControl(''),
+      remark: new UntypedFormControl(''),
+      apiMethod: new UntypedFormControl(''),
+      apiUrl: new UntypedFormControl(''),
+      reqHeader: new UntypedFormControl(''),
+      reqBodyType: new UntypedFormControl(''),
+      reqBody: new UntypedFormControl(''),
+      sucByType: new UntypedFormControl(''),
+      sucByField: new UntypedFormControl(''),
+      sucByValue: new UntypedFormControl(''),
+      idtName: new UntypedFormControl(''),
+      idtEmail: new UntypedFormControl(''),
+      idtPicture: new UntypedFormControl(''),
+      iconFile: new UntypedFormControl(''),
+      pageTitle: new UntypedFormControl(''),
+      createUser: new UntypedFormControl(''),
+      createDateTime: new UntypedFormControl(''),
+      updateUser: new UntypedFormControl(''),
+      updateDateTime: new UntypedFormControl(''),
+      idtLightId: new UntypedFormControl(''),
+      idtRoleName: new UntypedFormControl(''),
     });
 
     const codes = ['client_id', 'client_name', 'client_alias'];

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'api_jwt_status'
+    name: 'api_jwt_status',
+    standalone: false
 })
 export class APIJWTSStatusPipe implements PipeTransform {
     transform(input: any): any {

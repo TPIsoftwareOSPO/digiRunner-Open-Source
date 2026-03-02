@@ -1,5 +1,5 @@
 import { Component, OnInit, forwardRef } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { isObject } from 'util';
 
@@ -12,7 +12,9 @@ import { isObject } from 'util';
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => TimepickerComponent),
             multi: true
-        }]
+        }
+    ],
+    standalone: false
 })
 export class TimepickerComponent implements OnInit, ControlValueAccessor {
 
@@ -20,15 +22,15 @@ export class TimepickerComponent implements OnInit, ControlValueAccessor {
     onChange!: (value: any) => void;
 
     disabled?: boolean;
-    form: FormGroup;
+    form: UntypedFormGroup;
 
     constructor(
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService
     ) {
         this.form = this.fb.group({
-            hour: new FormControl(''),
-            minute: new FormControl('')
+            hour: new UntypedFormControl(''),
+            minute: new UntypedFormControl('')
         });
     }
 

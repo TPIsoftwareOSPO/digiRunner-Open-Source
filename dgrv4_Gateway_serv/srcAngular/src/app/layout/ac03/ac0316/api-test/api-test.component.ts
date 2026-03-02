@@ -16,7 +16,7 @@ import { ApiService } from './../../../../shared/services/api-api.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { TokenService } from 'src/app/shared/services/api-token.service';
 import { KeyValueComponent } from 'src/app/shared/key-value/key-value.module';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
 import { Component, Input, NgZone, OnInit, ViewChild } from '@angular/core';
 import * as shajs from 'sha.js'
@@ -29,10 +29,11 @@ import { StreamApiService, StreamResponse } from './stream-api.service';
 
 
 @Component({
-  selector: 'app-api-test',
-  templateUrl: './api-test.component.html',
-  styleUrls: ['./api-test.component.css'],
-  providers: [ApiService, ModuleService, DCService]
+    selector: 'app-api-test',
+    templateUrl: './api-test.component.html',
+    styleUrls: ['./api-test.component.css'],
+    providers: [ApiService, ModuleService, DCService],
+    standalone: false
 })
 export class ApiTestComponent implements OnInit {
 
@@ -44,7 +45,7 @@ export class ApiTestComponent implements OnInit {
   apiKey: string = '';
   moduleName: string = '';
   apiSrc: string = '';
-  form: FormGroup;
+  form: UntypedFormGroup;
   methods: { label: string; value: string; }[] = [];
   dcs: { label: string; value: string; }[] = [];
   sites: { label: string; value: string; }[] = [];
@@ -59,7 +60,7 @@ export class ApiTestComponent implements OnInit {
 
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tokenService: TokenService,
     private toolService: ToolService,
     private api: ApiService,
@@ -76,30 +77,30 @@ export class ApiTestComponent implements OnInit {
     this.acConf = this.tool.getAcConf();
 
     this.form = this.fb.group({
-      enableClientAuth: new FormControl(true),
-      enableUserAuth: new FormControl(false),
-      userName: new FormControl(),
-      passwd: new FormControl(),
-      clientId: new FormControl(""),
-      clientPasswd: new FormControl(""),
-      tsmpUrl: new FormControl(""),
-      method: new FormControl('POST'),
-      requestHeader: new FormControl,
-      ContentType: new FormControl("application/json"),
-      requestBody: new FormControl('none'),
-      keyValueRequest: new FormControl(""),
-      keyValueForm: new FormControl(""),
-      bodyText: new FormControl(),
-      resBody: new FormControl({ value: '', disabled: false }),
-      resStatus: new FormControl({ value: '', disabled: false }),
-      headerList: new FormControl({ value: '', disabled: false }),
-      dc: new FormControl(''),
-      siteCode: new FormControl(''),
-      baseUrl: new FormControl(location.hostname + (location.port ? ':' + location.port : '')),
-      testUrl: new FormControl(location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/'),
-      authType: new FormControl('cc'),
-      apiKey: new FormControl(''),
-      secretKey: new FormControl(''),
+      enableClientAuth: new UntypedFormControl(true),
+      enableUserAuth: new UntypedFormControl(false),
+      userName: new UntypedFormControl(),
+      passwd: new UntypedFormControl(),
+      clientId: new UntypedFormControl(""),
+      clientPasswd: new UntypedFormControl(""),
+      tsmpUrl: new UntypedFormControl(""),
+      method: new UntypedFormControl('POST'),
+      requestHeader: new UntypedFormControl,
+      ContentType: new UntypedFormControl("application/json"),
+      requestBody: new UntypedFormControl('none'),
+      keyValueRequest: new UntypedFormControl(""),
+      keyValueForm: new UntypedFormControl(""),
+      bodyText: new UntypedFormControl(),
+      resBody: new UntypedFormControl({ value: '', disabled: false }),
+      resStatus: new UntypedFormControl({ value: '', disabled: false }),
+      headerList: new UntypedFormControl({ value: '', disabled: false }),
+      dc: new UntypedFormControl(''),
+      siteCode: new UntypedFormControl(''),
+      baseUrl: new UntypedFormControl(location.hostname + (location.port ? ':' + location.port : '')),
+      testUrl: new UntypedFormControl(location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/'),
+      authType: new UntypedFormControl('cc'),
+      apiKey: new UntypedFormControl(''),
+      secretKey: new UntypedFormControl(''),
       file:null,
     });
   }

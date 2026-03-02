@@ -11,7 +11,8 @@ import { FileService } from 'src/app/shared/services/api-file.service';
 @Component({
     selector: 'app-api-lov',
     templateUrl: './api-lov.component.html',
-    styleUrls: ['./api-lov.component.css']
+    styleUrls: ['./api-lov.component.css'],
+    standalone: false
 })
 export class ApiLovComponent implements OnInit {
 

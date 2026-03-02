@@ -1,13 +1,14 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 
 
 @Component({
-  selector: 'app-fields-form-detail',
-  templateUrl: './fields-form-detail.component.html',
-  styleUrls: ['./fields-form-detail.component.css']
+    selector: 'app-fields-form-detail',
+    templateUrl: './fields-form-detail.component.html',
+    styleUrls: ['./fields-form-detail.component.css'],
+    standalone: false
 })
 export class FieldsFormDetailComponent implements OnInit {
   @Input() data?: { field: string, no: number };
@@ -22,19 +23,19 @@ export class FieldsFormDetailComponent implements OnInit {
   @Output() remove: EventEmitter<number> = new EventEmitter;
   // @Output() testApiEvt: EventEmitter<string> = new EventEmitter;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   fieldExp: string = '';
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private toolService:ToolService
   ) { }
 
   ngOnInit(): void {
 
     this.form = this.fb.group({
-      field: new FormControl(this.data ? this.data.field : ''),
+      field: new UntypedFormControl(this.data ? this.data.field : ''),
     })
 
     // console.log(this.headerPolicy)

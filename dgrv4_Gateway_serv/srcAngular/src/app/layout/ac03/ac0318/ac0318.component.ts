@@ -7,7 +7,7 @@ import { ToolService } from "src/app/shared/services/tool.service";
 import { ApiService } from "src/app/shared/services/api-api.service";
 import { AA0319Req, AA0319ReqItem } from "src/app/models/api/ApiService/aa0319.interface";
 import { NgxUiLoaderService } from "ngx-ui-loader";
-import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { FileService } from "src/app/shared/services/api-file.service";
 import { AA0318Item, AA0318Req } from "src/app/models/api/ApiService/aa0318.interface";
 import * as base64 from 'js-base64'
@@ -16,14 +16,15 @@ import * as base64 from 'js-base64'
     selector: 'app-ac0318',
     templateUrl: './ac0318.component.html',
     styleUrls: ['./ac0318.component.css'],
-    providers: [MessageService, ApiService, ConfirmationService]
+    providers: [MessageService, ApiService, ConfirmationService],
+    standalone: false
 })
 export class Ac0318Component extends BaseComponent implements OnInit {
 
     cols: { field: string; }[] = [];
     selected: Array<AA0318Item> = [];
     rowcount: number= 0;
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     apiList: Array<AA0318Item> = [];
     fileBatchNo: number = 0;
     apiFile?: File;
@@ -37,7 +38,7 @@ export class Ac0318Component extends BaseComponent implements OnInit {
         private toolService: ToolService,
         private apiService: ApiService,
         private ngxService: NgxUiLoaderService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private fileService: FileService,
         private confirmationService: ConfirmationService,
         private router:Router
@@ -47,9 +48,9 @@ export class Ac0318Component extends BaseComponent implements OnInit {
 
     ngOnInit() {
         this.form = this.fb.group({
-            file: new FormControl(),
-            fileName: new FormControl({ value: '', disabled: true }),
-            fileSize: new FormControl('')
+            file: new UntypedFormControl(),
+            fileName: new UntypedFormControl({ value: '', disabled: true }),
+            fileSize: new UntypedFormControl('')
         })
         this.selected = [];
         this.cols = [

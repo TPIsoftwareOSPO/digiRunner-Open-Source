@@ -12,7 +12,7 @@ import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { AA0017Req } from 'src/app/models/api/RoleService/aa0017.interface';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { AA0022Req, AA0022List } from 'src/app/models/api/RoleService/aa0022.interface';
 import { RoleService } from 'src/app/shared/services/api-role.service';
 import { AA0021Req } from 'src/app/models/api/RoleService/aa0021.interface';
@@ -22,10 +22,11 @@ import * as ValidatorFns from '../../../shared/validator-functions';
 import { RoleListLovComponent } from 'src/app/shared/role-list-lov/role-list-lov.component';
 
 @Component({
-  selector: 'app-ac0015',
-  templateUrl: './ac0015.component.html',
-  styleUrls: ['./ac0015.component.css'],
-  providers: [MessageService, ConfirmationService]
+    selector: 'app-ac0015',
+    templateUrl: './ac0015.component.html',
+    styleUrls: ['./ac0015.component.css'],
+    providers: [MessageService, ConfirmationService],
+    standalone: false
 })
 export class Ac0015Component extends BaseComponent implements OnInit {
 
@@ -35,7 +36,7 @@ export class Ac0015Component extends BaseComponent implements OnInit {
   dialogTitle: string = '';
   formOperate = FormOperate;
   deleteData?: AA0022List;
-  form: FormGroup;
+  form: UntypedFormGroup;
   roleRoleMappingList: Array<AA0022List> = new Array<AA0022List>();
   rowcount: number = 0;
   pageNum: number = 1; // 1: 查詢，2: 建立、更新
@@ -50,7 +51,7 @@ export class Ac0015Component extends BaseComponent implements OnInit {
     private translate: TranslateService,
     private tool: ToolService,
     private message: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private roleService: RoleService,
     private dialogService: DialogService,
     private confirmationService: ConfirmationService,
@@ -58,11 +59,11 @@ export class Ac0015Component extends BaseComponent implements OnInit {
     super(route, tr);
 
     this.form = this.fb.group({
-      keyword: new FormControl(''),
-      roleName: new FormControl('', ValidatorFns.requiredValidator()),
-      roleAlias: new FormControl({ value: '', disabled: true }),
-      roleAliasMapping: new FormControl([]),
-      roleNameMapping: new FormControl([], ValidatorFns.requiredValidator())
+      keyword: new UntypedFormControl(''),
+      roleName: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+      roleAlias: new UntypedFormControl({ value: '', disabled: true }),
+      roleAliasMapping: new UntypedFormControl([]),
+      roleNameMapping: new UntypedFormControl([], ValidatorFns.requiredValidator())
     });
   }
 

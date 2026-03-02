@@ -23,7 +23,8 @@ import { Observable, tap, timer } from 'rxjs';
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
     styleUrls: ['./sidebar.component.scss'],
-    providers: [UserService]
+    providers: [UserService],
+    standalone: false
 })
 export class SidebarComponent extends BaseComponent {
 
@@ -318,7 +319,7 @@ export class SidebarComponent extends BaseComponent {
             } else {
                 // this.router.navigate(['/login']);
                 this.logoutService.logout();
-                obser.next();
+                obser.next(null);
             }
         })
 

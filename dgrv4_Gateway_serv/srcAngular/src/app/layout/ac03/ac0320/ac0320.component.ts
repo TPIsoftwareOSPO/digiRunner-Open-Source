@@ -8,7 +8,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { DPB0294RespItem } from 'src/app/models/api/ServerService/dpb0294.interface';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { DPB0290Req } from 'src/app/models/api/ServerService/dpb0290.interface';
 import { DPB0292Req } from 'src/app/models/api/ServerService/dpb0292.interface';
 import * as ValidatorFns from '../../../shared/validator-functions';
@@ -20,10 +20,11 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { AlertType } from 'src/app/models/common.enum';
 
 @Component({
-  selector: 'app-ac0320',
-  templateUrl: './ac0320.component.html',
-  styleUrls: ['./ac0320.component.css'],
-  providers: [MessageService, ConfirmationService, ApiService],
+    selector: 'app-ac0320',
+    templateUrl: './ac0320.component.html',
+    styleUrls: ['./ac0320.component.css'],
+    providers: [MessageService, ConfirmationService, ApiService],
+    standalone: false
 })
 export class Ac0320Component extends BaseComponent implements OnInit {
   pageNum: number = 1;
@@ -31,8 +32,8 @@ export class Ac0320Component extends BaseComponent implements OnInit {
 
   tableData: Array<DPB0294RespItem> = [];
   selected: Array<DPB0294RespItem> = [];
-  formEdit!: FormGroup;
-  formFile!: FormGroup;
+  formEdit!: UntypedFormGroup;
+  formFile!: UntypedFormGroup;
   currentAction: string = '';
 
   selectedItem?: DPB0294RespItem;
@@ -48,7 +49,7 @@ export class Ac0320Component extends BaseComponent implements OnInit {
     private messageService: MessageService,
     private toolService: ToolService,
     private ngxService: NgxUiLoaderService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private serverService: ServerService,
     private confirmationService: ConfirmationService,
     private alertService: AlertService
@@ -58,23 +59,23 @@ export class Ac0320Component extends BaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.formEdit = this.fb.group({
-      gRPCProxyMapId: new FormControl(''),
-      serviceName: new FormControl(''),
-      proxyHostName: new FormControl(''),
-      targetHostName: new FormControl(''),
-      targetPort: new FormControl(''),
-      connectTimeoutMs: new FormControl('5000'),
-      sendTimeoutMs: new FormControl('10000'),
-      readTimeoutMs: new FormControl('30000'),
-      secureMode: new FormControl('SECURE'),
-      autoTrustUpstreamCerts: new FormControl('Y'),
-      trustedCertsContent: new FormControl(''),
-      enable: new FormControl(''),
+      gRPCProxyMapId: new UntypedFormControl(''),
+      serviceName: new UntypedFormControl(''),
+      proxyHostName: new UntypedFormControl(''),
+      targetHostName: new UntypedFormControl(''),
+      targetPort: new UntypedFormControl(''),
+      connectTimeoutMs: new UntypedFormControl('5000'),
+      sendTimeoutMs: new UntypedFormControl('10000'),
+      readTimeoutMs: new UntypedFormControl('30000'),
+      secureMode: new UntypedFormControl('SECURE'),
+      autoTrustUpstreamCerts: new UntypedFormControl('Y'),
+      trustedCertsContent: new UntypedFormControl(''),
+      enable: new UntypedFormControl(''),
     });
 
     this.formFile = this.fb.group({
-      file: new FormControl(),
-      fileName: new FormControl({ value: '', disabled: true }),
+      file: new UntypedFormControl(),
+      fileName: new UntypedFormControl({ value: '', disabled: true }),
     });
 
     this.serverService.queryGrpcService_ignore1298({}).subscribe((res) => {

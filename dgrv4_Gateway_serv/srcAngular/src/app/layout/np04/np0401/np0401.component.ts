@@ -3,7 +3,7 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { Component, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import { DPB0067RespItem, DPB0067Req } from 'src/app/models/api/RequisitionService/dpb0067.interface';
 import { DPB0068Resp, DPB0068Req, DPB0068D2 } from 'src/app/models/api/RequisitionService/dpb0068.interface';
@@ -32,14 +32,15 @@ import { OpenApiKeyFormComponent } from '../../np03/np0304/open-api-key-form/ope
     selector: 'app-np0401',
     templateUrl: './np0401.component.html',
     styleUrls: ['./np0401.component.css'],
-    providers: [ConfirmationService]
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Np0401Component extends BaseComponent implements OnInit {
 
     @ViewChild('dialog') _dialog!: DialogComponent;
     @ViewChild('requisitionViewRef', { read: ViewContainerRef }) requisitionViewRef!: ViewContainerRef;
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     formOperate = FormOperate;
     dataList: Array<DPB0067RespItem> = [];
     cols: { field: string; header: string }[] = [];
@@ -59,7 +60,7 @@ export class Np0401Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private requisition: RequisitionService,
         private tool: ToolService,
         private translate: TranslateService,
@@ -76,11 +77,11 @@ export class Np0401Component extends BaseComponent implements OnInit {
 
     async ngOnInit() {
         this.form = this.fb.group({
-            keyword: new FormControl(''),
-            startDate: new FormControl(''),
-            endDate: new FormControl(''),
-            encodeReqType: new FormControl('all'),
-            encodeReqSubtype: new FormControl('all')
+            keyword: new UntypedFormControl(''),
+            startDate: new UntypedFormControl(''),
+            endDate: new UntypedFormControl(''),
+            encodeReqType: new UntypedFormControl('all'),
+            encodeReqSubtype: new UntypedFormControl('all')
         });
         this.converDateInit();
         const code = ['apply_date', 'all', 'apply_type', 'apply_user', 'message.layer', 'status', 'case_number'];

@@ -20,16 +20,17 @@ export interface _DPB0233WhitelistItem extends DPB0233WhitelistItem {
 }
 
 @Component({
-  selector: 'app-white-list-form',
-  templateUrl: './white-list-form.component.html',
-  styleUrls: ['./white-list-form.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => WhiteListFormComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-white-list-form',
+    templateUrl: './white-list-form.component.html',
+    styleUrls: ['./white-list-form.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => WhiteListFormComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class WhiteListFormComponent implements OnInit {
   onTouched!: () => void;

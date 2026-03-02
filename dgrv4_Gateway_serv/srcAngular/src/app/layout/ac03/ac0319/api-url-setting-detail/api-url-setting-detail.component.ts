@@ -1,14 +1,15 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { AA0424ReqSrcUrlList } from 'src/app/models/api/ApiService/aa0424.interface';
 
 interface _AA0424ReqSrcUrlList extends AA0424ReqSrcUrlList {
   no: number
 }
 @Component({
-  selector: 'app-api-url-setting-detail',
-  templateUrl: './api-url-setting-detail.component.html',
-  styleUrls: ['./api-url-setting-detail.component.css'],
+    selector: 'app-api-url-setting-detail',
+    templateUrl: './api-url-setting-detail.component.html',
+    styleUrls: ['./api-url-setting-detail.component.css'],
+    standalone: false
 })
 export class ApiUrlSettingDetailComponent implements OnInit {
 
@@ -20,19 +21,19 @@ export class ApiUrlSettingDetailComponent implements OnInit {
   @Output() change: EventEmitter<_AA0424ReqSrcUrlList> = new EventEmitter;
   @Output() remove: EventEmitter<number> = new EventEmitter;
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      srcUrl: new FormControl(''),
-      isPercentage: new FormControl(false),
-      percentage: new FormControl({ value: 0, disabled: true }),
-      isReplace: new FormControl(false),
-      replaceString: new FormControl({ value: '', disabled: true }),
+      srcUrl: new UntypedFormControl(''),
+      isPercentage: new UntypedFormControl(false),
+      percentage: new UntypedFormControl({ value: 0, disabled: true }),
+      isReplace: new UntypedFormControl(false),
+      replaceString: new UntypedFormControl({ value: '', disabled: true }),
     })
 
     this.form.valueChanges.subscribe((res: AA0424ReqSrcUrlList) => {

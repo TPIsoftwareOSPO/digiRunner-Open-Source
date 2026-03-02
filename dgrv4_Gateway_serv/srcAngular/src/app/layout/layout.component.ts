@@ -10,9 +10,10 @@ import { AlertService } from '../shared/services/alert.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-layout',
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss'],
+    selector: 'app-layout',
+    templateUrl: './layout.component.html',
+    styleUrls: ['./layout.component.scss'],
+    standalone: false
 })
 export class LayoutComponent implements OnInit {
   // collapedSideBar: boolean = false;
@@ -54,6 +55,10 @@ export class LayoutComponent implements OnInit {
           res.RespBody.majorVersionNo,
           'majorVersionNo'
         );
+         this.toolService.writeToken(
+          String(res.RespBody.isExpired),
+          'isExpired'
+        );
       }
     });
    if(this.firstTimeLogin) this.checkFirstLogin();
@@ -63,7 +68,7 @@ export class LayoutComponent implements OnInit {
     const codes = [
       'changeMimaFirstLogin',
       'message.update',
-      'changeMimaFirstLogin',            
+      'changeMimaFirstLogin',
       'message.success',
       'plz_login_again',
     ];

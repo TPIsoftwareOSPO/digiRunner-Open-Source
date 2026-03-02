@@ -3,9 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  UntypedFormControl,
   FormGroupDirective,
 } from '@angular/forms';
 import { UserService } from '../../../shared/services/api-user.service';
@@ -23,13 +23,14 @@ import * as base64 from 'js-base64';
 import * as dayjs from 'dayjs';
 
 @Component({
-  selector: 'app-ac0006',
-  templateUrl: './ac0006.component.html',
-  styleUrls: ['./ac0006.component.css'],
-  providers: [UserService],
+    selector: 'app-ac0006',
+    templateUrl: './ac0006.component.html',
+    styleUrls: ['./ac0006.component.css'],
+    providers: [UserService],
+    standalone: false
 })
 export class Ac0006Component extends BaseComponent implements OnInit {
-  form: FormGroup;
+  form: UntypedFormGroup;
   // isValid: boolean;
   user_id: string = '';
   user_name: string = '';
@@ -52,7 +53,7 @@ export class Ac0006Component extends BaseComponent implements OnInit {
   constructor(
     route: ActivatedRoute,
     tr: TransformMenuNamePipe,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private userService: UserService,
     private tool: ToolService,
     private alert: AlertService,
@@ -62,14 +63,14 @@ export class Ac0006Component extends BaseComponent implements OnInit {
   ) {
     super(route, tr);
     this.form = this.fb.group({
-      newUserName: new FormControl(''), //, [ValidatorFns.stringNameValidator(this.newUserNameLimitChar.value)]),
-      newUserAlias: new FormControl(''), //, [ValidatorFns.stringAliasValidator(this.newUserAliasLimitChar.value)]),
-      newUserMail: new FormControl(''), //, [ValidatorFns.maxLengthValidator(this.newUserMailLimitChar.value)]),
-      userBlock: new FormControl('', [
+      newUserName: new UntypedFormControl(''), //, [ValidatorFns.stringNameValidator(this.newUserNameLimitChar.value)]),
+      newUserAlias: new UntypedFormControl(''), //, [ValidatorFns.stringAliasValidator(this.newUserAliasLimitChar.value)]),
+      newUserMail: new UntypedFormControl(''), //, [ValidatorFns.maxLengthValidator(this.newUserMailLimitChar.value)]),
+      userBlock: new UntypedFormControl('', [
         ValidatorFns.maxLengthValidator(this.newUserBlockLimitChar.value),
       ]),
-      newUserBlock: new FormControl(''),
-      confirmUserBlock: new FormControl(''),
+      newUserBlock: new UntypedFormControl(''),
+      confirmUserBlock: new UntypedFormControl(''),
     });
     // this.form.controls.newUserBlock.setValidators([ValidatorFns.confirmPasswordForUserValidator(this.form, true), ValidatorFns.maxLengthValidator(this.newUserBlockLimitChar.value)]);
     // this.form.controls.confirmUserBlock.setValidators([ValidatorFns.confirmPasswordForUserValidator(this.form, true), ValidatorFns.maxLengthValidator(this.newUserBlockLimitChar.value)]);

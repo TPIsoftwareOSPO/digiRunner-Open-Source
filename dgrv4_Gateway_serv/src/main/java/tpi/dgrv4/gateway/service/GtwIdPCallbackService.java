@@ -17,15 +17,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.IdTokenUtil;
 import tpi.dgrv4.codec.utils.IdTokenUtil.IdTokenData;
 import tpi.dgrv4.codec.utils.JWKcodec;
 import tpi.dgrv4.codec.utils.JWKcodec.JWKVerifyResult;
 import tpi.dgrv4.codec.utils.UUID64Util;
-import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.constant.TsmpAuthCodeStatus2;
+import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
@@ -56,56 +59,33 @@ import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
  * (GOOGLE / MS / OIDC) <br>
  * @author Mini_
  */
+
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class GtwIdPCallbackService {
 
-    private TsmpSettingService tsmpSettingService;
-    private GtwIdPAuthService gtwIdPAuthService;
-    private ObjectMapper objectMapper;
-    private DgrAuditLogService dgrAuditLogService;
-    private OAuthTokenService oAuthTokenService;
-    private DgrAcIdpInfoDao dgrAcIdpInfoDao;
-    private DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
-    private DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
-    private OauthClientDetailsDao oauthClientDetailsDao;
-    private TokenHelper tokenHelper;
-    private IdPWellKnownHelper idPWellKnownHelper;
-    private IdPUserInfoHelper idPUserInfoHelper;
-    private IdPTokenHelper idPTokenHelper;
-    private GtwIdPHelper gtwIdPHelper;
-    private DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
+    private final TsmpSettingService tsmpSettingService;
+    private final GtwIdPAuthService gtwIdPAuthService;
+    private final ObjectMapper objectMapper;
+    private final DgrAuditLogService dgrAuditLogService;
+    private final OAuthTokenService oAuthTokenService;
+    private final DgrAcIdpInfoDao dgrAcIdpInfoDao;
+    private final DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao;
+    private final DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao;
+    private final OauthClientDetailsDao oauthClientDetailsDao;
+    private final TokenHelper tokenHelper;
+    private final IdPWellKnownHelper idPWellKnownHelper;
+    private final IdPUserInfoHelper idPUserInfoHelper;
+    private final IdPTokenHelper idPTokenHelper;
+    private final GtwIdPHelper gtwIdPHelper;
+    private final DgrGtwIdpInfoODao dgrGtwIdpInfoODao;
     
-    @Autowired
-	public GtwIdPCallbackService(TsmpSettingService tsmpSettingService, GtwIdPAuthService gtwIdPAuthService,
-			ObjectMapper objectMapper, DgrAuditLogService dgrAuditLogService, OAuthTokenService oAuthTokenService,
-			DgrAcIdpInfoDao dgrAcIdpInfoDao, DgrGtwIdpAuthMDao dgrGtwIdpAuthMDao,
-			DgrGtwIdpAuthCodeDao dgrGtwIdpAuthCodeDao, OauthClientDetailsDao oauthClientDetailsDao,
-			TokenHelper tokenHelper, IdPWellKnownHelper idPWellKnownHelper, IdPUserInfoHelper idPUserInfoHelper,
-			IdPTokenHelper idPTokenHelper, GtwIdPHelper gtwIdPHelper, DgrGtwIdpInfoODao dgrGtwIdpInfoODao) {
-		super();
-		this.tsmpSettingService = tsmpSettingService;
-		this.gtwIdPAuthService = gtwIdPAuthService;
-		this.objectMapper = objectMapper;
-		this.dgrAuditLogService = dgrAuditLogService;
-		this.oAuthTokenService = oAuthTokenService;
-		this.dgrAcIdpInfoDao = dgrAcIdpInfoDao;
-		this.dgrGtwIdpAuthMDao = dgrGtwIdpAuthMDao;
-		this.dgrGtwIdpAuthCodeDao = dgrGtwIdpAuthCodeDao;
-		this.oauthClientDetailsDao = oauthClientDetailsDao;
-		this.tokenHelper = tokenHelper;
-		this.idPWellKnownHelper = idPWellKnownHelper;
-		this.idPUserInfoHelper = idPUserInfoHelper;
-		this.idPTokenHelper = idPTokenHelper;
-		this.gtwIdPHelper = gtwIdPHelper;
-		this.dgrGtwIdpInfoODao = dgrGtwIdpInfoODao;
-	}
-
 	public ResponseEntity<?> gtwIdPCallback(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, String idPType) throws Exception {
 		
 		String reqUri = httpReq.getRequestURI();
-		String userIp = !StringUtils.hasLength(httpHeaders.getFirst("x-forwarded-for")) ? httpReq.getRemoteAddr()
-				: httpHeaders.getFirst("x-forwarded-for");
+        String userIp = ClientIpUtil.getClientIp(httpReq);
 		String userHostname = httpReq.getRemoteHost();
 		
 		try {
@@ -138,13 +118,13 @@ public class GtwIdPCallbackService {
 			String codeVerifierForOauth2 = GtwIdPHelper.getStateFromCookies(httpReq, GtwIdPHelper.COOKIE_CODE_VERIFIER);
 			String idPAuthCode = httpReq.getParameter("code");
 
-			errRespEntity = gtwIdPCallback_oauth2(httpResp, idPType, state, idPAuthCode, reqUri, userIp, userHostname,
+			errRespEntity = gtwIdPCallbackForOAuth2(httpResp, idPType, state, idPAuthCode, reqUri, userIp, userHostname,
 					codeVerifierForOauth2);
 			if (errRespEntity != null) {// 資料驗證有錯誤
 				return errRespEntity;
 			}
 			
-		}else {
+		} else {
 			// 無效的 idP Type
 			String errMsg = String.format(IdPHelper.MSG_INVALID_IDPTYPE, idPType);
 			TPILogger.tl.debug(errMsg);
@@ -159,7 +139,7 @@ public class GtwIdPCallbackService {
 	/**
 	 * for GOOGLE / MS / OIDC IdP 流程
 	 */
-	public ResponseEntity<?> gtwIdPCallback_oauth2(HttpServletResponse httpResp, String idPType, String state,
+	public ResponseEntity<?> gtwIdPCallbackForOAuth2(HttpServletResponse httpResp, String idPType, String state,
 			String idPAuthCode, String reqUri, String userIp, String userHostname, String codeVerifierForOauth2)
 			throws Exception {
 		
@@ -180,7 +160,7 @@ public class GtwIdPCallbackService {
 		}
     	
 		// 2.依 state 取得 dgR 的 client_id
-    	// DGR_GTW_IDP_AUTH_M (Gateway IdP Auth記錄檔主檔)
+		// DGR_GTW_IDP_AUTH_M (Gateway IdP Auth記錄檔主檔)
 		DgrGtwIdpAuthM dgrGtwIdpAuthM = getDgrGtwIdpAuthMDao().findFirstByState(state);
 		if(dgrGtwIdpAuthM == null) {
 			//Table [DGR_GTW_IDP_AUTH_M] 查不到資料
@@ -202,7 +182,7 @@ public class GtwIdPCallbackService {
 		
 		String dgrClientId = dgrGtwIdpAuthM.getClientId();
     	
-    	// 3.取得 dgR client 對應的 IdP 相關資料
+		// 3.取得 dgR client 對應的 IdP 相關資料
 		// 取得狀態為 "Y",且建立時間最新的
 		String status = "Y";
 		DgrGtwIdpInfoO dgrGtwIdpInfoO = getDgrGtwIdpInfoODao()
@@ -213,7 +193,7 @@ public class GtwIdPCallbackService {
 			TPILogger.tl.debug("Table [DGR_GTW_IDP_INFO_O] can't find data. dgrClientId: " + dgrClientId
 					+ ", idpType: " + idPType + ", status: " + status);
 			// 設定檔缺少參數
-			String errMsg = TokenHelper.THE_PROFILE_IS_MISSING_PARAMETERS + "GTW IdP Info";
+			String errMsg = TokenHelper.THE_PROFILE_IS_MISSING_PARAMETERS + "GTW IdP Info, idpType: " + idPType;
 			TPILogger.tl.debug(errMsg);
 			errRespEntity = getTokenHelper().getUnauthorizedErrorResp(reqUri, errMsg);// 401
 			return errRespEntity;
@@ -320,7 +300,7 @@ public class GtwIdPCallbackService {
 			userEmail = idTokenData.userEmail;
 			userPicture = idTokenData.userPicture;
 			
-		}else {// 驗證 ID Token 失敗, 再用 access token 打 UserInfo 取得 email, 若仍沒有值, 才顯示錯誤訊息
+		} else {// 驗證 ID Token 失敗, 再用 access token 打 UserInfo 取得 email, 若仍沒有值, 才顯示錯誤訊息
 			// 8.2.打 IdP 的 UserInfo API, 取得 sub, name 和 email
 			
 			// 取得 UserInfo URL
@@ -459,7 +439,7 @@ public class GtwIdPCallbackService {
 		dgrGtwIdpAuthCode.setCreateUser("SYSTEM");
 		dgrGtwIdpAuthCode.setCreateDateTime(DateTimeUtil.now());
 		dgrGtwIdpAuthCode = getDgrGtwIdpAuthCodeDao().save(dgrGtwIdpAuthCode);
-    	return dgrGtwIdpAuthCode;
+		return dgrGtwIdpAuthCode;
 	}
  
 	protected TsmpSettingService getTsmpSettingService() {

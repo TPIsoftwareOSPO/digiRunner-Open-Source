@@ -16,16 +16,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HostInputDetailComponent } from '../host-input-detail/host-input-detail.component';
 
 @Component({
-  selector: 'app-host-input',
-  templateUrl: './host-input.component.html',
-  styleUrls: ['./host-input.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HostInputComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-host-input',
+    templateUrl: './host-input.component.html',
+    styleUrls: ['./host-input.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => HostInputComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class HostInputComponent implements OnInit, ControlValueAccessor {
   @ViewChild('hostInput', { read: ViewContainerRef, static: true })

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { ReportService } from 'src/app/shared/services/api-report.service';
@@ -20,11 +20,12 @@ import { AlertType } from "src/app/models/common.enum";
     selector: 'app-ac1305',
     templateUrl: './ac1305.component.html',
     styleUrls: ['./ac1305.component.css'],
-    providers: [ApiService]
+    providers: [ApiService],
+    standalone: false
 })
 export class Ac1305Component extends BaseComponent implements OnInit {
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     canvas: any;
     ctx: any;
     timeTypes: { label: string; value: string }[] = [];
@@ -40,7 +41,7 @@ export class Ac1305Component extends BaseComponent implements OnInit {
     constructor(
          router: ActivatedRoute,
          tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private toolService: ToolService,
         private list: ListService,
         private reportService: ReportService,
@@ -54,11 +55,11 @@ export class Ac1305Component extends BaseComponent implements OnInit {
         this.canvas = document.getElementById('reportChart');
         this.ctx = this.canvas.getContext('2d');
         this.form = this.fb.group({
-            timeType: new FormControl('DAY'),
-            startDate: new FormControl(''),
-            endDate: new FormControl(''),
-            startHour: new FormControl('00'),
-            endHour: new FormControl('23')
+            timeType: new UntypedFormControl('DAY'),
+            startDate: new UntypedFormControl(''),
+            endDate: new UntypedFormControl(''),
+            startHour: new UntypedFormControl('00'),
+            endHour: new UntypedFormControl('23')
         });
         // 欄位檢查
         this.reportService.queryBadattemptConnection_before().subscribe(res => {

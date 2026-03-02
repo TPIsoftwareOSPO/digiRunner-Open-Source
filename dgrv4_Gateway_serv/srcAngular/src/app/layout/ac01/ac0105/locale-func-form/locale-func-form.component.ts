@@ -19,16 +19,17 @@ interface _AA0106ReqItem extends AA0106ReqItem {
 }
 
 @Component({
-  selector: 'app-locale-func-form',
-  templateUrl: './locale-func-form.component.html',
-  styleUrls: ['./locale-func-form.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => LocaleFuncFormComponent),
-      multi: true,
-    },
-  ],
+    selector: 'app-locale-func-form',
+    templateUrl: './locale-func-form.component.html',
+    styleUrls: ['./locale-func-form.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => LocaleFuncFormComponent),
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class LocaleFuncFormComponent implements OnInit {
   @ViewChild('funcData', { read: ViewContainerRef, static: true })

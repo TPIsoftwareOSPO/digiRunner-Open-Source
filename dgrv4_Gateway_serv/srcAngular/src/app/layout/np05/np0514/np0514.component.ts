@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, ViewContainerRef } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -25,12 +25,13 @@ import { DPB0115Req } from 'src/app/models/api/RoleService/dpb0115.interface';
     selector: 'app-np0514',
     templateUrl: './np0514.component.html',
     styleUrls: ['./np0514.component.scss'],
-    providers: [ConfirmationService]
+    providers: [ConfirmationService],
+    standalone: false
 })
 export class Np0514Component extends BaseComponent implements OnInit {
     @ViewChild('op') op;
 
-    form: FormGroup;
+    form: UntypedFormGroup;
     statusOption: { label: string; value: string; }[] = [];
     scheduleCols: { field: string; header: string; }[] = [];
     scheduleList: Array<DPB0102Items> = [];
@@ -58,7 +59,7 @@ export class Np0514Component extends BaseComponent implements OnInit {
     constructor(
         route: ActivatedRoute,
         tr: TransformMenuNamePipe,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private tool: ToolService,
         private list: ListService,
         private scheduleService: CycleScheduleService,
@@ -69,19 +70,19 @@ export class Np0514Component extends BaseComponent implements OnInit {
         super(route, tr);
 
         this.form = this.fb.group({
-          keyword: new FormControl(''),
-          status: new FormControl('all'),
-          rjobName: new FormControl(''),
-          remark: new FormControl(''),
-          frequency: new FormControl('0'),
-          dayRange: new FormControl({ value: [], disabled: true }),
-          weekRange: new FormControl({ value: [], disabled: true }),
-          hour: new FormControl(0, ValidatorFns.requiredValidator()),
-          minute: new FormControl(0, ValidatorFns.requiredValidator()),
-          effDateTime: new FormControl(''),
-          invDateTime: new FormControl(''),
-          rjobItems: new FormControl([]),
-          orirjobItems: new FormControl([])
+          keyword: new UntypedFormControl(''),
+          status: new UntypedFormControl('all'),
+          rjobName: new UntypedFormControl(''),
+          remark: new UntypedFormControl(''),
+          frequency: new UntypedFormControl('0'),
+          dayRange: new UntypedFormControl({ value: [], disabled: true }),
+          weekRange: new UntypedFormControl({ value: [], disabled: true }),
+          hour: new UntypedFormControl(0, ValidatorFns.requiredValidator()),
+          minute: new UntypedFormControl(0, ValidatorFns.requiredValidator()),
+          effDateTime: new UntypedFormControl(''),
+          invDateTime: new UntypedFormControl(''),
+          rjobItems: new UntypedFormControl([]),
+          orirjobItems: new UntypedFormControl([])
       });
     }
 

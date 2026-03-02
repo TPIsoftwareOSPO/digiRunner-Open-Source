@@ -141,7 +141,7 @@
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
 <p-confirmDialog #cd [style]="{width: '400px'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center;">
+    <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
         [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
         label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>

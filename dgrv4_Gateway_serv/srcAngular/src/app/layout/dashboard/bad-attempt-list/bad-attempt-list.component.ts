@@ -4,9 +4,10 @@ import { AA1212BadAttemptItemResp } from 'src/app/models/api/ReportService/aa121
 import { ToolService } from 'src/app/shared/services/tool.service';
 
 @Component({
-  selector: 'app-bad-attempt-list',
-  templateUrl: './bad-attempt-list.component.html',
-  styleUrls: ['./bad-attempt-list.component.css'],
+    selector: 'app-bad-attempt-list',
+    templateUrl: './bad-attempt-list.component.html',
+    styleUrls: ['./bad-attempt-list.component.css'],
+    standalone: false
 })
 export class BadAttemptListComponent implements OnInit {
   badAttemptList:Array<AA1212BadAttemptItemResp> = [];

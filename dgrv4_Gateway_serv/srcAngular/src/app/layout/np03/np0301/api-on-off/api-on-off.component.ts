@@ -1,7 +1,7 @@
 import { DialogService } from 'primeng/dynamicdialog';
 import { Component, OnInit, ViewChild, forwardRef, ViewContainerRef, ElementRef, ComponentFactoryResolver, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup, FormBuilder, FormControl, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { DPB0075RespItem, DPB0075Req } from 'src/app/models/api/LovService/dpb0075.interface';
@@ -25,15 +25,16 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { RequisitionService } from 'src/app/shared/services/api-requisition.service';
 
 @Component({
-  selector: 'app-api-on-off',
-  templateUrl: './api-on-off.component.html',
-  styleUrls: ['./api-on-off.component.css'],
-  // providers: [{
-  //     provide: NG_VALUE_ACCESSOR,
-  //     useExisting: forwardRef(() => ApiOnOffComponent),
-  //     multi: true
-  // }, MessageService]
-  providers: [MessageService]
+    selector: 'app-api-on-off',
+    templateUrl: './api-on-off.component.html',
+    styleUrls: ['./api-on-off.component.css'],
+    // providers: [{
+    //     provide: NG_VALUE_ACCESSOR,
+    //     useExisting: forwardRef(() => ApiOnOffComponent),
+    //     multi: true
+    // }, MessageService]
+    providers: [MessageService],
+    standalone: false
 })
 export class ApiOnOffComponent implements OnInit {
 
@@ -49,7 +50,7 @@ export class ApiOnOffComponent implements OnInit {
   value: Array<newApiOnOff> = new Array<newApiOnOff>();
   disabled: boolean = false;
   apiOnOffNo: number = 0;
-  form: FormGroup;
+  form: UntypedFormGroup;
   cols: { field: string; header: string; }[] = [];
   apiOffDataList: Array<DPB0075RespItem> = new Array();
   apiOffSelected: Array<DPB0075RespItem> = new Array();
@@ -69,7 +70,7 @@ export class ApiOnOffComponent implements OnInit {
   oriApi: Array<DPB0068D2> = new Array<DPB0068D2>();
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private tool: ToolService,
     private factoryResolver: ComponentFactoryResolver,
     private lov: LovService,
@@ -85,10 +86,10 @@ export class ApiOnOffComponent implements OnInit {
 
 
     this.form = this.fb.group({
-      reqSubtype: new FormControl(''),
-      reqDesc: new FormControl(''),
-      effectiveDate: new FormControl(''),
-      encPublicFlag: new FormControl('')
+      reqSubtype: new UntypedFormControl(''),
+      reqDesc: new UntypedFormControl(''),
+      effectiveDate: new UntypedFormControl(''),
+      encPublicFlag: new UntypedFormControl('')
     });
   }
 
@@ -601,19 +602,19 @@ export class ApiOnOffComponent implements OnInit {
     switch (formOperate) {
       case FormOperate.create:
         return {
-          reqSubtype: new FormControl('API_ON', ValidatorFns.requiredValidator()),
-          reqDesc: new FormControl('', ValidatorFns.requiredValidator()),
-          effectiveDate: new FormControl(dayjs(new Date()).format('YYYY/MM/DD'), ValidatorFns.requiredValidator()),
-          encPublicFlag: new FormControl('', ValidatorFns.requiredValidator())
+          reqSubtype: new UntypedFormControl('API_ON', ValidatorFns.requiredValidator()),
+          reqDesc: new UntypedFormControl('', ValidatorFns.requiredValidator()),
+          effectiveDate: new UntypedFormControl(dayjs(new Date()).format('YYYY/MM/DD'), ValidatorFns.requiredValidator()),
+          encPublicFlag: new UntypedFormControl('', ValidatorFns.requiredValidator())
         }
       case FormOperate.update:
       case FormOperate.resend:
         let detailData = this.data.data as DPB0068Resp;
         return {
-          reqSubtype: new FormControl({ value: detailData.reqSubtype, disabled: true }, ValidatorFns.requiredValidator()),
-          reqDesc: new FormControl(detailData.reqDesc, ValidatorFns.requiredValidator()),
-          effectiveDate: new FormControl(detailData.effectiveDate, ValidatorFns.requiredValidator()),
-          encPublicFlag: new FormControl(detailData.apiOnOff!.publicFlag, ValidatorFns.requiredValidator())
+          reqSubtype: new UntypedFormControl({ value: detailData.reqSubtype, disabled: true }, ValidatorFns.requiredValidator()),
+          reqDesc: new UntypedFormControl(detailData.reqDesc, ValidatorFns.requiredValidator()),
+          effectiveDate: new UntypedFormControl(detailData.effectiveDate, ValidatorFns.requiredValidator()),
+          encPublicFlag: new UntypedFormControl(detailData.apiOnOff!.publicFlag, ValidatorFns.requiredValidator())
         };
       default:
         return {

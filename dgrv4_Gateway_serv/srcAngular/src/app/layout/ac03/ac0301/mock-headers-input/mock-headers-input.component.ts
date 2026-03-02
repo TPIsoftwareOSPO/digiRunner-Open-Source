@@ -4,14 +4,15 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Component, OnInit, forwardRef, ViewChild, ViewContainerRef } from '@angular/core';
 
 @Component({
-  selector: 'app-mock-headers-input',
-  templateUrl: './mock-headers-input.component.html',
-  styleUrls: ['./mock-headers-input.component.css'],
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => MockHeadersInputComponent),
-    multi: true
-  }]
+    selector: 'app-mock-headers-input',
+    templateUrl: './mock-headers-input.component.html',
+    styleUrls: ['./mock-headers-input.component.css'],
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MockHeadersInputComponent),
+            multi: true
+        }],
+    standalone: false
 })
 export class MockHeadersInputComponent implements OnInit {
 
