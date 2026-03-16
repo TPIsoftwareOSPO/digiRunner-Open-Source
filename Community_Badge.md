@@ -8,7 +8,7 @@ and impact within our open source community 💛
 > These badges are an internal recognition system within the OpenTPI/digiRunner community. They are displayed here and in our community spaces, rather than automatically appearing as official GitHub Profile Achievements.
 
 If you're curious about how to earn a badge, please see:
-👉 [BADGES.md](./BADGES.md)
+👉 [Badges.md](./Badges.md)
 
 ---
 
