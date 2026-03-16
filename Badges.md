@@ -5,7 +5,7 @@ meaningful participation in our open source community.
 
 > **⚠️ Note on Badge Display:**
 > These badges are an internal OpenTPI community recognition and are **not official GitHub Profile Achievements**. 
-> Badges awarded will be showcased in our official [`COMMUNITY_BADGES.md`](./COMMUNITY_BADGES.md). They do not automatically sync to your personal GitHub Profile, but you are welcome to paste the badge snippets into your own profile to show off your impact!
+> Badges awarded will be showcased in our official [`Community_Badges.md`](./Community_Badges.md). They do not automatically sync to your personal GitHub Profile, but you are welcome to paste the badge snippets into your own profile to show off your impact!
 
 Whether you're asking questions, helping others, sharing insights,
 or building real-world projects — every contribution matters 💛
@@ -67,7 +67,7 @@ learning, sharing, and growing together.
 - Most badges are awarded once per person.
 - Project-based badges may be awarded multiple times for different projects.
 
-Recipient lists are published in [`COMMUNITY_BADGES.md`](./COMMUNITY_BADGES.md).
+Recipient lists are published in [`Community_Badges.md`](./Community_Badges.md).
 
 ---
 
