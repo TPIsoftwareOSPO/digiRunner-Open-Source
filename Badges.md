@@ -20,7 +20,7 @@ learning, sharing, and growing together.
 
 ### 1. First Step Badge
 **Your open source journey starts here.**
-[First Step Badge](./assets/01-First%20Step%20Badge.svg)
+[First Step Badge](./Badges_Assets/01-First%20Step%20Badge.svg)
 
 **Trigger**
 - Your first post or thread in GitHub Discussions
@@ -39,7 +39,7 @@ learning, sharing, and growing together.
 
 ### 2. Project Builder Badge
 **Building, sharing, and learning — this is open source.**
-[Project Builder Badge](./assets/02-Project%20Builder%20Badge.svg)
+[Project Builder Badge](./Badges_Assets/02-Project%20Builder%20Badge.svg)
 
 **Trigger**
 - Using OpenTPI open source software (e.g. digiRunner) to complete a
