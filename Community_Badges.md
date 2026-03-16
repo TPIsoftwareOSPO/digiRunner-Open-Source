@@ -16,7 +16,7 @@ If you're curious about how to earn a badge, please see:
 
 ### First Step Badge
 > Your open source journey starts here.
-[First Step Badge](./assets/01-First%20Step%20Badge.svg)
+[First Step Badge](./Badges_Assets/01-First%20Step%20Badge.svg)
 
 ---
 
@@ -24,7 +24,7 @@ If you're curious about how to earn a badge, please see:
 
 ### Project Builder Badge
 > Building, sharing, and learning – this is open source.
-[Project Builder Badge](./assets/02-Project%20Builder%20Badge.svg)
+[Project Builder Badge](./Badges_Assets/02-Project%20Builder%20Badge.svg)
 
 ---
 
