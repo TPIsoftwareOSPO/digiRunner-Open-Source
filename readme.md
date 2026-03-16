@@ -356,10 +356,10 @@ Open your browser and navigate to: http://localhost:18080/dgrv4/login
 We recognize outstanding contributors through our badge system.
 
 > **⚠️ Important Note:** > These are OpenTPI/digiRunner community-specific honors designed to celebrate your contributions. Please note that these are **not** official GitHub Profile Achievements. 
-> Badges are proudly displayed in our [`COMMUNITY_BADGES.md`](./COMMUNITY_BADGES.md). They will not automatically appear on your personal GitHub Profile, though you are highly encouraged to add the badge snippets to your own profile!
+> Badges are proudly displayed in our [`Community_Badges.md`](./Community_Badges.md). They will not automatically appear on your personal GitHub Profile, though you are highly encouraged to add the badge snippets to your own profile!
 
 [First Step Badge](./assets/01-First%20Step%20Badge.svg)
 [Project Builder Badge](./assets/02-Project%20Builder%20Badge.svg)
 
-- 📘 [Badge Criteria](./BADGES.md)
-- 👑 [Badge Recipients](./COMMUNITY_BADGES.md)
+- 📘 [Badge Criteria](./Badges.md)
+- 👑 [Badge Recipients](./Community_Badges.md)
