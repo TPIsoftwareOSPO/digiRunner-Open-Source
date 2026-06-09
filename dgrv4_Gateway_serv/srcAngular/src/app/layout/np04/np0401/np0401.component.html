@@ -1,30 +1,29 @@
 <app-container [title]="title">
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-        <div class="form-group row">
-            <div class="col-4 col-xl-4 col-lg-4">
-                <label class="control-label">{{'keyword_search'|translate}}</label>
-                <input type="text" formControlName="keyword" class="form-control"
-                    placeholder="{{'plz_enter'|translate}}">
-            </div>
-            <div class="col-4 col-xl-4 col-lg-4">
-                <label class="required control-label">{{'apply_date'|translate}}</label>
-                <div class="d-flex align-items-center">
+  <form [formGroup]="form" (ngSubmit)="submitForm()">
+    <div class="form-group row">
+      <div class="col-4 col-xl-4 col-lg-4">
+        <label class="control-label">{{'keyword_search'|translate}}</label>
+        <input type="text" formControlName="keyword" class="form-control" placeholder="{{'plz_enter'|translate}}">
+      </div>
+      <div class="col-4 col-xl-4 col-lg-4">
+        <label class="required control-label">{{'apply_date'|translate}}</label>
+        <div class="d-flex align-items-center">
 
-                        <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
-                            formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
-                        </p-calendar>
-
-
-                        <label class="me-2">～</label>
+          <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+            formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
+          </p-datepicker>
 
 
-                        <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="endDate" appendTo="body"
-                            dateFormat="yy/mm/dd" [showIcon]="true">
-                        </p-calendar>
+          <label class="me-2">～</label>
 
-                </div>
-            </div>
-            <!-- <div
+
+          <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="endDate"
+            appendTo="body" dateFormat="yy/mm/dd" [showIcon]="true">
+          </p-datepicker>
+
+        </div>
+      </div>
+      <!-- <div
                 [ngClass]="{'col-4 col-xl-4 col-lg-4': subTypes.length == 0,'col-2 col-xl-2 col-lg-2': subTypes.length != 0}">
                 <label class="required control-label">{{'apply_type'|translate}}</label>
                 <div>
@@ -47,175 +46,150 @@
                     </div>
                 </div>
             </div> -->
-        </div>
-        <div class="form-group row">
-            <div class="col-3 col-xl-3">
-                <button type="submit" class="btn tpi-btn tpi-primary pull-right me-2">{{'button.search'|translate}}</button>
-            </div>
-        </div>
-    </form>
-    <hr>
-    <p-tabView *ngIf="tabTitles" (onChange)="changeTab($event)">
-        <!-- 申請者(REQ)、待審單(EXA)、已審單(REV) -->
-        <p-tabPanel [header]="tabview.label" *ngFor="let tabview of tabTitles; let i = index" [selected]="i == 0">
-            <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" styleClass="p-datatable-striped"
-                [style]="{'word-break':'break-word'}">
-                <ng-template pTemplate="colgroup" let-columns>
-                    <colgroup>
-                        <col *ngFor="let col of columns" [style.width]="col.width">
-                        <col style="width: 15%;">
-                    </colgroup>
-                </ng-template>
-                <ng-template pTemplate="header" let-columns>
-                    <tr>
-                        <th *ngFor="let col of columns" scope="col" pResizableColumn>
-                            {{col.header}}
-                        </th>
-                        <th style="width: 15%;" scope="col">{{'action'|translate}}</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-rowData let-columns="columns" let-i="rowIndex">
-                    <tr>
-                        <td *ngFor="let col of columns">
-                            <span *ngIf="col.field != 'chkStatus'">
-                                {{rowData[col.field]}}
-                            </span>
-                            <span *ngIf="col.field == 'chkStatus'">
-                                {{rowData['checkPointName']}} - {{rowData['chkStatus']}}
-                            </span>
-                        </td>
-                        <td style="text-align: center;width: 15%;">
-                            <!-- <div class="btn-group" style="flex-wrap: wrap;"> -->
-                                <!-- <button *ngIf="rowData['reviewVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
+    </div>
+    <div class="form-group row">
+      <div class="col-3 col-xl-3">
+        <button type="submit" class="btn tpi-btn tpi-primary pull-right me-2">{{'button.search'|translate}}</button>
+      </div>
+    </div>
+  </form>
+  <hr>
+  <p-tabs [value]="activeTabIndex" *ngIf="tabTitles" [activeIndex]="activeTabIndex" (valueChange)="changeTab({index:+$event})" class="tab">
+    <p-tablist>
+      <p-tab *ngFor="let tabview of tabTitles; let i = index" [value]="i">{{tabview.label}}</p-tab>
+    </p-tablist>
+  </p-tabs>
+  <!-- 申請者(REQ)、待審單(EXA)、已審單(REV) -->
+  <div *ngIf="tabTitles" style="padding: 10px;border: 1px solid #ccc;">
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" stripedRows
+      [style]="{'word-break':'break-word'}">
+      <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+          <col *ngFor="let col of columns" [style.width]="col.width">
+          <col style="width: 15%;">
+        </colgroup>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngFor="let col of columns" scope="col" pResizableColumn>
+            {{col.header}}
+          </th>
+          <th style="width: 15%;" scope="col">{{'action'|translate}}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns" let-i="rowIndex">
+        <tr>
+          <td *ngFor="let col of columns">
+            <span *ngIf="col.field != 'chkStatus'">
+              {{rowData[col.field]}}
+            </span>
+            <span *ngIf="col.field == 'chkStatus'">
+              {{rowData['checkPointName']}} - {{rowData['chkStatus']}}
+            </span>
+          </td>
+          <td style="text-align: center;width: 15%;">
+            <!-- <div class="btn-group" style="flex-wrap: wrap;"> -->
+            <!-- <button *ngIf="rowData['reviewVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.review)">
                                     <span class="fa fa-edit">{{'button.review'|translate}}</span>
                                 </button> -->
-                                <button *ngIf="rowData['reviewVisiable'] == 'Y'"
-                                        pButton pRipple type="button" icon="fa fa-check"
-                                        class="p-button-rounded p-button-text p-button-plain"
-                                        (click)="showDialog(rowData,formOperate.review)"
-                                        [pTooltip]="'button.review' | translate" tooltipPosition="top"></button>
+            <button *ngIf="rowData['reviewVisiable'] == 'Y'" pButton pRipple type="button" icon="fa fa-check"
+              class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.review)"
+              [pTooltip]="'button.review' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['trakerVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
+            <!-- <button *ngIf="rowData['trakerVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.traker)">
                                     <span class="fa fa-edit">{{'button.traker'|translate}}</span>
                                 </button> -->
-                                <button *ngIf="rowData['trakerVisiable'] == 'Y'"
-                                        pButton pRipple type="button" icon="fa fa-tasks"
-                                        class="p-button-rounded p-button-text p-button-plain"
-                                        (click)="showDialog(rowData,formOperate.traker)"
-                                        [pTooltip]="'button.tracker' | translate" tooltipPosition="top"></button>
+            <button *ngIf="rowData['trakerVisiable'] == 'Y'" pButton pRipple type="button" icon="fa fa-tasks"
+              class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.traker)"
+              [pTooltip]="'button.tracker' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['closeVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
+            <!-- <button *ngIf="rowData['closeVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.settle)">
                                     <span class="fa fa-edit">{{'button.close'|translate}}</span>
                                 </button> -->
-                                <button *ngIf="rowData['closeVisiable'] == 'Y'"
-                                        pButton pRipple type="button" icon="fa fa-trash-alt"
-                                        class="p-button-rounded p-button-text p-button-plain"
-                                        (click)="showDialog(rowData,formOperate.settle)"
-                                        [pTooltip]="'button.close' | translate" tooltipPosition="top"></button>
+            <button *ngIf="rowData['closeVisiable'] == 'Y'" pButton pRipple type="button" icon="fa fa-trash-alt"
+              class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.settle)"
+              [pTooltip]="'button.close' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['resendVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
+            <!-- <button *ngIf="rowData['resendVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.resend)">
                                     <span class="fa fa-edit">{{'button.resend'|translate}}</span>
                                 </button> -->
-                                <button *ngIf="rowData['resendVisiable'] == 'Y'"
-                                        pButton pRipple type="button" icon="fa fa-paper-plane"
-                                        class="p-button-rounded p-button-text p-button-plain"
-                                        (click)="showDialog(rowData,formOperate.resend)"
-                                        [pTooltip]="'button.resend' | translate" tooltipPosition="top"></button>
+            <button *ngIf="rowData['resendVisiable'] == 'Y'" pButton pRipple type="button" icon="fa fa-paper-plane"
+              class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.resend)"
+              [pTooltip]="'button.resend' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['updateVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
+            <!-- <button *ngIf="rowData['updateVisiable'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.update)">
                                     <span class="fa fa-edit">{{'button.edit'|translate}}</span>
                                 </button> -->
-                                <button *ngIf="rowData['updateVisiable'] == 'Y'"
-                                        pButton pRipple type="button" icon="fa fa-edit"
-                                        class="p-button-rounded p-button-text p-button-plain"
-                                        (click)="showDialog(rowData,formOperate.update)"
-                                        [pTooltip]="'button.edit' | translate" tooltipPosition="top"></button>
+            <button *ngIf="rowData['updateVisiable'] == 'Y'" pButton pRipple type="button" icon="fa fa-edit"
+              class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.update)"
+              [pTooltip]="'button.edit' | translate" tooltipPosition="top"></button>
 
-                                <!-- <button *ngIf="rowData['sendVisible'] == 'Y'" type="button" class="btn btn-deta me-5"
+            <!-- <button *ngIf="rowData['sendVisible'] == 'Y'" type="button" class="btn btn-deta me-5"
                                     (click)="showDialog(rowData,formOperate.create)">
                                     <span class="fa fa-edit">{{'button.submit_for_review'|translate}}</span>
                                 </button> -->
-                                <button *ngIf="rowData['sendVisible'] == 'Y'"
-                                pButton pRipple type="button" icon="fa fa-paper-plane"
-                                class="p-button-rounded p-button-text p-button-plain"
-                                (click)="showDialog(rowData,formOperate.create)"
-                                [pTooltip]="'button.submit_for_review' | translate" tooltipPosition="top"></button>
-                            <!-- </div> -->
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="footer" let-columns>
-                    <tr *ngIf="rowcount">
-                        <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
-                            <span>{{'row_count' | translate}}: {{rowcount}}</span>
-                            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
+            <button *ngIf="rowData['sendVisible'] == 'Y'" pButton pRipple type="button" icon="fa fa-paper-plane"
+              class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.create)"
+              [pTooltip]="'button.submit_for_review' | translate" tooltipPosition="top"></button>
+            <!-- </div> -->
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="rowcount">
+          <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+            <span>{{'row_count' | translate}}: {{rowcount}}</span>
+            <!-- <button type="button" class="btn btn-warning pull-right ms-3"
                                 (click)="moreData();">{{'button.more'|translate}}</button> -->
 
-                                <!-- 查詢更多 -->
-                                <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
-                                <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
-                                </button>
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage" let-columns>
-                    <tr>
-                        <td [attr.colspan]="columns.length+1">
-                            {{'no_rec' | translate}}
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </p-tabPanel>
-    </p-tabView>
+            <!-- 查詢更多 -->
+            <button type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="columns.length+1">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </app-container>
 <app-dialog [title]="dialogTitle" #dialog></app-dialog>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<!-- <p-toast position="center" key="confirm" (onClose)="onReject()" [baseZIndex]="5000">
-    <ng-template let-message pTemplate="message">
-        <div style="text-align: center">
-            <em class="fas fa-exclamation-triangle fa-3x"></em>
-            <h4>{{message.summary}}</h4>
-            <p>{{message.detail}}</p>
-        </div>
-        <div class="ui-g ui-fluid">
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="onCreateRequisition()" label="Yes"
-                    class="ui-button-success"></button>
-            </div>
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="onReject()" label="No" class="ui-button-secondary"></button>
-            </div>
-        </div>
-    </ng-template>
-</p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
-      <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+      <button type="button" pButton icon="pi pi-check"
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>
-<p-dialog header="{{dialogTitle}}" [(visible)]="display" [modal]="true" [dismissableMask]="true" [maximizable]="false" [draggable]="false">
-    <ng-template #requisitionViewRef></ng-template>
-    <!-- <p-footer> -->
-        <div class="text-center">
-            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary"
-                (click)="executeReg('ACCEPT');">{{'button.approve'|translate}}</button>
-            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
-                (click)="executeReg('RETURN');">{{'button.return'|translate}}</button>
-            <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
-                (click)="executeReg('DENIED');">{{'button.reject'|translate}}</button>
-            <button *ngIf="closeBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
-                (click)="executeReg('END');">{{'button.confirm'|translate}}</button>
-            <button *ngIf="resendBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
-                (click)="doResend();">{{'button.resend'|translate}}</button>
-        </div>
-    <!-- </p-footer> -->
+<p-dialog header="{{dialogTitle}}" [(visible)]="display" [modal]="true" [dismissableMask]="true" [maximizable]="false"
+  [draggable]="false">
+  <ng-template #requisitionViewRef></ng-template>
+  <div class="text-center">
+    <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary"
+      (click)="executeReg('ACCEPT');">{{'button.approve'|translate}}</button>
+    <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
+      (click)="executeReg('RETURN');">{{'button.return'|translate}}</button>
+    <button *ngIf="reviewBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
+      (click)="executeReg('DENIED');">{{'button.reject'|translate}}</button>
+    <button *ngIf="closeBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
+      (click)="executeReg('END');">{{'button.confirm'|translate}}</button>
+    <button *ngIf="resendBtnFlag" type="button" class="btn tpi-btn tpi-primary ms-2"
+      (click)="doResend();">{{'button.resend'|translate}}</button>
+  </div>
 </p-dialog>

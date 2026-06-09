@@ -1,22 +1,8 @@
 <app-container [title]="title" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <form [formGroup]="form" >
-
-
       <div class="form-group row">
-
         <div class="col-12 d-flex align-items-center">
-
-          <!-- <label for="keyword">{{'keyword_search'|translate}}</label> -->
-          <!-- <input type="text" class="form-control" id="keyword" formControlName="keyword"
-            placeholder="{{'role_name'|translate}}、{{'role_desc'|translate}}"> -->
-          <!-- <div class="ui-inputgroup">
-            <input type="text" class="form-control" id="keyword" formControlName="keyword"
-              placeholder="{{'role_name'|translate}}、{{'role_desc'|translate}}">
-            <button pButton type="button" icon="pi pi-search" class="p-button-text"
-              (click)="submitForm();"></button>
-          </div> -->
-
           <app-search-input placeholder="{{'role_name'|translate}}、{{'role_desc'|translate}}"
           [control]="form.get('keyword')" [searchFn]="submitForm.bind(this)"
           class="col-9 col-lg-4 col-sm-6"></app-search-input>
@@ -25,16 +11,8 @@
             (click)="create();">{{'button.create'|translate}}</button>
         </div>
       </div>
-      <!-- <div class="form-group">
-                        <button type="submit" class="btn btn-warning pull-right me-3">{{'button.search' |
-                            translate}}</button>
-                        <button type="button" class="btn btn-primary pull-right"
-                            (click)="create();">{{'button.create'|translate}}</button>
-                    </div> -->
-
     </form>
-    <!-- <hr> -->
-    <p-table [columns]="cols" [value]="roleDetailList" [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped"
+    <p-table [columns]="cols" [value]="roleDetailList" [style]="{'word-break':'break-word'}" stripedRows
              responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -259,14 +237,13 @@
         </div>
     </ng-template>
 </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

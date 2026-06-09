@@ -2,7 +2,7 @@ import { LogoutService } from './../../../shared/services/logout.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { UserService } from './../../../shared/services/api-user.service';
 import { DialogComponent } from './../../../shared/dialog/dialog.component';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, model, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -255,9 +255,11 @@ export class Ac0002Component extends BaseComponent implements OnInit {
         data: { selectionMode: 'single' },
         header: dict['role_list'],
         width: '700px',
+        closable:true,
+        modal:true
       });
 
-      ref.onClose.subscribe((res) => {
+      ref!.onClose.subscribe((res) => {
         if (res) {
           this.roleAlias!.setValue(res.roleAlias);
           this.roleName!.setValue(res.roleName);
@@ -326,9 +328,11 @@ export class Ac0002Component extends BaseComponent implements OnInit {
         // data: { data: data },
         header: dict['role_list'],
         width: '700px',
+        closable:true,
+        modal:true
       });
 
-      ref.onClose.subscribe((res) => {
+      ref!.onClose.subscribe((res) => {
         if (res) {
           let set = new Set();
           let _roleAliasList: string[] = [];
@@ -548,10 +552,6 @@ export class Ac0002Component extends BaseComponent implements OnInit {
   }
 
   async deleteUser() {
-    // const code = ['cfm_del_user', 'user_name', 'user_alias'];
-    // const dict = await this.toolService.getDict(code);
-    // this.messageService.add({ key: 'deleteUser', sticky: true, severity: 'error', summary: dict['cfm_del_user'], detail: `${dict['user_name']}：${this.userDetail!.userName}、${dict['user_alias']}：${this.userDetail!.userAlias}` });
-
     const code = ['cfm_del', 'user_name', 'user_alias'];
     const dict = await this.toolService.getDict(code);
     this.confirmationService.confirm({
@@ -757,7 +757,6 @@ export class Ac0002Component extends BaseComponent implements OnInit {
 
     const refDialog = this.dialogService.open(OrganizationComponent, {
       header: dict['org_chart'],
-      modal: true,
       data: {
         orgList: this.orgList,
         showFooterBtn: true,
@@ -765,9 +764,11 @@ export class Ac0002Component extends BaseComponent implements OnInit {
       },
       width: '90vw',
       height: '100vh',
+      closable:true,
+      modal:true
     });
 
-    refDialog.onClose.subscribe((res) => {
+    refDialog!.onClose.subscribe((res) => {
       if (res) {
         switch (this.currentAction) {
           case 'query':

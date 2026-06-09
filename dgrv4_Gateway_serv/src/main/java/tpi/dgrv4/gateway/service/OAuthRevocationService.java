@@ -62,7 +62,7 @@ public class OAuthRevocationService {
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp("Internal Server Error", null,
+					TokenHelper.getOAuthTokenErrorResp("Internal Server Error", null,
 							HttpStatus.INTERNAL_SERVER_ERROR.value(), reqUri),
 					HttpStatus.INTERNAL_SERVER_ERROR);// 500
 		}

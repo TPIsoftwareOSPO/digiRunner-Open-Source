@@ -115,9 +115,11 @@ export class ApiShelvesComponent implements OnInit {
           width: '80vw',
           height: '100vh',
           header: dict['un_shelves_api_search'],
+          closable:true,
+          modal:true
         })
 
-        ref.onClose.subscribe(_chooseAPI => {
+        ref!.onClose.subscribe(_chooseAPI => {
           if (_chooseAPI) {
             if (this.data && window.location.hash == '#/np04/np0401') {
               this.data.apiUid = _chooseAPI.apiUid;
@@ -180,12 +182,14 @@ export class ApiShelvesComponent implements OnInit {
             displayInDialog: true,
             data: { selectedThemes: this.selectedThemes, dataList: res.RespBody.dataList, keyword: ReqBody.keyword },
           },
-          width: '50vw',
+          width: '30vw',
           height: '100vh',
           header: dict['theme_list'],
+          closable:true,
+          modal:true
         })
 
-        ref.onClose.subscribe(_chooseThemes => {
+        ref!.onClose.subscribe(_chooseThemes => {
           if (_chooseThemes) {
             this.selectedThemes = _chooseThemes;
             let _refThemeId: any[] = [];

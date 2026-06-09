@@ -1,0 +1,14 @@
+ .header-button {
+  border-radius: 4px;
+  background: #fff;
+  color: var(--p-menu-item-color);
+
+  &:hover {
+    background: #fcf0d3;
+    color: var(--tpi-primary);
+    // background-color: var(--p-red-500);
+    // border-color: var(--p-red-500);
+  }
+}
+
+

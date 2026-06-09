@@ -321,10 +321,12 @@ export class Ac0015Component extends BaseComponent implements OnInit {
       const ref = this.dialogService.open(RoleListLovComponent, {
         data: data,
         header: dict['role_list'],
-        width: '700px'
+        width: '700px',
+        closable:true,
+        modal:true
       });
 
-      ref.onClose.subscribe(res => {
+      ref!.onClose.subscribe(res => {
         if (res) {
           switch (action) {
             case 'role':

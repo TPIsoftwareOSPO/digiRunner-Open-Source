@@ -275,7 +275,7 @@ public class TptokenService {
 		if(isGetToken()) {
 			ObjectMapper objectMapper = new ObjectMapper();
 			ResponseEntity<?> respObj = getOAuthTokenService().getToken(httpResp, formData, authorization,
-					"/oauth/token");
+					"/oauth/token", "1");
 			Object bodyObj = respObj.getBody();
 			String json = null;
 			if(bodyObj instanceof OAuthTokenResp) {

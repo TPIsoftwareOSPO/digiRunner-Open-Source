@@ -46,9 +46,9 @@
             <div class="col-4 col-xl-4 col-lg-4">
                 <label class="required control-label">{{'effective_date'|translate}}</label>：
                 <!-- calendar disabled style [inputStyle]="{'opacity':'0.5','cursor':'default','background-color':'#cccccc'}" -->
-                <p-calendar dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" appendTo="body"
+                <p-datepicker dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" appendTo="body"
                     formControlName="effectiveDate">
-                </p-calendar>
+                </p-datepicker>
                 <div *ngIf="effectiveDate?.invalid && (effectiveDate?.dirty || effectiveDate?.touched)"
                     class="text-danger">
                     <small class="form-text">{{effectiveDate.errors.required | translate}}</small>
@@ -58,8 +58,8 @@
                         <label class="required control-label">{{'effective_date'|translate}}</label>：
                     </div>
                     <div class="col-9">
-                        <p-calendar dateFormat="yy/mm/dd" [showIcon]="true" formControlName="effectiveDate">
-                        </p-calendar>
+                        <p-datepicker dateFormat="yy/mm/dd" [showIcon]="true" formControlName="effectiveDate">
+                        </p-datepicker>
                     </div>
                 </div> -->
             </div>
@@ -109,12 +109,12 @@
                 <div class="ui-inputgroup">
                     <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}"
                         [(ngModel)]='keyword'>
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night input-btn"
                         (click)="searchShelvesAPI('API_OFF');"></button>
                 </div>
             </div>
         </div>
-        <p-table *ngIf="cols" [columns]="cols" [value]="apiOffDataList" selectionMode="single" styleClass="p-datatable-striped"
+        <p-table *ngIf="cols" [columns]="cols" [value]="apiOffDataList" selectionMode="single" stripedRows
             [(selection)]="apiOffSelected" [style]="{'word-break':'break-word'}">
             <ng-template pTemplate="caption">
                 <div class="ui-helper-clearfix">
@@ -185,7 +185,7 @@
                 <div class="ui-inputgroup">
                     <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}"
                         [(ngModel)]='keyword'>
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night input-btn"
                         (click)="searchShelvesAPI('API_ON_UPDATE');"></button>
                 </div>
             </div>

@@ -134,7 +134,7 @@
           <h5 style="font-weight: bold;">{{'unpopular_5'|translate}}
             ({{'data_time'|translate}}:{{'permanent'|translate}})</h5>
           <p-table *ngIf="unpopular.length>0" [value]="unpopular" [style]="{'word-break':'break-word'}"
-            styleClass="p-datatable-striped" responsiveLayout="scroll">
+            stripedRows responsiveLayout="scroll">
             <ng-template pTemplate="header" let-columns>
               <tr>
                 <th>{{'api_name'|translate}}</th>
@@ -211,7 +211,7 @@
           <p-tabView [scrollable]="true" *ngIf="clientUsagePercentage.length>0">
             <p-tabPanel [header]="item.client" *ngFor="let item of clientUsagePercentage; let i = index"
               [selected]="i == 0">
-              <p-table [value]="item.apiUsage" [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped"
+              <p-table [value]="item.apiUsage" [style]="{'word-break':'break-word'}" stripedRows
                 responsiveLayout="scroll">
                 <ng-template pTemplate="header" let-columns>
                   <tr>
@@ -257,7 +257,7 @@
       <div class="col-5 pe-2">
         <p-card class="tpi-card-content">
           <h5 style="font-weight: bold;">{{'last_login_log'|translate}}</h5>
-          <p-table [value]="lastLoginLog" [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped"
+          <p-table [value]="lastLoginLog" [style]="{'word-break':'break-word'}" stripedRows
             responsiveLayout="scroll">
             <ng-template pTemplate="header" let-columns>
               <tr>

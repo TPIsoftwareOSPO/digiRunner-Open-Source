@@ -1,0 +1,78 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group row">
+        <div class="col-4 col-xl-4 col-lg-4">
+          <label class="control-label">{{'dbha.src_node'|translate}}</label>
+          <p-select [options]="srcNodeList" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+            formControlName="sourceId" [style]="{'width':'100%'}">
+          </p-select>
+        </div>
+        <div class="col-4 col-xl-4 col-lg-4">
+          <label class="control-label">{{'dbha.tar_node'|translate}}</label>
+          <p-multiSelect [options]="tarNodeList" formControlName="targetIds" placeholder="{{'plz_chs' | translate}}"
+            [style]="{'width':'100%'}">
+          </p-multiSelect>
+
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col">
+          <button type="button" class="btn tpi-btn tpi-primary" [disabled]="form.get('sourceId')?.value == null || form.get('targetIds')?.value.length == 0 || !btnStatus"
+            (click)="dbSyncTrigger();">{{'dbha.sync'|translate}}</button>
+        </div>
+      </div>
+    </form>
+    <hr />
+    <div>
+      <table class="table table-bordered" style="font-size: 0.8rem;">
+        <tbody>
+          <tr>
+            <td class="w-25">{{ 'dbha.syncType' | translate }}</td>
+            <td>{{ currentSync?.syncType }}</td>
+          </tr>
+          <tr [ngClass]="{ 'table-success': currentSync?.status === 'DONE' }">
+            <td><i class="pi pi-check-circle me-2" *ngIf="currentSync?.status === 'DONE'"></i>{{ 'status' | translate }}</td>
+            <td class="fw-bold">{{ currentSync?.status }}</td>
+          </tr>
+          <tr *ngIf="currentSync?.status=='RUNNING' || currentSync?.status=='DONE'">
+            <td>{{ 'job_step' | translate }}</td>
+            <td>
+              <p-progressBar [value]="currentSync?.progress??0"></p-progressBar>
+            </td>
+          </tr>
+            <tr>
+            <td>{{ 'dbha.currentStep' | translate }}</td>
+            <td>{{ currentSync?.currentStep }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'dbha.syncId' | translate }}</td>
+            <td>{{ currentSync?.syncId }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'dbha.scheduleId' | translate }}</td>
+            <td>{{ currentSync?.scheduleId }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'dbha.src_node' | translate }}</td>
+            <td>{{ currentSync?.sourceId }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'dbha.tar_node' | translate }}</td>
+            <td>{{ currentSync?.targetIds.join(', ') }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'start_time' | translate }}</td>
+            <td>{{ currentSync?.startTime | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'dbha.elapsed' | translate }}</td>
+            <td>{{ currentSync?.elapsed }} </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>
+</app-container>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

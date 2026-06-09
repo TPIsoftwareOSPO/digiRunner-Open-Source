@@ -1,0 +1,6 @@
+<div class="ui-inputgroup">
+  <input [type]="mask ? 'password' : 'text'" [class]="class" [formControl]="control"
+    [placeholder]="placeholder">
+  <button pButton type="button" [icon]="mask ? 'pi pi-eye':'pi pi-eye-slash'" class="ms-1 tpi-night input-btn"
+    style="height: 30px;" (click)="toggleMask()"></button>
+</div>

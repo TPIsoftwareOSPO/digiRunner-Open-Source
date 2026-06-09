@@ -135,10 +135,7 @@ public class TSMPCServiceGet implements IApiCacheService {
 				srcUrl = srcUrl + getCommForwardProcService().getTsmpcPathParameter(reqUrl);
 			}
 
-			String queryStr = httpReq.getQueryString();
-			if (null != queryStr) {
-				srcUrl += "?" + queryStr;
-			}
+			srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, srcUrl);
 
 			int tokenPayload = apiReg.getFunFlag();
 

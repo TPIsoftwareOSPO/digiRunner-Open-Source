@@ -176,7 +176,7 @@ public class AA1212Service {
 			queueResp.setRdb(clientVo.getRdbQueue());
 			itemVo.setQueue(queueResp);
 			//ip
-			itemVo.setIp(clientVo.getIp() + ":" + clientVo.getServerPort());
+			itemVo.setIp(clientVo.getWebLocalIP() + ":" + clientVo.getServerPort());
 			//keeperServer
 			if(clientVo.getWebLocalIP().equals(clientVo.getKeeperServerIp())) {
 				itemVo.setKeeperServer("Y");
@@ -186,8 +186,13 @@ public class AA1212Service {
 			AA1212NodeInfoResp nodeInfoResp = new AA1212NodeInfoResp();
 			nodeInfoResp.setCpuUsage(clientVo.getCpu());
 			itemVo.setNodeInfo(nodeInfoResp);
-			
+
+            AA1212DbResp dbResp = new AA1212DbResp();
+            dbResp.setConnectedNode(clientVo.getConnectedNode());
+            itemVo.setDb(dbResp);
+
 			dataList.add(itemVo);
+
 		}
 		
 	}
@@ -245,7 +250,10 @@ public class AA1212Service {
 					allNodeVo.setOthers(allNodeVo.getOthers() + dashboardVo.getBadAttemptOthers());
 					
 					//db
-					AA1212DbResp dbResp = new AA1212DbResp();
+                    AA1212DbResp dbResp = itemVo.getDb();
+                    if (dbResp == null) {
+                        dbResp = new AA1212DbResp();
+                    }
 					dbResp.setActive(dashboardVo.getDbActive());
 					dbResp.setIdle(dashboardVo.getDbIdle());
 					dbResp.setTotal(dashboardVo.getDbTotal());

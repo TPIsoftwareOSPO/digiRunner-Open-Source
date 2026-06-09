@@ -27,17 +27,18 @@ export class AlertService {
     this.ref = this.dialogService.open(CustomAlertComponent, {
       data,
       showHeader: false,
+      modal:true
     });
 
     // 監聽對話框關閉時，清除 this.ref，避免 memory leak
-    this.ref.onClose.subscribe(() => {
+    this.ref?.onClose.subscribe(() => {
       this.ref = null;
     });
   }
 
   ok(
     title: string,
-    text: string,
+    text: string = '',
     type: AlertType = AlertType.warning,
     html?: string
   ) {

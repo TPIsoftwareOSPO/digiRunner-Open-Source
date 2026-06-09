@@ -6,9 +6,10 @@
           <label id="startDate_label" class="control-label">{{'date_range'|translate}}</label>
           <div class="d-flex">
             <div>
-              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+
+              <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                 formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true">
-              </p-calendar>
+              </p-datepicker>
               <div *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)" class="text-danger">
                 <small class="form-text">{{startDate.errors.isRequired}}</small>
                 <small class="form-text">{{startDate.errors.pattern}}</small>
@@ -16,9 +17,9 @@
             </div>
             <label style="padding: 5px 10px;">～</label>
             <div>
-              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+              <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                 formControlName="endDate" dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true">
-              </p-calendar>
+              </p-datepicker>
               <div *ngIf="endDate?.invalid && (endDate?.dirty || endDate?.touched)" class="text-danger">
                 <small class="form-text">{{endDate.errors.isRequired}}</small>
                 <small class="form-text">{{endDate.errors.pattern}}</small>
@@ -33,9 +34,9 @@
         </div>
         <div class="col-2 col-xl-2 col-lg-2">
           <label class="control-label">{{'mail_result'|translate}}</label>
-          <p-dropdown [options]="resultOption" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="resultOption" [filter]="true" placeholder="{{'plz_chs' | translate}}"
             formControlName="result" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
         </div>
       </div>
       <div class="form-group row">
@@ -45,7 +46,7 @@
       </div>
     </form>
     <hr>
-    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" stripedRows
       [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>

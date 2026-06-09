@@ -819,14 +819,15 @@ export class Ac0212Component extends BaseComponent implements OnInit {
     }
     return Authorities_str;
   }
-  async showDialog_APIList(Data: Object[]) {
+  async showDialog_APIList(_data: Object[]) {
     let data: any[] = [];
-    Data['apiList']?.forEach((element) => {
+    _data['apiList']?.forEach((element) => {
       let single_data = {};
       single_data['label'] = `${element['apiKey']}(${element['apiName']})`;
       single_data['value'] = element;
       data.push(single_data);
     });
+
     this.data_APIList = data;
   }
   async Choose_API(Data: Object[]) {

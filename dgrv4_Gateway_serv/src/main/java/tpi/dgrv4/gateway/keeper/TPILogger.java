@@ -5,6 +5,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +34,7 @@ import tpi.dgrv4.codec.utils.UUID64Util;
 import tpi.dgrv4.common.component.cache.core.DaoGenericCache;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.LoggerLevelConstant;
+import tpi.dgrv4.common.constant.TsmpDpDBMSType;
 import tpi.dgrv4.common.keeper.ITPILogger;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.LicenseType;
@@ -38,10 +53,7 @@ import tpi.dgrv4.entity.ifs.IEntityTPILogger;
 import tpi.dgrv4.entity.repository.DgrDashboardEsLogDao;
 import tpi.dgrv4.entity.repository.DgrNodeLostContactDao;
 import tpi.dgrv4.entity.repository.TsmpSettingDao;
-import tpi.dgrv4.gateway.TCP.Packet.NodeInfoPacket;
-import tpi.dgrv4.gateway.TCP.Packet.RequireAllClientListPacket;
-import tpi.dgrv4.gateway.TCP.Packet.TPILogInfoPacket;
-import tpi.dgrv4.gateway.TCP.Packet.WebsiteTargetThroughputPacket;
+import tpi.dgrv4.gateway.TCP.Packet.*;
 import tpi.dgrv4.gateway.component.BotDetectionRuleValidator;
 import tpi.dgrv4.gateway.component.ServerConfigProperties;
 import tpi.dgrv4.gateway.component.ServiceConfig;
@@ -51,6 +63,7 @@ import tpi.dgrv4.gateway.component.job.JobHelper;
 import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.constant.DgrDataType;
 import tpi.dgrv4.gateway.constant.DgrDeployRole;
+import tpi.dgrv4.gateway.constant.H2ConfigSyncEnum;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.server.CommunicationServerConfig;
 import tpi.dgrv4.gateway.service.*;
@@ -63,15 +76,6 @@ import tpi.dgrv4.tcp.utils.packets.DoSetUserName;
 import tpi.dgrv4.tcp.utils.packets.RealtimeDashboardPacket;
 import tpi.dgrv4.tcp.utils.packets.UndertowMetricsPacket;
 import tpi.dgrv4.tcp.utils.packets.UrlStatusPacket;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Getter(AccessLevel.PROTECTED)
 @Component
@@ -92,7 +96,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
     public static boolean hasSecondConnectionStarting = false; // 第一次連接後, 要改連 RDB 為加速需要變更為 true
 
     public static LinkerClient lc;
-    public static LinkedList<String> logStartingMsg = new LinkedList<String>();
+    public static CopyOnWriteArrayList<String> logStartingMsg = new CopyOnWriteArrayList<String>();
 
     private ClinetNotifier lcNofify;
 
@@ -103,8 +107,10 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
     private String prifixUserName = "gateway";
 
     public static String uuid = UUID64Util.UUID64(UUID.randomUUID()).substring(0, 4);
+    
+    public static boolean keeperNodeInfoLogEnable = false;
 
-    @Value("${digi.instance.id}")
+    @Value("${digi.instance.id:}")
     private String instanceId;
 
     @Value("${es.apilog.disk.free.threshold:0.2f}")
@@ -152,7 +158,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
     public static final AtomicLong lastUpdateTimeSetting = new AtomicLong(-1);
     // 儲存 Token 最後更新的時間戳，初始值為 -1 表示尚未更新
     public static final AtomicLong lastUpdateTimeToken = new AtomicLong(-1);
-
     public static Map<String, Long> tokenUsedMap = new HashMap<>();// 用來記錄 token 的使用量
     public static Map<String, Integer> apiUsedMap = new HashMap<>();// 用來記錄 API 的使用量
 
@@ -163,12 +168,50 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
     @Value("${digiRunner.gtw.deploy.interval.ms:1000}")
     private Long deployIntervalMs;
 
+    @Getter
+    @Value("${h2.config.primary.path:./h2dir/dgrdb.mv.db}")
+    private String primaryH2ConfigPath;
+
+    @Getter
+    @Value("${h2.config.replica.path:./h2dir/dgrdb.mv.db}")
+    private String replicaH2ConfigPath;
+
+    @Getter
+    @Value("${h2.config.as.primary.instance.id:}")
+    private String primaryId;
+    @Setter
+    @Getter
+    @Value("${h2.config.as.replica.instance.ids:}")
+    private String replicaIds;
+
+    @Getter
+    @Value("${h2.config.backup.dir:./backups/h2-sync}")
+    private String h2ConfigBackupDir;
+
+    @Getter
+    @Value("${h2.config.backup.retention.days:7}")
+    private int h2ConfigBackupRetentionDays;
+
+    @Setter
+    @Getter
+    @Value("${file.sync.chunk.size.kb:512}")
+    private  int fileSyncChunkSizeKb;
+
+    @Setter
+    @Getter
+    @Value("${file.sync.sleep.time.ms:1}")
+    private  int sleepTime;
     @Setter
     @Getter
     @Value("${linker.client.packet.queue.size:999}")
-    private int packetQueueSize = 999;
+    private int packetQueueSize= 999 ;
 
-    // 從配置中獲取最大目錄大小
+    @Setter
+    @Getter
+    @Value("${digi.h2.port:9092}")
+    private int h2Port;
+
+	// 從配置中獲取最大目錄大小
     private long getConfiguredMaxDirSize() {
         // 這裡可以從系統屬性、配置文件或環境變量讀取配置
         return parseSize(esApiLogDirMaxSize);
@@ -263,6 +306,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
     private HikariDataSource dataSource;
     private ChangeDbConnInfoService changeDbConnInfoService;
     private ServerConfigProperties serverConfigProperties;
+    private H2ConfigSyncServive h2ConfigSyncServive;
 
     @Autowired
     public void setTPILogger(@Nullable ITomcatMetricsService undertowMetricsService,
@@ -275,7 +319,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
                              TsmpSettingCacheProxy tsmpSettingCacheProxy, WebsiteService websiteService,
                              BotDetectionRuleValidator botDetectionRuleValidator, ObjectMapper objectMapper, AwsApiService awsApiService,
                              HikariDataSource dataSource, ChangeDbConnInfoService changeDbConnInfoService,
-                             ServerConfigProperties serverConfigProperties) {
+                             ServerConfigProperties serverConfigProperties, H2ConfigSyncServive h2ConfigSyncServive) {
         this.undertowMetricsService = undertowMetricsService;
         this.licenseUtilBase = licenseUtilBase;
         this.communicationServerConfig = communicationServerConfig;
@@ -299,6 +343,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
         this.dataSource = dataSource;
         this.changeDbConnInfoService = changeDbConnInfoService;
         this.serverConfigProperties = serverConfigProperties;
+        this.h2ConfigSyncServive = h2ConfigSyncServive;
     }
 
     static {
@@ -547,7 +592,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
         if (!trace_flag) {
             return;
         } // 不寫檔 + 不送 keeper
-        if (!StringUtils.hasLength(traceMsg)) {
+        if (!StringUtils.hasText(traceMsg)) {
             return;
         }
         TPILogInfo log = new TPILogInfo();
@@ -719,6 +764,17 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
         // 控制後續的非首次連線
         TPILogger.isFirstConnection = false;
 
+        createThreadStarter();
+
+        // 控制後續的非首次連線
+        TPILogger.isFirstConnection = false;
+        h2ConfigSyncServive.setPrimaryId(primaryId);
+        h2ConfigSyncServive.setReplicaIds(replicaIds);
+
+
+        // After the first connection, handle automatic failback if a DB node reconnects.
+        handleDbNodeReconnection();
+
     }
 
     private void createThreadStarter() {
@@ -885,7 +941,13 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 
                         // In-Memory 調用 Landing 的 API
                         nodeInfoPacket = sendNodeInfo();
-
+                        //避免多佔db連線數,KEEPER_NODE_INFO_LOG_ENABLE暫定給固定值false
+                		//To avoid consuming too many database connections, KEEPER_NODE_INFO_LOG_ENABLE we'll temporarily assign a fixed value of false.
+                        keeperNodeInfoLogEnable = getTsmpSettingService() != null ? getTsmpSettingService().getVal_KEEPER_NODE_INFO_LOG_ENABLE() : false;
+                        if (keeperNodeInfoLogEnable ) {
+							TPILogger.tl.info("inMemoryGtwRefresh2Landing: sending NodeInfoPacket, upTime=" + nodeInfoPacket.upTime);
+						}
+                        
                         String threadStatus = "...No Enterprise Service...";
                         if (undertowMetricsService != null) {
                             threadStatus = undertowMetricsService.webserverProperties();
@@ -1212,6 +1274,12 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
                         }
                         // 傳送 Node Info 給 Keeper server
                         nodeInfoPacket = sendNodeInfo();
+                        //避免多佔db連線數,KEEPER_NODE_INFO_LOG_ENABLE暫定給固定值false
+                		//To avoid consuming too many database connections, KEEPER_NODE_INFO_LOG_ENABLE we'll temporarily assign a fixed value of false.
+                        keeperNodeInfoLogEnable = getTsmpSettingService() != null ? getTsmpSettingService().getVal_KEEPER_NODE_INFO_LOG_ENABLE() : false;
+						if (keeperNodeInfoLogEnable) {
+							TPILogger.tl.info("report2Keeper: sending NodeInfoPacket, upTime=" + nodeInfoPacket.upTime);
+						}
                         lc.send(nodeInfoPacket);
                         lc.send(new RequireAllClientListPacket());
                         String threadStatus = "...No Enterprise Service...";
@@ -1238,6 +1306,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
                         return;
                     }
                 }
+                TPILogger.tl.info("\n..."+TPILogger.lcUserName+"_report2Keeper()=" + Thread.currentThread().getName() + "...lc close EXIT...");
             }
 
         }).start();
@@ -1267,6 +1336,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
         Map<String, Object> map = dbInfoMap;
         String dbConnect = dataSource.getUsername();
         nodeInfoPacket.dbConnect = dbConnect + "";
+        nodeInfoPacket.connectedNode = getConnectedNode();
         if (map != null) {
             if (map.get("dbInfo") != null) {
                 nodeInfoPacket.dbInfo = ((JsonNode) map.get("dbInfo")).toPrettyString();
@@ -1322,6 +1392,7 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 
         long endTime = System.currentTimeMillis();
         nodeInfoPacket.upTime = DateTimeUtil.secondsToDaysHoursMinutesSeconds(endTime - startTime);
+        
 
         return nodeInfoPacket;
 //		lc.send(nodeInfoPacket);
@@ -1617,9 +1688,174 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
         return botDetectionRuleValidator;
     }
 
-    public void setBotDetectionRuleValidator(BotDetectionRuleValidator botDetectionRuleValidator) {
-        this.botDetectionRuleValidator = botDetectionRuleValidator;
+	public void setBotDetectionRuleValidator(BotDetectionRuleValidator botDetectionRuleValidator) {
+		this.botDetectionRuleValidator = botDetectionRuleValidator;
+	}
+
+	/**
+	 * Handles the automatic failback logic when a DB node (Primary or Replica) reconnects to the Keeper.
+	 */
+    private void handleDbNodeReconnection() {
+        if (isFirstConnection) {
+            return;
+        }
+        String msg = null;
+        if (instanceId.equals(primaryId)) {
+            // Case 1: The Primary DB has reconnected. Trigger failback unconditionally.
+            msg = String.format("Primary DB node [%s] has reconnected. Triggering automatic failback broadcast to all gateways.", instanceId);
+            doEvictPacket(msg);
+        } else if (StringUtils.hasText(replicaIds) && isReplicaNode()) {
+            boolean higherPriorityNodeOnline = isHigherPriorityNodeOnline();
+            // 3. If no higher-priority nodes are online, trigger the failback.
+            if (!higherPriorityNodeOnline) {
+                msg = String.format("Replica node [%s] is the highest-priority available DB. Triggering automatic failback broadcast to all gateways.", instanceId);
+                doEvictPacket(msg);
+            }
+        }
     }
 
+    private boolean isReplicaNode() {
+        return Arrays.asList(replicaIds.split(",")).contains(instanceId);
+    }
+
+    private Set<String> buildPriorityList() {
+        Set<String> priorityList = new LinkedHashSet<>();
+        if (StringUtils.hasText(primaryId)) {
+            priorityList.add(primaryId);
+        }
+        priorityList.addAll(Arrays.asList(replicaIds.split(",")));
+        return priorityList;
+    }
+
+    private Set<String> getOnlineClients() {
+        @SuppressWarnings("unchecked")
+        List<ClientKeeper> allClientList = (List<ClientKeeper>) TPILogger.lc.paramObj.get("allClientList");
+        return allClientList != null
+                ? allClientList.stream().map(ClientKeeper::getUsername).collect(Collectors.toSet())
+                : Collections.emptySet();
+    }
+
+    private boolean isNodeOnline(String nodeId, Set<String> onlineClients) {
+        return onlineClients.stream().anyMatch(client -> client.contains(nodeId));
+    }
+
+    private void doEvictPacket(String message) {
+        TPILogger.tl.warn(message);
+        ExecutePoolSoftEvictPacket evictPacket = new ExecutePoolSoftEvictPacket();
+        evictPacket.primaryId = primaryId;
+        evictPacket.replicaIds = replicaIds;
+        TPILogger.lc.send(evictPacket);
+    }
+
+    private boolean isHigherPriorityNodeOnline() {
+        Set<String> priorityList = buildPriorityList();
+        Set<String> onlineClients = getOnlineClients();
+
+        for (String nodeId : priorityList) {
+            if (nodeId.equals(instanceId)) {
+                return false;
+            }
+            if (isNodeOnline(nodeId, onlineClients)) {
+                TPILogger.tl.info(String.format("Failback for [%s] skipped: a higher priority node [%s] is already online.", instanceId, nodeId));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 取得資料庫連線節點資訊
+     * - H2 Embedded 模式：用 @Value 注入的 instanceId（同一個 JVM）
+     * - H2 TCP 模式：透過 SQL ALIAS 查詢 H2 Server 端的 System Property（可穿透 Nginx Proxy）
+     * - 其他 DB：返回資料庫產品名稱
+     */
+    private String getConnectedNode() {
+        try (Connection conn = dataSource.getConnection()) {
+            String productName = conn.getMetaData().getDatabaseProductName();
+
+            // H2 - 顯示節點 ID（HA 架構需要）
+            if ("H2".equalsIgnoreCase(productName)) {
+                return getH2NodeId(conn);
+            }
+
+            // 其他 DB - 直接返回產品名稱
+            return productName;
+        } catch (Exception e) {
+            TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+            return null;
+        }
+    }
+
+    private String getRoleTag(String id) {
+        if (!StringUtils.hasText(id)) return null;
+
+        if (StringUtils.hasText(primaryId) && id.equals(primaryId)) {
+            return H2ConfigSyncEnum.PRIMARY.getDisplayName();
+        }
+        if (StringUtils.hasText(replicaIds) && replicaIds.contains(id)) {
+            return H2ConfigSyncEnum.REPLICA.getDisplayName();
+        }
+
+        return null;
+    }
+
+    /**
+     * 取得 H2 資料庫的節點 ID / Get H2 database node ID
+     *
+     * <p>此方法用於 H2 HA 架構中辨識目前連線到哪個 DB 節點。
+     * This method is used to identify which DB node is currently connected in H2 HA architecture.</p>
+     *
+     * <ul>
+     *   <li>TCP 模式 (透過 Nginx Proxy)：使用 SQL ALIAS 呼叫遠端 H2 Server 的 System.getProperty()，
+     *       可穿透 Proxy 取得實際 DB 節點的 instance ID。
+     *       TCP mode (via Nginx Proxy): Uses SQL ALIAS to call System.getProperty() on remote H2 Server,
+     *       allowing identification of actual DB node through proxy.</li>
+     *   <li>Embedded/File 模式：直接使用本機 JVM 的 instanceId（同一個 JVM）。
+     *       Embedded/File mode: Uses local JVM's instanceId directly (same JVM).</li>
+     * </ul>
+     *
+     * @param conn 資料庫連線 / Database connection
+     * @return 節點 ID（含角色標籤），如 "dgr-3-primary-sa (Primary)"；若無法取得則返回 "h2"
+     *         Node ID with role tag, e.g. "dgr-3-primary-sa (Primary)"; returns "h2" if unavailable
+     */
+    private String getH2NodeId(Connection conn) {
+        try {
+            String url = conn.getMetaData().getURL();
+            String id = null;
+
+            if (url != null && url.contains("jdbc:h2:tcp://")) {
+                // TCP 模式：查詢遠端 H2 Server 的 System Property
+                // TCP mode: Query System Property from remote H2 Server
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("CREATE ALIAS IF NOT EXISTS GET_SYS_PROP FOR \"java.lang.System.getProperty\"");
+                    try (ResultSet rs = stmt.executeQuery("SELECT COALESCE(GET_SYS_PROP('digi.instance.id'), '')")) {
+                        if (rs.next()) {
+                            id = rs.getString(1);
+                        }
+                    }
+                }
+            } else {
+                // Embedded/File 模式：同一個 JVM，直接使用本機的 instanceId
+                // Embedded/File mode: Same JVM, use local instanceId directly
+                id = this.instanceId;
+            }
+
+            // 檢查 id 是否有效
+            // 已透過 SQL COALESCE 處理，若未設定 -Ddigi.instance.id 則回傳空字串，故只需判斷 hasText
+            // Check if id is valid
+            // Handled via SQL COALESCE; returns empty string if -Ddigi.instance.id is not set, so only hasText check is needed
+            if (StringUtils.hasText(id)) {
+                String roleTag = getRoleTag(id);
+                return StringUtils.hasText(roleTag) ? id + " (" + roleTag + ")" : id;
+            }
+
+            // 無法取得節點 ID，返回資料庫類型
+            // Unable to get node ID, return database type
+            return TsmpDpDBMSType.H2;
+        } catch (SQLException e) {
+            TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+            return TsmpDpDBMSType.H2;
+        }
+    }
 
 }

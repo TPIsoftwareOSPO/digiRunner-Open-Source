@@ -8,7 +8,7 @@
           ></button>
       </div>
     </div>
-    <p-table [value]="tableData" styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}"
+    <p-table [value]="tableData" stripedRows [style]="{'word-break':'break-word'}"
       responsiveLayout="scroll" [customSort]="true" (sortFunction)="customSort($event)"
       #dt >
       <ng-template pTemplate="header" let-columns>

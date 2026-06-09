@@ -73,6 +73,7 @@ import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.entity.repository.UsersDao;
 import tpi.dgrv4.gateway.component.ServiceConfig;
 import tpi.dgrv4.gateway.component.job.JobHelper;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.OAuthTokenService;
 import tpi.dgrv4.common.utils.ClientIpUtil;
@@ -831,7 +832,8 @@ public class SsotokenService{
 //		HttpRespData respObj = HttpUtil.httpReqByFormData(reqUrl, method, formData, httpHeader, true);
 //		logger.debug(respObj.getLogStr());
 		
-		ResponseEntity<OAuthTokenResp> respObj = (ResponseEntity<OAuthTokenResp>) getOAuthTokenService().getToken(formData, ssotoken_authorization, "/oauth/token");
+		ResponseEntity<OAuthTokenResp> respObj = (ResponseEntity<OAuthTokenResp>) getOAuthTokenService()
+				.getToken(formData, ssotoken_authorization, "/oauth/token", DgrTokenVersion.PATH_V1);
 		OAuthTokenResp oauthTokenResp = respObj.getBody();
 		
 		ObjectMapper objectMapper = new ObjectMapper();

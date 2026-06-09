@@ -147,6 +147,8 @@ public class TSMPCServicePatch {
 		// 完整轉發url為http://127.0.0.1:8080/dgrv4/mocktest/delete/api/a/bb/ccc/1
 		if (isURLRID)
 			tsmpcPatch_srcUrl = tsmpcPatch_srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
+		
+		tsmpcPatch_srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, tsmpcPatch_srcUrl);
 
 		int tokenPayload = apiReg.getFunFlag();
 
@@ -167,9 +169,9 @@ public class TSMPCServicePatch {
 			throws Exception {
 
 		// 1. req header / body
-		// print
-		StringBuffer reqLog = getLogReq(httpReq, httpHeaders, payload, reqUrl);
-		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC】--\n" + reqLog.toString());
+		// print,It has already been printed, so there is no need for annotation.
+//		StringBuffer reqLog = getLogReq(httpReq, httpHeaders, payload, reqUrl);
+//		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC】--\n" + reqLog.toString());
 
 		// 2. tsmpc req header / body
 		// 3. tsmpc resp header / body / code
@@ -177,8 +179,9 @@ public class TSMPCServicePatch {
 		// http header
 		Map<String, List<String>> header = getCommForwardProcService().getConvertHeader(httpReq, httpHeaders,
 				tokenPayload, cApiKeySwitch, uuid, false);
-
-		TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC-to-Backend】--"
+		
+		StringBuffer tsmpcPatch_sb = new StringBuffer();
+		tsmpcPatch_sb.append("\n--【LOGUUID】【" + uuid + "】【Start TSMPC-to-Backend】--"
 				+ "\n--【LOGUUID】【" + uuid + "】【End TSMPC-from-Backend】--\n");
 		
 		// 第二組ES REQ, 20260126補上
@@ -188,8 +191,8 @@ public class TSMPCServicePatch {
 
 		HttpRespData respObj = getHttpRespData(httpReq, header, reqUrl, payload);
 		respObj.fetchByte(maskInfo);
-
-		TPILogger.tl.debug(respObj.getLogStr());
+		tsmpcPatch_sb.append(respObj.getLogStr());
+		TPILogger.tl.debug(tsmpcPatch_sb.toString());
 		
 		// Must call respObj.getLogStr() first
 		// Threshhold > 10,000 => print warn msg.
@@ -237,10 +240,10 @@ public class TSMPCServicePatch {
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl)
 			throws IOException {
 		StringBuffer tsmpcPatch_log = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
 		// print
 		writeLogger(tsmpcPatch_log, "--【URL】--");
-		writeLogger(tsmpcPatch_log, httpReq.getRequestURI());
+		writeLogger(tsmpcPatch_log, uri);
 		writeLogger(tsmpcPatch_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(tsmpcPatch_log, "【" + httpReq.getMethod() + "】\r\n");
 

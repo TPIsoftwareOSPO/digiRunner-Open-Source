@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,22 +34,23 @@ import java.util.UUID;
 @Configuration
 @ConditionalOnProperty(name = "db.connection.mode", havingValue = "api")
 public class CustomDataSourceConfig {
-    private TPILogger logger = TPILogger.tl;
+    private final TPILogger logger = TPILogger.tl;
 
+    @Getter
     @Value(value = "${cus.ip.port}")
     private String cusIpPort;
 
+    @Getter
     @Value(value = "${cus.scheme}")
     private String cusScheme;
 
     @Value(value = "${cus.api.getDbMima}")
     private String getDbMima;
 
+    @Getter
     @Value(value = "${db.connection.mode}")
-    private String dbconnectionMode;
+    private String dbConnectionMode;
 
-//    @Value(value = "${dbConnectInit}")
-    private String dbConnectInit;
 
     @Value("${spring.datasource.hikari.maximum-pool-size:10}")
     private int hikariMaximumPoolSize;
@@ -58,10 +60,10 @@ public class CustomDataSourceConfig {
     private long hikariIdleTimeout;
     @Value("${spring.datasource.hikari.max-lifetime:1800000}")
     private long hikariMaxLifeTime;
-    private static String tpiSalt = "TPIdigiRunner";
+    private static final String tpiSalt = "TPIdigiRunner";
 
-    private DataSourceProperties dataSourceProperties;
-    private ObjectMapper om;
+    private final DataSourceProperties dataSourceProperties;
+    private final ObjectMapper om;
     
     @Value(value = "${httpclient.connection.timeout:0}")
     private int connectTimeout;
@@ -91,15 +93,15 @@ public class CustomDataSourceConfig {
         this.om = om;
     }
 
-    @Bean
+    @Bean(name = "rawApiDataSource")
     public DataSource getDataSource() {
         HikariConfig hikariConfig = new HikariConfig();
         HikariDataSource hikaridataSource = null;
         try {
             TPILogger.tl.info("============Start setting DB============");
             // API 獲取資料庫密碼
-            if (DbConnectionMode.API.equalsIgnoreCase(dbconnectionMode)) {
-                TPILogger.tl.info("Db Connection Mode :  " + dbconnectionMode);
+            if (DbConnectionMode.API.equalsIgnoreCase(dbConnectionMode)) {
+                TPILogger.tl.info("Db Connection Mode :  " + dbConnectionMode);
                 TPILogger.dbConnByApi = true;
                 // 沒有設定scheme
                 if (!StringUtils.hasLength(getCusScheme())) {
@@ -241,23 +243,9 @@ public class CustomDataSourceConfig {
 
     }
 
-    public String getCusScheme() {
-        return cusScheme;
-
-    }
-
-    public String getCusIpPort() {
-        return cusIpPort;
-    }
-
 
     public String getCusDbInfoUri() {
         return getDbMima;
-    }
-
-
-    public String getDbconnectionMode() {
-        return dbconnectionMode;
     }
 
 

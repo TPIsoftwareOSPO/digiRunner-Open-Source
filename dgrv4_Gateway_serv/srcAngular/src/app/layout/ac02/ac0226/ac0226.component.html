@@ -9,7 +9,7 @@
     </form>
     <hr>
     <p-table *ngIf="clientListCols" [columns]="clientListCols" [value]="clientList" selectionMode="single"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      stripedRows [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -71,7 +71,7 @@
     </div>
 
     <p-table [value]="gtwIdpList" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-      styleClass="p-datatable-striped">
+      stripedRows>
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th rowspan="2" style="width: 10%;">Enable</th>
@@ -213,9 +213,9 @@
         <label class="control-label">IdP Client Secret</label>
         <div class="ui-inputgroup">
           <label class="form-control border-line">{{showPassword?gtwIdPInfo?.idpClientMima: maskAllWithDots(gtwIdPInfo?.idpClientMima) }}</label>
-           <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+           <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
               (click)="togglePassword()"></button>
-            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night input-btn"
               (click)="copyToClipboard(gtwIdPInfo?.idpClientMima);" [pTooltip]="'copy' | translate"></button>
         </div>
       </div>
@@ -304,11 +304,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value="Y"  inputId="statusY"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value="Y"  inputId="statusY"></p-radioButton>
                 <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value="N"  inputId="statusN"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value="N"  inputId="statusN"></p-radioButton>
                 <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
@@ -333,9 +333,9 @@
       <div class="form-group row">
         <div class="col-6">
           <label id="idpType_label" for="idpType" class="control-label">Type</label>
-          <p-dropdown [options]="idpTypeList"
+          <p-select [options]="idpTypeList"
               placeholder="{{'plz_chs' | translate}}" formControlName="idpType" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="idpType?.invalid && (idpType?.dirty || idpType?.touched)" class="text-danger">
             <small class="form-text">{{idpType?.errors.isRequired | translate}}</small>
           </div>
@@ -343,7 +343,7 @@
         <div class="col-6">
           <label id="remark_label" for="remark" class="control-label">Remark</label>
           <div style="display:block">
-            <textarea rows="2" style="width:100%" id="remark" formControlName="remark"
+            <textarea class="form-control" rows="2" style="width:100%" id="remark" formControlName="remark"
               pInputTextarea></textarea>
           </div>
         </div>
@@ -372,9 +372,9 @@
           <div class="ui-inputgroup">
             <input [type]="showPassword ? 'text' : 'password'" class="form-control"
               id="idpClientMima" formControlName="idpClientMima">
-            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
               (click)="togglePassword()"></button>
-            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night input-btn"
               (click)="copyToClipboard(idpClientMima!.value);" [pTooltip]="'copy' | translate"></button>
           </div>
           <div *ngIf="idpClientMima?.invalid && (idpClientMima?.dirty || idpClientMima?.touched)" class="text-danger">
@@ -442,14 +442,13 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

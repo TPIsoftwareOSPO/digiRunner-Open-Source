@@ -21,7 +21,9 @@ import tpi.dgrv4.codec.utils.JWKcodec.JWKVerifyResult;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.component.GtwIdPHelper;
+import tpi.dgrv4.gateway.component.OIDCWellKnownHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.vo.GtwIdPVerifyResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
@@ -63,7 +65,7 @@ public class GtwIdPVerifyService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			respEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			respEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return respEntity;
 		}
 	}
@@ -81,7 +83,7 @@ public class GtwIdPVerifyService {
 			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "id_token";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 		
@@ -92,7 +94,7 @@ public class GtwIdPVerifyService {
 			//checkmarx, Reflected XSS All Clients 
 			errMsg = ESAPI.encoder().encodeForHTML(errMsg);
 			TPILogger.tl.debug(errMsg);
-			return getTokenHelper().getForbiddenErrorResp(reqUri, errMsg);// 403
+			return TokenHelper.getForbiddenErrorResp(errMsg);// 403
 		}
 		
 		String iss = idTokenData.iss;
@@ -129,7 +131,7 @@ public class GtwIdPVerifyService {
 			errMsg = ESAPI.encoder().encodeForHTML(errMsg);
 			
 			TPILogger.tl.debug(errMsg);
-			return getTokenHelper().getForbiddenErrorResp(reqUri, errMsg);// 403
+			return TokenHelper.getForbiddenErrorResp(errMsg);// 403
 		}
 	}
 	
@@ -173,7 +175,7 @@ public class GtwIdPVerifyService {
 		if (!StringUtils.hasLength(iss)) {
 			String errMsg = "Missing ID token parameter: iss";
 			TPILogger.tl.debug(errMsg);
-			return getTokenHelper().getForbiddenErrorResp(reqUri, errMsg);// 403
+			return TokenHelper.getForbiddenErrorResp(errMsg);// 403
 		}
 
 		// 對外公開的域名或IP
@@ -181,13 +183,13 @@ public class GtwIdPVerifyService {
 		// 對外公開的Port
 		String dgrPublicPort = getTsmpSettingService().getVal_DGR_PUBLIC_PORT();
 		
-		String schemeAndDomainAndPort = GtwIdPWellKnownService.getSchemeAndDomainAndPort(dgrPublicDomain,
+		String schemeAndDomainAndPort = OIDCWellKnownHelper.getSchemeAndDomainAndPort(dgrPublicDomain,
 				dgrPublicPort);
 
 		String matchIssuer = null;
 		List<String> supportGtwIdPTypeList = GtwIdPHelper.getSupportGtwIdPType();// 目前 GTW IdP 支援的 IdP Type
 		for (String idPType : supportGtwIdPTypeList) {
-			String issuer = GtwIdPWellKnownService.getIssuer(schemeAndDomainAndPort, idPType);
+			String issuer = OIDCWellKnownHelper.getIssuer(schemeAndDomainAndPort, idPType, DgrTokenVersion.PATH_V1);
 			if (iss.equals(issuer)) {
 				matchIssuer = issuer;
 				break;
@@ -200,7 +202,7 @@ public class GtwIdPVerifyService {
 			//checkmarx, Reflected XSS All Clients 
 			errMsg = ESAPI.encoder().encodeForHTML(errMsg);
 			TPILogger.tl.debug(errMsg);
-			return getTokenHelper().getForbiddenErrorResp(reqUri, errMsg);// 403
+			return TokenHelper.getForbiddenErrorResp(errMsg);// 403
 		}
 		
 		return null;

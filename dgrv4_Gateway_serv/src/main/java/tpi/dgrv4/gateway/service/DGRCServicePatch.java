@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +21,8 @@ import org.springframework.web.context.request.async.AsyncRequestNotUsableExcept
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.entity.entity.TsmpApiReg;
 import tpi.dgrv4.entity.entity.TsmpApiRegId;
@@ -159,6 +158,7 @@ public class DGRCServicePatch implements IApiCacheService {
 		payload = jwtPayloadData.payloadStr;
 
 		List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
+		srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
 		// 沒有目標URL,則回覆錯誤訊息
 		if (CollectionUtils.isEmpty(srcUrlList)) {
 			ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, dgrcPatchApiId);
@@ -404,10 +404,10 @@ public class DGRCServicePatch implements IApiCacheService {
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl, Map<String, String> maskInfo)
 			throws IOException {
 		StringBuffer dgrcPatchLogReq = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
 		// print
 		writeLogger(dgrcPatchLogReq, "--【URL】--");
-		writeLogger(dgrcPatchLogReq, httpReq.getRequestURI());
+		writeLogger(dgrcPatchLogReq, uri);
 		writeLogger(dgrcPatchLogReq, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(dgrcPatchLogReq, "【" + httpReq.getMethod() + "】\r\n");
 
@@ -510,4 +510,5 @@ public class DGRCServicePatch implements IApiCacheService {
 			return null;
 		}
 	}
+
 }

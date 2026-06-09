@@ -15,6 +15,7 @@ export class KeyValueDetailComponent implements OnInit,AfterViewInit {
   keyvalue :IKeyValue |undefined;
   form:UntypedFormGroup;
 
+
   ngAfterViewInit(): void {
 
   }
@@ -25,6 +26,9 @@ export class KeyValueDetailComponent implements OnInit,AfterViewInit {
   @Output() change : EventEmitter<IKeyValue>= new EventEmitter;
   keyLabel:string|undefined;
   valueLabel:string|undefined;
+
+  isMima: boolean = false;
+  useMask: boolean = false;
 
   constructor(private fb:UntypedFormBuilder) {
     this.form = this.fb.group({
@@ -43,6 +47,17 @@ export class KeyValueDetailComponent implements OnInit,AfterViewInit {
     this.form.valueChanges.subscribe((res:{key:string,value:any,selected:boolean}) => {
       this.change.emit({key : res.key , value : res.value , no : this.no, selected: res.selected} as IKeyValue);
     })
+    this.isMima = this.key?.value.toLowerCase().startsWith('auth') || this.key?.value.toLowerCase().startsWith('x-api-key');
+    this.key?.valueChanges.subscribe((key) => {
+      if (
+        key.toLowerCase().startsWith('auth') ||
+        key.toLowerCase().startsWith('x-api-key')
+      ) {
+        this.isMima = true;
+      } else {
+        this.isMima = false;
+      }
+    });
 
   }
   delete($event:any){

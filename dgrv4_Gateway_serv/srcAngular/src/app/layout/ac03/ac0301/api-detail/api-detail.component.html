@@ -223,7 +223,7 @@
       </div>
 
       <p-table [value]="ipSrcUrl" selectionMode="single" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-        styleClass="p-datatable-striped">
+        stripedRows>
         <ng-template pTemplate="header" let-columns>
           <tr>
             <th style="width: 15%;" scope="col">Source IP</th>
@@ -542,7 +542,7 @@
     <div class="col-sm-12">
       <label class="control-label">{{ "group_list" | translate }}</label>
       <p-table *ngIf="detailCols" [columns]="detailCols" [value]="apiGroupList" selectionMode="single"
-        styleClass="p-datatable-striped" [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
+        stripedRows [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
           <form [formGroup]="detailForm">
 
@@ -608,7 +608,7 @@
     <div class="col-12">
       <label class="control-label">{{ "label_tag" | translate }}</label>
       <div>
-        <p-chips [(ngModel)]="apiDetail.labelList" [ngModelOptions]="{standalone: true}" disabled></p-chips>
+         <p-autocomplete [(ngModel)]="apiDetail.labelList" multiple fluid disabled [typeahead]="false" />
       </div>
     </div>
   </div>

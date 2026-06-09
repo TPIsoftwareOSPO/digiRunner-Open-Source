@@ -101,9 +101,11 @@ export class SrcUrlRegDetailComponent implements OnInit {
       data: {},
       header: 'AI APIKEY',
       width: '700px',
+      closable:true,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) {
         this.url.setValue(`dgr+ai-gateway##dgrv4/ai/prompt/${res.id}`);
       } else {

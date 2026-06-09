@@ -1,6 +1,10 @@
 package tpi.dgrv4.entity.repository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,9 +25,9 @@ public abstract class SuperDaoImpl<T> implements SuperDao<T> {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-    private ConfigurableListableBeanFactory beanFactory;
- 
-    @Autowired
+	private ConfigurableListableBeanFactory beanFactory;
+
+	@Autowired
 	public void setSuperDaoImpl(ConfigurableListableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -75,6 +79,64 @@ public abstract class SuperDaoImpl<T> implements SuperDao<T> {
 			}
 		}
 		return getRepository().save(entity);
+	}
+
+	// 批次新增, 更新
+	@SuppressWarnings("rawtypes")
+	@Override
+	public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+		if (entities == null) {
+			throw new IllegalArgumentException("The given Iterable of entities must not be null!");
+		}
+
+		List<S> entityList = new ArrayList<>();
+		List<Long> assignedIds = new ArrayList<>();
+
+		// 步驟 1: 批次分配 ID
+		for (S entity : entities) {
+			DgrSeqAssignResult result = DgrSeqEntityHelper.assignDgrSeq(entity, false);
+			entityList.add(entity);
+
+			// 收集新分配的 ID
+			if (!result.hasDgrSeqAlready()) {
+				assignedIds.add(result.getDgrSeq());
+			}
+		}
+
+		// 步驟 2: 批次檢查 ID 是否重複
+		if (!assignedIds.isEmpty()) {
+			Set<Long> duplicateIds = new HashSet<>();
+			for (Long id : assignedIds) {
+				if (getRepository().existsById(id)) {
+					duplicateIds.add(id);
+				}
+			}
+
+			// 步驟 3: 為重複的 ID 重新取號
+			if (!duplicateIds.isEmpty()) {
+				for (S entity : entityList) {
+					@SuppressWarnings("rawtypes")
+					DgrSeqAssignResult result = new DgrSeqAssignResult(entity);
+					Long currentId = result.getDgrSeq();
+
+					if (duplicateIds.contains(currentId)) {
+						// 重新取號直到不重複
+						DgrSeqAssignResult newResult;
+						do {
+							newResult = DgrSeqEntityHelper.assignDgrSeq(entity, true);
+						} while (getRepository().existsById(newResult.getDgrSeq()) ||
+								duplicateIds.contains(newResult.getDgrSeq()));
+
+						// 更新已分配的 ID 集合
+						duplicateIds.remove(currentId);
+						duplicateIds.add(newResult.getDgrSeq());
+					}
+				}
+			}
+		}
+
+		// 步驟 4: 一次性批次儲存
+		return getRepository().saveAll(entityList);
 	}
 
 	@SuppressWarnings("unchecked")

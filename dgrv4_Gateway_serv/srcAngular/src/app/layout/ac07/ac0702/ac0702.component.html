@@ -12,23 +12,17 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="roleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
               (click)="changePage('query_role');"></button>
           </div>
         </div>
         <div class="col-4">
           <label class="control-label" for="alertEnabled">{{'status'|translate}}</label>
           <div class="ps-2">
-            <!-- <div class="form-check-inline" *ngFor="let stat of queryStatus">
-              <label class="form-check-label">
-                <input type="radio" class="form-check-input" formControlName="alertEnabled"
-                  value={{stat.value}}>{{stat.label}}
-              </label>
-            </div> -->
             <div class="p-form-check-line form-group">
               <ng-container *ngFor="let stat of queryStatus">
                 <div class="p-form-check">
-                  <p-radioButton formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled{{stat.value}}"></p-radioButton>
+                  <p-radioButton name="alertEnabled" formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled{{stat.value}}"></p-radioButton>
                   <label for="alertEnabled{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                 </div>
               </ng-container>
@@ -46,7 +40,7 @@
     </form>
     <hr>
     <p-table *ngIf="alertSettingListCols" [columns]="alertSettingListCols" [value]="alertSettingList"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="Scroll">
+      stripedRows [style]="{'word-break':'break-word'}" responsiveLayout="Scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -128,7 +122,7 @@
     </form>
     <hr>
     <p-table *ngIf="roleInfoListCols" [columns]="roleInfoListCols" [value]="roleInfoList"
-      styleClass="p-datatable-striped" [(selection)]="selectedRole" [style]="{'word-break':'break-word'}"
+      stripedRows [(selection)]="selectedRole" [style]="{'word-break':'break-word'}"
       responsiveLayout="Scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -237,7 +231,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of createStatus">
               <div class="p-form-check">
-                <p-radioButton formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled{{stat.value}}"></p-radioButton>
+                <p-radioButton name="alertEnabled" formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled{{stat.value}}"></p-radioButton>
                 <label for="alertEnabled{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -259,9 +253,9 @@
         <div class="col-4 col-sm-4">
           <label id="alertType_label" class="control-label">{{'alert_type'|translate}}</label>
           <div>
-            <p-dropdown formControlName="alertType" [showClear]="false" [options]="alertTypes"
+            <p-select formControlName="alertType" [showClear]="false" [options]="alertTypes"
               placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%','z-index':'1000'}">
-            </p-dropdown>
+            </p-select>
           </div>
           <div *ngIf="alertType?.invalid && (alertType?.dirty || alertType?.touched)" class="text-danger">
             <small class="form-text">{{alertType.errors.isRequired}}</small>
@@ -351,9 +345,9 @@
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="exType_label" class="control-label">{{'alert_settings'|translate}}</label>
-          <p-dropdown formControlName="exType" (onChange)="changeControlStatus()" [showClear]="false"
+          <p-select formControlName="exType" (onChange)="changeControlStatus()" [showClear]="false"
             [options]="exceptionTypes" placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="exType?.invalid && (exType?.dirty || exType?.touched)" class="text-danger">
             <small class="form-text">{{exType.errors.maxlength}}</small>
             <small class="form-text">{{exType.errors.minlength}}</small>
@@ -398,7 +392,7 @@
       <div class="form-group row">
         <div class="col-12 col-sm-12">
           <label class="required control-label">{{'alert_role_list'|translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2"
+          <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2 input-btn"
             (click)="showAlerRoleList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="pageNum == 3 && roleName!.value.length > 0" class="ui-chips ui-widget">
@@ -444,7 +438,7 @@
     </form>
     <hr>
     <p-table *ngIf="roleInfoListCols" [columns]="roleInfoListCols" [value]="roleInfoList"
-      styleClass="p-datatable-striped" [(selection)]="selectedAlertRole" [style]="{'word-break':'break-word'}"
+      stripedRows [(selection)]="selectedAlertRole" [style]="{'word-break':'break-word'}"
       responsiveLayout="Scroll">
 
       <ng-template pTemplate="colgroup" let-columns>
@@ -674,7 +668,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of createStatus">
               <div class="p-form-check">
-                <p-radioButton formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled_{{stat.value}}"></p-radioButton>
+                <p-radioButton name="alertEnabled" formControlName="alertEnabled" value={{stat.value}}  inputId="alertEnabled_{{stat.value}}"></p-radioButton>
                 <label for="alertEnabled_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -688,9 +682,9 @@
         <div class="col-4 col-sm-4">
           <label id="alertType_label" class="control-label">{{'alert_type'|translate}}</label>
           <div>
-            <p-dropdown formControlName="alertType" [showClear]="false" [options]="alertTypes"
+            <p-select formControlName="alertType" [showClear]="false" [options]="alertTypes"
               placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%','z-index':'1000'}">
-            </p-dropdown>
+            </p-select>
           </div>
           <div *ngIf="alertType.invalid && (alertType.dirty || alertType.touched)" class="text-danger">
             <small class="form-text">{{alertType.errors.isRequired}}</small>
@@ -780,9 +774,9 @@
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="exType_label" class="control-label">{{'alert_settings'|translate}}</label>
-          <p-dropdown formControlName="exType" (onChange)="changeControlStatus()" [showClear]="false"
+          <p-select formControlName="exType" (onChange)="changeControlStatus()" [showClear]="false"
             [options]="exceptionTypes" placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="exType.invalid && (exType.dirty || exType.touched)" class="text-danger">
             <small class="form-text">{{exType.errors.maxlength}}</small>
             <small class="form-text">{{exType.errors.minlength}}</small>
@@ -824,7 +818,7 @@
       <div class="form-group row">
         <div class="col-12 col-sm-12">
           <label class="required control-label">{{'alert_role_list'|translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2"
+          <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2 input-btn"
             (click)="showAlerRoleList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="pageNum == 6 && roleName.value.length > 0" class="ui-chips ui-widget">
@@ -877,14 +871,13 @@
     </ng-template>
 </p-toast> -->
 
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

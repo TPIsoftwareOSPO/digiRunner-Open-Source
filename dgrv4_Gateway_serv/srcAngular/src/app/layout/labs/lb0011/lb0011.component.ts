@@ -24,7 +24,7 @@ import { DPB0284Req } from 'src/app/models/api/ServerService/dpb0284.interface';
 import { Subscription } from 'rxjs';
 import { AlertType } from 'src/app/models/common.enum';
 import { saveAs} from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Component({
     selector: 'app-lb0011',
@@ -494,7 +494,7 @@ export class Lb0011Component extends BaseComponent implements OnInit {
         });
 
         const date = dayjs(new Date()).format('YYYYMMDD_HHmm');
-        saveAs(data, `Webhook_${date}.xlsx`);
+        saveAs(data, `AiProxy_${date}.xlsx`);
       }
       this.ngxService.stop();
     });

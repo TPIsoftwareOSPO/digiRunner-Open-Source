@@ -2338,3 +2338,5 @@ INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('PWD_STRENGTH_DESC', 'The pas
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_PWD_STRENGTH', '^.{6,}$', 'Regular Expression for Client Password Strength');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('CLIENT_PWD_STRENGTH_DESC', 'The password must be at least 6 digits', 'Client password strength description');
 
+-- 20260303, keeper debug用, Tom
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('KEEPER_NODE_INFO_LOG_ENABLE', 'false', 'Enable debug logging for Keeper sending/receiving.(true/false) (default: false)');

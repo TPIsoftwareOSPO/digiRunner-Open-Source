@@ -123,7 +123,7 @@ public class AcIdPService {
 		formData.put("grant_type", DgrTokenGrantType.DELEGATE_AUTH);// "delegate_auth",客製,SSO與IdP介接
 		formData.put("code", dgRcode);
 
-		ResponseEntity<?> respObj = getOAuthTokenService().getToken(httpRes, formData, authorization, "/oauth/token");
+		ResponseEntity<?> respObj = getOAuthTokenService().getToken(httpRes, formData, authorization, "/oauth/token", "1");
 		Object bodyObj = respObj.getBody();
 		int statusCode = respObj.getStatusCode().value();
 

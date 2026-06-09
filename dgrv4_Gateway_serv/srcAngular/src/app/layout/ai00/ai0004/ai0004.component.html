@@ -10,17 +10,17 @@
 
           <div class="p-form-check-line form-group">
             <div class="p-form-check">
-              <p-radioButton formControlName="aiPromptTemplateEnable" value="Y"
+              <p-radioButton name="aiPromptTemplateEnable" formControlName="aiPromptTemplateEnable" value="Y"
                 inputId="aiPromptTemplateEnableY"></p-radioButton>
               <label for="aiPromptTemplateEnableY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton formControlName="aiPromptTemplateEnable" value="N"
+              <p-radioButton name="aiPromptTemplateEnable" formControlName="aiPromptTemplateEnable" value="N"
                 inputId="aiPromptTemplateEnableN"></p-radioButton>
               <label for="aiPromptTemplateEnableN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton formControlName="aiPromptTemplateEnable" value=""
+              <p-radioButton name="aiPromptTemplateEnable" formControlName="aiPromptTemplateEnable" value=""
                 inputId="aiPromptTemplateEnableAll"></p-radioButton>
               <label for="aiPromptTemplateEnableAll" class="ms-2 mb-0">{{'all'|translate}}</label>
             </div>
@@ -33,7 +33,7 @@
       </div>
 
     </form>
-    <p-table [value]="tableData" styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}"
+    <p-table [value]="tableData" stripedRows [style]="{'word-break':'break-word'}"
       responsiveLayout="scroll">
       <ng-template pTemplate="header" let-columns>
         <tr>
@@ -102,12 +102,12 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="aiPromptTemplateEnable" value="Y"
+                <p-radioButton name="aiPromptTemplateEnable" formControlName="aiPromptTemplateEnable" value="Y"
                   inputId="aiPromptTemplateEditEnableY"></p-radioButton>
                 <label for="aiPromptTemplateEditEnableY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="aiPromptTemplateEnable" value="N"
+                <p-radioButton name="aiPromptTemplateEnable" formControlName="aiPromptTemplateEnable" value="N"
                   inputId="aiPromptTemplateEditEnableN"></p-radioButton>
                 <label for="aiPromptTemplateEditEnableN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
@@ -150,13 +150,13 @@
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
 <p-confirmDialog #cd [style]="{width: '400px'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
-  <ng-template pTemplate="footer">
-    <div class="col-12 d-flex gap-2 justify-content-center">
+  <ng-template #footer >
+    <div class="col-12 d-flex gap-2 mt-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

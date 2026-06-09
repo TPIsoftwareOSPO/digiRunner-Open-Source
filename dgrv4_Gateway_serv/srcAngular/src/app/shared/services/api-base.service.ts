@@ -25,7 +25,7 @@ import { AA0206Req } from 'src/app/models/api/ClientService/aa0206.interface';
 import { BaseDotNetRes } from 'src/app/models/api/baseDotNet.interface';
 import { ReqHeader } from 'src/app/models/api/base.header.interface';
 // import { ReqHeader } from 'src/app/models/models/api/base.header.interface';
-import * as $ from 'jquery';
+// import * as $ from 'jquery';
 
 
 

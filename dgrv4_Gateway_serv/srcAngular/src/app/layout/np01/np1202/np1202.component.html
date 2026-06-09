@@ -3,53 +3,58 @@
     <form [formGroup]="form" (ngSubmit)="axios_queryApiStatusByGroup()">
 
       <div class="form-group">
-        <p-tabView class="tab" (onChange)="tabChange($event)">
-          <p-tabPanel header="{{'keyword_search'|translate}}" key="keyWords">
-            <div class="form-group">
-              <label class="control-label required">{{'keyword_search'|translate}}</label>
-              <input #keyWords type="search" formControlName="keyWords" class="form-control"
-                placeholder="{{'group_id'|translate}}、{{'group_alias'|translate}}、{{'group_name'|translate}}">
-              <div *ngIf="keyWords?.invalid && (keyWords?.dirty || keyWords?.touched)" class="text-danger">
-                <small class="form-text">{{keyWords.errors.required | translate}}</small>
+        <p-tabs value="keyWords" class="tab" (valueChange)="tabChange($event)">
+          <p-tablist>
+            <p-tab value="keyWords">{{'keyword_search'|translate}}</p-tab>
+            <p-tab value="xApiKey">{{'xapikey_search'|translate}}</p-tab>
+          </p-tablist><p-tabpanels>
+            <p-tabpanel value="keyWords">
+              <div class="form-group">
+                <label class="control-label required">{{'keyword_search'|translate}}</label>
+                <input #keyWords type="search" formControlName="keyWords" class="form-control"
+                  placeholder="{{'group_id'|translate}}、{{'group_alias'|translate}}、{{'group_name'|translate}}">
+                <div *ngIf="keyWords?.invalid && (keyWords?.dirty || keyWords?.touched)" class="text-danger">
+                  <small class="form-text">{{keyWords.errors.required | translate}}</small>
+                </div>
               </div>
-            </div>
-            <div class="form-group row">
-              <div class="col-12 col-xl-12 col-lg-12">
-                <div style="
+              <div class="form-group row">
+                <div class="col-12 col-xl-12 col-lg-12">
+                  <div style="
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 width: 100%;
               ">
-                  <button type="submit" class="btn tpi-btn tpi-primary"
-                    [disabled]="form.invalid">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary"
+                      [disabled]="form.invalid">{{'button.search'|translate}}</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </p-tabPanel>
-          <p-tabPanel header="{{'xapikey_search'|translate}}" key="xApiKey">
-            <div class="form-group">
-              <label class="control-label required">{{'xapikey_search'|translate}}</label>
-              <input #xApiKey type="search" formControlName="xApiKey" class="form-control" placeholder="X-API-Key">
-              <div *ngIf="xApiKey?.invalid && (xApiKey?.dirty || xApiKey?.touched)" class="text-danger">
-                <small class="form-text">{{xApiKey.errors.required | translate}}</small>
+            </p-tabpanel>
+            <p-tabpanel value="xApiKey">
+              <div class="form-group">
+                <label class="control-label required">{{'xapikey_search'|translate}}</label>
+                <input #xApiKey type="search" formControlName="xApiKey" class="form-control" placeholder="X-API-Key">
+                <div *ngIf="xApiKey?.invalid && (xApiKey?.dirty || xApiKey?.touched)" class="text-danger">
+                  <small class="form-text">{{xApiKey.errors.required | translate}}</small>
+                </div>
               </div>
-            </div>
-            <div class="form-group row">
-              <div class="col-12 col-xl-12 col-lg-12">
-                <div style="
+              <div class="form-group row">
+                <div class="col-12 col-xl-12 col-lg-12">
+                  <div style="
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 width: 100%;
               ">
-                  <button type="submit" class="btn tpi-btn tpi-primary"
-                    [disabled]="form.invalid">{{'button.search'|translate}}</button>
+                    <button type="submit" class="btn tpi-btn tpi-primary"
+                      [disabled]="form.invalid">{{'button.search'|translate}}</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </p-tabPanel>
-        </p-tabView>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
 
       </div>
 
@@ -101,7 +106,7 @@
 
 
         <p-table [value]="item.apiDataList" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-          styleClass="p-datatable-striped">
+          stripedRows>
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th style="width: 40%;" scope="col">{{"api_name"|translate}}</th>
@@ -188,7 +193,7 @@
 
 
         <p-table [value]="responseFromXapiKey.groupList" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-          styleClass="p-datatable-striped">
+          stripedRows>
           <ng-template pTemplate="header" let-columns>
             <tr>
 
@@ -212,8 +217,8 @@
               </td>
               <td [attr.rowspan]="1">
                 <button pButton pRipple type="button" icon="pi pi-eye"
-                class="p-button-rounded p-button-text p-button-plain" (click)="showDetailPage(rowData.apiDataList[0])"
-                [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+                  class="p-button-rounded p-button-text p-button-plain" (click)="showDetailPage(rowData.apiDataList[0])"
+                  [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
               </td>
 
             </tr>
@@ -227,8 +232,8 @@
                 </td>
                 <td [attr.rowspan]="1">
                   <button pButton pRipple type="button" icon="pi pi-eye"
-                  class="p-button-rounded p-button-text p-button-plain" (click)="showDetailPage(apiDataItem)"
-                  [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+                    class="p-button-rounded p-button-text p-button-plain" (click)="showDetailPage(apiDataItem)"
+                    [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
                 </td>
               </tr>
             </ng-container>
@@ -251,14 +256,14 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

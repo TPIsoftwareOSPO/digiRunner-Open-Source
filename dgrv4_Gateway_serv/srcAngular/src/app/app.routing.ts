@@ -13,6 +13,9 @@ const routes: Routes = [
   { path: 'gtwidp/:type/:ver/:action', loadChildren: () => import('./layout/login/gtwidp/gtwidp.module').then(m => m.GtwidpModule)},
   { path: 'gtwidp/:type/:action', loadChildren: () => import('./layout/login/gtwidp/gtwidp.module').then(m => m.GtwidpModule)},
   { path: 'gtwidp/:type', loadChildren: () => import('./layout/login/gtwidp/gtwidp.module').then(m => m.GtwidpModule)},
+  { path: 'smart/consent', loadChildren: () => import('./layout/smart-consent/smart-consent.module').then(m => m.SmartConsentModule) },
+  { path: 'smart/select-patient', loadChildren: () => import('./layout/smart-select-patient/smart-select-patient.module').then(m => m.SmartSelectPatientModule) },
+  { path: 'smart/select-provider', loadChildren: () => import('./layout/smart-select-provider/smart-select-provider.module').then(m => m.SmartSelectProviderModule) },
   { path: '', loadChildren: () => import('./layout/layout.module').then(m => m.LayoutModule)},
   { path: '**', redirectTo: '/'},
 ];

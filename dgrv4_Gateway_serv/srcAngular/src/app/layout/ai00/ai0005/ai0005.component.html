@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <p-table [value]="tableData" styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}"
+    <p-table [value]="tableData" stripedRows [style]="{'word-break':'break-word'}"
       responsiveLayout="scroll">
       <ng-template pTemplate="header" let-columns>
         <tr>
@@ -66,11 +66,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="aiApiKeyConsumerType" value="user" inputId="typeU"></p-radioButton>
+                <p-radioButton name="aiApiKeyConsumerType" formControlName="aiApiKeyConsumerType" value="user" inputId="typeU"></p-radioButton>
                 <label for="typeU" class="ms-2 mb-0">User</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="aiApiKeyConsumerType" value="client" inputId="typeC"></p-radioButton>
+                <p-radioButton name="aiApiKeyConsumerType" formControlName="aiApiKeyConsumerType" value="client" inputId="typeC"></p-radioButton>
                 <label for="typeC" class="ms-2 mb-0">Client</label>
               </div>
             </ng-container>
@@ -80,9 +80,9 @@
       <div class="form-group row">
         <div class="col-4">
           <label for="aiPromptTemplateId" class="required control-label">{{'ai.template_name'|translate}}</label>
-          <p-dropdown [options]="aIPromptTemplateData" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="aIPromptTemplateData" placeholder="{{'plz_chs' | translate}}"
             formControlName="aiPromptTemplateId" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="aiPromptTemplateId.invalid && (aiPromptTemplateId.dirty || aiPromptTemplateId.touched)"
             class="text-danger">
             <small class="form-text">{{aiPromptTemplateId?.errors.required|translate}}</small>
@@ -104,13 +104,13 @@
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
 <p-confirmDialog #cd [style]="{width: '400px'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
-  <ng-template pTemplate="footer">
-    <div class="col-12 d-flex gap-2 justify-content-center">
+  <ng-template #footer >
+    <div class="col-12 d-flex gap-2 mt-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

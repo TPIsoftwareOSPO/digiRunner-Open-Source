@@ -41,4 +41,5 @@ public interface TsmpDpApptJobDao extends JpaRepository<TsmpDpApptJob, Long> {
 	public List<TsmpDpApptJob> findByRefItemNoAndStatus(String refItemNo, String status);
 	
 	public boolean existsByApptJobIdAndStatus(Long apptJobId, String status);
+    public List<TsmpDpApptJob> findByRefItemNo(String refItemNo);
 }

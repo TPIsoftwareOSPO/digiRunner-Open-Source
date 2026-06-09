@@ -110,9 +110,11 @@ export class Ac0319Component extends BaseComponent implements OnInit {
     const ref = this.dialogService.open(LabelListComponent, {
       header: dict['label_list'],
       width: '700px',
+      closable:true,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) {
         this.apiListReq.labelList = res.length > 0 ? res : undefined;
         delete this.apiListReq.targetSite;
@@ -127,9 +129,11 @@ export class Ac0319Component extends BaseComponent implements OnInit {
     const ref = this.dialogService.open(TargetSiteListComponent, {
       header: dict['target_site_search'],
       width: '700px',
+      closable:true,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) {
         this.apiListReq.targetSite = res.length > 0 ? res : undefined;
         delete this.apiListReq.labelList;
@@ -147,9 +151,11 @@ export class Ac0319Component extends BaseComponent implements OnInit {
       data: {
         data: this.selected,
       },
+      closable:true,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) {
         let req = {
           apiList: this.selected.map((data) => {
@@ -368,9 +374,12 @@ export class Ac0319Component extends BaseComponent implements OnInit {
       data: {
         data: this.selected,
       },
+      styleClass: 'cHeader cContent cIcon',
+      closable:true,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) {
         // console.log(res);
 

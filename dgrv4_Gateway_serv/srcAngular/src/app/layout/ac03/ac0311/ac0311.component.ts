@@ -9,7 +9,11 @@ import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder,
+  UntypedFormControl,
+  UntypedFormGroup,
+} from '@angular/forms';
 import {
   AA0315Item,
   AA0315Req,
@@ -44,13 +48,16 @@ import { pairwise, startWith, Subscription } from 'rxjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { NotifyListComponent } from 'src/app/shared/notify-list/notify-list.component';
+import { AboutService } from 'src/app/shared/services/api-about.service';
+import { TranslateService } from '@ngx-translate/core';
+import { AlertType } from 'src/app/models/common.enum';
 
 @Component({
-    selector: 'app-ac0311',
-    templateUrl: './ac0311.component.html',
-    styleUrls: ['./ac0311.component.css'],
-    providers: [ApiService, MessageService, ConfirmationService],
-    standalone: false
+  selector: 'app-ac0311',
+  templateUrl: './ac0311.component.html',
+  styleUrls: ['./ac0311.component.css'],
+  providers: [ApiService, MessageService, ConfirmationService],
+  standalone: false,
 })
 export class Ac0311Component extends BaseComponent implements OnInit {
   @ViewChild('upload_file') upload_file!: ElementRef;
@@ -115,7 +122,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   ];
 
   jwtSettingSub?: Subscription;
-  isExpired:boolean = false;
+  isExpired: boolean = false;
 
   constructor(
     route: ActivatedRoute,
@@ -131,7 +138,9 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     private serverService: ServerService,
     private confirmationService: ConfirmationService,
     private alertService: AlertService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private aboutService: AboutService,
+    private translateService: TranslateService,
   ) {
     super(route, tr);
     this.oasForm = this.fb.group({
@@ -212,7 +221,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.labelList.valueChanges.subscribe((res) => {
       this.labelList.setValue(
         Array.isArray(res) ? res.map((item) => item.toLowerCase()) : [],
-        { emitEvent: false }
+        { emitEvent: false },
       );
     });
 
@@ -231,7 +240,11 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isExpired = sessionStorage.getItem('isExpired') === 'true' ? true : false;
+    this.aboutService
+      .checkLicenseExpired()
+      .subscribe((isExpired) => (this.isExpired = isExpired));
+
+
     //mode
     let modeReq = {
       id: 'DGR_PATHS_COMPATIBILITY',
@@ -497,6 +510,10 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   async uploadClickHandler(uploadValue) {
+    if (this.isExpired){
+      this.alertService.ok(this.translateService.instant('license_expired'),'',AlertType.error)
+      return;
+    }
     if (!uploadValue) return;
     if (typeof uploadValue == 'object') {
       // 透過 .json、.yml
@@ -584,24 +601,36 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           //     item.duplicateFlag = true;
           // }
           // 動態產生各個rowdata的jwe設定相關control name
-          this.oasForm.addControl(`jwtSetting_${idx}`, new UntypedFormControl(false));
+          this.oasForm.addControl(
+            `jwtSetting_${idx}`,
+            new UntypedFormControl(false),
+          );
           this.oasForm.addControl(
             `jweFlag_${idx}`,
-            new UntypedFormControl({ value: '0', disabled: true })
+            new UntypedFormControl({ value: '0', disabled: true }),
           );
           this.oasForm.addControl(
             `jweFlagResp_${idx}`,
-            new UntypedFormControl({ value: '0', disabled: true })
+            new UntypedFormControl({ value: '0', disabled: true }),
           );
           // 動態產生各個rowdata的功能設定相關control name
-          this.oasForm.addControl(`urlRID_${idx}`, new UntypedFormControl(false));
-          this.oasForm.addControl(`noOAuth_${idx}`, new UntypedFormControl(false));
+          this.oasForm.addControl(
+            `urlRID_${idx}`,
+            new UntypedFormControl(false),
+          );
+          this.oasForm.addControl(
+            `noOAuth_${idx}`,
+            new UntypedFormControl(false),
+          );
           this.oasForm.addControl(
             `tokenPayload_${idx}`,
-            new UntypedFormControl(false)
+            new UntypedFormControl(false),
           );
           // 動態產生各個rowdata的資料格式control name
-          this.oasForm.addControl(`dataFormat_${idx}`, new UntypedFormControl(''));
+          this.oasForm.addControl(
+            `dataFormat_${idx}`,
+            new UntypedFormControl(''),
+          );
           if (this.openApiDocData?.moduleSrc == '1') {
             this.oasForm.get(`dataFormat_${idx}`)!.setValue('0');
           } else {
@@ -612,7 +641,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           // 動態產生各個rowdata的API ID control name
           this.oasForm.addControl(
             `apiId_${idx}`,
-            new UntypedFormControl(item.rearPath)
+            new UntypedFormControl(item.rearPath),
           );
           if (this.o_type.value == '0') {
             this.oasForm.get(`apiId_${idx}`)?.valueChanges.subscribe((res) => {
@@ -624,19 +653,19 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           if (this.o_type.value == '0') {
             this.oasForm.addControl(
               `srcUrl_${idx}`,
-              new UntypedFormControl(item.srcUrl)
+              new UntypedFormControl(item.srcUrl),
             );
           } else {
             const compTarURl =
               this.o_tarUrl.value.charAt(this.o_tarUrl.value.length - 1) == '/'
                 ? this.o_tarUrl.value.substr(
                     0,
-                    this.o_tarUrl.value.length - 1
+                    this.o_tarUrl.value.length - 1,
                   ) + item.path
                 : this.o_tarUrl.value + item.path;
             this.oasForm.addControl(
               `srcUrl_${idx}`,
-              new UntypedFormControl(compTarURl)
+              new UntypedFormControl(compTarURl),
             );
           }
 
@@ -646,7 +675,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
           this.oasForm.addControl(
             `summary_${idx}`,
-            new UntypedFormControl(item.summary)
+            new UntypedFormControl(item.summary),
           );
           if (this.o_type.value == '1') {
             this.oasForm
@@ -682,7 +711,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         const _this = this;
         const multiList = this.openApiList.filter((item, index) => {
           return _this.openApiList.some(
-            (multi, idx) => item.rearPath === multi.rearPath && idx !== index
+            (multi, idx) => item.rearPath === multi.rearPath && idx !== index,
           );
         });
 
@@ -752,32 +781,33 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         dataFormat:
           this.tool.Base64Encoder(
             this.tool.BcryptEncoder(
-              this.oasForm.get(`dataFormat_${idx}`)!.value
-            )
+              this.oasForm.get(`dataFormat_${idx}`)!.value,
+            ),
           ) +
           ',' +
           this.apiDataFormats.findIndex(
-            (item) => item.value == this.oasForm.get(`dataFormat_${idx}`)!.value
+            (item) =>
+              item.value == this.oasForm.get(`dataFormat_${idx}`)!.value,
           ),
         apiDesc: this.oasForm.get(`apiDesc_${idx}`)!.value,
         jweFlag:
           this.tool.Base64Encoder(
-            this.tool.BcryptEncoder(this.oasForm.get(`jweFlag_${idx}`)!.value)
+            this.tool.BcryptEncoder(this.oasForm.get(`jweFlag_${idx}`)!.value),
           ) +
           ',' +
           this.jwtSettingFlags.findIndex(
-            (item) => item.value == this.oasForm.get(`jweFlag_${idx}`)!.value
+            (item) => item.value == this.oasForm.get(`jweFlag_${idx}`)!.value,
           ),
         jweFlagResp:
           this.tool.Base64Encoder(
             this.tool.BcryptEncoder(
-              this.oasForm.get(`jweFlagResp_${idx}`)!.value
-            )
+              this.oasForm.get(`jweFlagResp_${idx}`)!.value,
+            ),
           ) +
           ',' +
           this.jwtSettingFlags.findIndex(
             (item) =>
-              item.value == this.oasForm.get(`jweFlagResp_${idx}`)!.value
+              item.value == this.oasForm.get(`jweFlagResp_${idx}`)!.value,
           ),
         urlRID: this.oasForm.get(`urlRID_${idx}`)!.value,
         noOAuth: this.oasForm.get(`noOAuth_${idx}`)!.value,
@@ -992,7 +1022,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let _jwtSetting = this.oasForm.get(`jwtSetting_${this.rowDataIdx}`)!.value;
     let _jweFlag = this.oasForm.get(`jweFlag_${this.rowDataIdx}`)!.value;
     let _jweFlagResp = this.oasForm.get(
-      `jweFlagResp_${this.rowDataIdx}`
+      `jweFlagResp_${this.rowDataIdx}`,
     )!.value;
     // 當前資料格式值
     let _dataFormat = this.oasForm.get(`dataFormat_${this.rowDataIdx}`)!.value;
@@ -1002,7 +1032,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     let _urlRID = this.oasForm.get(`urlRID_${this.rowDataIdx}`)!.value;
     let _noOAuth = this.oasForm.get(`noOAuth_${this.rowDataIdx}`)!.value;
     let _tokenPayload = this.oasForm.get(
-      `tokenPayload_${this.rowDataIdx}`
+      `tokenPayload_${this.rowDataIdx}`,
     )!.value;
     // 當前API ID
     let _apiId = this.oasForm.get(`apiId_${this.rowDataIdx}`)!.value;
@@ -1146,7 +1176,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     this.apiAlias!.setValue(
       `${_moduleName.t ? _moduleName.ori : _moduleName.val}-${
         _apiName.t ? _apiName.ori : _apiName.val
-      }(${_apiKey.t ? _apiKey.ori : _apiKey.val})`
+      }(${_apiKey.t ? _apiKey.ori : _apiKey.val})`,
     );
   }
 
@@ -1166,37 +1196,34 @@ export class Ac0311Component extends BaseComponent implements OnInit {
 
         // this.clearCustomizePageData();
 
-
-
-         const _srcURl = res.RespBody.srcUrl?.o
+        const _srcURl = res.RespBody.srcUrl?.o
           ? res.RespBody.srcUrl?.o
-          : res.RespBody.srcUrl?.v ?? '';
+          : (res.RespBody.srcUrl?.v ?? '');
 
         let isAiGateway = this.tool.checkSrcUrlisAiGateway(_srcURl);
-        let isWebhook = this.tool.checkSrcUrlisWebhook(_srcURl)
-        if(isAiGateway){
-          this.c_apiType.setValue('AI_GATEWAY')
-        }else if(isWebhook){
+        let isWebhook = this.tool.checkSrcUrlisWebhook(_srcURl);
+        if (isAiGateway) {
+          this.c_apiType.setValue('AI_GATEWAY');
+        } else if (isWebhook) {
           this.c_apiType.setValue('WEBHOOK');
-        }
-        else this.clearCustomizePageData();
+        } else this.clearCustomizePageData();
 
-        if(isWebhook) {
+        if (isWebhook) {
           this.srcUrl!.setValue(this.aiProxySwitch(true));
-        }else{
+        } else {
           this.srcUrl!.setValue(_srcURl);
         }
 
         this.c_moduleName!.setValue(
           res.RespBody.moduleName.t
             ? res.RespBody.moduleName.o
-            : res.RespBody.moduleName.v
+            : res.RespBody.moduleName.v,
         );
         this.c_apiId!.setValue(
-          res.RespBody.apiKey.t ? res.RespBody.apiKey.o : res.RespBody.apiKey.v
+          res.RespBody.apiKey.t ? res.RespBody.apiKey.o : res.RespBody.apiKey.v,
         );
         this.c_tsmpUrl!.setValue(
-          `/${this.c_moduleName!.value}/${this.c_apiId!.value}`
+          `/${this.c_moduleName!.value}/${this.c_apiId!.value}`,
         );
         this.c_urlRID!.setValue(res.RespBody.urlRID == '1' ? true : false);
         this.c_noOAuth!.setValue(res.RespBody.noOAuth == '1' ? true : false);
@@ -1244,12 +1271,12 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           this.c_apiName.setValue(
             res.RespBody.apiName.o
               ? res.RespBody.apiName.o
-              : res.RespBody.apiName.v
+              : res.RespBody.apiName.v,
           );
           this.c_dgrPath.setValue(
             res.RespBody.apiKey.o
               ? res.RespBody.apiKey.o
-              : res.RespBody.apiKey.v
+              : res.RespBody.apiKey.v,
           );
         }
 
@@ -1262,13 +1289,13 @@ export class Ac0311Component extends BaseComponent implements OnInit {
                   ipSrcUrl: row.ipSrcUrl.t ? row.ipSrcUrl.o : row.ipSrcUrl.v,
                 };
               })
-            : []
+            : [],
         );
         this.headerMaskKey.setValue(res.RespBody.headerMaskKey);
         this.headerMaskPolicy.setValue(res.RespBody.headerMaskPolicy);
         this.headerMaskPolicyNum.setValue(res.RespBody.headerMaskPolicyNum);
         this.headerMaskPolicySymbol.setValue(
-          res.RespBody.headerMaskPolicySymbol
+          res.RespBody.headerMaskPolicySymbol,
         );
 
         this.bodyMaskKeyword.setValue(res.RespBody.bodyMaskKeyword);
@@ -1277,17 +1304,14 @@ export class Ac0311Component extends BaseComponent implements OnInit {
         this.bodyMaskPolicySymbol.setValue(res.RespBody.bodyMaskPolicySymbol);
 
         this.labelList.setValue(res.RespBody.labelList);
-
-
       }
     });
   }
 
-  aiProxySwitch(toShow:boolean=false){
-    if(toShow){
+  aiProxySwitch(toShow: boolean = false) {
+    if (toShow) {
       return 'dgr+aiproxy##dgrv4/aiproxy';
-    }
-    else{
+    } else {
       return 'dgr+webhook##dgrv4/webhook';
     }
   }
@@ -1311,11 +1335,11 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     if (this.requestHeader!.value) {
       if (ReqBody.headerList && ReqBody.headerList.length > 0) {
         ReqBody.headerList = ReqBody.headerList.concat(
-          this.keyvalueConvetToList(this.keyValueRequest!.value)
+          this.keyvalueConvetToList(this.keyValueRequest!.value),
         );
       } else {
         ReqBody.headerList = this.keyvalueConvetToList(
-          this.keyValueRequest!.value
+          this.keyValueRequest!.value,
         );
       }
     }
@@ -1326,7 +1350,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
           break;
         case 'form':
           ReqBody.paramList = this.keyvalueConvetToList(
-            this.keyValueForm!.value
+            this.keyValueForm!.value,
           );
           break;
       }
@@ -1342,7 +1366,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   keyvalueConvetToList(
-    keyvalues: { key: string; value: string; selected?: boolean }[]
+    keyvalues: { key: string; value: string; selected?: boolean }[],
   ) {
     let keyValueList: Array<object> = new Array<object>();
     if (keyvalues && keyvalues.length) {
@@ -1360,11 +1384,17 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   async registerCustomApi() {
-
+    if (this.isExpired){
+      this.alertService.ok(this.translateService.instant('license_expired'),'',AlertType.error)
+      return;
+    }
     let reqBody = {
       apiSrc: 'R',
       protocol: this.protocol!.value,
-      srcUrl: this.c_apiType.value == 'WEBHOOK' ? this.aiProxySwitch(false):  this.srcUrl!.value,
+      srcUrl:
+        this.c_apiType.value == 'WEBHOOK'
+          ? this.aiProxySwitch(false)
+          : this.srcUrl!.value,
       moduleName:
         this.c_type.value == '0'
           ? this.c_moduleName!.value
@@ -1379,28 +1409,28 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       methods: this.c_methods!.value,
       dataFormat:
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.c_dataFormat!.value)
+          this.tool.BcryptEncoder(this.c_dataFormat!.value),
         ) +
         ',' +
         this.apiDataFormats.findIndex(
-          (item) => item.value == this.c_dataFormat!.value
+          (item) => item.value == this.c_dataFormat!.value,
         ),
       // regHostId: this.c_regHostId!.value,
       jweFlag:
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.c_jweFlag!.value)
+          this.tool.BcryptEncoder(this.c_jweFlag!.value),
         ) +
         ',' +
         this.jwtSettingFlags.findIndex(
-          (item) => item.value == this.c_jweFlag!.value
+          (item) => item.value == this.c_jweFlag!.value,
         ),
       jweFlagResp:
         this.tool.Base64Encoder(
-          this.tool.BcryptEncoder(this.c_jweFlagResp!.value)
+          this.tool.BcryptEncoder(this.c_jweFlagResp!.value),
         ) +
         ',' +
         this.jwtSettingFlags.findIndex(
-          (item) => item.value == this.c_jweFlagResp!.value
+          (item) => item.value == this.c_jweFlagResp!.value,
         ),
       apiDesc: this.c_apiDesc!.value,
       type: this.c_type.value,
@@ -1481,14 +1511,24 @@ export class Ac0311Component extends BaseComponent implements OnInit {
       reqBody.bodyMaskPolicyNum = this.bodyMaskPolicyNum.value;
       reqBody.bodyMaskPolicySymbol = this.bodyMaskPolicySymbol.value;
 
-      if ((this.bodyMaskPolicy.value != '5' && this.bodyMaskPolicy.value != '6' && this.bodyMaskPolicy.value != '7') && this.bodyMaskKeyword.value.trim() == '') {
+      if (
+        this.bodyMaskPolicy.value != '5' &&
+        this.bodyMaskPolicy.value != '6' &&
+        this.bodyMaskPolicy.value != '7' &&
+        this.bodyMaskKeyword.value.trim() == ''
+      ) {
         const code = ['mask.body_key_required'];
         const dict = await this.tool.getDict(code);
         this.alertService.ok(dict['mask.body_key_required'], '');
         return;
       }
 
-      reqBody.bodyMaskKeyword = (this.bodyMaskPolicy.value == '5'||this.bodyMaskPolicy.value=='6'||this.bodyMaskPolicy.value=='7') ? 'N/A': this.bodyMaskKeyword.value;
+      reqBody.bodyMaskKeyword =
+        this.bodyMaskPolicy.value == '5' ||
+        this.bodyMaskPolicy.value == '6' ||
+        this.bodyMaskPolicy.value == '7'
+          ? 'N/A'
+          : this.bodyMaskKeyword.value;
     }
 
     reqBody.labelList = this.labelList.value;
@@ -1748,7 +1788,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
               case 1:
                 this.t_method!.setValue(this.c_methods!.value[0]);
                 this.t_testURL!.setValue(
-                  `${this.protocol!.value}://${this.srcUrl!.value}`
+                  `${this.protocol!.value}://${this.srcUrl!.value}`,
                 );
                 break;
             }
@@ -1789,7 +1829,7 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     const multiList = this.openApiList.filter((item, index) => {
       delete item.duplicateFlag;
       return _this.openApiList.some(
-        (multi, idx) => item.rearPath === multi.rearPath && idx !== index
+        (multi, idx) => item.rearPath === multi.rearPath && idx !== index,
       );
     });
 
@@ -1870,11 +1910,43 @@ export class Ac0311Component extends BaseComponent implements OnInit {
     const ref = this.dialogService.open(NotifyListComponent, {
       header: 'Notify Name',
       width: '700px',
+      closable:true,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if(res) this.c_notifyNameList.setValue(res);
     });
+  }
+
+  checkLength(event: KeyboardEvent) {
+
+    const maxLimit = 5;
+    const currentValues = this.customForm.get('labelList')?.value || [];
+
+    if (event.key === 'Enter') {
+      const duplicates = currentValues.filter((item, index) => {
+        return currentValues.indexOf(item) !== index;
+      });
+
+      if(duplicates.length > 0){
+        currentValues.pop();
+        this.customForm.get('labelList')?.setValue(currentValues);
+      }
+
+      if (currentValues.length > maxLimit) {
+
+        event.preventDefault();
+
+        this.messageService.add({
+          severity: 'warn',
+          // summary: '上限提醒',
+          detail: this.translateService.instant('label_tag_max', { value: 5 }),
+        });
+        currentValues.pop();
+        this.customForm.get('labelList')?.setValue(currentValues);
+      }
+    }
   }
 
   public get uploadDoc() {

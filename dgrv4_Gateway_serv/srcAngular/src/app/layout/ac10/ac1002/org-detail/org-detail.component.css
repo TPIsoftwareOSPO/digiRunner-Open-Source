@@ -4,3 +4,7 @@
 }
 
 .py-1{padding-bottom:.25rem!important}
+
+.form-group label {
+  background: #F6F6F6;
+}

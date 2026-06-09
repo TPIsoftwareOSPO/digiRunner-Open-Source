@@ -185,7 +185,7 @@
     "manager_oauth_virtual_group": "認可範囲の設定",
     "tracker": "コース",
     "connect_test": "接続テスト",
-    "searchByTags": "タグで検索",
+    "searchByTags": "タグで検索",    
     "refresh": "リフレッシュ",
     "label_reset": "ラベルをリセット",
     "preview": "プレビュー",
@@ -1400,5 +1400,35 @@
     "cfm": "作業を続けますか？"
   },
   "keeper_address": "Keeper アドレス",
-  "change_keeper_address": "Keeper アドレスの変更"
+  "change_keeper_address": "Keeper アドレスの変更",
+  "dbha": {
+    "src_node": "ソースノード",
+    "tar_node": "ターゲットノード",
+    "sync": "同期",
+    "syncType": "同期タイプ",
+    "syncId": "同期ID",
+    "currentStep": "現在のステップ説明",
+    "elapsed": "経過時間（秒）",
+    "scheduleId": "スケジュールID",
+    "R": "実行中",
+    "D": "完了",
+    "E": "失敗"
+  },
+  "sof": {
+    "name": "プロキシ名",
+    "status": "プロキシステータスコード",
+    "access_token": "アクセストークン保護スイッチ",
+    "sql_injection": "SQLインジェクション保護スイッチ",
+    "traffic": "トラフィック保護スイッチ",
+    "xss": "XSS保護スイッチ",
+    "xxe": "XXE保護スイッチ",
+    "ignore_api": "API除外リスト",
+    "client_id": "クライアントIDリスト",
+    "show_log": "ログ出力ステータス",
+    "diversion_list": "分流リスト",
+    "diversion_rul": "転送先URL",
+    "sticky": "Backend Sticky",
+    "base_tip": "転送先URLには FHIR Base を入力してください。例: https://hapi.fhir.tw/fhir"
+  },
+  "license_expired": "ライセンス期限切れ"
 }

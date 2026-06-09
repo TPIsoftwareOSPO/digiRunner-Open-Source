@@ -115,7 +115,7 @@ public class GtwIdPAuthService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			errRespEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			errRespEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return errRespEntity;
 		}
 	}

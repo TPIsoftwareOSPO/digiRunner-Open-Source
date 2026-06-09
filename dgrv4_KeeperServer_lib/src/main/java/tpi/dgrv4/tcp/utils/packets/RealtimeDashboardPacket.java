@@ -19,6 +19,7 @@ public class RealtimeDashboardPacket implements Packet_i {
 	private int dbActive;
 	private int dbIdle;
 	private int dbWaiting;
+    private String connectedNode;
 	private int cpuCore;
 	private String cpuUsage;
 	private String memFree;
@@ -212,5 +213,11 @@ public class RealtimeDashboardPacket implements Packet_i {
 		this.uuid = uuid;
 	}
 
+    public String getConnectedNode() {
+		return connectedNode;
+	}
+    public void setConnectedNode(String connectedNode) {
+        this.connectedNode = connectedNode;
+    }
 	
 }

@@ -1,0 +1,426 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group">
+        <div class="col-12 d-flex">
+          <app-search-input
+            placeholder="ID, {{'sof.name'|translate}}, {{'memo'|translate}}, {{'sof.diversion_rul'|translate}}"
+            [control]="form.get('keyword')" [searchFn]="querySmartOnFhirProxyList.bind(this)"
+            class="col-9 col-lg-6 col-sm-6"></app-search-input>
+
+          <button type="button" class="btn tpi-btn tpi-second ms-auto"
+            (click)="changePage('create');">{{'button.create'|translate}}</button>
+
+        </div>
+      </div>
+      <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
+
+        <div>
+          <button type="button" class="btn tpi-btn tpi-primary me-2"
+            (click)="exportFile()">{{'button.export'|translate}}</button>
+          <span [hidden]="exportStatus=='complete' || exportStatus == ''">{{exportProcessPercent}}%</span>
+        </div>
+
+        <button type="button" class="btn tpi-btn tpi-primary me-2"
+          (click)="changePage('import')">{{'button.import'|translate}}</button>
+
+        <!-- <div style="display: flex;align-items: center;">
+
+          <div class="ui-inputgroup me-2">
+            <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
+            <input type="text" class="form-control" value="{{fileName}}" readOnly
+              placeholder="{{'upload_file' | translate}}">
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+              [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
+          </div>
+          <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!fileName"
+            (click)="importFile()">{{'button.import'|translate}}</button>
+        </div> -->
+      </div>
+    </form>
+    <hr>
+    <p-table *ngIf="cols" [columns]="cols" [value]="tableData" styleClass="p-datatable-striped"
+      [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+          <col *ngFor="let col of columns" [style.width]="col.width">
+        </colgroup>
+        <colgroup style="width:150px;">{{'action'|translate}}</colgroup>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngFor="let col of columns" scope="col">
+            {{col.header}}
+          </th>
+          <th style="width:150px;" scope="col">{{'action'|translate}}
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="index">
+        <tr>
+          <td style="text-align: center">
+            <img [alt]="rowData.sofProxyStatus" style="width: 20px; height: 20px"
+              [src]="rowData.sofProxyStatus ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+          </td>
+          <td>{{rowData.sofProxyId}}</td>
+          <td>{{rowData.sofProxyName}}</td>
+          <td>{{rowData.sofProxyRemark}}</td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxyAccessToken ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxySqlInjection ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxyTraffic ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxyXss ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxyXxe ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxyShowLog ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td style="text-align: center">
+            <i *ngIf="rowData.sofProxySticky ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td>{{rowData.sofProxyTps}}</td>
+          <td>{{rowData.sofProxyIgnoreApi}}</td>
+          <td>{{rowData.sofProxyClientId.join(',')}}</td>
+          <td>{{formatDiversionList(rowData.diversionList)}}</td>
+          <td>{{rowData.updateDateTime}}</td>
+          <td>{{rowData.updateUser}}</td>
+          <td style="text-align:center;width: 150px">
+            <!-- 詳細資料 -->
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              (click)="changePage('detail', rowData)" [pTooltip]="'button.detail' | translate"
+              tooltipPosition="top"></button>
+            <!-- Sticky List -->
+            <button pButton pRipple type="button" icon="fa fa-list"
+              class="p-button-rounded p-button-text p-button-plain"
+              (click)="changePage('sticky', rowData)"
+              pTooltip="Sticky List"
+              tooltipPosition="top"></button>
+            <!-- 更新 -->
+            <button pButton pRipple type="button" icon="fa fa-edit"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
+              [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
+            <!-- 刪除 -->
+            <button pButton pRipple type="button" icon="fa fa-trash-alt"
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('delete',rowData)"
+              [pTooltip]="'button.delete' | translate" tooltipPosition="top"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="tableData.length">
+          <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+
+            <!-- 查詢更多 -->
+            <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+              <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="columns.length+1">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- 建立/更新/詳細資料 -->
+  <div [hidden]="pageNum != 2">
+    <form [formGroup]="formE">
+      <div class="form-group row">
+        <div class="col-4">
+          <label id="sofProxyName_label" for="sofProxyName" class="control-label required">{{ 'sof.name' |
+            translate}}</label>
+
+          <input type="text" class="form-control" id="sofProxyName" formControlName="sofProxyName">
+          <div *ngIf="sofProxyName.invalid && (sofProxyName.dirty || sofProxyName.touched)" class="text-danger">
+            <small class="form-text">{{sofProxyName.errors.required |translate}}</small>
+          </div>
+        </div>
+        <div class="col-auto">
+          <label id="sofProxyStatus_label" for="sofProxyStatus" class="control-label">{{ "status" | translate }}</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton formControlName="sofProxyStatus" value="Y" inputId="sofProxyStatusY"></p-radioButton>
+                <label for="sofProxyStatusY" class="ms-2 mb-0">Y</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton formControlName="sofProxyStatus" value="N" inputId="sofProxyStatusN"></p-radioButton>
+                <label for="sofProxyStatusN" class="ms-2 mb-0">N</label>
+              </div>
+            </ng-container>
+          </div>
+          <!-- <div *ngIf="websiteStatusC.invalid && (websiteStatusC.dirty || websiteStatusC.touched)" class="text-danger">
+            <small class="form-text">{{websiteStatusC.errors.isRequired}}</small>
+          </div> -->
+        </div>
+        <div class="col-auto" *ngIf="currentAction=='update'">
+          <label id="sticky_label" class="control-label">Sticky List</label>
+          <div class="form-control border-line" style=" background: #F6F6F6;">
+            <button pButton pRipple type="button" icon="fa fa-list"
+              class="p-button-rounded p-button-text p-button-plain" (click)="openStickyList(selectedItem)"
+              tooltipPosition="top"></button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-12">
+          <label class="control-label">{{ "check_item" | translate }}</label>
+          <div class="p-form-check-line">
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="sofProxyAccessToken" formControlName="sofProxyAccessToken"
+                trueValue="Y" falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="sofProxyAccessToken">Auth</label>
+            </div>
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="sqlInj" formControlName="sofProxySqlInjection" trueValue="Y"
+                falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="sqlInj">SQL Injection</label>
+            </div>
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="tps" formControlName="sofProxyTraffic" trueValue="Y"
+                falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="tps">TPS</label>
+            </div>
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="xss" formControlName="sofProxyXss" trueValue="Y"
+                falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="xss">XSS</label>
+            </div>
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="xxe" formControlName="sofProxyXxe" trueValue="Y"
+                falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="xxe">XXE</label>
+            </div>
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="showLog" formControlName="sofProxyShowLog" trueValue="Y"
+                falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="showLog">Show Log</label>
+            </div>
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="sticky" formControlName="sofProxySticky" trueValue="Y"
+                falseValue="N"></p-checkbox>
+              <label class="mb-0 ms-2" for="sticky">Sticky</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-12">
+          <label class="control-label">{{ "sof.diversion_list" | translate }}
+
+            <span class="text-danger">
+              <small class="form-text"> ({{"sof.base_tip"|translate}})</small>
+            </span>
+          </label>
+          <app-diversion-list formControlName="diversionList" (formValid)="formValid($event)"></app-diversion-list>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-7">
+          <label id="tps_label" for="tps" class="control-label">{{ "tps_node" | translate }}</label>
+          <input id="tps" type="number" class="form-control" formControlName="sofProxyTps">
+          <!--<div *ngIf="tps.invalid && (tps.dirty || tps.touched)" class="text-danger">
+              <small class="form-text">{{tps.errors.isRequired}}</small>
+              <small class="form-text">{{tps.errors.min | translate}}</small>
+              <small class="form-text">{{tps.errors.max | translate}}</small>
+            </div> -->
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-7">
+          <label id="ignoreApi_label" for="ignoreApi" class="control-label">Ignore API</label>
+          <textarea id="ignoreApi" rows="3" class="form-control" formControlName="sofProxyIgnoreApi"></textarea>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-7">
+          <label id="ignoreApi_label" for="ignoreApi" class="control-label">Client ID List
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
+              [hidden]="currentAction=='detail'" [pTooltip]="'button.select_client' | translate" tooltipPosition="top"
+              (click)="queryRoleList();"></button>
+          </label>
+          <textarea id="ignoreApi" rows="3" class="form-control" formControlName="sofProxyClientId"></textarea>
+        </div>
+      </div>
+
+      <!-- 備註 -->
+      <div class="form-group row">
+        <div class="col-7">
+          <label id="remark_label" for="remark" class="control-label">{{ "memo" | translate }}</label>
+          <textarea rows="3" formControlName="sofProxyRemark" class="form-control"></textarea>
+        </div>
+      </div>
+
+
+
+      <div class="form-group row">
+        <div class="col-12 col-lg-12">
+          <button type="button" class="btn tpi-btn float-start me-3" [hidden]="currentAction=='detail'"
+            [ngClass]="[btnName == ('button.create'|translate) ? 'tpi-second': 'tpi-primary']"
+            [disabled]="!formE.valid || !this._formValid" (click)="procData();">{{btnName}}</button>
+          <button type="button" class="btn tpi-btn tpi-primary float-start"
+            (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+  <div [hidden]="pageNum != 3">
+    <!-- <form [formGroup]="formFile"> -->
+    <div class="form-group row">
+      <div class="col-3">
+        <div class="ui-inputgroup">
+          <input type="file" id="file" accept=".json" (change)="changeFile($event)" style="display: none;">
+          <!-- <input type="text" class="form-control" formControlName="fileName"
+              placeholder="{{'chs_json_file' | translate}}"> -->
+          <input type="text" class="form-control" value="{{importFileName}}" readOnly
+            placeholder="{{'upload_file' | translate}}">
+          <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+            (click)="openFileBrowser();"></button>
+        </div>
+      </div>
+      <div class="col-1">
+        <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="uploadFile()"
+          [disabled]="!importFile">
+          {{'button.upload'|translate}}
+        </button>
+      </div>
+    </div>
+
+    <p-table *ngIf="cols" [columns]="cols" [value]="importData" [(selection)]="importSelected"
+      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      <ng-template pTemplate="caption">
+        <div class="ui-helper-clearfix">
+          <button [disabled]="!importData || importSelected.length == 0" type="button"
+            class="btn tpi-btn tpi-primary float-start me-1" (click)="importFileProcess()">
+            {{ 'button.import' | translate }}
+          </button>
+
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns selectionMode="multiple">
+        <tr>
+
+          <th rowspan="2" style="width: 2.25em" scope="col">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+
+          <ng-container *ngFor="let col of columns">
+            <th *ngIf="!col.field.startsWith('update')" rowspan="2" scope="col">
+              {{col.header}}
+            </th>
+          </ng-container>
+
+
+          <th rowspan="1" scope="col">{{'check_action'|translate}}</th>
+          <th rowspan="1" scope="col">
+            Validate
+          </th>
+          <th rowspan="1" scope="col">{{'import_result'|translate}}</th>
+        </tr>
+        <tr style="text-align: center">
+          <th rowspan="1" colspan="3" scope="col">{{'desc'|translate}}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="index">
+        <tr>
+          <td rowspan="2" style="width: 2.25em">
+            <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <img [alt]="rowData.sofProxyStatus" style="width: 20px; height: 20px"
+              [src]="rowData.sofProxyStatus ==='Y' ? 'assets/images/icon_green.png': 'assets/images/icon_red.png'" />
+          </td>
+          <td rowspan="2">{{rowData.sofProxyId}}</td>
+          <td rowspan="2">{{rowData.sofProxyName}}</td>
+          <td rowspan="2">{{rowData.sofProxyRemark}}</td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxyAccessToken ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxySqlInjection ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxyTraffic ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxyXss ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxyXxe ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxyShowLog ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2" style="text-align: center">
+            <i *ngIf="rowData.sofProxySticky ==='Y'" class="fas fa-check"></i>
+          </td>
+          <td rowspan="2">{{rowData.sofProxyTps}}</td>
+          <td rowspan="2">{{rowData.sofProxyIgnoreApi}}</td>
+          <td rowspan="2">{{rowData.sofProxyClientId.join(',')}}</td>
+          <td rowspan="2">{{formatDiversionList(rowData.diversionList)}}</td>
+          <td rowspan="1">{{rowData.validationResult.operationType??'&nbsp;'}}</td>
+          <td rowspan="1"
+            [ngStyle]="{'width': 'auto', 'background-color': (rowData.validationResult.success ? '#FAEBD7' : '')}">
+            <ng-container *ngIf="rowData.validationResult.success != null; else empty">
+              {{ rowData.validationResult.success ? ('message.success' | translate) : ('message.fail' | translate) }}
+            </ng-container>
+            <ng-template #empty>&nbsp;</ng-template>
+          </td>
+          <td rowspan="1" [ngStyle]="{'width': 'auto', 'background-color': (rowData.result ? '#FAEBD7' : '')}">
+            <ng-container *ngIf="rowData.result != null; else empty">
+              {{ rowData.result ? ('message.success' | translate) : ('message.fail' | translate) }}
+            </ng-container>
+            <ng-template #empty>&nbsp;</ng-template>
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="1" colspan="3">{{ rowData.validationResulterrorMessage??'&nbsp;'}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="importData.length">
+          <td [attr.colspan]="columns.length+3" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{importData.length}}</span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="columns.length+3">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</app-container>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="col-12 d-flex gap-2 justify-content-center">
+      <button type="button" pButton icon="pi pi-check"
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>
+

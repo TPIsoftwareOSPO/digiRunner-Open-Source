@@ -34,6 +34,8 @@ export class KeyValueGridComponent implements OnInit, ControlValueAccessor {
   keyvalues: Array<IKeyValueGrid> = new Array<IKeyValueGrid>();
   value: { key: string, value: any }[] = [];
 
+  @Input() useMask: boolean = false;
+
   constructor(
     // private factoryResolver: ComponentFactoryResolver,
   ) {
@@ -106,6 +108,7 @@ export class KeyValueGridComponent implements OnInit, ControlValueAccessor {
     componentRef.instance.valueLabel = this.valueLabel || 'Value';
     componentRef.instance.no = this.nums;
     componentRef.instance.data = keyvalue;
+    componentRef.instance.useMask = this.useMask;
     this.nums++;
     componentRef.instance.change.subscribe((res: IKeyValueGrid) => {
       // console.log(this.keyvalues);

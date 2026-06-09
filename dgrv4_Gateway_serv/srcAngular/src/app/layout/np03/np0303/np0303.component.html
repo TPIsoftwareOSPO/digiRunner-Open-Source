@@ -8,7 +8,7 @@
     </div>
   </form>
   <hr>
-  <p-table *ngIf="cols" [columns]="cols" [value]="clientList" selectionMode="single" styleClass="p-datatable-striped"
+  <p-table *ngIf="cols" [columns]="cols" [value]="clientList" selectionMode="single" stripedRows
     [style]="{'word-break':'break-word'}">
     <ng-template pTemplate="colgroup" let-columns>
       <colgroup>

@@ -669,7 +669,95 @@ import {
   RespDPB0297,
 } from 'src/app/models/api/ServerService/dpb0297.interface';
 import { RespDPB0299 } from 'src/app/models/api/ServerService/dpb0299.interface';
-import { DPB0300Req, ReqDPB0300, RespDPB0300 } from 'src/app/models/api/ServerService/dpb0300.interface';
+import {
+  DPB0300Req,
+  ReqDPB0300,
+  RespDPB0300,
+} from 'src/app/models/api/ServerService/dpb0300.interface';
+import {
+  DPB0302Req,
+  ReqDPB0302,
+  RespDPB0302,
+} from 'src/app/models/api/ServerService/dpb0302.interface';
+import {
+  DPB0303Req,
+  ReqDPB0303,
+  RespDPB0303,
+} from 'src/app/models/api/ServerService/dpb0303.interface';
+import {
+  DPB0304Req,
+  ReqDPB0304,
+  RespDPB0304,
+} from 'src/app/models/api/ServerService/dpb0304.interface';
+import {
+  DPB0305Req,
+  ReqDPB0305,
+  RespDPB0305,
+} from 'src/app/models/api/ServerService/dpb0305.interface';
+import {
+  ReqDPB0310,
+  RespDPB0310,
+  SmartOnFhirProxySearchReq,
+} from 'src/app/models/api/ServerService/dpb0310.interface';
+import {
+  ReqDPB0311,
+  RespDPB0311,
+  SmartOnFhirProxyDto,
+} from 'src/app/models/api/ServerService/dpb0311.interface';
+import {
+  DPB0312Req,
+  ReqDPB0312,
+} from 'src/app/models/api/ServerService/dpb0312.interface';
+import {
+  DPB0313Req,
+  ReqDPB0313,
+  RespDPB0313,
+} from 'src/app/models/api/ServerService/dpb0313.interface';
+import {
+  ReqDPB0314,
+  RespDPB0314,
+} from 'src/app/models/api/ServerService/dpb0314.interface';
+import {
+  ReqDPB0317,
+  RespDPB0317,
+  SmartOnFhirProxyStickyDto,
+  SmartOnFhirProxyStickySearchReq,
+} from 'src/app/models/api/ServerService/dpb0317.interface';
+import {
+  DPB0318Req,
+  ReqDPB0318,
+  RespDPB0318,
+} from 'src/app/models/api/ServerService/dpb0318.interface';
+import {
+  DPB0319Req,
+  ReqDPB0319,
+  RespDPB0319,
+} from 'src/app/models/api/ServerService/dpb0319.interface';
+import {
+  DPB0320Req,
+  ReqDPB0320,
+  RespDPB0320,
+} from 'src/app/models/api/ServerService/dpb0320.interface';
+import {
+  DPB0330ReqBody,
+  ReqDPB0330,
+  RespDPB0330,
+} from 'src/app/models/api/ServerService/dpb0330.interface';
+import {
+  DPB0331ReqBody,
+  ReqDPB0331,
+  RespDPB0331,
+} from 'src/app/models/api/ServerService/dpb0331.interface';
+import {
+  DPB0332ReqBody,
+  ReqDPB0332,
+  RespDPB0332,
+} from 'src/app/models/api/ServerService/dpb0332.interface';
+import {
+  DPB0333ReqBody,
+  ReqDPB0333,
+  RespDPB0333,
+} from 'src/app/models/api/ServerService/dpb0333.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -700,7 +788,7 @@ export class ServerService {
   }
 
   queryTsmpSettingList_ignore1298(
-    ReqBody: DPB9900Req
+    ReqBody: DPB9900Req,
   ): Observable<RespDPB9900> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.queryTsmpSettingList),
@@ -722,7 +810,9 @@ export class ServerService {
     return this.api.excuteNpPost<RespDPB9901>(path, body);
   }
 
-  queryTsmpSettingDetail_ignore1298(ReqBody: DPB9901Req): Observable<RespDPB9901> {
+  queryTsmpSettingDetail_ignore1298(
+    ReqBody: DPB9901Req,
+  ): Observable<RespDPB9901> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.queryTsmpSettingDetail),
       ReqBody: ReqBody,
@@ -853,7 +943,7 @@ export class ServerService {
   }
 
   queryCusSettingList_ignore1298(
-    DPB9910Req: DPB9910Req
+    DPB9910Req: DPB9910Req,
   ): Observable<RespDPB9910> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.queryCusSettingList),
@@ -1488,7 +1578,7 @@ export class ServerService {
   }
 
   queryGtwIdPInfoByClientId_oauth2(
-    ReqBody: DPB0169Req
+    ReqBody: DPB0169Req,
   ): Observable<RespDPB0169> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.queryGtwIdPInfoByClientId_oauth2),
@@ -2183,7 +2273,7 @@ export class ServerService {
   }
 
   createAndUpdateBotDetectionList(
-    ReqBody: DPB0233Req
+    ReqBody: DPB0233Req,
   ): Observable<RespDPB0233> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.createAndUpdateBotDetectionList),
@@ -2423,7 +2513,7 @@ export class ServerService {
   }
 
   importGrpcSetting(
-    ReqBody: Array<DgrGrpcProxyMapDto>
+    ReqBody: Array<DgrGrpcProxyMapDto>,
   ): Observable<RespDPB0297> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.importGrpcSetting),
@@ -2442,7 +2532,7 @@ export class ServerService {
     return this.api.excutePostGetFile(path, body);
   }
 
-   importWebhook(file: File): Observable<RespDPB0299> {
+  importWebhook(file: File): Observable<RespDPB0299> {
     const req = {
       ReqHeader: this.api.getReqHeader(TxID.importWebhook),
       ReqBody: {},
@@ -2458,5 +2548,195 @@ export class ServerService {
     } as ReqDPB0300;
     const path = `${this.indexPath}/DPB0300`;
     return this.api.npPost<RespDPB0300>(path, body);
+  }
+
+  dbSyncNodeInfo(ReqBody: DPB0302Req): Observable<RespDPB0302> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.dbSyncNodeInfo),
+      ReqBody: ReqBody,
+    } as ReqDPB0302;
+    const path = `${this.indexPath}/DPB0302`;
+    return this.api.npPost<RespDPB0302>(path, body);
+  }
+
+  dbSyncNodeInfo_ignore1298(ReqBody: DPB0302Req): Observable<RespDPB0302> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.dbSyncNodeInfo),
+      ReqBody: ReqBody,
+    } as ReqDPB0302;
+    const path = `${this.indexPath}/DPB0302`;
+    return this.api.excuteNpPost_ignore1298<RespDPB0302>(path, body);
+  }
+
+  dbSyncTrigger(ReqBody: DPB0303Req): Observable<RespDPB0303> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.dbSyncTrigger),
+      ReqBody: ReqBody,
+    } as ReqDPB0303;
+    const path = `${this.indexPath}/DPB0303`;
+    return this.api.npPost<RespDPB0303>(path, body);
+  }
+
+  dbSyncHistory(ReqBody: DPB0304Req): Observable<RespDPB0304> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.dbSyncHistory),
+      ReqBody: ReqBody,
+    } as ReqDPB0304;
+    const path = `${this.indexPath}/DPB0304`;
+    return this.api.npPost<RespDPB0304>(path, body);
+  }
+
+  dbSyncHistory_ignore1298(ReqBody: DPB0304Req): Observable<RespDPB0304> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.dbSyncHistory),
+      ReqBody: ReqBody,
+    } as ReqDPB0304;
+    const path = `${this.indexPath}/DPB0304`;
+    return this.api.excuteNpPost_ignore1298<RespDPB0304>(path, body);
+  }
+
+  dbSyncHistoryDetail(ReqBody: DPB0305Req): Observable<RespDPB0305> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.dbSyncHistoryDetail),
+      ReqBody: ReqBody,
+    } as ReqDPB0305;
+    const path = `${this.indexPath}/DPB0305`;
+    return this.api.excuteNpPost<RespDPB0305>(path, body);
+  }
+
+  querySmartOnFhirProxyList(
+    ReqBody: SmartOnFhirProxySearchReq,
+  ): Observable<RespDPB0310> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.querySmartOnFhirProxyList),
+      ReqBody: ReqBody,
+    } as ReqDPB0310;
+    const path = `${this.indexPath}/DPB0310`;
+    return this.api.npPost<RespDPB0310>(path, body);
+  }
+
+  querySmartOnFhirProxyList_ignore1298(
+    ReqBody: SmartOnFhirProxySearchReq,
+  ): Observable<RespDPB0310> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.querySmartOnFhirProxyList),
+      ReqBody: ReqBody,
+    } as ReqDPB0310;
+    const path = `${this.indexPath}/DPB0310`;
+    return this.api.excuteNpPost_ignore1298<RespDPB0310>(path, body);
+  }
+
+  addSmartOnFhirProxy(ReqBody: SmartOnFhirProxyDto): Observable<RespDPB0311> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.addSmartOnFhirProxy),
+      ReqBody: ReqBody,
+    } as ReqDPB0311;
+    const path = `${this.indexPath}/DPB0311`;
+    return this.api.npPost<RespDPB0311>(path, body);
+  }
+
+  batchUpdateSmartOnFhirProxy(ReqBody: DPB0312Req): Observable<RespDPB0311> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.batchUpdateSmartOnFhirProxy),
+      ReqBody: ReqBody,
+    } as ReqDPB0312;
+    const path = `${this.indexPath}/DPB0312`;
+    return this.api.npPost<RespDPB0311>(path, body);
+  }
+
+  deleteSmartOnFhirProxy(ReqBody: DPB0313Req): Observable<RespDPB0313> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.deleteSmartOnFhirProxy),
+      ReqBody: ReqBody,
+    } as ReqDPB0313;
+    const path = `${this.indexPath}/DPB0313`;
+    return this.api.npPost<RespDPB0313>(path, body);
+  }
+
+  exportSmartOnFhirProxy(
+    ReqBody: SmartOnFhirProxySearchReq,
+  ): Observable<RespDPB0314> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.exportSmartOnFhirProxy),
+      ReqBody: ReqBody,
+    } as ReqDPB0314;
+    const path = `${this.indexPath}/DPB0314`;
+    return this.api.npPost<RespDPB0314>(path, body);
+  }
+
+  queryStickyList(
+    ReqBody: SmartOnFhirProxyStickySearchReq,
+  ): Observable<RespDPB0317> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.queryStickyList),
+      ReqBody: ReqBody,
+    } as ReqDPB0317;
+    const path = `${this.indexPath}/DPB0317`;
+    return this.api.npPost<RespDPB0317>(path, body);
+  }
+
+  addSticky(ReqBody: DPB0318Req): Observable<RespDPB0318> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.addSticky),
+      ReqBody: ReqBody,
+    } as ReqDPB0318;
+    const path = `${this.indexPath}/DPB0318`;
+    return this.api.npPost<RespDPB0318>(path, body);
+  }
+
+  batchUpdateSticky(ReqBody: DPB0319Req): Observable<RespDPB0319> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.batchUpdateSticky),
+      ReqBody: ReqBody,
+    } as ReqDPB0319;
+    const path = `${this.indexPath}/DPB0319`;
+    return this.api.npPost<RespDPB0319>(path, body);
+  }
+
+  batchDeleteSticky(ReqBody: DPB0320Req): Observable<RespDPB0320> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.batchDeleteSticky),
+      ReqBody: ReqBody,
+    } as ReqDPB0320;
+    const path = `${this.indexPath}/DPB0320`;
+    return this.api.npPost<RespDPB0320>(path, body);
+  }
+
+  // ==================== SMART Client 管理（DPB0330-0333） ====================
+
+  querySmartClientList(ReqBody: DPB0330ReqBody): Observable<RespDPB0330> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.querySmartClientList),
+      ReqBody: ReqBody,
+    } as ReqDPB0330;
+    const path = `${this.indexPath}/DPB0330`;
+    return this.api.npPost<RespDPB0330>(path, body);
+  }
+
+  createSmartClient(ReqBody: DPB0331ReqBody): Observable<RespDPB0331> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.createSmartClient),
+      ReqBody: ReqBody,
+    } as ReqDPB0331;
+    const path = `${this.indexPath}/DPB0331`;
+    return this.api.npPost<RespDPB0331>(path, body);
+  }
+
+  batchUpdateSmartClient(ReqBody: DPB0332ReqBody): Observable<RespDPB0332> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.batchUpdateSmartClient),
+      ReqBody: ReqBody,
+    } as ReqDPB0332;
+    const path = `${this.indexPath}/DPB0332`;
+    return this.api.npPost<RespDPB0332>(path, body);
+  }
+
+  batchDeleteSmartClient(ReqBody: DPB0333ReqBody): Observable<RespDPB0333> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.batchDeleteSmartClient),
+      ReqBody: ReqBody,
+    } as ReqDPB0333;
+    const path = `${this.indexPath}/DPB0333`;
+    return this.api.npPost<RespDPB0333>(path, body);
   }
 }

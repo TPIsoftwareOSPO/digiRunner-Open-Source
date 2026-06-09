@@ -43,13 +43,22 @@ public class ClientKeeper implements Serializable {
 	private String lastUpdateTimeToken;
 
 	private String dbConnect;
+	private String connectedNode;
 	private Object cusInfo;
 
-	
+
 	//0:dg產品 1:客製包
 	public String projectType;
 	public String keeperServerApi;
 	public String livenessUrlPath;
+
+	public String getConnectedNode() {
+		return connectedNode;
+	}
+
+	public void setConnectedNode(String connectedNode) {
+		this.connectedNode = connectedNode;
+	}
 	
 	public String getRcdCacheSize() {
 		return rcdCacheSize;

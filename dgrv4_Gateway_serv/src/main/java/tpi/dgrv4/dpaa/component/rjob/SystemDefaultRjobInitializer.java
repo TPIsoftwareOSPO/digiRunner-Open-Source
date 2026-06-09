@@ -47,16 +47,17 @@ public class SystemDefaultRjobInitializer {
 	public static final String HOUSEKEEPING_SCHEDULE = "Housekeeping Schedule"; // Housekeeping排程
 	public static final String API_AUTO_LISTING_SCHEDULE = "API auto listing schedule"; // 自動上下架排程
 	public static final String API_AUTO_ENABLES_SCHEDULE = "API auto enables schedule"; // 自動啟用停用排程
-
+	public static final String H2_Config_SYNC = "H2 Config Sync to Replicas"; // DB主從同步排程
+    private boolean h2ConfigSyncEnabled;
 	/**
 	 * 把要註冊的 Rjob 加入 defaultRjobList
 	 */
 	public SystemDefaultRjobInitializer(DPB0101Service dpb0101Service, TsmpDpApptRjobDao tsmpDpApptRjobDao, //
-			BcryptParamHelper bcryptParamHelper) {
+                                        BcryptParamHelper bcryptParamHelper, boolean h2ConfigSyncEnabled) {
 		this.dpb0101Service = dpb0101Service;
 		this.tsmpDpApptRjobDao = tsmpDpApptRjobDao;
 		this.bcryptParamHelper = bcryptParamHelper;
-
+        this.h2ConfigSyncEnabled = h2ConfigSyncEnabled;
 		// [報表排程]: 預設每一天的0點10分執行一次，為了統計到前一天的允許數值
 		//20250407 no execute
 		/*register( //
@@ -153,6 +154,21 @@ public class SystemDefaultRjobInitializer {
 						.refSubitemNo("API_DISABLE", 1) //
 						.sortBy(1) //
 						.build());
+
+		// [H2Config同步排程]: 預設每小時一次
+            if (h2ConfigSyncEnabled) {
+                register( //
+                        H2_Config_SYNC, "Default H2 Config Sync to Replicas Schedule", //
+                    new DPB0101CronBuilder() //
+                            .frequency(5) //
+                            .hour(0) //
+                            .minute(0) //
+                            .build(), //
+                    new DPB0101ItemsBuilder(this.bcryptParamHelper) //
+                            .refItemNo("H2_CONFIG_SYNC", 21)
+                            .sortBy(0)
+                            .build());
+        }
 	}
 
 	public List<DPB0101Req> getDefaultRjobList() {

@@ -30,6 +30,7 @@ export class KeyValueFormComponent implements OnInit {
   no: number = 0;
 
   @Input() required: boolean = false;
+  @Input() useMask: boolean = false;
 
   // keyValueList: { [key: string]: string }[] = [];
 
@@ -118,6 +119,8 @@ export class KeyValueFormComponent implements OnInit {
     componentRef.instance.data = this.keyValueList[this.no]
     componentRef.instance._disabled = this.disabled;
     componentRef.instance.required = this.required;
+    componentRef.instance.useMask = this.useMask;
+
 
     this.no++;
 

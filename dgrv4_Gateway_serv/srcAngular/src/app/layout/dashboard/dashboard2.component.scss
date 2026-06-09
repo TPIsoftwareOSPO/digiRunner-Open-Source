@@ -3,6 +3,7 @@
   --card-gap: 0.5rem;
   --card-width: calc((100% - var(--sidebar-w)) / 2);
   --card-min-width: 500px;
+  --card-max-width: 650px;
   padding: 10px 1rem 0;
   --border-color:#d8d8d4;
   display: flex;
@@ -14,6 +15,7 @@
     gap: var(--wrapper-gap);
     flex-direction: column;
     min-width: var(--card-min-width);
+    max-width: var(--card-max-width);
     flex-basis: var(--card-width);
     flex-shrink: 0;
   }
@@ -27,6 +29,8 @@
   gap: var(--card-gap);
   padding: 0 var(--wrapper-gap) var(--wrapper-gap);
   min-width: var(--card-min-width);
+  max-width: var(--card-max-width);
+
   flex-basis: var(--card-width);
   flex-shrink: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -173,7 +177,7 @@
       width: 2.5rem;
       text-align: center;
       &.red{
-        --tag-color:var(--red-300);
+        --tag-color:var(--p-red-300);
       }
       &.green{
         --tag-color:#14b8a6;
@@ -201,7 +205,7 @@
       // color: white;
       margin-right: 0.05rem;
       // background-color: var(--green-500);
-      color: var(--orange-600);
+      color: var(--p-orange-600);
       font-size: 1.125rem;
     }
     &.ex {
@@ -210,7 +214,7 @@
       // color: white;
       margin-right: 0.05rem;
       // background-color: var(--red-500);
-      color: var(--red-500);
+      color: var(--p-red-500);
       font-size: 1.125rem;
     }
     &.sub{
@@ -284,14 +288,14 @@
   // background-color: #609af8;
 }
 .all-node {
-  --node-color: linear-gradient(var(--orange-500), var(--orange-100));
+  --node-color: linear-gradient(var(--p-orange-500), var(--p-orange-100));
   // --node-color: #ffbe77;
 }
 .keep-server {
-  --node-color: linear-gradient(var(--cyan-500), var(--cyan-100));
+  --node-color: linear-gradient(var(--p-cyan-500), var(--p-cyan-100));
 }
 .not-keep-server {
-  --node-color: linear-gradient(var(--teal-500), var(--teal-100));
+  --node-color: linear-gradient(var(--p-teal-500), var(--p-teal-100));
 }
 .empty-area {
   display: flex;
@@ -302,7 +306,7 @@
   margin: var(--card-gap);
   height: 152px;
   i{
-    color: var(--gray-300);
+    color: var(--p-gray-300);
     font-size: 3rem;
   }
   img{

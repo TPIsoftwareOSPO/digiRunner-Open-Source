@@ -141,6 +141,7 @@ public class RequireAllClientListPacket implements Packet_i {
 					}
 					// 目前的DB連線帳號
 					c.setDbConnect(nodeInfoData.get(NodeInfoPacket.DBCONNECT_TITLE));
+					c.setConnectedNode(nodeInfoData.get(NodeInfoPacket.CONNECTEDNODE_TITLE));
 					// 如果更新時間超過 n000, 則移除
 					Optional<Date> date = DateTimeUtil.stringToDateTime(c.getUpdateTime(), DateTimeFormatEnum.西元年月日時分秒);
 					Date updateDate = date.orElse(DateTimeUtil.now());
@@ -180,6 +181,9 @@ public class RequireAllClientListPacket implements Packet_i {
 					mustRemoveConnNameAndIp.add(ipAndName);
 
 					c.setUpTime(nodeInfoData.get(NodeInfoPacket.upTimeInfo));
+					if (TPILogger.keeperNodeInfoLogEnable) {
+						TPILogger.tl.info("RequireAllClientListPacket: node=" + server.userName + ", upTime=" + c.getUpTime() + ", updateTime=" + c.getUpdateTime());
+					}
 					c.setStartTime(nodeInfoData.get(NodeInfoPacket.startTimeInfo));
 					c.setServerPort(nodeInfoData.get(NodeInfoPacket.serverPortInfo));
 					c.setServerSslEnalbed(nodeInfoData.get(NodeInfoPacket.serverSslEnalbedInfo));
@@ -247,7 +251,7 @@ public class RequireAllClientListPacket implements Packet_i {
 					clientKeeper.setH_total(nodeInfoPacket.h_total);
 					clientKeeper.setLivenessUrlPath(nodeInfoPacket.ldUrl);
 					clientKeeper.setDbConnect(nodeInfoPacket.dbConnect);
-				
+					clientKeeper.setConnectedNode(nodeInfoPacket.connectedNode);
 					if (jumpOverAndRemove) {
 						
 					}

@@ -73,6 +73,7 @@ public class NodeInfoPacket implements Packet_i {
 	
 	public static final String DBINFO_TITLE = "dbInfo";
 	public static final String DBCONNECT_TITLE = "dbConnect";
+	public static final String CONNECTEDNODE_TITLE = "connectedNode";
 
 	public static final String METASPACE_TITLE = "METASPACE";
 
@@ -160,6 +161,9 @@ public class NodeInfoPacket implements Packet_i {
 
 	public String dbConnect;
 
+	public String connectedNode;
+
+
 	public NodeInfoPacket() {
 	}
 
@@ -171,6 +175,9 @@ public class NodeInfoPacket implements Packet_i {
 	@Override
 	public void runOnServer(LinkerServer ls) {
 		try {
+			if (TPILogger.keeperNodeInfoLogEnable) {
+				TPILogger.tl.info("NodeInfoPacket received: ls.userName=" + ls.userName + ", upTime=" + upTime);
+			}
 			if (http) {
 				// 客製包訊息 online console 對應 update time
 				this.updateTime = DateTimeUtil.dateTimeToString(DateTimeUtil.now(), DateTimeFormatEnum.西元年月日時分秒).orElse(null);				
@@ -208,6 +215,7 @@ public class NodeInfoPacket implements Packet_i {
 				nodeInfoData.put(H_FREE_TITLE, h_free);
 				nodeInfoData.put(H_TOTAL_TITLE, h_total);
 				nodeInfoData.put(DBCONNECT_TITLE, dbConnect);
+				nodeInfoData.put(CONNECTEDNODE_TITLE, connectedNode);
 				if (TPILogger.dbConnByApi) {
 					nodeInfoData.put(DBINFO_TITLE, dbInfo);
 				}
@@ -227,3 +235,5 @@ public class NodeInfoPacket implements Packet_i {
 	}
 
 }
+
+

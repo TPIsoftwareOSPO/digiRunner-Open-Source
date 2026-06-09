@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RdbConnectionComponent } from './rdb-connection.component';
 import { Ac0228Module } from '../../ac02/ac0228/ac0228.module';
+import { MimaInputComponent } from 'src/app/shared/mima-input/mima-input.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { Ac0228Module } from '../../ac02/ac0228/ac0228.module';
     ReactiveFormsModule,
     FormsModule,
     RdbConnectionRoutingModule,
-    Ac0228Module
+    Ac0228Module,
+    MimaInputComponent
   ],
   declarations: [RdbConnectionComponent],
   providers:[TokenExpiredGuard]

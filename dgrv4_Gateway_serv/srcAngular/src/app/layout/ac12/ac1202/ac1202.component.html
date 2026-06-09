@@ -9,9 +9,9 @@
         </div>
         <div class="col-4 col-xl-4 col-lg-4">
           <label class="control-label">{{'list_type'|translate}}</label>
-          <p-dropdown [options]="listTypeOptionForQuery" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="listTypeOptionForQuery" [filter]="true" placeholder="{{'plz_chs' | translate}}"
             formControlName="listType" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
         </div>
       </div>
       <div class="form-group row">
@@ -25,7 +25,7 @@
     </form>
     <hr>
     <p-table *ngIf="rtMappingCols" [columns]="rtMappingCols" [value]="rtMappingList" selectionMode="single"
-      [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped" responsiveLayout="scroll">
+      [style]="{'word-break':'break-word'}" stripedRows responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -114,7 +114,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="roleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn"
               (click)="queryRoleList();"></button>
           </div>
         </div>
@@ -135,9 +135,9 @@
       <div class="form-group row">
         <div class="col-4 col-lg-4">
           <label id="listType_label" for="listType" class="control-label">{{'list_type' | translate}}</label>
-          <p-dropdown [options]="listTypeOptionNotQuery" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="listTypeOptionNotQuery" [filter]="true" placeholder="{{'plz_chs' | translate}}"
             formControlName="listType" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="listType?.invalid && (listType?.dirty || listType?.touched)" class="text-danger">
             <small class="form-text">{{listType.errors.isRequired}}</small>
             <small class="form-text">{{listType.errors.maxlength | translate}}</small>
@@ -165,7 +165,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="newRoleAlias"
               placeholder="{{'role_alias' | translate}}">
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn"
               (click)="queryRoleList();"></button>
           </div>
         </div>
@@ -186,9 +186,9 @@
       <div class="form-group row">
         <div class="col-4 col-lg-4">
           <label id="newListType_label" for="newListType" class="control-label">{{'list_type' | translate}}</label>
-          <p-dropdown [options]="listTypeOptionNotQuery" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="listTypeOptionNotQuery" [filter]="true" placeholder="{{'plz_chs' | translate}}"
             formControlName="newListType" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="newListType?.invalid && (newListType?.dirty || newListType?.touched)" class="text-danger">
             <small class="form-text">{{newListType.errors.isRequired}}</small>
             <small class="form-text">{{newListType.errors.maxlength | translate}}</small>
@@ -230,14 +230,14 @@
         </div>
     </ng-template>
 </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

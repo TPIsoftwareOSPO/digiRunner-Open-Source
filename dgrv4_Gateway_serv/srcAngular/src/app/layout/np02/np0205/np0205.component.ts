@@ -350,6 +350,8 @@ export class Np0205Component extends BaseComponent implements OnInit {
           header: type,
           width: '800px',
           styleClass: 'cHeader cContent cIcon',
+          closable:true,
+          modal:true
         });
       }
     });
@@ -394,6 +396,8 @@ export class Np0205Component extends BaseComponent implements OnInit {
             header: dict['cert'],
             width: '800px',
             styleClass: 'cHeader cContent cIcon',
+            closable:true,
+            modal:true
           });
         }else{
           this.alertService.error('Error','File does not exist.');

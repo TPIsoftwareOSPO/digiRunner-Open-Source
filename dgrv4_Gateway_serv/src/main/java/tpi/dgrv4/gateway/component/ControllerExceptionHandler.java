@@ -11,6 +11,7 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -61,6 +62,41 @@ public class ControllerExceptionHandler {
 		String errorStr = StackTraceUtil.logStackTrace(throwable);
 		return ResponseEntity.internalServerError().body(errorStr);
 	};
+
+	/**
+	 * JSON 解析失敗的處理。
+	 *
+	 * 背景：預設的 catch-all（handleUnTrackException）會把完整 stack trace 回傳給 client，
+	 * 暴露內部 class 名稱和套件結構。此 handler 攔截 JSON 解析錯誤，
+	 * 回傳結構化的 ResHeader，不洩漏技術細節。
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+		TPILogger.tl.error("Request body parse error: " + ex.getMessage());
+
+		String rtnCode = DgrRtnCode.SYSTEM_ERROR.getCode();
+		String rtnMsg = rtnCode + " - Invalid request body. Check that the JSON format and field names match the API specification.";
+
+		try {
+			String locale = ServiceUtil.getLocale(null);
+			TsmpRtnCode tsmpRtnCode = getRtnMsgById(rtnCode, locale);
+			if (tsmpRtnCode != null) {
+				rtnMsg = rtnCode + " - " + tsmpRtnCode.getTsmpRtnMsg()
+					+ ". Invalid request body. Check that the JSON format and field names match the API specification.";
+			}
+		} catch (Exception e) {
+			// 查詢 rtnMsg 失敗時用預設訊息，不影響回應
+			TPILogger.tl.error("Failed to resolve rtnMsg: " + e.getMessage());
+		}
+
+		ResHeader resHeader = new ResHeader();
+		resHeader.setRtnCode(rtnCode);
+		resHeader.setRtnMsg(rtnMsg);
+
+		ModelAndView mav = new ModelAndView(new MappingJackson2JsonView());
+		mav.addObject(TsmpBaseResp.KEY_OF_HEADER, resHeader);
+		return mav;
+	}
 
 	@ExceptionHandler(Throwable.class)
 	public ResponseEntity<String> handleUnTrackException(Throwable e) {

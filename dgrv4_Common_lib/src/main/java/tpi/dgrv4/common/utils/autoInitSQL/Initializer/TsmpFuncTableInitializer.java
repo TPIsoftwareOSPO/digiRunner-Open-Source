@@ -44,10 +44,10 @@ public class TsmpFuncTableInitializer {
 			//系統現況查詢
 			"NP05","NP0504","NP0512","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012", "LB0013","LB0014","LB0015","LB0016",
 			// AI Gateway
 			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
-	};	
+	};
 	public static final String[] ENTERPRISE = new String[] {
 			//v4-權限管理
 			"AC00","AC0002","AC0006","AC0012","AC0015","AC1002","AC1202","AC0016","AC0017","AC0018","AC0019","AC0020","AC0021",
@@ -68,7 +68,7 @@ public class TsmpFuncTableInitializer {
 			//系統現況查詢
 			"NP05","NP0504","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012", "LB0013","LB0014","LB0015","LB0016",
 			// AI Gateway
 			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};
@@ -93,7 +93,7 @@ public class TsmpFuncTableInitializer {
 			//系統現況查詢
 			"NP05","NP0504","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012","LB0013","LB0014","LB0015","LB0016",
 			// AI Gateway
 			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};
@@ -118,11 +118,11 @@ public class TsmpFuncTableInitializer {
 			//系統現況查詢
 			"NP05","NP0504","NP0513","NP0514","NP0516","NP1201","NP1202",
 			//系統設定
-			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012",
+			"LB00","LB0001","LB0002","LB0003","LB0004","LB0005","LB0006","LB0007","LB0008","LB0009","LB0010","LB0011","LB0012","LB0013","LB0014","LB0015","LB0016",
 			// AI Gateway
 			"AI00","AI0001","AI0002","AI0003","AI0004","AI0005",
 	};
-	
+
 	public List<TsmpFuncVo> insertTsmpFunc(LicenseEditionTypeVo licenseEdition, boolean isOsType) {
 		try {
 			   
@@ -195,7 +195,7 @@ public class TsmpFuncTableInitializer {
 	    	createTsmpFunc("AC0510","API儀表板","APIDashboard","API儀表板",null,"zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0511","Home Dashboard","Home Dashboard","Home Dashboard",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0511","首頁儀表板","Home Dashboard","首頁儀表板",null,"zh-TW","manager",DateTimeUtil.now());
-	    	createTsmpFunc("AC0702","Alert Settings","Alert Query","Alert Query",null,"en-US","manager",DateTimeUtil.now());
+	    	createTsmpFunc("AC0702","Alert Settings","Alert Query","Alert Query",null,"en-US","manager",DateTimeUtil.now());   
 	    	createTsmpFunc("AC0702","告警設定","Alert查詢","Alert查詢",null,"zh-TW","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0706","Alert Settings","Alert Query","Alert Query",null,"en-US","manager",DateTimeUtil.now());
 	    	createTsmpFunc("AC0706","告警設定","Alert查詢","Alert查詢",null,"zh-TW","manager",DateTimeUtil.now());
@@ -361,6 +361,19 @@ public class TsmpFuncTableInitializer {
 
 			createTsmpFunc("AC0322","API List Export","API List Export","apiListExport","","en-US","manager",DateTimeUtil.now());
 			createTsmpFunc("AC0322","API列表匯出","API List Export","apiListExport","","zh-TW","manager",DateTimeUtil.now());
+
+
+			createTsmpFunc("LB0013","Smart On FHIR Proxy","Smart On FHIR Proxy","Smart On FHIR Proxy","","en-US","manager",DateTimeUtil.now());
+			createTsmpFunc("LB0013","Smart On FHIR Proxy","Smart On FHIR Proxy","Smart On FHIR Proxy","","zh-TW","manager",DateTimeUtil.now());
+
+            createTsmpFunc("LB0014","H2 Config Synchronization","H2 Config Synchronization","h2ConfigSynchronization","","en-US","manager",DateTimeUtil.now());
+            createTsmpFunc("LB0014","H2 Config 同步","H2 Config Synchronization","h2ConfigSynchronization","","zh-TW","manager",DateTimeUtil.now());
+
+            createTsmpFunc("LB0015", "H2 Config Synchronization History" ,"H2 Config Synchronization History","h2ConfigSynchronizationHistory","","en-US","manager",DateTimeUtil.now());
+            createTsmpFunc("LB0015","H2 Config 同步紀錄","H2 Config Synchronization History","h2ConfigSynchronizationHistory","","zh-TW","manager",DateTimeUtil.now());
+
+            createTsmpFunc("LB0016","SMART Launcher","SMART Launcher","SMART Launcher","","en-US","manager",DateTimeUtil.now());
+            createTsmpFunc("LB0016","SMART Launcher","SMART Launcher","SMART Launcher","","zh-TW","manager",DateTimeUtil.now());
 			//取得版本tsmpFunc清單
 	    	setVersionTsmpFunc(licenseEdition);
 	    	List<TsmpFuncVo> tsmpFuncVos = new LinkedList<TsmpFuncVo>();	    	

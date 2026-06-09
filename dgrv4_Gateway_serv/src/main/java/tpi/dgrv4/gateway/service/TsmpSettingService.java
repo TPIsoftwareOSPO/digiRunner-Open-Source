@@ -1591,10 +1591,20 @@ public class TsmpSettingService {
         return  TsmpSettingDao.Key.KIBANA_COOKIE_BYPASS_PATHS ;
     }
 
-
-
     public List<String> getVal_KIBANA_COOKIE_BYPASS_PATHS() {
         String key = getKey_KIBANA_COOKIE_BYPASS_PATHS();
         return getListVal(key, ",", String::valueOf);
     }
+    
+    public String getKey_KEEPER_NODE_INFO_LOG_ENABLE(){
+		return  TsmpSettingDao.Key.KEEPER_NODE_INFO_LOG_ENABLE;
+	}
+
+	public  boolean getVal_KEEPER_NODE_INFO_LOG_ENABLE(){
+		//String key = getKey_KEEPER_NODE_INFO_LOG_ENABLE();
+		//return getBooleanVal(key, Boolean.FALSE);
+		//避免多佔db連線數,暫定給固定值false
+		//To avoid consuming too many database connections, we'll temporarily assign a fixed value of false.
+		return false;
+	}
 }

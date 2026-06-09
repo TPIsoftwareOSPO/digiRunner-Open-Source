@@ -5,17 +5,17 @@
                 <label class="required control-label">{{'date_range'|translate}}</label>
                 <div class="row">
                     <div class="col-5 col-xl-5">
-                        <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                        <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                             formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
-                        </p-calendar>
+                        </p-datepicker>
                     </div>
                     <div class="col-1 col-xl-1 text-center">
                         <label style="padding: 3px 20px;">～</label>
                     </div>
                     <div class="col-5 col-xl-5">
-                        <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="endDate" appendTo="body"
+                        <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="endDate" appendTo="body"
                             dateFormat="yy/mm/dd" [showIcon]="true">
-                        </p-calendar>
+                        </p-datepicker>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
         </div>
     </form>
     <hr>
-    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" stripedRows
         [style]="{'word-break':'break-word'}">
         <ng-template pTemplate="colgroup" let-columns>
             <colgroup>

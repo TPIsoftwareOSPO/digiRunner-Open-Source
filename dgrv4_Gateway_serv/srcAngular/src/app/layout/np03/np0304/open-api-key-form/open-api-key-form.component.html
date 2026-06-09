@@ -40,26 +40,6 @@
                 <label *ngIf="data.operate != formOperate.create">{{data.data.subTitle}}</label>
             </div>
             <div class="col-4 col-xl-4 col-lg-4">
-                <label class="required control-label" id="effectiveDate_label" for="effectiveDate">{{'effective_date'|translate}}</label>：
-                <p-calendar dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" appendTo="body"
-                    formControlName="effectiveDate" id="effectiveDate">
-                </p-calendar>
-                <div *ngIf="effectiveDate?.invalid && (effectiveDate?.dirty || effectiveDate?.touched)"
-                    class="text-danger">
-                    <small class="form-text">{{effectiveDate.errors.isRequired | translate}}</small>
-                </div>
-            </div>
-        </div>
-        <div *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_APPLICA'" class="form-group row">
-            <div class="col-12 col-xl-12 col-lg-12">
-                <label class="control-label">Open API Key</label>：
-                <label *ngIf="data.operate == formOperate.create">{{data.data.openApiKey}}</label>
-                <label *ngIf="data.operate == formOperate.update">{{data.data.openApiKey.openApiKey}}</label>
-                <label *ngIf="data.operate == formOperate.resend">{{data.data.openApiKey.openApiKey}}</label>
-            </div>
-        </div>
-        <div class="form-group row">
-            <div class="col-4 col-xl-4 col-lg-4">
                 <label class="control-label" id="openApiKeyAlias_label" for="openApiKeyAlias"
                     [ngClass]="{'required':data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'}">{{'open_api_key_alias'|translate}}</label>：
                 <input *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'" type="text" class="form-control" id="openApiKeyAlias"
@@ -73,15 +53,35 @@
                 </div>
                 <label
                     *ngIf="data.data.reqSubtype == 'OPEN_API_KEY_REVOKE'">{{ checkFromOperation() ? data.data.openApiKeyAlias : data.data.openApiKey.openApiKeyAlias}}</label>
-
             </div>
+        </div>
+        <div *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_APPLICA'" class="form-group row">
+            <div class="col-12 col-xl-12 col-lg-12">
+                <label class="control-label">Open API Key</label>：
+                <label *ngIf="data.operate == formOperate.create">{{data.data.openApiKey}}</label>
+                <label *ngIf="data.operate == formOperate.update">{{data.data.openApiKey.openApiKey}}</label>
+                <label *ngIf="data.operate == formOperate.resend">{{data.data.openApiKey.openApiKey}}</label>
+            </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-4 col-xl-4 col-lg-4">
+                <label class="required control-label" id="effectiveDate_label" for="effectiveDate">{{'effective_date'|translate}}</label>：
+                <p-datepicker dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" appendTo="body"
+                    formControlName="effectiveDate" id="effectiveDate" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
+                </p-datepicker>
+                <div *ngIf="effectiveDate?.invalid && (effectiveDate?.dirty || effectiveDate?.touched)"
+                    class="text-danger">
+                    <small class="form-text">{{effectiveDate.errors.isRequired | translate}}</small>
+                </div>
+            </div>
+
             <div class="col-4 col-xl-4 col-lg-4">
                 <label class="control-label" id="expiredAt_label" for="expiredAt"
                     [ngClass]="{'required':data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'}">{{'expired_date'|translate}}</label>：
-                <p-calendar *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'" dateFormat="yy/mm/dd" appendTo="body"
+                <p-datepicker *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'" dateFormat="yy/mm/dd" appendTo="body"
                     [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" formControlName="expiredAt" id="expiredAt"
-                    [style]="{'width':'100%'}" [inputStyle]="{'width':'95%'}">
-                </p-calendar>
+                    [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
+                </p-datepicker>
                 <div *ngIf="expiredAt?.invalid && (expiredAt?.dirty || expiredAt?.touched)"
                     class="text-danger">
                     <small class="form-text">{{expiredAt.errors.isRequired | translate}}</small>
@@ -133,11 +133,11 @@
                     <div class="ui-inputgroup mb-1">
                         <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}" (keyup.enter)="searchAPI();"
                             formControlName="keyword">
-                        <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
+                        <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1 input-btn" style="height: 38px;"
                             (click)="searchAPI();"></button>
                     </div>
                 </div>
-                <p-table *ngIf="cols" [columns]="cols" [value]="apiList" selectionMode="single" styleClass="p-datatable-striped"
+                <p-table *ngIf="cols" [columns]="cols" [value]="apiList" selectionMode="single" stripedRows
                     [(selection)]="selectedApis" [style]="{'word-break':'break-word'}">
                     <ng-template *ngIf="data.data.reqSubtype != 'OPEN_API_KEY_REVOKE'" pTemplate="caption">
                         <div class="ui-helper-clearfix">

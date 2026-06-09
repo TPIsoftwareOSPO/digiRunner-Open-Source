@@ -95,14 +95,15 @@ export class Np1202Component extends BaseComponent implements OnInit {
     });
   }
 
-  tabKeys: string[] = ['keyWords', 'xApiKey'];
+  // tabKeys: string[] = ['keyWords', 'xApiKey'];
   tabChange(evt: any) {
     this.resetFormValidator(this.form);
     this.apiCount = '';
     this.dataList = [];
     this.responseFromXapiKey = undefined;
-    this.flag.setValue(this.tabKeys[evt.index]);
-    if (this.tabKeys[evt.index] === 'keyWords') {
+
+    this.flag.setValue(evt);
+    if (evt === 'keyWords') {
       this.keyWords.setValidators(ValidatorFns.requiredValidator());
       this.keyWords.updateValueAndValidity();
       setTimeout(() => {
@@ -124,7 +125,6 @@ export class Np1202Component extends BaseComponent implements OnInit {
   }
 
   async showDetailPage(rowData:DPB0234ApiDataItem) {
-    // console.log(rowData)
     const code = ['detail'];
     const dict = await this.toolService.getDict(code);
     let detailReqBody = {
@@ -141,7 +141,8 @@ export class Np1202Component extends BaseComponent implements OnInit {
           },
           header: dict['detail'],
           width: '80vw',
-          styleClass: 'cHeader cContent'
+          closable:true,
+          modal:true
         })
       }
     })

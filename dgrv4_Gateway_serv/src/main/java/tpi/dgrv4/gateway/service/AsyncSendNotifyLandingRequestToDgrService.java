@@ -67,7 +67,7 @@ public class AsyncSendNotifyLandingRequestToDgrService {
 		return () -> {
 			sendNotifyLandingRequestToDgr(oauthTokenData, isHasRefreshToken, userName, clientId, accessTokenJti,
 					refreshTokenJti, scopeStr, stime, accessTokenExp, refreshTokenExp, grantType, oldAccessTokenJti,
-					oauthTokenData.idPType, idTokenJwtstr, refreshTokenJwtstr);
+					oauthTokenData.getIdPType(), idTokenJwtstr, refreshTokenJwtstr);
 		};
 	}
 
@@ -102,7 +102,7 @@ public class AsyncSendNotifyLandingRequestToDgrService {
 		// 建立通知登陸請求的主體內容
 		String reqJson = makeNotifyLandingBody(oauthTokenData, isHasRefreshToken, userName, clientId, accessTokenJti,
 				refreshTokenJti, scopeStr, stime, accessTokenExp, refreshTokenExp, grantType, oldAccessTokenJti,
-				oauthTokenData.idPType, idTokenJwtstr, refreshTokenJwtstr);
+				oauthTokenData.getIdPType(), idTokenJwtstr, refreshTokenJwtstr);
 
 		String reqUrl = null;
 		try {

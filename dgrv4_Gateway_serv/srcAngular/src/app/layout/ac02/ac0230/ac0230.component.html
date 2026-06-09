@@ -1,61 +1,26 @@
-<app-container
-  [title]="currentTitle"
-  [isDefault]="pageNum == 1"
-  (headerReturn)="headerReturn()"
->
+<app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <div class="form-group row">
       <div class="col-2">
         <label class="control-label">{{ "button.export" | translate }}</label>
         <div class="form-control border-line" style="background: #f6f6f6">
-          <button
-            type="button"
-            class="btn tpi-btn tpi-primary"
-            (click)="epxortClientRelatedClick()"
-          >
+          <button type="button" class="btn tpi-btn tpi-primary" (click)="epxortClientRelatedClick()">
             {{ "button.export" | translate }}
           </button>
         </div>
       </div>
       <div class="col-5">
-        <label class="control-label"
-          >{{ "button.import" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.import_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
+        <label class="control-label">{{ "button.import" | translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.import_tip' | translate }}"
+            [escape]="false"></i></label>
         <div>
           <div class="ui-inputgroup">
-            <input
-              type="file"
-              id="file"
-              accept=".json"
-              (change)="changeFile($event)"
-              style="display: none"
-            />
-            <input
-              [value]="jsonFile?.name"
-              readonly
-              type="text"
-              class="form-control"
-              (click)="openFileBrowser()"
-              placeholder="{{ 'chs_json_file' | translate }}"
-            />
-            <button
-              pButton
-              type="button"
-              icon="pi pi-file"
-              class="ms-1 tpi-primary"
-              (click)="openFileBrowser()"
-            ></button>
-            <button
-              type="button"
-              class="btn tpi-btn tpi-primary ms-2"
-              (click)="uploadFile()"
-              [disabled]="!jsonFile"
-            >
+            <input type="file" id="file" accept=".json" (change)="changeFile($event)" style="display: none" />
+            <input [value]="jsonFile?.name" readonly type="text" class="form-control" (click)="openFileBrowser()"
+              placeholder="{{ 'chs_json_file' | translate }}" />
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+              (click)="openFileBrowser()"></button>
+            <button type="button" class="btn tpi-btn tpi-primary ms-2" (click)="uploadFile()" [disabled]="!jsonFile">
               {{ "button.upload" | translate }}
             </button>
           </div>
@@ -63,7 +28,7 @@
       </div>
     </div>
     <div class="form-group col">
-     <label>{{ "export_dont_modify" | translate }}</label>
+      <label>{{ "export_dont_modify" | translate }}</label>
     </div>
   </div>
   <hr />
@@ -76,21 +41,13 @@
     </div>
     <div class="form-group row">
       <div class="col-12">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.lackApi" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.lack_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.lackApi" |
+          translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.lack_tip' | translate }}"
+            [escape]="false"></i></label>
 
-        <p-table
-          [value]="relateData?.lackApiList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <p-table [value]="relateData?.lackApiList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th>{{ "module_name" | translate }}</th>
@@ -113,16 +70,12 @@
         </p-table>
       </div>
       <div class="col-12" *ngIf="relateData?.lackApiList.length > 0">
-        <p-checkbox
-          [binary]="true"
-          inputId="lackCheck"
-          [(ngModel)]="checkLackApi"
-        >
+        <p-checkbox [binary]="true" inputId="lackCheck" [(ngModel)]="checkLackApi">
         </p-checkbox>
 
         <label class="mb-0 ms-1 pt-1" for="lackCheck" style="font-weight: bold; font-size: 1.2rem;">{{
           "client_related.cofirm_by_lack" | translate
-        }}</label>
+          }}</label>
       </div>
     </div>
     <!-- <div class="form-group row col">
@@ -145,20 +98,12 @@
     <!-- 用戶端資訊 -->
     <div class="form-group row">
       <div class="col">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.client_info" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.client_info_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
-        <p-table
-          [value]="relateData?.clientList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.client_info" |
+          translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.client_info_tip' | translate }}"
+            [escape]="false"></i></label>
+        <p-table [value]="relateData?.clientList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th width="180px">
@@ -171,18 +116,16 @@
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
             <tr>
-              <td
-                [style]="{
+              <td [style]="{
                   color:
                     rowData.dataStatus == 'R' ||
                     rowData.dataStatus == 'CA' ||
                     rowData.dataStatus == 'CR'
                       ? 'red'
                       : ''
-                }"
-              >
+                }">
                 <!-- {{ rowData.dataStatusName }} -->
-                {{ rowData.dataStatus | dataChangeStatus| async  }}
+                {{ rowData.dataStatus | dataChangeStatus| async }}
               </td>
               <td>{{ rowData.clientId }}</td>
               <td>{{ rowData.clientName }}</td>
@@ -202,20 +145,11 @@
     <!-- 群組維護 -->
     <div class="form-group row">
       <div class="col">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.group" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.group_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
-        <p-table
-          [value]="relateData?.groupList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.group" | translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.group_tip' | translate }}"
+            [escape]="false"></i></label>
+        <p-table [value]="relateData?.groupList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th width="180px">
@@ -227,18 +161,16 @@
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
             <tr>
-              <td
-                [style]="{
+              <td [style]="{
                   color:
                     rowData.dataStatus == 'R' ||
                     rowData.dataStatus == 'CA' ||
                     rowData.dataStatus == 'CR'
                       ? 'red'
                       : ''
-                }"
-              >
+                }">
                 <!-- {{ rowData.dataStatusName }} -->
-                {{ rowData.dataStatus | dataChangeStatus| async  }}
+                {{ rowData.dataStatus | dataChangeStatus| async }}
               </td>
               <td>{{ rowData.groupName }}</td>
               <td>{{ rowData.groupAlias }}</td>
@@ -257,20 +189,12 @@
     <!-- 授權範圍維護 -->
     <div class="form-group row">
       <div class="col">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.vgroup" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.vgroup_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
-        <p-table
-          [value]="relateData?.vgroupList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.vgroup" |
+          translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.vgroup_tip' | translate }}"
+            [escape]="false"></i></label>
+        <p-table [value]="relateData?.vgroupList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th width="180px">
@@ -282,18 +206,16 @@
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
             <tr>
-              <td
-                [style]="{
+              <td [style]="{
                   color:
                     rowData.dataStatus == 'R' ||
                     rowData.dataStatus == 'CA' ||
                     rowData.dataStatus == 'CR'
                       ? 'red'
                       : ''
-                }"
-              >
+                }">
                 <!-- {{ rowData.dataStatusName }} -->
-                {{ rowData.dataStatus | dataChangeStatus| async  }}
+                {{ rowData.dataStatus | dataChangeStatus| async }}
               </td>
               <td>{{ rowData.vgroupName }}</td>
               <td>{{ rowData.vgroupAlias }}</td>
@@ -312,20 +234,12 @@
     <!-- 查詢核身方式 -->
     <div class="form-group row">
       <div class="col">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.group_auth" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.group_auth_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
-        <p-table
-          [value]="relateData?.groupAuthList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.group_auth" |
+          translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.group_auth_tip' | translate }}"
+            [escape]="false"></i></label>
+        <p-table [value]="relateData?.groupAuthList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th width="180px">
@@ -337,18 +251,16 @@
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
             <tr>
-              <td
-                [style]="{
+              <td [style]="{
                   color:
                     rowData.dataStatus == 'R' ||
                     rowData.dataStatus == 'CA' ||
                     rowData.dataStatus == 'CR'
                       ? 'red'
                       : ''
-                }"
-              >
+                }">
                 <!-- {{ rowData.dataStatusName }} -->
-                {{ rowData.dataStatus | dataChangeStatus| async  }}
+                {{ rowData.dataStatus | dataChangeStatus| async }}
               </td>
               <td>{{ rowData.groupAuthId }}</td>
               <td>{{ rowData.groupAuthName }}</td>
@@ -367,20 +279,12 @@
     <!-- 安全等級 -->
     <div class="form-group row">
       <div class="col">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.security_level" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.security_level_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
-        <p-table
-          [value]="relateData?.securityLevelList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.security_level" |
+          translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.security_level_tip' | translate }}"
+            [escape]="false"></i></label>
+        <p-table [value]="relateData?.securityLevelList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th width="180px">
@@ -392,18 +296,16 @@
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
             <tr>
-              <td
-                [style]="{
+              <td [style]="{
                   color:
                     rowData.dataStatus == 'R' ||
                     rowData.dataStatus == 'CA' ||
                     rowData.dataStatus == 'CR'
                       ? 'red'
                       : ''
-                }"
-              >
+                }">
                 <!-- {{ rowData.dataStatusName }} -->
-                {{ rowData.dataStatus | dataChangeStatus| async  }}
+                {{ rowData.dataStatus | dataChangeStatus| async }}
               </td>
               <td>{{ rowData.securityLevelId }}</td>
               <td>{{ rowData.securityLevelName }}</td>
@@ -422,20 +324,12 @@
     <!-- RDB連線 -->
     <div class="form-group row">
       <div class="col">
-        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;"
-          >{{ "client_related.rdb_connection" | translate
-          }}<i
-            class="far fa-question-circle ms-2"
-            pTooltip="{{ 'client_related.rdb_connection_tip' | translate }}"
-            [escape]="false"
-          ></i
-        ></label>
-        <p-table
-          [value]="relateData?.rdbConnectionList"
-          styleClass="p-datatable-striped"
-          [style]="{ 'word-break': 'break-word' }"
-          responsiveLayout="scroll"
-        >
+        <label class="control-label" style="font-weight: bold; font-size: 1.2rem;">{{ "client_related.rdb_connection" |
+          translate
+          }}<i class="far fa-question-circle ms-2" pTooltip="{{ 'client_related.rdb_connection_tip' | translate }}"
+            [escape]="false"></i></label>
+        <p-table [value]="relateData?.rdbConnectionList" stripedRows
+          [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
           <ng-template pTemplate="header" let-columns>
             <tr>
               <th width="180px">
@@ -446,18 +340,16 @@
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
             <tr>
-              <td
-                [style]="{
+              <td [style]="{
                   color:
                     rowData.dataStatus == 'R' ||
                     rowData.dataStatus == 'CA' ||
                     rowData.dataStatus == 'CR'
                       ? 'red'
                       : ''
-                }"
-              >
+                }">
                 <!-- {{ rowData.dataStatusName }} -->
-                {{ rowData.dataStatus | dataChangeStatus| async  }}
+                {{ rowData.dataStatus | dataChangeStatus| async }}
               </td>
               <td>{{ rowData.connectionName }}</td>
 
@@ -474,65 +366,32 @@
       </div>
     </div>
     <div class="form-group row col">
-      <button
-        type="button"
-        class="btn tpi-btn tpi-primary"
-        (click)="allCover()"
-      >
+      <button type="button" class="btn tpi-btn tpi-primary" (click)="allCover()">
         {{ "client_related.cover_all" | translate }}
       </button>
       <div style="display: flex; align-items: center">
-        <i
-          class="far fa-question-circle mx-2"
-          pTooltip="{{ 'client_related.cover_all_tip' | translate }}"
-          [escape]="false"
-        ></i>
+        <i class="far fa-question-circle mx-2" pTooltip="{{ 'client_related.cover_all_tip' | translate }}"
+          [escape]="false"></i>
       </div>
 
-      <button
-        type="button"
-        class="btn tpi-btn tpi-primary"
-        (click)="importConfirm()"
-        [disabled]="
+      <button type="button" class="btn tpi-btn tpi-primary" (click)="importConfirm()" [disabled]="
           relateData?.lackApiList &&
           relateData?.lackApiList.length > 0 &&
           !checkLackApi
-        "
-        *ngIf="!checkCAflag && !imported"
-      >
+        " *ngIf="!checkCAflag && !imported">
         {{ "button.confirm" | translate }}
       </button>
     </div>
   </div>
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<p-confirmDialog
-  #cd
-  [style]="{ width: '50vw' }"
-  icon="pi pi-exclamation-triangle"
-  styleClass="cHeader cContent cIcon"
->
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button
-        type="button"
-        pButton
-        icon="pi pi-check"
-        [ngStyle]="{
-          backgroundColor: 'var(--red-300)',
-          'border-color': 'var(--red-300)'
-        }"
-        label="{{ 'button.confirm' | translate }}"
-        (click)="cd.accept()"
-      ></button>
-      <button
-        type="button"
-        pButton
-        icon="pi pi-times"
-        class="p-button-secondary"
-        label="{{ 'button.cancel' | translate }}"
-        (click)="cd.reject()"
-      ></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

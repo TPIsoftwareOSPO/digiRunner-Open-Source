@@ -36,7 +36,7 @@
       </div>
     </div>
     <hr>
-    <p-table [columns]="funcInfoListCols" [value]="funcInfoList" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table [columns]="funcInfoListCols" [value]="funcInfoList" selectionMode="single" stripedRows
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -132,7 +132,7 @@
         <label>{{ "fun_desc" | translate }}</label>
 
         <div style="display: block">
-          <textarea readonly rows="2" style="width: 100%" [value]="currentFuncInfo?.funcDesc" pInputTextarea></textarea>
+          <textarea readonly rows="2" class="form-control" style="width: 100%" [value]="currentFuncInfo?.funcDesc" pInputTextarea></textarea>
         </div>
       </div>
     </div>
@@ -155,7 +155,7 @@
 
     </form>
     <!-- <hr /> -->
-    <p-table [columns]="roleInfoListCols" [value]="roleInfoList" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table [columns]="roleInfoListCols" [value]="roleInfoList" selectionMode="single" stripedRows
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -302,20 +302,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="form-group row">
-        <div class="col-12 col-lg-12">
-          <label for="newDesc">{{ "fun_desc" | translate }}</label>
-          <div style="display: block">
-            <textarea id="newDescTextArea" class="form-control" [rows]="5" pInputTextarea formControlName="newDesc"
-              placeholder="{{ 'new_fun_desc' | translate }}"></textarea>
-          </div>
-          <div *ngIf="newDesc.invalid && (newDesc.dirty || newDesc.touched)" class="text-danger">
-            <small class="form-text">{{
-              newDesc.errors.maxlength | translate : newFunDescLimitChar
-              }}</small>
-          </div>
-        </div>
-      </div> -->
       <div class="form-group row">
         <div class="col-12 col-lg-12">
           <button type="button" class="btn tpi-btn tpi-primary float-start me-3"
@@ -338,13 +324,13 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="type" [value]="0" inputId="type0"></p-radioButton>
+                <p-radioButton name="type" formControlName="type" [value]="0" inputId="type0"></p-radioButton>
                 <label for="type0" class="ms-2 mb-0">{{'main_func'|translate}}</label>
               </div>
             </ng-container>
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="type" [value]="1" inputId="type1"></p-radioButton>
+                <p-radioButton name="type" formControlName="type" [value]="1" inputId="type1"></p-radioButton>
                 <label for="type1" class="ms-2 mb-0">{{'sub_func'|translate}}</label>
               </div>
             </ng-container>
@@ -377,9 +363,9 @@
               [pTooltip]="'main_func_tip.1'|translate"
               [escape]="false"></i>
           </label>
-          <p-dropdown [options]="mFuncData" placeholder="{{ 'plz_chs' | translate }}" formControlName="masterFuncCode"
+          <p-select [options]="mFuncData" placeholder="{{ 'plz_chs' | translate }}" formControlName="masterFuncCode"
             optionLabel="funcName" optionValue="funcCode" [style]="{ width: '100%' }">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="masterFuncCode?.invalid && (masterFuncCode?.dirty || masterFuncCode?.touched)"
             class="text-danger">
             <small class="form-text">{{ masterFuncCode.errors.required | translate }}</small>
@@ -448,15 +434,13 @@
   </div>
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{ width: '50vw' }" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{
-          backgroundColor: 'var(--red-300)',
-          'border-color': 'var(--red-300)'
-        }" label="{{ 'button.confirm' | translate }}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{ 'button.cancel' | translate }}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

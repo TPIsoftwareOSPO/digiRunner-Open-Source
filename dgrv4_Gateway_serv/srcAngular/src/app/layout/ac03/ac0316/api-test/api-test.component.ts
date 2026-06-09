@@ -19,7 +19,7 @@ import { KeyValueComponent } from 'src/app/shared/key-value/key-value.module';
 import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
 import { Component, Input, NgZone, OnInit, ViewChild } from '@angular/core';
-import * as shajs from 'sha.js'
+import SHA256 from 'sha.js/sha256'
 import { CommonAPI } from 'src/app/shared/register-api/common-api.class';
 import * as base64 from 'js-base64'
 // const crypto = require('libp2p-crypto');
@@ -859,11 +859,11 @@ export class ApiTestComponent implements OnInit {
   keyvalueConvetToList(keyvalues: { key: string, value: string|File, selected?: boolean }[]) {
     let formatResult: HttpHeader[] = []
     if (keyvalues && keyvalues.length) {
-      // let headerList: T[] = new Array<T>();
-
-      formatResult = (keyvalues.filter(item => {
-        return item.selected;
-      })).map(keyvalue => {
+      formatResult = (keyvalues.filter(item => item.selected))
+      .flatMap(keyvalue => {
+        if (Array.isArray(keyvalue.value)) {
+          return keyvalue.value.map(v => ({ name: keyvalue.key, value: v } as HttpHeader));
+        }
         return { name: keyvalue.key, value: keyvalue.value } as HttpHeader
       })
 
@@ -901,7 +901,7 @@ export class ApiTestComponent implements OnInit {
     const prefix = signBlock;
     const bodyJosn = body;
     // console.log(prefix + bodyJosn);
-    return shajs('sha256').update(prefix + bodyJosn).digest('hex');
+    return new SHA256().update(prefix + bodyJosn).digest('hex');
   }
 
   private calResponseTime(): void {

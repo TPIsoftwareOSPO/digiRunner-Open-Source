@@ -16,7 +16,7 @@
           pButton
           type="button"
           icon="pi pi-search"
-          class="ms-1 tpi-primary"
+          class="ms-1 tpi-primary input-btn"
           (click)="queryRoleMappingList('search')"
         ></button>
       </div>
@@ -30,7 +30,7 @@
     [value]="roleInfoList"
     [(selection)]="selected"
     [style]="{ 'word-break': 'break-word' }"
-    styleClass="p-datatable-striped"
+    stripedRows
     responsiveLayout="scroll"
   >
     <ng-template pTemplate="colgroup" let-columns>

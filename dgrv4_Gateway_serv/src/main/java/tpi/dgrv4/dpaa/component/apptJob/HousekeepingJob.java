@@ -45,6 +45,7 @@ import tpi.dgrv4.gateway.component.job.appt.ApptJob;
 import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
+import tpi.dgrv4.gateway.service.SmartOnFhirProxyService;
 import tpi.dgrv4.gateway.service.WebsiteService;
 
 /**
@@ -71,6 +72,7 @@ public class HousekeepingJob extends ApptJob {
     private DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao;
     private TrafficCheck trafficCheck;
     private WebsiteService websiteService;
+    private SmartOnFhirProxyService smartOnFhirProxyService;
     private DgrWebsiteCacheProxy dgrWebsiteCacheProxy;
     private TsmpSettingService tsmpSettingService;
     private DgrAuditLogMDao dgrAuditLogMDao;
@@ -84,7 +86,8 @@ public class HousekeepingJob extends ApptJob {
 			TsmpNoticeLogDao tsmpNoticeLogDao, TsmpDpFileDao tsmpDpFileDao, TsmpSettingDao tsmpSettingDao,
 			TsmpClientDao tsmpClientDao, TsmpTokenHistoryDao tsmpTokenHistoryDao,
 			DgrAcIdpAuthCodeDao dgrAcIdpAuthCodeDao, DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao,
-			TrafficCheck trafficCheck, WebsiteService websiteService, DgrWebsiteCacheProxy dgrWebsiteCacheProxy,
+			TrafficCheck trafficCheck, WebsiteService websiteService,
+			SmartOnFhirProxyService smartOnFhirProxyService, DgrWebsiteCacheProxy dgrWebsiteCacheProxy,
 			TsmpSettingService tsmpSettingService, ApptJobDispatcher apptJobDispatcher,DgrAuditLogMDao dgrAuditLogMDao ,
                            DgrAuditLogDDao dgrAuditLogDDao, DgrWebhookNotifyLogDao dgrWebhookNotifyLogDao) {
 		super(tsmpDpApptJob, TPILogger.tl, apptJobDispatcher, tsmpDpApptJobDao);
@@ -103,6 +106,7 @@ public class HousekeepingJob extends ApptJob {
 		this.dgrImportClientRelatedTempDao = dgrImportClientRelatedTempDao;
 		this.trafficCheck = trafficCheck;
 		this.websiteService = websiteService;
+		this.smartOnFhirProxyService = smartOnFhirProxyService;
 		this.dgrWebsiteCacheProxy = dgrWebsiteCacheProxy;
 		this.tsmpSettingService = tsmpSettingService;
 		this.dgrAuditLogMDao = dgrAuditLogMDao;
@@ -330,13 +334,20 @@ public class HousekeepingJob extends ApptJob {
             }
 
             // website
-            step("10. 2/2");
+            step("10. 2/3");
             keyList = new ArrayList<>(getWebsiteService().trifficMap.keySet());
             for (String key : keyList) {
                 DgrWebsite vo = getDgrWebsiteCacheProxy().findFirstByWebsiteName(key);
                 if (vo == null) {
                     getWebsiteService().trifficMap.remove(key);
                 }
+            }
+
+            // smart on fhir proxy
+            step("10. 3/3");
+            keyList = new ArrayList<>(getSmartOnFhirProxyService().trafficMap.keySet());
+            for (String key : keyList) {
+                getSmartOnFhirProxyService().trafficMap.remove(key);
             }
         } catch (Exception e) {
             TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
@@ -658,6 +669,10 @@ public class HousekeepingJob extends ApptJob {
 
     protected WebsiteService getWebsiteService() {
         return websiteService;
+    }
+
+    protected SmartOnFhirProxyService getSmartOnFhirProxyService() {
+        return smartOnFhirProxyService;
     }
 
     protected DgrWebsiteCacheProxy getDgrWebsiteCacheProxy() {

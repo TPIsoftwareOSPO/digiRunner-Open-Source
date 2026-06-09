@@ -7,6 +7,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { TokenExpiredGuard } from 'src/app/shared';
 import { Ai0002RoutingModule } from './ai0002-routing.module';
 import { Ai0002Component } from './ai0002.component';
+import { MimaInputComponent } from 'src/app/shared/mima-input/mima-input.component';
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import { Ai0002Component } from './ai0002.component';
     SharedModule,
     ReactiveFormsModule,
     FormsModule,
+    MimaInputComponent
   ],
   declarations: [Ai0002Component],
   providers:[TokenExpiredGuard]

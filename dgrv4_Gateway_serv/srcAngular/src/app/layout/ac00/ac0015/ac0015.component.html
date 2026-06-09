@@ -26,7 +26,7 @@
             </div> -->
         </form>
         <hr>
-        <p-table [columns]="cols" [value]="roleRoleMappingList" [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped"
+        <p-table [columns]="cols" [value]="roleRoleMappingList" [style]="{'word-break':'break-word'}" stripedRows
                  responsiveLayout="scroll">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>
@@ -119,7 +119,8 @@
                     <div *ngIf="currentAction == 'create'" class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="roleAlias"
                             placeholder="{{'login_role' | translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
+
+                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
                             (click)="queryRoleList('role');"></button>
                     </div>
                     <label *ngIf="currentAction == 'update'"
@@ -130,7 +131,7 @@
                 <div class="col-12">
                     <label for="roleAliasMapping"
                         class="required control-label">{{'role_alias_mapping' | translate}}</label>
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2 mb-1"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night ms-2 mb-1  input-btn"
                         (click)="queryRoleList('mappingRole');"></button>
                     <label class="form-control border-line" style="height: unset;">
                         <div *ngIf="roleAliasMapping!.value.length > 0" class="ui-chips ui-widget">
@@ -181,11 +182,15 @@
         </div>
     </ng-template>
 </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon" >
+
+
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
-      <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

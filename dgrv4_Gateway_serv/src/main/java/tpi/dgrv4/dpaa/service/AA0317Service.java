@@ -322,6 +322,8 @@ public class AA0317Service {
 		labelList.sort(null);
 
 		respItem.setLabelList(labelList);
+		
+		respItem.setDataFormat(apiData.getTsmpApi().getDataFormat());
 
 
 		List<String> notifyNameList = new ArrayList<>();

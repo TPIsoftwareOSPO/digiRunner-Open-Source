@@ -6,13 +6,13 @@
                     <label class="control-label">{{'date_range'|translate}}</label>
                     <div class="row">
                         <div class="col-6 col-xl-6">
-                            <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="timeStart" appendTo="body"
-                            dateFormat="yy-mm-dd" showTime="true" [showIcon]="true"></p-calendar>
+                            <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="timeStart" appendTo="body"
+                            dateFormat="yy-mm-dd" showTime="true" [showIcon]="true"></p-datepicker>
                             </div>
                             <div class="col-6 col-xl-6">
-                                <p-calendar [style]="{'width':'95%'}" formControlName="timeEnd" [inputStyle]="{'width':'100%'}" appendTo="body"
+                                <p-datepicker [style]="{'width':'95%'}" formControlName="timeEnd" [inputStyle]="{'width':'100%'}" appendTo="body"
                                 dateFormat="yy-mm-dd" showTime="true" [showIcon]="true">
-                            </p-calendar>
+                            </p-datepicker>
                             </div>
                     </div>
 
@@ -27,7 +27,7 @@
                     <div class="ui-inputgroup">
                         <input type="text" class="form-control" formControlName="apiAlias"
                             placeholder="{{'module_name' | translate}}-{{'api_name'|translate}}({{'api_key'|translate}})">
-                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
+                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn"
                             (click)="changePage('api_list');"></button>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
             </div>
         </form>
         <hr>
-        <p-table *ngIf="cols" [columns]="selectedColumns" [value]="auditLogList" [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped"
+        <p-table *ngIf="cols" [columns]="selectedColumns" [value]="auditLogList" [style]="{'word-break':'break-word'}" stripedRows
             [resizableColumns]="false" selectionMode="single">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>
@@ -122,7 +122,7 @@
             </div>
         </form>
         <hr>
-        <p-table *ngIf="apiListCols" [columns]="apiListCols" [value]="apiList" [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped"
+        <p-table *ngIf="apiListCols" [columns]="apiListCols" [value]="apiList" [style]="{'word-break':'break-word'}" stripedRows
             selectionMode="single" [(selection)]="selectedApi">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>

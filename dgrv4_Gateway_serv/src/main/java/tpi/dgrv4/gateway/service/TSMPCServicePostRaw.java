@@ -155,6 +155,9 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 
 				tsmpcPostRaw_srcUrl = tsmpcPostRaw_srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
 			}
+			
+			tsmpcPostRaw_srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, tsmpcPostRaw_srcUrl);
+			
 			int tokenPayload = apiReg.getFunFlag();
 
 			// For API mock test
@@ -418,10 +421,11 @@ public class TSMPCServicePostRaw implements IApiCacheService {
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl, Map<String, String> maskInfo)
 			throws IOException {
 		StringBuffer tsmpcPostRaw_log = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
+		
 		// print
 		writeLogger(tsmpcPostRaw_log, "--【URL】--");
-		writeLogger(tsmpcPostRaw_log, httpReq.getRequestURI());
+		writeLogger(tsmpcPostRaw_log, uri);
 		writeLogger(tsmpcPostRaw_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(tsmpcPostRaw_log, "【" + httpReq.getMethod() + "】\r\n");
 

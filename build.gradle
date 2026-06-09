@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '3.5.7'
+	id 'org.springframework.boot' version '3.5.14'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'com.github.jk1.dependency-license-report' version '2.9'
 
@@ -22,7 +22,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-rc-v4.7.10.0-14-g81f406576'
+	version = 'release-rc-v4.7.24.1-2-g2be5dee15'
 	apply plugin:  'io.spring.dependency-management'
 	
 	repositories {
@@ -59,35 +59,16 @@ subprojects {
     }
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.7.10.0-14-g81f406576-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.7.10.0-14-g81f406576-lib.jar")
-
-		implementation ('org.springframework.boot:spring-boot-starter-data-jpa'){
-			//CVE-2025-41249
-			exclude group:'org.springframework', module:'spring-core'
-			//CVE-2026-1225
-			exclude group:'ch.qos.logback', module:'logback-core'
-			//CVE-2026-1225
-			exclude group:'ch.qos.logback', module:'logback-classic'
-		}
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.7.24.1-2-g2be5dee15-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.7.24.1-2-g2be5dee15-lib.jar")
 		
-		// Correct the above exclusions, CVE-2025-41249
-		implementation 'org.springframework:spring-core:6.2.11'
-		// Correct the above exclusions, CVE-2026-1225
-		implementation 'ch.qos.logback:logback-core:1.5.25'
-		// Correct the above exclusions, CVE-2026-1225
-		implementation 'ch.qos.logback:logback-classic:1.5.25'
-		
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 		implementation ('org.springframework.boot:spring-boot-starter-web'){
-			//CVE-2025-66614, CVE-2026-24733
 			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
 		}
-		
-		// Correct the above exclusions, CVE-2025-66614, CVE-2026-24733
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.49'
 
-		implementation 'org.jboss.xnio:xnio-nio:3.8.16.Final'
-		implementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+		// Correct the above exclusions
+		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.55'
 
 		compileOnly 'com.h2database:h2'
 		compileOnly 'org.projectlombok:lombok:1.18.42'
@@ -97,6 +78,8 @@ subprojects {
 		implementation 'org.bouncycastle:bc-fips:2.1.2'
 		
 		implementation 'org.bouncycastle:bcpkix-fips:2.1.9'
+		
+		annotationProcessor 'org.hibernate.orm:hibernate-jpamodelgen'
 	}
 	
 	// clear lib
@@ -149,6 +132,36 @@ static def getDate() {
 // Gateway jar runnable
 project(':dgrv4_Gateway_serv'){
 
+	// [EN]grpc-netty-shaded and grpc-netty cannot coexist — both register the same gRPC transport provider
+	//     but with different Netty classpaths. Having both causes AbstractMethodError at startup.
+	// [ZH]grpc-netty-shaded 和 grpc-netty 不能同時存在，兩者都會註冊相同的 gRPC transport provider，
+	//     但使用不同的 Netty classpath，同時存在會在啟動時造成 AbstractMethodError。
+	// [EN]grpc-netty-shaded is pulled in by google-cloud-logging-logback → gax-grpc → grpc-netty-shaded:1.55.1,
+	//     so per-dependency exclude is insufficient; a global exclude is required.
+	// [ZH]grpc-netty-shaded 會透過 google-cloud-logging-logback → gax-grpc 傳遞引入 1.55.1，
+	//     單一依賴的 exclude 不夠，必須全域排除。
+	configurations.all {
+		exclude group: 'io.grpc', module: 'grpc-netty-shaded'
+		resolutionStrategy {
+			// [EN]Without force, grpc-inprocess:1.58.0 and grpc-services:1.58.0 (from the starter) are NOT
+			//     upgraded by Gradle's conflict resolution, so grpc-core:1.58.0 can still appear in
+			//     the effective classpath alongside grpc-core:1.61.0 → wrong interface version is loaded.
+			// [ZH]若不強制，grpc-inprocess:1.58.0 和 grpc-services:1.58.0（來自 starter）不會被 Gradle
+			//     衝突解析升版，grpc-core:1.58.0 可能仍與 grpc-core:1.61.0 同時存在於 classpath，
+			//     導致載入錯誤的介面版本。
+			force 'io.grpc:grpc-core:1.61.0'
+			force 'io.grpc:grpc-api:1.61.0'
+			force 'io.grpc:grpc-context:1.61.0'
+			force 'io.grpc:grpc-stub:1.61.0'
+			force 'io.grpc:grpc-protobuf:1.61.0'
+			force 'io.grpc:grpc-protobuf-lite:1.61.0'
+			force 'io.grpc:grpc-netty:1.61.0'
+			force 'io.grpc:grpc-inprocess:1.61.0'
+			force 'io.grpc:grpc-services:1.61.0'
+			force 'io.grpc:grpc-util:1.61.0'
+		}
+	}
+
 	// 引用其它 project
 	dependencies{
 
@@ -195,12 +208,7 @@ project(':dgrv4_Gateway_serv'){
 		implementation 'com.esotericsoftware:kryo:5.4.0'
 
 		// websocket
-		implementation ('org.springframework.boot:spring-boot-starter-websocket'){
-   			//CVE-2025-41254
-   			exclude group:'org.springframework', module:'spring-websocket'
-		}
-		//修正上方排除的CVE-2025-41254
-		implementation 'org.springframework:spring-websocket:6.2.12'
+		implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
 		implementation 'com.github.oshi:oshi-core:6.4.5'
 		implementation 'net.java.dev.jna:jna:5.13.0'
@@ -211,7 +219,7 @@ project(':dgrv4_Gateway_serv'){
 		implementation project(':dgrv4_H2Config_lib')
 		implementation 'com.microsoft.sqlserver:mssql-jdbc:13.2.1.jre11'
 		implementation 'com.oracle.database.jdbc:ojdbc11'
-		implementation 'org.postgresql:postgresql:42.7.7'
+		implementation 'org.postgresql:postgresql:42.7.11'
 		implementation('org.mariadb.jdbc:mariadb-java-client:3.1.2', {
 			exclude group: 'net.java.dev.jna', module: 'jna-platform'  //使用其它版本的相依
 			exclude group: 'com.google.protobuf', module: 'protobuf-java'
@@ -221,8 +229,17 @@ project(':dgrv4_Gateway_serv'){
 		compileOnly 'com.google.protobuf:protobuf-java:3.25.5'
 
 		// gRPC Proxy
-		implementation 'net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE'
-		implementation 'io.grpc:grpc-netty-shaded:1.75.0'
+		// [EN]Exclude grpc-netty-shaded from the starter; use non-shaded grpc-netty instead.
+		// [ZH]從 starter 排除 grpc-netty-shaded，改用 non-shaded grpc-netty。
+		// [EN]grpc-netty-shaded and grpc-netty cannot coexist — both register the same transport provider
+		//     but with different Netty classpaths (shaded vs. real). Having both causes TLS handshake to hang.
+		// [ZH]grpc-netty-shaded 和 grpc-netty 不能同時存在 — 兩者都會註冊相同的 transport provider
+		//     但使用不同的 Netty classpath（shaded vs. 真實），同時存在會導致 TLS handshake hang。
+		// [EN]Switching to non-shaded also allows Netty CVEs to be patched via exclude + override (impossible with shaded).
+		// [ZH]改用 non-shaded 後可透過 exclude + 版本覆蓋修補 Netty CVE（shaded 版無法做到）。
+		implementation ('net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE') {
+			exclude group:'io.grpc', module:'grpc-netty-shaded'
+		}
 		implementation ('io.grpc:grpc-protobuf:1.61.0'){
 			exclude group:'com.google.protobuf', module:'protobuf-java'
 		}
@@ -234,6 +251,11 @@ project(':dgrv4_Gateway_serv'){
 
 		// 添加對 Netty 的非遮蔽(non-shaded)依賴，以便 TLS 相關功能
 		implementation ('io.grpc:grpc-netty:1.61.0'){
+			// [EN]grpc-netty:1.61.0 has a transitive dep on grpc-netty-shaded:1.55.1,
+			//     which puts a second grpc-core (v1.55.1) on the classpath and causes AbstractMethodError.
+			// [ZH]grpc-netty:1.61.0 傳遞依賴了 grpc-netty-shaded:1.55.1，
+			//     會把第二個 grpc-core（v1.55.1）放上 classpath 導致 AbstractMethodError，必須排除。
+			exclude group:'io.grpc', module:'grpc-netty-shaded'
 			// CVE-2025-55163
 			exclude group:'io.netty', module:'netty-codec-http2'
 			//CVE-2025-58056
@@ -241,19 +263,21 @@ project(':dgrv4_Gateway_serv'){
 			//CVE-2025-58057
 			exclude group:'io.netty', module:'netty-codec'
 		}
-		// Correct the above exclusions, CVE-2025-55163
-		implementation ('io.netty:netty-codec-http2:4.1.125.Final') {
-			//CVE-2025-58057
-			exclude group:'io.netty', module:'netty-codec'
-		}
-		// Correct the above exclusions, CVE-2025-58056, CVE-2025-67735
-		implementation 'io.netty:netty-codec-http:4.1.129.Final'
-		// Correct the above exclusions, CVE-2025-58057
-		implementation 'io.netty:netty-codec:4.1.125.Final'
+		// Correct the above exclusions, CVE-2025-55163, CVE-2026-33871, CVE-2026-42587
+		implementation 'io.netty:netty-codec-http2:4.1.133.Final'
+		// Correct the above exclusions, CVE-2025-58056, CVE-2025-67735, CVE-2026-33870, CVE-2026-41417, CVE-2026-42587
+		implementation 'io.netty:netty-codec-http:4.1.133.Final'
+		// Correct the above exclusions, CVE-2025-58057, CVE-2026-42583
+		implementation 'io.netty:netty-codec:4.1.133.Final'
+		//CVE-2026-42578
+		implementation 'io.netty:netty-handler-proxy:4.1.133.Final'
 		
 		implementation 'io.netty:netty-tcnative-boringssl-static:2.0.61.Final'
 		
 		implementation 'com.google.code.gson:gson:2.10.1'
+		
+		// JsonNullable for partial updates (used in batch update APIs)
+		implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 	}
 
 	protobuf {

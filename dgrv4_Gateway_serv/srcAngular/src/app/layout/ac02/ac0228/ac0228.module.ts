@@ -8,6 +8,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { TokenExpiredGuard } from 'src/app/shared';
 import { KeyValueFormComponent } from './key-value-form/key-value-form.component';
 import { KeyValueFieldComponent } from './key-value-field/key-value-field.component';
+import { MimaInputComponent } from 'src/app/shared/mima-input/mima-input.component';
 
 @NgModule({
     imports: [
@@ -16,7 +17,8 @@ import { KeyValueFieldComponent } from './key-value-field/key-value-field.compon
         PrimengModule,
         SharedModule,
         ReactiveFormsModule,
-        FormsModule
+        FormsModule,
+        MimaInputComponent
     ],
     declarations: [Ac0228Component, KeyValueFormComponent, KeyValueFieldComponent],
     providers: [TokenExpiredGuard],

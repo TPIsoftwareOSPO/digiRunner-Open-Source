@@ -61,7 +61,13 @@ public class LinkerServer implements Runnable {
                 while (true) {
                     if (isExitThread) break;
                     sendObject();
+                    // 【Bug 4 修正】
+                    // sendObjectClaude() 收到 ExitThread 時，設定 isExitThread=true 後 return。
+                    // 若只在 while 頂部檢查，執行緒會再次進入 sendObject() → snd.take() 阻塞，
+                    // 永遠無法退出迴圈。在 sendObject() 返回後立即二次檢查，確保能正常結束。
+                    if (isExitThread) break;
                 }
+                logger.info("[SERVER-SEND-THREAD] 發送執行緒已結束");
             }
         }.start();
 
@@ -94,30 +100,38 @@ public class LinkerServer implements Runnable {
 
                 byte[] actualData = Arrays.copyOf(socketReadBuffer, bytesRead);
 
-                baos4ReadObj.write(actualData, 0, actualData.length);
-                baos4ReadObj.flush();
+                // 【Bug 1 & Bug 3 修正】
+                // 原始邏輯：先將資料寫入 baos4ReadObj，再用 baos4ReadObj.toString() 比對偵測訊號。
+                // 問題一：baos4ReadObj 可能已累積前次的正常封包資料，導致 toString() 永遠無法匹配偵測字串。
+                // 問題二：若 Kryo 正常封包長度剛好等於偵測字串長度（23 or 19 bytes），
+                //         baos4ReadObj.reset() 會把正常封包資料靜默清空，造成封包永久丟失。
+                // 修正方式：先用「當次讀取的原始資料」做偵測比對（不經過 baos4ReadObj），
+                //           確認不是偵測訊號後，才將資料寫入 baos4ReadObj 進行正常封包處理。
+                final String detectDgR = "dgR v4 init detect end!";
+                final String detectDP  = "DP init detect end!";
 
-                if (bytesRead == "dgR v4 init detect end!".length()) {
-                    boolean endFlag = "dgR v4 init detect end!".equals(baos4ReadObj.toString());
-                    baos4ReadObj.reset();
-                    if (endFlag) {
-                        logger.info("[SERVER-RUN] 收到 dgR 初始化偵測訊號，回應並關閉");
-                        socket.getOutputStream().write("Yes, I am dgRunner".getBytes());
-                        socket.getOutputStream().flush();
-                        socket.close();
-                        break;
-                    }
-                } else if (bytesRead == "DP init detect end!".length()) {
-                    boolean endFlag = "DP init detect end!".equals(baos4ReadObj.toString());
-                    baos4ReadObj.reset();
-                    if (endFlag) {
-                        logger.info("[SERVER-RUN] 收到 DP 初始化偵測訊號，回應並關閉");
-                        socket.getOutputStream().write("Yes, I am DP".getBytes());
-                        socket.getOutputStream().flush();
-                        socket.close();
-                        break;
-                    }
+                boolean isDetectDgR = (bytesRead == detectDgR.length())
+                        && detectDgR.equals(new String(actualData, 0, bytesRead));
+                boolean isDetectDP  = (bytesRead == detectDP.length())
+                        && detectDP.equals(new String(actualData, 0, bytesRead));
+
+                if (isDetectDgR) {
+                    // 偵測訊號：不寫入 baos4ReadObj，直接回應並關閉，正常封包資料不受影響
+                    logger.info("[SERVER-RUN] 收到 dgR 初始化偵測訊號，回應並關閉");
+                    socket.getOutputStream().write("Yes, I am dgRunner".getBytes());
+                    socket.getOutputStream().flush();
+                    socket.close();
+                    break;
+                } else if (isDetectDP) {
+                    logger.info("[SERVER-RUN] 收到 DP 初始化偵測訊號，回應並關閉");
+                    socket.getOutputStream().write("Yes, I am DP".getBytes());
+                    socket.getOutputStream().flush();
+                    socket.close();
+                    break;
                 } else {
+                    // 正常 Kryo 封包：寫入累積緩衝區後解析
+                    baos4ReadObj.write(actualData, 0, actualData.length);
+                    baos4ReadObj.flush();
                     boolean endFlag = procKyroPacket(kryo);
                     if (endFlag) {
                         logger.info("[SERVER-RUN] 收到 ExitThread 訊號，準備結束");
@@ -205,13 +219,17 @@ public class LinkerServer implements Runnable {
         try (Input input = new Input(new ByteArrayInputStream(payload))) {
             obj = kryo.readClassAndObject(input);
         } catch (KryoBufferUnderflowException e) {
-            if (bigContinueDeque == null) {
-                bigContinueDeque = new ArrayDeque<>();
-            }
-
-            ByteArrayOutputStream baosBigContinue = new ByteArrayOutputStream();
-            baosBigContinue.write(payload, 0, payload.length);
-            bigContinueDeque.addLast(baosBigContinue);
+            // 【Bug 2 修正】
+            // 原始邏輯：將 payload 存入 bigContinueDeque，期望後續拼接。
+            // 問題：bigContinueDeque 只有寫入，程式碼中從未讀取，導致：
+            //   1. 封包靜默丟失，不會進入 rev 佇列被處理。
+            //   2. bigContinueDeque 無限增長，造成記憶體洩漏。
+            // 根本原因分析：sendObjectClaude() 已確保 Header+Kryo資料+Footer
+            //   在記憶體中完整組裝後才一次性寫入 Socket，正常情況下封包邊界完整，
+            //   不應出現此異常。若仍發生，代表封包本身已損壞，繼續拼接無意義。
+            // 修正方式：記錄錯誤並丟棄，不再累積無法消費的資料。
+            logger.error("[SERVER-DESERIALIZE] ✗ 封包資料不完整 (KryoBufferUnderflow)，已丟棄。" +
+                    " payload size={} bytes。請確認發送端使用 sendObjectClaude() 確保封包原子性。", payload.length, e);
             return;
         } catch (Exception e) {
             logger.error("[SERVER-DESERIALIZE] ✗ Kryo 反序列化失敗", e);
@@ -311,6 +329,54 @@ public class LinkerServer implements Runnable {
 
     // ===== 關鍵修改：發送物件 (Server) =====
     private void sendObject() {
+//        Packet_i obj = null;
+//        try {
+//            obj = snd.take();
+//            if (obj instanceof ExitThread) {
+//                this.isExitThread = true;
+//                return;
+//            }
+//
+//            synchronized (sendLock) {
+//                Kryo kryo = CommunicationServer.kryoLocal.get();
+//                try (ByteArrayOutputStream baosSendObj = new ByteArrayOutputStream(socketReadBuffer.length);
+//                     Output kryoOutput = new Output(baosSendObj, socketReadBuffer.length)) {
+//
+//                    baosSendObj.write(keeperHeaerByte.getBytes());
+//                    kryo.writeClassAndObject(kryoOutput, obj);
+//                    kryoOutput.flush();
+//                    baosSendObj.write(keeperFooterByte.getBytes());
+//
+//                    byte[] data = baosSendObj.toByteArray();
+//
+//                    socket.getOutputStream().write(data);
+//                    socket.getOutputStream().flush();
+//
+//                } finally {
+//                    kryo.reset();
+//                }
+//            }
+//        } catch (InterruptedException e) {
+//            logger.info("[SERVER-SENDOBJ] 發送執行緒被中斷" , e);
+//            Thread.currentThread().interrupt();
+//        } catch (Exception e) {
+//            this.isExitThread = true;
+//            logger.error("[SERVER-SENDOBJ] ✗ 發送封包時發生異常", e);
+//            close();
+//            CommunicationServer.cs.doDisconnectProc(this);
+//        }
+        
+        // 2026/03/29
+        // 原始實作使用了 ByteArrayOutputStream(socketReadBuffer.length)，
+        // 這會直接在堆記憶體中申請一個 10MB 的連續空間。
+        // 二次分配：呼叫 baosSendObj.toByteArray() 時，會產生第二次 10MB 的陣列分配。
+        // GC 壓力：這就是「巨型物件分配」的元兇。這兩個 10MB 的陣列加起來 20MB，
+        // 在 G1 GC (Region 4MB) 下，會瘋狂觸發 Concurrent Mark Cycle。
+        sendObjectClaude();
+    }
+    
+
+    private void sendObjectClaude() {
         Packet_i obj = null;
         try {
             obj = snd.take();
@@ -321,17 +387,31 @@ public class LinkerServer implements Runnable {
 
             synchronized (sendLock) {
                 Kryo kryo = CommunicationServer.kryoLocal.get();
-                try (ByteArrayOutputStream baosSendObj = new ByteArrayOutputStream(socketReadBuffer.length);
-                     Output kryoOutput = new Output(baosSendObj, socketReadBuffer.length)) {
+                try {
+                    // 【修正說明】
+                    // 原錯誤版本：直接對 Socket OutputStream 寫入，
+                    // Kryo Output 超過 64KB 時會自動 flush 到 Socket，
+                    // 導致 Header + 資料 + Footer 分批送出，破壞封包原子性，造成少傳資料。
+                    //
+                    // 正確做法：保留 ByteArrayOutputStream 作為組裝緩衝區，
+                    // 初始給 4KB（動態擴展，非固定 10MB），避免 Humongous Allocation。
+                    // 改用 writeTo() 取代 toByteArray()，消除第二次陣列複製，
+                    // 確保 Header + Kryo資料 + Footer 完整組裝後，再一次性原子寫入 Socket。
+                    ByteArrayOutputStream baosSendObj = new ByteArrayOutputStream(4 * 1024);
 
                     baosSendObj.write(keeperHeaerByte.getBytes());
-                    kryo.writeClassAndObject(kryoOutput, obj);
-                    kryoOutput.flush();
+
+                    // Output 包住 BAOS（非 Socket），超過 64KB 自動擴展到 BAOS，不會提前送出
+                    // try-with-resources 的 close() 只關閉 BAOS，不會關閉 Socket ✓
+                    try (Output kryoOutput = new Output(baosSendObj, 64 * 1024)) {
+                        kryo.writeClassAndObject(kryoOutput, obj);
+                        kryoOutput.flush();
+                    }
+
                     baosSendObj.write(keeperFooterByte.getBytes());
 
-                    byte[] data = baosSendObj.toByteArray();
-
-                    socket.getOutputStream().write(data);
+                    // 一次性原子寫入 Socket（writeTo 直接串流寫出，無二次陣列複製）
+                    baosSendObj.writeTo(socket.getOutputStream());
                     socket.getOutputStream().flush();
 
                 } finally {

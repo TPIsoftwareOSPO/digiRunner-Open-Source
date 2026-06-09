@@ -89,10 +89,12 @@ export class Ac1202Component extends BaseComponent implements OnInit {
         let _listTypeOptionForQuery = [
           { label: dict['all'], value: 'all' }
         ];
+        let _listTypeOptionNotQuery:{label:string,value:string}[] = [];
         res.RespBody.subItems?.map(item => {
           _listTypeOptionForQuery.push({ label: item.subitemName, value: item.subitemNo });
-          this.listTypeOptionNotQuery.push({ label: item.subitemName, value: item.subitemNo });
+          _listTypeOptionNotQuery.push({ label: item.subitemName, value: item.subitemNo });
         });
+        this.listTypeOptionNotQuery = _listTypeOptionNotQuery;
         this.listTypeOptionForQuery = _listTypeOptionForQuery;
       }
     });
@@ -345,10 +347,12 @@ export class Ac1202Component extends BaseComponent implements OnInit {
     const ref = this.dialogService.open(RoleListLovComponent, {
       data: { selectionMode: 'single' },
       header: dict['role_list'],
-      width: '700px'
+      width: '700px',
+      closable:true,
+      modal:true
     })
 
-    ref.onClose.subscribe(res => {
+    ref!.onClose.subscribe(res => {
       if (res) {
         console.log(res)
         // for create

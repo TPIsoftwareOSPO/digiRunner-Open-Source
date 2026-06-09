@@ -3255,3 +3255,172 @@ CREATE TABLE IF NOT EXISTS dgr_otp (
 
 -- 20251003, v4, 加大欄位長度, Mini Lee
 ALTER TABLE tsmp_token_history MODIFY COLUMN user_name NVARCHAR(400);
+
+-- 20260304, TSMP API 匯入資料, 增加欄位 ,Tom
+ALTER TABLE tsmp_api_imp ADD data_format CHAR(1) DEFAULT '1' NULL;
+
+-- 20251230, v4, 新增 dgr_smart_on_fhir_proxy, Kevin Cheng
+CREATE TABLE IF NOT EXISTS dgr_smart_on_fhir_proxy (
+    sof_proxy_id            BIGINT          NOT NULL,                -- SOF PROXY ID
+    sof_proxy_name          VARCHAR(100)    NOT NULL,                -- SOF PROXY 名稱
+    sof_proxy_status        VARCHAR(1)      NOT NULL DEFAULT 'Y',    -- SOF PROXY 狀態
+    sof_proxy_remark        NVARCHAR(500),                           -- SOF PROXY 備註
+    sof_proxy_access_token  VARCHAR(1)      NOT NULL DEFAULT 'N',    -- 檢查 ACCESS TOKEN
+    sof_proxy_sql_injection VARCHAR(1)      NOT NULL DEFAULT 'N',    -- 檢查SQL Injection
+    sof_proxy_traffic       VARCHAR(1)      NOT NULL DEFAULT 'N',    -- 檢查Traffic
+    sof_proxy_xss           VARCHAR(1)      NOT NULL DEFAULT 'N',    -- 檢查XSS
+    sof_proxy_xxe           VARCHAR(1)      NOT NULL DEFAULT 'N',    -- 檢查XXE
+    sof_proxy_show_log      VARCHAR(1)      NOT NULL DEFAULT 'N',    -- SOF PROXY 是否印出 Log
+    sof_proxy_sticky        VARCHAR(1)      NOT NULL DEFAULT 'Y',    -- SOF PROXY 是否做 backend sticky
+    sof_proxy_tps           INT             NOT NULL DEFAULT 0,      -- 每秒最大請求次數
+    sof_proxy_ignore_api    NVARCHAR(4000),                          -- 略過不檢查的API,多個以逗號分隔(,)
+    sof_proxy_client_id     NVARCHAR(4000),                          -- 相關連的 Client ID
+    create_date_time        DATETIME        DEFAULT CURRENT_TIMESTAMP, -- 建立日期
+    create_user             NVARCHAR(1000)  DEFAULT 'SYSTEM',        -- 建立人員
+    update_date_time        DATETIME,                                -- 更新日期
+    update_user             NVARCHAR(1000),                          -- 更新人員
+    version                 INT             DEFAULT 1,               -- 版號
+    PRIMARY KEY (sof_proxy_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260205, v4, 新增 sof_proxy_diversion_resource_types 欄位用於手動指定 Resource Types , Kevin Cheng
+CREATE TABLE IF NOT EXISTS dgr_smart_on_fhir_proxy_diversion (
+    sof_proxy_id                        BIGINT          NOT NULL,                -- SOF_PROXY_ID
+    sof_proxy_diversion_id              BIGINT          NOT NULL,                -- SOF_PROXY_DIVERSION_ID
+    sof_proxy_diversion_probability     INT             NOT NULL,                -- 機率
+    sof_proxy_diversion_url             VARCHAR(1000)   NOT NULL,                -- 目標URL
+    create_date_time                    DATETIME        DEFAULT CURRENT_TIMESTAMP, -- 建立日期
+    create_user                         NVARCHAR(1000)  DEFAULT 'SYSTEM',        -- 建立人員
+    update_date_time                    DATETIME,                                -- 更新日期
+    update_user                         NVARCHAR(1000),                          -- 更新人員
+    version                             INT             DEFAULT 1,               -- 版號
+    PRIMARY KEY (sof_proxy_diversion_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260123 v4, 新增 dgr_smart_on_fhir_proxy_sticky, Kevin Cheng
+CREATE TABLE IF NOT EXISTS dgr_smart_on_fhir_proxy_sticky (
+    sof_proxy_sticky_id        BIGINT          NOT NULL,                -- 主鍵
+    sof_proxy_id               BIGINT          NOT NULL,                -- SOF Proxy ID
+    sof_proxy_diversion_id     BIGINT          NOT NULL,                -- SOF Proxy Diversion ID
+    sof_proxy_sticky_interaction NVARCHAR(200),                         -- 互動類型
+    sof_proxy_sticky_type      NVARCHAR(200),                           -- FHIR resource name
+    sof_proxy_sticky_type_id   NVARCHAR(200),                           -- FHIR resource id
+    sof_proxy_sticky_verb      NVARCHAR(50),                            -- HTTP method
+    sof_proxy_sticky_path      NVARCHAR(2000),                          -- HTTP URL
+    sof_proxy_sticky_hashcode  NVARCHAR(500),                           -- websitename + resource
+    create_date_time           DATETIME        DEFAULT CURRENT_TIMESTAMP, -- 建立日期
+    create_user                NVARCHAR(1000)  DEFAULT 'SYSTEM',        -- 建立人員
+    update_date_time           DATETIME,                                -- 更新日期
+    update_user                NVARCHAR(1000),                          -- 更新人員
+    version                    INT             DEFAULT 1,               -- 版號
+    PRIMARY KEY (sof_proxy_sticky_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260213, v4, 每個 diversion 各自指定 FHIR API 根路徑, Kevin Cheng
+ALTER TABLE dgr_smart_on_fhir_proxy_diversion ADD sof_proxy_diversion_fhir_base_path VARCHAR(500);
+
+-- 20260302, v4, 新增 URL 改寫開關（預設 Y，啟用時支援 X-Forwarded-* header）, Kevin Cheng
+ALTER TABLE dgr_smart_on_fhir_proxy ADD sof_proxy_url_rewrite VARCHAR(1) NOT NULL DEFAULT 'Y';
+
+-- 20260107, dgr_db_sync_history Zoe
+CREATE TABLE IF NOT EXISTS dgr_h2_config_sync_history (
+    sync_id                             BIGINT          NOT NULL,                -- ID
+    sync_type                           NVARCHAR(20)    NOT NULL,                -- 同步類型
+    schedule_id                         BIGINT,                                  -- 排程ID
+    source_id                           NVARCHAR(100)   NOT NULL,                -- 來源ID
+    target_ids                          NVARCHAR(1000)  NOT NULL,                -- 目標ID
+    status                              NVARCHAR(20)    NOT NULL,                -- 狀態
+    current_step                        NVARCHAR(100)   NOT NULL,                -- 目前步驟
+    progress                            INT             NOT NULL DEFAULT 0,      -- 進度
+    error_message                       NVARCHAR(2000),                          -- 錯誤訊息
+    start_time                          DATETIME        NOT NULL,                -- 開始時間
+    end_time                            DATETIME,                                -- 結束時間
+    duration                            BIGINT,                                  -- 用時
+    create_date_time                    DATETIME,                                -- 建立日期
+    create_user                         NVARCHAR(1000)  DEFAULT 'SYSTEM',        -- 建立人員
+    update_date_time                    DATETIME,                                -- 更新日期
+    PRIMARY KEY (sync_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260326, v4, 新增 SMART App Launch client 設定表, Kevin Cheng
+CREATE TABLE IF NOT EXISTS dgr_smart_client (
+    smart_client_id             BIGINT          NOT NULL,                    -- 主鍵
+    client_id                   VARCHAR(200)    NOT NULL,                    -- OAuth client ID（FK → tsmp_client.client_id）
+    client_type                 VARCHAR(50)     NOT NULL,                    -- 認證方式：public / confidential-symmetric / confidential-asymmetric
+    idp_type                    VARCHAR(50)     NOT NULL,                    -- 身份驗證方式：GOOGLE / MS / OIDC / LDAP / JDBC / API / CUS
+    idp_client_id               VARCHAR(200)    NOT NULL,                    -- ssotoken 第二段驗證用的 client ID（FK → tsmp_client.client_id）
+    allowed_scopes              VARCHAR(4000)   NOT NULL,                    -- 該 client 被授權的 SMART scope，空格分隔
+    redirect_uris               VARCHAR(4000),                               -- SMART 專用 redirect URI，多個以換行分隔
+    launch_mode                 VARCHAR(20),                                 -- standalone / ehr / both
+    auto_approve                VARCHAR(1)      NOT NULL DEFAULT 'N',        -- 是否跳過 consent（Y/N）
+    jwks_uri                    VARCHAR(1000),                               -- Client 的 JWK Set URL（非對稱認證，動態抓取公鑰）
+    jwks                        TEXT,                                        -- Client 的 JWK Set JSON（非對稱認證，直接存放）
+    token_endpoint_auth_method  VARCHAR(50),                                 -- client_secret_basic / client_secret_post / private_key_jwt
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,   -- 建立日期
+    create_user                 NVARCHAR(1000)  DEFAULT 'SYSTEM',            -- 建立人員
+    update_date_time            DATETIME,                                    -- 更新日期
+    update_user                 NVARCHAR(1000),                              -- 更新人員
+    version                     INT             DEFAULT 1,                   -- 版號
+    PRIMARY KEY (smart_client_id),
+    CONSTRAINT uk_dgr_smart_client_cid UNIQUE (client_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260326, v4, 新增 SMART App Launch 授權流程狀態表, Kevin Cheng
+CREATE TABLE IF NOT EXISTS dgr_smart_auth_session (
+    session_id                  BIGINT          NOT NULL,                    -- 主鍵
+    state                       VARCHAR(500)    NOT NULL,                    -- OAuth state，串接整個授權流程
+    client_id                   VARCHAR(200)    NOT NULL,                    -- 發起授權的 client ID
+    aud                         VARCHAR(1000)   NOT NULL,                    -- 目標 FHIR Server URL
+    website_name                VARCHAR(100)    NOT NULL,                    -- 從 aud 解析出的 proxy 名稱
+    fhir_base_path              VARCHAR(500)    NOT NULL,                    -- 從 aud 解析出的 FHIR base path
+    requested_scope             TEXT            NOT NULL,                    -- 請求的 scope，空格分隔（TEXT 避免 row size 65535 超限）
+    granted_scope               TEXT,                                        -- consent 後授予的 scope，空格分隔（TEXT 避免 row size 65535 超限）
+    redirect_uri                VARCHAR(1000)   NOT NULL,                    -- 本次請求的 redirect URI
+    code_challenge              VARCHAR(500),                                -- PKCE challenge 值
+    code_challenge_method       VARCHAR(10),                                 -- PKCE 方法（S256）
+    launch                      VARCHAR(500),                                -- EHR Launch 的 launch context token
+    patient_id                  VARCHAR(200),                                -- 患者上下文（授予 patient/ scope 時必填）
+    encounter_id                VARCHAR(200),                                -- 就醫上下文（授予 launch/encounter 時）
+    auth_code                   VARCHAR(200),                                -- 簽發的授權碼
+    auth_code_expire            BIGINT,                                      -- 授權碼到期時間（epoch millis）
+    phase                       VARCHAR(20)     NOT NULL DEFAULT 'PENDING',  -- 流程階段：PENDING / AUTHENTICATED / APPROVED / EXCHANGED
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,   -- 建立日期
+    PRIMARY KEY (session_id),
+    CONSTRAINT uk_dgr_smart_auth_session_state UNIQUE (state)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260429, 新增使用者身份欄位與 refresh token 欄位, Kevin Cheng
+ALTER TABLE dgr_smart_auth_session ADD user_name VARCHAR(200);
+ALTER TABLE dgr_smart_auth_session ADD user_email VARCHAR(500);
+ALTER TABLE dgr_smart_auth_session ADD refresh_token VARCHAR(200);
+ALTER TABLE dgr_smart_auth_session ADD refresh_token_expire BIGINT;
+ALTER TABLE dgr_smart_auth_session ADD version INT DEFAULT 1;
+CREATE INDEX idx_smart_session_refresh_token ON dgr_smart_auth_session(refresh_token);
+ALTER TABLE dgr_smart_auth_session ADD user_alias VARCHAR(500);
+ALTER TABLE dgr_smart_auth_session ADD sim_error VARCHAR(100);
+
+-- 20260507, 新增 dgr_smart_launch_context, Kevin Cheng
+CREATE TABLE IF NOT EXISTS dgr_smart_launch_context (
+    launch_token                VARCHAR(100)    NOT NULL,
+    client_id                   VARCHAR(200)    NOT NULL,
+    patient_id                  VARCHAR(200),
+    encounter_id                VARCHAR(200),
+    consumed                    BOOLEAN         NOT NULL DEFAULT FALSE,
+    expire_at                   BIGINT          NOT NULL,
+    create_date_time            DATETIME        DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (launch_token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 20260512, 新增 provider/fhirUser 欄位（fhirUser scope 支援）, Kevin Cheng
+ALTER TABLE dgr_smart_launch_context ADD provider_ids VARCHAR(2000);
+ALTER TABLE dgr_smart_auth_session ADD provider_candidates TEXT;
+ALTER TABLE dgr_smart_auth_session ADD fhir_user VARCHAR(500);
+
+-- 20260512, Patient 多選對齊 Provider, Kevin Cheng
+ALTER TABLE dgr_smart_launch_context ADD patient_ids VARCHAR(2000);
+ALTER TABLE dgr_smart_auth_session ADD patient_candidates TEXT;
+
+-- 20260512, fhirUser 類型欄位（區分 Provider EHR vs Patient Portal Launch）, Kevin Cheng
+ALTER TABLE dgr_smart_launch_context ADD fhir_user_type VARCHAR(20);
+ALTER TABLE dgr_smart_auth_session ADD fhir_user_type VARCHAR(20);
+

@@ -5,27 +5,24 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.JWKcodec;
 import tpi.dgrv4.gateway.constant.DgrTokenGrantType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
-import tpi.dgrv4.gateway.service.GtwIdPWellKnownService;
 import tpi.dgrv4.gateway.service.OAuthTokenService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 
@@ -94,19 +91,7 @@ public class GtwIdPMockJSCallbackController {
 
 		clientMima = Base64Util.base64Encode(clientMima.getBytes());// Base64 Encode
 
-		// 對外公開的域名或IP
-		String dgrPublicDomain = getTsmpSettingService().getVal_DGR_PUBLIC_DOMAIN();
-		// 對外公開的Port
-		String dgrPublicPort = getTsmpSettingService().getVal_DGR_PUBLIC_PORT();
-
-		String schemeAndDomainAndPort = GtwIdPWellKnownService.getSchemeAndDomainAndPort(dgrPublicDomain,
-				dgrPublicPort);
-
-		String tokenEndpoint = GtwIdPWellKnownService.getTokenEndpoint(schemeAndDomainAndPort);
-
 		String clientRedirectUrl = "https://localhost:8080/dgrv4/mocktenancy/gtwcallback";
-		
-//		return getToken(clientId, clientMima, tokenEndpoint, clientRedirectUrl, code, httpResp);
 	
 		return getToken(httpResp, clientId, clientMima, clientRedirectUrl, code);
 	}
@@ -134,7 +119,7 @@ public class GtwIdPMockJSCallbackController {
         formData.put("code_verifier", "minitestpkce");
     	
 		ResponseEntity<?> respObj = getOAuthTokenService().getToken(httpResp, formData, authorization,
-				"/oauth/token");
+				"/oauth/token", "1");
 		return respObj;
     }
     

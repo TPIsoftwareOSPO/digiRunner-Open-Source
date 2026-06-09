@@ -11,9 +11,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +44,10 @@ import tpi.dgrv4.tcp.utils.communication.Role;
 public class CommunicationServerConfig {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-
+    @Setter
+    @Getter
+    @Value("${linker.server.packet.queue.size:999}")
+    private int packetQueueSize;
 	private TsmpSettingService tsmpSettingService;
 	private DgrNodeLostContactDao dgrNodeLostContactDao;
 
@@ -142,7 +148,8 @@ public class CommunicationServerConfig {
 		
 		boolean canConnect = telenetPort("127.0.0.1", getTsmpSettingService().getVal_DGRKEEPER_PORT());
 		if ( !canConnect ) {
-			new CommunicationServer(getTsmpSettingService().getVal_DGRKEEPER_PORT(), notifyObj);
+            CommunicationServer  cs= 	new CommunicationServer(getTsmpSettingService().getVal_DGRKEEPER_PORT(), notifyObj);
+            cs.setPacketQueueSize(this.packetQueueSize);
 			StringBuffer msgbuf = new StringBuffer();
 			String s = "\r\n"
 					+ " __  ___ .______          _______.____    ____  _______ .______      \r\n"

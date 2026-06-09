@@ -8,7 +8,7 @@
       </div>
     </div>
     <p-table [columns]="cols" [value]="acAuthList" selectionMode="single" [style]="{'word-break':'break-word'}"
-      responsiveLayout="scroll" styleClass="p-datatable-striped">
+      responsiveLayout="scroll" stripedRows>
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th rowspan="2" style="width: 4%;" scope="col">Enable</th>
@@ -119,9 +119,9 @@
           <div class="ui-inputgroup">
             <input [type]="showPassword ? 'text' : 'password'" class="form-control"
               [value]="userDetail.clientMima" readonly>
-            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
               (click)="togglePassword()"></button>
-            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night input-btn"
               (click)="copyToClipboard(userDetail.clientMima);" [pTooltip]="'copy' | translate"></button>
           </div>
         </div>
@@ -238,9 +238,9 @@
           <div class="ui-inputgroup">
             <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="clientMima"
               formControlName="clientMima" placeholder="">
-            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+            <button pButton type="button" [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
               (click)="togglePassword()"></button>
-            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-copy" class="ms-1 tpi-night input-btn"
               (click)="copyToClipboard(clientMima!.value);" [pTooltip]="'copy' | translate"></button>
           </div>
           <div *ngIf="clientMima?.invalid && (clientMima?.dirty || clientMima?.touched)" class="text-danger">
@@ -255,9 +255,9 @@
           <!-- <label id="idpType" for="idpType" class="control-label">{{'user_alias' | translate}}</label> -->
           <label for="idpType" class="required control-label">Type</label>
           <!-- <input type="text" class="form-control" id="idpType" formControlName="idpType" placeholder=""> -->
-          <p-dropdown [options]="idpTypeList" placeholder="{{'plz_chs' | translate}}" formControlName="idpType"
+          <p-select [options]="idpTypeList" placeholder="{{'plz_chs' | translate}}" formControlName="idpType"
             [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="idpType?.invalid && (idpType?.dirty || idpType?.touched)" class="text-danger">
             <small class="form-text">{{idpType?.errors.maxlength | translate }}</small>
             <small class="form-text">{{idpType?.errors.pattern | translate}}</small>
@@ -270,11 +270,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="clientStatus" value="Y" inputId="statusY"></p-radioButton>
+                <p-radioButton name="clientStatus" formControlName="clientStatus" value="Y" inputId="statusY"></p-radioButton>
                 <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="clientStatus" value="N" inputId="statusN"></p-radioButton>
+                <p-radioButton name="clientStatus" formControlName="clientStatus" value="N" inputId="statusN"></p-radioButton>
                 <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
@@ -367,14 +367,13 @@
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
 
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

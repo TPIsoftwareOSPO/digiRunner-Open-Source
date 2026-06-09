@@ -164,7 +164,7 @@ public class DGRCServiceGet implements IApiCacheService {
 			}
 
 			// 目標URL加上 Query String
-			srcUrlList = getSrcUrlListAddQueryString(httpReq, srcUrlList);
+			srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
 
 			int tokenPayload = apiReg.getFunFlag();
 
@@ -220,21 +220,6 @@ public class DGRCServiceGet implements IApiCacheService {
 		}
 	}
 
-	/**
-	 * 目標URL加上 Query String
-	 */
-	private List<String> getSrcUrlListAddQueryString(HttpServletRequest httpReq, List<String> srcUrlList) {
-		List<String> srcUrlList2 = new ArrayList<>();
-		String queryStr = httpReq.getQueryString();
-		for (String srcUrl : srcUrlList) {
-			if (StringUtils.hasLength(queryStr)) {
-				srcUrl += "?" + queryStr;
-			}
-			srcUrlList2.add(srcUrl);
-		}
-
-		return srcUrlList2;
-	}
 
 	/**
 	 * 依失敗處置策略,決定只調用API一次或API失敗時重試

@@ -9,8 +9,8 @@
       </div>
     </div>
 
-    <p-table [value]="tableData" [(selection)]="selected" styleClass="p-datatable-striped"
-      [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
+    <p-table [value]="tableData" [(selection)]="selected" stripedRows [style]="{ 'word-break': 'break-word' }"
+      responsiveLayout="scroll">
       <!-- 表單工具列 -->
       <ng-template pTemplate="caption">
         <div class="ui-helper-clearfix">
@@ -35,13 +35,13 @@
             {{ "button.label_reset" | translate }}
           </button>
           <button type="button" class="btn tpi-btn tpi-primary float-end" [disabled]="selected.length == 0"
-          (click)="changePage('api_url_setting')">{{'api_url_setting'|translate}}</button>
+            (click)="changePage('api_url_setting')">{{'api_url_setting'|translate}}</button>
 
           <button type="button" title="{{ 'fail_handle_policy.reset' | translate }}"
-          class="btn tpi-primary tpi-btn float-start me-1" (click)="resetHandlePolicyProc()"
-          [disabled]="selected.length == 0">
-          {{ "fail_handle_policy.reset" | translate }}
-        </button>
+            class="btn tpi-primary tpi-btn float-start me-1" (click)="resetHandlePolicyProc()"
+            [disabled]="selected.length == 0">
+            {{ "fail_handle_policy.reset" | translate }}
+          </button>
 
         </div>
       </ng-template>
@@ -157,15 +157,16 @@
         <div class="col-12">
           <label class="control-label">{{ "label_tag" | translate }}</label>
           <div>
-            <p-chips [(ngModel)]="previewRow.labelList" [ngModelOptions]="{standalone: true}" disabled></p-chips>
+            <p-autocomplete [(ngModel)]="previewRow.labelList" multiple fluid [unique]="false" [typeahead]="false"
+              disabled maxlength="20" [placeholder]="'label_tag_max'|translate:{value:5}" />
           </div>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-6">
           <label class="control-label">{{ "tar_url_edit.ori" | translate }}</label>
-          <p-table [value]="previewRow.oldSrcUrlList" styleClass="p-datatable-striped"
-            [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
+          <p-table [value]="previewRow.oldSrcUrlList" stripedRows [style]="{ 'word-break': 'break-word' }"
+            responsiveLayout="scroll">
             <ng-template pTemplate="header" selectionMode="multiple">
               <tr style="text-align: center;">
                 <th style="width: 70px;white-space: nowrap;background: #347800!important;">%</th>
@@ -185,8 +186,8 @@
         </div>
         <div class="col-6">
           <label class="control-label">{{ "tar_url_edit.new" | translate }}</label>
-          <p-table [value]="previewRow.newSrcUrlList" styleClass="p-datatable-striped"
-            [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
+          <p-table [value]="previewRow.newSrcUrlList" stripedRows [style]="{ 'word-break': 'break-word' }"
+            responsiveLayout="scroll">
             <ng-template pTemplate="header" selectionMode="multiple">
               <tr style="text-align: center">
                 <th style="width: 70px;white-space: nowrap;background: #e64c00!important;">%</th>
@@ -201,8 +202,9 @@
               <tr *ngFor="let row of rowData.srcUrlList;let i=index">
                 <td style="text-align: right">{{row.percentage}}</td>
                 <td>{{row.srcUrl}}</td>
-                <td *ngIf="i==0" [attr.rowspan]="rowData.srcUrlList.length" [style]="{ 'color': rowData.isSuccess? 'unset': '#dc3545','background': rowData.isSuccess? 'unset':'#F6D8CB'}">
-                    {{rowData.isSuccess ? ('alert.title.ok' | translate) : ('alert.title.error' | translate) }}
+                <td *ngIf="i==0" [attr.rowspan]="rowData.srcUrlList.length"
+                  [style]="{ 'color': rowData.isSuccess? 'unset': '#dc3545','background': rowData.isSuccess? 'unset':'#F6D8CB'}">
+                  {{rowData.isSuccess ? ('alert.title.ok' | translate) : ('alert.title.error' | translate) }}
                 </td>
               </tr>
 
@@ -230,20 +232,19 @@
   </div>
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<p-confirmDialog key="cd" #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle"
+<p-confirmDialog key="cd" #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle"
   styleClass="cHeader cContent cIcon">
-  <ng-template pTemplate="footer">
-    <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+  <ng-template #footer>
+    <div class="col-12 d-flex gap-2 mt-2 justify-content-center">
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>
 
-<p-dialog [header]="'error'|translate" [visible]="showErrMsg" [style]="{width: '50vw'}" [modal]="true"
+<p-dialog [header]="'error'|translate" [visible]="showErrMsg" [style]="{width: '30vw'}" [modal]="true"
   [dismissableMask]="true" [draggable]="false" [closable]="false">
   <span>{{errMsg}}</span>
   <p-table [value]="errList">
@@ -265,28 +266,3 @@
       translate}}</button>
   </ng-template>
 </p-dialog>
-
-<!-- <p-confirmDialog key="err" #err [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
-  <p-table [value]="errList">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>{{'api_key'|translate}}</th>
-        <th>{{'module_name'|translate}}</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-rowData>
-      <tr>
-        <td>{{rowData.apiKey}}</td>
-        <td>{{rowData.moduleName}}</td>
-        <td></td>
-      </tr>
-    </ng-template>
-  </p-table>
-  <ng-template pTemplate="footer">
-    <div class="row" style="justify-content: center;">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="err.accept()"></button>
-    </div>
-  </ng-template>
-</p-confirmDialog> -->

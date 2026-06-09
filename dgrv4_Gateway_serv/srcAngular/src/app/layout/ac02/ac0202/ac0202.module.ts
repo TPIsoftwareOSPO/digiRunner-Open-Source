@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { Ac0202RoutingModule } from './ac0202-routing.module';
 import { Ac0202Component } from './ac0202.component';
+import { SmartClientSettingComponent } from './smart-client-setting/smart-client-setting.component';
 
 import { SharedModule } from '../../../shared/shared.module';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ import { PrimengModule } from 'src/app/shared/primeng.module';
     ReactiveFormsModule,
     FormsModule
   ],
-  declarations: [Ac0202Component],
+  declarations: [Ac0202Component, SmartClientSettingComponent],
   providers:[TokenExpiredGuard]
 })
 export class Ac0202Module {

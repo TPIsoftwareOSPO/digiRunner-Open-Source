@@ -7,7 +7,7 @@
 }
 
 
-table thead>tr>th {
+/* table thead>tr>th {
   padding: 5px;
   border: 1px solid #c8c8c8;
   font-weight: 700;
@@ -27,4 +27,4 @@ table>tbody>tr:nth-child(odd) {
 
 table>tbody>tr:nth-child(even) {
   background-color: #F9F9F9;
-}
+} */

@@ -501,6 +501,8 @@ public class  AA0319Service {
 		i.setCorsAllowOrigin(tsmpApiReg.getCorsAllowOrigin());
 		i.setCorsAllowMethods(tsmpApiReg.getCorsAllowMethods());
 		i.setCorsAllowHeaders(tsmpApiReg.getCorsAllowHeaders());
+		
+		i.setDataFormat(StringUtils.hasText(tsmpApi.getDataFormat()) ? tsmpApi.getDataFormat() : "1");
 
 		getTsmpApiImpDao().saveAndFlush(i);
 	}
@@ -668,6 +670,7 @@ public class  AA0319Service {
 		tsmpApi.setLabel5(source.getLabel5());
 
 		tsmpApi.setApiStatus(source.getApiStatus());
+		tsmpApi.setDataFormat(StringUtils.hasText(source.getDataFormat()) ? source.getDataFormat() : "1");
 
 		tsmpApi = getTsmpApiDao().saveAndFlush(tsmpApi);
 
@@ -795,6 +798,7 @@ public class  AA0319Service {
 		tsmpApi.setLabel4(source.getLabel4());
 		tsmpApi.setLabel5(source.getLabel5());
 		tsmpApi.setApiStatus(source.getApiStatus());
+		tsmpApi.setDataFormat(StringUtils.hasText(source.getDataFormat()) ? source.getDataFormat() : "1");
 
 		tsmpApi = getTsmpApiDao().saveAndFlush(tsmpApi);
 

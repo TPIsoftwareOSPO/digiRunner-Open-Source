@@ -80,6 +80,7 @@ import tpi.dgrv4.dpaa.component.nodeTask.CleanAllCacheNotifier;
 import tpi.dgrv4.dpaa.component.nodeTask.CleanCacheByKeyNotifier;
 import tpi.dgrv4.dpaa.component.nodeTask.CleanCacheByTableNameNotifier;
 import tpi.dgrv4.dpaa.component.req.DpReqServiceFactory;
+import tpi.dgrv4.dpaa.component.apptJob.H2ConfigSyncReplica;
 import tpi.dgrv4.dpaa.component.rjob.ThinkpowerArticleJob;
 import tpi.dgrv4.dpaa.es.DgrESService;
 import tpi.dgrv4.dpaa.service.DgrAuditLogService;
@@ -115,6 +116,8 @@ import tpi.dgrv4.gateway.component.check.TrafficCheck;
 import tpi.dgrv4.gateway.component.job.appt.ApptJobDispatcher;
 import tpi.dgrv4.gateway.component.job.appt.HttpUtilJob;
 import tpi.dgrv4.gateway.config.BeanConfig;
+import tpi.dgrv4.gateway.service.SmartOnFhirProxyService;
+import tpi.dgrv4.gateway.service.H2ConfigSyncServive;
 import tpi.dgrv4.gateway.service.WebsiteService;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
@@ -164,6 +167,7 @@ public class DpaaJobConfig {
 	private final DgrImportClientRelatedTempDao dgrImportClientRelatedTempDao;
 	private final TrafficCheck trafficCheck;
 	private final WebsiteService websiteService;
+	private final SmartOnFhirProxyService smartOnFhirProxyService;
 	private final DgrWebsiteCacheProxy dgrWebsiteCacheProxy;
 	private final TsmpSettingService tsmpSettingService;
 	private final ObjectMapper objectMapper;
@@ -210,7 +214,9 @@ public class DpaaJobConfig {
     private final DpaaAlertNotifierLine dpaaAlertNotifierLine;
     private final DpaaAlertNotifierCustom dpaaAlertNotifierCustom;
     private final DpaaAlertDispatcherJobHelper dpaaAlertDispatcherJobHelper;
+    private final H2ConfigSyncServive h2ConfigSyncServive;
     private final DgrWebhookNotifyLogDao dgrWebhookNotifyLogDao;
+    private final DgrH2ConfigSyncHistoryDao dgrDbSyncManualDao;
     @Nullable
     private final DgrESService dgrESService;
 
@@ -498,7 +504,7 @@ public class DpaaJobConfig {
 				this.tsmpDpItemsCacheProxy, this.dpReqServiceFactory, this.tsmpDpReqOrdermDao, this.tsmpNoticeLogDao,
 				this.tsmpDpFileDao, this.tsmpSettingDao, this.tsmpClientDao, this.tsmpTokenHistoryDao,
 				this.dgrAcIdpAuthCodeDao, this.dgrImportClientRelatedTempDao, this.trafficCheck, this.websiteService,
-				this.dgrWebsiteCacheProxy, this.tsmpSettingService, this.apptJobDispatcher,this.dgrAuditLogMDao,this.dgrAuditLogDDao,this.dgrWebhookNotifyLogDao);
+				this.smartOnFhirProxyService, this.dgrWebsiteCacheProxy, this.tsmpSettingService, this.apptJobDispatcher,this.dgrAuditLogMDao,this.dgrAuditLogDDao,this.dgrWebhookNotifyLogDao);
 	}
 	
 	@Bean
@@ -656,5 +662,12 @@ public class DpaaJobConfig {
 			String identif) {
 		return new SendMailJob(auth, mailEvents, sendTime, identif, this.prepareMailService);
 	}
+
+    @Bean
+    @Scope("prototype")
+    public H2ConfigSyncReplica apptJob_H2_CONFIG_SYNC(TsmpDpApptJob job) {
+        return new H2ConfigSyncReplica(job, this.apptJobDispatcher,
+                this.tsmpDpApptJobDao, this.h2ConfigSyncServive, this.dgrDbSyncManualDao, this.tsmpSettingService);
+    }
 
 }

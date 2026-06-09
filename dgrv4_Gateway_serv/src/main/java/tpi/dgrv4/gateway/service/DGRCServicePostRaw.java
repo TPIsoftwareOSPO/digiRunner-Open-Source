@@ -177,6 +177,7 @@ public class DGRCServicePostRaw implements IApiCacheService {
 			payload = jwtPayloadData.payloadStr;
 
 			List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
+			srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
 			// 沒有目標URL,則回覆錯誤訊息
 			if (CollectionUtils.isEmpty(srcUrlList)) {
 				ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
@@ -511,10 +512,10 @@ public class DGRCServicePostRaw implements IApiCacheService {
 
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl, Map<String, String> maskInfo) throws IOException {
 		StringBuffer dgrcPostRaw_log = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
 		// print
 		writeLogger(dgrcPostRaw_log, "--【URL】--");
-		writeLogger(dgrcPostRaw_log, httpReq.getRequestURI());
+		writeLogger(dgrcPostRaw_log, uri);
 		writeLogger(dgrcPostRaw_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(dgrcPostRaw_log, "【" + httpReq.getMethod() + "】\r\n");
 

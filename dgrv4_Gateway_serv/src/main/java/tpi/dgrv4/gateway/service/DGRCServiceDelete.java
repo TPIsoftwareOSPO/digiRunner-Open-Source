@@ -169,6 +169,7 @@ public class DGRCServiceDelete implements IApiCacheService {
 			payload = jwtPayloadData.payloadStr;
 
 			List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
+			srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
 			// 沒有目標URL,則回覆錯誤訊息
 			if (CollectionUtils.isEmpty(srcUrlList)) {
 				ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
@@ -446,10 +447,10 @@ public class DGRCServiceDelete implements IApiCacheService {
 
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, Map<String, String> maskInfo) throws IOException {
 		StringBuffer dgrcDelLog = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
 		// print
 		writeLogger(dgrcDelLog, "--【URL】--");
-		writeLogger(dgrcDelLog, httpReq.getRequestURI());
+		writeLogger(dgrcDelLog, uri);
 		writeLogger(dgrcDelLog, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(dgrcDelLog, "【" + httpReq.getMethod() + "】\r\n");
 

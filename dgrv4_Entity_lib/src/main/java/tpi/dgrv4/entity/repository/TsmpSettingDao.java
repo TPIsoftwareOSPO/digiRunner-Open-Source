@@ -305,6 +305,11 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
         public static final String HTTPUTIL_RESP_TIME_LOG = "HTTPUTIL_RESP_TIME_LOG";
 
         public static final String PROPERTIES_MASK_LIST = "PROPERTIES_MASK_LIST";
+        
+        public static final String KEEPER_NODE_INFO_LOG_ENABLE = "KEEPER_NODE_INFO_LOG_ENABLE";
+
+        // H2 Sync
+        public static final String H2_SYNC_TIMEOUT_MINUTES = "H2_SYNC_TIMEOUT_MINUTES";
 
     }
 

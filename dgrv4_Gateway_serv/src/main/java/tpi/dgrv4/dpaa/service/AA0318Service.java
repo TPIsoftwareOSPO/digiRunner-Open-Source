@@ -340,6 +340,9 @@ public class AA0318Service {
 		aa0317RespItem.setCorsAllowMethods(getNodeAsText(node, "corsAllowMethods"));
 		aa0317RespItem.setCorsAllowHeaders(getNodeAsText(node, "corsAllowHeaders"));
 		
+		String dataFormat = getNodeAsText(node, "dataFormat");
+		aa0317RespItem.setDataFormat(StringUtils.hasText(dataFormat)? dataFormat : "1");
+		
 		return aa0317RespItem;
 	}
 
@@ -556,6 +559,8 @@ public class AA0318Service {
 		i.setCorsAllowOrigin(api.getCorsAllowOrigin());
 		i.setCorsAllowMethods(api.getCorsAllowMethods());
 		i.setCorsAllowHeaders(api.getCorsAllowHeaders());
+		
+		i.setDataFormat(StringUtils.hasText(api.getDataFormat()) ? api.getDataFormat() : "1");
 	
 		return i;
 	}

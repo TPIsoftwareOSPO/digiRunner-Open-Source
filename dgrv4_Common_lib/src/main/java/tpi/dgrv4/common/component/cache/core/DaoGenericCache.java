@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -15,11 +16,9 @@ import tpi.dgrv4.common.utils.StackTraceUtil;
 @Component
 public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 
-	private static final Long DEFAULT_CACHE_TIMEOUT = 120000L; // 預設快取存活時間 120sec
-
-	public static final long BUFFER_INTERVAL = 6000L; // 預設快取緩衝時間 6sec
 
 	protected Long cacheTimeout;
+	protected long bufferInterval;
 
 	protected Map<String, CacheValue> cacheMap;
 
@@ -66,30 +65,35 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 		};
 	}
 
+	private Object daoGenericCacheLock = new Object();
+
 	@Autowired
-	public DaoGenericCache() {
-		this(DEFAULT_CACHE_TIMEOUT, null);
+	public DaoGenericCache(
+			@Value("${digi.cache.default-timeout.ms:120000}") Long cacheTimeout,
+			@Value("${digi.cache.buffer-interval.ms:6000}") Long bufferInterval) {
+		this(cacheTimeout,bufferInterval,null);
 	}
 
-	private Object daoGenericCacheLock = new Object();
-	public DaoGenericCache(Long cacheTimeout, Consumer<String> traceLogger) {
-
+	public DaoGenericCache(Long cacheTimeout, Long bufferInterval, Consumer<String> traceLogger) {
 		this.cacheTimeout = cacheTimeout;
+		this.bufferInterval = bufferInterval;
 		if (traceLogger != null) {
-			// junit用到
+			//testcase用
 			this.traceLogger = traceLogger;
 		}
 		this.clear();
+		this.startCleanThread();
+	}
 
-		// 處理超過 DEFAULT_CACHE_TIMEOUT(預設120sec) 的舊快取資料
+	// [EN]Starts the background thread that periodically cleans expired cache entries
+	// [ZH]啟動背景執行緒，定期清除過期的快取項目
+	private void startCleanThread() {
 		new Thread() {
 			public void run() {
 				while (true) {
 					try {
-						// 休息1秒，避免CPU飆高
-//						Thread.sleep(1000);
 						synchronized (daoGenericCacheLock) {
-							daoGenericCacheLock.wait(1000); 
+							daoGenericCacheLock.wait(1000);
 						}
 						clean();
 					} catch (InterruptedException e) {
@@ -140,7 +144,7 @@ public class DaoGenericCache implements IDaoGenericCache<String, Object> {
 
 			CacheValue cv = opt.get();
 
-			long expirationTimeMillis = cv.getUpdateTime() + BUFFER_INTERVAL;
+			long expirationTimeMillis = cv.getUpdateTime() + this.bufferInterval;
 			boolean isExpired = System.currentTimeMillis() > expirationTimeMillis;
 
 			// 檢查有沒有超過 預設快取緩衝時間，若超過則從快取移除，沒超過就更新快取時間。

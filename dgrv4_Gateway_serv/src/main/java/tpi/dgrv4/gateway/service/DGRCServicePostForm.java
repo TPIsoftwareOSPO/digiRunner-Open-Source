@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
@@ -159,6 +160,9 @@ public class DGRCServicePostForm implements IApiCacheService {
 			}
 
 			List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
+			
+			srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
+			
 			// 沒有目標URL,則回覆錯誤訊息
 			if (CollectionUtils.isEmpty(srcUrlList)) {
 				ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
@@ -298,7 +302,9 @@ public class DGRCServicePostForm implements IApiCacheService {
 			paramVo.setDgrReqVo(dgrcPostFormDgrReqVo);
 			paramVo.setUuid(uuid);
 			paramVo.setHttpMethod(httpReq.getMethod());
-			paramVo.setParamMap(httpReq.getParameterMap());
+			// [EN]Filter out queryString params from parameterMap to avoid duplication (queryString is already appended to srcUrl)
+			// [ZH]從 parameterMap 過濾掉 queryString 參數，避免重複 (queryString 已附加在 srcUrl)
+			paramVo.setParamMap(getCommForwardProcService().removeQueryStringParams(httpReq, httpReq.getParameterMap()));
 			paramVo.setPartContentTypes(partContentTypes);
 			paramVo.setHttpReq(httpReq);
 			AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
@@ -452,7 +458,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 
 		// print
 		writeLogger(dgrcPostFormLog_log, "--【URL】--");
-		writeLogger(dgrcPostFormLog_log, httpReq.getRequestURI());
+		writeLogger(dgrcPostFormLog_log, getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI()));
 		writeLogger(dgrcPostFormLog_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(dgrcPostFormLog_log, "【" + httpReq.getMethod() + "】\r\n");
 
@@ -586,7 +592,7 @@ public class DGRCServicePostForm implements IApiCacheService {
 
 		// 1. 【URL】
 		writeLogger(dgrcPostFormForward_log, "--【URL】--");
-		writeLogger(dgrcPostFormForward_log, httpReq.getRequestURI());
+		writeLogger(dgrcPostFormForward_log, getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI()));
 		writeLogger(dgrcPostFormForward_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 
 		// 2. 【HTTP METHOD】
@@ -619,51 +625,69 @@ public class DGRCServicePostForm implements IApiCacheService {
 		for (Part part : parts) {
 			partContentTypes.put(part.getName(), part.getContentType());
 		}
-		// 文字
-		Map<String, String[]> parameterMap = httpReq.getParameterMap();
-		if (!CollectionUtils.isEmpty(parameterMap)) {
-			String dgrcPostForm_name;
-			String[] vals;
-			byte[] data;
-
-			for (Map.Entry<String, String[]> entries : parameterMap.entrySet()) {
-				dgrcPostForm_name = entries.getKey();
-				vals = entries.getValue();
-				for (String val : vals) {
-					Map<String, Object> dataMap = HttpUtil.getFormBodyPart(dgrcPostForm_name, null, val.getBytes(),
-							boundary, dgrcPostFormForward_log, partContentTypes.get(dgrcPostForm_name), maskInfo);
-					data = (byte[]) dataMap.get("data");
-					formBodyParts.add(data);
-					Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
-					formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
-					formBodyParts_File2Hex.add((byte[]) logData.get("content"));
-				}
+		
+		// 文字, 因為此段會把queryString也一起取得,若要還原也需把
+		//srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);這段註解
+//		Map<String, String[]> parameterMap = httpReq.getParameterMap();
+//		if (!CollectionUtils.isEmpty(parameterMap)) {
+//			String dgrcPostForm_name;
+//			String[] vals;
+//			byte[] data;
+//
+//			for (Map.Entry<String, String[]> entries : parameterMap.entrySet()) {
+//				dgrcPostForm_name = entries.getKey();
+//				vals = entries.getValue();
+//				for (String val : vals) {
+//					Map<String, Object> dataMap = HttpUtil.getFormBodyPart(dgrcPostForm_name, null, val.getBytes(),
+//							boundary, dgrcPostFormForward_log, partContentTypes.get(dgrcPostForm_name), maskInfo);
+//					data = (byte[]) dataMap.get("data");
+//					formBodyParts.add(data);
+//					Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
+//					formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
+//					formBodyParts_File2Hex.add((byte[]) logData.get("content"));
+//				}
+//			}
+//		}
+		// [EN]Text fields only (using getParts() to get only multipart form-data text fields, excluding queryString parameters)
+		// [ZH]文字欄位 (只取 multipart form-data 的文字欄位,不含 queryString 參數)
+		for (Part part : parts) {
+			if (part.getSubmittedFileName() == null) { // 文字欄位 (非檔案)
+				String dgrcPostForm_name = part.getName();
+				byte[] valBytes = part.getInputStream().readAllBytes();
+				Map<String, Object> dataMap = HttpUtil.getFormBodyPart(dgrcPostForm_name, null, valBytes,
+						boundary, dgrcPostFormForward_log, partContentTypes.get(dgrcPostForm_name), maskInfo);
+				byte[] data = (byte[]) dataMap.get("data");
+				formBodyParts.add(data);
+				Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
+				formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
+				formBodyParts_File2Hex.add((byte[]) logData.get("content"));
 			}
 		}
 
-		// 檔案
-		Map<String, MultipartFile> fileMap = httpReq.getFileMap();
-		if (!CollectionUtils.isEmpty(fileMap)) {
+		// [EN]Files (use getMultiFileMap to support multiple files with the same key)
+		// [ZH]檔案 (使用 getMultiFileMap 以支援相同 key 有多個檔案的情境)
+		MultiValueMap<String, MultipartFile> multiFileMap = httpReq.getMultiFileMap();
+		if (!CollectionUtils.isEmpty(multiFileMap)) {
 			String dgrcPostForm_name;
-			MultipartFile mf;
 			byte[] data;
-			for (Map.Entry<String, MultipartFile> entries : fileMap.entrySet()) {
+			for (Map.Entry<String, List<MultipartFile>> entries : multiFileMap.entrySet()) {
 				dgrcPostForm_name = entries.getKey();
-				mf = entries.getValue();
-				// String contentType = mf.getContentType(); // Get the content type from the
-				// MultipartFile
-				Map<String, Object> dataMap = HttpUtil.getFormBodyPart(dgrcPostForm_name, mf.getOriginalFilename(),
-						mf.getBytes(), boundary, dgrcPostFormForward_log, partContentTypes.get(dgrcPostForm_name),
-						maskInfo);
-				data = (byte[]) dataMap.get("data");
-				formBodyParts.add(data);
+				for (MultipartFile mf : entries.getValue()) {
+					// String contentType = mf.getContentType(); // Get the content type from the
+					// MultipartFile
+					Map<String, Object> dataMap = HttpUtil.getFormBodyPart(dgrcPostForm_name, mf.getOriginalFilename(),
+							mf.getBytes(), boundary, dgrcPostFormForward_log, partContentTypes.get(dgrcPostForm_name),
+							maskInfo);
+					data = (byte[]) dataMap.get("data");
+					formBodyParts.add(data);
 
-				Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
-				// byte[] hexData = ("\r\n"+ HttpUtil.PREFIX_Sha256_Hex +
-				// HexStringUtils.toString(SHA256Util.getSHA256((byte[])logData.get("content")))).getBytes()
-				// ;
-				formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
-				formBodyParts_File2Hex.add((byte[]) logData.get("content"));
+					Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
+					// byte[] hexData = ("\r\n"+ HttpUtil.PREFIX_Sha256_Hex +
+					// HexStringUtils.toString(SHA256Util.getSHA256((byte[])logData.get("content")))).getBytes()
+					// ;
+					formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
+					formBodyParts_File2Hex.add((byte[]) logData.get("content"));
+				}
 			}
 		}
 
@@ -701,6 +725,11 @@ public class DGRCServicePostForm implements IApiCacheService {
 		}
 
 		List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
+		
+		// [EN]Append the queryString to the target URL (text fields have been changed to use getParts(), which no longer includes queryString)
+		// [ZH]將 queryString 附加到目標URL (文字欄位已改用 getParts() 取值,不再包含 queryString)
+		srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
+		
 		// 沒有目標URL,則回覆錯誤訊息
 		if (CollectionUtils.isEmpty(srcUrlList)) {
 			ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
@@ -944,4 +973,5 @@ public class DGRCServicePostForm implements IApiCacheService {
 	protected TsmpSettingService getTsmpSettingService() {
 		return tsmpSettingService;
 	}
+
 }

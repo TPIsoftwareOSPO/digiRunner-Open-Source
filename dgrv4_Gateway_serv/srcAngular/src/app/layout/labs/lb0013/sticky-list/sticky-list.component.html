@@ -1,0 +1,136 @@
+<div class="container py-1">
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group row">
+        <div class="col-6">
+          <label for="sofProxyId" class="control-label">ID</label>
+          <label class="form-control border-line">{{sofDto?.sofProxyId}}</label>
+        </div>
+        <div class="col-6">
+          <label for="sofProxyName" class="control-label">{{ 'sof.name' |translate}}</label>
+          <label class="form-control border-line">{{sofDto?.sofProxyName}}</label>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-6 ">
+          <label for="sofProxyDiversionId">Diversion</label>
+          <p-select [options]="diversionData" placeholder="{{'plz_chs' | translate}}"
+            formControlName="sofProxyDiversionId" [style]="{'width':'100%'}" showClear="true">
+          </p-select>
+        </div>
+        <div class="col-6">
+          <label for="sofProxyStickyType">FHIR Resource Type</label>
+          <input type="text" class="form-control" id="sofProxyStickyType" formControlName="sofProxyStickyType"
+            placeholder="">
+        </div>
+      </div>
+      <div class="col-12 form-group">
+        <button type="button" class="btn tpi-btn tpi-primary"
+          (click)="queryStickyList()">{{'button.search'|translate}}</button>
+        <button type="button" class="btn tpi-btn tpi-second float-end"
+          (click)="changePage('create');">{{'button.create'|translate}}</button>
+      </div>
+
+    </form>
+    <hr/>
+     <div class="col-12 form-group">
+
+     </div>
+    <p-table [value]="stickyData" [(selection)]="selectedStickyData" selectionMode="multiple" responsiveLayout="scroll"
+      [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped">
+      <ng-template pTemplate="caption">
+        <div class="p-0">
+           <button type="button" class="btn tpi-primary tpi-btn" (click)="batchDeleteSticky()"
+              [disabled]="selectedStickyData.length == 0">
+              {{ "button.delete" | translate }}
+            </button>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th rowspan="2" style="width: 2.25em" scope="col">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th>FHIR Resource Type</th>
+          <th>Diversion</th>
+          <th>Action</th>
+
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+          </td>
+          <td>{{rowData.sofProxyStickyType}}</td>
+          <td>{{rowData.sofProxyDiversionUrl}}</td>
+          <td style="text-align: center; width: 60px">
+            <button pButton pRipple type="button" icon="fa fa-edit"
+                class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
+                [pTooltip]="'button.update' | translate" tooltipPosition="top"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="4">
+            {{'no_rec' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer" let-columns>
+        <tr *ngIf="stickyData.length>0">
+          <td [attr.colspan]="4" style="color: #b7b7b7;">
+            <span style="vertical-align: middle;">{{'row_count' | translate}}: {{stickyData.length}}</span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div class="text-center pt-2">
+      <!-- <button type="button" class="btn tpi-btn tpi-primary me-3" (click)="chooseClient()"
+        [disabled]="selectedStickyData.length == 0">
+        {{ "button.confirm" | translate }}
+      </button> -->
+      <button type="button" class="btn tpi-btn tpi-primary" (click)="cancelClient()">
+        {{ "button.return_to_list" | translate }}
+      </button>
+    </div>
+  </div>
+  <div [hidden]="pageNum != 2">
+    <form [formGroup]="formE">
+      <div class="form-group row">
+        <div class="col-6">
+          <label for="sofProxyId" class="control-label">ID</label>
+          <label class="form-control border-line">{{sofDto?.sofProxyId}}</label>
+        </div>
+        <div class="col-6">
+          <label for="sofProxyName" class="control-label">{{ 'sof.name' |translate}}</label>
+          <label class="form-control border-line">{{sofDto?.sofProxyName}}</label>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-6 ">
+          <label for="sofProxyDiversionId" class="control-label required">Diversion</label>
+          <!-- <input type="text" class="form-control" id="sofProxyDiversionId" formControlName="sofProxyDiversionId"
+            placeholder=""> -->
+          <p-select [options]="diversionData" placeholder="{{'plz_chs' | translate}}"
+            formControlName="sofProxyDiversionId" [style]="{'width':'100%'}" appendTo="body">
+          </p-select>
+        </div>
+        <div class="col-6">
+          <label for="sofProxyStickyType" class="control-label required">FHIR Resource Type</label>
+          <input type="text" class="form-control" id="sofProxyStickyType" formControlName="sofProxyStickyType"
+            placeholder="">
+        </div>
+      </div>
+      <div class="col-12 form-group text-center">
+        <button type="button" class="btn tpi-btn tpi-second me-2" [disabled]="formE.invalid"
+          (click)="addSticky();" *ngIf="currentAction == 'create'">{{'button.create'|translate}}</button>
+        <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="formE.invalid"
+          (click)="batchUpdateSticky();" *ngIf="currentAction == 'update'">{{'button.update'|translate}}</button>
+        <button type="button" class="btn tpi-btn tpi-primary"
+          (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+      </div>
+    </form>
+  </div>
+</div>

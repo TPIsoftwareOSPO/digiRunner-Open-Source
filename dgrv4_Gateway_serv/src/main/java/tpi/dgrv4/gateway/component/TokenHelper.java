@@ -2,6 +2,7 @@ package tpi.dgrv4.gateway.component;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -28,6 +30,11 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.EncryptedJWT;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,11 +44,14 @@ import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.HexStringUtils;
 import tpi.dgrv4.codec.utils.JWEcodec;
+import tpi.dgrv4.codec.utils.JWKcodec;
+import tpi.dgrv4.codec.utils.JWKcodec.JWKVerifyResult;
 import tpi.dgrv4.codec.utils.JWScodec;
 import tpi.dgrv4.codec.utils.OpenApiKeyUtil;
 import tpi.dgrv4.codec.utils.SHA256Util;
 import tpi.dgrv4.codec.utils.TimeZoneUtil;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
+import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.DateTimeUtil;
 import tpi.dgrv4.common.utils.ServiceUtil;
@@ -85,12 +95,19 @@ import tpi.dgrv4.gateway.constant.DgrAcIdpUserStatus;
 import tpi.dgrv4.gateway.constant.DgrDeployRole;
 import tpi.dgrv4.gateway.constant.DgrTokenGrantType;
 import tpi.dgrv4.gateway.constant.DgrTokenType;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.GtwIdPJwksService;
+import tpi.dgrv4.gateway.service.GtwIdPWellKnownService;
+import tpi.dgrv4.gateway.service.OAuthTokenService;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
 import tpi.dgrv4.gateway.vo.BasicAuthCacheVo;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
+import tpi.dgrv4.gateway.vo.SmartOnFhirAuthorizationContext;
+import tpi.dgrv4.gateway.vo.SmartOnFhirTokenClaims;
 
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
@@ -124,7 +141,11 @@ public class TokenHelper {
 	private final DgrXApiKeyCacheProxy dgrXApiKeyCacheProxy;
 	private final DgrXApiKeyMapCacheProxy dgrXApiKeyMapCacheProxy;
 	private final ServiceConfig serviceConfig;
-	
+	private final ClientPublicKeyHelper clientPublicKeyHelper;
+	private final GtwIdPJwksService gtwIdPJwksService;
+	private final SmartOnFhirScopeValidator smartOnFhirScopeValidator;
+	private final TsmpSettingService tsmpSettingService;
+
 	@Value("${digi.cookie.samesite.value:Lax}")
 	public String samesiteValue;
 
@@ -140,6 +161,7 @@ public class TokenHelper {
 	public static final String JTI = "jti";
 	public static final String NO_AUTH = "noAuth";
 	public static final String SSOTOKEN = "ssotoken";
+	public static final String SMART_TOKEN = "smart_token";
 
 	public static final String AUTHORIZATION_DOES_NOT_HAVE_THE_WORD = "Authorization does not have the word: ";
 	public static final String AUTHORIZATION_HAS_NO_VALUE = "Authorization has no value";
@@ -166,32 +188,32 @@ public class TokenHelper {
 	public static final String THE_PROFILE_IS_MISSING_PARAMETERS = "The profile is missing parameters: ";
 	// 缺少必需的參數
 	public static final String MISSING_REQUIRED_PARAMETER = "Missing required parameter: ";
-	
+
 	/**
-	 * 這是一個假的 getInstance(),
-	 * 實際上不會有機會建立一個空的 TokenHelper(),
-	 * 因為在啟動 Spring boot 時, 早就被 @Component 載入,
-	 * 寫這段是為了配合 init() 將物件指向一個 volatile instance,
-	 * 方便在其它的 class 中直接使用此 sigaletone object
+	 * 這是一個假的 getInstance(), <br>
+	 * 實際上不會有機會建立一個空的 TokenHelper(), <br>
+	 * 因為在啟動 Spring boot 時, 早就被 @Component 載入, <br>
+	 * 寫這段是為了配合 init() 將物件指向一個 volatile instance, <br>
+	 * 方便在其它的 class 中直接使用此 sigaletone object <br>
 	 */
-	// Double-Checked Locking mode
-	// 雙重檢查鎖定(Double-Checked Locking)模式
+	// Double-Checked Locking mode <br>
+	// 雙重檢查鎖定(Double-Checked Locking)模式 <br>
     public static TokenHelper getInstance() {
         if (instance == null) {
             synchronized (TokenHelper.class) {
 				if (instance == null) {
 					instance = new TokenHelper(null, null, null, null, null, null, null, null, null, null, null, null,
-							null, null, null, null, null, null, null, null);
+							null, null, null, null, null, null, null, null, null, null, null, null);
 				}
             }
         }
         return instance;
     }
     
-    @PostConstruct
-    public void init() {
-    	instance = this;
-    }
+	@PostConstruct
+	public void init() {
+		instance = this;
+	}
 
 	public static class JwtPayloadData {
 		public ResponseEntity<?> errRespEntity;
@@ -269,8 +291,6 @@ public class TokenHelper {
 			String errMsg = TokenHelper.AUTHORIZATION_HAS_NO_VALUE;
 			TPILogger.tl.debug(errMsg);
 
-			errMsg = TokenHelper.UNAUTHORIZED;
-			TPILogger.tl.debug(errMsg);
 			return getUnauthorizedErrorResp(apiUrl, errMsg);// 401
 		}
 		return null;
@@ -463,18 +483,19 @@ public class TokenHelper {
 					getOAuthTokenErrorResp(errMsg1, errMsg2, HttpStatus.UNAUTHORIZED.value(), apiUrl),
 					setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * 檢查 client 密碼, 使用 cache,<br>
 	 * 因每次都要做密碼 hash 比對, 效能會太差, 改用 cache,<br>
-	 * 當 client 的密碼比對成功, 則將 clientSecret(DB 中密碼的 Bcrypt 值) 存入 cache,<br> 
+	 * 當 client 的密碼比對成功, 則將 clientSecret(DB 中密碼的 Bcrypt 值) 存入 cache,<br>
 	 * 下次若 cache ID("client ID,密碼") 相同, 直接取出 cache 值和DB 中密碼的 Bcrypt 值比對,<br>
 	 * 若 client 改了密碼(DB 中的Bcrypt 值會變動), 但仍輸入舊的密碼, 則會比對失敗<br>
-	 * @param clientId - client帳號
-	 * @param clientPw - client輸入的密碼
+	 * 
+	 * @param clientId     - client帳號
+	 * @param clientPw     - client輸入的密碼
 	 * @param clientSecret - DB 中密碼的 BCrypt 值
 	 * @return
 	 */
@@ -491,38 +512,38 @@ public class TokenHelper {
 				// 執行 bcrypt 密碼比對
 				BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 				isMatch = passwordEncoder.matches(clientPw, clientSecret);// 比對密碼(做 bcrypt)
-				if(isMatch) {
+				if (isMatch) {
 					// 如果比對成功,則更新cache紀錄
 					updateBasicAuthCache(cacheVo, clientSecret, cacheId);
 				}
-				
+
 			} else {// 取得cache資料
 				isMatch = clientSecret.equals(cacheVo.getHash());// 比對密碼(用 cache 的值比)
 				if (!isMatch) {// 表示 client 有改密碼, 移除舊資料
 					basicAuthCacheVoMap.remove(cacheId);
 				}
 			}
-			
+
 		} else {// 找不到 cache 資料, 則比對密碼(做 bcrypt)
 			BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 			isMatch = passwordEncoder.matches(clientPw, clientSecret);// 比對密碼(做 bcrypt)
-			if(isMatch) {
+			if (isMatch) {
 				// 如果比對成功,則更新cache紀錄
 				updateBasicAuthCache(cacheVo, clientSecret, cacheId);
 			}
 		}
-		
+
 		return isMatch;
 	}
-	
+
 	/**
-	 * 取得  Basic auth 的 cache id,<br>
+	 * 取得 Basic auth 的 cache id,<br>
 	 * 資料格式為 "child id,clientPw"<br>
 	 */
 	private String getBasicAuthCacheId(String clientId, String clientPw) {
 		return clientId.toLowerCase() + "," + clientPw;
 	}
-	
+
 	/**
 	 * Cache 是否過期要更新
 	 */
@@ -533,7 +554,7 @@ public class TokenHelper {
 
 		return nowTimestamp > cacheTimestamp;
 	}
-	
+
 	/**
 	 * 更新 Basic auth 的 cache 記錄
 	 */
@@ -541,10 +562,10 @@ public class TokenHelper {
 		if (cacheVo == null) {
 			cacheVo = new BasicAuthCacheVo();
 		}
-		
+
 		cacheVo.setHash(clientSecret);
 		cacheVo.setDataTimestamp(System.currentTimeMillis());
-		
+
 		basicAuthCacheVoMap.put(cacheId, cacheVo);
 	}
 
@@ -595,7 +616,7 @@ public class TokenHelper {
 			} else {
 				List<String> ipList = list.stream().map(vo -> vo.getHostIp()).collect(Collectors.toList());
 //				String ip = ServiceUtil.getIpAddress(httpReq);
-                String ip = ClientIpUtil.getClientIp(httpReq);
+				String ip = ClientIpUtil.getClientIp(httpReq);
 				String dn = ServiceUtil.getFQDN(httpReq);
 				if (ipList.contains(ip) || ipList.contains(dn)) {
 					return null;
@@ -678,16 +699,16 @@ public class TokenHelper {
 		DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-ddZ");
 
 		if (startDateLong != null && endDateLong != null) {
-			String startDateStr_yyyyMMdd = TimeZoneUtil.long2UTCstringByFormatter(startDateLong, timeZone, formatter);
-			String endDateStr_yyyyMMdd = TimeZoneUtil.long2UTCstringByFormatter(endDateLong, timeZone, formatter);
+			String startDateStrByyyyyMMdd = TimeZoneUtil.long2UTCstringByFormatter(startDateLong, timeZone, formatter);
+			String endDateStrByyyyyMMdd = TimeZoneUtil.long2UTCstringByFormatter(endDateLong, timeZone, formatter);
 			String nowStr = TimeZoneUtil.long2UTCstringByFormatter(nowLong, timeZone, formatter);
 
-			int startDate_yyyyMMdd = Integer.parseInt(startDateStr_yyyyMMdd);
-			int endDate_yyyyMMdd = Integer.parseInt(endDateStr_yyyyMMdd);
-			int now_yyyyMMdd = Integer.parseInt(nowStr);
+			int startDateByyyyyMMdd = Integer.parseInt(startDateStrByyyyyMMdd);
+			int endDateByyyyyMMdd = Integer.parseInt(endDateStrByyyyyMMdd);
+			int nowByyyyyMMdd = Integer.parseInt(nowStr);
 
 			// client 未啟用
-			if (now_yyyyMMdd < startDate_yyyyMMdd) {// 未啟用
+			if (nowByyyyyMMdd < startDateByyyyyMMdd) {// 未啟用
 				String startDateStr = TimeZoneUtil.long2UTCstringByFormatter(startDateLong, timeZone, formatter2);
 				String errMsg = "Client before start day";
 				TPILogger.tl.debug(errMsg);
@@ -699,7 +720,7 @@ public class TokenHelper {
 			}
 
 			// client 已到期
-			if (now_yyyyMMdd > endDate_yyyyMMdd) {// 已到期
+			if (nowByyyyyMMdd > endDateByyyyyMMdd) {// 已到期
 				String endDateStr = TimeZoneUtil.long2UTCstringByFormatter(endDateLong, timeZone, formatter2);
 				String errMsg = "Client expired";
 				TPILogger.tl.debug(errMsg);
@@ -725,15 +746,15 @@ public class TokenHelper {
 		if (startTimePerDayLong != null && endTimePerDayLong != null) {
 			// 只取出時分(HHmm)和現在的時分(HHmm) 比較大小
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
-			String startTimePerDay_HHmm = TimeZoneUtil.long2UTCstringByFormatter(startTimePerDayLong, zone, formatter);
-			String endTimePerDay_HHmm = TimeZoneUtil.long2UTCstringByFormatter(endTimePerDayLong, zone, formatter);
-			String nowDay_HHmm = TimeZoneUtil.long2UTCstringByFormatter(nowLong, zone, formatter);
+			String startTimePerDayByHHmm = TimeZoneUtil.long2UTCstringByFormatter(startTimePerDayLong, zone, formatter);
+			String endTimePerDayByHHmm = TimeZoneUtil.long2UTCstringByFormatter(endTimePerDayLong, zone, formatter);
+			String nowDayByHHmm = TimeZoneUtil.long2UTCstringByFormatter(nowLong, zone, formatter);
 
-			int startTime_HHmm = Integer.parseInt(startTimePerDay_HHmm);
-			int endTime_HHmm = Integer.parseInt(endTimePerDay_HHmm);
-			int now_HHmm = Integer.parseInt(nowDay_HHmm);
+			int startTimeByHHmm = Integer.parseInt(startTimePerDayByHHmm);
+			int endTimeByHHmm = Integer.parseInt(endTimePerDayByHHmm);
+			int nowByHHmm = Integer.parseInt(nowDayByHHmm);
 
-			if (now_HHmm < startTime_HHmm || now_HHmm > endTime_HHmm) {// 不在每日服務時間內
+			if (nowByHHmm < startTimeByHHmm || nowByHHmm > endTimeByHHmm) {// 不在每日服務時間內
 				DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH:mmZ");
 				String startTimePerDayStr = TimeZoneUtil.long2UTCstringByFormatter(startTimePerDayLong, zone,
 						formatter2);
@@ -756,7 +777,8 @@ public class TokenHelper {
 
 	/**
 	 * [ZH] 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
-	 * [EN] Check if the redirectUri passed in is the same as the one registered in the client system <br>
+	 * [EN] Check if the redirectUri passed in is the same as the one registered in
+	 * the client system <br>
 	 */
 	public ResponseEntity<?> checkRedirectUri(String clientId, String redirectUri, String apiUrl) {
 		String errMsg = null;
@@ -772,13 +794,13 @@ public class TokenHelper {
 
 		// 取得 OAUTH_CLIENT_DETAILS 的 web_server_redirect_uri
 		// Get the web_server_redirect_uri of OAUTH_CLIENT_DETAILS
-		Optional<OauthClientDetails> opt_authClientDetails = getOauthClientDetailsCacheProxy().findById(clientId);
-		if (!opt_authClientDetails.isPresent()) {
+		Optional<OauthClientDetails> optAuthClientDetails = getOauthClientDetailsCacheProxy().findById(clientId);
+		if (!optAuthClientDetails.isPresent()) {
 			return getFindOauthClientDetailsError(clientId, apiUrl);
 		}
 
-		OauthClientDetails authClientDetails = opt_authClientDetails.get();
-		
+		OauthClientDetails authClientDetails = optAuthClientDetails.get();
+
 		// 取得 client 在 digiRunner 設定的重新導向URI資料
 		// Get the redirect URI data set by the client in digiRunner
 		List<String> webServerRedirectUriList = getWebServerRedirectUriList(authClientDetails);
@@ -787,11 +809,14 @@ public class TokenHelper {
 		// redirect_uri 不正確
 		// The redirect_uri is incorrect
 		if (!isMatchRedirectUri(webServerRedirectUriList, redirectUri)) {
-			errMsg = String.format("The redirect_uri mismatch. \n" //
-					+ "client_id: %s, \n" //
-					+ "redirect_uri: %s, \n" //
-					+ "Table [OAUTH_CLIENT_DETAILS] web_server_redirect_uri:\n%s" //
-					, //
+			errMsg = """
+					The redirect_uri mismatch.
+					client_id: %s,
+					redirect_uri: %s,
+					Table [OAUTH_CLIENT_DETAILS] web_server_redirect_uri:
+					%s""";
+
+			errMsg = String.format(errMsg, //
 					clientId, //
 					redirectUri, //
 					webServerRedirectUriMsg //
@@ -809,9 +834,12 @@ public class TokenHelper {
 	 * [ZH] 檢查傳入的 redirectUri 和 client 註冊在系統中的是否相同 <br>
 	 * 若 redirectUri 為 https 或 https, 則網址必須完全相同才是符合 <br>
 	 * 否則, redirectUri 只要和註冊的 * 號前後相同即符合 <br>
-	 * [EN]Check if the redirectUri passed in is the same as the client registered in the system <br>
-	 * If redirectUri is https or https, the URL must be exactly the same to comply with <br>
-	 * Otherwise, redirectUri will be in compliance as long as it is the same as the registered * before and after <br>
+	 * [EN]Check if the redirectUri passed in is the same as the client registered
+	 * in the system <br>
+	 * If redirectUri is https or https, the URL must be exactly the same to comply
+	 * with <br>
+	 * Otherwise, redirectUri will be in compliance as long as it is the same as the
+	 * registered * before and after <br>
 	 * 
 	 * @param webServerRedirectUriList [ZH] client 註冊在 dgR 中的 [EN] The client is
 	 *                                 registered in dgR
@@ -821,10 +849,7 @@ public class TokenHelper {
 	private boolean isMatchRedirectUri(List<String> webServerRedirectUriList, String reqRedirectUri) {
 		if (isHttpsOrHttp(reqRedirectUri)) {// https or http
 			// 必須完全相同才是符合
-			if (webServerRedirectUriList.contains(reqRedirectUri)) {
-				return true;
-			}
-			return false;
+			return webServerRedirectUriList.contains(reqRedirectUri);
 
 		} else {// 不是 https or http
 			for (String uriRule : webServerRedirectUriList) {
@@ -844,6 +869,7 @@ public class TokenHelper {
 	/**
 	 * [ZH] 網址是否為 "https://" 或 "http://" 開頭 <br>
 	 * [EN] Whether the URL starts with "https://" or "http://" <br>
+	 * 
 	 * @return true: yes; false: not
 	 */
 	private boolean isHttpsOrHttp(String uri) {
@@ -857,13 +883,13 @@ public class TokenHelper {
 
 		return false;
 	}
-
+	
 	private String getMsgForWebServerRedirectUri(List<String> webServerRedirectUriList) {
-		String msg = "";
-		for (String uri : webServerRedirectUriList) {
-			msg += uri + "\n";
-		}
-		return msg;
+	    StringBuilder sb = new StringBuilder();
+	    for (String uri : webServerRedirectUriList) {
+	        sb.append(uri).append("\n"); // 使用 append 串接
+	    }
+	    return sb.toString();
 	}
 
 	/**
@@ -1082,18 +1108,19 @@ public class TokenHelper {
 		}
 
 		// 支援的 scope
-		List<String> supportScope = GtwIdPHelper.getSupportScopeList();
+		List<String> supportScope = GtwIdPHelper.getScopesSupportedList();
 		String[] reqScopeArr = reqScopeStr.split(" ");
-		String errScopeStr = "";
+		StringBuilder errScopeSb = new StringBuilder();
 		for (String reqScope : reqScopeArr) {
 			boolean isSupport = supportScope.contains(reqScope.toLowerCase());// 轉小寫,再比較(忽略大小寫)
 			if (!isSupport) {
-				if (StringUtils.hasLength(errScopeStr)) {
-					errScopeStr += ", ";
+				if (!errScopeSb.isEmpty()) {
+					errScopeSb.append(", ");
 				}
-				errScopeStr += reqScope;
+				errScopeSb.append(reqScope);
 			}
 		}
+		String errScopeStr = errScopeSb.toString();
 
 		// 不是支援的 scope
 		if (StringUtils.hasLength(errScopeStr)) {
@@ -1121,8 +1148,8 @@ public class TokenHelper {
 			TPILogger.tl.debug("Full authentication is required to access this resource");
 			errMsg = TokenHelper.UNAUTHORIZED;
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<>(getOAuthTokenErrorResp2(errMsg, errMsg),
-					setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
+			return new ResponseEntity<>(getOAuthTokenErrorResp2(errMsg, errMsg), setContentTypeHeader(),
+					HttpStatus.UNAUTHORIZED);// 401
 		}
 		return null;
 	}
@@ -1130,6 +1157,7 @@ public class TokenHelper {
 	/**
 	 * 1.取得 token (access token / refresh token) 的 payload, <br>
 	 * 2.做 JWS 驗章 或 JWE 解密 <br>
+	 * token 來自 URL, 例如 https://127.0.0.1:8080/oauth/token <br>
 	 * (1).JWS 驗章, 使用 digiRunner 的公鑰驗章, 取得 payload 做 Base64 Decode 後的值 <br>
 	 * (2).JWE 解密, 使用 digiRunner 的私鑰解密, 取得 payload 解密後的值 <br>
 	 */
@@ -1176,6 +1204,47 @@ public class TokenHelper {
 					TPILogger.tl.debug(errMsg);
 					jwtPayloadData.errRespEntity = getTokenFormatError();
 				}
+
+			} else {// 錯誤格式
+				jwtPayloadData.errRespEntity = getTokenFormatError();
+			}
+
+		} catch (Exception e) {
+			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
+			jwtPayloadData.errRespEntity = getTokenFormatError();
+		}
+
+		return jwtPayloadData;
+	}
+	
+	/**
+	 * 驗證符合 OIDC 的 token, 使用 digiRunner 的 JWKS 公鑰驗章 <br>
+	 * token 來自 URL, 例如 https://127.0.0.1:8080/oauth/v2/token <br>
+	 * 取得 payload 做 Base64 Decode 後的值 <br>
+	 */
+	public JwtPayloadData verifyTokenByJwks(String tokenJwtstr, String issuer, String jwksJsonStr) {
+		JwtPayloadData jwtPayloadData = new JwtPayloadData();
+
+		try {
+			String[] jwtInfoArr = tokenJwtstr.split("\\.");// 切分 JWT
+			
+			if (jwtInfoArr.length == 3) {// JWS
+				boolean isVerify = false;
+				// issuer 必須和 token 的 "iss" 值完全相同, 注意後面有沒有 "/" 有差別
+				JWKVerifyResult jwkRs = JWKcodec.verifyJWStokenByJsonString(tokenJwtstr, issuer, jwksJsonStr);
+				isVerify = jwkRs.verify;
+				if (!isVerify) {
+					// 驗證 Token 失敗,印出訊息
+					TPILogger.tl.error(jwkRs.errorMessg);
+					TPILogger.tl.error(StackTraceUtil.logStackTrace(jwkRs.errException));
+					jwtPayloadData.errRespEntity = getTokenFormatError();
+				}
+
+				// 取得 payload 做 Base64 Decode 後的值
+				String payloadJsonStr = new String(Base64Util.base64URLDecode(jwtInfoArr[1]));
+				ObjectMapper om = new ObjectMapper();
+				jwtPayloadData.payloadStr = payloadJsonStr;
+				jwtPayloadData.payloadJsonNode = om.readTree(payloadJsonStr);
 
 			} else {// 錯誤格式
 				jwtPayloadData.errRespEntity = getTokenFormatError();
@@ -1414,8 +1483,7 @@ public class TokenHelper {
 
 		if (isRevoked) {
 			// refresh token 已撤銷
-			ResponseEntity<?> respEntity = getRefreshTokenRevokedError(jti);
-			return respEntity;
+			return getRefreshTokenRevokedError(jti);
 		}
 
 		return null;
@@ -1514,8 +1582,7 @@ public class TokenHelper {
 		if (time.toString().length() == 10) {// 若為秒
 			time = time * 1000;// 轉成毫秒
 		}
-		Date date = new Date(time);
-		return date;
+		return new Date(time);
 	}
 
 	/**
@@ -1637,8 +1704,7 @@ public class TokenHelper {
 	 */
 	public static String getXApiKeyEn(String xApiKey) throws Exception {
 		byte[] byteArr = SHA256Util.getSHA256(xApiKey.getBytes());
-		String xApiKeyEn = HexStringUtils.toString(byteArr);// 大寫
-		return xApiKeyEn;
+		return HexStringUtils.toString(byteArr);// 大寫
 	}
 
 	/**
@@ -1674,7 +1740,7 @@ public class TokenHelper {
 		xApiKeyScopeList2.addAll(xApiKeyScopeList);
 
 		xApiKeyScopeList2.retainAll(apiScopeList);// 交集
-		if (xApiKeyScopeList2.size() == 0) {
+		if (xApiKeyScopeList2.isEmpty()) {
 			String errMsg = "X-Api-Key Violates Scope Authorization Access Settings";
 			String errLog = errMsg + "\n" + "X-Api-Key ScopeList:" + xApiKeyScopeList.toString() + "\n"
 					+ "Api ScopeList:" + apiScopeList.toString();
@@ -1717,7 +1783,7 @@ public class TokenHelper {
 		// 是否有"bearer "字樣,忽略大小寫
 		boolean hasBearer = checkHasKeyword(authorization, TokenHelper.BEARER);
 		if (hasBearer) {
-			respEntity = verifyApiForBearer(authorization, apiId, moduleName, reqUri, httpReq);
+			respEntity = verifyApiForBearer(authorization, apiId, moduleName, reqUri, httpReq, null, null, false);
 			if (respEntity != null) {
 				return respEntity;
 			} else {
@@ -1816,25 +1882,65 @@ public class TokenHelper {
 
 		return null;
 	}
-
+	
 	/**
 	 * 驗證打 API 的 authorization, Bearer 格式 (token)
 	 */
 	public ResponseEntity<?> verifyApiForBearer(String authorization, String apiId, String moduleName, String apiUrl,
-			HttpServletRequest httpReq) {
+			HttpServletRequest httpReq, String smartOnFhirResourceType, String smartOnFhirResourceURL,
+			boolean isBundleTransaction) {
 		try {
-			String tokenStr = authorization.substring(TokenHelper.BEARER.length());
+			
+			JwtPayloadData jwtPayloadData = null;
+			ResponseEntity<?> respEntity = null;
 
-			// 1.由 token 取得資料, 驗證 JWS 簽章 或 JWE 解密
-			JwtPayloadData jwtPayloadData = getJwtPayloadData(tokenStr);
-			ResponseEntity<?> respEntity = jwtPayloadData.errRespEntity;
+			String tokenStr = authorization.substring(TokenHelper.BEARER.length());
+			
+			String issuer = null;
+			JWTClaimsSet tokenClaims = null;
+			
+			// 解析 JWT
+			JWT jwt = JWTParser.parse(tokenStr);
+
+			if (jwt instanceof SignedJWT) {
+			    // 這是 JWS
+			    SignedJWT signedJWT = (SignedJWT) jwt;
+			    
+			    // 取得 JWS 的 Claims 集合 (Payload 部分)
+			   tokenClaims = signedJWT.getJWTClaimsSet();
+			    
+			    // 取得 JWS 的 Issuer
+			    issuer = tokenClaims.getIssuer();// iss
+			} else if (jwt instanceof EncryptedJWT) {
+			    // 這是 JWE
+			    EncryptedJWT encryptedJWT = (EncryptedJWT) jwt;
+			}
+			
+			// 1.由 token 取得資料
+			if (StringUtils.hasLength(issuer)) { // 為 JWS, 且有 iss 值, 為符合 OIDC 的 token
+				// 取得 JWKS 的公鑰 JSON
+				String jwksJsonStr = getGtwIdPJwksService().getJwksJsonStr();
+				// 驗證 JWS 簽章
+				jwtPayloadData = verifyTokenByJwks(tokenStr, issuer, jwksJsonStr);
+				// TODO, Mini, <Smart On FHIR>
+				// OIDC JWT 驗證標準 claims
+				respEntity = validateOidcJwtClaims(tokenClaims);
+				if (respEntity != null) {// 資料有錯誤
+					return respEntity;
+				}
+			} else {
+				// 驗證 JWS 簽章 或 JWE 解密
+				jwtPayloadData = getJwtPayloadData(tokenStr);
+			}
+			
+			respEntity = jwtPayloadData.errRespEntity;
 			if (respEntity != null) {// 資料有錯誤
 				return respEntity;
 			}
 			JsonNode payloadJsonNode = jwtPayloadData.payloadJsonNode;
 
 			// 2.是否 token exp 沒有值 或 token 過期
-			Long exp = JsonNodeUtil.getNodeAsLong(payloadJsonNode, "exp");
+			Long exp = JsonNodeUtil.getNodeAsLong(payloadJsonNode, "exp");// exp
 			respEntity = checkAccessTokenExp(tokenStr, exp);
 			if (respEntity != null) {// 資料有錯誤
 				return respEntity;
@@ -1911,7 +2017,36 @@ public class TokenHelper {
 				// 8.檢查 access token 的 scope 是否有權限打 API
 				JsonNode scopeArray = payloadJsonNode.get("scope");// 取得 token 的 scope(group id)
 				List<String> tokenScopeList = JsonNodeUtil.convertJsonArrayToList(scopeArray);
-				respEntity = checkTokenScope(apiId, moduleName, tokenScopeList, apiUrl);
+
+				if (TokenHelper.SMART_TOKEN.equals(apiId)) {// 依 SMART on FHIR 規則
+					if(!isBundleTransaction && !StringUtils.hasText(smartOnFhirResourceType)) {
+						// 不是打 Bundle transaction API 時, 資源類型必須具有值
+						String errMsg = "[SMART On FHIR] Resource type must have a value.";
+						TPILogger.tl.debug(errMsg);
+						return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+								setContentTypeHeader(), HttpStatus.BAD_REQUEST);// 400
+					}
+					
+					// 判斷是否是否為 search
+					boolean isSearch = isSearchForSmartOnFhir(smartOnFhirResourceURL);
+
+					TPILogger.tl.debug("resourceType: " + smartOnFhirResourceType + ", isSearch: " + isSearch);
+
+					// 轉換為 TokenClaims 物件
+					SmartOnFhirTokenClaims smartOnFhirTokenClaims = SmartOnFhirTokenClaims.fromJWTClaimsSet(tokenClaims);
+					// 驗證 Scope, 是否有權限打 FHIR API
+					respEntity = getSmartOnFhirScopeValidator().validateScope(smartOnFhirTokenClaims, httpReq.getMethod(),
+							smartOnFhirResourceType, isSearch, apiUrl, isBundleTransaction);
+					
+					// 建立授權上下文，傳遞給 Controller
+					SmartOnFhirAuthorizationContext authContext = new SmartOnFhirAuthorizationContext(smartOnFhirTokenClaims);
+					httpReq.setAttribute("authContext", authContext);
+					
+				} else {
+					// 驗證 Scope, 是否有權限打註冊 API
+					respEntity = checkTokenScope(apiId, moduleName, tokenScopeList, apiUrl);
+				}
+				
 				if (respEntity != null) {// 資料有錯誤
 					return respEntity;
 				}
@@ -1928,7 +2063,7 @@ public class TokenHelper {
 					// 但當角色為 Memory, 先用 Map 儲存 token 的使用量
 					addTokenUsedMap4InMemory(jti);
 				} else {
-					respEntity = checkClientAccessTokenQuota(jti, apiUrl);
+					respEntity = checkClientAccessTokenQuota(jti);
 					if (respEntity != null) {// 資料驗證有錯誤
 						return respEntity;
 					}
@@ -1957,6 +2092,36 @@ public class TokenHelper {
 			TPILogger.tl.error(errMsg);
 			return getInternalServerErrorResp(apiUrl, errMsg);// 500
 		}
+	}
+	
+	/**
+	 * SMART on FHIR, 判斷是否為 search <br>
+	 * read 或 search 區別不是看有沒有 ? 而是看 <br>
+	 * 1. URL path 有 resource id 為 read <br>
+	 * 例如: <br>
+	 * GET /fhir/Patient/A0001?_pretty=true <br>
+	 * (_pretty 只是格式參數) <br>
+	 * 2. URL path 沒有 resource id 為 search (沒有 resource id, 用參數查詢) <br>
+	 * 例如: <br>
+	 * GET /fhir/Patient?_id=A0001 <br>
+	 * GET /fhir/Patient?name=王小明&birthdate=1990-01-01 <br>
+	 * 
+	 * @param resourceURL 例如: /fhir/Patient/A0001 或 /fhir/Patient?_id=A0001
+	 * @return
+	 */
+	private boolean isSearchForSmartOnFhir(String smartOnFhirResourceURL) {
+		// 去掉開頭的 /，再用 / 切割
+		// 例如: /fhir/Patient/A0001 → segments: ["fhir", "Patient", "A0001"]
+		// 例如: /fhir/Patient?_id=A0001 → segments: ["fhir", "Patient?_id=A0001"]
+		
+		String[] segments = smartOnFhirResourceURL.replaceFirst("^/", "").split("/");
+		// segments = ["fhir", "Patient", "A0001"],  index: 0 1 2, length: 3
+		// segments = ["fhir", "Patient?_id=A0001"], index: 0 1,   length: 2
+
+		// 有 resource id = index 2 存在 = segments.length >= 3
+		boolean hasResourceId = segments.length >= 3 && !segments[2].isEmpty();
+
+		return !hasResourceId;
 	}
 
 	/**
@@ -2069,15 +2234,13 @@ public class TokenHelper {
 			long nowTime = System.currentTimeMillis();// 亳秒
 
 			// 8.API Key 已撤銷
-			if (revokedAt != null) {
-				if (revokedAt < nowTime) {// 撤銷
-					Date revokedDate = new Date(revokedAt);
-					String revokedStr = DateTimeUtil.dateTimeToString(revokedDate, DateTimeFormatEnum.西元年月日時分秒毫秒_2)
-							.orElse(null);
-					String errMsg = "API Key Has Revoked, revoked at: " + revokedStr;
-					TPILogger.tl.debug(errMsg);
-					return getUnauthorizedErrorResp(apiUrl, errMsg);// 401
-				}
+			if (revokedAt != null && revokedAt < nowTime) {// 撤銷
+				Date revokedDate = new Date(revokedAt);
+				String revokedStr = DateTimeUtil.dateTimeToString(revokedDate, DateTimeFormatEnum.西元年月日時分秒毫秒_2)
+						.orElse(null);
+				String errMsg = "API Key Has Revoked, revoked at: " + revokedStr;
+				TPILogger.tl.debug(errMsg);
+				return getUnauthorizedErrorResp(apiUrl, errMsg);// 401
 			}
 
 			// 9.API Key 已過期
@@ -2195,7 +2358,7 @@ public class TokenHelper {
 		clientScopeList2.addAll(clientScopeList);
 
 		clientScopeList2.retainAll(apiScopeList);// 交集
-		if (clientScopeList2.size() == 0) {
+		if (clientScopeList2.isEmpty()) {
 			String errMsg = "Token Violates Scope Authorization Access Settings";
 			String errLog = errMsg + "\n" + "Client Id: " + clientId + "\n" + "Client ScopeList: "
 					+ clientScopeList.toString() + "\n" + "Api ScopeList: " + apiScopeList.toString();
@@ -2270,12 +2433,12 @@ public class TokenHelper {
 	 */
 	public ResponseEntity<?> checkClientSupportGrantType(String clientId, String grantType, String apiUrl) {
 
-		Optional<OauthClientDetails> opt_authClientDetails = getOauthClientDetailsCacheProxy().findById(clientId);
-		if (!opt_authClientDetails.isPresent()) {
+		Optional<OauthClientDetails> optAuthClientDetails = getOauthClientDetailsCacheProxy().findById(clientId);
+		if (!optAuthClientDetails.isPresent()) {
 			return getFindOauthClientDetailsError(clientId, apiUrl);
 		}
 
-		OauthClientDetails authClientDetails = opt_authClientDetails.get();
+		OauthClientDetails authClientDetails = optAuthClientDetails.get();
 		String authGrantTypes = authClientDetails.getAuthorizedGrantTypes();
 		authGrantTypes = authGrantTypes.toLowerCase();// 轉小寫,再比較(忽略大小寫)
 		List<String> authGrantTypesList = Arrays.asList(authGrantTypes.split(","));// client 被授權的 grant type
@@ -2301,24 +2464,24 @@ public class TokenHelper {
 		// --- 使用 Cache ---
 		// 查無 client
 		// 因為最終要用findFirstByClientId的cache機制,所以沒用findById
-		TsmpClient cache_tsmpClient = getTsmpClientCacheProxy().findFirstByClientId(clientId);
-		if (cache_tsmpClient == null) {
+		TsmpClient cacheTsmpClient = getTsmpClientCacheProxy().findFirstByClientId(clientId);
+		if (cacheTsmpClient == null) {
 			return getFindTsmpClientError(clientId, reqUri);
 		}
 
-		Integer apiQuota = cache_tsmpClient.getApiQuota();
+		Integer apiQuota = cacheTsmpClient.getApiQuota();
 		// 1.若 api_quota(API可用量)為 null 或 0, 為不限次數, 不檢查 且 api_used(API使用量)不加1
 		if (apiQuota == null || apiQuota == 0) {
 			return null;
 		}
 
 		// --- 使用 Dao ---
-		Optional<TsmpClient> opt_client = getTsmpClientDao().findById(clientId);
-		if (opt_client.isEmpty()) {
+		Optional<TsmpClient> optClient = getTsmpClientDao().findById(clientId);
+		if (optClient.isEmpty()) {
 			return getFindTsmpClientError(clientId, reqUri);
 		}
 
-		TsmpClient tsmpClient = opt_client.get();
+		TsmpClient tsmpClient = optClient.get();
 		apiQuota = tsmpClient.getApiQuota();
 		Integer apiUsed = tsmpClient.getApiUsed() == null ? 0 : tsmpClient.getApiUsed();
 
@@ -2327,8 +2490,7 @@ public class TokenHelper {
 			String errMsg = "Client(application) quota ran out";// client 配額用完
 			String errMsg2 = errMsg + ", client_id: " + clientId;
 			TPILogger.tl.debug(errMsg2);
-			return new ResponseEntity<>(
-					getOAuthTokenErrorResp(errMsg, errMsg2, HttpStatus.FORBIDDEN.value(), reqUri),
+			return new ResponseEntity<>(getOAuthTokenErrorResp(errMsg, errMsg2, HttpStatus.FORBIDDEN.value(), reqUri),
 					setContentTypeHeader(), HttpStatus.FORBIDDEN);// 403
 		}
 
@@ -2348,19 +2510,19 @@ public class TokenHelper {
 	/**
 	 * 檢查 client access token 可用量 和 打 API 成功後, access token 使用量 加1
 	 */
-	protected ResponseEntity<?> checkClientAccessTokenQuota(String jti, String apiUrl) {
+	protected ResponseEntity<?> checkClientAccessTokenQuota(String jti) {
 		// --- 使用 Cache ---
 		// 1.查詢 TSMP_TOKEN_HISTORY, 此 access token 的記錄
-		TsmpTokenHistory cache_tsmpTokenHistory = getTsmpTokenHistoryCacheProxy().findFirstByTokenJti(jti);
-		if (cache_tsmpTokenHistory == null) {// 查無資料
+		TsmpTokenHistory cacheTsmpTokenHistory = getTsmpTokenHistoryCacheProxy().findFirstByTokenJti(jti);
+		if (cacheTsmpTokenHistory == null) {// 查無資料
 			// Table [TSMP_TOKEN_HISTORY] 查不到資料
 			TPILogger.tl.debug("Table [TSMP_TOKEN_HISTORY] can't find data, token_jti:" + jti);
 			// access_token 已撤銷
 			return getTokenRevokedError(jti);// 403
 		}
 
-		Long tokenQuota = cache_tsmpTokenHistory.getTokenQuota() == null ? 0 : cache_tsmpTokenHistory.getTokenQuota();
-		Long tokenUsed = cache_tsmpTokenHistory.getTokenUsed() == null ? 0 : cache_tsmpTokenHistory.getTokenUsed();
+		Long tokenQuota = cacheTsmpTokenHistory.getTokenQuota() == null ? 0 : cacheTsmpTokenHistory.getTokenQuota();
+		Long tokenUsed = cacheTsmpTokenHistory.getTokenUsed() == null ? 0 : cacheTsmpTokenHistory.getTokenUsed();
 
 		// 2.若 token_quota(可用量) 為 null 或 0, 則為不限次數, 不檢查
 		// 且 token_used(使用量) 不加1
@@ -2384,7 +2546,7 @@ public class TokenHelper {
 		// 4.每打一次 API, access token使用量 + 1, 更新 TSMP_TOKEN_HISTORY
 		tokenUsed += 1;
 		tsmpTokenHistory.setTokenUsed(tokenUsed);
-		tsmpTokenHistory = getTsmpTokenHistoryDao().saveAndFlush(tsmpTokenHistory);
+		getTsmpTokenHistoryDao().saveAndFlush(tsmpTokenHistory);
 
 		// 當角色為 Memory, 先用 Map 儲存 token 的使用量
 		addTokenUsedMap4InMemory(jti);
@@ -2474,17 +2636,17 @@ public class TokenHelper {
 				setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
 	}
 
-	public ResponseEntity<?> getForbiddenErrorResp(String reqUri, String errMsg) {
+	public static ResponseEntity<?> getForbiddenErrorResp(String errMsg) {
 		return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.FORBIDDEN, errMsg), HttpStatus.FORBIDDEN);// 403
 	}
 
-	public ResponseEntity<?> getInternalServerErrorResp(String apiUrl, String errMsg) {
+	public static ResponseEntity<?> getInternalServerErrorResp(String apiUrl, String errMsg) {
 		return new ResponseEntity<>(
 				getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.INTERNAL_SERVER_ERROR.value(), apiUrl),
 				setContentTypeHeader(), HttpStatus.INTERNAL_SERVER_ERROR);// 500
 	}
 
-	public ResponseEntity<?> getTokenFormatError() {
+	public static ResponseEntity<OAuthTokenErrorResp2> getTokenFormatError() {
 		// token 格式不對
 		String errMsg = TokenHelper.CANNOT_CONVERT_ACCESS_TOKEN_TO_JSON;
 		TPILogger.tl.debug(errMsg);
@@ -2492,7 +2654,7 @@ public class TokenHelper {
 				HttpStatus.BAD_REQUEST);// 400
 	}
 
-	public ResponseEntity<?> getApiJwsBodyFormatError() {
+	public static ResponseEntity<?> getApiJwsBodyFormatError() {
 		// API JWS request body 格式不對
 		String errMsg = "API JWS Request_body Required";
 		TPILogger.tl.debug(errMsg);
@@ -2500,7 +2662,7 @@ public class TokenHelper {
 				setContentTypeHeader(), HttpStatus.BAD_REQUEST);// 400
 	}
 
-	public ResponseEntity<?> getApiJweBodyFormatError() {
+	public static ResponseEntity<?> getApiJweBodyFormatError() {
 		// API JWE request body 格式不對
 		String errMsg = "JWE Cannot Be Resolved";
 		TPILogger.tl.debug(errMsg);
@@ -2508,7 +2670,7 @@ public class TokenHelper {
 				setContentTypeHeader(), HttpStatus.BAD_REQUEST);// 400
 	}
 
-	public ResponseEntity<?> getApiBodyFormatError() {
+	public static ResponseEntity<?> getApiBodyFormatError() {
 		// API request body 格式不對
 		String errMsg = "API request body is incorrect";
 		TPILogger.tl.debug(errMsg);
@@ -2516,23 +2678,23 @@ public class TokenHelper {
 				setContentTypeHeader(), HttpStatus.BAD_REQUEST);// 400
 	}
 
-	public ResponseEntity<?> getTokenRevokedError(String jti) {
+	public static ResponseEntity<?> getTokenRevokedError(String jti) {
 		// access_token 已撤銷
 		String errMsg = "Access token revoked, jti: " + jti;
 		TPILogger.tl.debug(errMsg);
-		return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg),
-				setContentTypeHeader(), HttpStatus.FORBIDDEN);// 403
+		return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg), setContentTypeHeader(),
+				HttpStatus.FORBIDDEN);// 403
 	}
 
-	public ResponseEntity<?> getRefreshTokenRevokedError(String jti) {
+	public static ResponseEntity<?> getRefreshTokenRevokedError(String jti) {
 		// refresh token 已撤銷
 		String errMsg = "Refresh token revoked, jti: " + jti;
 		TPILogger.tl.debug(errMsg);
-		return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg),
-				setContentTypeHeader(), HttpStatus.FORBIDDEN);// 403
+		return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg), setContentTypeHeader(),
+				HttpStatus.FORBIDDEN);// 403
 	}
 
-	public OAuthTokenErrorResp getOAuthTokenErrorResp(String error, String message, int httpCode, String apiUrl) {
+	public static OAuthTokenErrorResp getOAuthTokenErrorResp(String error, String message, int httpCode, String apiUrl) {
 		OAuthTokenErrorResp resp = new OAuthTokenErrorResp();
 		resp.setTimestamp(System.currentTimeMillis() + "");
 		resp.setStatus(httpCode);
@@ -2588,12 +2750,10 @@ public class TokenHelper {
 
 		Object obj = errRespEntity.getBody();
 		String msg = null;
-		if (obj instanceof OAuthTokenErrorResp) {
-			OAuthTokenErrorResp resp = (OAuthTokenErrorResp) obj;
+		if (obj instanceof OAuthTokenErrorResp resp) {
 			msg = resp.getMessage();
 
-		} else if (obj instanceof OAuthTokenErrorResp2) {
-			OAuthTokenErrorResp2 resp = (OAuthTokenErrorResp2) obj;
+		} else if (obj instanceof OAuthTokenErrorResp2 resp) {
 			msg = resp.getErrorDescription();
 		}
 
@@ -2606,9 +2766,7 @@ public class TokenHelper {
 			return null;
 		}
 		String scheme = httpReq.getScheme();
-		String localBaseUrl = scheme + "://" + host;
-
-		return localBaseUrl;
+		return scheme + "://" + host;
 	}
 
 	private String getServiceConfigVal(String key) {
@@ -2663,14 +2821,162 @@ public class TokenHelper {
 	}
 
 	/**
-	 * 為了postman 沒有帶 APPLICATION_JSON
+	 * 為了 postman 沒有帶 APPLICATION_JSON
 	 * 
 	 * @return
 	 */
-	private MultiValueMap<String, String> setContentTypeHeader() {
+	protected static MultiValueMap<String, String> setContentTypeHeader() {
 		// 為了postman 沒有帶 APPLICATION_JSON
 		MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
 		header.put("Content-Type", Arrays.asList(MediaType.APPLICATION_JSON.toString()));
 		return header;
+	}
+	
+	/**
+	 * 驗證標準 OIDC Access token claims 
+	 */
+	private ResponseEntity<OAuthTokenErrorResp2> validateOidcJwtClaims(JWTClaimsSet tokenClaims){
+		String errMsg = null;
+		
+		try {
+			// 1.取得 JWT 的 Issuer
+			String issuer = tokenClaims.getIssuer();// iss
+			
+			// 2.驗證 issuer
+			// 對外公開的域名或IP, ex: www.tpisoftware.com
+			String dgrPublicDomain = getTsmpSettingService().getVal_DGR_PUBLIC_DOMAIN();
+			// 對外公開的Port, ex: 80
+			String dgrPublicPort = getTsmpSettingService().getVal_DGR_PUBLIC_PORT();
+			String schemeAndDomainAndPort = OIDCWellKnownHelper.getSchemeAndDomainAndPort(dgrPublicDomain,
+					dgrPublicPort);
+			// 符合 OIDC 的 Access token 要有 iss, client_credentials 固定用 "OIDC"
+			String expectedIssuer = OIDCWellKnownHelper.getIssuer(schemeAndDomainAndPort, DgrIdPType.OIDC,
+					DgrTokenVersion.PATH_V2);
+			if (!expectedIssuer.equals(issuer)) {
+				errMsg = "Invalid issuer. Expected: " + expectedIssuer + ", Got: " + issuer;
+				TPILogger.tl.debug(errMsg);
+				return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg),
+						setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
+			}
+			
+			// 3.驗證 audience
+			String expectedAudience = OAuthTokenService.AUDIENCE_OIDC;
+			List<String> audience = tokenClaims.getAudience();
+			if (audience == null || !audience.contains(expectedAudience)) {
+				errMsg = "Invalid audience. Expected: " + expectedAudience + ", Got: " + audience;
+				TPILogger.tl.debug(errMsg);
+				return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg),
+						setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
+			}
+			
+			// 4.驗證過期時間
+			Date expirationTime = tokenClaims.getExpirationTime();
+			if (expirationTime == null) {
+				errMsg = "Missing expiration time";
+				TPILogger.tl.debug();
+				return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg),
+						setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
+			}
+			
+			if (expirationTime.toInstant().isBefore(Instant.now())) {
+				errMsg = "Token has expired: " + expirationTime;
+				TPILogger.tl.debug("Token has expired: " + expirationTime);
+				return new ResponseEntity<>(getOAuthTokenErrorResp2(TokenHelper.INVALID_TOKEN, errMsg),
+						setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
+			}
+			
+			return null;
+
+		} catch (Exception e) {
+			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
+			return getTokenFormatError();
+		}
+	}
+
+	/**
+	 * SMART on FHIR 使用, <br>
+	 * 驗證 Access token <br>
+	 */
+	public ResponseEntity<?> verifyAccessTokenForSmartOnFhir(HttpHeaders httpHeaders, HttpServletRequest httpReq,
+			String reqUri, String smartOnFhirResourceType, List<String> allowedClients, String smartOnFhirResourceURL, boolean isBundleTransaction) {
+
+		String authorization = Optional.ofNullable(httpHeaders.get("Authorization")).map(az -> az.get(0)).orElse("");
+
+		// 是否有 Authorization
+		ResponseEntity<?> respEntity = checkHasAuthorization(authorization, reqUri);
+		if (respEntity != null) {
+			return respEntity;
+		}
+
+		// 是否有"bearer "字樣,忽略大小寫
+		boolean hasBearer = checkHasKeyword(authorization, TokenHelper.BEARER);
+		if (!hasBearer) {// 沒有字樣
+			String errMsg = TokenHelper.UNAUTHORIZED;
+			TPILogger.tl.debug(errMsg);
+			return getUnauthorizedErrorResp(reqUri, errMsg);
+		}
+		
+		// 檢查 Access token 的 client_id 是否在允許清單中
+		respEntity = checkClientIdAllowedForSmartOnFhir(authorization, allowedClients, reqUri);
+		if (respEntity != null) {
+			return respEntity;
+		}
+
+		// 驗證 Access token
+		respEntity = verifyApiForBearer(authorization, TokenHelper.SMART_TOKEN, null, reqUri, httpReq,
+				smartOnFhirResourceType, smartOnFhirResourceURL, isBundleTransaction);
+		if (respEntity != null) {
+			return respEntity;
+		}
+
+		return null;
+	}
+	
+	/**
+	 * SMART on FHIR 使用, <br>
+	 * 檢查 Access token 的 client id 是否在允許清單中 <br>
+	 */
+	private ResponseEntity<?> checkClientIdAllowedForSmartOnFhir(String authorization,
+			List<String> allowedClients, String reqUri) {
+		
+		if (CollectionUtils.isEmpty(allowedClients)) {// 當允許清單為空時, 表示全部 client ID 都允許
+			return null;
+		}
+		
+		String clientIdFromToken = null;
+		try {
+			String tokenStr = authorization.substring(TokenHelper.BEARER.length());
+
+			JWT jwt = JWTParser.parse(tokenStr);// 解析 JWT
+			SignedJWT signedJWT = (SignedJWT) jwt;
+			JWTClaimsSet tokenClaims = signedJWT.getJWTClaimsSet();// 取得 JWS 的 Claims 集合 (Payload 部分)
+
+			clientIdFromToken = tokenClaims.getStringClaim("client_id");
+			
+		} catch (Exception e) {
+			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
+			return getTokenFormatError();
+		}
+		
+		if (!StringUtils.hasText(clientIdFromToken)) {
+			// Access token 中的 'client_id' 必須有值
+			TPILogger.tl.debug("The 'client_id' in the access token must have a value.");
+			return getTokenFormatError();
+		}
+		
+		if (!allowedClients.contains(clientIdFromToken)) {
+			// "SMART on FHIR 存取遭拒：客戶端 ID '%s' 未授權。允許的 ID 為：%s"
+			String errorMsg = String.format(
+					"[SMART on FHIR] Access denied: Client ID '%s' is not authorized. Allowed: %s", clientIdFromToken,
+					allowedClients);
+			
+			TPILogger.tl.debug(errorMsg);
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(TokenHelper.FORBIDDEN, errorMsg,
+							HttpStatus.FORBIDDEN.value(), reqUri),
+					TokenHelper.setContentTypeHeader(), HttpStatus.FORBIDDEN);// 403
+		}
+
+		return null;
 	}
 }

@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.dpaa.vo.DigiRunnerTokenResp;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.OAuthTokenService;
 import tpi.dgrv4.gateway.vo.OAuthTokenResp;
@@ -132,7 +133,7 @@ public class DigiRunnerTokenService {
 			
 			String apiUrl = "/oauth/token";
 			ResponseEntity<OAuthTokenResp> responseEntity = (ResponseEntity<OAuthTokenResp>) getOAuthTokenService() //
-				.getToken(formData, basicAuth, apiUrl);
+				.getToken(formData, basicAuth, apiUrl, DgrTokenVersion.PATH_V1);
 			if (responseEntity.getStatusCode().is2xxSuccessful()) {
 				OAuthTokenResp oauthTokenResp = responseEntity.getBody();
 

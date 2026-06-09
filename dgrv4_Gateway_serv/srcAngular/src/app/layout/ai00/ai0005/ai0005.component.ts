@@ -167,12 +167,12 @@ export class Ai0005Component extends BaseComponent implements OnInit {
       .updateConsumerAIPromptTemplateSetting(req)
       .subscribe(async (res) => {
         if (this.toolService.checkDpSuccess(res.ResHeader)) {
-          const code = ['message.create', 'message.success'];
+          const code = ['message.create', 'message.success', 'message.update'];
           const dict = await this.toolService.getDict(code);
           this.messageService.add({
             severity: 'success',
-            summary: `${dict['message.create']} `,
-            detail: `${dict['message.create']} ${dict['message.success']}!`,
+            summary: this.currentAction == 'create' ? `${dict['message.create']} ` : `${dict['message.update']} ` ,
+            detail: `${this.currentAction == 'create' ? dict['message.create'] : dict['message.update']} ${dict['message.success']}!`,
           });
           this.changePage('query');
           this.listConsumerAIPromptTemplateSetting();

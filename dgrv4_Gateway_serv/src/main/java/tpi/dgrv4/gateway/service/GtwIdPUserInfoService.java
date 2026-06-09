@@ -51,7 +51,7 @@ public class GtwIdPUserInfoService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			respEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			respEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return respEntity;
 		}
 	}

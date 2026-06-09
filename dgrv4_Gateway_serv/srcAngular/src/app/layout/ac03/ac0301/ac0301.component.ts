@@ -23,7 +23,7 @@ import {
   UntypedFormArray,
   UntypedFormControl,
 } from '@angular/forms';
-import { FormOperate } from 'src/app/models/common.enum';
+import { AlertType, FormOperate } from 'src/app/models/common.enum';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 import {
@@ -200,7 +200,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   reloadFlag: boolean = false;
 
   jwtSettingSub?: Subscription;
-  isExpired:boolean = false;
+  isExpired: boolean = false;
 
   constructor(
     route: ActivatedRoute,
@@ -225,6 +225,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     private toolServiceW: ToolServiceWebhoook,
     private orgService: TOrgService,
     private aboutService: AboutService,
+    private alertService: AlertService,
   ) {
     super(route, tr);
 
@@ -301,7 +302,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isExpired = sessionStorage.getItem('isExpired') === 'true' ? true : false;
+    this.aboutService
+      .checkLicenseExpired()
+      .subscribe((isExpired) => (this.isExpired = isExpired));
 
     this.form = this.fb.group({
       file: new UntypedFormControl(),
@@ -606,6 +609,15 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       }
     });
 
+    // this.labelList.valueChanges.subscribe(values => {
+    //   if (Array.isArray(values)) {
+    //     const uniqueValues = [...new Set(values)];
+    //     if (uniqueValues.length !== values.length) {
+    //       setTimeout(() => this.labelList.setValue(uniqueValues, { emitEvent: false }));
+    //     }
+    //   }
+    // });
+
     this.queryAllLabel();
   }
 
@@ -904,8 +916,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       2: dict['button.disable'],
       4: dict['button.export'],
     };
+    console.log('currentUpdateStatusAction', this.currentUpdateStatusAction);
     switch (this.currentUpdateStatusAction) {
       case '0': {
+        console.log('first', this.currentUpdateStatusAction);
+
         this.translate.get('alert').subscribe((alert) => {
           this.translate
             .get('alert.text.actions', { statusText: statusText[action] })
@@ -942,8 +957,10 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           data: {
             status: this.currentUpdateStatusAction,
           },
+          closable: true,
+          modal: true,
         });
-        ref.onClose.subscribe((res) => {
+        ref!.onClose.subscribe((res) => {
           if (res) {
             if (!res.modifyDate || res.modifyDate == '') {
               this.active(0, res.apiStatus);
@@ -971,7 +988,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
             revokeFlag: revokeFlag ? revokeFlag : 'revokeAll',
           },
         });
-        ref2.onClose.subscribe((res) => {
+        ref2!.onClose.subscribe((res) => {
           if (res) {
             // 清除 API 預定啟用日期或停用日期
             this.apiService
@@ -1305,24 +1322,18 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           const ref = this.dialogService.open(ApiTestComponent, {
             header: dict['api_test_page'],
             styleClass: 'cHeader',
-            autoZIndex: false,
-
+            modal: true,
             data: {
               apikey: rowData.apiKey.ori
                 ? rowData.apiKey.ori
                 : rowData.apiKey.val,
-              // rowData.apiKey.t == true
-              //   ? rowData.apiKey.ori
-              //   : rowData.apiKey.val,
               moduleName: rowData.moduleName.ori
                 ? rowData.moduleName.ori
                 : rowData.moduleName.val,
-              // rowData.moduleName.t == true
-              //   ? rowData.moduleName.ori
-              //   : rowData.moduleName.val,
               apiSrc: rowData.apiSrc.v,
             },
             width: '90vw',
+            closable: true,
           });
         } else if (type == 'page') {
           this.pageNum = 4;
@@ -1330,26 +1341,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
             apikey: rowData.apiKey.ori
               ? rowData.apiKey.ori
               : rowData.apiKey.val,
-            // (rowData.apiKey.t == true
-            //   ? rowData.apiKey.ori
-            //   : rowData.apiKey.val) ?? '',
             moduleName: rowData.moduleName.ori
               ? rowData.moduleName.ori
               : rowData.moduleName.val,
-            // (rowData.moduleName.t == true
-            //   ? rowData.moduleName.ori
-            //   : rowData.moduleName.val) ?? '',
             apiSrc: rowData.apiSrc.v,
           };
-        } else {
-          // this.router.navigate([
-          //   '/ac03/ac0316',
-          //   rowData.apiKey.t == true ? rowData.apiKey.ori : rowData.apiKey.val,
-          //   rowData.moduleName.t == true
-          //     ? rowData.moduleName.ori
-          //     : rowData.moduleName.val,
-          //   rowData.apiSrc.v,
-          // ]);
         }
         break;
     }
@@ -1574,6 +1570,41 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     }
   }
 
+  checkLength(event: KeyboardEvent) {
+    // const inputElement = event.target as HTMLInputElement;
+    // const newValue = inputElement.value.trim();
+
+    const maxLimit = 5;
+    const currentValues = this.updateForm.get('labelList')?.value || [];
+    // console.log(newValue)
+    // console.log(currentValues)
+    if (event.key === 'Enter') {
+      // console.log(currentValues)
+      const duplicates = currentValues.filter((item, index) => {
+        return currentValues.indexOf(item) !== index;
+      });
+      // console.log(duplicates)
+
+      if(duplicates.length > 0){
+        currentValues.pop();
+        this.updateForm.get('labelList')?.setValue(currentValues);
+      }
+
+      if (currentValues.length > maxLimit) {
+
+        event.preventDefault();
+
+        this.messageService.add({
+          severity: 'warn',
+          // summary: '上限提醒',
+          detail: this.translate.instant('label_tag_max', { value: 5 }),
+        });
+        currentValues.pop();
+        this.updateForm.get('labelList')?.setValue(currentValues);
+      }
+    }
+  }
+
   async updateApi() {
     // console.log(this.u_srcUrl!.value)
     // return;
@@ -1761,7 +1792,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                   this.selLabelList = this.selLabelList.filter((selItem) =>
                     this.lblList.map((x) => x.label).includes(selItem),
                   );
-                  this.clearFilter();
+                  // this.clearFilter();
 
                   this.searchByLabel
                     ? this.queryAPIListByLabel(this.selLabelList)
@@ -2355,9 +2386,19 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           },
           width: '90vw',
           height: '100vh',
+          closable: true,
+          modal: true,
         });
         break;
       case 'import':
+        if (this.isExpired) {
+          this.alertService.ok(
+            this.translate.instant('license_expired'),
+            '',
+            AlertType.error,
+          );
+          return;
+        }
         this.resetFormValidator(this.form);
         this.apiFile = undefined;
         $('#file').val('');
@@ -2855,8 +2896,10 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       data: {
         updateJwtSettingFlags: this.updateJwtSettingFlags,
       },
+      closable: true,
+      modal: true,
     });
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) {
         this.q_jweFlag!.setValue(res.jweFlag);
         this.q_jweFlagResp!.setValue(res.jweFlagResp);
@@ -2872,9 +2915,11 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       data: {
         notifyNameList: this.notifyNameList.value,
       },
+      closable: true,
+      modal: true,
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       if (res) this.notifyNameList.setValue(res);
     });
   }
@@ -2900,7 +2945,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
             height: '100vh',
           });
 
-          refDialog.onClose.subscribe((res) => {
+          refDialog!.onClose.subscribe((res) => {
             if (res) {
               const reqArr = this.selected.map((rowData) => {
                 return {

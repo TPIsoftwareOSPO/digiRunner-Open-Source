@@ -150,6 +150,8 @@ public class TSMPCServiceDelete implements IApiCacheService {
 			// 完整轉發url為http://127.0.0.1:8080/dgrv4/mocktest/delete/api/a/bb/ccc/1
 			if (isURLRID)
 				tsmpcDel_srcUrl = tsmpcDel_srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
+			
+			tsmpcDel_srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, tsmpcDel_srcUrl);
 
 			int tokenPayload = apiReg.getFunFlag();
 
@@ -350,10 +352,10 @@ public class TSMPCServiceDelete implements IApiCacheService {
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl, Map<String, String> maskInfo)
 			throws IOException {
 		StringBuffer tsmpcDel_log = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
 		// print
 		writeLogger(tsmpcDel_log, "--【URL】--");
-		writeLogger(tsmpcDel_log, httpReq.getRequestURI());
+		writeLogger(tsmpcDel_log, uri);
 		writeLogger(tsmpcDel_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(tsmpcDel_log, "【" + httpReq.getMethod() + "】\r\n");
 

@@ -10,6 +10,7 @@ public class FilteredHeaderResponseWrapper extends HttpServletResponseWrapper {
 
     private final HttpServletRequest request;
     private final boolean isKibanaRequest; // Flag to indicate if the request is for Kibana
+    private final boolean isDgrcOrTsmpc;
 
     private static final Set<String> HTTP2_FORBIDDEN_HEADERS = Set.of(
             "connection", "keep-alive", "proxy-connection", "transfer-encoding", "upgrade"
@@ -21,10 +22,12 @@ public class FilteredHeaderResponseWrapper extends HttpServletResponseWrapper {
      * @param request The original request
      * @param isKibanaRequest True if the request is identified as a Kibana request
      */
-    public FilteredHeaderResponseWrapper(HttpServletResponse response, HttpServletRequest request, boolean isKibanaRequest) {
+    public FilteredHeaderResponseWrapper(HttpServletResponse response, HttpServletRequest request, boolean isKibanaRequest
+    		, boolean isDgrcOrTsmpc) {
         super(response);
         this.request = request;
         this.isKibanaRequest = isKibanaRequest;
+        this.isDgrcOrTsmpc = isDgrcOrTsmpc;
     }
 
     private boolean isHttp2() {
@@ -54,7 +57,7 @@ public class FilteredHeaderResponseWrapper extends HttpServletResponseWrapper {
             return;
         }
         // Only apply the ignoreHeaders filter if it's NOT a Kibana request.
-        if (!this.isKibanaRequest && ignoreHeaders.contains(name.toLowerCase())) {
+        if (!this.isDgrcOrTsmpc && !this.isKibanaRequest && ignoreHeaders.contains(name.toLowerCase())) {
             return;
         }
 

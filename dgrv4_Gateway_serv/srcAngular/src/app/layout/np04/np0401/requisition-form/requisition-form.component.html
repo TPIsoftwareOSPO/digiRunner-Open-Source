@@ -121,7 +121,7 @@
                 <label>{{data.data.detailData.openApiKey.timesThreshold}}</label>
             </div>
             <div *ngIf="data.data.detailData.reqType != 'CLIENT_REG'" class="col-12 col-sm-12">
-                <p-table *ngIf="detailCols" [columns]="detailCols" [value]="detailDataList" styleClass="p-datatable-striped"
+                <p-table *ngIf="detailCols" [columns]="detailCols" [value]="detailDataList" stripedRows
                     [style]="{'word-break':'break-word'}">
                     <ng-template pTemplate="colgroup" let-columns>
                         <colgroup>
@@ -182,7 +182,7 @@
                 <label class="control-label">{{'dialog.approval_history'|translate}}：</label>
             </div>
             <div class="col-12 col-sm-12">
-                <p-table *ngIf="trakerCols" [columns]="trakerCols" [value]="trakerDataList" [scrollable]="true" styleClass="p-datatable-striped"
+                <p-table *ngIf="trakerCols" [columns]="trakerCols" [value]="trakerDataList" [scrollable]="true" stripedRows
                     scrollHeight="100%" [style]="{'word-break':'break-word'}">
                     <ng-template pTemplate="colgroup" let-columns>
                         <colgroup>

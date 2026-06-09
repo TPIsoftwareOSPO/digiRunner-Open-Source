@@ -51,19 +51,6 @@ export class CusService {
         } as ReqCUS0001;
         const path = `${this._basePath}/CUS0001`;
         return this.api.excuteNpPost<ResCUS0001>(path, body);
-        // return of({
-        //     ResHeader: {},
-        //     RespBody: {
-        //         dataItem: {
-        //             cusSettingId: '8',
-        //             settingNo: 'MSG',
-        //             settingName: '訊息',
-        //             subsettingNo: 'SEARCH_WORD',
-        //             subsettingName: '提示訊息',
-        //             param1: 'TSP ID(例如：統一編號)，可以用*做萬用字元查詢'
-        //         }
-        //     } as CUS0001Resp
-        // } as ResCUS0001)
     }
     /**
      * PEM檔-上傳/解析/save用戶憑證
@@ -84,28 +71,12 @@ export class CusService {
      * @returns Observable<ResponseInvoke>
      */
     queryQmInvokeCUS0003(ReqBody: ReqBodyCUS0003Invoke): Observable<ResCUS0003Invoke> {
-        console.log('call cus0003 invoke');
         let body = {
             ReqHeader: this.api.getReqHeader(TxID.queryQmInvokeCUS0003),
             ReqBody: ReqBody
         } as ReqCUS0003;
         const path = `${this._basePath}/CUS0003?invoke`;
         return this.api.excuteNpPost<ResCUS0003Invoke>(path, body);
-        // return of({
-        //     ResHeader: { "txSN": "1210317182949UHD5uh", "txDate": "20210317T182949+0800", "txID": "DPB0083", "rtnCode": "1100", "rtnMsg": null },
-        //     RespBody: {
-        //         apptJobId: 1001,
-        //         showUI: {
-        //             cgRespBody: {
-        //                 code: '0',
-        //                 message: '成功',
-        //                 data: [
-        //                     { tspid: '1000' } as CUS0003CgRespBodyItem
-        //                 ]
-        //             } as CUS0003CgRespBody
-        //         } as CUS0003ShowUI
-        //     } as ResBodyCUS0003Invoke
-        // } as ResCUS0003Invoke)
     }
     /**
      * 查詢預約工作狀態
@@ -117,44 +88,7 @@ export class CusService {
         console.log('call cus0003 loopstatus');
         const path = `${this._basePath}/CUS0003?loopStatus&apptJobId=${reqbodyLoopStatus.apptJobId}`;
         return this.api.excuteDpGet<ResCUS0003LoopStatus>(path,TxID.queryQmLoopStatusCUS0003);
-        // this.count++;
-        // if (this.count % 3 == 0) {
-        //     return of({
-        //         ResHeader: {},
-        //         RespBody: {
-        //             commLoopStatus: {
-        //                 apptJobId: 1001,
-        //                 status: EmApptJobStatus.等待,
-        //                 statusName: '等待',
-        //                 stackTrace: ''
-        //             }
-        //         } as ResBodyCUS0003LoopStatus
-        //     } as ResCUS0003LoopStatus)
-        // } else if (this.count % 3 == 1) {
-        //     return of({
-        //         ResHeader: {},
-        //         RespBody: {
-        //             commLoopStatus: {
-        //                 apptJobId: 1001,
-        //                 status: EmApptJobStatus.執行中,
-        //                 statusName: '執行中',
-        //                 stackTrace: ''
-        //             }
-        //         } as ResBodyCUS0003LoopStatus
-        //     } as ResCUS0003LoopStatus)
-        // } else {
-        //     return of({
-        //         ResHeader: {},
-        //         RespBody: {
-        //             commLoopStatus: {
-        //                 apptJobId: 1001,
-        //                 status: EmApptJobStatus.完成,
-        //                 statusName: '完成',
-        //                 stackTrace: ''
-        //             }
-        //         } as ResBodyCUS0003LoopStatus
-        //     } as ResCUS0003LoopStatus)
-        // }
+
     }
     /**
      * 查詢調用全景API回覆結果
@@ -165,28 +99,7 @@ export class CusService {
         console.log('call cus0003 result');
         const path = `${this._basePath}/CUS0003?result&apptJobId=${reqbodyResult.apptJobId}`;
         return this.api.excuteDpGet<ResCUS0003Result>(path,TxID.queryQmResultCUS0003);
-        // return of({
-        //     ResHeader: {},
-        //     RespBody: {
-        //         result: {
-        //             commLoopStatus: {
-        //                 apptJobId: 1001,
-        //                 status: EmApptJobStatus.完成,
-        //                 statusName: '完成',
-        //                 stackTrace: ''
-        //             } as CusCommLoopStatus,
-        //             showUI: {
-        //                 cgRespBody: {
-        //                     code: '0',
-        //                     message: '成功',
-        //                     data: [
-        //                         { tspid: '1000' } as CUS0003CgRespBodyItem
-        //                     ]
-        //                 } as CUS0003CgRespBody
-        //             } as CUS0003ShowUI
-        //         } as CUS0003Result
-        //     } as ResBodyCUS0003Result
-        // } as ResCUS0003Result)
+
     }
 
     queryQmInvokeCUS0004(ReqBody: ReqBodyCUS0004Invoke): Observable<ResCUS0004Invoke> {

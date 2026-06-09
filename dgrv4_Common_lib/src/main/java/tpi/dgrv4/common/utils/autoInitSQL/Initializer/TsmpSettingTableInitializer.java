@@ -66,14 +66,16 @@ public class TsmpSettingTableInitializer {
 //	        createTsmpSetting("SERVICE_SECONDARY_MAIL_FROM","system@elite-erp.com.tw","次要smtp server設定, 本系統寄件者郵件位址");
 			createTsmpSetting("SERVICE_SECONDARY_MAIL_FROM","example@tpisoftware.com","Secondary SMTP server setting : Sender email address ( system@elite-erp.com.tw )");
 			createTsmpSetting("SERVICE_SECONDARY_MAIL_X_MAILER","Thinkpower","Secondary SMTP server setting : mail delivery process name");
-			createTsmpSetting("TSMP_EDITION","Cn88-nNO8-xx8u-un88-nVoF-Fr48-80rc-L5rF-xN#8-e1=x-6#xo-=d4#-2!=n-!#2!-=!!!-!!!","TSMP license key");
+			createTsmpSetting("TSMP_EDITION","Cn88-nNTO-8xx8-uCuF-88nV-9occ-!S4x-8!!r-nF!r-Fn!#-xL!=-8!#e-!=8!-#x!=-L!#c-!=!!-!!!!-","TSMP license key");
 			// 這段 hardcoded IP 會被 SonarQube 標記為 Security Hotspots, 故改為 DNS 名稱
 			createTsmpSetting("LDAP_URL","ldap://ldap.example.com:389","ldap login URL");
 			createTsmpSetting("LDAP_DN","uid={{0}},dc=tstpi,dc=com","ldap login user DN");
 			createTsmpSetting("LDAP_TIMEOUT","3000","Connection timeout for ldap login, in milliseconds(ms)");
 			createTsmpSetting("LDAP_CHECK_ACCT_ENABLE","false","LDAP check account function enablement - true/false");
+
 			createTsmpSetting("TSMP_AC_CLIENT_ID","YWRtaW5Db25zb2xl","Login AC account (do not modify)");
 			createTsmpSetting("TSMP_AC_CLIENT_PW","dHNtcDEyMw==","AC login password (do not modify)");
+
 			createTsmpSetting("TSMP_FAIL_THRESHOLD","6","Allowed \"User password\" fail THRESHOLD");
 			createTsmpSetting("SSO_PKCE","true","PKCE Level AuthCode verification enablement - true/false");
 			createTsmpSetting("SSO_DOUBLE_CHECK","true","Enablement of Double-check verification - true/false");
@@ -354,6 +356,13 @@ public class TsmpSettingTableInitializer {
             // -- 2026/01/15, token的設定, Mini Lee, 核發 client_credentials token 是否使用 cache? (true/false) (預設為false)
             createTsmpSetting("DGR_TOKEN_CLIENT_CREDENTIALS_CACHE_ENABLE", "false", "Does the client_credentials token use a cache? (true/false) (default: false)");
             
+            // -- 2026/03/03, keeper debug用, Tom
+            createTsmpSetting((id = "KEEPER_NODE_INFO_LOG_ENABLE"),(value = "false"),(memo = "Enable debug logging for Keeper sending/receiving.(true/false) (default: false)"));
+
+            // -- 2026/03/27, H2 sync time out , Zoe Lee
+            createTsmpSetting((id = "H2_SYNC_TIMEOUT_MINUTES"),(value = "30"),(memo = "H2 sync timeout minutes (default: 30)"));
+
+
         } catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;

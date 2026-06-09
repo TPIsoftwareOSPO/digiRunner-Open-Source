@@ -34,7 +34,7 @@
       </div>
     </div>
     <hr />
-    <p-table [columns]="funcInfoListCols" [value]="funcInfoList" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table [columns]="funcInfoListCols" [value]="funcInfoList" selectionMode="single" stripedRows
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -135,7 +135,8 @@
     <div class="form-group row">
       <div class="col-12">
         <label>{{'fun_desc'|translate}}</label>
-        <textarea readonly rows="2" style="width: 100%" [value]="currentFuncInfo?.funcDesc" pInputTextarea></textarea>
+        <textarea readonly class="form-control"
+        rows="2" style="width: 100%" [value]="currentFuncInfo?.funcDesc" pInputTextarea></textarea>
       </div>
     </div>
     <hr />
@@ -174,7 +175,7 @@
       </div> -->
     </form>
 
-    <p-table [columns]="roleInfoListCols" [value]="roleInfoList" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table [columns]="roleInfoListCols" [value]="roleInfoList" selectionMode="single" stripedRows
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>

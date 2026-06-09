@@ -1,1 +1,1 @@
-release-rc-v4.7.10.0-14-g81f406576
+release-rc-v4.7.24.1-2-g2be5dee15

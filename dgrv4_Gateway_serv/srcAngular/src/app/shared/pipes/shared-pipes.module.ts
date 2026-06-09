@@ -23,6 +23,7 @@ import { DataChangeStatusPipe } from './data-change-status.pipe';
 import { ReportTypePipe } from './reportType.pipe';
 import { AiUsageLimitPolicyPipe } from './ai-usage-limit-policy.pipe';
 import { SafeUrlPipe } from './safe-url.pipe';
+import { MimaInputComponent } from '../mima-input/mima-input.component';
 
 @NgModule({
   imports: [CommonModule],

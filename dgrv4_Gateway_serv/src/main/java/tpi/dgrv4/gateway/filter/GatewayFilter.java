@@ -173,9 +173,10 @@ public class GatewayFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull FilterChain filterChain)
 			throws ServletException, IOException {
-		
+
 		TsmpApiReg tsmpApiReg = null;
 		String entry = ""; // uri 的第一個 path, 與 String uri 為同一組
+		boolean isDgrcOrTsmpc = false;
 		try {
 			request = new CusContentCachingRequestWrapper(request);
 			
@@ -223,7 +224,12 @@ public class GatewayFilter extends OncePerRequestFilter {
 
 			boolean isSpecialApi = isSpecialApi(uri); // 是否為 dgrv4 特權 API
 
-			if (!isSpecialApi) {
+			// [ZH]SMART on FHIR 公開端點（OAuth/JWKS/proxy 等）不受 digiRunner.gtw.mode 限制，
+			// 但仍會經過 hostHeaderCheck、CORS/CSP/HSTS 標頭注入與 API log，由各自 controller 自行認證
+			// [EN]SMART on FHIR public endpoints bypass gtw mode but keep host check, header injection and API log
+			boolean isSmartPublicApi = isSmartPublicApi(uri);
+
+			if (!isSpecialApi && !isSmartPublicApi) {
 				// [ZH]digiRunner.gtw.mode 檢查器, ex: onlyAC
 				// [EN]digiRunner.gtw.mode checker, ex: onlyAC
 				if (!modeCheck.check(uri)) {
@@ -259,6 +265,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 					"/kibana/",
 					"/composer/swagger3.0/",
 					"/website/",
+					"/smart-on-fhir/",
 					"/http-api/",
 					"/_plugin/kibana/",
 					"/_dashboards/",// [ZH]AWS上的OpenSearch的URL路徑 // [EN]URL path for OpenSearch on AWS
@@ -322,7 +329,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 			// [ZH]針對URL中有tsmpc或是dgrc，進行檢查器檢查。
 			// [EN]Perform a check if there is tsmpc or dgrc in the URL.
 			if (isDGRCorTSMPC(uri)) {
-
+				isDgrcOrTsmpc = true;
 				pathsSelector(request, uri, compatibilityPaths, isComposerAPI);
 				Object apiId = request.getAttribute(GatewayFilter.API_ID);
 				Object moduleName = request.getAttribute(GatewayFilter.MODULE_NAME);
@@ -389,7 +396,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 
 		// add Last Resp Header
 		boolean isKibana = (boolean) request.getAttribute(IS_KIBANA_REQUEST_ATTR);
-		var responseWrapper = new FilteredHeaderResponseWrapper(response, request, isKibana);
+		var responseWrapper = new FilteredHeaderResponseWrapper(response, request, isKibana, isDgrcOrTsmpc);
 
 //		String cspVal = String.format(cspDefaultVal, dgrCspVal);
 		// [ZH]加上 CSP 標題, 例如: 
@@ -1241,10 +1248,37 @@ public class GatewayFilter extends OncePerRequestFilter {
 		}
 	}
 
+	// [ZH]SMART on FHIR 不需 DGR Bearer、且不受 digiRunner.gtw.mode 限制的公開端點前綴
+	// [EN]SMART on FHIR public endpoint prefixes that need no DGR Bearer and bypass gtw mode
+	private static final Set<String> SMART_PUBLIC_PREFIXES = Set.of(
+			"/smart-on-fhir/",
+			"/dgrv4/ssotoken/smart/callback",
+			"/dgrv4/ssotoken/smart/approve",
+			"/dgrv4/ssotoken/smart/deny",
+			"/dgrv4/ssotoken/smart/consent-info",
+			"/dgrv4/ssotoken/smart/token",
+			"/dgrv4/ssotoken/smart/jwks",
+			"/dgrv4/ssotoken/smart/launch",
+			"/dgrv4/ssotoken/smart/introspect"
+	);
+
+	/**
+	 * [ZH]是否為 SMART on FHIR 公開端點 <br>
+	 * 這些端點不帶 DGR Bearer token，且不受 digiRunner.gtw.mode 限制，<br>
+	 * 由各自的 controller / service 自行處理認證 (token / jwks / launch / introspect 等)；<br>
+	 * 但仍會經過 hostHeaderCheck、CORS/CSP/HSTS 標頭注入與 API log，不再整段繞過 filter。<br>
+	 * [EN]Whether the uri is a SMART on FHIR public endpoint
+	 *
+	 * @return true: 是; false: 不是
+	 */
+	public static boolean isSmartPublicApi(String uri) {
+		return SMART_PUBLIC_PREFIXES.stream().anyMatch(uri::startsWith);
+	}
+
 	/**
 	 * 是否為 dgrv4 特權 API (不驗 token 之API) <br>
 	 * 例如: version、logger、online、AA0325、AA0326 <br>
-	 * 
+	 *
 	 * @return true: 是; false: 不是
 	 */
 	public static boolean isSpecialApi(String uri) {

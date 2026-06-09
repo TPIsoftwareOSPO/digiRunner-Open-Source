@@ -46,13 +46,15 @@
     gap: 0.3rem;
   }
   .header-toggler-btn {
+    border-radius: 50%!important;
     // display: block;
-    @media (min-width: 992px) {
-      display: none;
-    }
+    // @media (min-width: 992px) {
+    //   display: none;
+    // }
   }
   .header-toggler-btn,
   .header-info-btn {
+
     --font-size: 0.8rem;
     &.p-button-secondary {
       color: var(--text-color);

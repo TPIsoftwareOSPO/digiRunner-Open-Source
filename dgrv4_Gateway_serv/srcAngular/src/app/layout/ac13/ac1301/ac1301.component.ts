@@ -67,6 +67,8 @@ export class Ac1301Component extends BaseComponent implements OnInit {
     }
 
     ngOnInit() {
+      this.minDate.setHours(0,0,0,0);
+
         this.acConf = this.toolService.getAcConf();
         this.canvas = document.getElementById('reportChart');
         this.ctx = this.canvas.getContext('2d');
@@ -119,7 +121,8 @@ export class Ac1301Component extends BaseComponent implements OnInit {
               this.startHour.setValue('00');
               this.endHour.setValue('23');
             }
-
+            this.minDate.setHours(0,0,0,0);
+            this.maxDate = this.today;
             this.startDate.setValue(new Date);
             this.endDate.setValue(new Date);
         });

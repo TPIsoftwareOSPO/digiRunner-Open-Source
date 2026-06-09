@@ -35,8 +35,47 @@ table>tbody>tr:nth-child(even) {
 // .p-overlaypanenl-content{
 //   padding: 0px !important;
 // }
-::ng-deep .tpi-op.p-overlaypanel{
-  .p-overlaypanel-content{
-       padding: 0px;
-     }
+// ::ng-deep .tpi-pop.p-menu-item-content{
+//   .p-overlaypanel-content{
+//        padding: 0px;
+//      }
+::ng-deep .tpi-pop.p-menu {
+  // width: 9rem;
+  .p-menu-item{
+
+    .p-menu-item-content {
+      padding: 0.125rem;
+            &:not(.p-disabled):hover {
+              background: #fcf0d3;
+
+              /* 注意：因為 icon 和 text 已經在您自定義的結構中，
+                它們的父層是 .p-menuitem-link 或 .p-menuitem-content */
+              .p-menuitem-icon,
+              .p-menuitem-text {
+                color: var(--tpi-primary);
+              }
+            }
+      .p-menu-item-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--p-text-color);
+        cursor: pointer;
+
+        &:hover {
+          color: var(--tpi-primary);
+          --check-color: var(--p-primary-500);
+        }
+      }
+
+    }
+    &.p-focus, &.active {
+          .p-menu-item-link {
+            background: var(--p-highlight-background);
+            color: var(--p-highlight-color);
+            --check-color: var(--p-primary-500) !important;
+          }
+        }
+
+  }
 }

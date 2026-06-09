@@ -47,7 +47,7 @@
     </div>
     <div style="width: 100%">
       <p-table [value]="lastLoginLogList" [style]="{ 'word-break': 'break-word', width: '100%' }"
-        styleClass="p-datatable-striped" responsiveLayout="scroll">
+        stripedRows responsiveLayout="scroll">
         <ng-template pTemplate="header" let-columns>
           <tr>
             <th style="width: 45%">
@@ -373,6 +373,10 @@
 <ng-template #DBConnection let-item>
   <div class="average-time">
     <label class="dashboard-label">DB Connection</label>
+    <div class="info-row">
+      <label label="info-row-label ">Connected Node</label>
+      <span class="info-row-value border-bottom">{{ item?.db.connectedNode }}</span>
+    </div>
     <div class="info-row">
       <label label="info-row-label">Total</label>
       <span class="info-row-value">{{ item?.db.total }}</span>

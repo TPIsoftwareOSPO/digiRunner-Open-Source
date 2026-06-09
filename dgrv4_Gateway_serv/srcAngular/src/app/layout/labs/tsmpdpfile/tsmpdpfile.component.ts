@@ -100,7 +100,8 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
 
   ngOnInit() {
 
-    // this.checkOrgId();
+    this.dateEminDate.setHours(0, 0, 0, 0);
+
 
     this.form = this.fb.group({
       startDate: new UntypedFormControl('', [ValidatorFns.requiredValidator()]),
@@ -145,6 +146,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
     this.converDateInit();
     this.startDate.valueChanges.subscribe(time => {
       this.dateEminDate = new Date(time);
+      this.dateEminDate.setHours(0, 0, 0, 0);
     });
     this.endDate.valueChanges.subscribe(time => {
       this.dateSmaxDate = new Date(time);
@@ -152,6 +154,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
 
     this.dateS_formBucket.valueChanges.subscribe(time => {
       this.dateEminDate_formBucket = new Date(time);
+      this.dateEminDate_formBucket.setHours(0, 0, 0, 0);
     });
     this.dateE_formBucket.valueChanges.subscribe(time => {
       this.dateSmaxDate_formBucket = new Date(time);
@@ -834,7 +837,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
       }
       fileReader.readAsDataURL(files.item(0)!);
     }
-    
+
   }
 
   private udpateAPI(code, dict, tmpfileName: string | null) {
@@ -874,3 +877,4 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
   }
 
 }
+

@@ -4,13 +4,13 @@
             <div class="ui-inputgroup">
                 <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}"
                     [(ngModel)]='keyword' (keyup.enter)="searchThemes()">
-                <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
+                <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1 input-btn"
                     (click)="searchThemes();"></button>
             </div>
         </div>
     </div>
     <br>
-    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" [(selection)]="selected" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" [(selection)]="selected" stripedRows
         [style]="{'word-break':'break-word'}">
         <ng-template pTemplate="colgroup" let-columns>
             <colgroup>

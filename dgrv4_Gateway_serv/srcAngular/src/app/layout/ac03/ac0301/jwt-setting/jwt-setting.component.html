@@ -6,11 +6,11 @@
         <div class="p-form-check-line form-group">
           <ng-container>
             <div class="p-form-check">
-              <p-radioButton formControlName="jwtSetting" value="Y" inputId="jwtSettingY"></p-radioButton>
+              <p-radioButton name="jwtSetting" formControlName="jwtSetting" value="Y" inputId="jwtSettingY"></p-radioButton>
               <label for="jwtSettingY" class="ms-2 mb-0" style="white-space: nowrap;">{{'button.enable'|translate}}</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton formControlName="jwtSetting" value="N" inputId="jwtSettingN"></p-radioButton>
+              <p-radioButton name="jwtSetting" formControlName="jwtSetting" value="N" inputId="jwtSettingN"></p-radioButton>
               <label for="jwtSettingN" class="ms-2 mb-0" style="white-space: nowrap;">{{'button.disable'|translate}}</label>
             </div>
           </ng-container>
@@ -20,16 +20,16 @@
     <div class="form-group row">
       <div class="col-6">
         <label class="control-label">Request</label>
-        <p-dropdown class="jwt-req-dropdown" [options]="updateJwtSettingFlags" formControlName="jweFlag"
+        <p-select class="jwt-req-dropdown" [options]="updateJwtSettingFlags" formControlName="jweFlag"
           [style]="{ width: '100%'}" [virtualScroll]="true" scrollHeight="80px">
-        </p-dropdown>
+        </p-select>
 
       </div>
       <div class="col-6">
         <label class="control-label">Response</label>
-        <p-dropdown class="jwt-resp-dropdown" [options]="updateJwtSettingFlags" formControlName="jweFlagResp"
+        <p-select class="jwt-resp-dropdown" [options]="updateJwtSettingFlags" formControlName="jweFlagResp"
           [style]="{ width: '100%' }" [virtualScroll]="true" scrollHeight="80px">
-        </p-dropdown>
+        </p-select>
       </div>
     </div>
   </form>

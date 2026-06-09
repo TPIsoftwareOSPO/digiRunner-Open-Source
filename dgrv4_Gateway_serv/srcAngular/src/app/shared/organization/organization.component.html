@@ -4,7 +4,7 @@
       <p-autoComplete class="ui-fluid" [suggestions]="orgNameSuggestions" (completeMethod)="autoComplete($event)"
         formControlName="orgName" placeholder="{{'org_name' | translate}}">
       </p-autoComplete>
-      <button pButton type="submit" icon="pi pi-search" class="ms-1 tpi-primary"></button>
+      <button pButton type="submit" icon="pi pi-search" class="ms-1 tpi-primary input-btn"></button>
       <button *ngIf="showCreateBtn" type="button" class="btn tpi-btn tpi-second ms-2 float-end"
         (click)="showCreateDialog();">{{'button.create'|translate}}</button>
 
@@ -14,15 +14,13 @@
 </form>
 <hr class="my-0 mb-2">
 <div class="w-100" style="overflow: auto;height: 85%;">
-  <p-tree [value]="orgs" layout="horizontal" selectionMode="single" [(selection)]="selectedOrgNode"
-    (onNodeSelect)="onNodeSelect(selectedOrgNode)">
+  <p-organization-chart [value]="orgs" selectionMode="single" [(selection)]="selectedOrgNode">
     <ng-template let-node pTemplate="default">
-      <div style="margin: 15px;">
-
+      <div style="padding: 1.25rem; cursor: pointer;" (click)="selectedOrgNode=node;onNodeSelect({originalEvent:$event, node:node});$event.stopPropagation()">
         <span tabindex="0" id="{{node.data.orgName+'_'+uuid}}">{{node.data.orgName}}</span>
       </div>
     </ng-template>
-  </p-tree>
+  </p-organization-chart>
 
 
 </div>

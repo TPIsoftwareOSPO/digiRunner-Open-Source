@@ -7,7 +7,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { SidebarService } from '../sidebar/sidebar.service';
 import { UserService } from 'src/app/shared/services/api-user.service';
 import { AA0510Resp } from 'src/app/models/api/UtilService/aa0510.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import * as base64 from 'js-base64';
 import { MenuItem } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
@@ -17,10 +17,10 @@ import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss'],
-    standalone: false
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss'],
+  standalone: false,
 })
 export class HeaderComponent implements OnInit {
   items: MenuItem[] = [];
@@ -47,6 +47,8 @@ export class HeaderComponent implements OnInit {
   expired_in_alert: number = 30;
   aliveTimer$ = new BehaviorSubject<number>(this.aliveSec ?? 0);
 
+  ac_header?: { [key: string]: string };
+
   constructor(
     public router: Router,
     private siderbar: SidebarService,
@@ -55,7 +57,7 @@ export class HeaderComponent implements OnInit {
     private logoutService: LogoutService,
     private dialogService: DialogService,
     private translate: TranslateService,
-    private serverService:ServerService
+    private serverService: ServerService,
   ) {
     this.router.events.subscribe((val) => {
       if (
@@ -163,13 +165,38 @@ export class HeaderComponent implements OnInit {
           this.userAlias = jsonToken['name']
             ? jsonToken['name']
             : jsonToken['email']
-            ? jsonToken['email']
-            : jsonToken['sub']
-            ? jsonToken['sub']
-            : this.userAlias;
+              ? jsonToken['email']
+              : jsonToken['sub']
+                ? jsonToken['sub']
+                : this.userAlias;
         }
       }
     }
+
+    this.serverService
+      .queryTsmpSettingDetail_ignore1298({ id: 'AC_HEADER_STYLE' })
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          try {
+            let parsedValue = JSON.parse(res.RespBody.value);
+            // 如果第一次解析結果是字串，且該字串本身是有效的 JSON，則再次解析
+            if (
+              typeof parsedValue === 'string' &&
+              this.toolService.isValidJSON(parsedValue)
+            ) {
+              this.ac_header = JSON.parse(parsedValue);
+            } else if (typeof parsedValue === 'object') {
+              // 如果第一次解析結果已經是物件，則直接使用
+              this.ac_header = parsedValue;
+            }
+            // console.log('AC_HEADER_STYLE parsed:', this.ac_header);
+          } catch (e) {
+            // console.error('Error parsing AC_HEADER_STYLE from API response:', e, res.RespBody.value);
+            // 解析失敗時，可以選擇設定一個預設值，避免應用程式崩潰
+            this.ac_header = undefined;
+          }
+        }
+      });
 
     this.setCustomerExpiredAlert();
   }
@@ -182,9 +209,9 @@ export class HeaderComponent implements OnInit {
       const nowTimestamp: Date = new Date();
       const diffSecs = Math.round(
         dayjs(nowTimestamp).diff(dayjs(this.lastTimestamp), 'millisecond') /
-          1000
+          1000,
       );
-      this.aliveTimer$.next(this.aliveSec?this.aliveSec-1:0);
+      this.aliveTimer$.next(this.aliveSec ? this.aliveSec - 1 : 0);
       if (this.aliveSec == this.expired_in_alert) {
         const ref = this.dialogService.open(ExpiredInAlertComponent, {
           showHeader: false,
@@ -193,9 +220,10 @@ export class HeaderComponent implements OnInit {
           data: {
             timerStream: this.aliveTimer$,
           },
+          modal: true,
         });
 
-        ref.onClose.subscribe((res) => {
+        ref!.onClose.subscribe((res) => {
           this.toolService.setExpiredTime();
         });
       }
@@ -213,7 +241,7 @@ export class HeaderComponent implements OnInit {
       }
       this.aliveSec = Number(sessionStorage.getItem('expires_in')) - diffSecs;
       this.minStr = ('0' + Math.floor(this.aliveSec! / 60).toString()).slice(
-        -2
+        -2,
       );
       this.secStr = ('0' + (this.aliveSec! % 60).toString()).slice(-2);
 
@@ -282,27 +310,29 @@ export class HeaderComponent implements OnInit {
     // console.log(urlParam.replace('/'+urlPool[urlPool.length-1],'login?info=' + urlPool[urlPool.length-1]))
     if (window.location.href.indexOf('localhost') > -1) {
       this.router.navigateByUrl(
-        '/udpssologin?info=' + urlPool[urlPool.length - 1]
+        '/udpssologin?info=' + urlPool[urlPool.length - 1],
       );
     } else {
       let redirectUrl = urlParam.replace(
         '/' + urlPool[urlPool.length - 1],
-        'login?info=' + urlPool[urlPool.length - 1]
+        'login?info=' + urlPool[urlPool.length - 1],
       );
       window.location.href = redirectUrl;
     }
   }
 
-  setCustomerExpiredAlert(){
-     let modeReq = {
+  setCustomerExpiredAlert() {
+    let modeReq = {
       id: 'AC_EXPIRED_ALERT',
     } as DPB9901Req;
 
-    this.serverService.queryTsmpSettingDetail_ignore1298(modeReq).subscribe((res) => {
-      if (this.toolService.checkDpSuccess(res.ResHeader)) {
-        const numValue = Number(res.RespBody.value);
-        this.expired_in_alert = !isNaN(numValue) ? numValue : 0;
-      }
-    });
+    this.serverService
+      .queryTsmpSettingDetail_ignore1298(modeReq)
+      .subscribe((res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          const numValue = Number(res.RespBody.value);
+          this.expired_in_alert = !isNaN(numValue) ? numValue : 0;
+        }
+      });
   }
 }

@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ import tpi.dgrv4.codec.utils.ProbabilityAlgUtils;
 import tpi.dgrv4.codec.utils.SHA256Util;
 import tpi.dgrv4.common.constant.DateTimeFormatEnum;
 import tpi.dgrv4.common.constant.DgrAuthCodePhase;
+import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.common.constant.TsmpAuthCodeStatus2;
 import tpi.dgrv4.common.utils.ClientIpUtil;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -70,7 +72,9 @@ import tpi.dgrv4.entity.repository.TsmpGroupDao;
 import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.entity.repository.UsersDao;
+import tpi.dgrv4.gateway.component.ClientAssertionValidator;
 import tpi.dgrv4.gateway.component.GtwIdPHelper;
+import tpi.dgrv4.gateway.component.OIDCWellKnownHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.component.TokenHelper.BasicAuthClientData;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
@@ -78,15 +82,16 @@ import tpi.dgrv4.gateway.constant.DgrCodeChallengeMethod;
 import tpi.dgrv4.gateway.constant.DgrDeployRole;
 import tpi.dgrv4.gateway.constant.DgrOpenIDConnectScope;
 import tpi.dgrv4.gateway.constant.DgrTokenGrantType;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.AdaptiveThreadPoolExecutor;
 import tpi.dgrv4.gateway.util.DigiRunnerGtwDeployProperties;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
+import tpi.dgrv4.gateway.vo.ClientAssertionJwtData;
 import tpi.dgrv4.gateway.vo.ClientCredentialsCacheVo;
-import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
-import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.OAuthTokenResp;
 import tpi.dgrv4.gateway.vo.TsmpApiLogReq;
+
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
 @Service
@@ -112,6 +117,7 @@ public class OAuthTokenService {
 	private final CommForwardProcService commForwardProcService;
 	private final DigiRunnerGtwDeployProperties digiRunnerGtwDeployProperties;
 	private final AsyncSendNotifyLandingRequestToDgrService asyncSendNotifyLandingRequestToDgrService;
+	private final ClientAssertionValidator clientAssertionValidator;
 
 	private AdaptiveThreadPoolExecutor executor = new AdaptiveThreadPoolExecutor();
 
@@ -123,37 +129,44 @@ public class OAuthTokenService {
 	private static final String USER_NAME = "user_name";
 	private static final String SCOPE = "scope";
 	private static final String STIME = "stime";
-
+	
+	// v2
+	public static final String AUDIENCE_OIDC = "digiRunner";
+	
 	public static class OAuthTokenData {
 		// for grant_type = "delegate_auth" 或 "authorization_code" 或 "cookie_token"
-		public String idPType = null;
-		public String idPUserName = null;// 例如: 101872102234493560934
+		private String idPType = null;
+		private String idPUserName = null;// 例如: 101872102234493560934
 
 		// for grant_type = "authorization_code", "cookie_token"
-		public String idPUserEmail = null;
-		public String idPUserAlias = null;// 例如: 李OO Mini Lee
-		public String idPUserPicture = null;
-		public String apiResp = null;// for GTW IdP(API) 調用 Login API 得到的 response
+		private String idPUserEmail = null;
+		private String idPUserAlias = null;// 例如: 李OO Mini Lee
+		private String idPUserPicture = null;
+		private String apiResp = null;// for GTW IdP(API) 調用 Login API 得到的 response
 									//for AC IdP(GOOGLE/MS): 儲存 GOOGLE/MS IdP 的 response (含 Access token, Refresh token, ID token)	
 
-		public String idtLightId = null;// for GTW IdP(API), 調用 Login API 得到的 lightId、roleName
-		public String idtRoleName = null;
+		private String idtLightId = null;// for GTW IdP(API), 調用 Login API 得到的 lightId、roleName
+		private String idtRoleName = null;
 		
 		/**
 		 * for GTW IdP 時, grant_type = "authorization_code", <br>
 		 * IdP type 為 LDAP / JDBC: 有 OIDC scope & user 在同意畫面勾選的存取範圍(虛擬群組 id) <br>
 		 * IdP type 為 GOOGLE / MS: 只有 OIDC scope <br>
 		 */
-		public String oidcAndVgroupScopeStr = null;// 多個以空格" "分隔
+		private String oidcAndVgroupScopeStr = null;// 多個以空格" "分隔
 
-		public Long tokenQuota = null;
-		public Long tokenUsed = null;
-		public Long rftQuota = null;
-		public Long rftUsed = null;
+		private Long tokenQuota = null;
+		private Long tokenUsed = null;
+		private Long rftQuota = null;
+		private Long rftUsed = null;
+		
+		public String getIdPType() {
+			return idPType;
+		}
 	}
 
 	public ResponseEntity<?> getOAuthToken(HttpServletRequest httpReq, HttpHeaders headers,
-			HttpServletResponse httpResp) {
+			HttpServletResponse httpResp, String pathVer) {
 
 		Map<String, String> parameters = new HashMap<>();
 		httpReq.getParameterMap().forEach((k, vs) -> {
@@ -166,29 +179,29 @@ public class OAuthTokenService {
 		String authorization = headers.getFirst("Authorization");
 
 		// 製作 token
-		return getTokenLogged(httpReq, httpResp, parameters, authorization, reqUri);
+		return getTokenLogged(httpReq, httpResp, parameters, authorization, reqUri, pathVer);
 	}
 
 	public ResponseEntity<?> getToken(HttpServletResponse httpResp, Map<String, String> parameters,
-			String authorization, String reqUri) {
+			String authorization, String reqUri, String pathVer) {
 		TPILogger.tl.info("\n--【OAuthTokenService.getToken()】【1】--");
-		return getTokenLogged(null, httpResp, parameters, authorization, reqUri);
+		return getTokenLogged(null, httpResp, parameters, authorization, reqUri, pathVer);
 	}
 
-	public ResponseEntity<?> getToken(Map<String, String> parameters, String authorization, String reqUri) {
+	public ResponseEntity<?> getToken(Map<String, String> parameters, String authorization, String reqUri, String pathVer) {
 		TPILogger.tl.info("\n--【OAuthTokenService.getToken()】【2】--");
-		return getTokenLogged(null, null, parameters, authorization, reqUri);
+		return getTokenLogged(null, null, parameters, authorization, reqUri, pathVer);
 	}
 
 	/** 
 	 * 會記錄 ES 與 RDB Log
 	 */
 	protected ResponseEntity<?> getTokenLogged(HttpServletRequest httpReq, HttpServletResponse httpResp,
-			Map<String, String> parameters, String authorization, String reqUri) {
+			Map<String, String> parameters, String authorization, String reqUri, String pathVer) {
 		OAuthTokenData oauthTokenData = new OAuthTokenData();
 
 		ResponseEntity<?> errRespEntity = getToken1(oauthTokenData, httpReq, httpResp, parameters, authorization,
-				reqUri);
+				reqUri, pathVer);
 
 		// 統一在外層寫入 ES 與 RDB Log
 		if (errRespEntity == null) {
@@ -251,14 +264,20 @@ public class OAuthTokenService {
 	}
 
 	protected ResponseEntity<?> getToken1(OAuthTokenData oauthTokenData, HttpServletRequest httpReq,
-			HttpServletResponse httpResp, Map<String, String> parameters, String authorization, String reqUri) {
-
+			HttpServletResponse httpResp, Map<String, String> parameters, String authorization, String reqUri,
+			String pathVer) {
+		
+		if (pathVer == null) {
+			pathVer = "";
+		}
+		
 		ResponseEntity<?> errRespEntity = null;
 
 		String grantType = parameters.get("grant_type");
 		String codeVerifier = parameters.get("code_verifier");
 		String cookieJti = null;
 		String cookieIdPType = null;
+
 		if (StringUtils.hasLength(grantType)) {
 			// 若 body 有 grant type, 優先執行此流程
 
@@ -268,6 +287,7 @@ public class OAuthTokenService {
 			// 直接登入 AC 的沒有 idPType
 			cookieJti = GtwIdPHelper.getStateFromCookies(httpReq, GtwIdPHelper.COOKIE_JTI);
 			cookieIdPType = GtwIdPHelper.getStateFromCookies(httpReq, GtwIdPHelper.COOKIE_IDP_TYPE);
+			
 			if (StringUtils.hasLength(cookieJti) && isCookieToken) {
 				grantType = DgrTokenGrantType.COOKIE_TOKEN;
 			} else if (!isCookieToken) {
@@ -280,50 +300,81 @@ public class OAuthTokenService {
 			String errMsg = "Missing grant type";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					HttpStatus.BAD_REQUEST);// 400
+		}
+		
+		if (DgrTokenVersion.PATH_V2.equals(pathVer) && !DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType)) {
+			// 目前 '/oauth/v2/token' 僅支援的 grant type 為 'client_credentials' 但請求的 grant type 是'%s'
+			String errMsg = "Currently, '%s' only supports grant type 'client_credentials', but the requested grant type is '%s'.";
+			errMsg = String.format(errMsg, reqUri, grantType);
+			TPILogger.tl.debug(errMsg);
+			return new ResponseEntity<>(TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
+		// 取得 client id 和 pwd
 		String clientId = null;
 		String clientPw = null;
 		if (DgrTokenGrantType.COOKIE_TOKEN.equalsIgnoreCase(grantType)) {
 			// 沒有 Authorization, 不用檢查
 
-		} else if (DgrTokenGrantType.AUTHORIZATION_CODE.equalsIgnoreCase(grantType)) {
+		} else if (DgrTokenGrantType.AUTHORIZATION_CODE.equalsIgnoreCase(grantType)
+				|| DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType)) {
 			// client_id 和 client_secret 也可以放在 body
 			clientId = parameters.get(CLIENT_ID);// client id
 			clientPw = parameters.get("client_secret");// client_secret
 		}
+		
+		boolean isClientAssertion = false;
+		if (DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType)) {
+			// 檢查 client 斷言
+			ClientAssertionJwtData clientAssertionJwtData = getClientAssertionValidator().checkClientAssertion(parameters);
 
-		if (!StringUtils.hasLength(clientId)) {
+			if (clientAssertionJwtData != null) {
+				errRespEntity = clientAssertionJwtData.getErrRespEntity();
+				if (clientAssertionJwtData.getErrRespEntity() != null) {
+					return errRespEntity;
+				}
+
+				isClientAssertion = true;
+				clientId = clientAssertionJwtData.getClientId();
+			}
+		}
+
+		if (!StringUtils.hasLength(clientId)) {// 沒有 client id
 			if (DgrTokenGrantType.COOKIE_TOKEN.equalsIgnoreCase(grantType)) {
 				// 沒有 Authorization, 不用檢查
 
 			} else {
-				// 沒有 Basic Authorization 或 格式不正確
+				// 解析 Basic Authorization
 				BasicAuthClientData basicAuthClientData = getTokenHelper().getAuthClientDataForBasic(authorization, reqUri);
 				errRespEntity = basicAuthClientData.getErrRespEntity();
 				
+				// 沒有 Basic Authorization 或 格式不正確
 				if (errRespEntity != null) {
 					return errRespEntity;
-				} else {
-					String[] cliendData = basicAuthClientData.getCliendData();
-					clientId = cliendData[0];
-					clientPw = cliendData[1];
 				}
+				
+				// 取得 client id 和 pwd
+				String[] cliendData = basicAuthClientData.getCliendData();
+				clientId = cliendData[0];
+				clientPw = cliendData[1];
 			}
 		}
 
 		return getToken2(oauthTokenData, httpReq, httpResp, parameters, grantType, clientId, clientPw, cookieJti,
-				cookieIdPType, codeVerifier, reqUri);
+				cookieIdPType, codeVerifier, reqUri, pathVer, isClientAssertion);
 	}
 
 	protected ResponseEntity<?> getToken2(OAuthTokenData oauthTokenData, HttpServletRequest httpReq,
 			HttpServletResponse httpResp, Map<String, String> parameters, String grantType, String clientId,
-			String clientPw, String cookieJti, String cookieIdPType, String codeVerifier, String reqUri) {
+			String clientPw, String cookieJti, String cookieIdPType, String codeVerifier, String reqUri,
+			String pathVer, boolean isClientAssertion) {
 
 		ResponseEntity<?> errRespEntity = null;
 		TsmpTokenHistory tsmpTokenHistory = null;
+		
 		if (DgrTokenGrantType.COOKIE_TOKEN.equalsIgnoreCase(grantType)) {
 			// 沒有 Header 和 Body
 
@@ -342,7 +393,7 @@ public class OAuthTokenService {
 
 		} else {
 			// 檢查 client 帳號密碼
-			errRespEntity = verifyAuth(grantType, clientId, clientPw, codeVerifier, reqUri);
+			errRespEntity = verifyAuth(grantType, clientId, clientPw, codeVerifier, reqUri, isClientAssertion);
 			if (errRespEntity != null) {// 資料驗證有錯誤
 				return errRespEntity;
 			}
@@ -397,7 +448,7 @@ public class OAuthTokenService {
 
 			}
 			
-			ClientCredentialsCacheVo cacheVo = null;
+			ClientCredentialsCacheVo clientCredentialsCacheVo = null;
 			
 			// token JWE加密是否啟用,預設為false(JWS)
 			boolean isJwe = getTsmpSettingService().getVal_DGR_TOKEN_JWE_ENABLE();
@@ -460,12 +511,9 @@ public class OAuthTokenService {
 				// 是否為 GTW IdP 流程
 				boolean isGtwIdPFlow = TokenHelper.isGtwIdPFlow(userName, idPType);
 				if (isGtwIdPFlow) {
-					String scopeStr = "";
-					for (String scope : scopeList) {
-						scopeStr += scope + " ";
-					}
+					String scopeStr = getScopeListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
 					// ID Token 使用
-					oauthTokenData.oidcAndVgroupScopeStr = scopeStr.trim();
+					oauthTokenData.oidcAndVgroupScopeStr = scopeStr;
 				}
 
 				if (DgrTokenGrantType.REFRESH_TOKEN.equalsIgnoreCase(grantType) && isGtwIdPFlow) {
@@ -560,18 +608,19 @@ public class OAuthTokenService {
 				accessTokenValidity = authClientDetails.getAccessTokenValidity();// access token 授權期限, 單位為秒
 				accessTokenValidity = getTokenHelper().getTokenValidity(accessTokenValidity);// 若授權期限沒有值, 設為10分鐘
 				accessTokenExp = getTokenExp(accessTokenValidity, stime);// 由 stime 開始算
-				
+
 				// client_credentials 為解決大量產生 token 時, 寫入 TSMP_TOKEN_HISTORY I/O 效能瓶頸, 改用 cache
 				// 上面的資料檢查成功, 才能取 cache 的值
 				if (DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType) && isClientCredentialsTokenCache) {
 					// 是否為 client_credentials 且啟用 cache
 
+					String cacheId = getClientCredentialCacheId(clientId, pathVer);
 					// 依 cache id, 取得 cache 資料
-					cacheVo = clientCredentialsCacheVoMap.get(clientId);
+					clientCredentialsCacheVo = clientCredentialsCacheVoMap.get(cacheId);
 
-					OAuthTokenResp cacheOAuthTokenResp = getClientCredentialsCache(clientId, cacheVo,
+					OAuthTokenResp cacheOAuthTokenResp = getClientCredentialsCache(clientId, clientCredentialsCacheVo,
 							accessTokenValidity, isJwe, scopeList);
-					if (cacheOAuthTokenResp != null) {
+					if (cacheOAuthTokenResp != null) {// 快取仍有效, 取快取值回傳
 						return new ResponseEntity<>(cacheOAuthTokenResp, HttpStatus.OK);
 					}
 				}
@@ -596,12 +645,7 @@ public class OAuthTokenService {
 				isHasRefreshToken = false;
 				roleIdList = Arrays.asList(authClientDetailsAuthorities.split(","));// 例如: "authorities":["client"]
 			}
-
-			// 取得 Public Key
-			PublicKey publicKey = getTsmpCoreTokenHelper().getKeyPair().getPublic();
-			// 取得 Private Key
-			PrivateKey privateKey = getTsmpCoreTokenHelper().getKeyPair().getPrivate();
-
+			
 			String tokenUserName = userName;
 			if (StringUtils.hasLength(userNameB64)) {// 為 AC IdP 流程
 				tokenUserName = userNameB64;
@@ -615,37 +659,50 @@ public class OAuthTokenService {
 
 			// 是否為 GTW IdP 流程
 			boolean isGtwIdPFlow = TokenHelper.isGtwIdPFlow(tokenUserName, oauthTokenData.idPType);
+			
+			String schemeAndDomainAndPort = null;
+			if(DgrTokenVersion.PATH_V2.equals(pathVer)) { 
+				// 對外公開的域名或IP, ex: www.tpisoftware.com
+				String dgrPublicDomain = getTsmpSettingService().getVal_DGR_PUBLIC_DOMAIN();
+				// 對外公開的Port, ex: 80
+				String dgrPublicPort = getTsmpSettingService().getVal_DGR_PUBLIC_PORT();
+				schemeAndDomainAndPort = OIDCWellKnownHelper.getSchemeAndDomainAndPort(dgrPublicDomain,
+						dgrPublicPort);
+			}
+			
+			// 產生各 token 內容
 
-			String accessTokenJwtstr = getAccessToken(isJwe, publicKey, privateKey, grantType, accessTokenJti, node,
-					audIdList, stime, tokenUserName, orgId, scopeList, roleIdList, accessTokenExp, clientId, iat,
-					oauthTokenData.idPType, isAcIdPFlow, isGtwIdPFlow);
+			// 取得 Public Key
+			PublicKey publicKey = getTsmpCoreTokenHelper().getKeyPair().getPublic();
+			// 取得 Private Key
+			PrivateKey privateKey = getTsmpCoreTokenHelper().getKeyPair().getPrivate();
+			
+			String accessTokenPayload = getAccessTokenPayload(grantType, accessTokenJti, node, audIdList, stime,
+					tokenUserName, orgId, scopeList, roleIdList, accessTokenExp, clientId, iat, oauthTokenData.idPType,
+					isAcIdPFlow, isGtwIdPFlow, pathVer, schemeAndDomainAndPort);
+			
+			String accessTokenJwtstr = null;
+			if(DgrTokenVersion.PATH_V2.equals(pathVer)) {
+				accessTokenJwtstr = getTokenJwsByJwks(accessTokenPayload);
+			} else {
+				accessTokenJwtstr = getTokenJwt(isJwe, accessTokenPayload, publicKey, privateKey);
+			}
 
 			String refreshTokenJwtstr = null;
 			if (isHasRefreshToken) {
-				refreshTokenJwtstr = getRefreshToken(isJwe, publicKey, privateKey, grantType, accessTokenJti, node,
-						audIdList, stime, tokenUserName, orgId, scopeList, roleIdList, refreshTokenExp, clientId, iat,
-						refreshTokenJti, oauthTokenData.idPType, isAcIdPFlow, isGtwIdPFlow);
+				String refreshTokenPayload = getRefreshTokenPayload(grantType, accessTokenJti, node, audIdList, stime,
+						tokenUserName, orgId, scopeList, roleIdList, refreshTokenExp, clientId, iat, refreshTokenJti,
+						oauthTokenData.idPType, isAcIdPFlow, isGtwIdPFlow);
+				
+				refreshTokenJwtstr = getTokenJwt(isJwe, refreshTokenPayload, publicKey, privateKey);
 			}
 
-			String idTokenJwtstr = null;
 			// GTW IdP 流程的才有 ID Token
-			if (DgrTokenGrantType.AUTHORIZATION_CODE.equalsIgnoreCase(grantType)
-					|| (DgrTokenGrantType.COOKIE_TOKEN.equalsIgnoreCase(grantType) && isGtwIdPFlow)
-					|| (DgrTokenGrantType.REFRESH_TOKEN.equalsIgnoreCase(grantType) && isGtwIdPFlow)) {
-				Long idTokenExp = accessTokenExp;
-				idTokenJwtstr = getIdToken(oauthTokenData, accessTokenJwtstr, oauthTokenData.oidcAndVgroupScopeStr,
-						clientId, userName, iat, idTokenExp);
-			}
+			String idTokenJwtstr = getIdTokenJwtstr(grantType, isGtwIdPFlow, accessTokenExp, oauthTokenData,
+					accessTokenJwtstr, clientId, userName, iat);
 
-			String scopeStr = "";// 多個scope,用空格隔開
-			if (!CollectionUtils.isEmpty(scopeList)) {
-				for (String scopeTemp : scopeList) {
-					scopeStr += scopeTemp + " ";
-				}
-				scopeStr = scopeStr.trim();
-			}
+			String scopeStr = getScopeListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
 
-			String tokenType = "bearer";
 			resp.setAccessToken(accessTokenJwtstr);
 			resp.setExpiresIn(accessTokenValidity - 1);
 			resp.setJti(accessTokenJti);
@@ -654,7 +711,7 @@ public class OAuthTokenService {
 			resp.setRefreshToken(refreshTokenJwtstr);
 			resp.setScope(scopeStr);
 			resp.setStime(stime);
-			resp.setTokenType(tokenType);
+			resp.setTokenType("bearer");
 
 			// AC IdP 和 GTW IdP 的流程才有 idPType
 			resp.setIdpType(oauthTokenData.idPType);
@@ -678,8 +735,9 @@ public class OAuthTokenService {
 				// 是否為 client_credentials 且啟用 cache
 				
 				// 若核發 token, 則更新 cache 紀錄
-				updateClientCredentialsCache(cacheVo, clientId, resp, scopeList.toString(), accessTokenValidity,
-						accessTokenExp, isJwe);
+				String cacheId = getClientCredentialCacheId(clientId, pathVer);
+				updateClientCredentialsCache(clientCredentialsCacheVo, clientId, resp, scopeList.toString(), accessTokenValidity,
+						accessTokenExp, isJwe, cacheId);
 			}
 			
 			return new ResponseEntity<>(resp, HttpStatus.OK);
@@ -688,9 +746,53 @@ public class OAuthTokenService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			errRespEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
-			return errRespEntity;
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
+	}
+	
+	/**
+	 * 取得 ID Token <br>
+	 * GTW IdP 流程的才有 ID Token <br>
+	 */
+	private String getIdTokenJwtstr(String grantType, boolean isGtwIdPFlow, Long accessTokenExp,
+			OAuthTokenData oauthTokenData, String accessTokenJwtstr, String clientId, String userName, Long iat)
+			throws Exception {
+
+		if (DgrTokenGrantType.AUTHORIZATION_CODE.equalsIgnoreCase(grantType)
+				|| (DgrTokenGrantType.COOKIE_TOKEN.equalsIgnoreCase(grantType) && isGtwIdPFlow)
+				|| (DgrTokenGrantType.REFRESH_TOKEN.equalsIgnoreCase(grantType) && isGtwIdPFlow)) {
+			Long idTokenExp = accessTokenExp;
+			String idTokenPayload = getIdTokenPayload(oauthTokenData, accessTokenJwtstr,
+					oauthTokenData.oidcAndVgroupScopeStr, clientId, userName, iat, idTokenExp);
+
+			return getTokenJwsByJwks(idTokenPayload);
+		}
+
+		return null;
+	}
+
+	/**
+	 * 取得多個 scope, 以空格分隔的字串
+	 */
+	private String getScopeListToStr(List<String> scopeList) {
+		if (CollectionUtils.isEmpty(scopeList)) {
+			return "";
+		}
+
+		StringBuilder scopeSb = new StringBuilder();
+		for (String scope : scopeList) {
+			scopeSb.append(scope).append(" ");
+		}
+		
+		return scopeSb.toString().trim();
+	}
+	
+	/**
+	 * 取得 ClientCredentialCache 的 cache id,<br>
+	 * 資料格式為 "child id,pathVer" <br>
+	 */
+	private String getClientCredentialCacheId(String clientId, String pathVer) {
+		return clientId.toLowerCase() + "," + pathVer.toLowerCase();
 	}
 	
 	/**
@@ -723,11 +825,11 @@ public class OAuthTokenService {
 	
 	/**
 	 * Cache 是否要更新 <br>
-	 * 需更新的時機為:
-	 * 1.Cache 過期
-	 * 2.Access token 授權時間改變
-	 * 3.Group ID 改變
-	 * 4.token JWS 或 JWE 改變
+	 * 需更新的時機為: <br>
+	 * 1.Cache 過期 <br>
+	 * 2.Access token 授權時間改變 <br>
+	 * 3.Group ID 改變 <br>
+	 * 4.token JWS 或 JWE 改變 <br>
 	 */
 	public boolean isUpdateClientCredentialsCache(ClientCredentialsCacheVo cacheVo, long accessTokenValidity,
 			boolean isJwe, List<String> scopeList) {
@@ -748,11 +850,8 @@ public class OAuthTokenService {
 		}
 
 		boolean isJweCache = cacheVo.isJwe();
-		if (isJwe != isJweCache) {// token JWS 或 JWE 改變
-			return true;
-		}
-
-		return false;
+		return isJwe != isJweCache;// token JWS 或 JWE 是否有改變
+		
 	}
 	
 	/**
@@ -760,9 +859,9 @@ public class OAuthTokenService {
 	 */
 	private void updateClientCredentialsCache(ClientCredentialsCacheVo cacheVo, String clientId,
 			OAuthTokenResp oAuthTokenResp, String scopeList, long accessTokenValidity, long accessTokenExp,
-			boolean isJwe) {
+			boolean isJwe, String cacheId) {
 		if (accessTokenValidity <= 10) {// 授權期限 <= 10秒, 不做快取
-			clientCredentialsCacheVoMap.remove(clientId);
+			clientCredentialsCacheVoMap.remove(cacheId);
 			return;
 		}
 
@@ -777,7 +876,7 @@ public class OAuthTokenService {
 		cacheVo.setJwe(isJwe);
 		cacheVo.setAccessTokenExp(accessTokenExp);// Access token 到期時間
 
-		clientCredentialsCacheVoMap.put(clientId, cacheVo);
+		clientCredentialsCacheVoMap.put(cacheId, cacheVo);
 	}
 
 	private void sendNotifyLandingRequestToDgr(OAuthTokenData oauthTokenData, boolean isHasRefreshToken,
@@ -872,8 +971,8 @@ public class OAuthTokenService {
 			userAlias = userName;
 		}
 
-		String userAlias_en = Base64Util.base64URLEncode(userAlias.getBytes());
-		return String.format("b64" + ".%s" + ".%s" + ".%s", idPType, userAlias_en, userName);
+		String userAliasEn = Base64Util.base64URLEncode(userAlias.getBytes());
+		return String.format("b64" + ".%s" + ".%s" + ".%s", idPType, userAliasEn, userName);
 	}
 
 	/**
@@ -958,10 +1057,11 @@ public class OAuthTokenService {
 				oauthTokenData.apiResp);
 	}
 
-	public static String getAccessToken(boolean isJwe, PublicKey publicKey, PrivateKey privateKey, String grantType,
-			String accessTokenJti, String node, List<String> audList, Long stime, String userName, String orgId,
-			List<String> scopeList, List<String> roleIdList, Long accessTokenExp, String clientId, Long iat,
-			String idPType, boolean isAcIdPFlow, boolean isGtwIdPFlow) throws Exception {
+	public static String getAccessTokenPayload(String grantType, String accessTokenJti, String node,
+			List<String> audList, Long stime, String userName, String orgId, List<String> scopeList,
+			List<String> roleIdList, Long accessTokenExp, String clientId, Long iat, String idPType,
+			boolean isAcIdPFlow, boolean isGtwIdPFlow, String pathVer, String schemeAndDomainAndPort)
+			throws Exception {
 		Map<String, Object> payloadMap = new HashMap<>();
 
 		if (DgrTokenGrantType.PASSWORD.equalsIgnoreCase(grantType)
@@ -1008,6 +1108,20 @@ public class OAuthTokenService {
 		} else if (DgrTokenGrantType.CLIENT_CREDENTIALS.equalsIgnoreCase(grantType)) {
 			// 沒有 user_name, org_id
 			// 沒有 idp_type
+			
+			if (DgrTokenVersion.PATH_V2.equals(pathVer)) {
+				// 符合 OIDC 的 Access token 要有 iss, client_credentials 固定用 "OIDC"
+				String issuer = OIDCWellKnownHelper.getIssuer(schemeAndDomainAndPort, DgrIdPType.OIDC,
+						DgrTokenVersion.PATH_V2);
+				payloadMap.put("ver", DgrTokenVersion.VER2); // token 版本
+				payloadMap.put("iss", issuer);
+				payloadMap.put("sub", clientId);
+				scopeList.add("profile");
+				scopeList.add("email");
+				scopeList.add("system/*.cruds");// SMART on FHIR
+				audList = Arrays.asList(AUDIENCE_OIDC);
+			}
+			
 			payloadMap.put("node", node);
 			payloadMap.put("aud", audList);
 			// payloadMap.put(USER_NAME, userName);
@@ -1055,16 +1169,13 @@ public class OAuthTokenService {
 			payloadMap.put("idp_type", idPType);
 		}
 
-		String payload = OAuthTokenService.objectMapper.writeValueAsString(payloadMap);
-		String accessToken = getTokenJwt(isJwe, payload, publicKey, privateKey);
-
-		return accessToken;
+		return OAuthTokenService.objectMapper.writeValueAsString(payloadMap);
 	}
 
-	public static String getRefreshToken(boolean isJwe, PublicKey publicKey, PrivateKey privateKey, String grantType,
-			String accessTokenJti, String node, List<String> audList, Long stime, String userName, String orgId,
-			List<String> scopeList, List<String> roleIdList, Long refreshTokenExp, String clientId, Long iat,
-			String refreshTokenJti, String idPType, boolean isAcIdPFlow, boolean isGtwIdPFlow) throws Exception {
+	public static String getRefreshTokenPayload(String grantType, String accessTokenJti, String node,
+			List<String> audList, Long stime, String userName, String orgId, List<String> scopeList,
+			List<String> roleIdList, Long refreshTokenExp, String clientId, Long iat, String refreshTokenJti,
+			String idPType, boolean isAcIdPFlow, boolean isGtwIdPFlow) throws Exception {
 		Map<String, Object> payloadMap = new HashMap<>();
 
 		if (DgrTokenGrantType.PASSWORD.equalsIgnoreCase(grantType)
@@ -1091,7 +1202,7 @@ public class OAuthTokenService {
 			payloadMap.put("node", node);
 			payloadMap.put("aud", audList);
 			payloadMap.put(USER_NAME, userName);
-			if (isGtwIdPFlow == false) {
+			if (!isGtwIdPFlow) {
 				payloadMap.put("org_id", orgId);
 			}
 			payloadMap.put(SCOPE, scopeList);
@@ -1099,7 +1210,7 @@ public class OAuthTokenService {
 			payloadMap.put(STIME, stime);
 			payloadMap.put("iat", iat);
 			payloadMap.put("exp", refreshTokenExp);
-			if (isGtwIdPFlow == false) {
+			if (!isGtwIdPFlow) {
 				payloadMap.put("authorities", roleIdList);
 			}
 			payloadMap.put("jti", refreshTokenJti);
@@ -1149,16 +1260,13 @@ public class OAuthTokenService {
 			payloadMap.put("idp_type", idPType);
 		}
 
-		String payload = OAuthTokenService.objectMapper.writeValueAsString(payloadMap);
-		String refreshToken = getTokenJwt(isJwe, payload, publicKey, privateKey);
-
-		return refreshToken;
+		return OAuthTokenService.objectMapper.writeValueAsString(payloadMap);
 	}
 
 	/**
 	 * 轉成 JWT (JWS / JWE) 格式
 	 */
-	private static String getTokenJwt(boolean isJwe, String payload, PublicKey publicKey, PrivateKey privateKey)
+	public static String getTokenJwt(boolean isJwe, String payload, PublicKey publicKey, PrivateKey privateKey)
 			throws Exception {
 		String token = null;
 		if (isJwe) {
@@ -1172,10 +1280,10 @@ public class OAuthTokenService {
 	}
 
 	/**
-	 * 取得 ID Token
+	 * 取得 ID Token Payload
 	 * 注意: 當欄位有增加, GtwIdPVerifyResp 要同步增加
 	 */
-	private String getIdToken(OAuthTokenData oauthTokenData, String accessTokenJwtstr, String reqScopeStr,
+	private String getIdTokenPayload(OAuthTokenData oauthTokenData, String accessTokenJwtstr, String reqScopeStr,
 			String clientId, String userName, Long iat, Long idTokenExp) throws Exception {
 
 		reqScopeStr = reqScopeStr.toLowerCase();// 轉小寫,再比較(忽略大小寫)
@@ -1185,7 +1293,8 @@ public class OAuthTokenService {
 		boolean isHasIdToken = false;// 是否有 ID Token
 
 		// 有以下 scope 時, 才有 ID Token
-		if (reqScopeList.contains(DgrOpenIDConnectScope.OPENID) || reqScopeList.contains(DgrOpenIDConnectScope.EMAIL)
+		if (reqScopeList.contains(DgrOpenIDConnectScope.OPENID) 
+				|| reqScopeList.contains(DgrOpenIDConnectScope.EMAIL)
 				|| reqScopeList.contains(DgrOpenIDConnectScope.PROFILE)) {
 			isHasIdToken = true;
 		}
@@ -1199,11 +1308,12 @@ public class OAuthTokenService {
 		// 對外公開的Port, ex: 80
 		String dgrPublicPort = getTsmpSettingService().getVal_DGR_PUBLIC_PORT();
 
-		String schemeAndDomainAndPort = GtwIdPWellKnownService.getSchemeAndDomainAndPort(dgrPublicDomain,
+		String schemeAndDomainAndPort = OIDCWellKnownHelper.getSchemeAndDomainAndPort(dgrPublicDomain,
 				dgrPublicPort);
 
-		String iss = GtwIdPWellKnownService.getIssuer(schemeAndDomainAndPort, oauthTokenData.idPType);
-		String at_hash = getAtHash(accessTokenJwtstr);
+		String iss = OIDCWellKnownHelper.getIssuer(schemeAndDomainAndPort, oauthTokenData.idPType,
+				DgrTokenVersion.PATH_V1);
+		String atHash = getAtHash(accessTokenJwtstr);
 		String userEmail = oauthTokenData.idPUserEmail;
 		String userAlias = oauthTokenData.idPUserAlias;
 		String picture = oauthTokenData.idPUserPicture;
@@ -1214,7 +1324,7 @@ public class OAuthTokenService {
 		payloadMap.put("iss", iss); // REQUIRED, 發行 ID token 的唯一識別碼，通常會使用網址表示
 		payloadMap.put("aud", clientId); // REQUIRED, Token 的接受者, 應用程式所註冊的 client_id
 		payloadMap.put("sub", userName); // REQUIRED, 使用者的唯一識別碼
-		payloadMap.put("at_hash", at_hash); // OPTIONAL, 從 Access Token 取得部分的資訊雜湊後的結果
+		payloadMap.put("at_hash", atHash); // OPTIONAL, 從 Access Token 取得部分的資訊雜湊後的結果
 		payloadMap.put("iat", iat); // REQUIRED, Token 的發行時間
 		payloadMap.put("exp", idTokenExp); // REQUIRED, Token 失效或過期的時間
 
@@ -1249,15 +1359,14 @@ public class OAuthTokenService {
 				payloadMap.put("roleName", idtRoleName);
 		}
 
-		String payload = null;
+		String idTokenPayload = null;
 		try {
-			payload = getObjectMapper().writeValueAsString(payloadMap);
+			idTokenPayload = getObjectMapper().writeValueAsString(payloadMap);
 		} catch (JsonProcessingException e) {
 			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
 		}
 
-		String idToken = getIdTokenJws(payload);
-		return idToken;
+		return idTokenPayload;
 	}
 
 	private Boolean checkIdtRoleNameIsObject(String idtRoleName) {
@@ -1275,6 +1384,7 @@ public class OAuthTokenService {
 			return false;
 		}
 	}
+	
 	/**
 	 * 產生 ID Token 的 at_hash, 從 Access Token 取得部分的資訊雜湊後的結果, 是用來確認 ID Token 與 Access
 	 * Token 兩個關係的一致性
@@ -1288,15 +1398,15 @@ public class OAuthTokenService {
 		}
 
 		// 2.將左半部份,做 Base64UrlEncode, 得到 at_hash
-		String atHash = Base64Util.base64URLEncode(result);
-
-		return atHash;
+		return  Base64Util.base64URLEncode(result);
 	}
 
 	/**
-	 * 將 ID Token 的 payload 轉成 JWS 格式
+	 * 將 Access token / ID Token 的 payload 轉成 JWS 格式 <br>
+	 * 要符合 OIDC 規範, <br>
+	 * 需要使用 JWKS Endpoint 的 Private Key 簽章 <br>
 	 */
-	private String getIdTokenJws(String idTokenPayload) throws Exception {
+	private String getTokenJwsByJwks(String tokenPayload) throws Exception {
 		// 隨機選 JWK(2擇1)
 		String jwkStr = getJwk();
 		JWK jwk = JWK.parse(jwkStr);
@@ -1307,16 +1417,15 @@ public class OAuthTokenService {
 		String kid = JsonNodeUtil.getNodeAsText(rootNode, "kid");
 
 		// 簽章
-		String idTokenJws = JWScodec.jwsSign(privateKey, idTokenPayload, kid);
-		return idTokenJws;
+		return JWScodec.jwsSignByRS(privateKey, tokenPayload, JWSAlgorithm.RS256, kid, DgrTokenVersion.VER2);
 	}
 
 	/**
-	 * 隨機選JWK(2擇1), 用來做 ID Token 簽章
+	 * 隨機選JWK(2擇1), 用來做 Access token / ID Token 簽章
 	 */
 	private String getJwk() {
 		// 1.二組JWK的機率與資料,機率各一半(50%)
-		List<String[]> dataList = new LinkedList<String[]>();
+		List<String[]> dataList = new LinkedList<>();
 		dataList.add(new String[] { "50", "1" });
 		dataList.add(new String[] { "50", "2" });
 
@@ -1338,11 +1447,15 @@ public class OAuthTokenService {
 	 * 檢查 client 帳號密碼
 	 */
 	protected ResponseEntity<?> verifyAuth(String grantType, String clientId, String clientMima, String codeVerifier,
-			String reqUri) {
+			String reqUri, boolean isClientAssertion) {
 		// 沒有 clientId, 或 client 狀態不正確
 		ResponseEntity<?> respEntity = getTokenHelper().checkClientStatus(clientId, reqUri);
 		if (respEntity != null) {// 資料驗證有錯誤
 			return respEntity;
+		}
+		
+		if (isClientAssertion) {// 客戶斷言沒有密碼,不檢查
+			return null;
 		}
 
 		if (!StringUtils.hasLength(clientMima)) {// 沒有密碼
@@ -1354,8 +1467,8 @@ public class OAuthTokenService {
 				if (respEntity != null) {// 若沒有授權 Public client, 就必須有 client_secret
 					String errMsg = "Missing client_secret";
 					TPILogger.tl.debug(errMsg);
-					return new ResponseEntity<OAuthTokenErrorResp2>(
-							getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					return new ResponseEntity<>(
+							TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 							HttpStatus.BAD_REQUEST);// 400
 
 				} else {// 若有授權 Public client 且沒有密碼, 就必須有 PKCE 的 code_verifier
@@ -1363,11 +1476,12 @@ public class OAuthTokenService {
 						TPILogger.tl.debug("Public client needs to use PKCE");
 						String errMsg = "Missing code_verifier";
 						TPILogger.tl.debug(errMsg);
-						return new ResponseEntity<OAuthTokenErrorResp2>(
-								getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+						return new ResponseEntity<>(
+								TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 								HttpStatus.BAD_REQUEST);// 400
 					}
 				}
+				
 			} else if (DgrTokenGrantType.REFRESH_TOKEN.equalsIgnoreCase(grantType)) {// refresh_token 沒有密碼
 
 				// 檢查 client 是否有授權 Public
@@ -1375,21 +1489,20 @@ public class OAuthTokenService {
 				if (respEntity != null) {// 若沒有授權 Public client, 就必須有 client_secret
 					String errMsg = "Missing client_secret";
 					TPILogger.tl.debug(errMsg);
-					return new ResponseEntity<OAuthTokenErrorResp2>(
-							getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					return new ResponseEntity<>(
+							TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 							HttpStatus.BAD_REQUEST);// 400
 				}
-
 
 			} else {// 其他 grant type 沒有密碼
 				String errMsg = "Missing client_secret";
 				TPILogger.tl.debug(errMsg);
-				return new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+				return new ResponseEntity<>(
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 
-		}else {// 有密碼
+		} else {// 有密碼
 			// 查無 client 或 client 帳密不對
 			respEntity = getTokenHelper().checkClientMima(clientId, clientMima, reqUri);
 			if (respEntity != null) {// client資料驗證有錯誤
@@ -1411,8 +1524,8 @@ public class OAuthTokenService {
 		if (grantType == null) {
 			String errMsg = "Missing grant type";// Body 沒有 grant_type
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1421,8 +1534,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has grant_type, but no value");// Body 有 grant_type, 但沒有值
 			String errMsg = "Full authentication is required to access this resource";// 訪問此資源需要完全身份驗證
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1487,8 +1600,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has no username");// Body 沒有 username
 			errMsg = "Bad credentials";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_GRANT, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_GRANT, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1497,8 +1610,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has username, but no value");// Body 有 username, 但沒有值
 			errMsg = "Full authentication is required to access this resource";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1508,8 +1621,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has no password");// Body 沒有 password
 			errMsg = "Bad credentials";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_GRANT, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_GRANT, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1518,8 +1631,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has password, but no value");// Body 有 password, 但沒有值
 			errMsg = "Full authentication is required to access this resource";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1619,8 +1732,8 @@ public class OAuthTokenService {
 		if (!StringUtils.hasLength(code)) {
 			errMsg = "Missing required parameter: code";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1641,13 +1754,12 @@ public class OAuthTokenService {
 					"Table [DGR_GTW_IDP_AUTH_M] can't find data. auth_code:" + code + ", client_id: " + clientId);
 			errMsg = "Invalid auth code";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
 		long gtwIdpAuthMId = dgrGtwIdpAuthM.getGtwIdpAuthMId();
-		String state = dgrGtwIdpAuthM.getState();
 
 		// 取得 scope
 		List<DgrGtwIdpAuthD> dgrGtwIdpAuthDList = getDgrGtwIdpAuthDDao().findByRefGtwIdpAuthMId(gtwIdpAuthMId);
@@ -1669,7 +1781,7 @@ public class OAuthTokenService {
 		// 5.檢查 code verifier(PKCE)是否匹配
 		String codeChallenge = dgrGtwIdpAuthM.getCodeChallenge();
 		String codeChallengeMethod = dgrGtwIdpAuthM.getCodeChallengeMethod();
-		respEntity = checkDgrGtwIdpAuthCodeAndUpdate(oauthTokenData, code, clientId, state, codeVerifier, codeChallenge,
+		respEntity = checkDgrGtwIdpAuthCodeAndUpdate(oauthTokenData, code, clientId, codeVerifier, codeChallenge,
 				codeChallengeMethod, reqUri);
 		if (respEntity != null) {
 			return respEntity;
@@ -1691,8 +1803,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has no code");// Body 沒有 code
 			errMsg = "Missing code";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1701,8 +1813,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Body has code, but no value");// Body 有 code, 但沒有值
 			errMsg = "Missing code";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1734,8 +1846,8 @@ public class OAuthTokenService {
 		if (!StringUtils.hasLength(accessTokenJti)) {
 			errMsg = "Missing cookie jti";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1743,8 +1855,8 @@ public class OAuthTokenService {
 		if (!StringUtils.hasLength(idPType)) {
 			errMsg = "Missing cookie idPType";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -1766,8 +1878,8 @@ public class OAuthTokenService {
 		if (!StringUtils.hasLength(refreshTokenJwtstr)) {
 			errMsg = "Missing refreshTokenJwtstr";
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.UNAUTHORIZED_2, errMsg),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1806,7 +1918,7 @@ public class OAuthTokenService {
 	 * 3.更新 auth code 狀態為已使用 <br>
 	 */
 	private ResponseEntity<?> checkDgrGtwIdpAuthCodeAndUpdate(OAuthTokenData oauthTokenData, String authCode,
-			String clientId, String state, String codeVerifier, String codeChallenge, String codeChallengeMethod,
+			String clientId, String codeVerifier, String codeChallenge, String codeChallengeMethod,
 			String reqUri) {
 
 		DgrGtwIdpAuthCode dgrGtwIdpAuthCode = getDgrGtwIdpAuthCodeDao().findFirstByAuthCodeAndPhase(authCode,
@@ -1818,8 +1930,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Table [DGR_GTW_IDP_AUTH_CODE] can't find data. auth_code:" + authCode);
 			String errMsg = TokenHelper.UNAUTHORIZED;
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1835,8 +1947,8 @@ public class OAuthTokenService {
 			String errMsg1 = TokenHelper.UNAUTHORIZED;
 			String errMsg2 = "Auth code status is " + authCodeStatus + ". auth_code: " + authCode;
 			TPILogger.tl.debug(errMsg1 + "\n" + errMsg2);
-			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp(errMsg1, errMsg2, HttpStatus.UNAUTHORIZED.value(), reqUri),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(errMsg1, errMsg2, HttpStatus.UNAUTHORIZED.value(), reqUri),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1849,8 +1961,8 @@ public class OAuthTokenService {
 			String errMsg1 = TokenHelper.UNAUTHORIZED;
 			String errMsg2 = "Auth code expired. auth code exp: " + authCodeExpire + " (" + expireTime + ")";
 			TPILogger.tl.debug(errMsg2);
-			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp(errMsg1, errMsg2, HttpStatus.UNAUTHORIZED.value(), reqUri),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(errMsg1, errMsg2, HttpStatus.UNAUTHORIZED.value(), reqUri),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1868,7 +1980,7 @@ public class OAuthTokenService {
 
 		dgrGtwIdpAuthCode.setUpdateUser("SYSTEM");
 		dgrGtwIdpAuthCode.setUpdateDateTime(DateTimeUtil.now());
-		dgrGtwIdpAuthCode = getDgrGtwIdpAuthCodeDao().saveAndFlush(dgrGtwIdpAuthCode);
+		getDgrGtwIdpAuthCodeDao().saveAndFlush(dgrGtwIdpAuthCode);
 
 		// 5.判斷 code_challenge 和 code_verifier 是否匹配
 		// 若 PKCE 值不對,code 要算有使用過,所以在此之前先改為已使用
@@ -1891,8 +2003,8 @@ public class OAuthTokenService {
 				TPILogger.tl.debug("There is code_challenge, but no code_verifier");
 				String errMsg = "Missing code_verifier";
 				TPILogger.tl.debug(errMsg);
-				return new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+				return new ResponseEntity<>(
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 		}
@@ -1904,8 +2016,8 @@ public class OAuthTokenService {
 				TPILogger.tl.debug("There is code_verifier, but no code_challenge");
 				String errMsg = "Invalid code_verifier";
 				TPILogger.tl.debug(errMsg);
-				return new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+				return new ResponseEntity<>(
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 		}
@@ -1918,15 +2030,18 @@ public class OAuthTokenService {
 			}
 
 			if (!codeChallenge.equals(codeVerifierEn)) {
-				String errMsg = String.format(
-						"The code_verifier mismatch. \n" + "codeChallenge: %s, \n" + "t(codeVerifier): %s",
-						codeChallenge, codeVerifierEn);
+				String errMsg = """
+						The code_verifier mismatch.
+						codeChallenge: %s,
+						t(codeVerifier): %s
+						""";
+				errMsg = String.format(errMsg, codeChallenge, codeVerifierEn);
 				TPILogger.tl.debug(errMsg);
 
 				errMsg = "Invalid code_verifier";
 				TPILogger.tl.debug(errMsg);
-				return new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+				return new ResponseEntity<>(
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 		}
@@ -1951,8 +2066,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Table [DGR_AC_IDP_AUTH_CODE] can't find data, auth_code:" + dgRcode);
 			String errMsg = TokenHelper.UNAUTHORIZED;
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1963,8 +2078,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Auth code(dgRcode) is " + authCodeStatus + ", auth_code:" + dgRcode);
 			String errMsg = TokenHelper.UNAUTHORIZED;
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1977,8 +2092,8 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Auth code(dgRcode) expired, auth code exp:" + authCodeExpire + " (" + expireTime + ")");
 			String errMsg = TokenHelper.UNAUTHORIZED;
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
+			return new ResponseEntity<>(
+					TokenHelper.getOAuthTokenErrorResp(errMsg, errMsg, HttpStatus.UNAUTHORIZED.value(), reqUri),
 					HttpStatus.UNAUTHORIZED);// 401
 		}
 
@@ -1990,7 +2105,7 @@ public class OAuthTokenService {
 		dgrAcIdpAuthCode.setStatus(TsmpAuthCodeStatus2.USED.value());// 已使用
 		dgrAcIdpAuthCode.setUpdateDateTime(DateTimeUtil.now());
 		dgrAcIdpAuthCode.setUpdateUser("SYSTEM");
-		dgrAcIdpAuthCode = getDgrAcIdpAuthCodeDao().saveAndFlush(dgrAcIdpAuthCode);
+		getDgrAcIdpAuthCodeDao().saveAndFlush(dgrAcIdpAuthCode);
 
 		return null;
 	}
@@ -2022,13 +2137,12 @@ public class OAuthTokenService {
 		}
 
 		// 查詢 TSMP_CLIENT
-		Optional<TsmpClient> opt_client = getTsmpClientDao().findById(clientId);
-		if (!opt_client.isPresent()) {
-			ResponseEntity<?> errRespEntity = getTokenHelper().getFindTsmpClientError(clientId, reqUri);
-			return errRespEntity;
+		Optional<TsmpClient> optClient = getTsmpClientDao().findById(clientId);
+		if (!optClient.isPresent()) {
+			return getTokenHelper().getFindTsmpClientError(clientId, reqUri);
 		}
 
-		TsmpClient tsmpClient = opt_client.get();
+		TsmpClient tsmpClient = optClient.get();
 		Integer accessTokenQuota = tsmpClient.getAccessTokenQuota() == null ? 0 : tsmpClient.getAccessTokenQuota();
 		Integer refreshTokenQuota = tsmpClient.getRefreshTokenQuota() == null ? 0 : tsmpClient.getRefreshTokenQuota();
 
@@ -2052,13 +2166,12 @@ public class OAuthTokenService {
 	private ResponseEntity<?> checkClientRefreshTokenQuota(OAuthTokenData oauthTokenData, String clientId,
 			String retokenJti, String reqUri) {
 		// 查詢 TSMP_CLIENT
-		Optional<TsmpClient> opt_client = getTsmpClientDao().findById(clientId);
-		if (!opt_client.isPresent()) {
-			ResponseEntity<?> errRespEntity = getTokenHelper().getFindTsmpClientError(clientId, reqUri);
-			return errRespEntity;
+		Optional<TsmpClient> optClient = getTsmpClientDao().findById(clientId);
+		if (!optClient.isPresent()) {
+			return getTokenHelper().getFindTsmpClientError(clientId, reqUri);
 		}
 
-		TsmpClient tsmpClient = opt_client.get();
+		TsmpClient tsmpClient = optClient.get();
 		Integer accessTokenQuota = tsmpClient.getAccessTokenQuota() == null ? 0 : tsmpClient.getAccessTokenQuota();
 
 		// 查詢 TSMP_TOKEN_HISTORY, 此 refresh token 的最新記錄
@@ -2069,8 +2182,7 @@ public class OAuthTokenService {
 			TPILogger.tl.debug("Table [TSMP_TOKEN_HISTORY] can't find data, retoken_jti:" + retokenJti);
 
 			// refresh token 已撤銷
-			ResponseEntity<?> respEntity = getTokenHelper().getRefreshTokenRevokedError(retokenJti);
-			return respEntity;
+			return TokenHelper.getRefreshTokenRevokedError(retokenJti);
 		}
 
 		Long rftQuota = tsmpTokenHistory.getRftQuota() == null ? 0 : tsmpTokenHistory.getRftQuota();
@@ -2086,7 +2198,7 @@ public class OAuthTokenService {
 			// 否則, 若 rft_used >= rft_quota, refresh token 額度已滿不可使用
 			String errMsg = "Over Refresh Token Allow Times";// 超過 refresh token 允許次數
 			TPILogger.tl.debug(errMsg);
-			return new ResponseEntity<OAuthTokenErrorResp2>(getTokenHelper().getOAuthTokenErrorResp2(errMsg, errMsg),
+			return new ResponseEntity<>(TokenHelper.getOAuthTokenErrorResp2(errMsg, errMsg),
 					HttpStatus.FORBIDDEN);// 403
 
 		} else {
@@ -2150,8 +2262,6 @@ public class OAuthTokenService {
 		return logParams;
 	}
 
-	
-
 	/** 
 	 * 提供客製包使用的 cus Token,
 	 * 仿造 AC Access Token
@@ -2176,8 +2286,8 @@ public class OAuthTokenService {
 		payloadMap.put(CLIENT_ID, "cusA");
 		String payload = OAuthTokenService.objectMapper.writeValueAsString(payloadMap);
 		boolean isJwe = false;
-		String accessToken = getTokenJwt(isJwe, payload, publicKey, privateKey);
-		return accessToken;
+		
+		return getTokenJwt(isJwe, payload, publicKey, privateKey);
 	}
 	
 	/**

@@ -952,5 +952,15 @@ public class TsmpSettingService {
 		String key = getKey_CLIENT_PWD_STRENGTH_DESC();
 		return getStringVal(key);
 	}
-	
+
+	// H2 Sync
+	public String getKey_H2_SYNC_TIMEOUT_MINUTES() {
+		return TsmpSettingDao.Key.H2_SYNC_TIMEOUT_MINUTES;
+	}
+
+	public int getVal_H2_SYNC_TIMEOUT_MINUTES() {
+		String key = getKey_H2_SYNC_TIMEOUT_MINUTES();
+		return getIntVal(key, 30); // 預設 30 分鐘
+	}
+
 }

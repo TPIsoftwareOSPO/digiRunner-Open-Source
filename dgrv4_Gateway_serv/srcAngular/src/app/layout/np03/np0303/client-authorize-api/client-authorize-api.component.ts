@@ -158,10 +158,12 @@ export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit
             selectionMode: 'multiple',
             keyword: this.keyword!.value
             }
-          }
+          },
+          closable:true,
+          modal:true
         })
 
-        ref.onClose.subscribe(_chooseAPI => {
+        ref!.onClose.subscribe(_chooseAPI => {
           if(_chooseAPI) {
             this.keyword!.setValue('');
             this.authApiList = _chooseAPI;

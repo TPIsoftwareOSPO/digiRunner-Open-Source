@@ -8,21 +8,40 @@
           <label class="control-label" id="startDate_label">{{'lastUpdDateTime'|translate}}</label>
           <div class="d-flex">
             <div>
-              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" formControlName="startDate" appendTo="body"
-                dateFormat="yy/mm/dd" [maxDate]="dateSmaxDate" [showIcon]="true" showTime="true" [showIcon]="true"
-                showButtonBar="true" (onClearClick)="onClearClick('startDate')"
-                (onTodayClick)="onTodayClick('startDate')" [readonlyInput]="true"></p-calendar>
+              <p-datepicker
+                  formControlName="startDate"
+                  [style]="{'width':'100%'}"
+                  [inputStyle]="{'width':'100%'}"
+                  [maxDate]="dateSmaxDate"
+                  [showIcon]="true"
+                  [showTime]="true"
+                  [showButtonBar]="true"
+                  [readonlyInput]="true"
+                  appendTo="body"
+                  dateFormat="yy/mm/dd"
+                  (onClearClick)="onClearClick('startDate')"
+                  (onTodayClick)="onTodayClick('startDate')">
+              </p-datepicker>
               <div *ngIf="startDate.invalid && (startDate.dirty || startDate.touched)" class="text-danger">
                 <small class="form-text">{{startDate.errors.required | translate}}</small>
               </div>
             </div>
             <label style="padding: 5px 10px;">～</label>
             <div>
-              <p-calendar [style]="{'width':'100%'}" formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
-                dateFormat="yy/mm/dd" showTime="true" [showIcon]="true" [minDate]="dateEminDate" showButtonBar="true"
-                (onClearClick)="onClearClick('endDate')" (onTodayClick)="onTodayClick('endDate')"
-                [readonlyInput]="true">
-              </p-calendar>
+              <p-datepicker
+                  formControlName="endDate"
+                  [style]="{'width':'100%'}"
+                  [inputStyle]="{'width':'100%'}"
+                  [minDate]="dateEminDate"
+                  [showIcon]="true"
+                  [showTime]="true"
+                  [showButtonBar]="true"
+                  [readonlyInput]="true"
+                  appendTo="body"
+                  dateFormat="yy/mm/dd"
+                  (onClearClick)="onClearClick('endDate')"
+                  (onTodayClick)="onTodayClick('endDate')">
+              </p-datepicker>
               <div *ngIf="endDate.invalid && (endDate.dirty || endDate.touched)" class="text-danger">
                 <small class="form-text">{{endDate.errors.required | translate}}</small>
               </div>
@@ -32,9 +51,9 @@
         <div class="col-4">
           <label class="control-label">{{'file_classification'|translate}}</label>
           <div style="display: block" class="w-100">
-            <p-dropdown [options]="fileClassifications" [filter]="true" formControlName="fileClassification"
+            <p-select [options]="fileClassifications" [filter]="true" formControlName="fileClassification"
               placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
         <div class="col-3">
@@ -72,7 +91,7 @@
     </form>
 
     <!-- 查詢 -->
-    <p-table *ngIf="cols" [columns]="cols" [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="tableData" selectionMode="single" stripedRows
       [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -168,9 +187,9 @@
         <div class="col-3">
           <label class="control-label" id="refFileCateCode_label">{{'file_classification'|translate}}</label>
           <div style="display: block" class="w-100">
-            <p-dropdown [options]="fileClassifications" [filter]="true" formControlName="refFileCateCode"
+            <p-select [options]="fileClassifications" [filter]="true" formControlName="refFileCateCode"
               placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
             <div *ngIf="refFileCateCode_add.invalid && (refFileCateCode_add.dirty || refFileCateCode_add.touched)"
               class="text-danger">
               <small class="form-text">{{refFileCateCode_add.errors.required | translate}}</small>
@@ -267,9 +286,9 @@
         <div class="col-6">
           <label class="control-label" id="refFileCateCode_label">{{'file_classification'|translate}}</label>
           <div style="display: block" class="w-100">
-            <p-dropdown [options]="fileClassifications" [filter]="true" formControlName="refFileCateCode"
+            <p-select [options]="fileClassifications" [filter]="true" formControlName="refFileCateCode"
               placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
         <div class="col-6">
@@ -443,10 +462,10 @@
           <label class="control-label" id="startDate_label">{{'lastUpdDateTime'|translate}}</label>
           <div class="row">
             <div class="col-6">
-              <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="startDate" appendTo="body"
+              <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" formControlName="startDate" appendTo="body"
                 dateFormat="yy/mm/dd" [maxDate]="dateSmaxDate_formBucket" [showIcon]="true" showTime="true"
                 [showIcon]="true" showButtonBar="true" (onClearClick)="onClearClick('startDate')"
-                (onTodayClick)="onTodayClick('startDate')" [readonlyInput]="true"></p-calendar>
+                (onTodayClick)="onTodayClick('startDate')" [readonlyInput]="true"></p-datepicker>
               <div
                 *ngIf="formBucket.get('startDate').invalid && (formBucket.get('startDate').dirty || formBucket.get('startDate').touched)"
                 class="text-danger">
@@ -454,11 +473,11 @@
               </div>
             </div>
             <div class="col-6">
-              <p-calendar [style]="{'width':'95%'}" formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
+              <p-datepicker [style]="{'width':'95%'}" formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
                 dateFormat="yy/mm/dd" showTime="true" [showIcon]="true" [minDate]="dateEminDate_formBucket"
                 showButtonBar="true" (onClearClick)="onClearClick('endDate')" (onTodayClick)="onTodayClick('endDate')"
                 [readonlyInput]="true">
-              </p-calendar>
+              </p-datepicker>
               <div
                 *ngIf="formBucket.get('endDate').invalid && (formBucket.get('endDate').dirty || formBucket.get('endDate').touched)"
                 class="text-danger">
@@ -470,9 +489,9 @@
         <div class="col-3">
           <label class="control-label">{{'file_classification'|translate}}</label>
           <div style="display: block" class="w-100">
-            <p-dropdown [options]="fileClassifications" [filter]="true" formControlName="fileClassification"
+            <p-select [options]="fileClassifications" [filter]="true" formControlName="fileClassification"
               placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
         <div class="col-3">
@@ -506,7 +525,7 @@
     </form>
     <hr>
     <p-table *ngIf="cols" [columns]="cols" [value]="tableDataBucket" selectionMode="single"
-      [style]="{'word-break':'break-word'}" [(selection)]="selected" styleClass="p-datatable-striped">
+      [style]="{'word-break':'break-word'}" [(selection)]="selected" stripedRows>
       <ng-template pTemplate="caption">
         <div class="ui-helper-clearfix">
             <button type="button" class="btn tpi-primary float-start me-3" (click)="multiReductionPopup();"
@@ -622,73 +641,14 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left" (onClose)="onToastClose($event)"></p-toast>
-<!-- <p-toast position="center" key="reductionPopup" (onClose)="onReject()" [modal]="true" [baseZIndex]="5000">
-    <ng-template let-message pTemplate="message">
-        <div style="text-align: center">
-            <em class="fas fa-exclamation-triangle fa-3x"></em>
-            <h4>{{message.summary}}</h4>
-            <p>{{message.detail}}</p>
-        </div>
-        <div class="ui-g ui-fluid">
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="reductionConfirm()" label="{{'button.confirm'|translate}}"
-                    class="ui-button-success"></button>
-            </div>
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="onReject()" label="{{'button.cancel'|translate}}"
-                    class="ui-button-secondary"></button>
-            </div>
-        </div>
-    </ng-template>
-  </p-toast> -->
-
-<!-- <p-toast position="center" key="deletePopup" (onClose)="onReject()" [modal]="true" [baseZIndex]="5000">
-    <ng-template let-message pTemplate="message">
-        <div style="text-align: center">
-            <em class="fas fa-exclamation-triangle fa-3x"></em>
-            <h4>{{message.summary}}</h4>
-            <p>{{message.detail}}</p>
-        </div>
-        <div class="ui-g ui-fluid">
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="deleteConfirm()" label="{{'button.confirm'|translate}}"
-                    class="ui-button-success"></button>
-            </div>
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="onReject()" label="{{'button.cancel'|translate}}"
-                    class="ui-button-secondary"></button>
-            </div>
-        </div>
-    </ng-template>
-  </p-toast> -->
-
-<!-- <p-toast position="center" key="moveItemToBucket" (onClose)="onReject()" [modal]="true" [baseZIndex]="5000">
-    <ng-template let-message pTemplate="message">
-        <div style="text-align: center">
-            <em class="fas fa-exclamation-triangle fa-3x"></em>
-            <h4>{{message.summary}}</h4>
-            <p>{{message.detail}}</p>
-        </div>
-        <div class="ui-g ui-fluid">
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="moveItemToBucketConfirm()" label="{{'button.confirm'|translate}}"
-                    class="ui-button-success"></button>
-            </div>
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="onReject()" label="{{'button.cancel'|translate}}"
-                    class="ui-button-secondary"></button>
-            </div>
-        </div>
-    </ng-template>
-  </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

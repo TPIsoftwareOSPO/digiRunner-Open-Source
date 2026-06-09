@@ -12,7 +12,7 @@
             <div class="p-form-check-line form-group">
               <ng-container *ngFor="let stat of cusStatusData">
                 <div class="p-form-check">
-                  <p-radioButton formControlName="cusStatus" value={{stat.value}}
+                  <p-radioButton name="cusStatus" formControlName="cusStatus" value={{stat.value}}
                     inputId="cusStatus{{stat.value}}"></p-radioButton>
                   <label for="cusStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                 </div>
@@ -30,8 +30,7 @@
         </div>
       </div>
     </form>
-    <p-table [value]="tableData" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-      styleClass="p-datatable-striped">
+    <p-table [value]="tableData" [style]="{'word-break':'break-word'}" responsiveLayout="scroll" stripedRows>
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th style="width: 10%;" scope="col">{{"cusStatus"|translate}}</th>
@@ -124,11 +123,11 @@
           <div class="p-form-check-line">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="cusStatus" value="Y" inputId="cusStatusY"></p-radioButton>
+                <p-radioButton name="cusStatus" formControlName="cusStatus" value="Y" inputId="cusStatusY"></p-radioButton>
                 <label for="cusStatusY" class="ms-2 mb-0">{{"button.enable"|translate}}</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="cusStatus" value="N" inputId="cusStatusN"></p-radioButton>
+                <p-radioButton name="cusStatus" formControlName="cusStatus" value="N" inputId="cusStatusN"></p-radioButton>
                 <label for="cusStatusN" class="ms-2 mb-0">{{"button.disable"|translate}}</label>
               </div>
             </ng-container>
@@ -1028,14 +1027,13 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

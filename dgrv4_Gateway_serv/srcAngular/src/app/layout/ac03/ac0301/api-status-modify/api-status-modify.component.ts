@@ -43,6 +43,8 @@ export class ApiStatusModifyComponent implements OnInit {
   }
 
   async ngOnInit() {
+    this.minDate.setHours(0, 0, 0, 0);
+
     this.apiStatus.setValue(this.config.data.status);
     if (this.config.data.revokeFlag)
       this.revokeFlag.setValue(this.config.data.revokeFlag);

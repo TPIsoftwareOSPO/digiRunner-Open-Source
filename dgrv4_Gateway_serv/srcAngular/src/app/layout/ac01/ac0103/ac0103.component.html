@@ -35,7 +35,7 @@
     </div>
     <hr>
     <p-table *ngIf="cols.length>0" [columns]="cols" [value]="rtnCodeList" selectionMode="single"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      stripedRows [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -141,9 +141,9 @@
         </div>
         <div class="col-6 col-lg-6">
           <label id="locale_label" for="locale" class="control-label">{{'fun_locale' | translate}}</label>
-          <p-dropdown [options]="localies" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="localies" [filter]="true" placeholder="{{'plz_chs' | translate}}"
             formControlName="locale" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="locale?.invalid && (locale?.dirty || locale?.touched)" class="text-danger">
             <small class="form-text">{{locale.errors.isRequired}}</small>
             <small class="form-text">{{locale.errors.maxlength | translate}}</small>
@@ -202,14 +202,13 @@
         </div>
     </ng-template>
 </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

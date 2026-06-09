@@ -2,6 +2,7 @@ package tpi.dgrv4.gateway.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -165,6 +166,7 @@ public class DGRCServicePut implements IApiCacheService {
 			payload = jwtPayloadData.payloadStr;
 
 			List<String> srcUrlList = getDgrcRoutingHelper().getRouteSrcUrl(apiReg, reqUrl, httpReq);
+			srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);
 			// 沒有目標URL,則回覆錯誤訊息
 			if (CollectionUtils.isEmpty(srcUrlList)) {
 				ResponseEntity<?> srcUrlListErrResp = getDgrcRoutingHelper().getSrcUrlListErrResp(httpReq, apiId);
@@ -523,4 +525,5 @@ public class DGRCServicePut implements IApiCacheService {
 	protected boolean checkIfMockTest(HttpHeaders httpHeaders) {
 		return this.mockApiTestService.checkIfMockTest(httpHeaders);
 	}
+
 }

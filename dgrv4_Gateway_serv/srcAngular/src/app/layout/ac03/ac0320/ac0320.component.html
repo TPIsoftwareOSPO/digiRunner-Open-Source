@@ -1,6 +1,6 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <p-table [value]="tableData" [(selection)]="selected" styleClass="p-datatable-striped"
+    <p-table [value]="tableData" [(selection)]="selected" stripedRows
       [style]="{ 'word-break': 'break-word' }" responsiveLayout="scroll">
       <ng-template pTemplate="caption">
         <div class="d-flex justify-content-between align-items-center">
@@ -93,11 +93,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="enable" value="Y" inputId="enableY"></p-radioButton>
+                <p-radioButton name="enable" formControlName="enable" value="Y" inputId="enableY"></p-radioButton>
                 <label for="enableY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="enable" value="N" inputId="enableN"></p-radioButton>
+                <p-radioButton name="enable" formControlName="enable" value="N" inputId="enableN"></p-radioButton>
                 <label for="enableN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
             </ng-container>
@@ -138,11 +138,11 @@
             <div class="p-form-check-line form-group">
               <ng-container>
                 <div class="p-form-check">
-                  <p-radioButton formControlName="secureMode" value="SECURE" inputId="secureModeY"></p-radioButton>
+                  <p-radioButton name="secureMode" formControlName="secureMode" value="SECURE" inputId="secureModeY"></p-radioButton>
                   <label for="secureModeY" class="ms-2 mb-0">gRPCS</label>
                 </div>
                 <div class="p-form-check">
-                  <p-radioButton formControlName="secureMode" value="PLAINTEXT" inputId="secureModeN"></p-radioButton>
+                  <p-radioButton name="secureMode" formControlName="secureMode" value="PLAINTEXT" inputId="secureModeN"></p-radioButton>
                   <label for="secureModeN" class="ms-2 mb-0">gRPC</label>
                 </div>
               </ng-container>
@@ -174,7 +174,7 @@
       ( 'grpc.cert_tip_4_1' | translate ) + '<br/>' +
       ( 'grpc.cert_tip_4_2' | translate ) + '<br/>' +
       ( 'grpc.cert_tip_4_3' | translate )" [escape]="false"></i>
-          <textarea rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent"
+          <textarea class="form-control" rows="8" style="width:100%" id="trustedCertsContent" formControlName="trustedCertsContent"
             pInputTextarea></textarea>
         </div>
         <div *ngIf="trustedCertsContent?.invalid && (trustedCertsContent?.dirty || trustedCertsContent?.touched)"
@@ -265,7 +265,7 @@
         </div>
       </div>
     </form>
-    <p-table [value]="importList" [(selection)]="importSelected" styleClass="p-datatable-striped"
+    <p-table [value]="importList" [(selection)]="importSelected" stripedRows
       [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="caption">
         <div class="ui-helper-clearfix">
@@ -339,14 +339,13 @@
   </div>
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

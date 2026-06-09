@@ -683,9 +683,12 @@ public class TsmpDpItemsTableInitializer {
 	        
 	        createTsmpDpItems((itemId = 313L),(itemNo = "SCHED_MSG"),(itemName = "排程訊息"),(subitemNo = "FAILED"),(subitemName = "失敗"),(sortBy = 526),(locale = "zh-TW"),(isDefault = null),(param1 = null),(param2 = null),(param3 = null),(param4 = null),(param5 = null));
 	        createTsmpDpItems((itemId = 313L),(itemNo = "SCHED_MSG"),(itemName = "Scheduling message"),(subitemNo = "FAILED"),(subitemName = "failed"),(sortBy = 526),(locale = "en-US"),(isDefault = null),(param1 = null),(param2 = null),(param3 = null),(param4 = null),(param5 = null));
-	        
-	        		
-		} catch (Exception e) {
+
+            createTsmpDpItems((itemId = 314L), (itemNo = "SCHED_CATE1"), (itemName = "排程大分類"), (subitemNo = "H2_CONFIG_SYNC"), (subitemName = "H2Config同步排程"), (sortBy = 322), (locale = "zh-TW"), (isDefault = null), (param1 = "-1"), (param2 = null), (param3 = null), (param4 = null), (param5 = null));
+            createTsmpDpItems((itemId = 314L), (itemNo = "SCHED_CATE1"), (itemName = "Schedule big classification"), (subitemNo = "H2_CONFIG_SYNC"), (subitemName = "H2_CONFIG_SYNC"), (sortBy = 322), (locale = "en-US"), (isDefault = null), (param1 = "-1"), (param2 = null), (param3 = null), (param4 = null), (param5 = null));
+
+
+        } catch (Exception e) {
 			StackTraceUtil.logStackTrace(e);
 			throw e;
 		}

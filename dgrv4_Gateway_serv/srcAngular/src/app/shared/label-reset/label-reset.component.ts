@@ -7,7 +7,8 @@ import { ListService } from "../services/api-list.service";
 import { ApiService } from "../services/api-api.service";
 import { AA0423RespItem } from "src/app/models/api/ApiService/aa0423.interface";
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
-import { ConfirmationService } from "primeng/api";
+import { ConfirmationService, MessageService } from "primeng/api";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
     selector: 'app-label-reset',
@@ -31,6 +32,8 @@ export class LabelResetComponent implements OnInit {
     private config: DynamicDialogConfig,
     private fb: UntypedFormBuilder,
     private confirmationService: ConfirmationService,
+    private messageService:MessageService,
+    private translate: TranslateService
   ) { }
 
   ngOnInit(): void {
@@ -69,6 +72,38 @@ export class LabelResetComponent implements OnInit {
       }
     });
 
+  }
+
+  checkLength(event: KeyboardEvent) {
+
+    const maxLimit = 5;
+    const currentValues = this.form.get('labelList')?.value || [];
+    // this.showLabelList_tip = false;
+
+    if (event.key === 'Enter') {
+      const duplicates = currentValues.filter((item, index) => {
+        return currentValues.indexOf(item) !== index;
+      });
+
+      if(duplicates.length > 0){
+        currentValues.pop();
+        this.form.get('labelList')?.setValue(currentValues);
+      }
+
+      if (currentValues.length > maxLimit) {
+
+        event.preventDefault();
+
+        // this.showLabelList_tip = true;
+        this.messageService.add({
+          severity: 'warn',
+          // summary: '上限提醒',
+          detail: this.translate.instant('label_tag_max', { value: 5 }),
+        });
+        currentValues.pop();
+        this.form.get('labelList')?.setValue(currentValues);
+      }
+    }
   }
 
   cancelRole() {

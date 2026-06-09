@@ -7,7 +7,7 @@
     </div>
     <p-scrollPanel [style]="{width: '100%', height: '70vh'}">
       <p-table *ngIf="groupInfoListCols" [columns]="groupInfoListCols" [value]="groupInfoList" selectionMode="single"
-        responsiveLayout="scroll" styleClass="p-datatable-striped" [(selection)]="selectedGroups"
+        responsiveLayout="scroll" stripedRows [(selection)]="selectedGroups"
         [style]="{'word-break':'break-word'}">
         <ng-template pTemplate="colgroup" let-columns>
           <colgroup>

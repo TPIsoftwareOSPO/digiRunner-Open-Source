@@ -60,21 +60,7 @@ export class Ac1002Component extends BaseComponent implements OnInit {
     const codes = ['dialog.create', 'message.create', 'message.organization', 'message.success'];
     this.translate.get(codes).subscribe(dict => {
       this.dialogTitle = dict['dialog.create'];
-      // let data: FormParams = {
-      //     operate: FormOperate.create,
-      //     displayInDialog: true,
-      //     afterCloseCallback: (res) => {
-      //         if (res && this.toolService.checkDpSuccess(res.ResHeader)) {
-      //             this.messageService.add({ severity: 'success', summary: `${dict['message.create']} ${dict['message.organization']}`, detail: `${dict['message.create']} ${dict['message.success']}!` });
-      //             window.setTimeout(() => {
-      //                 this.router.navigateByUrl('/RefreshComponent', { skipLocationChange: true }).then(() => {
-      //                     this.router.navigate(['ac10', 'ac1002']);
-      //                 });
-      //             }, 1000);
-      //         }
-      //     }
-      // }
-      // this._dialog.open(OrgFormComponent, data);
+
       const ref = this.dialogService.open(OrgFormComponent, {
         data: {
           operate: FormOperate.create,
@@ -82,10 +68,12 @@ export class Ac1002Component extends BaseComponent implements OnInit {
         },
         header: this.dialogTitle,
         width: '50vw',
-        height: '100vh'
+        // height: '100vh',
+        closable:true,
+        modal:true
       });
 
-      ref.onClose.subscribe(resOb => {
+      ref!.onClose.subscribe(resOb => {
         if(resOb){
           resOb.subscribe(res => {
             if (res && this.toolService.checkDpSuccess(res.ResHeader)) {
@@ -132,31 +120,21 @@ export class Ac1002Component extends BaseComponent implements OnInit {
       } as AA1005Req;
       this.orgService.queryTOrgDetail(ReqBody).subscribe(res => {
         if (this.toolService.checkDpSuccess(res.ResHeader)) {
-          // let detail = {};
-          // detail = res.RespBody;
-          // let data: FormParams = {
-          //     data: detail,
-          //     afterCloseCallback: (r) => {
-          //         // console.log(r)
-          //         if (r) {
-          //             this.showDialog(r.data, r.operate);
-          //         }
-          //     }
-          // }
-          // this._dialog.open(OrgDetailComponent, data);
           const ref = this.dialogService.open(OrgDetailComponent, {
             data: res.RespBody,
             width: '50vw',
-            height: '100vh'
+            // height: '100vh',
+            closable:true,
+            modal:true,
+
+            header: this.translate.instant('detail')
           })
 
-          ref.onClose.subscribe(res => {
+          ref!.onClose.subscribe(res => {
             if (res) {
               this.showDialog(res.data, res.operate);
             }
           })
-
-          // obser.next(true);
         }
       });
     });
@@ -170,27 +148,6 @@ export class Ac1002Component extends BaseComponent implements OnInit {
           switch (operation) {
             case FormOperate.update:
               this.dialogTitle = dict['dialog.update'];
-              // let data: FormParams = {
-              //   operate: FormOperate.update,
-              //   data: rowData,
-              //   displayInDialog: true,
-              //   afterCloseCallback: (res) => {
-              //     // console.log(res)
-              //     if (res && this.toolService.checkDpSuccess(res.ResHeader)) {
-              //       // this.siderbar.reset();
-              //       this.messageService.add({
-              //         severity: 'success', summary: `${dict['message.update']} ${dict['message.organization']}`, detail: `${dict['message.update']} ${dict['message.success']}!`
-              //       });
-              //       window.setTimeout(() => {
-              //         this.router.navigateByUrl('/RefreshComponent', { skipLocationChange: true }).then(() => {
-              //           this.router.navigate(['ac10', 'ac1002']);
-              //         });
-              //       }, 1000);
-              //     }
-              //   }
-              // }
-              // this._dialog.open(OrgFormComponent, data);
-
               const ref = this.dialogService.open(OrgFormComponent, {
                 header: this.dialogTitle,
                 data: {
@@ -199,10 +156,12 @@ export class Ac1002Component extends BaseComponent implements OnInit {
                   displayInDialog: true,
                 },
                 width: '50vw',
-                height: '100vh'
+                // height: '100vh',
+                closable:true,
+                modal:true
               })
 
-              ref.onClose.subscribe(resOb => {
+              ref!.onClose.subscribe(resOb => {
                 if(resOb) {resOb.subscribe(res => {
                   // console.log(res)
                   if (res && this.toolService.checkDpSuccess(res.ResHeader)) {
@@ -224,9 +183,6 @@ export class Ac1002Component extends BaseComponent implements OnInit {
               break;
             case FormOperate.delete:
               this.selectedOrg = rowData;
-              // this.messageService.clear();
-              // this.messageService.add({ key: 'delete', sticky: true, severity: 'error', summary: dict['cfm_del_org'], detail: `${dict['dept_id']} : ${rowData.orgId} , ${dict['dept']} : ${rowData.orgName}` });
-
               this.confirmationService.confirm({
                 header: dict['cfm_del_org'],
                 message: `${dict['dept_id']} : ${rowData.orgId} , ${dict['dept']} : ${rowData.orgName}`,

@@ -263,8 +263,13 @@ public class TsmpApiImp {
 	@Column(name = "CORS_ALLOW_HEADERS")
 	private String corsAllowHeaders;
 	
+	@Column(name = "data_format")
+	private String dataFormat = "1";
+	
 	/* constructors */
 	public TsmpApiImp() {}
+
+	
 
 	@Override
 	public String toString() {
@@ -291,25 +296,30 @@ public class TsmpApiImp {
 				+ ", apiStatus=" + apiStatus + ", publicFlag=" + publicFlag + ", apiReleaseTime=" + apiReleaseTime
 				+ ", scheduledLaunchDate=" + scheduledLaunchDate + ", scheduledRemovalDate=" + scheduledRemovalDate
 				+ ", enableScheduledDate=" + enableScheduledDate + ", disableScheduledDate=" + disableScheduledDate
-				+ ", isCorsAllowOrigin=" + isCorsAllowOrigin + ", isCorsAllowMethods=" + isCorsAllowMethods
-				+ ", isCorsAllowHeaders=" + isCorsAllowHeaders + ", corsAllowOrigin=" + corsAllowOrigin
-				+ ", corsAllowMethods=" + corsAllowMethods + ", corsAllowHeaders=" + corsAllowHeaders + "]";
+				+ ", notifyNameList=" + notifyNameList + ", isCorsAllowOrigin=" + isCorsAllowOrigin
+				+ ", isCorsAllowMethods=" + isCorsAllowMethods + ", isCorsAllowHeaders=" + isCorsAllowHeaders
+				+ ", corsAllowOrigin=" + corsAllowOrigin + ", corsAllowMethods=" + corsAllowMethods
+				+ ", corsAllowHeaders=" + corsAllowHeaders + ", dataFormat=" + dataFormat + "]";
 	}
+
+
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(apiCacheFlag, apiDesc, apiKey, apiName, apiOwner, apiReleaseTime, apiSrc, apiStatus,
 				apiUuid, batchNo, bodyMaskKeyword, bodyMaskPolicy, bodyMaskPolicyNum, bodyMaskPolicySymbol, checkAct,
-				consumesOfJson, corsAllowHeaders, corsAllowMethods, corsAllowOrigin, createTime, createUser,
+				consumesOfJson, corsAllowHeaders, corsAllowMethods, corsAllowOrigin, createTime, createUser, dataFormat,
 				disableScheduledDate, enableScheduledDate, failDiscoveryPolicy, failHandlePolicy, filename,
 				fixedCacheTime, flow, funFlag, headerMaskKey, headerMaskPolicy, headerMaskPolicyNum,
 				headerMaskPolicySymbol, headersOfJson, ipForRedirect1, ipForRedirect2, ipForRedirect3, ipForRedirect4,
 				ipForRedirect5, ipSrcUrl1, ipSrcUrl2, ipSrcUrl3, ipSrcUrl4, ipSrcUrl5, isCorsAllowHeaders,
 				isCorsAllowMethods, isCorsAllowOrigin, jweFlag, jweFlagResp, label1, label2, label3, label4, label5,
-				memo, methodOfJson, mockBody, mockHeaders, mockStatusCode, moduleName, noOauth, paramsOfJson,
-				pathOfJson, producesOfJson, publicFlag, recordType, redirectByIp, result, scheduledLaunchDate,
-				scheduledRemovalDate, srcUrl, urlRid);
+				memo, methodOfJson, mockBody, mockHeaders, mockStatusCode, moduleName, noOauth, notifyNameList,
+				paramsOfJson, pathOfJson, producesOfJson, publicFlag, recordType, redirectByIp, result,
+				scheduledLaunchDate, scheduledRemovalDate, srcUrl, urlRid);
 	}
+
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -334,6 +344,7 @@ public class TsmpApiImp {
 				&& Objects.equals(corsAllowMethods, other.corsAllowMethods)
 				&& Objects.equals(corsAllowOrigin, other.corsAllowOrigin)
 				&& Objects.equals(createTime, other.createTime) && Objects.equals(createUser, other.createUser)
+				&& Objects.equals(dataFormat, other.dataFormat)
 				&& Objects.equals(disableScheduledDate, other.disableScheduledDate)
 				&& Objects.equals(enableScheduledDate, other.enableScheduledDate)
 				&& Objects.equals(failDiscoveryPolicy, other.failDiscoveryPolicy)
@@ -360,14 +371,17 @@ public class TsmpApiImp {
 				&& Objects.equals(memo, other.memo) && Objects.equals(methodOfJson, other.methodOfJson)
 				&& Objects.equals(mockBody, other.mockBody) && Objects.equals(mockHeaders, other.mockHeaders)
 				&& Objects.equals(mockStatusCode, other.mockStatusCode) && Objects.equals(moduleName, other.moduleName)
-				&& Objects.equals(noOauth, other.noOauth) && Objects.equals(paramsOfJson, other.paramsOfJson)
-				&& Objects.equals(pathOfJson, other.pathOfJson) && Objects.equals(producesOfJson, other.producesOfJson)
-				&& Objects.equals(publicFlag, other.publicFlag) && Objects.equals(recordType, other.recordType)
-				&& Objects.equals(redirectByIp, other.redirectByIp) && Objects.equals(result, other.result)
+				&& Objects.equals(noOauth, other.noOauth) && Objects.equals(notifyNameList, other.notifyNameList)
+				&& Objects.equals(paramsOfJson, other.paramsOfJson) && Objects.equals(pathOfJson, other.pathOfJson)
+				&& Objects.equals(producesOfJson, other.producesOfJson) && Objects.equals(publicFlag, other.publicFlag)
+				&& Objects.equals(recordType, other.recordType) && Objects.equals(redirectByIp, other.redirectByIp)
+				&& Objects.equals(result, other.result)
 				&& Objects.equals(scheduledLaunchDate, other.scheduledLaunchDate)
 				&& Objects.equals(scheduledRemovalDate, other.scheduledRemovalDate)
 				&& Objects.equals(srcUrl, other.srcUrl) && Objects.equals(urlRid, other.urlRid);
 	}
+
+
 
 	public String getApiKey() {
 		return apiKey;
@@ -953,4 +967,14 @@ public class TsmpApiImp {
 	public void setCorsAllowHeaders(String corsAllowHeaders) {
 		this.corsAllowHeaders = corsAllowHeaders;
 	}
+
+	public String getDataFormat() {
+		return dataFormat;
+	}
+
+	public void setDataFormat(String dataFormat) {
+		this.dataFormat = dataFormat;
+	}
+	
+	
 }

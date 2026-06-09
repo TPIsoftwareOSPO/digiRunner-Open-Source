@@ -124,7 +124,7 @@ public class DPB9937Service {
     }
 
     protected String getMode() {
-        return getCustomDataSourceConfig().getDbconnectionMode();
+        return getCustomDataSourceConfig().getDbConnectionMode();
     }
 
     protected CustomDataSourceConfig getCustomDataSourceConfig() {

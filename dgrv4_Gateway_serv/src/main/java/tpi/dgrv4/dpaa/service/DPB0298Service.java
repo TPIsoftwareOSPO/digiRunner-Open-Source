@@ -251,7 +251,7 @@ public class DPB0298Service {
         String nowDateTime = DateTimeUtil.dateTimeToString(new Date(), DateTimeFormatEnum.匯出檔案格式).orElse(null);
 
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=Webhook_" + nowDateTime + ".xlsx";
+        String headerValue = "attachment; filename=AiProxy_" + nowDateTime + ".xlsx";
         response.setHeader(headerKey, headerValue);
         //checkmarx, Missing HSTS Header
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");

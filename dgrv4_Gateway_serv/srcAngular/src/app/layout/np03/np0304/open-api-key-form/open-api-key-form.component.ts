@@ -62,7 +62,9 @@ export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
   }
 
   async ngOnInit() {
+    this.minDateValue.setHours(0, 0, 0, 0);
     this.form = this.fb.group(this.resetFormGroup(this.data.operate)!);
+
     const code = ['button.save', 'api_desc', 'dept', 'button.update', 'button.resend', 'api_name', 'theme_name', 'api_doc'];
     const dict = await this.tool.getDict(code);
     this.cols = [
@@ -98,11 +100,13 @@ export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
       case FormOperate.update:
       case FormOperate.resend:
         this.btnName = this.data.operate == FormOperate.update ? dict['button.update'] : dict['button.resend'];
+        let _apiList:DPB0093ApiItem[] = [];
         this.data.data.openApiKey.apiDatas.map(api => {
           let _fileName = Object.keys(api.docFileInfo)[0];
           let _filePath = api.docFileInfo[_fileName];
-          this.apiList.push({ apiKey: api.apiKey, moduleName: api.moduleName, apiName: api.apiName, themeDatas: api.themeList, orgId: api.orgId, orgName: api.orgName, apiDesc: api.apiDesc, apiExtId: api.apiExtId, apiUid: api.apiUid, fileName: _fileName, filePath: _filePath });
+          _apiList.push({ apiKey: api.apiKey, moduleName: api.moduleName, apiName: api.apiName, themeDatas: api.themeList, orgId: api.orgId, orgName: api.orgName, apiDesc: api.apiDesc, apiExtId: api.apiExtId, apiUid: api.apiUid, fileName: _fileName, filePath: _filePath });
         });
+        this.apiList = _apiList;
         this.rowcount = this.apiList.length;
 
         this.requisition.resendReq_before().subscribe(res => {
@@ -148,9 +152,11 @@ export class OpenApiKeyFormComponent extends BaseComponent implements OnInit {
       width: '80vw',
       height: '100vh',
       header: dict['api_list'],
+      closable:true,
+      modal:true
     })
 
-    ref.onClose.subscribe(chooseApis => {
+    ref!.onClose.subscribe(chooseApis => {
       if (chooseApis) {
         let set = new Set();
         this.apiList.map(item => {

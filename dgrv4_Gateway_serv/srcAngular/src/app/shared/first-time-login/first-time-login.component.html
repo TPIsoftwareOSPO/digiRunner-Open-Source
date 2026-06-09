@@ -6,7 +6,7 @@
         <div class="ui-inputgroup">
           <input [type]="oriMask ? 'text' : 'password'" class="form-control" id="oriMima" formControlName="oriMima"
             placeholder="{{'org_password' | translate}}">
-          <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+          <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
             (click)="toggleMask('oriMima')"></button>
         </div>
         <!-- <input type="password" class="form-control" id="oriMima" formControlName="oriMima"
@@ -24,7 +24,7 @@
         <div class="ui-inputgroup">
           <input [type]="newMask ? 'text' : 'password'" class="form-control" id="newMima" formControlName="newMima"
             placeholder="{{'new_password' | translate}}">
-          <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+          <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
             (click)="toggleMask('newMima')"></button>
         </div>
         <!-- <input type="password" class="form-control" id="newMima" formControlName="newMima"
@@ -44,7 +44,7 @@
         <div class="ui-inputgroup">
           <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmNewMima"
             formControlName="confirmNewMima" placeholder="{{'cfm_new_password' | translate}}">
-          <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+          <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
             (click)="toggleMask('cfmMima')"></button>
         </div>
         <!-- <input type="password" class="form-control" id="confirmNewMima" formControlName="confirmNewMima"

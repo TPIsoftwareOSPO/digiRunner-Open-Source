@@ -74,7 +74,7 @@ public class AcIdPMockJSLoginUiController {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 
 		return null;

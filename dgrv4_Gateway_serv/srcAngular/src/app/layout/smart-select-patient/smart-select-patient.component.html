@@ -1,0 +1,118 @@
+<div class="login-center-page">
+
+  <div class="form-wrapper" *ngIf="viewState === 'no-state'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">缺少授權參數</p></div>
+  </div>
+
+  <div class="form-wrapper" *ngIf="viewState === 'error'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">授權請求已過期或無效</p></div>
+  </div>
+
+  <div class="form-wrapper" *ngIf="viewState === 'loading'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">載入中…</p></div>
+  </div>
+
+  <div class="form-wrapper wide" *ngIf="viewState === 'ready'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body">
+
+      <p class="page-title">請選擇病患</p>
+      <p class="subtitle">「{{ clientName }}」需要存取病患資料</p>
+
+      <!-- 受限模式：候選 2+ -->
+      <div *ngIf="isRestricted" class="result-list">
+        <p class="text-muted small">請從以下候選中選擇：</p>
+        <table class="table table-sm table-hover mb-1">
+          <thead>
+            <tr>
+              <th style="width: 36px;"></th>
+              <th>ID</th>
+              <th>姓名</th>
+              <th>性別</th>
+              <th>出生日期</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let id of candidates" (click)="pickCandidate(id)" class="pick-row"
+                [class.selected]="selected && selected.id === id">
+              <td><input type="radio" name="patient" [checked]="selected && selected.id === id" (click)="pickCandidate(id)" /></td>
+              <td>{{ id }}</td>
+              <td>{{ candidateDisplayMap[id]?.name || '—' }}</td>
+              <td>{{ candidateDisplayMap[id]?.gender || '' }}</td>
+              <td>{{ candidateDisplayMap[id]?.birthDate || '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 全域搜尋模式：候選 0 -->
+      <ng-container *ngIf="!isRestricted">
+      <div class="input-group mb-3">
+        <select class="form-select search-mode-select" [(ngModel)]="searchMode">
+          <option value="name">姓名</option>
+          <option value="id">ID</option>
+        </select>
+        <input type="text" class="form-control"
+               [placeholder]="searchMode === 'name' ? '以姓名搜尋…' : '輸入病患 ID…'"
+               [(ngModel)]="keyword"
+               (keyup.enter)="search()" />
+        <button type="button" class="btn btn-outline-secondary" (click)="search()" [disabled]="loading">搜尋</button>
+      </div>
+
+      <p class="text-muted text-center" *ngIf="loading && patients.length === 0">搜尋中…</p>
+
+      <div class="result-list" *ngIf="patients.length > 0">
+        <table class="table table-sm table-hover mb-1">
+          <thead>
+            <tr>
+              <th style="width: 36px;"></th>
+              <th>ID</th>
+              <th>姓名</th>
+              <th>性別</th>
+              <th>出生日期</th>
+              <th>年齡</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of patients" (click)="pick(p)" class="pick-row"
+                [class.selected]="selected && selected.id === p.id">
+              <td>
+                <input type="radio" name="patient" [checked]="selected && selected.id === p.id" (click)="pick(p)" />
+              </td>
+              <td>{{ p.id }}</td>
+              <td>{{ p.name }}</td>
+              <td>{{ p.gender }}</td>
+              <td>{{ p.birthDate }}</td>
+              <td>{{ p.age != null ? p.age : '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager" *ngIf="patients.length > 0 || page > 1">
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="prevPage()" [disabled]="loading || !hasPrevPage">上一頁</button>
+          <span class="page-info">第 {{ page }} 頁</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="nextPage()" [disabled]="loading || !hasNextPage">下一頁</button>
+        </div>
+      </div>
+
+      <p class="text-muted text-center" *ngIf="!loading && patients.length === 0 && page === 1">找不到病患</p>
+      </ng-container>
+
+      <div class="btn-row">
+        <button type="button" class="btn tpi-btn tpi-primary" (click)="confirm()" [disabled]="!selected">
+          確認
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

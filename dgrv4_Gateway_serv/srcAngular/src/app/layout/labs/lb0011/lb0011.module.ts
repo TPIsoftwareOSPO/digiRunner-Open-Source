@@ -10,6 +10,7 @@ import { KeyValueFormComponent } from './key-value-form/key-value-form.component
 import { KeyValueFieldComponent } from './key-value-field/key-value-field.component';
 import { MappingUrlFormComponent } from './mapping-url-form/mapping-url-form.component';
 import { MappingUrlFieldComponent } from './mapping-url-field/mapping-url-field.component';
+import { MimaInputComponent } from 'src/app/shared/mima-input/mima-input.component';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { MappingUrlFieldComponent } from './mapping-url-field/mapping-url-field.
     SharedPipesModule,
     ReactiveFormsModule,
     FormsModule,
+    MimaInputComponent
   ],
   declarations: [
     Lb0011Component,

@@ -17,7 +17,10 @@ public class CustomEventEvaluator extends EventEvaluatorBase<ILoggingEvent> {
 		boolean isContain = message.contains("Starting DgrApplication") && message.contains("using Java");
 	    boolean logStartFlag = isContain
 		        || message.contains("Running with Spring Boot")
-		        || message.contains("seconds") 
+		        //Because this keyword might be present when accessing the registration API, I changed "seconds" to "Started DgrApplication in".
+		        //因為打註冊API時可能有此關鍵字,所以將seconds改成Started DgrApplication in
+		        //|| message.contains("seconds") 
+		        || message.contains("Started DgrApplication in")
 		        || message.contains("profile is active");
 	        
 	    // [ZH] 如果是啟動消息，添加到 TPILogger

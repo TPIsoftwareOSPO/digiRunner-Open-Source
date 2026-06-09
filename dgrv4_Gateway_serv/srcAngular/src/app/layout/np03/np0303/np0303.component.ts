@@ -135,7 +135,9 @@ export class Np0303Component extends BaseComponent implements OnInit {
                   data:{
                     operate: FormOperate.create,
                     data: res.RespBody,
-                  }
+                  },
+                  closable:true,
+                  modal:true
                 })
                 ref.onClose.subscribe(res => {
                   if(res && this.tool.checkDpSuccess(res.ResHeader)){

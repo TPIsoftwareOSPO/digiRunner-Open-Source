@@ -3,9 +3,9 @@
         <div class="form-group row">
             <div class="col-4">
               <label id="timeType_label" class="control-label">{{'time_unit'|translate}}</label>
-              <p-dropdown [showClear]="false" [options]="timeTypes" [filter]="false" placeholder="{{'plz_chs' | translate}}"
+              <p-select [showClear]="false" [options]="timeTypes" [filter]="false" placeholder="{{'plz_chs' | translate}}"
                 formControlName="timeType" [style]="{'width':'100%'}">
-              </p-dropdown>
+              </p-select>
               <div *ngIf="timeType.invalid && (timeType.dirty || timeType.touched)" class="text-danger">
                 <small class="form-text">{{timeType.errors.isRequired}}</small>
                 <small class="form-text">{{timeType.errors.maxlength}}</small>
@@ -19,14 +19,14 @@
               <label id="startDate_label" class="control-label">{{ timeType.value == 'MINUTE' ? ('query_date'|translate) :
                 ('start_date'|translate)}}</label>
               <div style="display:block">
-                <p-calendar *ngIf="timeType.value != 'MONTH'" [style]="{'width':'100%'}" appendTo="body"
+                <p-datepicker *ngIf="timeType.value != 'MONTH'" [style]="{'width':'100%'}" appendTo="body"
                   [inputStyle]="{'width':'95%'}" formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true"
                   [readonlyInput]="true" [minDate]="minDate" [maxDate]="maxDate">
-                </p-calendar>
-                <p-calendar *ngIf="timeType.value == 'MONTH'" view="month" [style]="{'width':'100%'}" appendTo="body"
+                </p-datepicker>
+                <p-datepicker *ngIf="timeType.value == 'MONTH'" view="month" [style]="{'width':'100%'}" appendTo="body"
                   [inputStyle]="{'width':'95%'}" formControlName="startDate" dateFormat="yy/mm" [showIcon]="true"
                   [readonlyInput]="true" [minDate]="minDate" [maxDate]="maxDate">
-                </p-calendar>
+                </p-datepicker>
               </div>
                 <div *ngIf="startDate.invalid && (startDate.dirty || startDate.touched)" class="text-danger">
                     <small class="form-text">{{startDate.errors.isRequired}}</small>
@@ -41,20 +41,20 @@
                 <label id="endDate_label" class="control-label">{{ timeType.value == 'MINUTE'? ('date_range'|translate) :
                   ('end_date'|translate)}}</label>
                 <div style="display:block">
-                  <p-calendar *ngIf="timeType.value == 'DAY'" [style]="{'width':'100%'}" appendTo="body"
+                  <p-datepicker *ngIf="timeType.value == 'DAY'" [style]="{'width':'100%'}" appendTo="body"
                     [inputStyle]="{'width':'95%'}" formControlName="endDate" dateFormat="yy/mm/dd" [showIcon]="true"
                     [readonlyInput]="true" [minDate]="minDate" [maxDate]="maxDate">
-                  </p-calendar>
-                  <p-calendar *ngIf="timeType.value == 'MONTH'" view="month" [style]="{'width':'100%'}" appendTo="body"
+                  </p-datepicker>
+                  <p-datepicker *ngIf="timeType.value == 'MONTH'" view="month" [style]="{'width':'100%'}" appendTo="body"
                     [inputStyle]="{'width':'95%'}" formControlName="endDate" dateFormat="yy/mm" [showIcon]="true"
                     [readonlyInput]="true" [minDate]="minDate" [maxDate]="maxDate">
-                  </p-calendar>
+                  </p-datepicker>
                   <div *ngIf="timeType.value == 'MINUTE'">
-                    <p-dropdown [options]="hourData" formControlName="startHour"
-                      placeholder="{{'plz_chs'|translate}}"></p-dropdown>
+                    <p-select [options]="hourData" formControlName="startHour"
+                      placeholder="{{'plz_chs'|translate}}"></p-select>
                     <label style="padding: 5px">H ~ </label>
-                    <p-dropdown [options]="hourData" formControlName="endHour"
-                      placeholder="{{'plz_chs'|translate}}"></p-dropdown>
+                    <p-select [options]="hourData" formControlName="endHour"
+                      placeholder="{{'plz_chs'|translate}}"></p-select>
                     <label style="padding: 5px">H</label>
                   </div>
                 </div>

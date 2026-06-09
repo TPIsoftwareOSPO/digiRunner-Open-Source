@@ -132,8 +132,7 @@ export class Ac0509Component extends BaseComponent implements OnInit {
 
   }
   async ngOnInit() {
-
-
+    this.dateEminDate.setHours(0,0,0,0);
 
     this.serverService.querySALMaster_before().subscribe(res => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {

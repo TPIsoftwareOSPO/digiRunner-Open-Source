@@ -8,10 +8,11 @@
   <form [formGroup]="form">
     <div class="form-group row">
       <div class="col-12">
-        <label class="control-label">{{ "label_tag" | translate }}</label><i class="far fa-question-circle ms-2 " pTooltip="{{'label_reset_tip'|translate}}" [escape]="false"></i>
+        <label class="control-label">{{ "label_tag" | translate }}</label><i class="far fa-question-circle ms-2 "
+          pTooltip="{{'label_reset_tip'|translate}}" [escape]="false"></i>
         <div>
-          <p-chips id="labelList" formControlName="labelList" [max]="5" [allowDuplicate]="false"
-            (onAdd)="checkChips($event)" [placeholder]="'label_tag_max'|translate:{value:5}"></p-chips>
+          <p-autocomplete id="labelList" formControlName="labelList" multiple fluid [unique]="false" [typeahead]="false"
+            maxlength="20" (keydown)="checkLength($event)" [placeholder]="'label_tag_max'|translate:{value:5}" />
           <div *ngIf="showLabelList_tip" class="text-danger">
             <small class="form-text">{{ 'validation.maxlength'| translate:{value:20} }}</small>
           </div>
@@ -30,14 +31,15 @@
     </button>
   </div>
 </div>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

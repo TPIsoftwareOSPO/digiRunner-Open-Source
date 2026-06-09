@@ -25,7 +25,7 @@
               >Policy 0:
               {{ "fail_discovery_policy.policy_0" | translate }}</label
             > -->
-            <p-radioButton formControlName="failDiscoveryPolicy" value="0"  inputId="failDiscoveryPolicy0"></p-radioButton>
+            <p-radioButton name="failDiscoveryPolicy" formControlName="failDiscoveryPolicy" value="0"  inputId="failDiscoveryPolicy0"></p-radioButton>
 			      <label for="failDiscoveryPolicy0" class="ms-2 mb-0"> {{ "fail_discovery_policy.policy_0" | translate }}</label>
           </div>
         </div>
@@ -38,11 +38,11 @@
         }}</label><i class="far fa-question-circle ms-2 " pTooltip="{{'fail_handle_policy.tip'|translate}}" [escape]="false"></i>
         <div class="col-12 form-group">
           <div class="p-form-check mb-2">
-            <p-radioButton formControlName="failHandlePolicy" value="0"  inputId="failHandlePolicy0"></p-radioButton>
+            <p-radioButton name="failHandlePolicy" formControlName="failHandlePolicy" value="0"  inputId="failHandlePolicy0"></p-radioButton>
 			      <label for="failHandlePolicy0" class="ms-2 mb-0">{{ "fail_handle_policy.policy_0" | translate }}</label>
           </div>
           <div class="p-form-check mb-2">
-            <p-radioButton formControlName="failHandlePolicy" value="1"  inputId="failHandlePolicy1"></p-radioButton>
+            <p-radioButton name="failHandlePolicy" formControlName="failHandlePolicy" value="1"  inputId="failHandlePolicy1"></p-radioButton>
 			      <label for="failHandlePolicy1" class="ms-2 mb-0">Policy 1: {{ "fail_handle_policy.policy_1" | translate }}</label>
           </div>
         </div>
@@ -63,14 +63,13 @@
     </button>
   </div>
 </div>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

@@ -132,6 +132,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
   statusTab: boolean = false;
   pwdTab: boolean = false;
   xapikeyTab: boolean = false;
+  smartClientTab: boolean = false;
   groupListDataCols: { field: string; header: string }[] = [];
   groupListData: Array<GroupInfo_0238> = new Array<GroupInfo_0238>();
   groupListDataRowcount: number = 0;
@@ -324,6 +325,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
   }
 
   async ngOnInit() {
+    this.minDateEff.setHours(0,0,0,0);
     // status
     let ReqBody = {
       encodeItemNo:
@@ -492,6 +494,8 @@ export class Ac0202Component extends BaseComponent implements OnInit {
         this.minDateExp = new Date(res);
       } else {
         this.minDateEff = new Date();
+        this.minDateEff.setHours(0,0,0,0);
+
         this.minDateExp = new Date();
       }
       if (this.minDateExp > this.expiredAt.value) {
@@ -740,7 +744,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
       signupNum: this.signupNum!.value,
       clientBlock: this.toolService.Base64Encoder(this.clientBlock!.value),
       emails: this.emails!.value,
-      tps: this.tps!.value ? this.tps!.value.toString() : '',
+      tps: this.tps!.value.toString(),
       encodeStatus:
         this.toolService.Base64Encoder(
           this.toolService.BcryptEncoder(this.createStatus!.value)
@@ -1726,6 +1730,9 @@ export class Ac0202Component extends BaseComponent implements OnInit {
         // this.form.controls.confirmNewClientBlock.setValidators([ValidatorFns.confirmPasswordForClientValidator(this.form, true), ValidatorFns.maxLengthValidator(this.maxlength256.value)]);
         this.resetBlock!.setValue(false);
         break;
+      case 7: // SMART Client 設定
+        // 子元件 SmartClientSettingComponent 透過 @Input clientId 自動載入
+        break;
     }
   }
 
@@ -2255,7 +2262,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
       // height: '100vh'
     });
 
-    refDialog.onClose.subscribe((res) => {
+    refDialog!.onClose.subscribe((res) => {
       if (res) {
         res.forEach((rowData) => {
           let tmp = this.groupIdList.value;

@@ -8,20 +8,11 @@
                     <input type="text" class="form-control" id="groupkeyword" formControlName="groupkeyword"
                         placeholder="{{'group_name'|translate}}、{{'group_alias'|translate}}">
                 </div>
-                <!-- <div class="col-3 col-xl-3 col-lg-3">
-                    <label for="groupAuthoritiesID">{{'authorities'|translate}}</label>
-                    <div class="ui-inputgroup">
-                        <input type="text" class="form-control" formControlName="groupAuthoritiesID"
-                            placeholder="{{'authorities'|translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
-                            (click)="queryAuthoritiesList();"></button>
-                    </div>
-                </div> -->
                 <div class="col-3 col-xl-3 col-lg-3">
                     <label for="securityLevelID">{{'security_level'|translate}}</label>
                     <div style="display:block">
-                        <p-dropdown [options]="securityLevels" [showClear]="true" placeholder="{{'plz_chs'| translate}}"
-                            formControlName="securityLevelID" [style]="{'width':'100%','z-index':'1000'}"></p-dropdown>
+                        <p-select [options]="securityLevels" [showClear]="true" placeholder="{{'plz_chs'| translate}}"
+                            formControlName="securityLevelID" [style]="{'width':'100%','z-index':'1000'}"></p-select>
                     </div>
                 </div>
             </div>
@@ -37,7 +28,7 @@
         <hr>
         <!-- <p-table *ngIf="cols" [columns]="cols" [value]="data" selectionMode="single" [scrollable]="true"
             scrollHeight="200%"> -->
-        <p-table *ngIf="cols" [columns]="cols" [value]="data" selectionMode="single" styleClass="p-datatable-striped"
+        <p-table *ngIf="cols" [columns]="cols" [value]="data" selectionMode="single" stripedRows
             [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>
@@ -146,7 +137,7 @@
         <hr>
         <!-- <p-table *ngIf="cols" [columns]="cols" [value]="data" selectionMode="single" [scrollable]="true"
             scrollHeight="200%"> -->
-        <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities" selectionMode="single" styleClass="p-datatable-striped"
+        <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities" selectionMode="single" stripedRows
             [style]="{'word-break':'break-word'}" [(selection)]="selected">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>
@@ -285,15 +276,19 @@
                   <div class="col-12 row">
                 <!-- <div class="col-4">
                     <label>{{'module_list'|translate}}</label> -->
-                    <!-- <div class="col-4"> -->
+                    <div class="col-4">
                       <p-listbox #data_0235Listbox [style]="{'width': '105%', 'font-size': '20px'}" [options]="data_0235"
-                      [(ngModel)]="selectedAPI_key" [ngModelOptions]="{standalone: true}" [filter]="true" class="col-4" [emptyMessage]="'no_data_result'|translate"
-                      filterValue="" (click)="showDialog_APIList(selectedAPI_key)" [listStyle]="{'max-height':'300px','min-height':'300px'}"></p-listbox>
-                    <!-- </div>
-                    <div class="col-8"> -->
-                      <p-listbox #data_APIListListbox [style]="{'width': '100%', 'font-size': '20px'}" class="col-8" [emptyMessage]="'no_data_result'|translate"
-                      [options]="data_APIList" [filter]="true" [listStyle]="{'max-height':'300px','min-height':'300px'}"></p-listbox>
-                    <!-- </div> -->
+                      [(ngModel)]="selectedAPI_key" [ngModelOptions]="{standalone: true}"
+                      [filter]="true"
+                      filterBy="label"
+                      class="col-4" [emptyMessage]="'no_data_result'|translate"
+                      (click)="showDialog_APIList(selectedAPI_key)" [listStyle]="{'max-height':'300px','min-height':'300px'}"
+                      metaKeySelection></p-listbox>
+                    </div>
+                    <div class="col-8">
+                      <p-listbox #data_APIListListbox [style]="{'width': '100%', 'font-size': '20px'}" class="col-8" [emptyMessage]="'no_data_result'|translate" filterBy="moduleName"
+                      [options]="data_APIList" [filter]="true" [listStyle]="{'max-height':'300px','min-height':'300px'}" filterBy="label"></p-listbox>
+                    </div>
 
                 <!-- </div>
                 <div class="col-8">
@@ -384,9 +379,9 @@
                             </div>
                         </div>
                         <div class="col-4" style="padding-left: 0px;">
-                            <p-dropdown [options]="dayOptions" formControlName="dayOptionsName_page4"
+                            <p-select [options]="dayOptions" formControlName="dayOptionsName_page4"
                                 placeholder="{{'plz_chs' | translate}}" [style]="{'width':'100%'}">
-                            </p-dropdown>
+                            </p-select>
                             <div *ngIf="dayOptionsName_page4?.invalid && (dayOptionsName_page4?.dirty || dayOptionsName_page4?.touched)"
                                 class="text-danger">
                                 <small class="form-text">{{dayOptionsName_page4.errors.isRequired}}</small>
@@ -414,23 +409,14 @@
                 </div>
             </div>
             <div class="form-group row">
-                <!-- <div class="col-6">
-                    <label for="groupAuthorities" class="control-label">{{'authorities'|translate}}</label>
-                    <div class="ui-inputgroup">
-                        <input type="text" class="form-control" formControlName="groupAuthoritiesName"
-                            placeholder="{{'authorities'|translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
-                            (click)="queryAuthoritiesList_page4();"></button>
-                    </div>
-                </div> -->
                 <div class="col-6">
                     <label id="securityLevelName_page4_label" for="securityLevel"
                         class="control-label">{{'security_level'|translate}}</label>
                     <div style="display:block">
-                        <p-dropdown [options]="new_securityLevels" [filter]="true" appendTo="body"
+                        <p-select [options]="new_securityLevels" [filter]="true" appendTo="body"
                             placeholder="{{'plz_chs'| translate}}" formControlName="securityLevelName_page4"
                             [style]="{'width':'100%','z-index':'1000'}">
-                        </p-dropdown>
+                        </p-select>
                         <div *ngIf="securityLevelName_page4?.invalid && (securityLevelName_page4?.dirty || securityLevelName_page4?.touched)"
                             class="text-danger">
                             <small class="form-text">{{securityLevelName_page4.errors.isRequired}}</small>
@@ -463,7 +449,7 @@
                         (click)="Choose_Module();">{{'button.chs_module'|translate}}</button>
                 </div>
             </div>
-            <p-table *ngIf="colsModuleList" [columns]="colsModuleList" [value]="data_0235_page4" selectionMode="single" styleClass="p-datatable-striped"
+            <p-table *ngIf="colsModuleList" [columns]="colsModuleList" [value]="data_0235_page4" selectionMode="single" stripedRows
                 [style]="{'word-break':'break-word'}" [(selection)]="selected">
                 <ng-template pTemplate="colgroup" let-columns>
                     <colgroup>
@@ -529,7 +515,7 @@
             </div>
         </form>
         <hr>
-        <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities_page4" styleClass="p-datatable-striped"
+        <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities_page4" stripedRows
             selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected_page4">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>
@@ -600,7 +586,7 @@
                     </div>
                 </form>
 
-                <p-table *ngIf="NoneChooseApiList" [columns]="NoneChooseApiList" [value]="none_choose_api_list" styleClass="p-datatable-striped"
+                <p-table *ngIf="NoneChooseApiList" [columns]="NoneChooseApiList" [value]="none_choose_api_list" stripedRows
                     selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
                         <colgroup>
@@ -665,7 +651,7 @@
                         <label class="control-label me-3">{{'been_chs_api'|translate}}</label>
                     </div>
                 </div>
-                <p-table *ngIf="ChooseApiList" [columns]="ChooseApiList" [value]="been_choose_api_list" styleClass="p-datatable-striped"
+                <p-table *ngIf="ChooseApiList" [columns]="ChooseApiList" [value]="been_choose_api_list" stripedRows
                     selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
                         <colgroup>
@@ -730,7 +716,7 @@
                     </div>
                 </form>
 
-                <p-table *ngIf="NoneChooseModuleList" [columns]="NoneChooseModuleList" [value]="none_choose_module_list" styleClass="p-datatable-striped"
+                <p-table *ngIf="NoneChooseModuleList" [columns]="NoneChooseModuleList" [value]="none_choose_module_list" stripedRows
                     selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
                         <colgroup>
@@ -796,7 +782,7 @@
                         <label class="control-label me-3">{{'been_chs_module'|translate}}</label>
                     </div>
                 </div>
-                <p-table *ngIf="ChooseModuleList" [columns]="ChooseModuleList" [value]="been_choose_module_list" styleClass="p-datatable-striped"
+                <p-table *ngIf="ChooseModuleList" [columns]="ChooseModuleList" [value]="been_choose_module_list" stripedRows
                     selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
                         <colgroup>
@@ -924,13 +910,14 @@
                 <div class="col-sm-4">
                     <label>{{'module_list'|translate}}</label>
                     <p-listbox #data_0235Listbox [style]="{'width': '105%', 'font-size': '20px'}" [options]="data_0235" [emptyMessage]="'no_data_result'|translate"
-                        [(ngModel)]="selectedAPI_key" [ngModelOptions]="{standalone: true}" [filter]="true"
-                        filterValue="" (click)="showDialog_APIList(selectedAPI_key)"></p-listbox>
+                        [(ngModel)]="selectedAPI_key" [ngModelOptions]="{standalone: true}" [filter]="true" filterBy="label"
+                        (click)="showDialog_APIList(selectedAPI_key)" [listStyle]="{'max-height':'300px','min-height':'300px'}"
+                        metaKeySelection></p-listbox>
                 </div>
                 <div class="col-sm-8">
                     <label>{{'api_list'|translate}}</label>
                     <p-listbox #data_APIListListbox [style]="{'width': '100%', 'font-size': '20px'}" [emptyMessage]="'no_data_result'|translate"
-                        [options]="data_APIList" [filter]="true"></p-listbox>
+                        [options]="data_APIList" [filter]="true" optionValue="value" optionLabel="label"  filterBy="label"></p-listbox>
                 </div>
             </div>
         </form>
@@ -993,9 +980,9 @@
                         </div>
                         <!-- <label id="dayOptionsName_label" class="control-label"> -->
                         <div class="col-4" style="padding-left: 0px;">
-                            <p-dropdown [options]="dayOptions_page9" formControlName="dayOptionsName"
+                            <p-select [options]="dayOptions_page9" formControlName="dayOptionsName"
                                 placeholder="{{'plz_chs' | translate}}" [style]="{'width':'100%'}">
-                            </p-dropdown>
+                            </p-select>
                             <div *ngIf="dayOptionsName?.invalid && (dayOptionsName?.dirty || dayOptionsName?.touched)"
                                 class="text-danger">
                                 <small class="form-text">{{dayOptionsName.errors.isRequired}}</small>
@@ -1023,23 +1010,14 @@
                 </div>
             </div>
             <div class="form-group row">
-                <!-- <div class="col-6">
-                    <label for="groupAuthorities" class="control-label">{{'authorities'|translate}}</label>
-                    <div class="ui-inputgroup">
-                        <input type="text" class="form-control" formControlName="groupAuthoritiesName"
-                            placeholder="{{'authorities'|translate}}">
-                        <button pButton type="button" icon="pi pi-search" class="tpi-primary ms-1"
-                            (click)="queryAuthoritiesList_page9();"></button>
-                    </div>
-                </div> -->
                 <div class="col-6">
                     <label id="securityLevelName_label" for="securityLevel"
                         class="control-label">{{'security_level'|translate}}</label>
                     <div style="display:block">
-                        <p-dropdown [options]="new_securityLevels" [filter]="true" appendTo="body"
+                        <p-select [options]="new_securityLevels" [filter]="true" appendTo="body"
                             placeholder="{{'plz_chs'| translate}}" formControlName="securityLevelName"
                             [style]="{'width':'100%','z-index':'1000'}">
-                        </p-dropdown>
+                        </p-select>
                         <div *ngIf="securityLevelName?.invalid && (securityLevelName?.dirty || securityLevelName?.touched)"
                             class="text-danger">
                             <small class="form-text">{{securityLevelName.errors.isRequired}}</small>
@@ -1073,7 +1051,7 @@
                         (click)="Choose_Module_paage9();">{{'button.chs_module'|translate}}</button>
                 </div>
             </div>
-            <p-table *ngIf="colsModuleList_page9" [columns]="colsModuleList_page9" [value]="data_0235_page9" styleClass="p-datatable-striped"
+            <p-table *ngIf="colsModuleList_page9" [columns]="colsModuleList_page9" [value]="data_0235_page9" stripedRows
                 selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected">
                 <ng-template pTemplate="colgroup" let-columns>
                     <colgroup>
@@ -1139,7 +1117,7 @@
             </div>
         </form>
         <hr>
-        <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities_page9" styleClass="p-datatable-striped"
+        <p-table *ngIf="colsAuthorities" [columns]="colsAuthorities" [value]="dataAuthorities_page9" stripedRows
             selectionMode="single" [style]="{'word-break':'break-word'}" [(selection)]="selected_page9">
             <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>
@@ -1210,7 +1188,7 @@
                     </div>
                 </form>
 
-                <p-table *ngIf="NoneChooseModuleList_page11" [columns]="NoneChooseModuleList_page11" styleClass="p-datatable-striped"
+                <p-table *ngIf="NoneChooseModuleList_page11" [columns]="NoneChooseModuleList_page11" stripedRows
                     [value]="none_choose_module_list_page11" selectionMode="single"
                     [style]="{'word-break':'break-word'}" [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
@@ -1276,7 +1254,7 @@
                         <label class="control-label me-3">{{'been_chs_module'|translate}}</label>
                     </div>
                 </div>
-                <p-table *ngIf="ChooseModuleList_page11" [columns]="ChooseModuleList_page11" styleClass="p-datatable-striped"
+                <p-table *ngIf="ChooseModuleList_page11" [columns]="ChooseModuleList_page11" stripedRows
                     [value]="been_choose_module_list_page11" selectionMode="single"
                     [style]="{'word-break':'break-word'}" [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
@@ -1343,7 +1321,7 @@
                     </div>
                 </form>
 
-                <p-table *ngIf="NoneChooseApiList_page12" [columns]="NoneChooseApiList_page12" styleClass="p-datatable-striped"
+                <p-table *ngIf="NoneChooseApiList_page12" [columns]="NoneChooseApiList_page12" stripedRows
                     [value]="none_choose_api_list_page12" selectionMode="single" [style]="{'word-break':'break-word'}"
                     [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>
@@ -1410,7 +1388,7 @@
                         <label class="control-label me-3">{{'been_chs_api'|translate}}</label>
                     </div>
                 </div>
-                <p-table *ngIf="ChooseApiList_page12" [columns]="ChooseApiList_page12" styleClass="p-datatable-striped"
+                <p-table *ngIf="ChooseApiList_page12" [columns]="ChooseApiList_page12" stripedRows
                     [value]="been_choose_api_list_page12" selectionMode="single" [style]="{'word-break':'break-word'}"
                     [(selection)]="selected">
                     <ng-template pTemplate="colgroup" let-columns>

@@ -11,7 +11,7 @@
     </form>
     <hr>
     <p-table *ngIf="clientListCols" [columns]="clientListCols" [value]="clientList" selectionMode="single"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      stripedRows [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -85,15 +85,15 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="status_client" value="Y" inputId="status_clientY"></p-radioButton>
+                <p-radioButton name="status_client" formControlName="status_client" value="Y" inputId="status_clientY"></p-radioButton>
                 <label for="status_clientY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="status_client" value="N" inputId="status_clientN"></p-radioButton>
+                <p-radioButton name="status_client" formControlName="status_client" value="N" inputId="status_clientN"></p-radioButton>
                 <label for="status_clientN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="status_client" value="A" inputId="status_clientA"></p-radioButton>
+                <p-radioButton name="status_client" formControlName="status_client" value="A" inputId="status_clientA"></p-radioButton>
                 <label for="status_clientA" class="ms-2 mb-0">{{'all'|translate}}</label>
               </div>
             </ng-container>
@@ -110,7 +110,7 @@
       </div>
     </form>
     <p-table [value]="gtwIdpList" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-      styleClass="p-datatable-striped">
+      stripedRows>
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th rowspan="2" style="width: 10%;" scope="col">Icon</th>
@@ -214,11 +214,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value="Y" inputId="statusY"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value="Y" inputId="statusY"></p-radioButton>
                 <label for="statusY" class="ms-2 mb-0">{{'button.enable'|translate}}</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value="N" inputId="statusN"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value="N" inputId="statusN"></p-radioButton>
                 <label for="statusN" class="ms-2 mb-0">{{'button.disable'|translate}}</label>
               </div>
             </ng-container>
@@ -456,14 +456,13 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

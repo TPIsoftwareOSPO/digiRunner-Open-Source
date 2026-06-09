@@ -8,7 +8,7 @@
     </div>
 
     <p-table [columns]="cols" [value]="dataList" selectionMode="single" [style]="{'word-break':'break-word'}"
-      responsiveLayout="scroll" styleClass="p-datatable-striped">
+      responsiveLayout="scroll" stripedRows>
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th rowspan="2" style="width: 10%;" scope="col">Icon</th>
@@ -134,11 +134,11 @@
             <div class="p-form-check-line">
 
               <div class="p-form-check">
-                <p-radioButton formControlName="ldapStatus" value="Y"  inputId="ldapStatusY"></p-radioButton>
+                <p-radioButton name="ldapStatus" formControlName="ldapStatus" value="Y"  inputId="ldapStatusY"></p-radioButton>
                 <label for="ldapStatusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="ldapStatus" value="N"  inputId="ldapStatusN"></p-radioButton>
+                <p-radioButton name="ldapStatus" formControlName="ldapStatus" value="N"  inputId="ldapStatusN"></p-radioButton>
                 <label for="ldapStatusN" class="ms-2 mb-0">N</label>
               </div>
             </div>
@@ -156,7 +156,7 @@
           <label id="approvalResultMail_label" for="approvalResultMail" class="control-label">Approval Result
             Mail</label>
           <div style="display:block">
-            <textarea rows="2" style="width:100%" id="approvalResultMail" formControlName="approvalResultMail"
+            <textarea rows="2" style="width:100%" id="approvalResultMail" class="form-control" formControlName="approvalResultMail"
               pInputTextarea></textarea>
           </div>
           <div *ngIf="approvalResultMail?.invalid && (approvalResultMail?.dirty || approvalResultMail?.touched)"
@@ -232,14 +232,13 @@
   </div>
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

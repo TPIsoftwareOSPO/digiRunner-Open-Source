@@ -7,13 +7,13 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="copy_target"
               placeholder="{{'module_name'|translate}}-{{'api_name'|translate}}({{'api_key'|translate}})" readonly>
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
               (click)="change_to_copy();"></button>
           </div>
         </div>
         <div class="col-1 col-xl-1 col-lg-1">
           <label class="control-label">&nbsp;</label>
-          <button type="button" class="form-control btn tpi-btn tpi-primary" (click)="copy()"
+          <button type="button" class="form-control btn tpi-btn tpi-primary input-btn" (click)="copy()"
               [disabled]="!copy_target">
             {{'copy'|translate}}
           </button>
@@ -69,11 +69,8 @@
         <div class="col-6 col-md-4">
           <label for="httpMethod" class="col-auto col-xl-12 required control-label">{{'methods'|translate}}</label>
           <div class="col-auto col-xl-12">
-            <!-- <p-multiSelect [options]="httpmethods" defaultLabel="{{'chs_methods'|translate}}" formControlName="methods"
-              [style]="{'width':'100%','height':'36px'}" [panelStyle]="{'width':'100%',minWidth:'150px'}">
-            </p-multiSelect> -->
-            <p-dropdown [options]="httpmethods" defaultLabel="{{'chs_methods'|translate}}" formControlName="methods"
-              [style]="{'width':'100%','height':'36px'}" [panelStyle]="{'width':'100%',minWidth:'150px'}"></p-dropdown>
+            <p-select [options]="httpmethods" defaultLabel="{{'chs_methods'|translate}}" formControlName="methods"
+              [style]="{'width':'100%','height':'36px'}" [panelStyle]="{'width':'100%',minWidth:'150px'}"></p-select>
             <div *ngIf="methods.invalid && (methods.dirty || methods.touched)" class="text-danger">
               <small class="form-text">{{methods.errors.isRequired}}</small>
               <small class="form-text">{{methods.errors.maxlength | translate}}</small>
@@ -87,9 +84,9 @@
         <div class="col-6 col-md-2">
           <label class="col-auto col-xl-12 control-label">{{'data_format'|translate}}</label>
           <div class="col-xl-12">
-            <p-dropdown [options]="dataFormats" formControlName="dataFormat" placeholder="{{'plz_chs'|translate}}"
+            <p-select [options]="dataFormats" formControlName="dataFormat" placeholder="{{'plz_chs'|translate}}"
               [style]="{'width':'100%','height':'36px'}" [panelStyle]="{'width':'100%',minWidth:'150px'}">
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
         <div class="col-12 col-md-2">
@@ -98,12 +95,12 @@
             <div class="col-12 p-form-check-line form-group d-flex flex-row align-items-center">
               <ng-container>
                 <div class="p-form-check">
-                  <p-radioButton formControlName="jwtSetting" [value]="true" inputId="jwtSettingY"></p-radioButton>
+                  <p-radioButton name="jwtSetting" formControlName="jwtSetting" [value]="true" inputId="jwtSettingY"></p-radioButton>
                   <label for="jwtSettingY" class="ms-2 mb-0"
                     style="white-space: nowrap;">{{'button.enable'|translate}}</label>
                 </div>
                 <div class="p-form-check">
-                  <p-radioButton formControlName="jwtSetting" [value]="false" inputId="jwtSettingN"></p-radioButton>
+                  <p-radioButton name="jwtSetting" formControlName="jwtSetting" [value]="false" inputId="jwtSettingN"></p-radioButton>
                   <label for="jwtSettingN" class="ms-2 mb-0"
                     style="white-space: nowrap;">{{'button.disable'|translate}}</label>
                 </div>
@@ -115,17 +112,17 @@
         <div class="col-12 col-md-2">
           <label class="col-xl-2 control-label">Request：</label>
           <div class="col-xl-12">
-            <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlag" (onChange)="jweFlagOnChange($event);"
+            <p-select [options]="jwtSettingFlags" formControlName="jweFlag" (onChange)="jweFlagOnChange($event);"
               class="jwt-req-dropdown" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
         <div class="col-12 col-md-2">
           <label class="control-label">Response：</label>
           <div class="col-xl-12">
-            <p-dropdown [options]="jwtSettingFlags" formControlName="jweFlagResp" class="jwt-resp-dropdown"
+            <p-select [options]="jwtSettingFlags" formControlName="jweFlagResp" class="jwt-resp-dropdown"
               (onChange)="jweFlagRespOnChange($event);" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
       </div>
@@ -139,8 +136,10 @@
       <div class="form-group row">
         <div class="col-12">
           <label class="control-label">{{ "label_tag" | translate }}</label>
-          <div>
-            <p-chips formControlName="labelList" [max]="5" [allowDuplicate]="false" (onAdd)="checkChips($event)" [placeholder]="'label_tag_max'|translate:{value:5}"></p-chips>
+          <div class="col-12">
+             <p-autocomplete id="labelList" formControlName="labelList" multiple fluid [unique]="false" [typeahead]="false"
+                      maxlength="20" (keydown)="checkLength($event)"
+                      [placeholder]="'label_tag_max'|translate:{value:5}"/>
           </div>
 
         </div>
@@ -149,7 +148,6 @@
     <div clas="row">
       <div class="col-auto d-flex justify-content-center mt-2 mb-4">
         <button type="button" class="btn tpi-btn tpi-primary float-start text-center me-2"
-        [disabled]="isExpired"
           (click)="composer()">{{'button.composer'|translate}}</button>
         <!-- <button type="button" class="btn btn-warning float-start text-center me-2"
                     [disabled]="!commonAPIFormIsValid"
@@ -180,7 +178,7 @@
     </form>
     <hr>
     <p-table *ngIf="apilist" [columns]="apilist" [value]="apilist_data" selectionMode="single"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" [(selection)]="selected_page2">
+      stripedRows [style]="{'word-break':'break-word'}" [(selection)]="selected_page2">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col style="width: 2.25em">

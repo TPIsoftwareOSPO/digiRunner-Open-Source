@@ -151,6 +151,8 @@ public class TSMPCServicePut implements IApiCacheService {
 			// 完整轉發url為http://127.0.0.1:8080/dgrv4/mocktest/delete/api/a/bb/ccc/1
 			if (isURLRID)
 				tsmpcPut_srcUrl = tsmpcPut_srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
+			
+			tsmpcPut_srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, tsmpcPut_srcUrl);
 
 			int tokenPayload = apiReg.getFunFlag();
 
@@ -351,10 +353,10 @@ public class TSMPCServicePut implements IApiCacheService {
 	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String payload, String reqUrl, Map<String, String> maskInfo)
 			throws IOException {
 		StringBuffer tsmpcPut_log = new StringBuffer();
-
+		String uri = getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI());
 		// print
 		writeLogger(tsmpcPut_log, "--【URL】--");
-		writeLogger(tsmpcPut_log, httpReq.getRequestURI());
+		writeLogger(tsmpcPut_log, uri);
 		writeLogger(tsmpcPut_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(tsmpcPut_log, "【" + httpReq.getMethod() + "】\r\n");
 

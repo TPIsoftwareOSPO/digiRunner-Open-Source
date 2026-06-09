@@ -2,6 +2,9 @@ package tpi.dgrv4.gateway.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -94,7 +98,11 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 			//Global masking
 			getCommForwardProcService().generateGlobalMaskParam(maskInfo);
 			
-			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl, maskInfo);
+			// [EN]Remove queryString params from values first, so that subsequent logs and forwarding only contain form body params
+			// [ZH]先從 values 移除 queryString 參數，讓後續 log 和轉發只包含 form body 參數
+			values = removeQueryStringParams(httpReq, values);
+
+			StringBuffer reqLog = getLogReq(httpReq, httpHeaders, reqUrl, values, maskInfo);
 			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start TSMPC】--\n" + reqLog.toString());
 
 			ResponseEntity<?> verifyResp = getCommForwardProcService().verifyData(httpRes, httpReq, httpHeaders,
@@ -132,6 +140,10 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 			// 完整轉發url為http://127.0.0.1:8080/dgrv4/mocktest/delete/api/a/bb/ccc/1
 			if (isURLRID)
 				tsmpcUrlEncoded_srcUrl = tsmpcUrlEncoded_srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
+			
+			// [EN]Append the queryString to the target URL (values already filtered above)
+			// [ZH]將 queryString 附加到目標URL (values 已在前面過濾)
+			tsmpcUrlEncoded_srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, tsmpcUrlEncoded_srcUrl);
 
 			int tokenPayload = apiReg.getFunFlag();
 
@@ -338,8 +350,10 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 		return respObj;
 	}
 
-	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String reqUrl, Map<String, String> maskInfo)
-			throws IOException {
+	// [EN]Print request log using filtered values (form body only, excluding queryString params)
+	// [ZH]用過濾後的 values 印出 request log (只有 form body，不含 queryString 參數)
+	private StringBuffer getLogReq(HttpServletRequest httpReq, HttpHeaders httpHeaders, String reqUrl,
+			MultiValueMap<String, String> values, Map<String, String> maskInfo) throws IOException {
 		StringBuffer tsmpcUrlEncoded_log = new StringBuffer();
 
 		// print
@@ -365,14 +379,13 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 		}
 		writeLogger(tsmpcUrlEncoded_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 
-		// print body
+		// [EN]Print form body params from filtered values (not from httpReq.getParameterMap() which mixes queryString)
+		// [ZH]從過濾後的 values 印出 form body 參數 (不用 httpReq.getParameterMap()，因為會混入 queryString)
 		writeLogger(tsmpcUrlEncoded_log, "--【Req payload / Form Data】");
-		httpReq.getParameterMap().forEach((k, vs) -> {
-			if (vs.length != 0) {
-				for (String v : vs) {
-					writeLogger(tsmpcUrlEncoded_log, "\tKey: " + k + ", Value: "
-							+ getCommForwardProcService().maskBodyFromFormData(maskInfo, k, v));
-				}
+		values.forEach((k, vs) -> {
+			for (String v : vs) {
+				writeLogger(tsmpcUrlEncoded_log, "\tKey: " + k + ", Value: "
+						+ getCommForwardProcService().maskBodyFromFormData(maskInfo, k, v));
 			}
 		});
 		writeLogger(tsmpcUrlEncoded_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
@@ -421,6 +434,40 @@ public class TSMPCServicePostFormUrlEncoded implements IApiCacheService {
 
 	protected boolean checkIfMockTest(HttpHeaders httpHeaders) {
 		return this.mockApiTestService.checkIfMockTest(httpHeaders);
+	}
+
+	/**
+	 * [EN]Remove the queryString parameter from the values, keeping only the form body parameter.
+	 * Because `@RequestParam MultiValueMap` contains both queryString and form body parameters,
+	 * it needs to be separated to avoid the queryString parameter being sent repeatedly.
+	 *
+	 * [ZH]從 values 中移除 queryString 的參數,只保留 form body 的參數。
+	 * 因為 @RequestParam MultiValueMap 會同時包含 queryString 和 form body 的參數,
+	 * 需要拆開以避免 queryString 參數被重複送出。
+	 */
+	private MultiValueMap<String, String> removeQueryStringParams(HttpServletRequest httpReq,
+			MultiValueMap<String, String> values) {
+		String queryString = httpReq.getQueryString();
+		if (!StringUtils.hasText(queryString)) {
+			return values;
+		}
+		LinkedMultiValueMap<String, String> bodyOnly = new LinkedMultiValueMap<>(values);
+		for (String param : queryString.split("&")) {
+			String[] kv = param.split("=", 2);
+			String key = URLDecoder.decode(kv[0], StandardCharsets.UTF_8);
+			String val = kv.length > 1 ? URLDecoder.decode(kv[1], StandardCharsets.UTF_8) : "";
+			List<String> existing = bodyOnly.get(key);
+			if (existing != null) {
+				existing = new ArrayList<>(existing);
+				existing.remove(val);
+				if (existing.isEmpty()) {
+					bodyOnly.remove(key);
+				} else {
+					bodyOnly.put(key, existing);
+				}
+			}
+		}
+		return bodyOnly;
 	}
 
 }

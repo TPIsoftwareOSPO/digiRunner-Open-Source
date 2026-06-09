@@ -76,7 +76,7 @@ public class GtwIdPUserInfoV2Service {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			respEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			respEntity =TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return respEntity;
 		}
 	}
@@ -104,8 +104,12 @@ public class GtwIdPUserInfoV2Service {
 		}
 
 		// 3.bearer 格式 (JWE/JWS)
+		// TODO, Mini, <Smart On FHIR>
+		String smartOnFhirResourceType = null;
+		String smartOnFhirResourceURL = null;
+		boolean isSmartOnFhirBundleTransaction = false;
 		respEntity = getTokenHelper().verifyApiForBearer(authorization, TokenHelper.SSOTOKEN, TokenHelper.SSOTOKEN,
-				reqUri, httpReq);
+				reqUri, httpReq, smartOnFhirResourceType, smartOnFhirResourceURL, isSmartOnFhirBundleTransaction);
 		if (respEntity != null) {
 			return respEntity;
 		}
@@ -152,7 +156,7 @@ public class GtwIdPUserInfoV2Service {
 			String errMsg1 = "Table [TSMP_TOKEN_HISTORY] can't find ID Token. token_jti: " + tokenJti;
 			String errMsg2 = String.format(TokenHelper.THE_ID_TOKEN_WAS_NOT_FOUND, tokenJti);
 			TPILogger.tl.debug(errMsg1 + ",\n" + errMsg2);
-			return getTokenHelper().getForbiddenErrorResp(reqUri, errMsg2);// 403
+			return getTokenHelper().getForbiddenErrorResp(errMsg2);// 403
 		}
 
 		// 4.取得 ID token 內容

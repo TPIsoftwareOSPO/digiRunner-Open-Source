@@ -1,117 +1,130 @@
 <app-container [title]="title" [isDefault]="pageNum==emPageBlock.QUERYPAGE" (headerReturn)="headerReturn()">
-    <ng-container *ngIf="pageNum === emPageBlock.QUERYPAGE">
-        <form [formGroup]="form" (ngSubmit)="submitForm()">
-            <p-tabView [(activeIndex)]="activeIndex">
-                <!-- 用戶端搜尋 -->
-                    <p-tabPanel header="{{'client_search'|translate}}">
-                        <div class="form-group row">
-                            <div class="col-4 col-xl-4 col-lg-4">
-                                <label class="control-label"
-                                    for="keyword">{{'client_search'|translate}}</label>
-                                <input type="text" class="form-control" id="keyword" formControlName="keyword"
-                                    placeholder="{{'fuzzy_search'|translate}}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-3 col-xl-3 col-lg-3">
-                                <button type="submit"
-                                    class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
-                            </div>
-                        </div>
-                        <hr>
-                        <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single" styleClass="p-datatable-striped"
-                            [style]="{'word-break':'break-word'}">
-                            <ng-template pTemplate="colgroup" let-columns>
-                                <colgroup>
-                                    <col *ngFor="let col of columns" [style.width]="col.width">
-                                </colgroup>
+  <ng-container *ngIf="pageNum === emPageBlock.QUERYPAGE">
+    <form [formGroup]="form" (ngSubmit)="submitForm()">
+      <p-tabs value="0" class="tab" (valueChange)="activeValue=$event">
+        <p-tablist>
+          <p-tab value="0">{{'client_search'|translate}}</p-tab>
+          <p-tab value="1" *ngIf="isCusEnable === 'Y'"
+            >{{'message.interface'|translate}}{{'button.search'|translate}}</p-tab>
 
-                            </ng-template>
-                            <ng-template pTemplate="header" let-columns>
-                                <tr>
-                                    <th *ngFor="let col of columns" scope="col">
-                                        {{col.header}}
-                                    </th>
-                                    <th style="width:80px;" scope="col">{{'action'|translate}}
-                                    </th>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="body" let-rowData let-columns="columns">
-                                <tr>
-                                    <td *ngFor="let col of columns" [style.width]="col.width">
-                                        <span>
-                                            {{rowData[col.field]}}
-                                        </span>
-                                    </td>
-                                    <td style="text-align:center;width: 80px">
-                                        <!-- <div class="btn-group">
+        </p-tablist>
+        <p-tabpanels>
+          <!-- 用戶端搜尋 -->
+          <p-tabpanel value="0">
+            <div class="form-group row">
+              <div class="col-4 col-xl-4 col-lg-4">
+                <label class="control-label" for="keyword">{{'client_search'|translate}}</label>
+                <input type="text" class="form-control" id="keyword" formControlName="keyword"
+                  placeholder="{{'fuzzy_search'|translate}}">
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-3 col-xl-3 col-lg-3">
+                <button type="submit"
+                  class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
+              </div>
+            </div>
+            <hr>
+            <p-table *ngIf="cols" [columns]="cols" [value]="dataList" selectionMode="single"
+              stripedRows [style]="{'word-break':'break-word'}">
+              <ng-template pTemplate="colgroup" let-columns>
+                <colgroup>
+                  <col *ngFor="let col of columns" [style.width]="col.width">
+                </colgroup>
+
+              </ng-template>
+              <ng-template pTemplate="header" let-columns>
+                <tr>
+                  <th *ngFor="let col of columns" scope="col">
+                    {{col.header}}
+                  </th>
+                  <th style="width:80px;" scope="col">{{'action'|translate}}
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-rowData let-columns="columns">
+                <tr>
+                  <td *ngFor="let col of columns" [style.width]="col.width">
+                    <span>
+                      {{rowData[col.field]}}
+                    </span>
+                  </td>
+                  <td style="text-align:center;width: 80px">
+                    <!-- <div class="btn-group">
                                             <button type="button" class="btn btn-deta me-5"
                                                 (click)="showDialog(rowData,formOperate.detail)">
                                                 <span class="fa fa-search">{{'button.detail'|translate}}</span>
                                             </button>
                                         </div> -->
-                                        <button pButton pRipple type="button" icon="pi pi-eye"
-                                                class="p-button-rounded p-button-text p-button-plain" (click)="showDialog(rowData,formOperate.detail)"
-                                                [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="footer" let-columns>
-                                <tr *ngIf="rowcount">
-                                    <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
-                                        <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
-                                            <!-- 查詢更多 -->
-                                            <button  type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'| translate}}
-                                            <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
-                                            </button>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="emptymessage" let-columns>
-                                <tr>
-                                    <td [attr.colspan]="columns.length+1">
-                                        {{'no_rec' | translate}}
-                                    </td>
-                                </tr>
-                            </ng-template>
-                        </p-table>
-                    </p-tabPanel>
-                <!-- 介接資料搜尋 -->
-                <p-tabPanel header="{{'message.interface'|translate}}{{'button.search'|translate}}" *ngIf="isCusEnable === 'Y'">
-                    <div class="form-group row">
-                        <div class="col-4 col-xl-4 col-lg-4">
-                            <label class="control-label"
-                                for="keyword2">{{'message.interface'|translate}}{{'button.search'|translate}}</label>
-                            <input type="text" class="form-control" id="keyword2" formControlName="interface_keyword"
-                                [placeholder]="placeholder">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="ms-3">
-                            <button type="submit"
-                                class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
-                        </div>
-                    </div>
-                    <hr>
-                    <app-ca-card [cards]="this.cards"></app-ca-card>
-                    <app-ca-stat [showType]="false" [apptJobId]="apptJobId" [stackTrace]="stackTrace" [statusName]="statusName" [cgRespBody]="cgRespBody" (restart)="restart($event)" ></app-ca-stat>
-                </p-tabPanel>
-            </p-tabView>
+                    <button pButton pRipple type="button" icon="pi pi-eye"
+                      class="p-button-rounded p-button-text p-button-plain"
+                      (click)="showDialog(rowData,formOperate.detail)" [pTooltip]="'button.detail' | translate"
+                      tooltipPosition="top"></button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="footer" let-columns>
+                <tr *ngIf="rowcount">
+                  <td [attr.colspan]="columns.length+1" style="color: #b7b7b7;">
+                    <span style="vertical-align: middle;">{{'row_count' | translate}}: {{rowcount}}</span>
+                    <!-- 查詢更多 -->
+                    <button type="button" class="btn tpi-header-return" (click)="moreData()">{{ 'button.more'|
+                      translate}}
+                      <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage" let-columns>
+                <tr>
+                  <td [attr.colspan]="columns.length+1">
+                    {{'no_rec' | translate}}
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+          <!-- 介接資料搜尋 -->
+          <p-tabpanel value="1">
+            <div class="form-group row">
+              <div class="col-4 col-xl-4 col-lg-4">
+                <label class="control-label"
+                  for="keyword2">{{'message.interface'|translate}}{{'button.search'|translate}}</label>
+                <input type="text" class="form-control" id="keyword2" formControlName="interface_keyword"
+                  [placeholder]="placeholder">
+              </div>
+            </div>
+            <div class="form-group row">
+              <div>
+                <button type="submit"
+                  class="btn tpi-btn tpi-primary float-start me-3">{{'button.search'|translate}}</button>
+              </div>
+            </div>
+            <hr>
+            <app-ca-card [cards]="this.cards"></app-ca-card>
+            <app-ca-stat [showType]="false" [apptJobId]="apptJobId" [stackTrace]="stackTrace" [statusName]="statusName"
+              [cgRespBody]="cgRespBody" (restart)="restart($event)"></app-ca-stat>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
 
-        </form>
-    </ng-container>
-    <ng-container *ngIf="pageNum === emPageBlock.CLIENT_DETAIL">
-        <app-client-ca *ngIf="clientData" [data]="clientData" [isCusEnable]="isCusEnable" (rowDataHandler)="rowDataHandler($event)"></app-client-ca>
-        <div class="text-start">
-            <button type="button" class="btn tpi-btn tpi-primary" (click)="redirectList($event)">{{'button.return_to_list'|translate}}</button>
-        </div>
-    </ng-container>
-    <ng-container *ngIf="pageNum === emPageBlock.CA_DETAIL">
-        <app-ca-detail *ngIf="caData" [data]="caData" [center]="false"></app-ca-detail>
-        <div class="text-start">
-            <button type="button" class="btn tpi-btn tpi-primary" (click)="redirectPrev($event)">{{'button.return'|translate}}</button>
-        </div>
-    </ng-container>
+    </form>
+  </ng-container>
+  <ng-container *ngIf="pageNum === emPageBlock.CLIENT_DETAIL">
+    <app-client-ca *ngIf="clientData" [data]="clientData" [isCusEnable]="isCusEnable"
+      (rowDataHandler)="rowDataHandler($event)"></app-client-ca>
+    <div class="text-start">
+      <button type="button" class="btn tpi-btn tpi-primary"
+        (click)="redirectList($event)">{{'button.return_to_list'|translate}}</button>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="pageNum === emPageBlock.CA_DETAIL">
+    <app-ca-detail *ngIf="caData" [data]="caData" [center]="false"></app-ca-detail>
+    <div class="text-start">
+      <button type="button" class="btn tpi-btn tpi-primary"
+        (click)="redirectPrev($event)">{{'button.return'|translate}}</button>
+    </div>
+  </ng-container>
 
 
 </app-container>

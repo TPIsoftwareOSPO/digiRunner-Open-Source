@@ -34,7 +34,7 @@ export class LayoutComponent implements OnInit {
     private router: Router,
   ) {}
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   getScreen() {
     //console.log(window.innerHeight);
     if (window.innerHeight <= 412) {
@@ -79,9 +79,10 @@ export class LayoutComponent implements OnInit {
       width: '300px',
       styleClass: 'cHeader cContent cIcon',
       closable: false,
+      modal:true
     });
 
-    ref.onClose.subscribe((res) => {
+    ref!.onClose.subscribe((res) => {
       this.alertService.logout(
         `${dict['message.update']} ${dict['message.success']}!`,
         `${dict['plz_login_again']}!`

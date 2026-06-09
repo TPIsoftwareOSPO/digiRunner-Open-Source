@@ -13,7 +13,7 @@
         <div class="form-group">
           <ng-container>
             <div class="p-form-check form-group align-items-center">
-              <p-radioButton formControlName="rptMode" value="group" inputId="group"></p-radioButton>
+              <p-radioButton name="rptMode" formControlName="rptMode" value="group" inputId="group"></p-radioButton>
               <!-- <div class="col-12 d-flex align-items-center"> -->
               <label for="group" class="mx-2 mb-0">{{'api_abnormal_greater_than'|translate}}</label>
               <input type="number" class="form-control text-end" formControlName="abnormalElapsedTime"
@@ -24,7 +24,7 @@
           </ng-container>
           <ng-container>
             <div class="p-form-check form-group">
-              <p-radioButton formControlName="rptMode" value="all" inputId="all"></p-radioButton>
+              <p-radioButton name="rptMode" formControlName="rptMode" value="all" inputId="all"></p-radioButton>
               <label for="all" class="ms-2 mb-0">{{'api_abnormal_failures'|translate}}</label>
             </div>
           </ng-container>
@@ -47,7 +47,7 @@
     </div>
   </form>
   <hr>
-  <p-table [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+  <p-table [value]="tableData" selectionMode="single" stripedRows
     [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
 
     <ng-template pTemplate="header" let-columns>

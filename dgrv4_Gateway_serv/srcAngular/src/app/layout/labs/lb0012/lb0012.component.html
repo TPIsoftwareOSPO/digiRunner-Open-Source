@@ -7,9 +7,9 @@
           <label id="startDate_label" class="control-label">{{'date_range'|translate}}</label>
           <div class="d-flex ">
             <div>
-              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+              <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                 formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true">
-              </p-calendar>
+              </p-datepicker>
               <div *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)" class="text-danger">
                 <small class="form-text">{{startDate.errors.isRequired}}</small>
                 <small class="form-text">{{startDate.errors.pattern}}</small>
@@ -19,9 +19,9 @@
               <label style="padding: 5px 10px;">～</label>
             </div>
             <div>
-              <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+              <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                 formControlName="endDate" dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true">
-              </p-calendar>
+              </p-datepicker>
               <div *ngIf="endDate?.invalid && (endDate?.dirty || endDate?.touched)" class="text-danger">
                 <small class="form-text">{{endDate.errors.isRequired}}</small>
                 <small class="form-text">{{endDate.errors.pattern}}</small>
@@ -40,7 +40,7 @@
     </form>
     <hr>
     <div class="col-12">
-      <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll"
+      <p-table [value]="tableData" stripedRows responsiveLayout="scroll"
         [style]="{'word-wrap':'break-word'}">
         <ng-template pTemplate="header" let-columns>
           <tr>
@@ -136,14 +136,14 @@
   </div>
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

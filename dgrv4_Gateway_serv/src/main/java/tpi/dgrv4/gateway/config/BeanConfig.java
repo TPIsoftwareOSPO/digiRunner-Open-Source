@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ulisesbocchio.jasyptspringboot.EncryptablePropertyResolver;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 import com.ulisesbocchio.jasyptspringboot.encryptor.DefaultLazyEncryptor;
 import com.ulisesbocchio.jasyptspringboot.properties.JasyptEncryptorConfigurationProperties;
 import com.ulisesbocchio.jasyptspringboot.util.Singleton;
@@ -15,7 +16,7 @@ import com.ulisesbocchio.jasyptspringboot.util.Singleton;
 import tpi.dgrv4.gateway.component.CustomEncryptablePropertyResolver;
 
 @Configuration
-@ComponentScan({"tpi.dgrv4.common.utils"})	// Online Console
+@ComponentScan({ "tpi.dgrv4.common.utils" }) // Online Console
 public class BeanConfig {
 
 	private DefaultLazyEncryptor defaultEncryptor;
@@ -37,16 +38,20 @@ public class BeanConfig {
 	public ObjectMapper objectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		// 關閉序列化空物件時的例外錯誤(允許序列化空物件)
-		return objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		// 註冊 JsonNullable 支援模組（用於 OpenAPI Generator 產生的 DTO）
+		objectMapper.registerModule(new JsonNullableModule());
+		return objectMapper;
 	}
 
 	/**
 	 * 一旦註冊了這個名稱的 Bean，則不論對稱式或非對稱式，一律都交由自訂的 Bean 處理加解密
+	 * 
 	 * @return
 	 */
-	@Bean(name="encryptablePropertyResolver")
-    public EncryptablePropertyResolver encryptablePropertyResolver() {
-        return new CustomEncryptablePropertyResolver(defaultEncryptor, configPropsSingleton);
-    }
+	@Bean(name = "encryptablePropertyResolver")
+	public EncryptablePropertyResolver encryptablePropertyResolver() {
+		return new CustomEncryptablePropertyResolver(defaultEncryptor, configPropsSingleton);
+	}
 
 }

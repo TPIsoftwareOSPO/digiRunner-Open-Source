@@ -1,6 +1,6 @@
 package tpi.dgrv4.dpaa.component;
 
-import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
@@ -66,7 +66,7 @@ public class TsmpCoreTokenInitializerInit implements ITsmpCoreTokenInitializerIn
 			}
 		}
 
-		LinkedList<String> logStartingMsg = tpi.dgrv4.gateway.keeper.TPILogger.logStartingMsg;
+		List<String> logStartingMsg = tpi.dgrv4.gateway.keeper.TPILogger.logStartingMsg;
 		for (String msg : logStartingMsg) {
 			info.append("\n ..." + msg);
 		}

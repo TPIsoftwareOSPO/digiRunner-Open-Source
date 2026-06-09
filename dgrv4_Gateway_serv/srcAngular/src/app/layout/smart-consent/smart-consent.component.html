@@ -1,0 +1,64 @@
+<div class="login-center-page">
+
+  <div class="form-wrapper" *ngIf="consentState === 'no-state'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">缺少授權參數</p></div>
+  </div>
+
+  <div class="form-wrapper" *ngIf="consentState === 'error'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">授權請求已過期或無效</p></div>
+  </div>
+
+  <div class="form-wrapper" *ngIf="consentState === 'loading'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">載入中…</p></div>
+  </div>
+
+  <!-- autoApprove=Y：不顯示任何 UI，自動送 approve -->
+  <div *ngIf="consentState === 'auto-submit'">
+    <form ngNoForm method="post" [action]="approveUrl" #autoForm>
+      <input type="hidden" name="state" [value]="state" />
+      <input type="hidden" name="approved_scopes" [value]="approvedScopes" />
+      <input *ngIf="selection.patientId" type="hidden" name="patient_id" [value]="selection.patientId" />
+      <input *ngIf="selection.encounterId" type="hidden" name="encounter_id" [value]="selection.encounterId" />
+      <input *ngIf="selection.fhirUser" type="hidden" name="fhir_user" [value]="selection.fhirUser" />
+    </form>
+  </div>
+
+  <!-- autoApprove=N：顯示 scope 同意畫面 -->
+  <div class="form-wrapper" *ngIf="consentState === 'ready'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body">
+
+      <p class="client-name">「{{ clientName }}」正在請求存取您的資料</p>
+
+      <p class="scope-title">此應用程式要求以下權限：</p>
+      <ul class="scope-list">
+        <li *ngFor="let item of scopes">{{ item.description }}</li>
+      </ul>
+
+      <div class="btn-row">
+        <form ngNoForm method="post" [action]="approveUrl" class="d-inline" (submit)="onSubmit()">
+          <input type="hidden" name="state" [value]="state" />
+          <input type="hidden" name="approved_scopes" [value]="approvedScopes" />
+          <input *ngIf="selection.patientId" type="hidden" name="patient_id" [value]="selection.patientId" />
+          <input *ngIf="selection.encounterId" type="hidden" name="encounter_id" [value]="selection.encounterId" />
+          <input *ngIf="selection.fhirUser" type="hidden" name="fhir_user" [value]="selection.fhirUser" />
+          <button type="submit" class="btn tpi-btn tpi-primary me-3">同意</button>
+        </form>
+
+        <form ngNoForm method="post" [action]="denyUrl" class="d-inline" (submit)="onSubmit()">
+          <input type="hidden" name="state" [value]="state" />
+          <button type="submit" class="btn tpi-btn tpi-night">拒絕</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>

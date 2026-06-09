@@ -4,10 +4,10 @@
       <div class="form-group row">
         <div class="col-12">
           <label>{{'apiStatus.scheduleDate'|translate}}</label>
-          <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+          <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
             formControlName="modifyDate" dateFormat="yy/mm/dd" [showIcon]="true" showButtonBar="true"
             [minDate]="minDate">
-          </p-calendar>
+          </p-datepicker>
         </div>
         <div class="col-12 text-danger">
           <small>{{'apiStatus.noScheduleLaunchedDiscontinuation'|translate}}</small>
@@ -19,7 +19,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of enableFlagList">
               <div class="p-form-check">
-                <p-radioButton formControlName="apiStatus" value={{stat.value}}
+                <p-radioButton name="apiStatus" formControlName="apiStatus" value={{stat.value}}
                   inputId="apiModStatus_{{stat.value}}"></p-radioButton>
                 <label for="apiModStatus_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
@@ -35,7 +35,7 @@
 
             <ng-container *ngFor="let stat of enableFlagList">
               <div class="p-form-check form-group">
-                <p-radioButton formControlName="revokeFlag" value={{stat.value}}
+                <p-radioButton name="revokeFlag" formControlName="revokeFlag" value={{stat.value}}
                   inputId="revokeFlag_{{stat.value}}"></p-radioButton>
                 <label for="revokeFlag_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>

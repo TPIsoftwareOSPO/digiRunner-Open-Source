@@ -39,7 +39,8 @@ export class Np0202Component extends BaseComponent implements OnInit {
     dialogTitle: string = '';
     dataList: Array<DPB0083RespItem> = new Array<DPB0083RespItem>();
     colETB: { field: string; header: string; }[] = [];
-    activeIndex: EmTabName = EmTabName.CLIENT_SEARCH;
+    // activeIndex: EmTabName = EmTabName.CLIENT_SEARCH;
+    activeValue: string = "0";
     intervalSubscription: any;
     statusName: any;
     emPageBlock = EmPageBlock;
@@ -124,11 +125,11 @@ export class Np0202Component extends BaseComponent implements OnInit {
     }
 
     submitForm() {
-        switch (this.activeIndex) {
-            case EmTabName.CLIENT_SEARCH:
+        switch (this.activeValue) {
+            case '0':
                 this.clientSubmitForm();
                 break;
-            case EmTabName.INTERFACE_SEARCH:
+            case '1':
                 this.interfaceSubmitForm();
                 break;
         }

@@ -25,9 +25,9 @@
           <label for="refItemNo" class="required control-label" id="refItemNo_label">
             {{'type'|translate}}
           </label>
-            <p-dropdown [options]="refItemNoOption" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+            <p-select [options]="refItemNoOption" [filter]="true" placeholder="{{'plz_chs' | translate}}"
                 formControlName="refItemNo" [style]="{'width':'100%'}">
-            </p-dropdown>
+            </p-select>
             <div *ngIf="refItemNo?.invalid && (refItemNo?.dirty || refItemNo?.touched)" class="text-danger">
                 <small class="form-text">{{refItemNo.errors.required | translate}}</small>
             </div>
@@ -37,9 +37,9 @@
           <label for="refSubitemNo" class="control-label" id="refSubitemNo_label">
             {{'task'|translate}}
           </label>
-          <p-dropdown [options]="refSubitemNoOption" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="refSubitemNoOption" [filter]="true" placeholder="{{'plz_chs' | translate}}"
               formControlName="refSubitemNo" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
         </div>
         <!-- Params -->
         <div class="form-group col-12">

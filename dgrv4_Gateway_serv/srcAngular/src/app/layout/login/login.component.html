@@ -54,7 +54,7 @@
           <div class="form-group">
             <p-table [value]="userListData" [(selection)]="selectedUser" selectionMode="multiple"
               (selectionChange)="onSelectionChange()" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-              styleClass="p-datatable-striped">
+              stripedRows>
               <ng-template pTemplate="header" let-columns>
                 <tr>
                   <th style="width: 2.25em" scope="col">
@@ -88,7 +88,7 @@
               <div class="ui-inputgroup">
                 <input [type]="newMask ? 'text' : 'password'" class="form-control" id="newMima"
                   formControlName="newMima" placeholder="{{'new_password' | translate}}">
-                <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
                   (click)="toggleMask('newMima')"></button>
               </div>
               <div *ngIf="newMima?.invalid && (newMima?.dirty || newMima?.touched)" class="text-danger">
@@ -107,7 +107,7 @@
               <div class="ui-inputgroup">
                 <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmNewMima"
                   formControlName="confirmNewMima" placeholder="{{'cfm_new_password' | translate}}">
-                <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
                   (click)="toggleMask('cfmMima')"></button>
               </div>
               <div *ngIf="confirmNewMima?.invalid && (confirmNewMima?.dirty || confirmNewMima?.touched)"

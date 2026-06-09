@@ -147,6 +147,8 @@ public class AA0317RespItem {
 	 */
 	private String corsAllowHeaders;
 	
+	private String dataFormat;
+	
 	public String getApiKey() {
 		return apiKey;
 	}
@@ -564,4 +566,14 @@ public class AA0317RespItem {
 	public void setCorsAllowHeaders(String corsAllowHeaders) {
 		this.corsAllowHeaders = corsAllowHeaders;
 	}
+
+	public String getDataFormat() {
+		return dataFormat;
+	}
+
+	public void setDataFormat(String dataFormat) {
+		this.dataFormat = dataFormat;
+	}
+	
+	
 }

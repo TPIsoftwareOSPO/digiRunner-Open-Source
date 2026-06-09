@@ -7,7 +7,7 @@
     <label id="locale_label" for="locale" class="control-label required">{{
       "fun_locale" | translate
     }}</label>
-    <p-dropdown
+    <p-select
       [options]="localeData"
       placeholder="{{ 'plz_chs' | translate }}"
       formControlName="locale"
@@ -20,7 +20,7 @@
       <ng-template let-locale pTemplate="item">
           <div>{{locale.label}} ({{locale.value}})</div>
       </ng-template>
-    </p-dropdown>
+    </p-select>
     <div
       *ngIf="locale?.invalid && (locale?.dirty || locale?.touched)"
       class="text-danger"

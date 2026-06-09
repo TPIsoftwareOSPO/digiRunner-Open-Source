@@ -14,9 +14,9 @@
             <div class="col-4 col-xl-4 col-lg-4">
                 <label class="required control-label">{{'effective_date'|translate}}</label>：
                 <!-- calendar disabled style [inputStyle]="{'opacity':'0.5','cursor':'default','background-color':'#cccccc'}" -->
-                <p-calendar dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" appendTo="body"
+                <p-datepicker dateFormat="yy/mm/dd" [showIcon]="true" [readonlyInput]="true" [minDate]="minDateValue" appendTo="body"
                     formControlName="effectiveDate" id="effectiveDate">
-                </p-calendar>
+                </p-datepicker>
                 <div *ngIf="effectiveDate?.invalid && (effectiveDate?.dirty || effectiveDate?.touched)" class="text-danger">
                     <small class="form-text">{{effectiveDate.errors.isRequired | translate}}</small>
                     <small class="form-text">{{effectiveDate.errors.maxlength | translate}}</small>
@@ -80,10 +80,10 @@
                 <div class="ui-inputgroup mb-1">
                     <input class="form-control" type="text" placeholder="{{'keyword_search'|translate}}"
                         formControlName="keyword">
-                    <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1"
+                    <button pButton type="button" icon="pi pi-search" class="tpi-night ms-1 input-btn"
                         (click)="searchAPI();"></button>
                 </div>
-                <p-table *ngIf="cols" [columns]="cols" [value]="authApiList" selectionMode="single" styleClass="p-datatable-striped"
+                <p-table *ngIf="cols" [columns]="cols" [value]="authApiList" selectionMode="single" stripedRows
                     [(selection)]="selectedApis" [style]="{'word-break':'break-word'}">
                     <ng-template pTemplate="caption">
                         <div class="ui-helper-clearfix">

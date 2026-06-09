@@ -65,7 +65,7 @@
               <div class="ui-inputgroup">
                 <input [type]="oriMask ? 'text' : 'password'" class="form-control" id="userBlock"
                   formControlName="userBlock" placeholder="{{'org_password' | translate}}">
-                <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                <button pButton type="button" [icon]="oriMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
                   (click)="toggleMask('oriMima')"></button>
               </div>
               <div *ngIf="userBlock?.invalid && (userBlock?.dirty || userBlock?.touched)" class="text-danger">
@@ -82,7 +82,7 @@
               <div class="ui-inputgroup">
                 <input [type]="newMask ? 'text' : 'password'" class="form-control" id="newUserBlock"
                   formControlName="newUserBlock" placeholder="{{'new_password' | translate}}">
-                <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                <button pButton type="button" [icon]="newMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
                   (click)="toggleMask('newMima')"></button>
               </div>
               <div *ngIf="newUserBlock?.invalid && (newUserBlock?.dirty || newUserBlock?.touched)" class="text-danger">
@@ -101,7 +101,7 @@
               <div class="ui-inputgroup">
                 <input [type]="cfmMask ? 'text' : 'password'" class="form-control" id="confirmUserBlock"
                   formControlName="confirmUserBlock" placeholder="{{'cfm_new_password' | translate}}">
-                <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night"
+                <button pButton type="button" [icon]="cfmMask ? 'pi pi-eye-slash' : 'pi pi-eye'" class="ms-1 tpi-night input-btn"
                   (click)="toggleMask('cfmMima')"></button>
               </div>
               <div *ngIf="confirmUserBlock?.invalid && (confirmUserBlock?.dirty || confirmUserBlock?.touched)"

@@ -184,7 +184,7 @@
     "reduction": "还原",
     "delete_permanently": "永久删除",
     "connect_test": "连线测试",
-    "searchByTags": "按标签搜索",
+    "searchByTags": "按标签搜索",    
     "refresh": "重新整理",
     "label_reset": "重设标签",
     "preview": "预览",
@@ -1391,5 +1391,35 @@
     "cfm": "您希望继续使用吗？"
   },
   "keeper_address": "Keeper 地址",
-  "change_keeper_address": "变更 Keeper 地址"
+  "change_keeper_address": "变更 Keeper 地址",
+  "dbha": {
+    "src_node": "源节点",
+    "tar_node": "目标节点",
+    "sync": "同步",
+    "syncType": "同步类型",
+    "syncId": "同步 ID",
+    "currentStep": "当前步骤描述",
+    "elapsed": "已執行时间（秒）",
+    "scheduleId": "调度 ID",
+    "R": "运行中",
+    "D": "成功",
+    "E": "失败"
+  },
+  "sof": {
+    "name": "Proxy 名称",
+    "status": "Proxy 状态码",
+    "access_token": "Access Token 防护开关",
+    "sql_injection": "SQL Injection 防护开关",
+    "traffic": "Traffic 防护开关",
+    "xss": "XSS 防护开关",
+    "xxe": "XXE 防护开关",
+    "ignore_api": "忽略 API 清单",
+    "client_id": "Client ID 清单",
+    "show_log": "Log 打印状态",
+    "diversion_list": "分流清单",
+    "diversion_rul": "转发目标 URL",
+    "sticky": "Backend Sticky",
+    "base_tip": "转发目標 URL 必须填写 FHIR Base。例如: https://hapi.fhir.tw/fhir"
+  },
+  "license_expired": "凭证已过期"
 }

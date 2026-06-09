@@ -1,0 +1,568 @@
+<div class="smart-launcher">
+
+  <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
+
+  <h2 class="text-primary launcher-title">{{ 'smart_launcher.title' | translate }}</h2>
+  <br/>
+
+  <!-- Tabs（Bootstrap nav，導覽用排版） -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" [class.active]="activeTab === 'launch'" (click)="activeTab = 'launch'">
+      <b role="tab">{{ 'smart_launcher.tab_launch' | translate }}</b>
+    </li>
+    <li role="presentation" [class.active]="activeTab === 'client'" (click)="activeTab = 'client'">
+      <b role="tab">{{ 'smart_launcher.tab_client' | translate }}</b>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- ═══════ Tab 1: App Launch Options ═══════ -->
+    <div *ngIf="activeTab === 'launch'">
+      <div class="row">
+
+        <!-- Left column -->
+        <div [class]="launchType === 'backend_services' ? 'col-sm-12' : 'col-sm-6'">
+
+          <!-- Launch Type -->
+          <div class="form-group">
+            <label class="text-primary" for="launch_type">{{ 'smart_launcher.launch_type' | translate }}</label>
+            <p-select id="launch_type" [options]="launchTypeOptions" optionValue="value"
+              [(ngModel)]="launchType" (onChange)="onLaunchTypeChange()" appendTo="body" styleClass="w-100">
+              <ng-template let-opt pTemplate="selectedItem">{{ opt.labelKey | translate }}</ng-template>
+              <ng-template let-opt pTemplate="item">{{ opt.labelKey | translate }}</ng-template>
+            </p-select>
+            <span class="help-block small">{{ launchTypeDescription | translate }}</span>
+          </div>
+
+          <!-- FHIR Server + Simulated Error -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="text-primary" for="proxyName">{{ 'smart_launcher.fhir_server' | translate }}</label>
+                <p-select id="proxyName" [options]="proxyNameOptions" [(ngModel)]="proxyName"
+                  [placeholder]="'smart_launcher.select_proxy' | translate"
+                  (onChange)="onProxyNameChange()" appendTo="body" styleClass="w-100"></p-select>
+                <span class="help-block small">{{ 'smart_launcher.fhir_proxy_hint' | translate }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="text-primary" for="sim_error">{{ 'smart_launcher.sim_error' | translate }}</label>
+                <p-select id="sim_error" [options]="simErrorOptions" [group]="true"
+                  optionValue="value" [(ngModel)]="simError" [showClear]="true"
+                  [placeholder]="'smart_launcher.sim_error_none' | translate" appendTo="body" styleClass="w-100">
+                  <ng-template let-group pTemplate="group">{{ group.label | translate }}</ng-template>
+                  <ng-template let-opt pTemplate="selectedItem">{{ opt.label | translate }}</ng-template>
+                  <ng-template let-opt pTemplate="item">{{ opt.label | translate }}</ng-template>
+                </p-select>
+                <span class="help-block small">{{ 'smart_launcher.sim_error_hint' | translate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Misc. Options -->
+          <div class="form-group" *ngIf="launchType !== 'backend_services'">
+            <div class="divider-bottom">
+              <label class="text-primary">{{ 'smart_launcher.misc_options' | translate }}</label>
+            </div>
+            <div class="field-checkbox mt-2" *ngIf="launchType === 'provider_ehr' || launchType === 'patient_portal'">
+              <p-checkbox [(ngModel)]="simEhr" [binary]="true" inputId="simEhr"></p-checkbox>
+              <label for="simEhr" class="ms-2">
+                {{ 'smart_launcher.sim_ehr' | translate }}
+                <span class="text-muted small"> {{ 'smart_launcher.sim_ehr_hint' | translate }}</span>
+              </label>
+            </div>
+            <div class="field-checkbox mt-2" *ngIf="launchType !== 'provider_ehr'">
+              <p-checkbox [(ngModel)]="skipLogin" [binary]="true" inputId="skipLogin"></p-checkbox>
+              <label for="skipLogin" class="ms-2">
+                {{ 'smart_launcher.skip_login' | translate }}
+                <span class="text-muted small"> {{ 'smart_launcher.skip_login_hint' | translate }}</span>
+              </label>
+            </div>
+            <div class="field-checkbox mt-2" *ngIf="launchType !== 'provider_ehr'">
+              <p-checkbox [(ngModel)]="skipAuth" [binary]="true" inputId="skipAuth"></p-checkbox>
+              <label for="skipAuth" class="ms-2">
+                {{ 'smart_launcher.skip_auth' | translate }}
+                <span class="text-muted small"> {{ 'smart_launcher.skip_auth_hint' | translate }}</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right column -->
+        <div class="col-sm-6" *ngIf="launchType !== 'backend_services'">
+
+          <!-- Patient -->
+          <div class="form-group picker-container">
+            <label class="text-primary" for="patient">{{ 'smart_launcher.patient' | translate }}</label>
+            <div class="p-inputgroup">
+              <input pInputText type="text" id="patient"
+                [(ngModel)]="patientId"
+                (ngModelChange)="onPatientIdsInputChange()"
+                [placeholder]="'smart_launcher.patient_ids_placeholder' | translate"
+                (blur)="onPatientIdBlur()" />
+              <button pButton type="button" icon="fa fa-search"
+                [pTooltip]="'smart_launcher.search_patients' | translate"
+                (click)="togglePatientPicker()"></button>
+            </div>
+            <span class="help-block small">
+              {{ 'smart_launcher.patient_hint' | translate }}
+            </span>
+
+            <!-- Patient Search Panel -->
+            <div class="picker-panel" *ngIf="showPatientPicker">
+              <div class="picker-header">
+                <div class="p-inputgroup picker-search-group">
+                  <p-select class="picker-search-mode" [options]="searchModeOptions" optionValue="value"
+                    [(ngModel)]="patientSearchMode" appendTo="body">
+                    <ng-template let-opt pTemplate="selectedItem">{{ opt.labelKey | translate }}</ng-template>
+                    <ng-template let-opt pTemplate="item">{{ opt.labelKey | translate }}</ng-template>
+                  </p-select>
+                  <input pInputText type="text"
+                    [placeholder]="patientSearchMode === 'name' ? ('smart_launcher.search_by_name' | translate) : ('smart_launcher.search_by_id' | translate)"
+                    [(ngModel)]="patientSearchKeyword"
+                    (keyup.enter)="searchPatients()" />
+                  <button pButton type="button" (click)="searchPatients()" [disabled]="patientSearching">
+                    {{ patientSearching ? ('smart_launcher.searching' | translate) : ('smart_launcher.search' | translate) }}
+                  </button>
+                </div>
+                <button pButton [text]="true" type="button" class="picker-close" (click)="showPatientPicker = false">&times;</button>
+              </div>
+              <div class="picker-error" *ngIf="patientSearchError">{{ patientSearchError }}</div>
+              <p-table [value]="patientResults" *ngIf="patientResults.length > 0" styleClass="picker-table p-datatable-sm">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="picker-check-col"></th>
+                    <th>{{ 'smart_launcher.col_id' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_name' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_gender' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_birth_date' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_age' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-p>
+                  <tr (click)="togglePatientSelection(p)" class="picker-row">
+                    <td><p-checkbox [ngModel]="isPatientSelectedInSet(p)" [binary]="true"
+                      (click)="$event.stopPropagation()" (onChange)="togglePatientSelection(p)"></p-checkbox></td>
+                    <td>{{ p.id }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.gender }}</td>
+                    <td>{{ p.birthDate }}</td>
+                    <td>{{ p.age !== null ? p.age : '' }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <div class="picker-empty" *ngIf="!patientSearching && !patientSearchError && patientResults.length === 0">
+                {{ 'smart_launcher.no_patients' | translate }}
+              </div>
+              <div class="picker-pager" *ngIf="patientResults.length > 0 || patientPage > 1">
+                <button pButton [outlined]="true" type="button"
+                  (click)="prevPatientPage()" [disabled]="patientSearching || !patientHasPrev">
+                  {{ 'smart_launcher.prev_page' | translate }}
+                </button>
+                <span class="page-info">
+                  {{ 'smart_launcher.page' | translate }} {{ patientPage }}
+                </span>
+                <button pButton [outlined]="true" type="button"
+                  (click)="nextPatientPage()" [disabled]="patientSearching || !patientHasNext">
+                  {{ 'smart_launcher.next_page' | translate }}
+                </button>
+              </div>
+              <div class="picker-footer" *ngIf="patientResults.length > 0">
+                <span class="text-muted small">{{ 'smart_launcher.selected_count' | translate }}: {{ selectedPatientIdSet.size }}</span>
+                <span>
+                  <button pButton [outlined]="true" type="button" (click)="clearPatientSelection()">
+                    {{ 'smart_launcher.clear' | translate }}
+                  </button>
+                  <button pButton type="button" class="ms-2" (click)="confirmPatientSelection()">
+                    {{ 'smart_launcher.apply' | translate }}
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Provider -->
+          <div class="form-group picker-container" *ngIf="showProvider">
+            <label class="text-primary" for="provider">{{ 'smart_launcher.provider' | translate }}</label>
+            <div class="p-inputgroup">
+              <input pInputText type="text" id="provider"
+                [(ngModel)]="providerIds"
+                (ngModelChange)="onProviderIdsInputChange()"
+                [placeholder]="'smart_launcher.provider_ids_placeholder' | translate" />
+              <button pButton type="button" icon="fa fa-search"
+                [pTooltip]="'smart_launcher.search_providers' | translate"
+                (click)="toggleProviderPicker()"></button>
+            </div>
+            <span class="help-block small">
+              {{ 'smart_launcher.provider_hint' | translate }}
+            </span>
+
+            <!-- Provider Search Panel -->
+            <div class="picker-panel" *ngIf="showProviderPicker">
+              <div class="picker-header">
+                <div class="p-inputgroup picker-search-group">
+                  <p-select class="picker-search-mode" [options]="searchModeOptions" optionValue="value"
+                    [(ngModel)]="providerSearchMode" appendTo="body">
+                    <ng-template let-opt pTemplate="selectedItem">{{ opt.labelKey | translate }}</ng-template>
+                    <ng-template let-opt pTemplate="item">{{ opt.labelKey | translate }}</ng-template>
+                  </p-select>
+                  <input pInputText type="text"
+                    [placeholder]="providerSearchMode === 'name' ? ('smart_launcher.search_by_name' | translate) : ('smart_launcher.search_by_id' | translate)"
+                    [(ngModel)]="providerSearchKeyword"
+                    (keyup.enter)="searchProviders()" />
+                  <button pButton type="button" (click)="searchProviders()" [disabled]="providerSearching">
+                    {{ providerSearching ? ('smart_launcher.searching' | translate) : ('smart_launcher.search' | translate) }}
+                  </button>
+                </div>
+                <button pButton [text]="true" type="button" class="picker-close" (click)="showProviderPicker = false">&times;</button>
+              </div>
+              <div class="picker-error" *ngIf="providerSearchError">{{ providerSearchError }}</div>
+              <p-table [value]="providerResults" *ngIf="providerResults.length > 0" styleClass="picker-table p-datatable-sm">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="picker-check-col"></th>
+                    <th>{{ 'smart_launcher.col_id' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_name' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-pr>
+                  <tr (click)="toggleProviderSelection(pr)" class="picker-row">
+                    <td><p-checkbox [ngModel]="isProviderSelected(pr)" [binary]="true"
+                      (click)="$event.stopPropagation()" (onChange)="toggleProviderSelection(pr)"></p-checkbox></td>
+                    <td>{{ pr.id }}</td>
+                    <td>{{ pr.name }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <div class="picker-pager" *ngIf="providerResults.length > 0 || providerPage > 1">
+                <button pButton [outlined]="true" type="button"
+                  (click)="prevProviderPage()" [disabled]="providerSearching || !providerHasPrev">
+                  {{ 'smart_launcher.prev_page' | translate }}
+                </button>
+                <span class="page-info">
+                  {{ 'smart_launcher.page' | translate }} {{ providerPage }}
+                </span>
+                <button pButton [outlined]="true" type="button"
+                  (click)="nextProviderPage()" [disabled]="providerSearching || !providerHasNext">
+                  {{ 'smart_launcher.next_page' | translate }}
+                </button>
+              </div>
+              <div class="picker-footer" *ngIf="providerResults.length > 0">
+                <span class="text-muted small">{{ 'smart_launcher.selected_count' | translate }}: {{ selectedProviderIdSet.size }}</span>
+                <span>
+                  <button pButton [outlined]="true" type="button" (click)="clearProviderSelection()">
+                    {{ 'smart_launcher.clear' | translate }}
+                  </button>
+                  <button pButton type="button" class="ms-2" (click)="confirmProviderSelection()">
+                    {{ 'smart_launcher.apply' | translate }}
+                  </button>
+                </span>
+              </div>
+              <div class="picker-empty" *ngIf="!providerSearching && !providerSearchError && providerResults.length === 0">
+                {{ 'smart_launcher.no_practitioners' | translate }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Encounter -->
+          <div class="form-group">
+            <label class="text-primary" for="encounter">{{ 'smart_launcher.encounter' | translate }}</label>
+            <div class="p-inputgroup">
+              <input pInputText type="text" id="encounter"
+                [(ngModel)]="encounterId"
+                [placeholder]="'smart_launcher.encounter_id_placeholder' | translate"
+                readonly />
+              <p-select class="encounter-mode-select" [options]="encounterModeOptions" optionValue="value"
+                [(ngModel)]="encounterMode" (onChange)="onEncounterModeChange()" appendTo="body">
+                <ng-template let-opt pTemplate="selectedItem">{{ opt.labelKey | translate }}</ng-template>
+                <ng-template let-opt pTemplate="item">{{ opt.labelKey | translate }}</ng-template>
+              </p-select>
+            </div>
+            <span class="help-block small">
+              {{ encounterMode === 'AUTO'
+                ? ('smart_launcher.encounter_auto_hint' | translate)
+                : ('smart_launcher.encounter_manual_hint' | translate) }}
+            </span>
+
+            <!-- Encounter loading -->
+            <div *ngIf="encounterLoading" class="small text-muted mt-1">
+              {{ 'smart_launcher.loading_encounters' | translate }}
+            </div>
+            <div class="picker-error" *ngIf="encounterError">{{ encounterError }}</div>
+
+            <!-- Encounter list (MANUAL mode) -->
+            <div *ngIf="encounterMode === 'MANUAL' && encounterResults.length > 0" class="mt-1">
+              <p-table [value]="encounterResults" styleClass="picker-table p-datatable-sm">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>{{ 'smart_launcher.col_id' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_type' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_period' | translate }}</th>
+                    <th>{{ 'smart_launcher.col_status' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-enc>
+                  <tr (click)="selectEncounter(enc)" class="picker-row" [class.active]="encounterId === enc.id">
+                    <td>{{ enc.id }}</td>
+                    <td>{{ enc.type }}</td>
+                    <td>{{ enc.period }}</td>
+                    <td>{{ enc.status }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+            <div class="picker-empty" *ngIf="!encounterLoading && !encounterError && encounterResults.length === 0 && patientId">
+              {{ 'smart_launcher.no_encounters' | translate }}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════ Tab 2: Client Registration & Validation ═══════ -->
+    <div *ngIf="activeTab === 'client'">
+
+      <!-- Client Selector: 選一個既有 OAuth client，載入其 dgr_smart_client 設定到下方欄位 -->
+      <div class="form-group" *ngIf="oauthClients.length > 0">
+        <label class="text-primary">{{ 'smart_launcher.cfg_select_client' | translate }}</label>
+        <p-select [options]="oauthClients" optionValue="clientId" [(ngModel)]="selectedRegisteredClient"
+          [showClear]="true" [filter]="true" filterBy="clientId,clientName"
+          [placeholder]="'smart_launcher.cfg_select_client_ph' | translate"
+          (onChange)="onRegisteredClientChange()" appendTo="body" styleClass="w-100">
+          <ng-template let-c pTemplate="selectedItem">{{ c.clientId }}{{ c.clientName ? ' (' + c.clientName + ')' : '' }}</ng-template>
+          <ng-template let-c pTemplate="item">{{ c.clientId }}{{ c.clientName ? ' (' + c.clientName + ')' : '' }}</ng-template>
+        </p-select>
+        <span class="help-block small">{{ 'smart_launcher.cfg_select_client_hint' | translate }}</span>
+        <span *ngIf="smartCfgLoading" class="help-block small text-muted">{{ 'smart_launcher.cfg_loading' | translate }}</span>
+        <span *ngIf="!smartCfgLoading && selectedRegisteredClient" class="help-block small"
+          [class.text-success]="smartCfgExists" [class.text-warning]="!smartCfgExists">
+          {{ (smartCfgExists ? 'smart_launcher.cfg_mode_edit' : 'smart_launcher.cfg_mode_create') | translate }}
+        </span>
+      </div>
+
+      <hr *ngIf="oauthClients.length > 0" />
+
+      <hr />
+
+      <!-- Client Type + PKCE (two columns) -->
+      <div class="row" *ngIf="launchType !== 'backend_services'">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.client_type' | translate }}</label>
+            <div class="field-radio mt-2">
+              <p-radioButton name="clientType" value="public" [(ngModel)]="clientType"
+                (onClick)="onClientTypeChange()" inputId="ct_public"></p-radioButton>
+              <label for="ct_public" class="ms-2">
+                <b>{{ 'smart_launcher.client_type_public' | translate }}</b>
+                <div class="small text-muted">{{ 'smart_launcher.client_type_public_desc' | translate }}</div>
+              </label>
+            </div>
+            <div class="field-radio mt-2">
+              <p-radioButton name="clientType" value="confidential-symmetric" [(ngModel)]="clientType"
+                (onClick)="onClientTypeChange()" inputId="ct_sym"></p-radioButton>
+              <label for="ct_sym" class="ms-2">
+                <b>{{ 'smart_launcher.client_type_symmetric' | translate }}</b>
+                <div class="small text-muted">{{ 'smart_launcher.client_type_sym_desc' | translate }}</div>
+              </label>
+            </div>
+            <div class="field-radio mt-2">
+              <p-radioButton name="clientType" value="confidential-asymmetric" [(ngModel)]="clientType"
+                (onClick)="onClientTypeChange()" inputId="ct_asym"></p-radioButton>
+              <label for="ct_asym" class="ms-2">
+                <b>{{ 'smart_launcher.client_type_asymmetric' | translate }}</b>
+                <div class="small text-muted">{{ 'smart_launcher.client_type_asym_desc' | translate }}</div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <!-- PKCE -->
+          <div class="form-group pkce-group" *ngIf="showPkce">
+            <div class="row">
+              <div class="col-5">
+                <label class="text-primary">{{ 'smart_launcher.pkce' | translate }}</label>
+              </div>
+              <div class="col-7 text-end">
+                <p-selectButton [options]="pkceModeOptions" optionValue="value" [(ngModel)]="pkceMode" [allowEmpty]="false">
+                  <ng-template let-opt pTemplate="item">{{ opt.labelKey | translate }}</ng-template>
+                </p-selectButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr *ngIf="launchType !== 'backend_services'" />
+
+      <!-- Client ID + Scope -->
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.client_id' | translate }}</label>
+            <input pInputText type="text" class="w-100" [(ngModel)]="clientId" placeholder="client_id" />
+            <span class="help-block small">{{ 'smart_launcher.client_id_hint' | translate }}</span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.scope' | translate }}</label>
+            <input pInputText type="text" class="w-100" [(ngModel)]="scopeText" (ngModelChange)="onScopeTextChange()" placeholder="scopes" />
+            <span class="help-block small">{{ 'smart_launcher.scope_hint' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scope chips -->
+      <div class="scope-chips">
+        <p-toggleButton *ngFor="let chip of scopeChips"
+          [(ngModel)]="chip.active"
+          [onLabel]="chip.value"
+          [offLabel]="chip.value"
+          (onChange)="onScopeChipsChange()"
+          styleClass="scope-chip-btn"></p-toggleButton>
+      </div>
+
+      <!-- Redirect URIs + Client Secret / JWKS URL -->
+      <div class="row mt-3">
+        <div [class]="showClientSecret || showJwks ? 'col-sm-6' : 'col-sm-12'">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.redirect_uris' | translate }}</label>
+            <input pInputText type="text" class="w-100" [(ngModel)]="redirectUri" placeholder="redirect_uris" />
+            <span class="help-block small">{{ 'smart_launcher.redirect_uris_hint' | translate }}</span>
+          </div>
+        </div>
+        <div class="col-sm-6" *ngIf="showClientSecret">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.client_secret' | translate }}</label>
+            <input pInputText type="text" class="w-100" [(ngModel)]="clientSecret" placeholder="client_secret" />
+            <span class="help-block small">{{ 'smart_launcher.client_secret_hint' | translate }}</span>
+          </div>
+        </div>
+        <div class="col-sm-6" *ngIf="showJwks">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.jwks_url' | translate }}</label>
+            <input pInputText type="text" class="w-100" [(ngModel)]="jwksUrl" placeholder="URL to JWKS" />
+            <span class="help-block small">{{ 'smart_launcher.jwks_url_hint' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- JWKS JSON -->
+      <div *ngIf="showJwks">
+        <div class="form-group">
+          <label class="text-primary">{{ 'smart_launcher.jwks_json' | translate }}</label>
+          <textarea pTextarea class="w-100 jwks-textarea" rows="4"
+            [(ngModel)]="jwksJson"
+            placeholder='{ "keys": [...] }'
+            spellcheck="false"></textarea>
+          <span class="help-block small">
+            {{ 'smart_launcher.jwks_json_hint' | translate }}
+          </span>
+        </div>
+      </div>
+
+      <!-- dgr_smart_client 補充欄位（既有 client 表單沒有的）+ 儲存 -->
+      <hr />
+      <h4 class="text-primary">{{ 'smart_launcher.cfg_extra_title' | translate }}</h4>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.cfg_idp_type' | translate }}</label>
+            <p-select [options]="cfgIdpTypes" [(ngModel)]="smartIdpType" appendTo="body" styleClass="w-100"></p-select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.cfg_idp_client_id' | translate }}</label>
+            <p-select [options]="oauthClients" optionValue="clientId" [(ngModel)]="smartIdpClientId"
+              [showClear]="true" [filter]="true" filterBy="clientId,clientName"
+              [placeholder]="'smart_launcher.cfg_select_client_ph' | translate"
+              appendTo="body" styleClass="w-100">
+              <ng-template let-c pTemplate="selectedItem">{{ c.clientId }}{{ c.clientName ? ' (' + c.clientName + ')' : '' }}</ng-template>
+              <ng-template let-c pTemplate="item">{{ c.clientId }}{{ c.clientName ? ' (' + c.clientName + ')' : '' }}</ng-template>
+            </p-select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.cfg_launch_mode' | translate }}</label>
+            <p-select [options]="cfgLaunchModes" [(ngModel)]="smartLaunchMode" appendTo="body" styleClass="w-100"></p-select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.cfg_auto_approve' | translate }}</label>
+            <p-select [options]="cfgAutoApproveOptions" [(ngModel)]="smartAutoApprove" appendTo="body" styleClass="w-100"></p-select>
+          </div>
+        </div>
+        <div class="col-sm-6" *ngIf="cfgAuthMethods().length > 0">
+          <div class="form-group">
+            <label class="text-primary">{{ 'smart_launcher.cfg_auth_method' | translate }}</label>
+            <p-select [options]="cfgAuthMethods()" [(ngModel)]="smartAuthMethod" appendTo="body" styleClass="w-100"></p-select>
+          </div>
+        </div>
+      </div>
+      <button pButton type="button" (click)="saveSmartConfig()">
+        {{ 'smart_launcher.cfg_save' | translate }}
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ═══════ Bottom Launch Box ═══════ -->
+  <div class="launch-box">
+
+    <!-- App Launch URL (all non-backend modes) -->
+    <div *ngIf="launchType !== 'backend_services'">
+      <h4 class="text-primary launch-box-title">{{ 'smart_launcher.app_launch_url' | translate }}</h4>
+      <div class="launch-box-row">
+        <div class="launch-box-input">
+          <div class="p-inputgroup">
+            <input pInputText type="text" class="mono-input"
+              [(ngModel)]="appLaunchUrl"
+              [placeholder]="'smart_launcher.app_launch_url_placeholder' | translate" />
+            <button pButton type="button"
+              (click)="launch()"
+              [disabled]="!appLaunchUrl || !proxyName">{{ 'smart_launcher.launch_btn' | translate }}</button>
+          </div>
+        </div>
+        <div class="launch-box-sample">
+          <button pButton [outlined]="true" type="button" (click)="launchSampleApp()">
+            <span class="text-success">{{ 'smart_launcher.launch_sample_app' | translate }}</span>
+          </button>
+        </div>
+      </div>
+      <span class="small text-muted">
+        {{ 'smart_launcher.app_launch_url_hint' | translate }}
+      </span>
+    </div>
+
+    <!-- FHIR Base URL (standalone + backend) -->
+    <div *ngIf="isStandaloneLaunch || launchType === 'backend_services'"
+      [class.mt-2]="launchType !== 'backend_services'">
+      <h4 class="text-primary launch-box-title">{{ 'smart_launcher.fhir_base_url' | translate }}</h4>
+      <div class="p-inputgroup">
+        <input pInputText type="text" class="mono-input" [value]="fhirBaseUrl" readonly />
+        <button pButton type="button"
+          (click)="copyFhirBaseUrl()">{{ copySuccess ? ('smart_launcher.copied' | translate) : ('smart_launcher.copy_url' | translate) }}</button>
+      </div>
+      <span class="small text-muted">
+        {{ 'smart_launcher.fhir_base_url_hint' | translate }}
+      </span>
+    </div>
+
+  </div>
+
+  <br/>
+  <hr/>
+  <p class="text-center small text-muted">
+    {{ 'smart_launcher.footer' | translate }}
+  </p>
+
+</div>

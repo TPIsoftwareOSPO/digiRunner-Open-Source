@@ -1,6 +1,6 @@
 <form [formGroup]="form">
   <div class="key-value-row">
-    <p-checkbox [binary]="true" formControlName="selected" ></p-checkbox>
+    <p-checkbox [binary]="true" formControlName="selected" style="margin-top: 4px;" ></p-checkbox>
     <!-- 鍵 -->
     <label class="col-form-label" *ngIf="keyLabel">{{ keyLabel }}</label>
     <input type="text" class="form-control" name="key" formControlName="key" />
@@ -9,7 +9,14 @@
     </ng-container>
     <!-- 值 -->
     <label class="col-form-label" *ngIf="valueLabel">{{valueLabel}}</label>
-    <input type="text" class="form-control" name="value" formControlName="value" />
+
+    @if (!(isMima && useMask)) {
+      <input type="text" class="form-control" name="value" formControlName="value" />
+    } @else {
+    <div style="width: 100%;">
+      <app-mima-input [control]="form.get('value')"></app-mima-input>
+    </div>
+    }
     <ng-container *ngIf="value.invalid && (value.dirty || value.touched)">
       <small class="form-text text-danger">{{ value.errors!["ipaddress"] }}</small>
     </ng-container>

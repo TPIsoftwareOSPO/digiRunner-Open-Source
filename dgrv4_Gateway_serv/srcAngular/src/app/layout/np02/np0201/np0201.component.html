@@ -2,23 +2,22 @@
   <form [formGroup]="form" (ngSubmit)="submitForm()">
     <div class="form-group col">
       <label class="control-label fw-bold">{{'date_range'|translate}}</label>
-      <div class="col-12 d-flex">
+      <div class="col-12 d-flex align-items-center">
         <p-button type="button" icon="pi pi-caret-left" styleClass="tpi-dark" (onClick)="preMonth();"></p-button>
-        <div class="d-flex mx-2">
-          <span style="font-size: 1.25rem; padding: 4px;">{{currentDate.getMonth() +
-            1}}{{'calendar.month'|translate}}</span>
+        <div class="mx-2" style="width: 5em; text-align: center;">
+          <span style="padding: 4px; white-space: nowrap;">{{currentDate.getMonth() + 1}}{{'calendar.month'|translate}}</span>
         </div>
         <p-button type="button" icon="pi pi-caret-right" styleClass="tpi-dark" class="me-3"
           (onClick)="nextMonth()"></p-button>
-        <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+        <p-datepicker [inputStyle]="{'width':'100%'}" appendTo="body"
           formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
-        </p-calendar>
-        <div class="d-flex">
+        </p-datepicker>
+        <div>
           <span style="padding: 5px;">～</span>
         </div>
-        <p-calendar [style]="{'width':'100%'}" formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
+        <p-datepicker formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
           dateFormat="yy/mm/dd" [showIcon]="true">
-        </p-calendar>
+        </p-datepicker>
       </div>
     </div>
     <div class="form-group row">
@@ -48,7 +47,7 @@
   </div>
 
   <p-table *ngIf="cols" [columns]="cols" [value]="certList" [(selection)]="selected"
-    [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped">
+    [style]="{'word-break':'break-word'}" stripedRows>
     <ng-template pTemplate="caption">
       <div class="ui-helper-clearfix">
         <button type="button" class="btn tpi-btn tpi-primary float-start me-1"
@@ -162,14 +161,14 @@
         </div>
     </ng-template>
 </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

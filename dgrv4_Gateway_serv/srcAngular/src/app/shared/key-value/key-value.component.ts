@@ -32,6 +32,7 @@ export class KeyValueComponent implements OnInit, ControlValueAccessor {
   nums: number = 0;
   keyvalues: Array<IKeyValue> = new Array<IKeyValue>();
   value: { key: string, value: any }[] = [];
+  @Input() useMask: boolean = false;
 
   constructor(
     // private factoryResolver: ComponentFactoryResolver,
@@ -105,6 +106,7 @@ export class KeyValueComponent implements OnInit, ControlValueAccessor {
     componentRef.instance.valueLabel = this.valueLabel || 'Value';
     componentRef.instance.no = this.nums;
     componentRef.instance.data = keyvalue;
+    componentRef.instance.useMask = this.useMask;
     this.nums++;
     componentRef.instance.change.subscribe((res: IKeyValue) => {
       // console.log(this.keyvalues);

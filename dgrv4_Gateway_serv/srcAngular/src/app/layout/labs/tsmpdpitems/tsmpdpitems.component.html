@@ -13,8 +13,8 @@
 
         <div class="col-3 col-xl-3 col-lg-3">
           <label class="control-label">{{'locale'|translate}}</label>
-          <p-dropdown [showClear]="true" [filter]="true" [options]="localeList" formControlName="locale"
-            placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}" (onChange)="localeChange()"></p-dropdown>
+          <p-select [showClear]="true" [filter]="true" [options]="localeList" formControlName="locale"
+            placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}" (onChange)="localeChange()"></p-select>
         </div>
       </div>
       <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
@@ -50,7 +50,7 @@
     </form>
     <hr>
     <p-table *ngIf="cols" [columns]="cols" [value]="tableData" [style]="{'word-break':'break-word'}"
-      styleClass="p-datatable-striped" responsiveLayout="scroll">
+      stripedRows responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -130,8 +130,8 @@
         </div>
         <div class="col-3 col-xl-3 col-lg-3">
           <label class="control-label">{{'locale'|translate}}</label>
-          <p-dropdown [showClear]="true" [filter]="true" [options]="localeList" formControlName="locale"
-            placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}" (onChange)="localeChange()"></p-dropdown>
+          <p-select [showClear]="true" [filter]="true" [options]="localeList" formControlName="locale"
+            placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}" (onChange)="localeChange()"></p-select>
         </div>
       </div>
 
@@ -155,7 +155,7 @@
 
     <hr>
     <p-table *ngIf="subCols" [columns]="subCols" [value]="subTableData" responsiveLayout="scroll"
-      [style]="{'word-break':'break-word'}" styleClass="p-datatable-striped">
+      [style]="{'word-break':'break-word'}" stripedRows>
       <ng-template pTemplate="colgroup" let-columns responseLayout="Scroll">
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -239,9 +239,9 @@
       </div>
       <div class="col-2">
         <label class="control-label">{{'locale'|translate}}</label>
-        <p-dropdown [showClear]="true" [filter]="true" [options]="localeList" [(ngModel)]="subitemDetail.locale"
+        <p-select [showClear]="true" [filter]="true" [options]="localeList" [(ngModel)]="subitemDetail.locale"
           placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}" (onChange)="subitemDetaillocaleChange()">
-        </p-dropdown>
+        </p-select>
       </div>
     </div>
 
@@ -267,7 +267,7 @@
       </div>
     </div>
     <!-- 參數表單 -->
-    <p-table [value]="subitemDetail.params" styleClass="p-datatable-striped" responsiveLayout="scroll">
+    <p-table [value]="subitemDetail.params" stripedRows responsiveLayout="scroll">
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th style="width: 20%">
@@ -472,14 +472,14 @@
     </div>
   </ng-template>
 </p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,6 +165,10 @@ public class TSMPCServicePostForm implements IApiCacheService {
 		// 完整轉發url為http://127.0.0.1:8080/dgrv4/mocktest/delete/api/a/bb/ccc/1
 		if (tsmpcPostForm_isURLRID)
 			srcUrl = srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
+		
+		// [EN]Append the queryString to the target URL (text fields have been changed to use getParts(), which no longer includes queryString)
+		// [ZH]將 queryString 附加到目標URL (文字欄位已改用 getParts() 取值,不再包含 queryString)
+		srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, srcUrl);
 
 		int tsmpcPostForm_tokenPayload = apiReg.getFunFlag();
 
@@ -194,7 +199,9 @@ public class TSMPCServicePostForm implements IApiCacheService {
 				paramVo.setDgrReqVo(tsmpcPostFormDgrReqVo);
 				paramVo.setUuid(uuid);
 				paramVo.setHttpMethod(httpReq.getMethod());
-				paramVo.setParamMap(httpReq.getParameterMap());
+				// [EN]Filter out queryString params from parameterMap to avoid duplication (queryString is already appended to srcUrl)
+				// [ZH]從 parameterMap 過濾掉 queryString 參數，避免重複 (queryString 已附加在 srcUrl)
+				paramVo.setParamMap(getCommForwardProcService().removeQueryStringParams(httpReq, httpReq.getParameterMap()));
 				paramVo.setPartContentTypes(partContentTypes);
 				AutoCacheRespVo apiCacheRespVo = getProxyMethodServiceCacheProxy().queryByIdCallApi(autoCacheId, this,
 						paramVo, maskInfo);
@@ -369,7 +376,7 @@ public class TSMPCServicePostForm implements IApiCacheService {
 
 		// print
 		writeLogger(tsmpcPostFormLog_log, "--【URL】--");
-		writeLogger(tsmpcPostFormLog_log, httpReq.getRequestURI());
+		writeLogger(tsmpcPostFormLog_log, getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI()));
 		writeLogger(tsmpcPostFormLog_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 		writeLogger(tsmpcPostFormLog_log, "【" + httpReq.getMethod() + "】\r\n");
 
@@ -477,7 +484,7 @@ public class TSMPCServicePostForm implements IApiCacheService {
 
 		// 1. 【URL】
 		writeLogger(tsmpcPostForm_log, "--【URL】--");
-		writeLogger(tsmpcPostForm_log, httpReq.getRequestURI());
+		writeLogger(tsmpcPostForm_log, getCommForwardProcService().getUrlAddQueryString(httpReq, httpReq.getRequestURI()));
 		writeLogger(tsmpcPostForm_log, "--【End】 " + StackTraceUtil.getLineNumber() + " --\r\n");
 
 		// 2. 【HTTP METHOD】
@@ -510,44 +517,62 @@ public class TSMPCServicePostForm implements IApiCacheService {
 		for (Part part : parts) {
 			partContentTypes.put(part.getName(), part.getContentType());
 		}
-		// 文字
-		Map<String, String[]> parameterMap = httpReq.getParameterMap();
-		if (!CollectionUtils.isEmpty(parameterMap)) {
+		
+		// 文字, 因為此段會把queryString也一起取得,若要還原也需把
+		//srcUrlList = getCommForwardProcService().getUrlListAddQueryString(httpReq, srcUrlList);這段註解
+//		Map<String, String[]> parameterMap = httpReq.getParameterMap();
+//		if (!CollectionUtils.isEmpty(parameterMap)) {
+//			String name;
+//			String[] vals;
+//			byte[] data;
+//			for (Map.Entry<String, String[]> entries : parameterMap.entrySet()) {
+//				name = entries.getKey();
+//				vals = entries.getValue();
+//				for (String val : vals) {
+//					Map<String, Object> dataMap = HttpUtil.getFormBodyPart(name, null, val.getBytes(), boundary,
+//							tsmpcPostForm_log, partContentTypes.get(name), maskInfo);
+//					data = (byte[]) dataMap.get("data");
+//					formBodyParts.add(data);
+//					Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
+//					formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
+//					formBodyParts_File2Hex.add((byte[]) logData.get("content"));
+//
+//				}
+//			}
+//		}
+		// [EN]Text fields only (using getParts() to get only multipart form-data text fields, excluding queryString parameters)
+		// [ZH]文字欄位 (只取 multipart form-data 的文字欄位,不含 queryString 參數)
+		for (Part part : parts) {
+			if (part.getSubmittedFileName() == null) { // 文字欄位 (非檔案)
+				String name = part.getName();
+				byte[] valBytes = part.getInputStream().readAllBytes();
+				Map<String, Object> dataMap = HttpUtil.getFormBodyPart(name, null, valBytes, boundary,
+						tsmpcPostForm_log, partContentTypes.get(name), maskInfo);
+				byte[] data = (byte[]) dataMap.get("data");
+				formBodyParts.add(data);
+				Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
+				formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
+				formBodyParts_File2Hex.add((byte[]) logData.get("content"));
+			}
+		}
+		// [EN]Files (use getMultiFileMap to support multiple files with the same key)
+		// [ZH]檔案 (使用 getMultiFileMap 以支援相同 key 有多個檔案的情境)
+		MultiValueMap<String, MultipartFile> multiFileMap = httpReq.getMultiFileMap();
+		if (!CollectionUtils.isEmpty(multiFileMap)) {
 			String name;
-			String[] vals;
 			byte[] data;
-			for (Map.Entry<String, String[]> entries : parameterMap.entrySet()) {
+			for (Map.Entry<String, List<MultipartFile>> entries : multiFileMap.entrySet()) {
 				name = entries.getKey();
-				vals = entries.getValue();
-				for (String val : vals) {
-					Map<String, Object> dataMap = HttpUtil.getFormBodyPart(name, null, val.getBytes(), boundary,
-							tsmpcPostForm_log, partContentTypes.get(name), maskInfo);
+				for (MultipartFile mf : entries.getValue()) {
+					String contentType = mf.getContentType(); // Get the content type from the MultipartFile
+					Map<String, Object> dataMap = HttpUtil.getFormBodyPart(name, mf.getOriginalFilename(), mf.getBytes(),
+							boundary, tsmpcPostForm_log, contentType, null);
 					data = (byte[]) dataMap.get("data");
 					formBodyParts.add(data);
 					Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
 					formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
 					formBodyParts_File2Hex.add((byte[]) logData.get("content"));
-
 				}
-			}
-		}
-		// 檔案
-		Map<String, MultipartFile> fileMap = httpReq.getFileMap();
-		if (!CollectionUtils.isEmpty(fileMap)) {
-			String name;
-			MultipartFile mf;
-			byte[] data;
-			for (Map.Entry<String, MultipartFile> entries : fileMap.entrySet()) {
-				name = entries.getKey();
-				mf = entries.getValue();
-				String contentType = mf.getContentType(); // Get the content type from the MultipartFile
-				Map<String, Object> dataMap = HttpUtil.getFormBodyPart(name, mf.getOriginalFilename(), mf.getBytes(),
-						boundary, tsmpcPostForm_log, contentType, null);
-				data = (byte[]) dataMap.get("data");
-				formBodyParts.add(data);
-				Map<String, Object> logData = (Map<String, Object>) dataMap.get("logData");
-				formBodyParts_File2Hex.add((byte[]) logData.get("contentD"));
-				formBodyParts_File2Hex.add((byte[]) logData.get("content"));
 			}
 		}
 
@@ -588,7 +613,11 @@ public class TSMPCServicePostForm implements IApiCacheService {
 		// 取出a/bb/ccc/1後，接在要轉發的url http://127.0.0.1:8080/dgrv4/mocktest/delete/api
 		// 完整轉發url為http://127.0.0.1:8080/dgrv4/mocktest/delete/api/a/bb/ccc/1
 		srcUrl = srcUrl + commForwardProcService.getTsmpcPathParameter(reqUrl);
-
+		
+		// [EN]Append the queryString to the target URL (text fields have been changed to use getParts(), which no longer includes queryString)
+		// [ZH]將 queryString 附加到目標URL (文字欄位已改用 getParts() 取值,不再包含 queryString)
+		srcUrl = getCommForwardProcService().getUrlAddQueryString(httpReq, srcUrl);
+		
 		int tokenPayload = apiReg.getFunFlag();
 
 		// For API mock test
@@ -626,7 +655,10 @@ public class TSMPCServicePostForm implements IApiCacheService {
 			httpReq.setAttribute(GatewayFilter.HTTP_CODE23, respObj.statusCode);
 			httpReq.setAttribute(GatewayFilter.ELAPSED_TIME23, respObj.elapsedTime);
 
+			TPILogger.tl.debug(tsmpcPostForm_log.toString());
+			
 			// 8. 【End TSMPC】
+			tsmpcPostForm_log = new StringBuffer();
 			writeLogger(tsmpcPostForm_log, "--【LOGUUID】【" + uuid + "】【End TSMPC】--");
 
 			// ===== ↓ NOTHING TO DO WITH LOGGER ↓ =====

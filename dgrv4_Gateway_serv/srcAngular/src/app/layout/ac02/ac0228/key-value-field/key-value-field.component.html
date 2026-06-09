@@ -3,7 +3,14 @@
     <label class="pe-1 control-label" [ngClass]="{'required':required}">Key</label>
     <input type="text" class="form-control" formControlName="key">
     <label class="ps-2 pe-1 control-label" [ngClass]="{'required':required}">Value</label>
+
+    @if (!(isMima && useMask)) {
     <input type="text" class="form-control" formControlName="value">
+    } @else {
+    <div style="width: 100%;">
+      <app-mima-input [control]="form.get('value')"></app-mima-input>
+    </div>
+    }
     <button type="button" class="btn tpi-primary ms-1" (click)="deleteItem()" style="border-radius: 50%"
       [hidden]="_disabled">
       <i class="fa fa-minus"></i>

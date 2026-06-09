@@ -300,9 +300,11 @@ export class ApiOnOffComponent implements OnInit {
                 height: '100vh',
               },
               header: dict['on_shelves_api_search'],
+              closable:true,
+              modal:true
             })
 
-            ref.onClose.subscribe(_chooseAPI => {
+            ref!.onClose.subscribe(_chooseAPI => {
               if (_chooseAPI) {
                 this.keyword = '';
                 if (this.data.operate != FormOperate.create && window.location.hash == '#/np04/np0401') {
@@ -353,7 +355,7 @@ export class ApiOnOffComponent implements OnInit {
               header: this.dialogTitle,
             })
 
-            ref2.onClose.subscribe(_chooseAPI => {
+            ref2!.onClose.subscribe(_chooseAPI => {
               if (_chooseAPI) {
                 this.keyword = '';
                 if (this.data.operate != FormOperate.create && window.location.hash == '#/np04/np0401') {

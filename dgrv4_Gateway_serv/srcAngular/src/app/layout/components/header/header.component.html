@@ -1,5 +1,5 @@
 <!-- <nav class="navbar navbar-expand-lg" style="z-index: 1000"> -->
-<div class="header">
+<div class="header" [style]="ac_header">
   <!-- logo 圖片 -->
   <a routerLink="/dashboard" (click)="click($event)">
    <div class="logo-panel">
@@ -8,7 +8,7 @@
       </div>
     </a>
   <div class="header-last-panel">
-    <button pButton icon="pi pi-bars" class="p-button-text p-button-secondary header-toggler-btn" type="button" (click)="toggleSidebar()"></button>
+    <button pButton icon="pi pi-bars" class="p-button-text header-button header-toggler-btn" type="button" (click)="toggleSidebar()"></button>
 
     <div [hidden]="!aliveSec || aliveSec == 0">
       <label class="expired-time" style="white-space: nowrap">
@@ -48,7 +48,7 @@
       </p-menu> -->
       <button
         type="button"
-        class="p-button-text p-button-secondary header-info-btn"
+        class="p-button-text header-button header-info-btn"
         pButton
         icon="pi pi-angle-down"
         label="Hi, {{ userAlias }}"

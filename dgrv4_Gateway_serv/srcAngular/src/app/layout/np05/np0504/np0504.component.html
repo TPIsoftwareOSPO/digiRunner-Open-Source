@@ -6,10 +6,10 @@
                     <label id="startDate_label" class="control-label">{{'date_range'|translate}}</label>
                     <div class="d-flex ">
                         <div >
-                            <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                            <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                                 formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true"
                                 [readonlyInput]="true">
-                            </p-calendar>
+                            </p-datepicker>
                             <div *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)"
                                 class="text-danger">
                                 <small class="form-text">{{startDate.errors.isRequired}}</small>
@@ -20,10 +20,10 @@
                             <label style="padding: 5px 10px;">～</label>
                         </div>
                         <div>
-                            <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                            <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                                 formControlName="endDate" dateFormat="yy/mm/dd" [showIcon]="true"
                                 [readonlyInput]="true">
-                            </p-calendar>
+                            </p-datepicker>
                             <div *ngIf="endDate?.invalid && (endDate?.dirty || endDate?.touched)" class="text-danger">
                                 <small class="form-text">{{endDate.errors.isRequired}}</small>
                                 <small class="form-text">{{endDate.errors.pattern}}</small>
@@ -44,7 +44,7 @@
             </div>
         </form>
         <hr>
-        <p-table *ngIf="clientOpenApiKeyListCols" [columns]="clientOpenApiKeyListCols" styleClass="p-datatable-striped"
+        <p-table *ngIf="clientOpenApiKeyListCols" [columns]="clientOpenApiKeyListCols" stripedRows
             [value]="clientOpenApiKeyListData" selectionMode="single" [style]="{'word-break':'break-word'}"
             responsiveLayout="scroll">
             <ng-template pTemplate="colgroup" let-columns>
@@ -155,7 +155,7 @@
                 <div class="form-group row">
                     <div class="col-12 col-xl-12 col-lg-12">
                         <label class="control-label">{{'auth_api'|translate}}</label>：
-                        <p-table *ngIf="openApiKeyDetailCols" [columns]="openApiKeyDetailCols" styleClass="p-datatable-striped"
+                        <p-table *ngIf="openApiKeyDetailCols" [columns]="openApiKeyDetailCols" stripedRows
                             [value]="openApiKeyDetailData.dataList" selectionMode="single"
                             [style]="{'word-break':'break-word'}">
                             <ng-template pTemplate="colgroup" let-columns>

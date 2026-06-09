@@ -12,7 +12,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of statusList">
               <div class="p-form-check">
-                <p-radioButton formControlName="websiteStatus" value={{stat.value}}
+                <p-radioButton name="websiteStatus" formControlName="websiteStatus" value={{stat.value}}
                   inputId="websiteStatus{{stat.value}}"></p-radioButton>
                 <label for="websiteStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
@@ -59,7 +59,7 @@
       </div>
     </form>
     <hr>
-    <p-table *ngIf="cols" [columns]="cols" [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="tableData" selectionMode="single" stripedRows
       [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -151,7 +151,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of statusListIgnoreAll">
               <div class="p-form-check">
-                <p-radioButton formControlName="websiteStatus" value={{stat.value}}
+                <p-radioButton name="websiteStatus" formControlName="websiteStatus" value={{stat.value}}
                   inputId="websiteStatus_{{stat.value}}"></p-radioButton>
                 <label for="websiteStatus_{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
@@ -266,14 +266,14 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

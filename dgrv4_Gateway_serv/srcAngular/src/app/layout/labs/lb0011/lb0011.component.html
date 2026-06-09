@@ -15,7 +15,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of statusList">
               <div class="p-form-check">
-                <p-radioButton formControlName="enable" value={{stat.value}}
+                <p-radioButton name="enable" formControlName="enable" value={{stat.value}}
                   inputId="enable{{stat.value}}"></p-radioButton>
                 <label for="enable{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
@@ -48,7 +48,7 @@
     </form>
 
     <hr>
-    <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll">
+    <p-table [value]="tableData" stripedRows responsiveLayout="scroll">
       <ng-template pTemplate="header" let-columns>
         <tr>
           <!-- <th>id</th> -->
@@ -124,9 +124,9 @@
         </div>
         <div class="col-4">
           <label id="notifyType_label" for="notifyType" class="control-label">{{ "notify.type" | translate }}</label>
-          <p-dropdown [options]="notifyTypeList" placeholder="{{'plz_chs' | translate}}" formControlName="notifyType"
+          <p-select [options]="notifyTypeList" placeholder="{{'plz_chs' | translate}}" formControlName="notifyType"
             [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="notifyTypeE?.invalid && (notifyTypeE?.dirty || notifyTypeE?.touched)" class="text-danger">
             <small class="form-text">{{notifyType?.errors.isRequired | translate}}</small>
           </div>
@@ -136,7 +136,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of statusListIgnoreAll">
               <div class="p-form-check">
-                <p-radioButton formControlName="enable" value={{stat.value}}
+                <p-radioButton name="enable" formControlName="enable" value={{stat.value}}
                   inputId="enableE{{stat.value}}"></p-radioButton>
                 <label for="enableE{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
@@ -154,15 +154,15 @@
           <div class="p-form-check-line">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="payloadFlag" value="0" inputId="payloadFlag0"></p-radioButton>
+                <p-radioButton name="payloadFlag" formControlName="payloadFlag" value="0" inputId="payloadFlag0"></p-radioButton>
                 <label for="payloadFlag0" class="ms-2 mb-0">form-data</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="payloadFlag" value="1" inputId="payloadFlag1"></p-radioButton>
+                <p-radioButton name="payloadFlag" formControlName="payloadFlag" value="1" inputId="payloadFlag1"></p-radioButton>
                 <label for="payloadFlag1" class="ms-2 mb-0">raw</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="payloadFlag" value="2" inputId="payloadFlag2"></p-radioButton>
+                <p-radioButton name="payloadFlag" formControlName="payloadFlag" value="2" inputId="payloadFlag2"></p-radioButton>
                 <label for="payloadFlag2" class="ms-2 mb-0">x-www-form-urlencoded</label>
               </div>
             </ng-container>
@@ -181,7 +181,7 @@
             <label id="message_label" class="control-label fw-bold">Message</label>
           </div>
           <div style="display:block">
-            <textarea rows="2" style="width:100%" id="message" formControlName="message" pInputTextarea></textarea>
+            <textarea class="form-control" rows="2" style="width:100%" id="message" formControlName="message" pInputTextarea></textarea>
           </div>
         </div>
       </div>
@@ -198,14 +198,14 @@
   </div>
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
       <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

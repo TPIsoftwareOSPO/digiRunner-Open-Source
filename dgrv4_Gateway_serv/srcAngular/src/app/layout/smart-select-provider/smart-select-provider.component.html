@@ -1,0 +1,107 @@
+<div class="login-center-page">
+
+  <div class="form-wrapper" *ngIf="viewState === 'no-state'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">缺少授權參數</p></div>
+  </div>
+
+  <div class="form-wrapper" *ngIf="viewState === 'error'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">授權請求已過期或無效</p></div>
+  </div>
+
+  <div class="form-wrapper" *ngIf="viewState === 'loading'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body"><p class="line">載入中…</p></div>
+  </div>
+
+  <div class="form-wrapper wide" *ngIf="viewState === 'ready'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body">
+
+      <p class="page-title">請選擇醫療人員</p>
+      <p class="subtitle">「{{ clientName }}」需要識別您的執業身份</p>
+
+      <!-- 受限清單模式（候選 2+） -->
+      <div *ngIf="isRestricted" class="result-list">
+        <p class="text-muted small">請從以下候選中選擇：</p>
+        <table class="table table-sm table-hover mb-1">
+          <thead>
+            <tr>
+              <th style="width: 36px;"></th>
+              <th>ID</th>
+              <th>姓名</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ref of candidates" (click)="pickCandidate(ref)" class="pick-row"
+                [class.selected]="selectedRef === ref">
+              <td><input type="radio" name="provider" [checked]="selectedRef === ref" (click)="pickCandidate(ref)" /></td>
+              <td>{{ displayMap[ref]?.id || '—' }}</td>
+              <td>{{ displayMap[ref]?.name || ref }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 全域搜尋模式（候選 0） -->
+      <div *ngIf="!isRestricted">
+        <div class="input-group mb-3">
+          <select class="form-select search-mode-select" [(ngModel)]="searchMode">
+            <option value="name">姓名</option>
+            <option value="id">ID</option>
+          </select>
+          <input type="text" class="form-control"
+                 [placeholder]="searchMode === 'name' ? '以姓名搜尋…' : '輸入醫療人員 ID…'"
+                 [(ngModel)]="keyword"
+                 (keyup.enter)="search()" />
+          <button type="button" class="btn btn-outline-secondary" (click)="search()" [disabled]="loading">搜尋</button>
+        </div>
+
+        <p class="text-muted text-center" *ngIf="loading && results.length === 0">搜尋中…</p>
+
+        <div class="result-list" *ngIf="results.length > 0">
+          <table class="table table-sm table-hover mb-1">
+            <thead>
+              <tr>
+                <th style="width: 36px;"></th>
+                <th>ID</th>
+                <th>姓名</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of results" (click)="pickResult(p)" class="pick-row"
+                  [class.selected]="selectedRef === p.reference">
+                <td><input type="radio" name="provider" [checked]="selectedRef === p.reference" (click)="pickResult(p)" /></td>
+                <td>{{ p.id }}</td>
+                <td>{{ p.name }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager" *ngIf="results.length > 0 || page > 1">
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="prevPage()" [disabled]="loading || !hasPrevPage">上一頁</button>
+          <span class="page-info">第 {{ page }} 頁</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="nextPage()" [disabled]="loading || !hasNextPage">下一頁</button>
+        </div>
+
+        <p class="text-muted text-center" *ngIf="!loading && results.length === 0 && page === 1">找不到醫療人員</p>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn tpi-btn tpi-primary" (click)="confirm()" [disabled]="!selectedRef">
+          確認
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

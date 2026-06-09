@@ -13,11 +13,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -128,7 +131,7 @@ public class CommForwardProcService {
 	@Value("${cors.allow.headers}")
 	private String corsAllowHeaders;
 
-	public static Map<String, FixedCacheVo> fixedCacheMap = new HashMap<>();
+	public static Map<String, FixedCacheVo> fixedCacheMap = new ConcurrentHashMap<>();
 
 	public static final String AUTHORIZATION = "authorization";
 	public static final String TOKENPAYLOAD = "tokenpayload";
@@ -1977,10 +1980,14 @@ public class CommForwardProcService {
 			}
 		}
 
+		// [EN]Parse queryString param keys to filter them out from getParameterMap() (which mixes queryString + form body)
+		// [ZH]解析 queryString 的參數 key，用來從 getParameterMap() 中過濾掉 (因為它會混合 queryString + form body)
+		Set<String> queryParamKeys = getQueryStringParamKeys(httpReq);
+
 		StringBuilder sb = new StringBuilder();
 		httpReq.getParameterMap().forEach((k, vs) -> {
-			if (vs.length != 0) {
-				String value = partContentTypes.get(k) == null ? "" : partContentTypes.get(k); 
+			if (vs.length != 0 && !queryParamKeys.contains(k)) {
+				String value = partContentTypes.get(k) == null ? "" : partContentTypes.get(k);
 				sb.append("{" + k + ":" + Arrays.asList(vs) + " Content Type :　" + value + "　},");
 			}
 		});
@@ -1991,24 +1998,28 @@ public class CommForwardProcService {
 
 		return str;
 	}
-	
+
 	public String getReqMbody(HttpServletRequest httpReq, Map<String, String> maskInfo) throws IOException, ServletException {
 
 		if(maskInfo == null) {
 			return getReqMbody(httpReq);
 		}else {
 			Map<String, String> partContentTypes = new HashMap<>();
-	
+
 			if (ContentType.MULTIPART_FORM_DATA.toString().equals(httpReq.getContentType())) {
 				for (Part part : httpReq.getParts()) {
 					partContentTypes.put(part.getName(), part.getContentType());
 				}
 			}
-	
+
+			// [EN]Parse queryString param keys to filter them out from getParameterMap() (which mixes queryString + form body)
+			// [ZH]解析 queryString 的參數 key，用來從 getParameterMap() 中過濾掉 (因為它會混合 queryString + form body)
+			Set<String> queryParamKeys = getQueryStringParamKeys(httpReq);
+
 			StringBuilder sb = new StringBuilder();
 			httpReq.getParameterMap().forEach((k, vs) -> {
-				if (vs.length != 0) {
-					String partContentTypesValue = partContentTypes.get(k) == null ? "" : partContentTypes.get(k); 
+				if (vs.length != 0 && !queryParamKeys.contains(k)) {
+					String partContentTypesValue = partContentTypes.get(k) == null ? "" : partContentTypes.get(k);
 					sb.append("{" + k + ":" +this.maskBodyFromFormData(maskInfo, k, Arrays.asList(vs).toString())  + " Content Type :　" + partContentTypesValue + "　},");
 				}
 			});
@@ -2016,9 +2027,43 @@ public class CommForwardProcService {
 			if (StringUtils.hasText(str)) {
 				str = str.substring(0, str.length() - 1);
 			}
-	
+
 			return str;
 		}
+	}
+
+	/**
+	 * [EN]Remove queryString parameters from parameterMap, keeping only form body parameters.
+	 * [ZH]從 parameterMap 中移除 queryString 的參數，只保留 form body 的參數。
+	 */
+	public Map<String, String[]> removeQueryStringParams(HttpServletRequest httpReq, Map<String, String[]> paramMap) {
+		Set<String> queryParamKeys = getQueryStringParamKeys(httpReq);
+		if (queryParamKeys.isEmpty()) {
+			return paramMap;
+		}
+		Map<String, String[]> filtered = new HashMap<>(paramMap);
+		queryParamKeys.forEach(filtered::remove);
+		return filtered;
+	}
+
+	/**
+	 * [EN]Parse queryString to get parameter keys. Used to filter out queryString params from getParameterMap().
+	 * [ZH]解析 queryString 取得參數 key。用來從 getParameterMap() 過濾掉 queryString 的參數。
+	 */
+	private Set<String> getQueryStringParamKeys(HttpServletRequest httpReq) {
+		Set<String> keys = new HashSet<>();
+		String queryString = httpReq.getQueryString();
+		if (StringUtils.hasText(queryString)) {
+			for (String param : queryString.split("&")) {
+				String[] kv = param.split("=", 2);
+				try {
+					keys.add(java.net.URLDecoder.decode(kv[0], StandardCharsets.UTF_8));
+				} catch (Exception e) {
+					keys.add(kv[0]);
+				}
+			}
+		}
+		return keys;
 	}
 
 	public boolean existIndex(String url, String indexName, String idPwd) throws IOException {
@@ -2212,12 +2257,12 @@ public class CommForwardProcService {
 					String errMsg = "API request JWE decryption error.";
 					TPILogger.tl.debug(errMsg);
 					ResponseEntity<?> responseEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-							getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+							TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 							HttpStatus.BAD_REQUEST);// 400
 					jwtPayloadData.errRespEntity = responseEntity;
 				}
 
-			} else {// 錯訊格式
+			} else {// 錯誤格式
 				jwtPayloadData.errRespEntity = getTokenHelper().getApiBodyFormatError();
 			}
 
@@ -3024,5 +3069,33 @@ public class CommForwardProcService {
 		}
 		
 		return corsAllowHeadersStr;
+	}
+	
+	/**
+	 * DGRC Add Query String to the target URL
+	 * DGRC目標URL加上 Query String
+	 */
+	public List<String> getUrlListAddQueryString(HttpServletRequest httpReq, List<String> urlList) {
+		List<String> list = new ArrayList<>();
+		String queryStr = httpReq.getQueryString();
+		for (String url : urlList) {
+			if (StringUtils.hasText(queryStr)) {
+				url += "?" + queryStr;
+			}
+			list.add(url);
+		}
+		return list;
+	}
+	
+	/**
+	 * TSMPC or log Add Query String to the target URL
+	 * TSMPC或log目標URL加上 Query String
+	 */
+	public String getUrlAddQueryString(HttpServletRequest httpReq, String url) {
+		String queryStr = httpReq.getQueryString();
+		if (StringUtils.hasText(queryStr)) {
+			url += "?" + queryStr;
+		}
+		return url;
 	}
 }

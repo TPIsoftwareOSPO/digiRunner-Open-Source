@@ -200,7 +200,7 @@ public class GtwIdPLoginService {
 				String errMsg = String.format(IdPHelper.MSG_INVALID_IDPTYPE, idPType);
 				TPILogger.tl.debug(errMsg);
 				errRespEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 			
@@ -221,7 +221,7 @@ public class GtwIdPLoginService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			errRespEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			errRespEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return errRespEntity;
 		}
 
@@ -339,7 +339,7 @@ public class GtwIdPLoginService {
 				// URL 的參數 'credential' JWE 解密成功, 但 'exp' 已過期
 				String errMsg = "URL parameter 'credential' JWE decrypted successfully, but 'exp' has expired: " + exp;
 				TPILogger.tl.debug(errMsg);
-				errRespEntity = getTokenHelper().getForbiddenErrorResp(reqUri, errMsg);// 403
+				errRespEntity = getTokenHelper().getForbiddenErrorResp(errMsg);// 403
 				userLoginData.errRespEntity = errRespEntity;
 				return userLoginData;
 			}
@@ -525,7 +525,7 @@ public class GtwIdPLoginService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 
 		return null;
@@ -576,7 +576,7 @@ public class GtwIdPLoginService {
 			if (StringUtils.hasLength(errMsg)) {
 				TPILogger.tl.debug(errMsg);
 				errRespEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_USER, errMsg),
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_USER, errMsg),
 						HttpStatus.UNAUTHORIZED);// 401
 				return errRespEntity;
 			}
@@ -625,7 +625,7 @@ public class GtwIdPLoginService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 
 		return null;
@@ -674,7 +674,7 @@ public class GtwIdPLoginService {
 				errMsg = ESAPI.encoder().encodeForHTML(errMsg.toString());
 				
 				errRespEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_USER, errMsg),
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_USER, errMsg),
 						HttpStatus.UNAUTHORIZED);// 401
 				return errRespEntity;
 			}
@@ -727,7 +727,7 @@ public class GtwIdPLoginService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 
 		return null;

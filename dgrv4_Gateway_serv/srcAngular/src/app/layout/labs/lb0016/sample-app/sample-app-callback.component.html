@@ -1,0 +1,66 @@
+<div class="sample-app">
+  <h2>{{ 'smart_sample_app.title' | translate }}</h2>
+
+  <!-- Loading -->
+  <div *ngIf="status === 'loading'" class="sa-status">
+    {{ 'smart_sample_app.exchanging_tokens' | translate }}
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="status === 'error'" class="sa-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="status === 'ready'">
+
+    <!-- SMART Context -->
+    <div class="sa-section">
+      <h4>{{ 'smart_sample_app.smart_context' | translate }}</h4>
+      <table class="sa-table" *ngIf="contextEntries.length > 0">
+        <tr *ngFor="let entry of contextEntries">
+          <td class="sa-key">{{ entry.key }}</td>
+          <td>{{ entry.value }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Access Token -->
+    <div class="sa-section">
+      <h4>{{ 'smart_sample_app.access_token' | translate }}</h4>
+      <div class="sa-token-raw">{{ tokenResponse.access_token }}</div>
+      <div *ngIf="accessTokenDecoded">
+        <h5>{{ 'smart_sample_app.decoded_payload' | translate }}</h5>
+        <pre class="sa-json">{{ accessTokenDecoded }}</pre>
+      </div>
+    </div>
+
+    <!-- ID Token -->
+    <div class="sa-section" *ngIf="tokenResponse.id_token">
+      <h4>{{ 'smart_sample_app.id_token' | translate }}</h4>
+      <div class="sa-token-raw">{{ tokenResponse.id_token }}</div>
+      <div *ngIf="idTokenDecoded">
+        <h5>{{ 'smart_sample_app.decoded_payload' | translate }}</h5>
+        <pre class="sa-json">{{ idTokenDecoded }}</pre>
+      </div>
+    </div>
+
+    <!-- Refresh Token -->
+    <div class="sa-section" *ngIf="tokenResponse.refresh_token">
+      <h4>{{ 'smart_sample_app.refresh_token' | translate }}</h4>
+      <div class="sa-token-raw">{{ tokenResponse.refresh_token }}</div>
+      <button class="btn btn-sm btn-default" (click)="refreshToken()">{{ 'smart_sample_app.refresh_btn' | translate }}</button>
+    </div>
+
+    <!-- Patient Data -->
+    <div class="sa-section" *ngIf="tokenResponse.patient">
+      <h4>{{ 'smart_sample_app.patient_data' | translate }} ({{ tokenResponse.patient }})</h4>
+      <div *ngIf="patientLoading">{{ 'smart_sample_app.loading_patient' | translate }}</div>
+      <pre class="sa-json" *ngIf="patientData">{{ patientData | json }}</pre>
+      <div *ngIf="!patientLoading && !patientData" class="sa-muted">
+        {{ 'smart_sample_app.no_patient_data' | translate }}
+      </div>
+    </div>
+
+  </div>
+</div>

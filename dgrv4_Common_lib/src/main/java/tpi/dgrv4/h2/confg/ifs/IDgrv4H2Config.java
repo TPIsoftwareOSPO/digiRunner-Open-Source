@@ -6,6 +6,10 @@ import tpi.dgrv4.common.keeper.ITPILogger;
 
 public interface IDgrv4H2Config {
 
-	Server createTcpServer(String string, String string2, String string3, String portStr, ITPILogger tl);
+	Server createTcpServer(String string, String string2, String string3, 
+							String tcpPort, ITPILogger tl);
+
+    Object createWebServer(String string, String string2, String string3, 
+                           String webPort, ITPILogger tl);
 
 }

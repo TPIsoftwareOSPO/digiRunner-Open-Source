@@ -28,6 +28,7 @@
   }
   .p-datatable-tfoot > tr > td {
     padding: 0.3rem 0.5rem;
+    background: #FAFAFA;
   }
   .p-button.p-button-icon-only {
     --font-size: 0.8rem;
@@ -110,12 +111,6 @@
   --dropdown-root-text: #ffac00;
   --dropdown-root-bg: #fff0d1;
   --dropdown-root-border: 1px solid #ffac00;
-  // --dropdown-root-border-focus: 1px solid #ffac00;
-  // --dropdown-root-box-shadow: 0 0 0 0.2rem #ffac0061;
-  // --dropdown-item-text: #333333;
-  // --dropdown-item-text-hover: #333333;
-  // --dropdown-item-text-highlight: white;
-  // --dropdown-item-bg: transparent;
   --dropdown-item-bg-hover: #fef0d1;
   --dropdown-item-bg-highlight: #ffb000;
   --dropdown-trigger-icon: #ffac00;
@@ -126,10 +121,6 @@
   --dropdown-root-border: 1px solid #6096e7;
   --dropdown-root-border-focus: 1px solid #6096e7;
   --dropdown-root-box-shadow: 0 0 0 0.2rem #6096e761;
-  // --dropdown-item-text: #333333;
-  // --dropdown-item-text-hover: #333333;
-  // --dropdown-item-text-highlight: white;
-  // --dropdown-item-bg: transparent;
   --dropdown-item-bg-hover: #d4e0f3;
   --dropdown-item-bg-highlight: #6096e7;
   --dropdown-trigger-icon: #6096e7;
@@ -240,48 +231,94 @@
   .p-listbox-empty-message {
     font-size: 0.8rem;
   }
-}
-.view-mode-menu.p-menu {
-  width: 9rem;
-  --bg: transparent;
-
-  .p-menuitem {
-    .p-menuitem-link {
-      &::before {
-        content: "";
-        border-bottom: 2px solid var(--bg);
-        border-left: 2px solid var(--bg);
-        display: block;
-        width: 12px;
-        height: 7px;
-        transform: rotate(-45deg) translateX(3px);
-        margin-right: 9px;
-      }
-
-      &:hover {
-        --bg: var(--tpi-primary);
-      }
-    }
-    &.active {
-      .p-menuitem-link {
-        &::before {
-          --bg: var(--tpi-primary);
-        }
-      }
-    }
+  .p-listbox-option{
+    font-size: 0.8rem;
   }
 }
+/* 使用 :host ::ng-deep 確保能穿透組件樣式，或者放在全域 styles.scss */
+.view-mode-menu.p-menu {
+  width: 9rem;
+  // padding: 0.25rem;
 
-.p-datatable .p-sortable-column.p-highlight{
+  .p-menu-item{
+    .p-menu-item-content { // v19 結構可能反映為 p-menu-item 或 p-menuitem
+      .p-menu-item-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--p-text-color); /* 使用 v19 標準文字顏色變數 */
+        cursor: pointer;
+
+        &::before {
+          content: "";
+          flex-shrink: 0;
+          border-bottom: 2px solid var(--check-color);
+          border-left: 2px solid var(--check-color);
+          width: 12px;
+          height: 7px;
+          transform: rotate(-45deg);
+          margin-right: 12px;
+          margin-bottom: 4px; /* 微調高度使其對齊文字 */
+          transition: border-color 0.2s;
+        }
+
+        &:hover {
+          /* 使用你自定義的 MyPreset 顏色變數 */
+          --check-color: var(--p-primary-500);
+        }
+      }
+
+    }
+    &.p-focus, &.active {
+          .p-menu-item-link {
+            background: var(--p-highlight-background);
+            color: var(--p-highlight-color);
+            --check-color: var(--p-primary-500) !important;
+          }
+        }
+  }
+}
+// .view-mode-menu.p-menu {
+//   width: 9rem;
+//   --bg: transparent;
+
+//   .p-menuitem {
+//     .p-menuitem-link {
+//       &::before {
+//         content: "";
+//         border-bottom: 2px solid var(--bg);
+//         border-left: 2px solid var(--bg);
+//         display: block;
+//         width: 12px;
+//         height: 7px;
+//         transform: rotate(-45deg) translateX(3px);
+//         margin-right: 9px;
+//       }
+
+//       &:hover {
+//         --bg: var(--tpi-primary);
+//       }
+//     }
+//     &.active {
+//       .p-menuitem-link {
+//         &::before {
+//           --bg: var(--tpi-primary);
+//         }
+//       }
+//     }
+//   }
+// }
+
+.p-datatable-table .p-sortable-column.p-highlight{
     &:hover {
         background-color: var(--tpi-orange);
      }
   background-color: var(--tpi-primary);
 }
 
-p-table .p-datatable {
+p-table .p-datatable-table{
     // 確保整個表格有單一的外圍邊框
-    // border: 0px solid var(--surface-d, #dee2e6) !important;
+    border: 0px solid var(--surface-d, #dee2e6) !important;
 
     .p-datatable-wrapper > table {
         border-collapse: collapse !important;
@@ -310,10 +347,160 @@ p-table .p-datatable {
   text-decoration: none;
 }
 
-.p-menu .p-menuitem > .p-menuitem-content {
-  // padding: 0.657rem;
-  // &:hover {
-  //   background: #fcf0d3;
-  //   color: var(--tpi-primary);
-  // }
+.p-confirmdialog .p-confirmdialog-icon {
+  font-size: 2rem;
+  color: var(--p-red-500);
 }
+
+.p-inputchips-input-item{
+  padding-left: 5px;
+}
+
+.p-datatable-header{
+  border-top: 1px solid var(--surface-d, #c8c8c8);
+  border-right: 1px solid var(--surface-d, #c8c8c8);
+  border-left: 1px solid var(--surface-d, #c8c8c8);
+  margin-top: 1px;
+  margin-right: 1px;
+  margin-left: 1px;
+  background: unset;
+}
+
+.p-autocomplete {
+  .p-autocomplete-input-multiple {
+    padding-left: 10px;  /* 左側間距 */
+    padding-right: 10px; /* 右側間距 */
+  }
+.p-autocomplete-chip{
+    color: #fff;
+    background-color: #ea7448;
+  }
+  .p-chip-remove-icon {
+     color: #fff;
+  }
+}
+
+.p-disabled {
+    .p-chip-remove-icon {
+      display: none !important;
+    }
+    .p-autocomplete-chip {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+}
+
+
+.jwt-req-dropdown.p-select {
+  --p-select-color: #ffac00;
+  --p-select-background: #fff0d1;
+  --p-select-border-color: #ffac00;
+  --p-select-hover-border-color: #ffac00;
+  --p-select-focus-border-color: #ffac00;
+  .p-select-dropdown {
+    color: #ffac00 !important;
+  }
+  .p-select-overlay {
+    .p-select-option {
+      &.p-focus { background: #fef0d1; } // Hover 效果
+      &.p-select-option-selected {
+        background: #ffb000 !important;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.jwt-resp-dropdown.p-select {
+  --p-select-color: #6096e7;
+  --p-select-background: #d4e0f3;
+  --p-select-border-color: #6096e7;
+  --p-select-hover-border-color: #6096e7;
+  --p-select-focus-border-color: #6096e7;
+  // --p-select-shadow: 0 0 0 0.2rem rgba(96, 150, 231, 0.38);
+
+  .p-select-dropdown {
+    color: #6096e7;
+  }
+  .p-select-overlay {
+    .p-select-option {
+      &.p-focus { background: #d4e0f3; } // Hover 效果
+      &.p-select-option-selected {
+        background: #6096e7 !important;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.p-datepicker-dropdown{
+  background: #666;
+  color: #fff;
+  // border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  // border-bottom-left-radius: 6px;
+}
+
+.p-select .p-select-label{
+  font-size: 0.8rem;
+}
+
+.p-dialog{
+  background: #f6f6f6;
+  .p-dialog-header{
+    color: #ffffff;
+    background: #434343;
+    padding: 0.5rem;
+    border-radius: 12px 12px 0 0;
+    margin: -1px -1px 0 -1px;
+  }
+
+  .p-dialog-content{
+    height: 100%;
+
+    padding: 0.75rem 1rem 0.5rem 1rem;
+    border-radius: 12px 12px 12px 12px
+  }
+
+  .p-confirm-dialog .p-confirm-dialog-icon{
+    color: #f94949;
+  }
+
+  .p-dialog-close-button{
+    border-radius: 50%;
+    color: #fff;
+  }
+  .p-dialog-close-button:hover{
+    background: #666666;
+  }
+}
+
+.p-menu{
+  .p-menu-item-content{
+    margin: 2px;
+  }
+}
+button.p-button-primary {
+background-color: var(--p-red-400);
+  border-color: var(--p-red-400);
+  border-radius: 4px;
+  color: #fff;
+  &:hover {
+    background-color: var(--p-red-500);
+    border-color: var(--p-red-500);
+  }
+}
+button.p-button-secondary {
+  background-color: var(--p-gray-400);
+  border-color: var(--p-gray-400);
+  border-radius: 4px;
+  color: #fff;
+  &:hover {
+    background-color: var(--p-gray-500);
+    border-color: var(--p-gray-500);
+  }
+}
+
+
+

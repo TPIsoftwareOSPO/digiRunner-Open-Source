@@ -208,11 +208,18 @@ public class DgrCusController {
 
 			Map<String, List<String>> headers = new HashMap<>();
 			for (Entry<String, List<String>> entry : httpHeaders.entrySet()) {
-				if (HttpHeaders.COOKIE.toUpperCase().equals(entry.getKey().toUpperCase())) {
+				String key = entry.getKey();
+				// [EN]Strip conditional request headers to prevent cus service from returning 304 Not Modified (empty body → gateway returns 404
+				//     (The judgment is made in the following program))
+				// [ZH]移除條件式請求 header，避免 cus service 回傳 304 Not Modified（空 body 會被 gateway 轉為 404(在下面的程式做判斷的)）
+				if ("If-None-Match".equalsIgnoreCase(key) || "If-Modified-Since".equalsIgnoreCase(key)) {
+					continue;
+				}
+				if (HttpHeaders.COOKIE.toUpperCase().equals(key.toUpperCase())) {
 					String cookieStr = String.join(";", entry.getValue());
-					headers.put(entry.getKey(), List.of(cookieStr));
+					headers.put(key, List.of(cookieStr));
 				} else {
-					headers.put(entry.getKey(), entry.getValue());
+					headers.put(key, entry.getValue());
 				}
 
 			}
@@ -235,7 +242,10 @@ public class DgrCusController {
 					vs.forEach((v) -> {
 						if (k != null) {
 							if (!k.equalsIgnoreCase(HttpHeaders.TRANSFER_ENCODING)) {
-								if (!"If-Modified-Since".equalsIgnoreCase(k) && !"If-None-Match".equalsIgnoreCase(k)) {
+								if (!"If-Modified-Since".equalsIgnoreCase(k) && !"If-None-Match".equalsIgnoreCase(k)
+										// [EN]Strip ETag and Last-Modified so browser never stores them and cannot send conditional requests
+										// [ZH]移除 ETag 和 Last-Modified，使瀏覽器不會儲存並在下次 request 帶上條件式 header
+										&& !"ETag".equalsIgnoreCase(k) && !"Last-Modified".equalsIgnoreCase(k)) {
 									// 20240808因客製包引用spring-boot-starter-security所以addHeader改為setHeader,否則會有相同的key
 									response.setHeader(k, v);
 								}

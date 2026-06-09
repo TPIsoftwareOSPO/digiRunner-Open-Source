@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,6 +34,14 @@ public abstract class DaoCacheProxy {
 	protected final DaoGenericCache cache;
 
 	private final CacheValueAdapter adapter;
+
+	// [EN]Per-key lock map to prevent cache stampede (thundering herd problem):
+	//     when multiple threads encounter a cache miss for the same key simultaneously,
+	//     only ONE thread queries the DB while the others wait, then all read from cache.
+	// [ZH]每個 key 對應的鎖，防止 cache stampede（雷擊群問題）：
+	//     當多個執行緒同時遇到相同 key 的 cache miss 時，只有一個執行緒查詢 DB，
+	//     其餘執行緒等待後直接從快取讀取，避免重複打穿 DB。
+	private final ConcurrentHashMap<String, Object> keyLocks = new ConcurrentHashMap<>();
 	
 	@Autowired
 	protected DaoCacheProxy(ObjectMapper objectMapper, DaoGenericCache cache) {
@@ -59,21 +68,52 @@ public abstract class DaoCacheProxy {
 	private <R> R get(String methodName, Supplier<R> supplier, Function<Object, R> caster, Object... params) {
 		String cacheKey = genCacheKey(getDaoClass(), methodName, params);
 
-		// 如果有存入過 cache
-		boolean hasCacheEntry = getCache().containsKey(cacheKey);
-		if (hasCacheEntry) {
-			Optional<Object> opt = getCache().get(cacheKey);
-			// 且 cache 中有值
-			if (opt.isPresent()) {
-				// 就直接從 cache 拿值
-				return caster.apply(opt.get());
-			}
+		// [EN]Fast path: return immediately if cache has a valid (non-expired) value, no locking overhead.
+		// [ZH]快速路徑：若快取有有效值（未過期）則直接回傳，避免取鎖的開銷（絕大多數請求走此路徑）。
+		Optional<Object> fastResult = tryGetFromCache(cacheKey);
+		if (fastResult.isPresent()) {
+			return caster.apply(fastResult.get());
 		}
 
-		// 某一種情況是：從 cache 取出的值為空，可能是過期被清掉了，應該要重查並放回 cache
-		R r = supplier.get();
-		getCache().put(cacheKey, r, getCacheValueAdapter());
-		return r;
+		// [EN]Slow path: use a per-key lock to prevent cache stampede.
+		//     computeIfAbsent is atomic — only one lock object is created per key.
+		//     Threads that arrive simultaneously for the same key will queue up on that lock
+		//     instead of all hitting the DB.
+		// [ZH]慢速路徑：使用 per-key 鎖防止 cache stampede。
+		//     computeIfAbsent 是原子操作，每個 key 只會建立一個鎖物件。
+		//     同時到達的執行緒會在同一把鎖上排隊，而不是同時打穿 DB。
+		Object lock = keyLocks.computeIfAbsent(cacheKey, k -> new Object());
+		synchronized (lock) {
+			try {
+				// [EN]Double-check inside the lock: a thread that was waiting may now find the cache already populated.
+				// [ZH]在鎖內雙重確認：前一個執行緒已查 DB 並寫入快取，後續執行緒應直接從快取讀取。
+				Optional<Object> rechecked = tryGetFromCache(cacheKey);
+				if (rechecked.isPresent()) {
+					return caster.apply(rechecked.get());
+				}
+
+				// [EN]Confirmed cache miss: only this thread queries the DB and populates the cache.
+				// [ZH]確認 cache miss：僅此執行緒向 DB 查詢並寫入快取（同一時間只有一個執行緒執行此操作）。
+				R r = supplier.get();
+				getCache().put(cacheKey, r, getCacheValueAdapter());
+				return r;
+			} finally {
+				// [EN]Remove the lock entry after the value is populated.
+				//     Threads already waiting hold a reference to the lock object, so removal is safe.
+				// [ZH]寫入快取後移除鎖物件，防止 keyLocks 無限累積。
+				//     等待中的執行緒已持有鎖物件引用，移除 map 中的 entry 不影響其正確性。
+				keyLocks.remove(cacheKey);
+			}
+		}
+	}
+
+	// [EN]Attempt to retrieve a value from cache; returns empty if the key is absent or the entry is expired.
+	// [ZH]嘗試從快取取值；若 key 不存在或快取項目已過期則回傳 Optional.empty()。
+	private Optional<Object> tryGetFromCache(String cacheKey) {
+		if (!getCache().containsKey(cacheKey)) {
+			return Optional.empty();
+		}
+		return getCache().get(cacheKey);
 	}
 
 	/**

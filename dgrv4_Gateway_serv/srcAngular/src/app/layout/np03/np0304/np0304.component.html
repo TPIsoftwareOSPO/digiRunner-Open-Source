@@ -12,7 +12,7 @@
     </form>
     <hr>
     <p-table *ngIf="clientListCols" [columns]="clientListCols" [value]="clientList" selectionMode="single"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      stripedRows [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -81,7 +81,7 @@
       </div>
       <hr>
       <p-table *ngIf="openApiKeyListCols" [columns]="openApiKeyListCols" [value]="openApiKeyList"
-        styleClass="p-datatable-striped" selectionMode="single" [style]="{'word-break':'break-word'}"
+        stripedRows selectionMode="single" [style]="{'word-break':'break-word'}"
         responsiveLayout="scroll">
         <ng-template pTemplate="colgroup" let-columns>
           <colgroup>
@@ -233,7 +233,7 @@
         <div class="form-group row">
           <div class="col-12 col-xl-12 col-lg-12">
             <label class="control-label">{{'auth_api'|translate}}</label>：
-            <p-table *ngIf="openApiKeyDetailCols" [columns]="openApiKeyDetailCols" styleClass="p-datatable-striped"
+            <p-table *ngIf="openApiKeyDetailCols" [columns]="openApiKeyDetailCols" stripedRows
               [value]="openApiKeyDetailData.dataList" selectionMode="single" [style]="{'word-break':'break-word'}">
               <ng-template pTemplate="colgroup" let-columns>
                 <colgroup>

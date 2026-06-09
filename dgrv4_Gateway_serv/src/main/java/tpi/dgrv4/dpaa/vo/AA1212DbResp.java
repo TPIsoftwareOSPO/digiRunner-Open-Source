@@ -5,7 +5,8 @@ public class AA1212DbResp {
 	private Integer active;
 	private Integer idle;
 	private Integer waiting;
-	
+	private String  connectedNode ;
+
 	public Integer getTotal() {
 		return total;
 	}
@@ -30,5 +31,10 @@ public class AA1212DbResp {
 	public void setWaiting(Integer waiting) {
 		this.waiting = waiting;
 	}
-	
+	public  String getConnectedNode() {
+		return connectedNode;
+	}
+	public void setConnectedNode(String connectedNode) {
+        this.connectedNode = connectedNode;
+    }
 }

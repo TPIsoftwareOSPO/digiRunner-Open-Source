@@ -169,30 +169,14 @@
 </app-container>
 <app-dialog [title]="dialogTitle" #dialog></app-dialog>
 <p-toast key="confirm" [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<!-- <p-toast position="center" key="delete" [baseZIndex]="5000">
-    <ng-template let-message pTemplate="message">
-        <div style="text-align: center">
-            <em class="fas fa-exclamation-triangle fa-3x"></em>
-            <h4>{{message.summary}}</h4>
-            <p>{{message.detail}}</p>
-        </div>
-        <div class="ui-g ui-fluid">
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="delete()" label="{{'button.confirm' | translate}}"
-                    class="ui-button-success"></button>
-            </div>
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="cancel()" label="{{'button.cancel' | translate}}"
-                    class="ui-button-secondary"></button>
-            </div>
-        </div>
-    </ng-template>
-</p-toast> -->
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
-      <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+      <button type="button" pButton icon="pi pi-check"
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

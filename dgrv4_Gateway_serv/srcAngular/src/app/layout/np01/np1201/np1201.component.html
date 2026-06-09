@@ -10,7 +10,7 @@
   <hr>
   <!-- <div class="h-100" style="word-break:break-word;"> -->
   <p-table *ngIf="cols" [columns]="cols" [value]="moduleList" [(selection)]="selectedModules"
-    styleClass="p-datatable-striped" (onRowSelect)="handleDeniedStatus($event);"
+    stripedRows (onRowSelect)="handleDeniedStatus($event);"
     (onRowUnselect)="handleDeniedStatus($event);" (onHeaderCheckboxToggle)="handleDeniedStatus($event);"
     [style]="{'word-break':'break-word'}">
     <ng-template pTemplate="caption">

@@ -204,7 +204,7 @@ export class OrgFormComponent implements OnInit {
 
     // this.openDynamicDialogRefs.push(refDialog)
 
-    refDialog.onClose.subscribe(res => {
+    refDialog!.onClose.subscribe(res => {
       if (res) {
         this.parentId!.setValue(res.data.orgName);
       }

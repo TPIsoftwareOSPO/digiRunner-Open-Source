@@ -29,8 +29,8 @@ public interface ITsmpDpAaError<ThrowableType extends Throwable> {
     	// index 從0開始
     	for(int i = 0; i < args.length; i++) {
     		String str = args[i];
-    		if("1499".equals(rtnCode)) {
-    			//rtnCode 1499為特例,不做中文檢查,為了能真實反應介接得到的訊息
+    		if("1499".equals(rtnCode) || "1559".equals(rtnCode) ) {
+    			//rtnCode 1499 , 1599 為特例,不做中文檢查,為了能真實反應介接得到的訊息
     		}else {
     			checkParam(str);
     		}
@@ -68,5 +68,46 @@ public interface ITsmpDpAaError<ThrowableType extends Throwable> {
         	throw TsmpDpAaRtnCode._1285.throwing();
         }
     }
+    
+    /**
+     * 建立例外物件但不拋出
+     */
+    public default TsmpDpAaException toException() {
+        return new TsmpDpAaException(this);
+    }
+    
+    /**
+     * 建立例外物件但不拋出（帶參數）
+     */
+    public default TsmpDpAaException toException(String...args) {
+        Map<String, String> params = new HashMap<>();
+        String rtnCode = this.getCode();	
+        for(int i = 0; i < args.length; i++) {
+            String str = args[i];
+            if("1499".equals(rtnCode) || "1559".equals(rtnCode) ) {
+                //rtnCode 1499 , 1599 為特例,不做中文檢查
+            }else {
+                checkParam(str);
+            }
+            params.put(String.valueOf(i), String.valueOf(str));
+        }
+        return new TsmpDpAaException(this, params);
+    }
+    
+    /**
+     * 建立例外物件但不拋出（帶參數和中文檢查開關）
+     */
+    public default TsmpDpAaException toException(Boolean state, String...args) {
+        Map<String, String> params = new HashMap<>();
+        for(int i = 0; i < args.length; i++) {
+            String str = args[i];
+            if(state) {
+                checkParam(str);
+            }
+            params.put(String.valueOf(i), String.valueOf(str));
+        }
+        return new TsmpDpAaException(this, params);
+    }
+
 
 }

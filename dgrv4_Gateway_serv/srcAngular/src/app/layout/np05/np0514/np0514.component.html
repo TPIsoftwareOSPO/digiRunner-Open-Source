@@ -5,9 +5,9 @@
       <div class="form-group row">
         <div class="col-12 d-flex">
           <div class="col-auto">
-            <p-dropdown [showClear]="true" [options]="statusOption" [filter]="true"
+            <p-select [showClear]="true" [options]="statusOption" [filter]="true"
               placeholder="{{ 'plz_chs' | translate }}" formControlName="status" [style]="{ width: '100%' }">
-            </p-dropdown>
+            </p-select>
           </div>
           <app-search-input placeholder="{{ 'keyword_search' | translate }}" [control]="form.get('keyword')"
             [searchFn]="queryScheduleList.bind(this)" class="col-6 col-lg-6 col-sm-6 ms-2"></app-search-input>
@@ -21,7 +21,7 @@
     </form>
     <hr />
     <p-table #body *ngIf="scheduleCols" [columns]="scheduleCols" [value]="scheduleList" selectionMode="single"
-      responsiveLayout="scroll" styleClass="p-datatable-striped" [style]="{ 'word-break': 'break-word' }">
+      responsiveLayout="scroll" stripedRows [style]="{ 'word-break': 'break-word' }">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width" />
@@ -57,55 +57,13 @@
               tooltipPosition="top"></button>
             <button pButton pRipple type="button" icon="fa fa-edit"
               class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
-              [pTooltip]="'button.edit' | translate" tooltipPosition="top"></button>
-            <button pButton pRipple type="button" icon="pi pi-ellipsis-v"
-              class="p-button-rounded p-button-text p-button-plain" (click)="toggleBtnMenu($event, rowData)"></button>
-
-            <!-- <button pButton pRipple type="button" icon="pi pi-ellipsis-h" class="p-button-rounded p-button-text p-button-plain"
-                        (click)="toggleBtnMenu2($event,rowData)" #hihi ></button> -->
-            <!-- <button pButton pRipple type="button" icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-plain"
-                        (click)="toggleBtnMenu($event,rowData);"></button> -->
-            <!-- <button type="button" pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-plain" (click)="toggleBtnMenu($event)"></button> -->
-
-            <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('detail',rowData);"
-                            [disabled]="rowData['detailFlag'] == false">
-                            <span class="fa fa-edit">{{'button.detail' | translate}}</span>
-                        </button> -->
-            <!-- <button type="button" class="btn btn-deta me-5" (click)="changePage('update',rowData);"
-                            [disabled]="rowData['updateFlag'] == false || canUpdate == false">
-                            <span class="fa fa-edit">{{'button.edit' | translate}}</span>
-                        </button> -->
-
-            <!-- <button *ngIf="rowData['pauseVisible']" type="button" class="btn btn-deta me-5"
-                            (click)="changePage('pause',rowData);"
-                            [disabled]="rowData['pauseFlag'] == false || canUpdate == false">
-                            <span class="fa fa-edit">{{'button.pause' | translate}}</span>
-                        </button>
-
-                        <button *ngIf="rowData['activeVisible']" type="button" class="btn btn-deta me-5"
-                            (click)="changePage('active',rowData);"
-                            [disabled]="rowData['activeFlag'] == false || canUpdate == false">
-                            <span class="fa fa-edit">{{'button.active' | translate}}</span>
-                        </button>
-                        <button type="button" class="btn btn-deta me-5" (click)="changePage('skip',rowData);"
-                            [disabled]="rowData['skipFlag'] == false || canUpdate == false">
-                            <span class="fa fa-edit">{{'button.pause_once'|translate}}</span>
-                        </button>
-                        <button type="button" class="btn btn-deta me-5" (click)="changePage('invalid',rowData);"
-                            [disabled]="rowData['inactiveFlag'] == false || canUpdate == false">
-                            <span class="fa fa-edit">{{'button.disable'|translate}}</span>
-                        </button>
-                        <button type="button" class="btn btn-deta me-5" (click)="changePage('traker',rowData);"
-                            [disabled]="rowData['historyFlag'] == false">
-                            <span class="fa fa-edit">{{'button.history'|translate}}</span>
-                        </button> -->
-
-            <!-- <p-overlayPanel #op  [style]="{'padding': '0px!important', 'background-color': 'darkolivegreen'}"> -->
-            <p-overlayPanel #op styleClass="tpi-op">
-              <ng-template pTemplate>
-                <p-menu [popup]="false" [model]="btnData"></p-menu>
-              </ng-template>
-            </p-overlayPanel>
+              [pTooltip]="'button.edit' | translate" tooltipPosition="top" [disabled]="!canUpdate"></button>
+            <button pButton pRipple type="button" icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-plain"
+                (click)="toggleBtnMenu($event, rowData)"></button>
+              <!-- [pPopover]="pop" -->
+              <!-- <p-popover  styleClass="tpi-op"> -->
+                <p-menu #pop [popup]="true" [model]="btnData" appendTo="body" styleClass="tpi-pop"></p-menu>
+            <!-- </p-popover> -->
           </td>
         </tr>
       </ng-template>
@@ -176,7 +134,7 @@
         </div>
         <!-- 每天 -->
         <div class="col-12 field-flex-start" style="min-height: 40px;">
-          <p-radioButton formControlName="frequency" value="0" inputId="frequency0"></p-radioButton>
+          <p-radioButton name="frequency" formControlName="frequency" value="0" inputId="frequency0"></p-radioButton>
           <label for="frequency0" class="mb-0">{{
             "everyday" | translate
             }}</label>
@@ -186,7 +144,7 @@
         </div>
         <!-- 每周 -->
         <div class="col-12 field-flex-start" style="min-height: 40px;">
-          <p-radioButton formControlName="frequency" value="2" inputId="frequency2"></p-radioButton>
+          <p-radioButton name="frequency" formControlName="frequency" value="2" inputId="frequency2"></p-radioButton>
           <label for="frequency2" class="mb-0">{{
             "every_week" | translate
             }}</label>
@@ -203,7 +161,7 @@
         </div>
         <!-- 每月 -->
         <div class="col-12 field-flex-start" style="min-height: 40px;">
-          <p-radioButton formControlName="frequency" value="1" inputId="frequency1"></p-radioButton>
+          <p-radioButton name="frequency" formControlName="frequency" value="1" inputId="frequency1"></p-radioButton>
           <label for="frequency1" class="mb-0">
             {{ "every_month" | translate }}</label>
           <ng-container *ngIf="frequency.value == '1'">
@@ -211,35 +169,17 @@
             <div *ngTemplateOutlet="time"></div>
           </ng-container>
         </div>
-
-        <!-- <div class="col-10 d-flex align-items-center">
-          每月
-          <app-datepicker
-            id="dayRange"
-            *ngIf="frequency.value == '1'"
-            [dateType]="'month'"
-            formControlName="dayRange"
-          ></app-datepicker>
-          每周
-          <app-datepicker
-            id="weekRange"
-            *ngIf="frequency.value == '2'"
-            [dateType]="'week'"
-            formControlName="weekRange"
-          ></app-datepicker>
-          <div *ngTemplateOutlet="time"></div>
-        </div> -->
         <ng-template #time>
-          <p-dropdown [options]="hourOption" formControlName="hour">
-          </p-dropdown>
+          <p-select [options]="hourOption" formControlName="hour">
+          </p-select>
           <label class="control-label mb-0">:</label>
           <div *ngIf="hour.invalid && (hour.dirty || hour.touched)" class="text-danger">
             <small class="form-text">{{
               hour.errors.required | translate
               }}</small>
           </div>
-          <p-dropdown [options]="minuteOption" formControlName="minute">
-          </p-dropdown>
+          <p-select [options]="minuteOption" formControlName="minute">
+          </p-select>
           <!-- <label class="control-label mb-0">{{ "minute" | translate }}</label> -->
           <div *ngIf="minute.invalid && (minute.dirty || minute.touched)" class="text-danger">
             <small class="form-text">{{
@@ -251,37 +191,37 @@
           <!-- 每十分鐘 -->
           <!-- <div class="p-form-check-line form-group"> -->
           <div class="p-form-check">
-            <p-radioButton formControlName="frequency" value="3" inputId="frequency3"></p-radioButton>
+            <p-radioButton name="frequency" formControlName="frequency" value="3" inputId="frequency3"></p-radioButton>
             <label for="frequency3" class="ms-2 mb-0">
               {{ "every_ten_minutes" | translate }}</label>
           </div>
           <!-- 每半小時 -->
           <div class="p-form-check">
-            <p-radioButton formControlName="frequency" value="4" inputId="frequency4"></p-radioButton>
+            <p-radioButton name="frequency" formControlName="frequency" value="4" inputId="frequency4"></p-radioButton>
             <label for="frequency4" class="ms-2 mb-0">
               {{ "every_halt_hour" | translate }}</label>
           </div>
           <!-- 每一小時 -->
           <div class="p-form-check">
-            <p-radioButton formControlName="frequency" value="5" inputId="frequency5"></p-radioButton>
+            <p-radioButton name="frequency" formControlName="frequency" value="5" inputId="frequency5"></p-radioButton>
             <label for="frequency5" class="ms-2 mb-0">
               {{ "every_hour" | translate }}</label>
           </div>
           <!-- 每二小時 -->
           <div class="p-form-check">
-            <p-radioButton formControlName="frequency" value="6" inputId="frequency6"></p-radioButton>
+            <p-radioButton name="frequency" formControlName="frequency" value="6" inputId="frequency6"></p-radioButton>
             <label for="frequency6" class="ms-2 mb-0">
               {{ "every_two_hours" | translate }}</label>
           </div>
           <!-- 每六小時 -->
           <div class="p-form-check">
-            <p-radioButton formControlName="frequency" value="7" inputId="frequency7"></p-radioButton>
+            <p-radioButton name="frequency" formControlName="frequency" value="7" inputId="frequency7"></p-radioButton>
             <label for="frequency7" class="ms-2 mb-0">
               {{ "every_six_hours" | translate }}</label>
           </div>
           <!-- 每十二小時 -->
           <div class="p-form-check">
-            <p-radioButton formControlName="frequency" value="8" inputId="frequency8"></p-radioButton>
+            <p-radioButton name="frequency" formControlName="frequency" value="8" inputId="frequency8"></p-radioButton>
             <label for="frequency8" class="ms-2 mb-0">
               {{ "every_twelve_hours" | translate }}</label>
           </div>
@@ -293,10 +233,10 @@
             {{ "start_time" | translate }}
             <i class="far fa-question-circle ms-2 " pTooltip="{{'date_duration_start'|translate}}" [escape]="false"></i>
           </label>
-          <p-calendar [style]="{ width: '100%' }" [inputStyle]="{ width: '95%' }" appendTo="body"
+          <p-datepicker [style]="{ width: '100%' }" [inputStyle]="{ width: '95%' }" appendTo="body"
             formControlName="effDateTime" dateFormat="yy/mm/dd" [showIcon]="true" showTime="true" [minDate]="minDate"
             [showButtonBar]="true">
-          </p-calendar>
+          </p-datepicker>
         </div>
         <!-- 結束時間 -->
         <div class="col-6">
@@ -304,189 +244,12 @@
             {{ "end_time" | translate }}
             <i class="far fa-question-circle ms-2 " pTooltip="{{'date_duration_end'|translate}}" [escape]="false"></i>
           </label>
-          <p-calendar [style]="{ width: '100%' }" [inputStyle]="{ width: '95%' }" appendTo="body"
+          <p-datepicker [style]="{ width: '100%' }" [inputStyle]="{ width: '95%' }" appendTo="body"
             formControlName="invDateTime" dateFormat="yy/mm/dd" [showIcon]="true" showTime="true" [minDate]="minDate"
             [showButtonBar]="true">
-          </p-calendar>
+          </p-datepicker>
         </div>
       </div>
-
-      <!-- <table class="w-100" style="table-layout: fixed;word-break: break-word;">
-                <caption></caption>
-                <tbody>
-                    <tr>
-                        <th scope="col"></th>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label class="form-group">
-                                <span class="control-label" id="rjobName_label" for="rjobName">
-                                    {{'task_name'|translate}}
-                                </span>
-                            </label>
-                        </td>
-                        <td colspan="2">
-                            <input type="text" class="form-control" formControlName="rjobName">
-                            <div *ngIf="rjobName.invalid && (rjobName.dirty || rjobName.touched)" class="text-danger">
-                                <small class="form-text">{{rjobName.errors.isRequired}}</small>
-                                <small class="form-text">{{rjobName.errors.maxlength | translate}}</small>
-                            </div>
-                        </td>
-                        <td>
-                            <label class="control-label" id="remark_label" for="remark">
-                                {{'memo'|translate}}
-                            </label>
-                        </td>
-                        <td colspan="2">
-                            <input type="text" class="form-control" formControlName="remark" id="remark">
-                            <div *ngIf="remark.invalid && (remark.dirty || remark.touched)" class="text-danger">
-                                <small class="form-text">{{remark.errors.maxlength | translate}}</small>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label class="form-group">
-                                <span *ngIf="currentAction != 'detail'" class="required control-label"
-                                    id="cronJson_label">
-                                    {{'repeating_time'|translate}}
-                                </span>
-                                <span *ngIf="currentAction == 'detail'" class="required control-label"
-                                    id="cronJson_label" for="cronJson" pTooltip="{{scheduleDetailData.cronExpression}}">
-                                    {{'repeating_time'|translate}}
-                                </span>
-                            </label>
-                        </td>
-                        <td colspan="5">
-                            <div class="col-12 col-xl-12 col-lg-12">
-                                <table style="table-layout: fixed;word-break: break-word;width: 50%;">
-                                    <caption></caption>
-                                    <tbody>
-                                        <tr>
-                                            <th scope="col"></th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="0"  inputId="frequency0"></p-radioButton>
-                                                <label for="frequency0" class="ms-2 mb-0">{{'everyday'|translate}}</label>
-                                              </div>
-                                                <div *ngIf="frequency.invalid && (frequency.dirty || frequency.touched)"
-                                                    class="text-danger">
-                                                    <small class="form-text">{{frequency.errors.required |
-                                                        translate}}</small>
-                                                </div>
-                                            </td>
-                                            <td rowspan="3">
-                                                <p-dropdown [options]="hourOption" formControlName="hour">
-                                                </p-dropdown>
-                                                <label class="control-label">{{'hour'|translate}}</label>
-                                                <div *ngIf="hour.invalid && (hour.dirty || hour.touched)"
-                                                    class="text-danger">
-                                                    <small class="form-text">{{hour.errors.required |
-                                                        translate}}</small>
-                                                </div>
-                                                <p-dropdown [options]="minuteOption" formControlName="minute">
-                                                </p-dropdown>
-                                                <label class="control-label">{{'minute'|translate}}</label>
-                                                <div *ngIf="minute.invalid && (minute.dirty || minute.touched)"
-                                                    class="text-danger">
-                                                    <small class="form-text">{{minute.errors.required |
-                                                        translate}}</small>
-                                                </div>
-                                            </td>
-                                            <td rowspan="3">
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="3"  inputId="frequency3"></p-radioButton>
-                                                <label for="frequency3" class="ms-2 mb-0"> {{'every_ten_minutes'|translate}}</label>
-                                              </div>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="4"  inputId="frequency4"></p-radioButton>
-                                                <label for="frequency4" class="ms-2 mb-0"> {{'every_halt_hour'|translate}}</label>
-                                              </div>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="5"  inputId="frequency5"></p-radioButton>
-                                                <label for="frequency5" class="ms-2 mb-0"> {{'every_hour'|translate}}</label>
-                                              </div>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="6"  inputId="frequency6"></p-radioButton>
-                                                <label for="frequency6" class="ms-2 mb-0">  {{'every_two_hours'|translate}}</label>
-                                              </div>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="7"  inputId="frequency7"></p-radioButton>
-                                                <label for="frequency7" class="ms-2 mb-0">   {{'every_six_hours'|translate}}</label>
-                                              </div>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="8"  inputId="frequency8"></p-radioButton>
-                                                <label for="frequency8" class="ms-2 mb-0">    {{'every_twelve_hours'|translate}}</label>
-                                              </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="1"  inputId="frequency1"></p-radioButton>
-                                                <label for="frequency1" class="ms-2 mb-0">    {{'every_month'|translate}}</label>
-                                              </div>
-
-                                                <p-multiSelect [options]="dayRangeOption"
-                                                    [style]="{'width':'100%'}"
-                                                    [panelStyle]="{'width':'100%',minWidth:'150px'}"
-                                                    defaultLabel="{{'plz_chs' | translate}}" formControlName="dayRange"
-                                                    [maxSelectedLabels]="dayRangeOption.length">
-                                                </p-multiSelect>
-                                                <label class="control-label">{{'day'|translate}}</label>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                              <div class="p-form-check">
-                                                <p-radioButton formControlName="frequency" value="2"  inputId="frequency2"></p-radioButton>
-                                                <label for="frequency2" class="ms-2 mb-0">{{'every_week'|translate}}</label>
-                                              </div>
-                                                <p-multiSelect [options]="weekRangeOption"
-                                                    [style]="{'width':'100%'}"
-                                                    [panelStyle]="{'width':'100%',minWidth:'150px'}"
-                                                    defaultLabel="{{'plz_chs' | translate}}" formControlName="weekRange"
-                                                    [maxSelectedLabels]="weekRangeOption.length">
-                                                </p-multiSelect>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label class="control-label" id="effDateTime_label" for="effDateTime">
-                                {{'start_time'|translate}}
-                            </label>
-                        </td>
-                        <td colspan="2">
-                            <p-calendar [style]="{'width':'90%'}" [inputStyle]="{'width':'95%'}" appendTo="body"
-                                formControlName="effDateTime" dateFormat="yy/mm/dd" [showIcon]="true" showTime="true"
-                                [minDate]="minDate">
-                            </p-calendar>
-                        </td>
-                        <td>
-                            <label class="control-label" id="invDateTime_label" for="invDateTime">
-                                {{'end_time'|translate}}
-                            </label>
-                        </td>
-                        <td colspan="2">
-                            <p-calendar [style]="{'width':'90%'}" [inputStyle]="{'width':'95%'}" appendTo="body"
-                                formControlName="invDateTime" dateFormat="yy/mm/dd" [showIcon]="true" showTime="true"
-                                [minDate]="minDate">
-                            </p-calendar>
-                        </td>
-                    </tr>
-                </tbody>
-            </table> -->
-
-      <!-- <p>123</p> -->
-      <!-- <app-datepicker [dateType]="'month'" formControlName="dayRange"></app-datepicker>
-            <app-datepicker [dateType]="'week'" formControlName="weekRange"></app-datepicker> -->
 
       <app-schedule-content formControlName="rjobItems" [action]="currentAction"></app-schedule-content>
       <hr />
@@ -528,7 +291,7 @@
           <label>{{ scheduleHistoryData.remark }}</label>
         </div>
       </div>
-      <p-table *ngIf="scheduleHistoryCols" [columns]="scheduleHistoryCols" styleClass="p-datatable-striped"
+      <p-table *ngIf="scheduleHistoryCols" [columns]="scheduleHistoryCols" stripedRows
         [value]="scheduleHistoryData.historyList" selectionMode="single" [style]="{ 'word-break': 'break-word' }">
         <ng-template pTemplate="colgroup" let-columns>
           <colgroup>
@@ -585,34 +348,14 @@
   </div>
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<!-- <p-toast position="center" key="confirm" (onClose)="onReject()" [baseZIndex]="5000">
-    <ng-template let-message pTemplate="message">
-        <div style="text-align: center">
-            <em class="fas fa-exclamation-triangle fa-3x"></em>
-            <h4>{{message.summary}}</h4>
-            <p>{{message.detail}}</p>
-        </div>
-        <div class="ui-g ui-fluid">
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="saveScheduleSetting()" label="{{'button.confirm'|translate}}"
-                    class="ui-button-success"></button>
-            </div>
-            <div class="ui-g-6">
-                <button type="button" pButton (click)="onReject()" label="{{'button.cancel'|translate}}"
-                    class="ui-button-secondary"></button>
-            </div>
-        </div>
-    </ng-template>
-</p-toast> -->
-<p-confirmDialog #cd [style]="{ width: '50vw' }" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{
-          backgroundColor: 'var(--red-300)',
-          'border-color': 'var(--red-300)'
-        }" label="{{ 'button.confirm' | translate }}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check"
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{ 'button.cancel' | translate }}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

@@ -19,7 +19,7 @@ import tpi.dgrv4.gateway.service.GtwIdPVerifyService;
 @RestController
 public class GtwIdPVerifyController {
 
-	GtwIdPVerifyService gtwIdPVerifyService;
+	private GtwIdPVerifyService gtwIdPVerifyService;
 	
 	@Autowired
 	public GtwIdPVerifyController(GtwIdPVerifyService gtwIdPVerifyService) {

@@ -187,7 +187,7 @@ public class DPB0047Service {
 	public String getDecoedeItemNo(String encodeItemNo, String locale) {
 		String itemNo = null;
 		try {
-			itemNo = decode(encodeItemNo, locale);//BcryptParam解碼
+ 			itemNo = decode(encodeItemNo, locale);//BcryptParam解碼
 		} catch (BcryptParamDecodeException e) {
 			throw TsmpDpAaRtnCode._1201.throwing();
 		}

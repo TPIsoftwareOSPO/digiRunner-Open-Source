@@ -1,0 +1,359 @@
+<!-- SMART Client 設定 -->
+<div class="smart-client-setting">
+
+  <!-- 載入中 -->
+  <div *ngIf="loading" class="text-center p-4">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  </div>
+
+  <!-- 主內容（非載入中） -->
+  <div *ngIf="!loading" class="layout-row">
+
+    <!-- ==================== 左側：表單 / 唯讀 ==================== -->
+    <div class="layout-left">
+
+      <!-- 尚未設定 -->
+      <div *ngIf="smartClient === undefined && mode === 'view'" class="text-center p-4">
+        <p class="text-secondary mb-3">{{'smart_client.not_configured' | translate}}</p>
+        <button pButton type="button"
+                [label]="'smart_client.create' | translate"
+                icon="pi pi-plus"
+                class="p-button-success"
+                (click)="enterCreateMode()">
+        </button>
+      </div>
+
+      <!-- 唯讀模式 -->
+      <div *ngIf="smartClient && mode === 'view'" class="p-3">
+        <div class="grid">
+          <div class="col-6 field">
+            <label>{{'smart_client.client_type' | translate}}</label>
+            <div class="field-value">{{smartClient.clientType}}</div>
+          </div>
+          <div class="col-6 field">
+            <label>{{'smart_client.idp_type' | translate}}</label>
+            <div class="field-value">{{smartClient.idpType}}</div>
+          </div>
+          <div class="col-6 field">
+            <label>{{'smart_client.launch_mode' | translate}}</label>
+            <div class="field-value">{{smartClient.launchMode}}</div>
+          </div>
+          <div class="col-6 field">
+            <label>{{'smart_client.auto_approve' | translate}}</label>
+            <div class="field-value">{{smartClient.autoApprove}}</div>
+          </div>
+          <div class="col-12 field">
+            <label>{{'smart_client.allowed_scopes' | translate}}</label>
+            <div class="field-value scope-view-chips">
+              <span *ngFor="let s of smartClient.allowedScopes?.split(' ')"
+                    class="scope-view-chip">{{s}}</span>
+            </div>
+          </div>
+          <div class="col-12 field" *ngIf="smartClient.redirectUris">
+            <label>{{'smart_client.redirect_uris' | translate}}</label>
+            <div class="field-value scope-view-chips">
+              <span *ngFor="let u of smartClient.redirectUris?.split('\n')"
+                    class="scope-view-chip">{{u}}</span>
+            </div>
+          </div>
+          <div class="col-6 field" *ngIf="smartClient.tokenEndpointAuthMethod">
+            <label>{{'smart_client.token_auth_method' | translate}}</label>
+            <div class="field-value">{{smartClient.tokenEndpointAuthMethod}}</div>
+          </div>
+          <div class="col-6 field" *ngIf="smartClient.jwksUri">
+            <label>{{'smart_client.jwks_uri' | translate}}</label>
+            <div class="field-value">{{smartClient.jwksUri}}</div>
+          </div>
+          <div class="col-6 field" *ngIf="smartClient.hasJwks">
+            <label>{{'smart_client.jwks' | translate}}</label>
+            <div class="field-value">{{'smart_client.jwks_configured' | translate}}</div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button pButton type="button"
+                  [label]="'btns.edit' | translate"
+                  icon="pi pi-pencil"
+                  class="p-button-primary"
+                  (click)="enterEditMode()">
+          </button>
+          <button pButton type="button"
+                  [label]="'btns.delete' | translate"
+                  icon="pi pi-trash"
+                  class="p-button-danger"
+                  (click)="deleteSmartClient()">
+          </button>
+        </div>
+      </div>
+
+      <!-- 表單模式（新增 / 編輯共用） -->
+      <div *ngIf="mode === 'create' || mode === 'edit'" class="p-3">
+        <form [formGroup]="form" (ngSubmit)="submitForm()">
+
+          <!-- 認證類型 -->
+          <div class="field">
+            <label class="required">{{'smart_client.client_type' | translate}}</label>
+            <p-dropdown [options]="clientTypes"
+                        optionLabel="key" optionValue="key"
+                        formControlName="clientType"
+                        [placeholder]="'smart_client.help.clientType.title' | translate"
+                        (onFocus)="activeField = 'clientType'"
+                        [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+
+          <!-- 身份驗證方式 -->
+          <div class="field">
+            <label class="required">{{'smart_client.idp_type' | translate}}</label>
+            <p-dropdown [options]="idpTypes"
+                        formControlName="idpType"
+                        [placeholder]="'smart_client.help.idpType.example' | translate"
+                        (onFocus)="activeField = 'idpType'"
+                        [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+
+          <!-- 授權範圍 -->
+          <div class="field" (click)="activeField = 'allowedScopes'">
+            <label class="required">{{'smart_client.allowed_scopes' | translate}}</label>
+            <div class="scope-picker">
+              <div *ngFor="let cat of scopeCategories" class="scope-category">
+                <div class="scope-cat-label">{{cat.label | translate}}</div>
+                <div class="scope-chips">
+                  <label *ngFor="let opt of getScopesByCategory(cat.key)"
+                         class="scope-chip"
+                         [class.scope-chip-active]="selectedScopes[opt.scope]">
+                    <input type="checkbox"
+                           [checked]="selectedScopes[opt.scope]"
+                           (change)="toggleScope(opt.scope)"
+                           class="scope-checkbox">
+                    <span>{{opt.scope}}</span>
+                  </label>
+                </div>
+              </div>
+              <!-- 自訂 scope -->
+              <div *ngIf="customScopes.length > 0" class="scope-category">
+                <div class="scope-cat-label">{{'smart_client.scope_cat.custom' | translate}}</div>
+                <div class="scope-chips">
+                  <span *ngFor="let cs of customScopes" class="scope-chip scope-chip-active scope-chip-custom">
+                    <span>{{cs}}</span>
+                    <i class="pi pi-times scope-chip-remove" (click)="removeCustomScope(cs)"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="scope-custom-input">
+                <input pInputText
+                       [(ngModel)]="customScopeInput"
+                       [ngModelOptions]="{standalone: true}"
+                       [placeholder]="'smart_client.custom_scope_placeholder' | translate"
+                       (keydown.enter)="addCustomScope(); $event.preventDefault()"
+                       class="w-full">
+                <button pButton type="button" icon="pi pi-plus"
+                        class="p-button-text p-button-sm"
+                        (click)="addCustomScope()"
+                        [disabled]="!customScopeInput?.trim()">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Redirect URI -->
+          <div class="field" (click)="activeField = 'redirectUris'">
+            <label>{{'smart_client.redirect_uris' | translate}}</label>
+            <div class="scope-picker">
+              <div class="scope-chips" *ngIf="redirectUriList.length > 0">
+                <span *ngFor="let uri of redirectUriList"
+                      class="scope-chip scope-chip-active scope-chip-custom uri-chip">
+                  <span>{{uri}}</span>
+                  <i class="pi pi-times scope-chip-remove" (click)="removeRedirectUri(uri)"></i>
+                </span>
+              </div>
+              <div class="scope-custom-input">
+                <input pInputText
+                       [(ngModel)]="redirectUriInput"
+                       [ngModelOptions]="{standalone: true}"
+                       [placeholder]="'smart_client.help.redirectUris.example' | translate"
+                       (keydown.enter)="addRedirectUri(); $event.preventDefault()"
+                       class="w-full">
+                <button pButton type="button" icon="pi pi-plus"
+                        class="p-button-text p-button-sm"
+                        (click)="addRedirectUri()"
+                        [disabled]="!redirectUriInput?.trim()">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 啟動模式 -->
+          <div class="field">
+            <label>{{'smart_client.launch_mode' | translate}}</label>
+            <p-dropdown [options]="launchModes"
+                        formControlName="launchMode"
+                        (onFocus)="activeField = 'launchMode'"
+                        [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+
+          <!-- 自動核准 -->
+          <div class="field">
+            <label>{{'smart_client.auto_approve' | translate}}</label>
+            <p-dropdown [options]="autoApproveOptions"
+                        formControlName="autoApprove"
+                        (onFocus)="activeField = 'autoApprove'"
+                        [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+
+          <!-- Token 認證方式（根據 clientType 動態顯示） -->
+          <div class="field" *ngIf="showAuthMethod">
+            <label class="required">{{'smart_client.token_auth_method' | translate}}</label>
+            <p-dropdown [options]="currentAuthMethods"
+                        formControlName="tokenEndpointAuthMethod"
+                        (onFocus)="activeField = 'tokenEndpointAuthMethod'"
+                        [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+
+          <!-- JWKS URI（根據 clientType 動態顯示） -->
+          <div class="field" *ngIf="showJwk">
+            <label>{{'smart_client.jwks_uri' | translate}}</label>
+            <input pInputText formControlName="jwksUri"
+                   [placeholder]="'smart_client.help.jwksUri.example' | translate"
+                   (focus)="activeField = 'jwksUri'"
+                   class="w-full">
+          </div>
+
+          <!-- JWKS JSON（根據 clientType 動態顯示） -->
+          <div class="field" *ngIf="showJwk">
+            <label>{{'smart_client.jwks' | translate}}</label>
+            <textarea pInputTextarea formControlName="jwks"
+                      [placeholder]="'smart_client.help.jwks.example' | translate"
+                      (focus)="activeField = 'jwks'"
+                      rows="4" class="w-full">
+            </textarea>
+          </div>
+
+          <!-- 按鈕 -->
+          <div class="flex gap-2 mt-3">
+            <button pButton type="submit"
+                    [label]="(mode === 'create' ? 'smart_client.create' : 'btns.update') | translate"
+                    icon="pi pi-check"
+                    class="p-button-success"
+                    [disabled]="form.invalid">
+            </button>
+            <button pButton type="button"
+                    [label]="'cancel' | translate"
+                    icon="pi pi-times"
+                    class="p-button-secondary"
+                    (click)="cancelEdit()">
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== 右側：說明面板 ==================== -->
+    <div class="layout-right" *ngIf="mode === 'create' || mode === 'edit'">
+      <div class="help-panel">
+
+        <!-- SVG 概念圖 -->
+        <svg viewBox="0 0 400 80" class="help-svg">
+          <!-- Client -->
+          <rect x="5" y="20" width="80" height="40" rx="6"
+                [class.svg-active]="isSvgActive('client')" class="svg-node"/>
+          <text x="45" y="45" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('client')" class="svg-text">Client</text>
+
+          <!-- 箭頭 1 -->
+          <line x1="85" y1="40" x2="110" y2="40" class="svg-arrow"/>
+          <polygon points="108,36 116,40 108,44" class="svg-arrow"/>
+
+          <!-- 認證方式 -->
+          <rect x="116" y="20" width="80" height="40" rx="6"
+                [class.svg-active]="isSvgActive('auth')" class="svg-node"/>
+          <text x="156" y="38" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('auth')" class="svg-text">Token</text>
+          <text x="156" y="52" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('auth')" class="svg-text">Auth</text>
+
+          <!-- 箭頭 2 -->
+          <line x1="196" y1="40" x2="221" y2="40" class="svg-arrow"/>
+          <polygon points="219,36 227,40 219,44" class="svg-arrow"/>
+
+          <!-- Credentials -->
+          <rect x="227" y="20" width="80" height="40" rx="6"
+                [class.svg-active]="isSvgActive('credentials')" class="svg-node"/>
+          <text x="267" y="38" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('credentials')" class="svg-text">Key /</text>
+          <text x="267" y="52" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('credentials')" class="svg-text">Secret</text>
+
+          <!-- 箭頭 3 -->
+          <line x1="307" y1="40" x2="332" y2="40" class="svg-arrow"/>
+          <polygon points="330,36 338,40 330,44" class="svg-arrow"/>
+
+          <!-- Scope / FHIR -->
+          <rect x="338" y="20" width="56" height="40" rx="6"
+                [class.svg-active]="isSvgActive('scope')" class="svg-node"/>
+          <text x="366" y="38" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('scope')" class="svg-text">FHIR</text>
+          <text x="366" y="52" text-anchor="middle"
+                [class.svg-text-active]="isSvgActive('scope')" class="svg-text">Scope</text>
+        </svg>
+
+        <!-- 欄位說明文字 -->
+        <div class="help-content" [ngSwitch]="activeField">
+
+          <div *ngSwitchCase="'clientType'">
+            <h5>{{'smart_client.help.clientType.title' | translate}}</h5>
+            <p>{{'smart_client.help.clientType.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'idpType'">
+            <h5>{{'smart_client.help.idpType.title' | translate}}</h5>
+            <p>{{'smart_client.help.idpType.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'allowedScopes'">
+            <h5>{{'smart_client.help.allowedScopes.title' | translate}}</h5>
+            <p>{{'smart_client.help.allowedScopes.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'redirectUris'">
+            <h5>{{'smart_client.help.redirectUris.title' | translate}}</h5>
+            <p>{{'smart_client.help.redirectUris.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'launchMode'">
+            <h5>{{'smart_client.help.launchMode.title' | translate}}</h5>
+            <p>{{'smart_client.help.launchMode.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'autoApprove'">
+            <h5>{{'smart_client.help.autoApprove.title' | translate}}</h5>
+            <p>{{'smart_client.help.autoApprove.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'tokenEndpointAuthMethod'">
+            <h5>{{'smart_client.help.tokenEndpointAuthMethod.title' | translate}}</h5>
+            <p>{{'smart_client.help.tokenEndpointAuthMethod.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'jwksUri'">
+            <h5>{{'smart_client.help.jwksUri.title' | translate}}</h5>
+            <p>{{'smart_client.help.jwksUri.desc' | translate}}</p>
+          </div>
+
+          <div *ngSwitchCase="'jwks'">
+            <h5>{{'smart_client.help.jwks.title' | translate}}</h5>
+            <p>{{'smart_client.help.jwks.desc' | translate}}</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 刪除確認對話框 -->
+<p-confirmDialog></p-confirmDialog>

@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  height: 100vh;
+}
+
+.ehr-sim {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ehr-header {
+  background: #2c3e50;
+  color: #fff;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.ehr-header-title {
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ehr-header-context {
+  font-size: 13px;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ehr-app-frame {
+  flex: 1;
+  min-height: 0;
+  background: #f0f0f0;
+}
+
+.ehr-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.ehr-no-app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 18px;
+}
+
+.ehr-footer {
+  background: #f8f8f8;
+  border-top: 1px solid #ddd;
+  padding: 10px 16px;
+  max-height: 200px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.ehr-footer-section {
+  margin-bottom: 8px;
+
+  h5 {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+  }
+}
+
+.ehr-json {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: monospace;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.ehr-url {
+  font-size: 12px;
+  word-break: break-all;
+  color: #337ab7;
+}

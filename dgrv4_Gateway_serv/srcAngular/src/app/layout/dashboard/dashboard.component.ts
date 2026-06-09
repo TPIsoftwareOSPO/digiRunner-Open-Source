@@ -14,7 +14,7 @@ import { AboutService } from 'src/app/shared/services/api-about.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0118Resp } from 'src/app/models/api/AboutService/dpb0118.interface';
 import { TranslateService } from '@ngx-translate/core';
-import * as dayjs from 'dayjs';
+import  dayjs from 'dayjs';
 import * as echarts from 'echarts';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import {
@@ -53,7 +53,6 @@ import { BadAttemptListComponent } from './bad-attempt-list/bad-attempt-list.com
 import { DialogService } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { NavigationExtras, Router } from '@angular/router';
-
 
 // tps
 interface tpsPoint {
@@ -562,6 +561,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               trigger: 'axis',
             },
             legend: {
+              top: 'top',
               data: ['dao', 'fixed', 'rcd'],
             },
             grid: {
@@ -661,6 +661,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               trigger: 'axis',
             },
             legend: {
+              top: 'top',
               data: ['Country road', 'Highway'],
             },
             grid: {
@@ -786,8 +787,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
               },
             },
             legend: {
+              top: 'top',
               data: ['Free', 'Total', 'Max'],
-              // data: ['memFree', 'memTotal', 'memMax'],
             },
             grid: {
               left: '3%',
@@ -934,6 +935,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               },
             },
             legend: {
+              top: 'top',
               data: ['CPU Usage'],
             },
             grid: {
@@ -1069,16 +1071,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             zoom: 1,
             tooltip: {
               trigger: 'axis',
-              // formatter: (params) => {
-              //   return `
-              //         ${params[0].name} <br />
-              //         ${params[0].marker} ${params[0].seriesName}:   ${params[0].value.success} <br />
-              //         ${params[1].marker} ${params[1].seriesName}:   ${params[0].value.fail} <br />
-              //         ${params[2].marker} ${params[2].seriesName}:   ${params[1].value.total}
-              //         `;
-              // },
             },
             legend: {
+              top: 'top',
               data: ['Success', 'Fail', 'Total'],
             },
             grid: {
@@ -1096,9 +1091,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
               axisLabel: {
                 fontSize: 8,
               },
-            },
-            yAxis: {
-              // type: 'value',
             },
 
             series: [
@@ -1213,6 +1205,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // },
           },
           legend: {
+            top: 'top',
             data: ['req', 'resp'],
           },
           grid: {
@@ -1331,6 +1324,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // },
           },
           legend: {
+            top: 'top',
             data: ['active', 'waiting', 'idle', 'total'],
           },
           grid: {
@@ -1471,6 +1465,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               // },
             },
             legend: {
+              top: 'top',
               data: ['Current', 'Discarded'],
             },
             grid: {
@@ -1597,6 +1592,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       header: `400 Above API List`,
       width: '700px',
       styleClass: 'cHeader cContent cIcon',
+      closable:true,
+      modal:true
     });
   }
 

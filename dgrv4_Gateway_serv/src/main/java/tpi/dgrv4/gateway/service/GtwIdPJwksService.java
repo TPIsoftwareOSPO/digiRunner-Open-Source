@@ -1,9 +1,5 @@
 package tpi.dgrv4.gateway.service;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,27 +8,24 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.JWK;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.JWKcodec;
 import tpi.dgrv4.common.utils.StackTraceUtil;
 import tpi.dgrv4.escape.ESAPI;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
 @Service
 public class GtwIdPJwksService {
 
-	ObjectMapper objectMapper;
-	TsmpSettingService tsmpSettingService;
-	TokenHelper tokenHelper;
-
-	@Autowired
-	public GtwIdPJwksService(ObjectMapper objectMapper, TsmpSettingService tsmpSettingService,
-			TokenHelper tokenHelper) {
-		super();
-		this.objectMapper = objectMapper;
-		this.tsmpSettingService = tsmpSettingService;
-		this.tokenHelper = tokenHelper;
-	}
+	private final ObjectMapper objectMapper;
+	private final TsmpSettingService tsmpSettingService;
 
 	public ResponseEntity<?> getGtwIdPJwks(HttpHeaders httpHeaders, HttpServletRequest httpReq,
 			HttpServletResponse httpResp) throws Exception {
@@ -50,7 +43,7 @@ public class GtwIdPJwksService {
 			TPILogger.tl.error(errMsg);
 			//checkmarx, Reflected XSS All Clients 
 			reqUri = ESAPI.encoder().encodeForHTML(reqUri);
-			respEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			respEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return respEntity;
 		}
 	}
@@ -77,9 +70,5 @@ public class GtwIdPJwksService {
 
 	protected TsmpSettingService getTsmpSettingService() {
 		return tsmpSettingService;
-	}
-
-	protected TokenHelper getTokenHelper() {
-		return tokenHelper;
 	}
 }

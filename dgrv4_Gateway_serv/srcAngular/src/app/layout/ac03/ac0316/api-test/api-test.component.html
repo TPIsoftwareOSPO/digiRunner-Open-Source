@@ -15,10 +15,10 @@
               }}</label>
           </div>
           <div class="col-10">
-            <p-dropdown *ngIf="dcs" [options]="dcs" formControlName="dc" [style]="{ 'z-index': '1000' }">
-            </p-dropdown>
-            <p-dropdown *ngIf="sites" [options]="sites" formControlName="siteCode" [style]="{ 'z-index': '1000' }">
-            </p-dropdown>
+            <p-select *ngIf="dcs" [options]="dcs" formControlName="dc" [style]="{ 'z-index': '1000' }">
+            </p-select>
+            <p-select *ngIf="sites" [options]="sites" formControlName="siteCode" [style]="{ 'z-index': '1000' }">
+            </p-select>
           </div>
         </div>
       </div>
@@ -28,45 +28,14 @@
         <label class="area-title required me-2">{{ "digirunner_url" | translate }}<span style="color:red;">*</span></label>
         <div class="col-12" class="d-flex align-items-center" style="gap:1rem">
           <!-- {{ protocol }}// -->
-          <p-dropdown [options]="methods" formControlName="method"></p-dropdown>
+          <p-select [options]="methods" formControlName="method"></p-select>
           <input class="form-control" id="testUrl" formControlName="testUrl" />
         </div>
-
-
-      <!-- <div [style]="{
-          display: 'flex',
-          width: '100%',
-          'flex-direction': 'column',
-          'align-items': 'start'
-        }">
-        <div>
-          <label class="required" style="padding: 0; margin: 0; font-weight: 500">
-            {{ "digirunner_url" | translate }}<span style="color:red">*</span></label>
-        </div>
-        <div [style]="{
-            display: 'flex',
-            width: '100%',
-            'align-items': 'center'
-          }">
-          {{ protocol }}//
-          <input class="form-control" formControlName="baseUrl" style="margin-left: 3px; margin-right: 3px" />
-          &nbsp; / &nbsp;
-          <input class="form-control" id="tsmpUrl" formControlName="tsmpUrl" />
-        </div>
-      </div> -->
-
       <hr />
-      <!-- Authorization -->
-      <!-- <div [style]="{
-          display: 'flex',
-          width: '100%',
-          'flex-direction': 'column',
-          'align-items': 'start'
-        }"> -->
       <label class="area-title">Authorization</label>
         <div class="form-group row">
             <div class="col-3">
-              <p-dropdown [options]="authTypeList" [filter]="true" formControlName="authType" [style]="{'width':'100%'}"></p-dropdown>
+              <p-select [options]="authTypeList" [filter]="true" formControlName="authType" [style]="{'width':'100%'}"></p-select>
             </div>
         </div>
 
@@ -82,8 +51,9 @@
             <label for="clientPwd" class="col-form-label me-2 required">{{
               "client_password" | translate
               }}<span style="color:red;">*</span></label>
-            <input type="password" class="form-control" id="clientPwd" formControlName="clientPasswd"
-              style="width: 100%" autocomplete="off" />
+              <app-mima-input id="clientPwd" [control]="form.get('clientPasswd')"></app-mima-input>
+            <!-- <input type="password" class="form-control" id="clientPwd" formControlName="clientPasswd"
+              style="width: 100%" autocomplete="off" /> -->
           </div>
         </div>
 
@@ -101,8 +71,9 @@
               <label for="clientPwd" class="col-form-label me-2 required">{{
                 "password" | translate
                 }}<span style="color:red;">*</span></label>
-              <input type="password" class="form-control" id="passwd" formControlName="passwd"
-                style="width: 100%" autocomplete="off" />
+                <app-mima-input id="passwd" [control]="form.get('passwd')"></app-mima-input>
+              <!-- <input type="password" class="form-control" id="passwd" formControlName="passwd"
+                style="width: 100%" autocomplete="off" /> -->
             </div>
           </div>
         </div>
@@ -118,35 +89,13 @@
 
             <div class="col-12">
               <label for="clientPwd" class="col-form-label me-2 required">Secret Key<span style="color:red;">*</span></label>
-              <input type="password" class="form-control" id="secretKey" formControlName="secretKey"style="width: 100%" autocomplete="off" />
+               <app-mima-input id="secretKey" [control]="form.get('secretKey')"></app-mima-input>
             </div>
           </div>
         </div>
 
 
       <hr />
-
-      <!-- <div [style]="{
-          display: 'flex',
-          width: '100%',
-          'flex-direction': 'column',
-          'align-items': 'start'
-        }">
-        <div style="font-weight: 500">
-          {{ "http_method" | translate }}
-        </div>
-        <div style="width: 50%">
-          <p-dropdown [options]="methods" formControlName="method" [style]="{
-              'z-index': '999',
-              'margin-top': '12px',
-              width: '100%',
-              'margin-bottom': '12px'
-            }">
-          </p-dropdown>
-        </div>
-      </div>
-
-      <hr /> -->
 
       <!-- 請求表頭 -->
       <label class="area-title">{{ "req_header" | translate }}</label>
@@ -162,8 +111,10 @@
           <input type="text" class="form-control" name="value" formControlName="ContentType" />
       </div>
       <div class="key-value-row-has-add-btn">
-          <app-key-value name="keyvalue" keyLabel="{{ 'key' | translate }}" valueLabel="{{ 'value' | translate }}"
-            #keyValueRequest formControlName="keyValueRequest"></app-key-value>
+          <app-key-value
+          name="keyvalue" keyLabel="{{ 'key' | translate }}" valueLabel="{{ 'value' | translate }}"
+            #keyValueRequest formControlName="keyValueRequest"
+            [useMask]="true"></app-key-value>
 
         <!-- <button type="button" style="
             border-radius: 50%;
@@ -203,19 +154,19 @@
         <div class="p-form-check-line form-group">
           <ng-container>
             <div class="p-form-check">
-              <p-radioButton formControlName="requestBody" value="none"  inputId="requestBody_none"></p-radioButton>
+              <p-radioButton name="requestBody" formControlName="requestBody" value="none"  inputId="requestBody_none"></p-radioButton>
               <label for="requestBody_none" class="ms-2 mb-0">{{"none" | translate}}</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton formControlName="requestBody" value="form"  inputId="requestBody_form"></p-radioButton>
+              <p-radioButton name="requestBody" formControlName="requestBody" value="form"  inputId="requestBody_form"></p-radioButton>
               <label for="requestBody_form" class="ms-2 mb-0">form-data</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton formControlName="requestBody" value="formurl"  inputId="requestBody_formurl"></p-radioButton>
+              <p-radioButton name="requestBody" formControlName="requestBody" value="formurl"  inputId="requestBody_formurl"></p-radioButton>
               <label for="requestBody_formurl" class="ms-2 mb-0">x-www-form-urlencoded</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton formControlName="requestBody" value="body"  inputId="requestBody_body"></p-radioButton>
+              <p-radioButton name="requestBody" formControlName="requestBody" value="body"  inputId="requestBody_body"></p-radioButton>
               <label for="requestBody_body" class="ms-2 mb-0">raw</label>
             </div>
           </ng-container>
@@ -229,28 +180,25 @@
 
         <div class="row col-12 px-0" *ngIf="this.form.get('requestBody')!.value == 'form'">
           <div class="col-10">
-            <app-key-value-grid name="keyvalue" #keyValueForm formControlName="keyValueForm"></app-key-value-grid>
+            <app-key-value-grid
+             name="keyvalue" #keyValueForm formControlName="keyValueForm" [useMask]="true"></app-key-value-grid>
           </div>
-          <div class="col-auto px-0" style="display: flex;
-          align-items: end;">
-            <!-- <button type="button" class="btn btn-warning mt-3" (click)="add('form')">
-              {{ "button.add" | translate }}
-            </button> -->
+          <div class="col-auto px-0" style="display: flex; align-items: end;">
             <button type="button" class="btn btn-icon tpi-second" (click)="add('form')"
-              style="margin-bottom: 22px">
+              style="margin-bottom: 14px">
               <i class="fa fa-plus"></i>
             </button>
           </div>
         </div>
 
         <!-- x-www-form-urlencode -->
-        <div class="row" *ngIf=" this.form.get('requestBody')!.value == 'formurl'">
-          <div class="col-auto">
-            <app-key-value name="keyvalue" #keyValueForm formControlName="keyValueForm"></app-key-value>
+        <div class="row col-12 px-0" *ngIf=" this.form.get('requestBody')!.value == 'formurl'">
+          <div class="col-10">
+            <app-key-value name="keyvalue" #keyValueForm formControlName="keyValueForm" [useMask]="true"></app-key-value>
           </div>
           <div class="col-auto px-0" style="display: flex;align-items: end;">
             <button type="button" class="btn tpi-second" (click)="add('form')"
-              style="border-radius: 50%;  margin-bottom: 22px">
+              style="border-radius: 50%;  margin-bottom: 8px">
               <i class="fa fa-plus"></i>
             </button>
           </div>

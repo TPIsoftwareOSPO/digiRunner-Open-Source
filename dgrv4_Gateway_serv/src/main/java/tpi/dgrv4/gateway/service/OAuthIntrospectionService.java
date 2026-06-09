@@ -1,14 +1,19 @@
 package tpi.dgrv4.gateway.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.IdTokenUtil;
 import tpi.dgrv4.codec.utils.IdTokenUtil.IdTokenData;
@@ -20,8 +25,10 @@ import tpi.dgrv4.entity.entity.TsmpUser;
 import tpi.dgrv4.entity.repository.DgrAcIdpUserDao;
 import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.gateway.component.OIDCWellKnownHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.constant.DgrTokenType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
@@ -29,9 +36,6 @@ import tpi.dgrv4.gateway.vo.OAuthIntrospectionResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class OAuthIntrospectionService {
@@ -72,7 +76,7 @@ public class OAuthIntrospectionService {
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			return new ResponseEntity<OAuthTokenErrorResp>(
-					getTokenHelper().getOAuthTokenErrorResp("Internal Server Error", null,
+					TokenHelper.getOAuthTokenErrorResp("Internal Server Error", null,
 							HttpStatus.INTERNAL_SERVER_ERROR.value(), reqUri),
 					HttpStatus.INTERNAL_SERVER_ERROR);// 500
 		}
@@ -135,7 +139,7 @@ public class OAuthIntrospectionService {
 			String errMsg = "Unsupported token_type_hint: " + tokenTypeHint;
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2("unsupported_token_type_hint", errMsg),
+					TokenHelper.getOAuthTokenErrorResp2("unsupported_token_type_hint", errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -152,7 +156,7 @@ public class OAuthIntrospectionService {
 				String errMsg = "Missing client_secret. client_id: " + clientId;
 				TPILogger.tl.debug(errMsg);
 				return new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 
@@ -232,12 +236,12 @@ public class OAuthIntrospectionService {
 		// 對外公開的Port
 		String dgrPublicPort = getTsmpSettingService().getVal_DGR_PUBLIC_PORT();
 
-		String schemeAndDomainAndPort = GtwIdPWellKnownService.getSchemeAndDomainAndPort(dgrPublicDomain,
+		String schemeAndDomainAndPort = OIDCWellKnownHelper.getSchemeAndDomainAndPort(dgrPublicDomain,
 				dgrPublicPort);
 		
 		String issuer = null;
 		if (isGtwIdPFlow) {// for GTW IdP
-			issuer = GtwIdPWellKnownService.getIssuer(schemeAndDomainAndPort, idPType);
+			issuer = OIDCWellKnownHelper.getIssuer(schemeAndDomainAndPort, idPType, DgrTokenVersion.PATH_V1);
 
 		} else {// 其他
 			issuer = String.format("%s/dgrv4", schemeAndDomainAndPort);

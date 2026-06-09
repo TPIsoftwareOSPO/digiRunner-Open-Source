@@ -44,3 +44,16 @@ body .ui-tree.ui-tree-horizontal .ui-treenode .ui-treenode-content.ui-state-high
 }
 
 
+.p-organizationchart-node{
+  padding: 0px;
+}
+
+.p-organizationchart-node:hover{
+  background: #FFECE5;
+  color: #666666
+}
+
+.p-organizationchart-node-selected{
+  color: #FFFFFF;
+  background: #FF6E38;
+}

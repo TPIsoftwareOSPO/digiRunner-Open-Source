@@ -170,6 +170,9 @@ public class WebhookService {
 									boolean isStreaming = MediaType.TEXT_EVENT_STREAM_VALUE.equalsIgnoreCase(httpResp.getContentType()) && resp.statusCode < 400;
 									resp.fetchByte(new HashMap<String, String>(), isStreaming); // because Enable inputStream																		
                                     httpResp.setStatus(resp.statusCode);
+                                    if(HttpStatus.OK.value() != resp.statusCode && !StringUtils.hasText(log.getRemark())) {
+                        				log.setRemark(calculateMsgAndMask(resp.respStr));
+                                    }
 									// content output
 									if(!isStreaming) {
 										ByteArrayInputStream bi = new ByteArrayInputStream(resp.httpRespArray);
@@ -244,7 +247,8 @@ public class WebhookService {
 		} catch (Exception e) {
             log.setRemark(calculateMsgAndMask(e.getMessage()));
 		}
-		getDgrWebhookNotifyLogDao().save(log);
+		//The outer layer is already there
+		//getDgrWebhookNotifyLogDao().save(log);
 	}
 	
 	private void processEmail(HttpServletRequest httpReq, DgrWebhookNotify wh, Map<String, String> fieldMap,
@@ -275,8 +279,9 @@ public class WebhookService {
 		} catch (Exception e) {
             log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
-		}		
-		getDgrWebhookNotifyLogDao().save(log);
+		}
+		//The outer layer is already there
+		//getDgrWebhookNotifyLogDao().save(log);
 	}
 	
 	private void processSlack(HttpServletRequest httpReq, DgrWebhookNotify wh, Map<String, String> fieldMap, DgrWebhookNotifyLog log) {
@@ -310,8 +315,9 @@ public class WebhookService {
 		} catch (Exception e) {
             log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
-		}		
-		getDgrWebhookNotifyLogDao().save(log);
+		}
+		//The outer layer is already there
+		//getDgrWebhookNotifyLogDao().save(log);
 	}
 	
 	private void processDiscord(HttpServletRequest httpReq, DgrWebhookNotify wh, Map<String, String> fieldMap, DgrWebhookNotifyLog log) {
@@ -347,8 +353,9 @@ public class WebhookService {
 		} catch (Exception e) {
             log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
-		}		
-		getDgrWebhookNotifyLogDao().save(log);
+		}
+		//The outer layer is already there
+		//getDgrWebhookNotifyLogDao().save(log);
 	}
 	
 	private HttpRespData processDefault(HttpServletRequest httpReq, HttpServletResponse httpResp, DgrWebhookNotify wh, Map<String, String> fieldMap, Map<String, String> headerMap, DgrWebhookNotifyLog log) {
@@ -411,18 +418,22 @@ public class WebhookService {
 				} else {
 					resp = HttpUtil.httpReqByFormData(reqUrl, "POST", fieldMap, httpHeader, true);
 				}
-			}			
-			// if HttpCode is not HttpStatus.OK then set message to remark
-			if(HttpStatus.OK.value() != resp.statusCode) {
-				log.setRemark(calculateMsgAndMask(resp.respStr));
 			}
+			
+			//Because `isEnableInputStream` is true, it's moved to an outer layer for writing, where `resp.fetchByte` is called.
+			// 因為isEnableInputStream是true所以提到外層來寫,外層有呼叫resp.fetchByte
+			// if HttpCode is not HttpStatus.OK then set message to remark
+//			if(HttpStatus.OK.value() != resp.statusCode) {
+//				log.setRemark(calculateMsgAndMask(resp.respStr));
+//			}
 		} catch (TsmpDpAaException e) {
             log.setRemark(calculateMsgAndMask(e.getMessage()));
 		} catch (Exception e) {
             log.setRemark(calculateMsgAndMask(e.getMessage()));
 			this.logger.error(StackTraceUtil.logStackTrace(e));
 		}
-		getDgrWebhookNotifyLogDao().save(log);
+		//The outer layer is already there
+		//getDgrWebhookNotifyLogDao().save(log);
 		return resp;
 	}
 	

@@ -100,7 +100,7 @@ public class GtwIdPCallbackService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 	}
 	
@@ -129,7 +129,7 @@ public class GtwIdPCallbackService {
 			String errMsg = String.format(IdPHelper.MSG_INVALID_IDPTYPE, idPType);
 			TPILogger.tl.debug(errMsg);
 			errRespEntity = new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 		
@@ -389,7 +389,7 @@ public class GtwIdPCallbackService {
 			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "code";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
  

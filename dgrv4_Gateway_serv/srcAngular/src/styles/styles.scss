@@ -207,6 +207,7 @@ body {
 //   background: #FF6E38!important;
 //   outline: none;
 // }
+// input[type='radio']{
 input[type='radio']{
   cursor: pointer;
   &:after {
@@ -1124,6 +1125,7 @@ margin-left: 0%;
 }
 
 .ui-inputgroup{
+  width: 100%;
   display: flex;
 }
 
@@ -1144,7 +1146,7 @@ margin-left: 0%;
   padding: 10px;
  }
 
- .summary .p-card .p-card-header {
+ .summary .p-card-header {
   background: #666666;
   color:#fff;
   border-radius: 5px 5px 0px 0px;
@@ -1152,7 +1154,7 @@ margin-left: 0%;
   padding: 10px;
  }
 
- .runningnode .p-card .p-card-header {
+ .runningnode .p-card-header {
   background: #6096E7;
   color:#fff;
   border-radius: 5px 5px 0px 0px;
@@ -1160,7 +1162,7 @@ margin-left: 0%;
   padding: 10px;
  }
 
- .lostnode .p-card .p-card-header {
+ .lostnode .p-card-header {
   background: #EA7448;
   color:#fff;
   border-radius: 5px 5px 0px 0px;
@@ -1168,7 +1170,7 @@ margin-left: 0%;
   padding: 10px;
  }
 
- .audit .p-card .p-card-header {
+ .audit .p-card-header {
   background: #434343;
   color:#fff;
   border-radius: 5px 5px 0px 0px;
@@ -1176,15 +1178,15 @@ margin-left: 0%;
   padding: 10px;
  }
 
- .tpi-card-content .p-card .p-card-content {
+ .tpi-card-content .p-card-content {
   padding: 0rem 0;
   height: 100%;
 }
-.tpi-card-content .p-card .p-card-body {
+.tpi-card-content .p-card-body {
   height: 100%;
 }
 
-.tpi-card-content .p-card.p-component{
+.tpi-card-content .p-component{
   height: 100%!important;
 }
 
@@ -1192,16 +1194,12 @@ margin-left: 0%;
   color: #ffffff;
   background: #434343;
   padding: 0.5rem;
+  border-radius: 12px 12px 0 0;
 }
 .cContent.p-dialog .p-dialog-content{
   background: #f6f6f6;
   padding: 0.5rem;
 }
-
-
-/* :host ::ng-deep .cContent.p-confirm-dialog .p-dialog-content{
-   background: #f8b7bd;
-} */
 
 .cIcon.p-dialog.p-confirm-dialog .p-confirm-dialog-icon{
 color: #f94949;
@@ -1214,21 +1212,12 @@ color: #f94949;
 .tpi-i-search:hover{
   cursor: pointer !important;
   color: #EA7448!important;
-  /* background: #FCD8CA!important; */
   border: #EA7448!important;
 }
 
 .tpi-i-input{
   padding-right: 30px;
 }
-
-/* ::ng-deep .p-overlaypanel-content{
-  padding: 0px;
-} */
-
-
-
-
 
 .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
   background: #FAFAFA;
@@ -1238,18 +1227,6 @@ color: #f94949;
   background: #ffffff;
 }
 
-.p-calendar-w-btn .p-datepicker-trigger{
-  margin-left: 2px;
-  color: #fff!important;
-  background: #666666!important;
-  border: 1px solid #666666!important;
-  border-radius: 5px!important;
-}
-.p-calendar-w-btn .p-datepicker-trigger:hover{
-  color: #EA7448!important;
-  background: #FCD8CA!important;
-  border: 1px #EA7448!important;
-}
 .tpi-dark-header{
     background: #666666;
     color:#ffffff;
@@ -1295,27 +1272,49 @@ color: #f94949;
 
 }
 
-.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  background: #EA7448;
-  border-color: #EA7448;
+.p-tabs .p-tablist-content .p-tablist-tab-list{
+  border-bottom: unset;
+  background: unset;
+  gap: 4px;
+  background-color: #f6f6f6;
 }
 
-.p-tabview .p-tabview-nav li .p-tabview-nav-link:has(.tab-img){
-  /* background-color: white; */
-  border-width: 1px 1px 0 1px;
-  padding: 0.5rem 0.8rem;
-}
-.p-tabview .p-tabview-nav-btn.p-link{
-  background: #666666;
-}
-.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link,.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus{
-  box-shadow: none;
-}
+// .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+//   background: #EA7448;
+//   border-color: #EA7448;
+// }
 
-.p-tabview .p-tabview-nav li{
-  margin-right: 4px;
- }
+// .p-tabview .p-tabview-nav li .p-tabview-nav-link:has(.tab-img){
+//   /* background-color: white; */
+//   border-width: 1px 1px 0 1px;
+//   padding: 0.5rem 0.8rem;
+// }
+// .p-tabview .p-tabview-nav-btn.p-link{
+//   background: #666666;
+// }
+// .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link,.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus{
+//   box-shadow: none;
+// }
+
+// .p-tabview .p-tabview-nav li{
+//   margin-right: 4px;
+//  }
  .p-highlight .tab-img{
+   filter: brightness(10);
+ }
+ .p-tabs .p-tablist .p-tab{
+  border-top: 1px solid #DEDEDE;
+  border-left: 1px solid #DEDEDE;
+  border-right: 1px solid #DEDEDE;
+  border-radius: 5px 5px 0 0;
+  padding: 0.475rem
+ }
+ .p-tabs .p-tablist .p-tab.p-tab-active {
+   background: #EA7448;
+   border-color: #EA7448;
+   color: #ffffff;
+ }
+ .p-tabs .p-tablist .p-tab.p-tab-active .tab-img{
    filter: brightness(10);
  }
 
@@ -1347,28 +1346,14 @@ p-inputswitch{
   box-shadow: 0 0 0 0.2rem var(--tpi-focus-color);
   border-color: #FFAC00;
 }
-.p-radiobutton .p-radiobutton-box {
-  border: 1px solid #a6a6a6;
-  background: #a6a6a6;
-}
-.p-radiobutton .p-radiobutton-box.p-highlight:not(.p-disabled):hover{
-  border-color: #ff5900;
-  background: white;
-}
-.p-radiobutton .p-radiobutton-box.p-highlight:not(.p-disabled):hover .p-radiobutton-icon{
-  background-color: #ff5900;
-}
-.p-radiobutton .p-radiobutton-box.p-highlight {
+.p-radiobutton-checked .p-radiobutton-box {
   border-color: #FFAC00;
-  background: white;
+  background: #FFAC00;
 }
-.p-radiobutton:not(.p-radiobutton-disabled) .p-radiobutton-box.p-focus{
-  box-shadow: 0 0 0 0.2rem var(--tpi-focus-color);
-  border-color: #FFAC00;
+.p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+  opacity: 0;
 }
-.p-radiobutton .p-radiobutton-box .p-radiobutton-icon{
-  background-color: #FFAC00;
-}
+
 /* .p-checkbox-label{
   margin-left: 0.2rem !important;
 } */
@@ -1476,10 +1461,19 @@ p-inputswitch{
   box-shadow: 0 0 0 0.2rem var(--tpi-focus-color);
 }
 
-.tab .p-tabview .p-tabview-panels{
+.tab .p-tabview .p-tabview-panels, .tab .p-tabpanels{
   background-color: unset;
+    padding: .571rem 1rem;
+    border: 1px solid #c8c8c8;
+    color: #333;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
-
+.p-tabpanels{
+    border: 1px solid #dedede;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
 .p-multiselect.p-multiselect-chip .p-multiselect-token {
   background: #EA7448!important;
   color: #fff;
@@ -1540,4 +1534,86 @@ input[readonly] {
 input[readonly]:focus {
   background-color: #e9ecef;
   opacity: 1;
+}
+
+.p-datepicker-today > .p-datepicker-day-selected {
+  background: var(--tpi-primary);
+}
+.p-datepicker-day-selected {
+  background: var(--tpi-primary);
+}
+
+
+/* 針對 PrimeNG p-radiobutton 全域樣式修改 */
+.p-radiobutton {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  // top: -4px;
+
+  .p-radiobutton-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #888888;
+    background: #888888;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+
+    // 中間的點 (Icon)
+    .p-radiobutton-icon {
+      width: 10px;
+      height: 10px;
+      background-color: white;
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.2s;
+    }
+  }
+
+  // 1. Hover 狀態 (未選中)
+  &:not(.p-radiobutton-disabled):not(.p-radiobutton-checked):hover .p-radiobutton-box {
+    background: #FFAC00;
+    border-color: #888888;
+    box-shadow: inset 0 0 0 3px white;
+  }
+
+  // 2. Checked 選中狀態
+  &.p-radiobutton-checked {
+    .p-radiobutton-box {
+      background: #FFAC00;
+      border-color: #FFAC00;
+      box-shadow: inset 0 0 0 3px white;
+
+      .p-radiobutton-icon {
+        transform: scale(1); // 顯示中間的白色圓點
+      }
+    }
+
+    // 選中後的 Hover
+    &:not(.p-radiobutton-disabled):hover .p-radiobutton-box {
+      background: #ff5900;
+      border-color: #FFAC00;
+    }
+  }
+
+  // 3. Disabled 禁用狀態
+  &.p-disabled {
+    opacity: 0.8;
+    .p-radiobutton-box {
+      background: #bababa;
+      border-color: #bababa;
+    }
+
+    &.p-radiobutton-checked .p-radiobutton-box {
+      background: #ffd37c;
+      border-color: #bababa;
+      box-shadow: inset 0 0 0 3px white;
+    }
+  }
+
+}
+
+// .mima-btn{
+.input-btn{
+  border-radius: 5px;
 }

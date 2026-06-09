@@ -30,14 +30,7 @@ export class AppComponent {
     } else {
       this.defaultLang = 'en-us';
     }
-    // console.log(this.defaultLang);
     translate.setDefaultLang(this.defaultLang);
-    translate.use(this.defaultLang)
-    translate.setDefaultLang('en-us');
-    // console.log(this.translate.getBrowserLang());
-    // this.httpClient.get(`assets/i18n/${navigator.language.toLowerCase()}.json`).subscribe((translations: any) => {
-    //   console.log(translations);
-    // this.translate.setTranslation(translations, true);
-    // });
+    translate.use(this.defaultLang);
   }
 }

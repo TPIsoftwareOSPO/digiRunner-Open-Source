@@ -11,7 +11,7 @@
     </form>
     <hr>
     <p-table *ngIf="clientListCols" [columns]="clientListCols" [value]="clientList" selectionMode="single"
-      styleClass="p-datatable-striped" [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
+      stripedRows [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
           <col *ngFor="let col of columns" [style.width]="col.width">
@@ -76,7 +76,7 @@
     </div>
 
     <p-table [value]="gtwIdpList" [style]="{'word-break':'break-word'}" responsiveLayout="scroll"
-      styleClass="p-datatable-striped">
+      stripedRows>
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th rowspan="2" style="width: 10%;" scope="col">Icon</th>
@@ -176,11 +176,11 @@
           <div class="p-form-check-line form-group">
             <ng-container>
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value="Y" inputId="statusY"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value="Y" inputId="statusY"></p-radioButton>
                 <label for="statusY" class="ms-2 mb-0">Y</label>
               </div>
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value="N" inputId="statusN"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value="N" inputId="statusN"></p-radioButton>
                 <label for="statusN" class="ms-2 mb-0">N</label>
               </div>
             </ng-container>
@@ -196,7 +196,7 @@
         <div class="col-6">
           <label id="remark_label" for="remark" class="control-label">Remark</label>
           <div style="display:block">
-            <textarea rows="2" style="width:100%" id="remark" formControlName="remark" pInputTextarea></textarea>
+            <textarea class="form-control" rows="2" style="width:100%" id="remark" formControlName="remark" pInputTextarea></textarea>
           </div>
         </div>
       </div>
@@ -243,10 +243,9 @@
       <div class="form-group row">
         <div class="col-6">
           <label id="connectionName_label" for="connectionName" class="control-label">Connection Name</label>
-          <!-- <input type="text" class="form-control" id="connectionName" formControlName="connectionName"> -->
           <div class="ui-inputgroup">
             <input type="text" class="form-control" formControlName="connectionName" placeholder="" readonly>
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
               (click)="queryRdbConnectionInfoList();"></button>
           </div>
           <div *ngIf="connectionName?.invalid && (connectionName?.dirty || connectionName?.touched)"
@@ -286,25 +285,19 @@
         </div>
         <div class="col-12 ps-5">
           <label class="control-label">SQL String Result Example</label>
-          <!-- <textarea rows="2" style="width:100%" class="form-control" [value]="sqlResult" pInputTextarea
-            readonly></textarea> -->
           <div class="example">
             For example, the user account entered is "<span style="font-weight: bold;">your_name</span>" :<br>
             select * from users u, tsmp_user ts where upper(u.username) = upper('<span style="font-weight: bold;">your_name</span>') and u.enabled = '<span style="font-weight: bold;">1</span>' and u.username = ts.user_name
           </div>
-          <!-- <div style="display:block">
-            <textarea rows="8" style="width:100%" class="form-control" [readOnly]="true" pInputTextarea
-              [value]="idTokenExp"></textarea>
-          </div> -->
         </div>
       </div>
 
       <div class="form-group row">
         <div class="col-6">
           <label id="userMimaAlg_label" for="userMimaAlg" class="control-label">User Secret Algorithm</label>
-          <p-dropdown [options]="serectAlgorithmList" placeholder="{{'plz_chs' | translate}}"
+          <p-select [options]="serectAlgorithmList" placeholder="{{'plz_chs' | translate}}"
             formControlName="userMimaAlg" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="userMimaAlg?.invalid && (userMimaAlg?.dirty || userMimaAlg?.touched)" class="text-danger">
             <small class="form-text">{{userMimaAlg?.errors.isRequired | translate}}</small>
           </div>
@@ -441,14 +434,13 @@
 
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-        [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}"
-        label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
-        label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

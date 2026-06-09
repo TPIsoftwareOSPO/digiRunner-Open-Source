@@ -53,7 +53,6 @@ export class ToolService {
   b64pad = '=';
 
   constructor(
-    private injector: Injector,
     private tokenService: TokenService,
     private translate: TranslateService,
   ) // private jwtHelper: JwtHelperService,

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import lombok.Setter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +22,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import tpi.dgrv4.codec.utils.RandomSeqLongUtil;
+import lombok.Setter;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.LocaleType;
 import tpi.dgrv4.common.constant.TableAct;
@@ -31,8 +30,32 @@ import tpi.dgrv4.common.constant.TsmpDpDataStatus;
 import tpi.dgrv4.common.constant.TsmpDpReqReviewType;
 import tpi.dgrv4.common.constant.TsmpDpSeqStoreKey;
 import tpi.dgrv4.common.ifs.ITsmpFirstInstallHelper;
-import tpi.dgrv4.common.utils.*;
-import tpi.dgrv4.common.utils.autoInitSQL.Initializer.*;
+import tpi.dgrv4.common.utils.DateTimeUtil;
+import tpi.dgrv4.common.utils.LicenseEditionType;
+import tpi.dgrv4.common.utils.LicenseEditionTypeVo;
+import tpi.dgrv4.common.utils.LicenseUtilBase;
+import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.AiGatewayTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.AuthoritiesTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.DgrRdbConnectionTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.OauthClientDetailsTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpAlertTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpClientGroupTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpClientTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpDpItemsTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpDpMailTpltTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpFuncTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpGroupTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpOrganizationTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpReportUrlTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRoleAlertTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRoleRoleMappingTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRoleTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpRtnCodeTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpSecurityLevelInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpSettingTableInitializer;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.TsmpUserTableInitializr;
+import tpi.dgrv4.common.utils.autoInitSQL.Initializer.UserTableInitializer;
 import tpi.dgrv4.common.utils.autoInitSQL.vo.AuthoritiesVo;
 import tpi.dgrv4.common.utils.autoInitSQL.vo.AutoInitSQLTsmpDpMailTpltVo;
 import tpi.dgrv4.common.utils.autoInitSQL.vo.AutoInitSQLTsmpRoleRoleMappingVo;
@@ -59,20 +82,84 @@ import tpi.dgrv4.dpaa.service.DgrAuditLogService;
 import tpi.dgrv4.dpaa.vo.DPB0101Req;
 import tpi.dgrv4.entity.daoService.BcryptParamHelper;
 import tpi.dgrv4.entity.daoService.SeqStoreService;
-import tpi.dgrv4.entity.entity.*;
+import tpi.dgrv4.entity.entity.Authorities;
+import tpi.dgrv4.entity.entity.AuthoritiesId;
+import tpi.dgrv4.entity.entity.DgrAiPromptTemplate;
+import tpi.dgrv4.entity.entity.DgrAiProvider;
+import tpi.dgrv4.entity.entity.DgrRdbConnection;
+import tpi.dgrv4.entity.entity.DgrXApiKey;
+import tpi.dgrv4.entity.entity.OauthClientDetails;
+import tpi.dgrv4.entity.entity.TsmpApi;
+import tpi.dgrv4.entity.entity.TsmpApiId;
+import tpi.dgrv4.entity.entity.TsmpApiRegId;
+import tpi.dgrv4.entity.entity.TsmpClient;
+import tpi.dgrv4.entity.entity.TsmpClientGroup;
+import tpi.dgrv4.entity.entity.TsmpClientGroupId;
+import tpi.dgrv4.entity.entity.TsmpDpClientext;
+import tpi.dgrv4.entity.entity.TsmpDpItems;
+import tpi.dgrv4.entity.entity.TsmpDpItemsId;
+import tpi.dgrv4.entity.entity.TsmpFunc;
+import tpi.dgrv4.entity.entity.TsmpFuncId;
+import tpi.dgrv4.entity.entity.TsmpGroup;
+import tpi.dgrv4.entity.entity.TsmpOrganization;
+import tpi.dgrv4.entity.entity.TsmpRole;
+import tpi.dgrv4.entity.entity.TsmpRoleFunc;
+import tpi.dgrv4.entity.entity.TsmpRoleFuncId;
+import tpi.dgrv4.entity.entity.TsmpRtnCode;
+import tpi.dgrv4.entity.entity.TsmpRtnCodeId;
+import tpi.dgrv4.entity.entity.TsmpSetting;
+import tpi.dgrv4.entity.entity.TsmpUser;
+import tpi.dgrv4.entity.entity.Users;
 import tpi.dgrv4.entity.entity.autoInitSQL.AutoInitSQLTsmpDpMailTplt;
 import tpi.dgrv4.entity.entity.autoInitSQL.AutoInitSQLTsmpRoleRoleMapping;
 import tpi.dgrv4.entity.entity.jpql.TsmpAlert;
+import tpi.dgrv4.entity.entity.jpql.TsmpClientHost;
 import tpi.dgrv4.entity.entity.jpql.TsmpDpChkLayer;
 import tpi.dgrv4.entity.entity.jpql.TsmpReportUrl;
 import tpi.dgrv4.entity.entity.jpql.TsmpReportUrlId;
 import tpi.dgrv4.entity.entity.jpql.TsmpRoleAlert;
 import tpi.dgrv4.entity.entity.jpql.TsmpRoleAlertId;
 import tpi.dgrv4.entity.entity.jpql.TsmpSecurityLevel;
-import tpi.dgrv4.entity.repository.*;
+import tpi.dgrv4.entity.repository.AuthoritiesDao;
+import tpi.dgrv4.entity.repository.DgrAiPromptTemplateRepository;
+import tpi.dgrv4.entity.repository.DgrAiProviderRepository;
+import tpi.dgrv4.entity.repository.DgrRdbConnectionDao;
+import tpi.dgrv4.entity.repository.DgrXApiKeyDao;
+import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
+import tpi.dgrv4.entity.repository.TsmpAlertDao;
+import tpi.dgrv4.entity.repository.TsmpApiDao;
+import tpi.dgrv4.entity.repository.TsmpClientDao;
+import tpi.dgrv4.entity.repository.TsmpClientGroupDao;
+import tpi.dgrv4.entity.repository.TsmpClientHostDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptRjobDDao;
+import tpi.dgrv4.entity.repository.TsmpDpApptRjobDao;
+import tpi.dgrv4.entity.repository.TsmpDpChkLayerDao;
+import tpi.dgrv4.entity.repository.TsmpDpClientextDao;
+import tpi.dgrv4.entity.repository.TsmpDpItemsDao;
+import tpi.dgrv4.entity.repository.TsmpFuncDao;
+import tpi.dgrv4.entity.repository.TsmpGroupDao;
+import tpi.dgrv4.entity.repository.TsmpOrganizationDao;
+import tpi.dgrv4.entity.repository.TsmpReportUrlDao;
+import tpi.dgrv4.entity.repository.TsmpRoleAlertDao;
+import tpi.dgrv4.entity.repository.TsmpRoleDao;
+import tpi.dgrv4.entity.repository.TsmpRoleFuncDao;
+import tpi.dgrv4.entity.repository.TsmpRoleRoleMappingDao;
+import tpi.dgrv4.entity.repository.TsmpRtnCodeDao;
+import tpi.dgrv4.entity.repository.TsmpSecurityLevelDao;
+import tpi.dgrv4.entity.repository.TsmpSettingDao;
+import tpi.dgrv4.entity.repository.TsmpUserDao;
+import tpi.dgrv4.entity.repository.UsersDao;
 import tpi.dgrv4.entity.repository.autoInitSQL.AutoInitSQLTsmpDpApptRjobDDao;
 import tpi.dgrv4.entity.repository.autoInitSQL.AutoInitSQLTsmpDpMailTpltDao;
 import tpi.dgrv4.entity.repository.autoInitSQL.AutoInitSQLTsmpRoleRoleMappingDao;
+import tpi.dgrv4.gateway.component.cache.proxy.DgrXApiKeyCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.DgrXApiKeyMapCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.TsmpApiRegCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.TsmpClientCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.TsmpClientHostCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.TsmpGroupApiCacheProxy;
+import tpi.dgrv4.gateway.component.cache.proxy.TsmpSettingCacheProxy;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.util.InnerInvokeParam;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
@@ -143,6 +230,18 @@ public class AutoInitSQL {
 	private @Setter(onMethod_ = @Autowired) DgrAiProviderRepository dgrAiProviderRepository;
 	private @Setter(onMethod_ = @Autowired) DgrAiPromptTemplateRepository dgrAiPromptTemplateRepository;
 	
+	private @Setter(onMethod_ = @Autowired) TsmpApiCacheProxy tsmpApiCacheProxy;
+	private @Setter(onMethod_ = @Autowired) TsmpApiRegCacheProxy tsmpApiRegCacheProxy;
+	private @Setter(onMethod_ = @Autowired) TsmpGroupApiCacheProxy tsmpGroupApiCacheProxy;
+	private @Setter(onMethod_ = @Autowired) TsmpSettingCacheProxy tsmpSettingCacheProxy;
+	private @Setter(onMethod_ = @Autowired) DgrXApiKeyCacheProxy dgrXApiKeyCacheProxy; 
+	private @Setter(onMethod_ = @Autowired) TsmpClientCacheProxy tsmpClientCacheProxy;
+	private @Setter(onMethod_ = @Autowired) TsmpClientHostCacheProxy tsmpClientHostCacheProxy;
+	private @Setter(onMethod_ = @Autowired) DgrXApiKeyMapCacheProxy dgrXApiKeyMapCacheProxy;
+	private @Setter(onMethod_ = @Autowired) TsmpApiDao tsmpApiDao;
+	private @Setter(onMethod_ = @Autowired) DgrXApiKeyDao dgrXApiKeyDao; 
+	private @Setter(onMethod_ = @Autowired) TsmpClientHostDao tsmpClientHostDao;
+	
 	@Autowired
 	public void setAutoInitSQL(@Nullable ITsmpFirstInstallHelper tsmpFirstInstallHelper,
 			ApplicationContext applicationContext) {
@@ -154,6 +253,13 @@ public class AutoInitSQL {
 
 	@Value("${service.mail.installation}")
 	private String mailLocalelInstallation;
+
+    @Value("${digiRunner.schedule.h2.config-sync.enabled:false}")
+    private boolean h2ConfigSyncEnabled;
+    
+    @Value("${digi.cache.init.enabled:false}")
+    private boolean cacheInitEnabled;
+    
 
 	private int featureListMaxLength;
 
@@ -189,6 +295,8 @@ public class AutoInitSQL {
 		Optional<TsmpSetting> autoInitsqlFlag = getTsmpSettingDao().findById(TsmpSettingDao.Key.AUTO_INITSQL_FLAG);
 		if (autoInitsqlFlag.isEmpty() == false && "false".equalsIgnoreCase(autoInitsqlFlag.get().getValue())) {
 			TPILogger.tl.info("AUTO_INITSQL_FLAG：false");
+			//初始化cahce
+			initCache();
 			return;
 		}
 
@@ -277,6 +385,9 @@ public class AutoInitSQL {
 
 			// 清空所有 static List
 			clearAllList();
+			
+			//初始化cahce
+			initCache();
 
 		} catch (Exception e) {
 			TPILogger.tl.debug(StackTraceUtil.logStackTrace(e));
@@ -286,6 +397,78 @@ public class AutoInitSQL {
 		String logMsgEnd = "=====================================================\n"
 				+ "        ===============AutoInitSQL is Success================";
 		TPILogger.tl.info(logMsgEnd);
+	}
+	
+	private void initCache() {
+		try {
+			TPILogger.tl.info("cacheInitEnabled=" + cacheInitEnabled);
+			if(!cacheInitEnabled) {
+				return;
+			}
+			
+			TPILogger.tl.info("start initCache");
+			long now1 = System.currentTimeMillis();
+			
+			//tsmpsetting
+			List<TsmpSetting> settingList = this.getTsmpSettingDao().findAll();
+			TPILogger.tl.info("settingList.size=" + settingList.size());
+			for(TsmpSetting vo : settingList) {
+				this.getTsmpSettingCacheProxy().findById(vo.getId());
+			}
+			
+			//tsmpAPI
+			List<TsmpApi> tsmpApiList = this.getTsmpApiDao().findAll();
+			TPILogger.tl.info("tsmpApiList.size=" + tsmpApiList.size());
+			for(TsmpApi apiVo : tsmpApiList) {
+				//tsmpApi
+				TsmpApiId tsmpApiId = new TsmpApiId();
+				tsmpApiId.setApiKey(apiVo.getApiKey());
+				tsmpApiId.setModuleName(apiVo.getModuleName());
+				getTsmpApiCacheProxy().findById(tsmpApiId);
+				
+				//tsmpApiReg
+				TsmpApiRegId tsmpApiRegId = new TsmpApiRegId();
+				tsmpApiRegId.setApiKey(apiVo.getApiKey());
+				tsmpApiRegId.setModuleName(apiVo.getModuleName());
+				getTsmpApiRegCacheProxy().findById(tsmpApiRegId);
+				
+				//tsmpGroupApi
+				getTsmpGroupApiCacheProxy().findByApiKeyAndModuleName(apiVo.getApiKey(), apiVo.getModuleName());
+			}
+			
+			//queryAll_APIkeyAndModuleNameAndSrcUrl
+			TPILogger.tl.info("queryAll_APIkeyAndModuleNameAndSrcUrl");
+			getTsmpApiCacheProxy().queryAll_APIkeyAndModuleNameAndSrcUrl();
+			
+			
+			//DgrXApiKey, DgrXApiKeyMap
+			List<DgrXApiKey> xApiKeyList = this.getDgrXApiKeyDao().findAll();
+			TPILogger.tl.info("xApiKeyList.size=" + xApiKeyList.size());
+			for(DgrXApiKey vo : xApiKeyList) {
+				getDgrXApiKeyCacheProxy().findFirstByApiKeyEn(vo.getApiKeyEn());
+				getDgrXApiKeyMapCacheProxy().findByRefApiKeyId(vo.getApiKeyId());
+			}
+			
+			//tsmpClient
+			List<TsmpClient> tsmpClietList = this.getTsmpClientDao().findAll();
+			TPILogger.tl.info("tsmpClietList.size=" + tsmpClietList.size());
+			for(TsmpClient vo : tsmpClietList) {
+				getTsmpClientCacheProxy().findFirstByClientId(vo.getClientId());
+			}
+			
+			//tsmpClientHost
+			List<TsmpClientHost> tsmpClietHostList = getTsmpClientHostDao().findAll();
+			TPILogger.tl.info("tsmpClietHostList.size=" + tsmpClietHostList.size());
+			for(TsmpClientHost vo : tsmpClietHostList) {
+				getTsmpClientHostCacheProxy().findByClientId(vo.getClientId());
+			}
+			long now2 = System.currentTimeMillis();
+			TPILogger.tl.info("end initCache, time spent "+(now2 - now1) + " ms" );
+		}catch(Exception e) {
+			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
+		}
+		
+		
 	}
 
 	private void clearAllList() {
@@ -1029,7 +1212,7 @@ public class AutoInitSQL {
 	// 寫入系統預設的週期排程
 	public void createDefaultRjobs() {
 		SystemDefaultRjobInitializer initializer = new SystemDefaultRjobInitializer( //
-				getDpb0101Service(), getTsmpDpApptRjobDao(), getBcryptParamHelper());
+				getDpb0101Service(), getTsmpDpApptRjobDao(), getBcryptParamHelper() , h2ConfigSyncEnabled);
 		List<DPB0101Req> rjobList = initializer.getDefaultRjobList();
 		if (CollectionUtils.isEmpty(rjobList)) {
 			return;

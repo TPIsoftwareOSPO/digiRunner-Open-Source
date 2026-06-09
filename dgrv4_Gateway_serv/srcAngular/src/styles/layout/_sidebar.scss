@@ -128,3 +128,18 @@
     }
   }
 }
+@media screen and (min-width: 993px) {
+  .push-right {
+      .layout-wrapper{
+        .layout-sidebar {
+            margin-left: calc(var(--sidebar-w) * -1);
+            transition: margin-left 0.3s ease-in-out;
+          }
+        .layout-main-container {
+            /* 當側邊欄收合時，主內容區域的 margin-left 設為 0 */
+            margin-left: 0;
+            width: 100%;
+          }
+      }
+  }
+}

@@ -10,9 +10,9 @@
                 <label class="required control-label">{{'date_range'|translate}}</label>
                 <div class="d-flex">
                     <div >
-                        <p-calendar [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                        <p-datepicker [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                             formControlName="startDate" dateFormat="yy/mm/dd" [showIcon]="true">
-                        </p-calendar>
+                        </p-datepicker>
                         <div *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)" class="text-danger">
                             <small class="form-text">{{startDate.errors.required | translate}}</small>
                         </div>
@@ -21,9 +21,9 @@
                         <label style="padding: 5px 10px;">～</label>
                     </div>
                     <div>
-                        <p-calendar [style]="{'width':'100%'}" formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
+                        <p-datepicker [style]="{'width':'100%'}" formControlName="endDate" [inputStyle]="{'width':'100%'}" appendTo="body"
                             dateFormat="yy/mm/dd" [showIcon]="true">
-                        </p-calendar>
+                        </p-datepicker>
                         <div *ngIf="endDate?.invalid && (endDate?.dirty || endDate?.touched)" class="text-danger">
                             <small class="form-text">{{endDate.errors.required | translate}}</small>
                         </div>
@@ -35,7 +35,7 @@
                 <div class="p-form-check-line form-group">
                   <ng-container *ngFor="let stat of orgFlagType">
                     <div class="p-form-check">
-                      <p-radioButton formControlName="orgFlag" value={{stat.value}}  inputId="orgFlag{{stat.value}}"></p-radioButton>
+                      <p-radioButton name="orgFlag" formControlName="orgFlag" value={{stat.value}}  inputId="orgFlag{{stat.value}}"></p-radioButton>
                       <label for="orgFlag{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
                     </div>
                   </ng-container>
@@ -58,7 +58,7 @@
         </div>
     </form>
     <hr>
-    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" [(selection)]="selectedApis" styleClass="p-datatable-striped"
+    <p-table *ngIf="cols" [columns]="cols" [value]="dataList" [(selection)]="selectedApis" stripedRows
         [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
             <div *ngIf="canSetting" class="ui-helper-clearfix">

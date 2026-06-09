@@ -298,7 +298,7 @@ public class AcIdPCallbackService {
 		// 10.驗證 IdP(GOOGLE / MS / OIDC) ID Token
 		boolean isVerify = false;
 		if (isCallJwksUrlSuccess) {// 取 JWKS 成功
-			// issuer 必須和 ID token 的 iss 完全相同, 注意後面有沒有 "/" 有差別
+			// issuer 必須和 ID token 的 "iss" 值完全相同, 注意後面有沒有 "/" 有差別
 			JWKVerifyResult jwkRs = JWKcodec.verifyJWStokenByJsonString(idTokenJwtstr, issuer, jwksResp.respStr);
 			isVerify = jwkRs.verify;
 			if(!isVerify) {

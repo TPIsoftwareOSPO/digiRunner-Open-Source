@@ -1,0 +1,66 @@
+.form-wrapper.wide {
+  max-width: 760px;
+  width: 92vw;
+}
+
+.page-title {
+  font-weight: 600;
+  font-size: 1.15rem;
+  text-align: center;
+  margin: 1rem 0 0.25rem;
+  color: var(--tpi-primary);
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.search-mode-select {
+  max-width: 90px;
+  flex: 0 0 auto;
+}
+
+.result-list {
+  table {
+    font-size: 0.875rem;
+  }
+  th {
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #666;
+  }
+  td {
+    vertical-align: middle;
+  }
+}
+
+.pick-row {
+  cursor: pointer;
+
+  &.selected {
+    background: #eef5ff;
+  }
+}
+
+.btn-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 0.5rem;
+
+  .page-info {
+    font-size: 0.85rem;
+    color: #666;
+    min-width: 120px;
+    text-align: center;
+  }
+}

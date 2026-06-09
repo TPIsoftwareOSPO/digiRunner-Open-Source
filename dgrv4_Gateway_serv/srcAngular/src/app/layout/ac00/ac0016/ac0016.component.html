@@ -7,7 +7,7 @@
           (click)="changePage('create');">{{'button.create'|translate}}</button>
       </div>
     </div>
-    <p-table [columns]="cols" [value]="tableData" selectionMode="single" styleClass="p-datatable-striped"
+    <p-table [columns]="cols" [value]="tableData" selectionMode="single" stripedRows
        [style]="{'word-break':'break-word'}" responsiveLayout="scroll">
       <ng-template pTemplate="header" let-columns>
         <tr>
@@ -86,9 +86,9 @@
         </div>
         <div class="col-3">
           <label id="idpType_label" for="idpType" class="control-label">Type</label>
-          <p-dropdown [options]="idpTypeList"
+          <p-select [options]="idpTypeList"
               placeholder="{{'plz_chs' | translate}}" formControlName="idpType" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="idpType?.invalid && (idpType?.dirty || idpType?.touched)" class="text-danger">
             <small class="form-text">{{idpType?.errors.isRequired | translate}}</small>
           </div>
@@ -108,7 +108,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of idpStatusList">
               <div class="p-form-check">
-                <p-radioButton formControlName="status" value={{stat.value}}  inputId="status{{stat.value}}"></p-radioButton>
+                <p-radioButton name="status" formControlName="status" value={{stat.value}}  inputId="status{{stat.value}}"></p-radioButton>
                 <label for="status{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -120,7 +120,7 @@
       <div class="form-group row">
         <div class="col-6">
           <label id="roleIdList_label" for="roleIdList" class="control-label">{{'role_list' |translate}}<span style="color: red;">*</span></label>
-          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
+          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn"
             (click)="queryRoleMappingList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="roleAliasList.value.length > 0" class="ui-chips ui-widget" id="roleIdList">
@@ -150,7 +150,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" id="orgName" formControlName="orgName"
               placeholder="{{'org_name' | translate}}" [attr.disabled]="true">
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary" (click)="openOrgDialog();"></button>
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn" (click)="openOrgDialog();"></button>
           </div>
           <div *ngIf="orgId?.invalid" class="text-danger">
             <small class="form-text">{{orgId?.errors.isRequired | translate}}</small>
@@ -194,9 +194,9 @@
         </div>
         <div class="col-3">
           <label id="newIdpType_label" for="newIdpType" class="control-label">Type</label>
-          <p-dropdown [options]="idpTypeList"
+          <p-select [options]="idpTypeList"
               placeholder="{{'plz_chs' | translate}}" formControlName="newIdpType" [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
           <div *ngIf="newIdpType_u?.invalid && (newIdpType_u?.dirty || newIdpType_u?.touched)" class="text-danger">
             <small class="form-text">{{newIdpType_u?.errors.isRequired | translate}}</small>
           </div>
@@ -216,7 +216,7 @@
           <div class="p-form-check-line form-group">
             <ng-container *ngFor="let stat of idpStatusList">
               <div class="p-form-check">
-                <p-radioButton formControlName="newStatus" value={{stat.value}}  inputId="newStatus{{stat.value}}"></p-radioButton>
+                <p-radioButton name="newStatus" formControlName="newStatus" value={{stat.value}}  inputId="newStatus{{stat.value}}"></p-radioButton>
                 <label for="newStatus{{stat.value}}" class="ms-2 mb-0">{{stat.label}}</label>
               </div>
             </ng-container>
@@ -229,7 +229,7 @@
         <div class="col-6">
           <label id="newRoleIdList_label" for="newRoleIdList" class="control-label">{{'role_list' |
             translate}}</label>
-          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
+          <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn"
             (click)="queryRoleMappingList();"></button>
           <label class="form-control border-line" style="height: unset;">
             <div *ngIf="newRoleAliasList_u.value.length > 0" class="ui-chips ui-widget">
@@ -258,7 +258,7 @@
           <div class="ui-inputgroup">
             <input type="text" class="form-control" id="newOrgName" formControlName="newOrgName"
               placeholder="{{'org_name' | translate}}" [attr.disabled]="true">
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary" (click)="openOrgDialog();"></button>
+            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary input-btn" (click)="openOrgDialog();"></button>
           </div>
           <div *ngIf="newOrgId_u?.invalid" class="text-danger">
             <small class="form-text">{{newOrgId_u?.errors.isRequired | translate}}</small>
@@ -279,11 +279,13 @@
    </div>
 </app-container>
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-<p-confirmDialog #cd [style]="{width: '50vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon" >
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" [ngStyle]="{backgroundColor:'var(--red-300)','border-color':'var(--red-300)'}" label="{{'button.confirm' | translate}}" (click)="cd.accept()"></button>
-      <button type="button" pButton icon="pi pi-times" class="p-button-secondary" label="{{'button.cancel' | translate}}" (click)="cd.reject()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

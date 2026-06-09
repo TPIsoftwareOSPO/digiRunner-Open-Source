@@ -450,10 +450,12 @@ select * from users u, tsmp_user ts where upper(u.username) = upper('tspuser') a
   queryRdbConnectionInfoList() {
     const ref = this.dialogService.open(ConnectionInfoListComponent, {
       header: 'Connection Info',
-      width: '1000px'
+      width: '1000px',
+      closable:true,
+      modal:true
     })
 
-    ref.onClose.subscribe((res: DPB0190RespItem) => {
+    ref!.onClose.subscribe((res: DPB0190RespItem) => {
       if (res) {
         //console.log(res)
         this.connectionName.setValue(res.connectionName)

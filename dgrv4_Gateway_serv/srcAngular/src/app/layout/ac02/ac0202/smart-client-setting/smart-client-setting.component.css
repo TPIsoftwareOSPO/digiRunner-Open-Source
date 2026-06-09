@@ -1,0 +1,226 @@
+/* ==================== 左右佈局 ==================== */
+
+.layout-row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.layout-left {
+  flex: 7;
+  min-width: 0;
+}
+
+.layout-right {
+  flex: 5;
+  min-width: 0;
+}
+
+/* ==================== 表單 ==================== */
+
+.smart-client-setting label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #6c757d;
+}
+
+.smart-client-setting label.required::after {
+  content: ' *';
+  color: #e24c4c;
+}
+
+.smart-client-setting .field {
+  margin-bottom: 1rem;
+}
+
+.smart-client-setting .field-value {
+  color: #333;
+}
+
+/* ==================== 說明面板 ==================== */
+
+.help-panel {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.help-content {
+  margin-top: 1rem;
+}
+
+.help-content h5 {
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.help-content p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* ==================== SVG 概念圖 ==================== */
+
+.help-svg {
+  width: 100%;
+  max-height: 80px;
+}
+
+.svg-node {
+  fill: #e9ecef;
+  stroke: #adb5bd;
+  stroke-width: 1.5;
+  transition: fill 0.3s, stroke 0.3s;
+}
+
+.svg-node.svg-active {
+  fill: #4c6ef5;
+  stroke: #364fc7;
+}
+
+.svg-text {
+  font-size: 11px;
+  fill: #495057;
+  font-family: sans-serif;
+  transition: fill 0.3s;
+}
+
+.svg-text.svg-text-active {
+  fill: #ffffff;
+}
+
+.svg-arrow {
+  stroke: #adb5bd;
+  stroke-width: 1.5;
+  fill: #adb5bd;
+}
+
+/* ==================== Scope 勾選器 ==================== */
+
+.scope-picker {
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.scope-category {
+  margin-bottom: 0.5rem;
+}
+
+.scope-category:last-of-type {
+  margin-bottom: 0;
+}
+
+.scope-cat-label {
+  font-size: 0.78rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.scope-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.scope-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #f8f9fa;
+  color: #495057;
+  user-select: none;
+}
+
+.scope-chip:hover {
+  border-color: #adb5bd;
+  background: #e9ecef;
+}
+
+.scope-chip-active {
+  background: #2b8a3e;
+  border-color: #2b8a3e;
+  color: #fff;
+}
+
+.scope-chip-active:hover {
+  background: #237032;
+  border-color: #237032;
+}
+
+.scope-checkbox {
+  display: none;
+}
+
+.scope-chip-custom {
+  padding-right: 0.35rem;
+}
+
+.scope-chip-remove {
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: 0.15rem;
+  opacity: 0.8;
+}
+
+.scope-chip-remove:hover {
+  opacity: 1;
+}
+
+.scope-custom-input {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.scope-custom-input input {
+  flex: 1;
+  font-size: 0.85rem;
+}
+
+/* ==================== 唯讀模式 scope chips ==================== */
+
+.scope-view-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.scope-view-chip {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* URI chips — 較寬的圓角 */
+.uri-chip {
+  border-radius: 6px;
+  background: #495057;
+  border-color: #495057;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+.uri-chip:hover {
+  background: #343a40;
+  border-color: #343a40;
+}

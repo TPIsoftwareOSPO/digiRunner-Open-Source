@@ -37,7 +37,8 @@ export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
 
   _fileName:string = ''
 
-
+  isMima: boolean = false;
+  useMask: boolean = false;
 
   constructor(
     private fb:UntypedFormBuilder,
@@ -73,6 +74,17 @@ export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
     this.valueType.valueChanges.subscribe(()=>{
       this.removeFile();
     })
+    this.isMima = this.key?.value.toLowerCase().startsWith('auth') || this.key?.value.toLowerCase().startsWith('x-api-key');
+    this.key?.valueChanges.subscribe((key) => {
+      if (
+        key.toLowerCase().startsWith('auth') ||
+        key.toLowerCase().startsWith('x-api-key')
+      ) {
+        this.isMima = true;
+      } else {
+        this.isMima = false;
+      }
+    });
 
   }
   delete($event:any){
@@ -83,15 +95,20 @@ export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
 
 
   onFileChange(event) {
-    // let reader = new FileReader();
 
     if(event.target.files && event.target.files.length) {
-      const _file = event.target.files[0];
 
-      this.form.patchValue({
-        file: _file
-      });
-      this._fileName = _file.name;
+      const files: FileList = event.target.files;
+
+      if (files && files.length>0) {
+        const currentFiles: File[] = this.form.get('file')?.value || [];
+        const updatedFiles: File[] = [...currentFiles, ...Array.from(files)];
+        this.form.patchValue({
+          file: updatedFiles
+        });
+        this._fileName = updatedFiles.map(f => f.name).join(', ');
+        event.target.value = '';
+      }
     }
   }
 

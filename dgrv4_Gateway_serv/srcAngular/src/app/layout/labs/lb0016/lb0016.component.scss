@@ -1,0 +1,471 @@
+// ──────────────────────────────────────────────
+//  SMART Launcher — Bootstrap 3 skin compat
+//  原始 launch.smarthealthit.org 用 BS3 + App.css
+//  DGR Angular 用 BS5，這裡補上 BS3 缺失的 class
+// ──────────────────────────────────────────────
+
+:host {
+  display: block;
+}
+
+.smart-launcher {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 15px 40px;
+  font-size: 15px;
+  color: #333;
+
+  // ── BS3 form-group ──
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  // ── BS3 help-block ──
+  .help-block {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #737373;
+  }
+
+  // ── BS3 text-primary override ──
+  .text-primary {
+    color: #337ab7 !important;
+  }
+
+  // ── BS3 checkbox / radio ──
+  .checkbox,
+  .radio {
+    position: relative;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    label {
+      min-height: 20px;
+      padding-left: 20px;
+      margin-bottom: 0;
+      font-weight: normal;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      position: absolute;
+      margin-top: 4px;
+      margin-left: -20px;
+    }
+  }
+
+  // ── BS3 btn-default ──
+  .btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+
+    &:hover {
+      color: #333;
+      background-color: #e6e6e6;
+      border-color: #adadad;
+    }
+  }
+
+  // ── BS3 nav-tabs ──
+  .nav-tabs {
+    border-bottom: 1px solid #ddd;
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+    display: flex;
+
+    > li {
+      margin-bottom: -1px;
+
+      > * {
+        margin-right: 2px;
+        line-height: 1.42857143;
+        border: 1px solid transparent;
+        border-radius: 4px 4px 0 0;
+        position: relative;
+        display: block;
+        padding: 10px 15px;
+        cursor: pointer;
+        opacity: 0.7;
+      }
+
+      &.active > * {
+        opacity: 1;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-bottom-color: transparent;
+      }
+
+      &:hover:not(.active) > * {
+        opacity: 0.9;
+        background-color: #f5f5f5;
+      }
+    }
+  }
+
+  .tab-content {
+    padding: 20px 0 0;
+  }
+
+  // ── BS3 form-control ──
+  .form-control {
+    font-size: 14px;
+    height: 34px;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+
+    &:focus {
+      border-color: #66afe9;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+      outline: none;
+    }
+  }
+
+  select.form-control {
+    appearance: auto;
+  }
+
+  textarea.form-control {
+    height: auto;
+    resize: vertical;
+  }
+
+  // ── BS3 input-group adjustments ──
+  .input-group {
+    .form-control {
+      border-radius: 4px 0 0 4px;
+    }
+
+    .btn:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+  }
+
+  // ── BS3 btn-group ──
+  .btn-group {
+    white-space: nowrap;
+    display: inline-flex;
+
+    .btn:focus {
+      outline: none;
+    }
+  }
+
+  // ── BS3 btn ──
+  .btn {
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+
+    &:hover {
+      background-color: #286090;
+      border-color: #204d74;
+    }
+  }
+
+  // ── BS3 misc helpers ──
+  hr {
+    margin: 1ex 0 1em;
+  }
+
+  .small,
+  small {
+    font-size: 85%;
+  }
+
+  // ── Scope Chips ──
+  .scope-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .scope-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    cursor: pointer;
+    user-select: none;
+    background: #f0f0f0;
+    color: #666;
+    border: 1px solid #ddd;
+
+    &.active {
+      background: #337ab7;
+      color: #fff;
+      border-color: #337ab7;
+    }
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  // ── Picker Panel ──
+  .picker-container {
+    position: relative;
+  }
+
+  .picker-panel {
+    position: absolute;
+    z-index: 1000;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .picker-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    background: #f9f9f9;
+  }
+
+  .picker-search-mode {
+    max-width: 90px;
+    flex: 0 0 auto;
+  }
+
+  .picker-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+  }
+
+  .picker-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px;
+    border-top: 1px solid #eee;
+
+    .page-info {
+      font-size: 0.85rem;
+      color: #666;
+      min-width: 80px;
+      text-align: center;
+    }
+  }
+
+  .picker-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    flex-shrink: 0;
+
+    &:hover {
+      color: #333;
+    }
+  }
+
+  .picker-error {
+    padding: 8px 12px;
+    color: #a94442;
+    background: #f2dede;
+    font-size: 13px;
+  }
+
+  .picker-empty {
+    padding: 12px;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+  }
+
+  .picker-more {
+    padding: 8px;
+    text-align: center;
+    border-top: 1px solid #eee;
+  }
+
+  .picker-table {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+
+    th {
+      background: #f5f5f5;
+      padding: 6px 10px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #eee;
+    }
+  }
+
+  .picker-row {
+    cursor: pointer;
+
+    &:hover {
+      background: #e8f0fe;
+    }
+
+    &.active {
+      background: #d0e3ff;
+      font-weight: 500;
+    }
+  }
+
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  // ── 標題 ──
+  .launcher-title {
+    font-weight: 300;
+    font-size: 32px;
+  }
+
+  // ── 取代 inline style 的工具 class ──
+  .divider-bottom {
+    border-bottom: 1px solid #eee;
+  }
+
+  .mono-input {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 13px;
+  }
+
+  .field-checkbox,
+  .field-radio {
+    display: flex;
+    align-items: flex-start;
+
+    label {
+      cursor: pointer;
+      font-weight: normal;
+    }
+  }
+
+  .encounter-mode-select {
+    flex: 0 0 auto;
+    min-width: 160px;
+  }
+
+  .picker-check-col {
+    width: 32px;
+  }
+
+  .picker-search-group {
+    flex: 1 1 auto;
+  }
+
+  .jwks-textarea {
+    white-space: pre;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px;
+  }
+
+  // ── Bottom Launch Box ──
+  .launch-box {
+    background: #f3f3f3;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+  }
+
+  .launch-box-title {
+    margin-top: 0;
+  }
+
+  .launch-box-row {
+    display: flex;
+  }
+
+  .launch-box-input {
+    flex: 10 1 0;
+  }
+
+  .launch-box-sample {
+    flex: 1 1 0;
+    margin-left: 5px;
+  }
+
+  // ── PrimeNG 元件樣式微調（::ng-deep 穿透，scope 限於 .smart-launcher） ──
+
+  // 1. input group 內的輸入框拉寬撐滿（病人/醫療人員/Encounter/啟動 URL）
+  ::ng-deep .p-inputgroup {
+    width: 100%;
+    display: flex;
+
+    .p-inputtext {
+      flex: 1 1 auto;
+      width: 1%;
+    }
+  }
+
+  // 2. picker 表格表頭文字加深、提高可讀性
+  ::ng-deep .picker-table {
+    .p-datatable-thead > tr > th {
+      background: #f5f5f5;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .p-datatable-column-title {
+      color: #333;
+      font-weight: 600;
+    }
+  }
+
+  // 3. scope chip 選取時用 primary 主題色（與 Launch App 按鈕同色，橘）
+  //    用 PrimeNG primary token，不寫死 hex，確保跟按鈕完全一致
+  //    注意：checked 的內層底色在 .p-togglebutton-content，須改該層才不會被白底蓋住
+  ::ng-deep .scope-chip-btn.p-togglebutton.p-togglebutton-checked {
+    border-color: var(--p-primary-color);
+
+    .p-togglebutton-content {
+      background: var(--p-primary-color);
+    }
+
+    .p-togglebutton-label {
+      color: var(--p-primary-contrast-color);
+    }
+  }
+
+  // ── Responsive ──
+  @media (max-width: 768px) {
+    .row {
+      flex-direction: column;
+    }
+  }
+}

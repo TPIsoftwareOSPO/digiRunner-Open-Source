@@ -113,14 +113,14 @@ public class GtwIdPApproveService {
 				String errMsg = "unjwe JWE decryption failed.";
 				TPILogger.tl.debug(errMsg);
 				return new ResponseEntity<OAuthTokenErrorResp2>(
-						getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+						TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 						HttpStatus.BAD_REQUEST);// 400
 			}
 		}else {
 			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "unjwe";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 
@@ -160,7 +160,7 @@ public class GtwIdPApproveService {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			errRespEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			errRespEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			getGtwIdPHelper().redirectToShowMsg(httpResp, errRespEntity, idPType, dgrClientRedirectUri);
 			return null;
 		}
@@ -179,7 +179,7 @@ public class GtwIdPApproveService {
 			String errMsg2 = "Table [DGR_GTW_IDP_AUTH_CODE] can't find, auth_code(state):" + state;
 			TPILogger.tl.debug(errMsg1 + "\n" + errMsg2);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_GRANT, errMsg1),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_GRANT, errMsg1),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 		
@@ -262,7 +262,7 @@ public class GtwIdPApproveService {
 			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "username";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 		
@@ -271,7 +271,7 @@ public class GtwIdPApproveService {
 			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "redirect_uri";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
 		
@@ -280,7 +280,7 @@ public class GtwIdPApproveService {
 			String errMsg = TokenHelper.MISSING_REQUIRED_PARAMETER + "state";
 			TPILogger.tl.debug(errMsg);
 			return new ResponseEntity<OAuthTokenErrorResp2>(
-					getTokenHelper().getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
+					TokenHelper.getOAuthTokenErrorResp2(TokenHelper.INVALID_REQUEST, errMsg),
 					HttpStatus.BAD_REQUEST);// 400
 		}
  

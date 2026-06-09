@@ -1,8 +1,4 @@
-<app-container
-  [title]="currentTitle"
-  [isDefault]="pageNum == 1"
-  (headerReturn)="headerReturn()"
->
+<app-container [title]="currentTitle" [isDefault]="pageNum == 1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
     <div class="form-group row">
       <div class="col-2">
@@ -10,51 +6,26 @@
 
         </label>
         <div class="form-control border-line" style="background: #f6f6f6">
-          <button
-            type="button"
-            class="btn tpi-btn tpi-primary"
-            (click)="exportTsmpDpMailTpltClick()"
-          >
+          <button type="button" class="btn tpi-btn tpi-primary" (click)="exportTsmpDpMailTpltClick()">
             {{ "button.export" | translate }}
           </button>
         </div>
       </div>
       <div class="col-5">
-        <label class="control-label"
-          >{{ "button.import" | translate}}
-          <i class="far fa-question-circle ms-2 " pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"CODE"} }}</li><li>{{"use_in_multi_language"|translate }}</li></ol>' [escape]="false"></i>
+        <label class="control-label">{{ "button.import" | translate}}
+          <i class="far fa-question-circle ms-2 "
+            pTooltip='<ol style="padding-inline-start: 20px;margin-block-end: 0;"><li>{{"import_key_tip"|translate:{key:"CODE"} }}</li><li>{{"use_in_multi_language"|translate }}</li></ol>'
+            [escape]="false"></i>
         </label>
         <div>
           <div class="ui-inputgroup">
-            <input
-              #fileInput
-              type="file"
-              id="file"
-              accept=".xlsx"
-              (change)="changeFile($event)"
-              style="display: none"
-            />
-            <input
-              [value]="_file?.name"
-              readonly
-              type="text"
-              class="form-control"
-              (click)="openFileBrowser()"
-              placeholder="{{ 'upload_file' | translate }}"
-            />
-            <button
-              pButton
-              type="button"
-              icon="pi pi-file"
-              class="ms-1 tpi-primary"
-              (click)="openFileBrowser()"
-            ></button>
-            <button
-              type="button"
-              class="btn tpi-btn tpi-primary ms-2"
-              (click)="uploadFile()"
-              [disabled]="!_file"
-            >
+            <input #fileInput type="file" id="file" accept=".xlsx" (change)="changeFile($event)"
+              style="display: none" />
+            <input [value]="_file?.name" readonly type="text" class="form-control" (click)="openFileBrowser()"
+              placeholder="{{ 'upload_file' | translate }}" />
+            <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+              (click)="openFileBrowser()"></button>
+            <button type="button" class="btn tpi-btn tpi-primary ms-2" (click)="uploadFile()" [disabled]="!_file">
               {{ "button.upload" | translate }}
             </button>
           </div>
@@ -66,33 +37,14 @@
 
 </app-container>
 <p-toast [style]="{ marginTop: '60px' }" position="top-left"></p-toast>
-<p-confirmDialog
-  #cd
-  [style]="{ width: '50vw' }"
-  icon="pi pi-exclamation-triangle"
-  styleClass="cHeader cContent cIcon"
->
+<p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button
-        type="button"
-        pButton
-        icon="pi pi-check"
-        [ngStyle]="{
-          backgroundColor: 'var(--red-300)',
-          'border-color': 'var(--red-300)'
-        }"
-        label="{{ 'button.confirm' | translate }}"
-        (click)="cd.accept()"
-      ></button>
-      <button
-        type="button"
-        pButton
-        icon="pi pi-times"
-        class="p-button-secondary"
-        label="{{ 'button.cancel' | translate }}"
-        (click)="cd.reject()"
-      ></button>
+      <button type="button" pButton icon="pi pi-check"
+         class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>

@@ -107,7 +107,7 @@ public class IdPJdbcHelper {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			String errMsg = TokenHelper.INTERNAL_SERVER_ERROR;
 			TPILogger.tl.error(errMsg);
-			userInfoData.errRespEntity = getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			userInfoData.errRespEntity = TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 			return userInfoData;
 		}
 

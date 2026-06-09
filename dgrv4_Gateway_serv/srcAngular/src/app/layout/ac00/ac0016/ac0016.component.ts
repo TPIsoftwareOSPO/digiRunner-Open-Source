@@ -287,10 +287,12 @@ export class Ac0016Component extends BaseComponent implements OnInit {
 
       const ref = this.dialogService.open(RoleMappingListLovComponent, {
         header: dict['role_list'],
-        width: '700px'
+        width: '700px',
+        closable:true,
+        modal:true
       })
 
-      ref.onClose.subscribe(res => {
+      ref!.onClose.subscribe(res => {
         if (res) {
 
           let tmpRoleIdList = this.currentAction == 'update' ? [...this.newRoleIdList_u.value]:[...this.roleIdList.value];
@@ -353,7 +355,7 @@ export class Ac0016Component extends BaseComponent implements OnInit {
       height: '100vh'
     })
 
-    refDialog.onClose.subscribe(res => {
+    refDialog!.onClose.subscribe(res => {
       if (res) {
         if(this.currentAction == 'update'){
           this.newOrgId_u.setValue(res.data.orgID);

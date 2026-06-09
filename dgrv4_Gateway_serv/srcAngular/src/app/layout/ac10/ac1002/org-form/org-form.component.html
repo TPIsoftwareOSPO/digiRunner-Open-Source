@@ -106,7 +106,8 @@
       </div>
     </div>
   </div>
-  <div *ngIf="isManager">
+  @if (isManager) {
+  <div>
     <div class="form-group row">
       <div class="col-12 col-lg-6">
         <label for="orgName" class="required control-label">{{'new_org_name' | translate}}</label>
@@ -122,19 +123,10 @@
     <div class="form-group row">
       <div class="col-12 text-center">
         <button type="button" class="btn tpi-btn tpi-primary "
-        (click)="managerUpdate();">{{"button.update"|translate}}</button>
+          (click)="managerUpdate();">{{"button.update"|translate}}</button>
       </div>
     </div>
   </div>
+  }
 </form>
-<!-- <p-dialog  header="{{'org_chart' | translate}}" [(visible)]="displayOrgChart" [modal]="true" [responsive]="true"
-    [dismissableMask]="true" [maximizable]="true" [closable]="false" [contentStyle]="{'overflow':'hidden'}">
-    <app-organization *ngIf="displayOrgChart==true" [orgList]="orgList" (selectedNode)="getOrgNode($event);">
-    </app-organization>
-    <p-footer>
-        <button type="button" class="btn tpi-btn tpi-primary"
-            (click)="displayOrgChart=false;">{{'button.confirm' | translate}}</button>
-        <button type="button" class="btn tpi-btn tpi-cancel" (click)="cancelOrg();">{{'button.cancel' | translate}}</button>
-    </p-footer>
-</p-dialog> -->
 <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

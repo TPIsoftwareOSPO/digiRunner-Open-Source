@@ -131,7 +131,7 @@ public class GtwIdPMockJSLoginUiController {
 			TPILogger.tl.error(errMsg);
 			//checkmarx, Reflected XSS All Clients 
 			reqUri = ESAPI.encoder().encodeForHTML(reqUri);
-			return getTokenHelper().getInternalServerErrorResp(reqUri, errMsg);// 500
+			return TokenHelper.getInternalServerErrorResp(reqUri, errMsg);// 500
 		}
 
 		return null;

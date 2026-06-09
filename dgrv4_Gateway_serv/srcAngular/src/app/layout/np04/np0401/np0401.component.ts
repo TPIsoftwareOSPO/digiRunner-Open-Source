@@ -56,6 +56,7 @@ export class Np0401Component extends BaseComponent implements OnInit {
     subTypes: { label: string; value: string; }[] = [];
     tabTitles?: { label: string; value: string; }[];
     currentQuyType: string = '';
+    activeTabIndex: number = 0;
 
     constructor(
         route: ActivatedRoute,
@@ -321,10 +322,12 @@ export class Np0401Component extends BaseComponent implements OnInit {
                                       data:{
                                         operate: operation == FormOperate.resend ? FormOperate.resend : FormOperate.update,
                                         data: res.RespBody,
-                                      }
+                                      },
+                                      closable:true,
+                                      modal:true
                                     })
 
-                                    ref.onClose.subscribe(res => {
+                                    ref!.onClose.subscribe(res => {
                                       if(res){
                                       this.message.add({ severity: 'success', summary: `${operation == FormOperate.resend ? dict['message.resend'] : dict['message.update']} ${dict['message.requisition.label']}`, detail: `${operation == FormOperate.resend ? dict['message.resend'] : dict['message.update']} ${dict['message.success']}!` });
                                       this.submitForm();
@@ -446,10 +449,11 @@ export class Np0401Component extends BaseComponent implements OnInit {
         }
     }
 
-    changeTab(evn) {
+    changeTab(event: any) {
+        this.activeTabIndex = event.index;
         this.dataList = [];
         this.rowcount = this.dataList.length;
-        this.currentQuyType = this.tabTitles![evn.index].value;
+        this.currentQuyType = this.tabTitles![event.index].value;
         this.submitForm();
     }
 

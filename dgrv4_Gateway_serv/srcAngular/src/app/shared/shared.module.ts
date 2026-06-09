@@ -77,6 +77,7 @@ import { SearchInputComponent } from '../layout/components/search-input/search-i
 import { NotifyListComponent } from './notify-list/notify-list.component';
 import { AiApikeyComponent } from '../layout/ac03/ac0311/ai-apikey/ai-apikey.component';
 import { ExpiredInAlertComponent } from '../layout/components/header/expired-in-alert/expired-in-alert.component';
+import { MimaInputComponent } from './mima-input/mima-input.component';
 
 @NgModule({
   imports: [
@@ -88,6 +89,7 @@ import { ExpiredInAlertComponent } from '../layout/components/header/expired-in-
     TranslateModule,
     KeyValueModule,
     KeyValueGridModule,
+    MimaInputComponent
   ],
   exports: [
     TranslateModule,

@@ -1,0 +1,197 @@
+<app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
+  <div [hidden]="pageNum != 1">
+    <form [formGroup]="form">
+      <div class="form-group row">
+        <div class="col-4">
+          <label class="control-label">{{ "keyword_search" | translate }}</label>
+          <app-search-input
+            placeholder="{{'dbha.syncId'|translate}}、{{'dbha.src_node'|translate}}、{{'dbha.tar_node'|translate}}"
+            [control]="form.get('keyword')" [searchFn]="dbSyncHistory.bind(this)"
+            class="col-9 col-lg-4 col-sm-6"></app-search-input>
+        </div>
+        <div class="col-4">
+          <label class="control-label">{{ "status" | translate }}</label>
+          <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton name="status" formControlName="status" value="D" inputId="statusD"></p-radioButton>
+                <label for="statusD" class="ms-2 mb-0">{{'D'|dbhaStatusType | async}}</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton name="status" formControlName="status" value="E" inputId="statusE"></p-radioButton>
+                <label for="statusE" class="ms-2 mb-0">{{'E'|dbhaStatusType | async}}</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton name="status" formControlName="status" value="R" inputId="statusR"></p-radioButton>
+                <label for="statusR" class="ms-2 mb-0">{{'R'|dbhaStatusType | async}}</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton name="status" formControlName="status" value="" inputId="statusAll"></p-radioButton>
+                <label for="statusAll" class="ms-2 mb-0">{{'all'|translate}}</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+        <div class="col-4">
+          <label class="control-label">{{ "dbha.syncType" | translate }}</label>
+           <div class="p-form-check-line form-group">
+            <ng-container>
+              <div class="p-form-check">
+                <p-radioButton name="syncType" formControlName="syncType" value="SCHEDULE" inputId="syncTypeS"></p-radioButton>
+                <label for="syncTypeS" class="ms-2 mb-0">SCHEDULE</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton name="syncType" formControlName="syncType" value="MANUAL" inputId="syncTypeM"></p-radioButton>
+                <label for="syncTypeM" class="ms-2 mb-0">MANUAL</label>
+              </div>
+              <div class="p-form-check">
+                <p-radioButton name="syncType" formControlName="syncType" value="" inputId="syncTypeD"></p-radioButton>
+                <label for="syncTypeD" class="ms-2 mb-0">{{'all'|translate}}</label>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </form>
+    <hr>
+    <div class="col-12">
+      <p-table [value]="tableData" styleClass="p-datatable-striped" responsiveLayout="scroll"
+        [style]="{'word-wrap':'break-word'}">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th>{{'dbha.syncType'|translate}}</th>
+            <th>{{'dbha.syncId'|translate}}</th>
+            <th>{{'dbha.scheduleId'|translate}}</th>
+            <th>{{'status'|translate}}</th>
+            <th>{{'dbha.src_node'|translate}}</th>
+            <th>{{'dbha.tar_node'|translate}}</th>
+            <th>{{'create_time'|translate}}</th>
+            <th>{{'end_time'|translate}}</th>
+            <th>{{'duration'|translate}}(s)</th>
+            <th style="width:60px;">{{'action'|translate}}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData>
+          <tr>
+            <td>{{rowData.syncType}}</td>
+            <td>{{rowData.syncId}}</td>
+            <td>{{rowData.scheduleId}}</td>
+            <td>{{rowData.status | dbhaStatusType | async}}</td>
+            <td>{{rowData.sourceId}}</td>
+            <td>{{rowData.targetIds.join(',')}}</td>
+            <td>{{rowData.startTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{rowData.endTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{rowData.duration}}</td>
+            <td style="text-align:center;width: 60px">
+              <div>
+                <!-- 詳細資料 -->
+                <button pButton pRipple type="button" icon="pi pi-eye"
+                  class="p-button-rounded p-button-text p-button-plain" (click)="changePage('detail', rowData)"
+                  [pTooltip]="'button.detail' | translate" tooltipPosition="top"></button>
+
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer" let-columns>
+          <tr *ngIf="tableData.length>0">
+            <td [attr.colspan]="10" style="color: #b7b7b7;">
+              <span style="vertical-align: middle;">{{'row_count' | translate}}: {{tableData.length}}</span>
+              <!-- <button type="button" class="btn tpi-header-return" (click)="getMoreData()">{{ 'button.more'| translate}}
+                <i class="fas fa-angle-double-right" style="margin-left: 5px;"></i>
+              </button> -->
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage" let-columns>
+          <tr>
+            <td [attr.colspan]="10">
+              {{'no_rec' | translate}}
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+  </div>
+  <div [hidden]="pageNum != 2">
+    <div class="form-group row">
+      <div class="col-4">
+        <label>{{'dbha.syncId'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.syncId}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'dbha.scheduleId'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.scheduleId}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'dbha.syncType'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.syncType}}</label>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-4">
+        <label>{{'dbha.src_node'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.sourceId}}</label>
+      </div>
+      <div class="col-8">
+        <label>{{'dbha.tar_node'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.targetIds.join(',')}}</label>
+      </div>
+    </div>
+     <div class="form-group row">
+      <div class="col-4">
+        <label>{{'status'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.status | dbhaStatusType | async}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'dbha.currentStep'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.currentStep}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'job_step'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.progress}}%</label>
+      </div>
+
+     </div>
+    <div class="form-group row">
+      <div class="col-4">
+        <label>{{'start_time'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.startTime | date:'yyyy-MM-dd HH:mm:ss'}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'end_time'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.endTime | date:'yyyy-MM-dd HH:mm:ss'}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'duration'|translate}}(s)</label>
+        <label class="form-control border-line">{{detailData?.duration}}</label>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-4">
+        <label>{{'create_user'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.createUser}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'create_time'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.createDateTime | date:'yyyy-MM-dd HH:mm:ss'}}</label>
+      </div>
+      <div class="col-4">
+        <label>{{'update_time'|translate}}</label>
+        <label class="form-control border-line">{{detailData?.updateDateTime | date:'yyyy-MM-dd HH:mm:ss'}}</label>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-12">
+        <label>{{'errmsg'|translate}}</label>
+        <textarea rows="10" style="width:100%" class="form-control" [readOnly]="true" pInputTextarea
+          [value]="detailData?.errorMessage"></textarea>
+      </div>
+    </div>
+    <div class="col-12 col-lg-12">
+      <button type="button" class="btn tpi-btn tpi-primary float-start"
+        (click)="changePage('query');">{{'button.return_to_list'|translate}}</button>
+    </div>
+  </div>
+</app-container>

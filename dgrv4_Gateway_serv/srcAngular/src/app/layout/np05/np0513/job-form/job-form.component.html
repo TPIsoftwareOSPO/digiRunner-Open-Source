@@ -4,18 +4,18 @@
             <div class="form-group row">
                 <div class="col-6 col-xl-6 col-lg-6">
                     <label class="required control-label">{{'type'|translate}}</label>
-                    <p-dropdown [options]="refItemNos" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+                    <p-select [options]="refItemNos" [filter]="true" placeholder="{{'plz_chs' | translate}}"
                         formControlName="refItemNo" [style]="{'width':'100%'}">
-                    </p-dropdown>
+                    </p-select>
                     <div *ngIf="refItemNo?.invalid && (refItemNo?.dirty || refItemNo?.touched)" class="text-danger">
                         <small class="form-text">{{refItemNo.errors.required | translate}}</small>
                     </div>
                 </div>
                 <div class="col-6 col-xl-6 col-lg-6">
                     <label id="refSubitemNo_label" class="control-label">{{'task'|translate}}</label>
-                    <p-dropdown [options]="refSubitemNos" [filter]="true" placeholder="{{'plz_chs' | translate}}"
+                    <p-select [options]="refSubitemNos" [filter]="true" placeholder="{{'plz_chs' | translate}}"
                         formControlName="refSubitemNo" [style]="{'width':'100%'}">
-                    </p-dropdown>
+                    </p-select>
                     <div *ngIf="refSubitemNo?.invalid && (refSubitemNo?.dirty || refSubitemNo?.touched)"
                         class="text-danger">
                         <small class="form-text">{{refSubitemNo.errors.required | translate}}</small>
@@ -25,9 +25,9 @@
             <div class="form-group row">
                 <div class="col-6 col-xl-6 col-ls-6">
                     <label class="required control-label">{{'job_start_date'|translate}}</label>
-                    <p-calendar [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
+                    <p-datepicker [style]="{'width':'95%'}" [inputStyle]="{'width':'100%'}" appendTo="body"
                         formControlName="startDateTime" dateFormat="yy/mm/dd" [showIcon]="true" [showTime]="true">
-                    </p-calendar>
+                    </p-datepicker>
                     <div *ngIf="startDateTime?.invalid && (startDateTime?.dirty || startDateTime?.touched)"
                         class="text-danger">
                         <small class="form-text">{{startDateTime.errors.required | translate}}</small>

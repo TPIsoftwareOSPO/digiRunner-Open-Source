@@ -6,16 +6,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.common.constant.DgrIdPType;
 import tpi.dgrv4.entity.entity.DgrGtwIdpAuthM;
@@ -74,13 +73,13 @@ public class GtwIdPHelper {
 	/**
 	 * 目前 GTW IdP 支援的 OIDC Scope
 	 */
-	public static List<String> getSupportScopeList() {
-		List<String> supportScopeList = new ArrayList<String>();
-		supportScopeList.add(DgrOpenIDConnectScope.OPENID);
-		supportScopeList.add(DgrOpenIDConnectScope.EMAIL);
-		supportScopeList.add(DgrOpenIDConnectScope.PROFILE);
+	public static List<String> getScopesSupportedList() {
+		List<String> scopesSupportedList = new ArrayList<String>();
+		scopesSupportedList.add(DgrOpenIDConnectScope.OPENID);
+		scopesSupportedList.add(DgrOpenIDConnectScope.EMAIL);
+		scopesSupportedList.add(DgrOpenIDConnectScope.PROFILE);
 
-		return supportScopeList;
+		return scopesSupportedList;
 	}
 
 	/**
@@ -104,8 +103,9 @@ public class GtwIdPHelper {
 	}
 
 	/**
-	 * 重新導向到前端,顯示訊息 1.若 idPType 為 LDAP, 則 URL 改成相對路徑, 例如. "/dgrv4/ac4/gtwidp/errMsg"
-	 * 2.若 idPType 為 GOOGLE / MS, 則 URL 依 DB 的值為準
+	 * 重新導向到前端,顯示訊息 <br>
+	 * 1.若 idPType 為 LDAP, 則 URL 改成相對路徑, 例如. "/dgrv4/ac4/gtwidp/errMsg" <br>
+	 * 2.若 idPType 為 GOOGLE / MS, 則 URL 依 DB 的值為準 <br>
 	 */
 	public void redirectToShowMsg(HttpServletResponse httpResp, String msg, String idPType, String redirectUri)
 			throws Exception {

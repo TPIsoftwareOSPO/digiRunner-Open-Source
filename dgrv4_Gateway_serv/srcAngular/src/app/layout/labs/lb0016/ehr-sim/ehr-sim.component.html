@@ -1,0 +1,59 @@
+<div class="ehr-sim">
+
+  <!-- Top bar: EHR context -->
+  <div class="ehr-header">
+    <div class="ehr-header-title">{{ 'smart_ehr_sim.title' | translate }}</div>
+    <div class="ehr-header-context">
+      <span *ngIf="patient">
+        <b>{{ 'smart_ehr_sim.patient' | translate }}</b> {{ patient.name }} ({{ patientId }})
+        <span *ngIf="patient.gender"> &middot; {{ patient.gender }}</span>
+        <span *ngIf="patient.age !== null"> &middot; {{ patient.age }}y</span>
+      </span>
+      <span *ngIf="!patient && patientId">
+        <b>{{ 'smart_ehr_sim.patient' | translate }}</b> {{ patientId }}
+      </span>
+      <span *ngIf="provider" style="margin-left: 20px;">
+        <b>{{ 'smart_ehr_sim.provider' | translate }}</b> {{ provider.name }} ({{ providerId }})
+      </span>
+      <span *ngIf="!provider && providerId" style="margin-left: 20px;">
+        <b>{{ 'smart_ehr_sim.provider' | translate }}</b> {{ providerId }}
+      </span>
+      <span *ngIf="encounter" style="margin-left: 20px;">
+        <b>{{ 'smart_ehr_sim.encounter' | translate }}</b> {{ encounter.type }} ({{ encounterId }})
+      </span>
+      <span *ngIf="!encounter && encounterId" style="margin-left: 20px;">
+        <b>{{ 'smart_ehr_sim.encounter' | translate }}</b> {{ encounterId }}
+      </span>
+    </div>
+  </div>
+
+  <!-- App iframe -->
+  <div class="ehr-app-frame">
+    <iframe
+      *ngIf="appUrl"
+      [src]="appUrl"
+      class="ehr-iframe"
+      sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+    ></iframe>
+    <div *ngIf="!appUrl" class="ehr-no-app">
+      {{ 'smart_ehr_sim.no_app_url' | translate }}
+    </div>
+  </div>
+
+  <!-- Bottom panel: Launch Context -->
+  <div class="ehr-footer">
+    <div class="ehr-footer-section">
+      <h5>{{ 'smart_ehr_sim.launch_context' | translate }}</h5>
+      <pre class="ehr-json">{{ launchContextJson }}</pre>
+    </div>
+    <div class="ehr-footer-section" *ngIf="rawAppUrl">
+      <h5>{{ 'smart_ehr_sim.app_url' | translate }}</h5>
+      <code class="ehr-url">{{ rawAppUrl }}</code>
+    </div>
+    <div class="ehr-footer-section" *ngIf="appMessages.length > 0">
+      <h5>{{ 'smart_ehr_sim.messages_from_app' | translate }}</h5>
+      <pre *ngFor="let msg of appMessages" class="ehr-json">{{ msg }}</pre>
+    </div>
+  </div>
+
+</div>
