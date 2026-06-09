@@ -1,7 +1,7 @@
 {
   "scanSettings": {
     "configMode": "AUTO",
-    "baseBranches": [],
+    "baseBranches": ["main"],
     "enableLicenseViolations": true
   },
   "checkRunSettings": {
