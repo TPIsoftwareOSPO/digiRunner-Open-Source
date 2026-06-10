@@ -288,7 +288,7 @@ Enjoy your hands-on experience with digiRunner! 💡
  | (_| | (_| |  _ <| |_| | | | | | | |  __/ |     \ V /|__   _|
   \__,_|\__, |_| \_\\__,_|_| |_|_| |_|\___|_|      \_/    |_|  
         |___/                                                  
-========== dgRv4 web server info =============
+========== dgRv4 web server info ============
 ...
 ```
 
