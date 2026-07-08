@@ -346,6 +346,137 @@ docker run -p 18080:18080 digirunner
 Open your browser and navigate to: http://localhost:18080/dgrv4/login
 
 
+## SMART on FHIR Proxy
+
+digiRunner implements the **HL7 SMART on FHIR STU2.2** standard, acting as both an **OAuth 2.0 Authorization Server** and a **reverse proxy** for FHIR API resources. This enables healthcare applications to securely authenticate, authorize, and route FHIR requests across backend servers.
+
+### Key Features
+
+- **SMART App Launch (Standalone & EHR Launch)** — Full authorization code flow with PKCE S256 support, scope validation, consent management, and refresh token rotation
+- **FHIR Reverse Proxy** — Routes `/smart-on-fhir/{proxyName}/*` requests to configurable backend FHIR servers with URL rewriting, security checks (SQLi/XSS/XXE), and TPS rate limiting
+- **Client Authentication** — Supports `public`, `client_secret_basic`, `client_secret_post`, and `private_key_jwt` (client assertion per RFC 7523) authentication methods
+- **Diversion & Sticky Routing** — Probability-based traffic splitting across multiple backends, with sticky session binding for resource-type affinity
+- **RS256 JWT Tokens** — Access tokens are signed using RS256; supports `id_token` (OIDC), token introspection (RFC 7662), and JWKS endpoint
+- **Management CRUD APIs** — Create, update, search, delete, import, and export SMART Client and Proxy configurations via the admin console
+
+### Authorization Flow
+
+```mermaid
+sequenceDiagram
+    participant App as SMART App
+    participant DGR as digiRunner Gateway
+    participant IdP as Built-in IdP
+    participant FHIR as FHIR Server
+
+    Note over App,FHIR: Standalone Launch
+    App->>DGR: GET .well-known/smart-configuration
+    DGR-->>App: endpoints, capabilities, scopes
+    
+    App->>DGR: GET /smart/authorize?aud=&client_id=&scope=&redirect_uri=&code_challenge=S256
+    DGR-->>IdP: 302 Redirect to IdP login
+    IdP-->>App: User authenticates
+    App->>DGR: GET /smart/callback?code=dgRcode
+    DGR-->>App: 302 to consent page (or direct auth code if autoApprove)
+    App->>DGR: POST /smart/approve (approved scopes & patient context)
+    DGR-->>App: 302 ?code=authCode&state=
+
+    App->>DGR: POST /smart/token (grant_type=authorization_code + code_verifier)
+    DGR-->>App: {access_token, id_token, refresh_token, patient, encounter}
+
+    App->>DGR: GET /smart-on-fhir/{proxyName}/Patient/123 (Bearer JWT)
+    DGR->>+FHIR: Forward request (with security checks)
+    FHIR-->>-DGR: FHIR Resource
+    DGR-->>App: Rewritten response (URLs updated)
+```
+
+### Discovery Endpoint Response
+
+The `.well-known/smart-configuration` endpoint returns the SMART on FHIR capabilities. It is served at the proxy URL path:
+
+```
+GET http://localhost:18080/smart-on-fhir/{proxyName}/.well-known/smart-configuration
+```
+
+```json
+{
+  "token_endpoint": "http://localhost:18080/dgrv4/ssotoken/smart/token",
+  "grant_types_supported": [
+    "authorization_code",
+    "client_credentials",
+    "refresh_token"
+  ],
+  "capabilities": [
+    "launch-standalone",
+    "launch-ehr",
+    "client-public",
+    "client-confidential-symmetric",
+    "client-confidential-asymmetric",
+    "context-standalone-patient",
+    "context-ehr-patient",
+    "context-ehr-encounter",
+    "permission-patient",
+    "permission-user",
+    "permission-v2",
+    "permission-offline",
+    "sso-openid-connect"
+  ],
+  "code_challenge_methods_supported": [
+    "S256"
+  ],
+  "issuer": "http://localhost:18080",
+  "jwks_uri": "http://localhost:18080/dgrv4/ssotoken/smart/jwks",
+  "authorization_endpoint": "http://localhost:18080/dgrv4/ssotoken/smart/authorize",
+  "scopes_supported": [
+    "openid",
+    "fhirUser",
+    "profile",
+    "launch",
+    "launch/patient",
+    "launch/encounter",
+    "patient/*.cruds",
+    "user/*.cruds",
+    "system/*.cruds",
+    "offline_access"
+  ],
+  "response_types_supported": [
+    "code"
+  ],
+  "introspection_endpoint": "http://localhost:18080/dgrv4/ssotoken/smart/introspect",
+  "revocation_endpoint": "http://localhost:18080/dgrv4/ssotoken/smart/revoke",
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_basic",
+    "client_secret_post",
+    "private_key_jwt"
+  ]
+}
+```
+
+### Quick Start
+
+**Step 1: Create a SMART Client**
+
+In the admin UI, navigate to **SMART Client Setting** and register a client:
+- Client ID, Type (public/confidential), Allowed Scopes (e.g., `patient/*.read`, `openid`, `profile`), Redirect URIs, Launch Mode (standalone/ehr/both)
+
+**Step 2: Create a FHIR Proxy**
+
+In **SMART on FHIR Proxy**, create a proxy configuration:
+- Proxy Name (used in the URL path), Backend FHIR Server URLs, Diversion weights, Security settings (enable SQLi/XSS/XXE checks), TPS limit
+
+**Step 3: Configure Sticky Routing (optional)**
+
+Bind specific FHIR resource types to diversion targets for session affinity.
+
+**Step 4: Obtain an Access Token**
+
+Use the SMART App Launch flow to obtain a JWT access token, or use `client_credentials` grant with client assertion for Backend Services.
+
+**Step 5: Call FHIR Resources**
+
+```sh
+curl -H "Authorization: Bearer <access_token>" \
+  http://localhost:18080/smart-on-fhir/{proxyName}/Patient/123
+```
 
 
 [tpi-url]: https://tpi.dev/
