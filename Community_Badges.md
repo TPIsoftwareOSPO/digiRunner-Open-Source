@@ -32,6 +32,7 @@ If you're curious about how to earn a badge, please see:
   - **Contributors:**
     - [@wen-han-chang](https://github.com/wen-han-chang)
     - [@kevinzeroCode](https://github.com/kevinzeroCode)
+    - [@ruryu](https://github.com/ruryu)
 
 - @Google Developer Groups on Campus NCU
   - **Project:** Magic pinecone
