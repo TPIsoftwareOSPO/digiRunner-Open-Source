@@ -1,4 +1,4 @@
-# OpenTPI Community Badge Recipients
+<img width="970" height="136" alt="image" src="https://github.com/user-attachments/assets/c9a5634b-3c32-437a-9d11-efe4dc9420a6" /># OpenTPI Community Badge Recipients
 
 This page recognizes and celebrates contributors who have received
 OpenTPI Community Badges for their participation, contributions,
@@ -69,6 +69,20 @@ If you're curious about how to earn a badge, please see:
   - **Repo:** [https://github.com/sukaito94/agentic-ai-risk-governance](https://github.com/sukaito94/agentic-ai-risk-governance)
   - **Contributors:**
     - [@sukaito94](https://github.com/sukaito94)
+
+- @Google Developer Groups on Campus NTPU
+  - **Project:** Reinventing Tutoring with AI
+  - **Repo:** [https://github.com/GDG-AI-Chatbot/GDG-ChatBot](https://github.com/GDG-AI-Chatbot/GDG-ChatBot)
+  - **Contributors:**
+    - [@xianyu623](https://github.com/xianyu623)
+    - [@chessmanbry](https://github.com/chessmanbry)
+    - [@aoitsukikage-eng](https://github.com/aoitsukikage-eng)
+    - [@Boxun-Shih](https://github.com/Boxun-Shih)
+    - [@hellochen0719](https://github.com/hellochen0719)
+    - [@isyuhann](https://github.com/isyuhann)
+    - [@jenny20050401](https://github.com/jenny20050401)
+    - [@mint789-kkk](https://github.com/mint789-kkk)
+    - [@p-yuu](https://github.com/p-yuu)
 ---
 
 ## 📌 Notes
