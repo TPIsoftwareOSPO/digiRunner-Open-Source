@@ -1,4 +1,4 @@
-<img width="970" height="136" alt="image" src="https://github.com/user-attachments/assets/c9a5634b-3c32-437a-9d11-efe4dc9420a6" /># OpenTPI Community Badge Recipients
+# OpenTPI Community Badge Recipients
 
 This page recognizes and celebrates contributors who have received
 OpenTPI Community Badges for their participation, contributions,
