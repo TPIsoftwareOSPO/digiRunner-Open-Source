@@ -83,6 +83,17 @@ If you're curious about how to earn a badge, please see:
     - [@jenny20050401](https://github.com/jenny20050401)
     - [@mint789-kkk](https://github.com/mint789-kkk)
     - [@p-yuu](https://github.com/p-yuu)
+
+- @Google Developer Groups on Campus NCCU
+  - **Project:** Rewardsaur
+  - **Repo:** [https://github.com/shinshinchang/TPIsoftware_AIchatbot_project.git](https://github.com/shinshinchang/TPIsoftware_AIchatbot_project.git)
+  - **Contributors:**
+    - [@Jammie-Liu](https://github.com/Jammie-Liu)
+    - [@shinshinchang](https://github.com/shinshinchang)
+    - [@xuan09023849-coder](https://github.com/xuan09023849-coder)
+    - [@emilychiu0512](https://github.com/emilynicolechiu0512-ship-it)
+    - [@max0514](https://github.com/max0514)
+
 ---
 
 ## 📌 Notes
