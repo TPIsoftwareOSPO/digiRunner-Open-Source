@@ -85,7 +85,7 @@ If you're curious about how to earn a badge, please see:
     - [@p-yuu](https://github.com/p-yuu)
 
 - @Google Developer Groups on Campus NCCU
-  - **Project:** Rewardsaur
+  - **Project:** Rewardsaur – AI Credit Card Optimization System
   - **Repo:** [https://github.com/shinshinchang/TPIsoftware_AIchatbot_project.git](https://github.com/shinshinchang/TPIsoftware_AIchatbot_project.git)
   - **Contributors:**
     - [@Jammie-Liu](https://github.com/Jammie-Liu)
@@ -94,6 +94,19 @@ If you're curious about how to earn a badge, please see:
     - [@emilychiu0512](https://github.com/emilynicolechiu0512-ship-it)
     - [@max0514](https://github.com/max0514)
 
+- @Google Developer Groups on Campus NCCU
+  - **Project:** Patent OCR/RAG Chatbot (PatentMind)
+  - **Repo:** [https://github.com/Washyu0826/shin-lee-patent-rag](https://github.com/Washyu0826/shin-lee-patent-rag)
+  - **Contributors:**
+    - [@Washyu0826](https://github.com/Washyu0826)
+    - [@sherryyangyang](https://github.com/sherryyangyang)
+    - [@karen623](https://github.com/karen623)
+
+- @Google Developer Groups on Campus NCUE
+  - **Project:** NCUE Scholarship Platform
+  - **Repo:** [https://github.com/io-software-ai/NCUE-Scholarship](https://github.com/io-software-ai/NCUE-Scholarship)
+  - **Contributors:**
+    - [@Ming Chen](https://github.com/Ming874)
 ---
 
 ## 📌 Notes
