@@ -269,6 +269,7 @@ project(':dgrv4_Gateway_serv'){
 		implementation 'io.netty:netty-codec-http:4.1.133.Final'
 		// Correct the above exclusions, CVE-2025-58057, CVE-2026-42583
 		implementation 'io.netty:netty-codec:4.1.133.Final'
+		//implementation 'io.netty:netty-codec:4.1.125.Final'
 		//CVE-2026-42578
 		implementation 'io.netty:netty-handler-proxy:4.1.133.Final'
 		
