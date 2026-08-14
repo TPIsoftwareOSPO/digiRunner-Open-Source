@@ -15,7 +15,7 @@
             [escape]="false"></i></label>
         <div>
           <div class="ui-inputgroup">
-            <input type="file" id="file" accept=".json" (change)="changeFile($event)" style="display: none" />
+            <input type="file" id="file" #fileRef accept=".json" (change)="changeFile($event)" style="display: none" />
             <input [value]="jsonFile?.name" readonly type="text" class="form-control" (click)="openFileBrowser()"
               placeholder="{{ 'chs_json_file' | translate }}" />
             <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"

@@ -40,6 +40,9 @@ public class SmartConsentService {
 
     private static final long AUTH_CODE_TTL_MS = 60_000L;
     private static final int AUTH_CODE_BYTES = 16;
+    // [EN] Reuse a single SecureRandom instance to satisfy SonarQube java:S2119
+  	// [ZH] 重用同一個 SecureRandom 實例，符合 SonarQube java:S2119 規則
+  	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final DgrSmartAuthSessionDao sessionDao;
     private final TsmpClientDao tsmpClientDao;
@@ -253,16 +256,20 @@ public class SmartConsentService {
      * 判斷本次 launch 的 fhirUser 是 Patient 還是 Practitioner。
      *
      * 規則（優先序）：
-     * 1. session.fhirUserType（由 launch 註冊明確指定）→ 'patient' → Patient
-     * 2. requested scope 含 launch/patient（standalone Patient Portal）→ Patient
+     * 1. session.fhirUserType（由 launch 註冊明確指定）→ 'patient' → Patient、'practitioner' → Practitioner
+     * 2. requested scope 含 launch/patient（standalone Patient Portal，無 launch 註冊）→ Patient
      * 3. 其他 → Practitioner（預設）
      *
-     * 第 1 條對應官方 launcher 在 iss URL 編碼 launch type 的做法；
+     * 第 1 條對應官方 launcher 在 iss URL 編碼 launch type 的做法，明確指定必須優先，
+     * 避免 provider EHR launch 因 scope 混入 launch/patient 被誤判為 Patient Portal；
      * 第 2 條對應 standalone Patient Portal Launch（沒有 launch 註冊步驟）。
      */
     private String determineFhirUserResourceType(DgrSmartAuthSession session) {
         if ("patient".equalsIgnoreCase(session.getFhirUserType())) {
             return "Patient";
+        }
+        if ("practitioner".equalsIgnoreCase(session.getFhirUserType())) {
+            return "Practitioner";
         }
         List<String> scope = session.getRequestedScope();
         if (scope == null || scope.isEmpty()) {
@@ -320,9 +327,8 @@ public class SmartConsentService {
     }
 
     private String generateAuthCode() {
-        SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[AUTH_CODE_BYTES];
-        random.nextBytes(bytes);
+        SECURE_RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
@@ -386,7 +392,7 @@ public class SmartConsentService {
         return new ConsentInfo(clientId, clientName, scopes,
                 needsPatientSelection, needsEncounterSelection, needsProviderSelection,
                 providerCandidates, session.getFhirUser(), autoApprove,
-                patientCandidates,
+                patientCandidates, session.getPatientId(),
                 session.getWebsiteName(), session.getFhirBasePath());
     }
 
@@ -411,6 +417,7 @@ public class SmartConsentService {
      * @param needsProviderSelection  需要選擇 fhirUser 時為 true（候選 0 或 2+ 時）
      * @param providerCandidates      Provider 候選清單，FHIR Reference 格式（如 Practitioner/123）
      * @param fhirUser                已選定的 fhirUser（候選 1 個時 authorize 已自動帶入）
+     * @param patientId               已預綁的病患 ID（launch 註冊時單選帶入；供 encounter 選取頁過濾）
      * @param websiteName             FHIR Proxy 名稱（供前端組裝 Patient 查詢 URL）
      * @param fhirBasePath            FHIR base path（如 /fhir/r4）
      */
@@ -425,6 +432,7 @@ public class SmartConsentService {
             String fhirUser,
             boolean autoApprove,
             List<String> patientCandidates,
+            String patientId,
             String websiteName,
             String fhirBasePath) {}
 }

@@ -62,6 +62,7 @@ public class DPB0193Service {
 			drc.setJdbcUrl(req.getJdbcUrl());
 			drc.setMaxLifetime(req.getMaxLifetime());
 			drc.setMaxPoolSize(req.getMaxPoolSize());
+			drc.setMinimumIdle(req.getMinimumIdle());
 			String mima = req.getMima();
 			String encMima = "";
 

@@ -25,7 +25,6 @@ export class SidebarTemplateComponent implements OnInit {
   @Output('menuClick') menuClick = new EventEmitter<any>();
 
   isActive: boolean = true;
-  firstPageLoad: boolean = true;
   allEnabled: boolean = true;
 
   _mainId: string = '';
@@ -45,35 +44,15 @@ export class SidebarTemplateComponent implements OnInit {
     }
 
     this.service.getMenuMainId().subscribe((_id) => {
-      if (_id) this._mainId = _id;
+      this._mainId = _id;
     });
   }
 
-  ngAfterViewInit() {
-    if (this.tsmp_menu) {
-      this.addExpandClass(this.tsmp_menu.nativeElement);
-    }
-    this.firstPageLoad = false;
-  }
-
-  addExpandClass(element: any, _menuMain: string = '') {
-    let $li = $(element).children('li').first();
-
-    if (this.firstPageLoad) {
-      this.isActive ? $li.find('>ul').slideDown() : $li.find('>ul').slideUp();
+  toggleExpand() {
+    if (this._mainId === this.menu!.main) {
+      this.service.setMenuMainId(''); // 再次點擊已展開的項目 → 收合
     } else {
-      $li.find('>ul').is(':hidden')
-        ? $li.find('>ul').slideDown()
-        : $li.find('>ul').slideUp();
-
-      $li
-        .closest('.menu-group')
-        .find('li.nested')
-        .not($li)
-        .find('>ul')
-        .slideUp();
-
-      this.service.setMenuMainId(this.menu!.main);
+      this.service.setMenuMainId(this.menu!.main); // 展開這個、自動收合其他（沿用既有廣播機制）
     }
   }
 

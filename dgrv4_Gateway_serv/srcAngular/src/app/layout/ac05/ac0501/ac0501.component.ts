@@ -17,7 +17,7 @@ import * as ValidatorFns from '../../../shared/validator-functions';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { AboutService } from 'src/app/shared/services/api-about.service';
 import {  DPB0118Resp } from 'src/app/models/api/AboutService/dpb0118.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Component({
     selector: 'app-ac0501',
@@ -66,10 +66,6 @@ export class Ac0501Component extends BaseComponent implements OnInit {
     //   tableNames: new FormControl('')
     // });
 
-    for(let i=0;i<3;i++){
-      let tmp = {};
-      this.liveNodeList.push(tmp);
-    }
   }
 
   ngOnInit() {
@@ -159,9 +155,8 @@ export class Ac0501Component extends BaseComponent implements OnInit {
 
   }
 
-  formateDate(date:Date){
-
-    return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+  formateDate(date?: string | null): string {
+    return date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '';
   }
   // queryNodeStatus() {
   //   let ReqBpody = {

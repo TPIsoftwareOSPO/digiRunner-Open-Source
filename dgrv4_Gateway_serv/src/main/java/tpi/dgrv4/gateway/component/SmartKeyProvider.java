@@ -5,12 +5,16 @@ import java.security.interfaces.RSAPublicKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 
 import tpi.dgrv4.entity.component.cipher.TsmpCoreTokenEntityHelper;
+import tpi.dgrv4.gateway.keeper.TPILogger;
+import tpi.dgrv4.gateway.service.TsmpSettingService;
 
 /**
  * SMART token 端點所需的 RSA 公鑰管理元件。
@@ -30,9 +34,12 @@ public class SmartKeyProvider {
 
     private final TsmpCoreTokenEntityHelper keyHelper;
 
+    private final TsmpSettingService tsmpSettingService;
+
     @Autowired
-    public SmartKeyProvider(TsmpCoreTokenEntityHelper keyHelper) {
+    public SmartKeyProvider(TsmpCoreTokenEntityHelper keyHelper, TsmpSettingService tsmpSettingService) {
         this.keyHelper = keyHelper;
+        this.tsmpSettingService = tsmpSettingService;
     }
 
     /**
@@ -97,6 +104,41 @@ public class SmartKeyProvider {
         } catch (Exception e) {
             throw new IllegalStateException("無法計算 kid：" + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 依 JWT header 的 kid 解析驗章公鑰。
+     *
+     * 簽發端目前有兩把 key（見 SmartTokenService）：
+     * - core key（kid = RFC 7638 thumbprint）：Backend Services access token、id_token
+     * - GtwIdP key（GTW_IDP_JWK1/JWK2 setting，kid 為 UUID）：app-launch access token
+     *
+     * @param kid JWT header 的 kid；null 或空白時 fallback 到 core key
+     * @return 對應的 RSA 公鑰；kid 無法對應任何已知 key 時回傳 null
+     */
+    public RSAPublicKey getVerificationKey(String kid) {
+        if (!StringUtils.hasText(kid) || kid.equals(getKid())) {
+            return (RSAPublicKey) getSigningKeyPair().getPublic();
+        }
+
+        for (String jwkJson : new String[] {
+                tsmpSettingService.getVal_GTW_IDP_JWK1(),
+                tsmpSettingService.getVal_GTW_IDP_JWK2() }) {
+            if (!StringUtils.hasText(jwkJson)) {
+                continue;
+            }
+            try {
+                JWK jwk = JWK.parse(jwkJson);
+                if (kid.equals(jwk.getKeyID())) {
+                    return jwk.toRSAKey().toRSAPublicKey();
+                }
+            } catch (Exception e) {
+                // 單把 JWK 設定損壞時不影響另一把的比對
+                TPILogger.tl.warn("[SMART KeyProvider] GTW_IDP_JWK 設定無法解析: " + e.getMessage());
+            }
+        }
+
+        return null;
     }
 
     /**

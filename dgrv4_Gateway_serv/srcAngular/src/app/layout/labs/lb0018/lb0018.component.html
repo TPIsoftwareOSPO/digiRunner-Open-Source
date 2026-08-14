@@ -1,0 +1,598 @@
+<app-container [title]="currentTitle">
+  <form [formGroup]="form">
+    <!-- ═══════ 區塊一：Fhir base URL or well know ═══════ -->
+    <div class="lb-section">
+      <div class="lb-section__head">
+        <i class="fa fa-link"></i>
+        <label class="area-title">{{ 'fhir_viewer.base_block_title' | translate }}</label>
+      </div>
+      <div class="lb-section__body">
+        <div class="row">
+          <div class="col-12">
+            <label for="sofProxyUrl" class="col-form-label">{{ 'fhir_viewer.sof_proxy' | translate }}</label>
+            <p-select id="sofProxyUrl" [options]="proxyUrlOptions" [filter]="true" formControlName="sofProxyUrl"
+              [style]="{'width':'100%'}" appendTo="body"></p-select>
+          </div>
+          <div class="col-12">
+            <label for="fhirBaseUrl" class="col-form-label">{{ 'fhir_viewer.fhir_base_url' | translate }}</label>
+            <div class="field-flex-start">
+              <input class="form-control" id="fhirBaseUrl" formControlName="fhirBaseUrl" autocomplete="off" />
+              <button type="button" class="btn-icon tpi-second" title="{{ 'button.refresh' | translate }}"
+                (click)="refreshFhirBaseUrl()">
+                <i class="fa fa-sync"></i>
+              </button>
+            </div>
+            @if (baseUrlNotFound) {
+              <small class="text-danger">{{ 'fhir_viewer.base_url_not_found' | translate }}</small>
+            }
+          </div>
+          <div class="col-12">
+            <label for="wellKnownUrl" class="col-form-label">{{ 'fhir_viewer.well_known' | translate }}</label>
+            <input class="form-control" id="wellKnownUrl" formControlName="wellKnownUrl" autocomplete="off" />
+            @if (wellKnownNotFound) {
+              <small class="text-danger">{{ 'fhir_viewer.well_known_not_found' | translate }}</small>
+            }
+          </div>
+          <div class="col-12">
+            <label for="tokenEndpoint" class="col-form-label">{{ 'fhir_viewer.token_endpoint' | translate }}</label>
+            <input class="form-control" id="tokenEndpoint" formControlName="tokenEndpoint" readonly />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ 區塊二：分頁共用區 ═══════ -->
+    <div class="lb-section">
+      <div class="lb-section__head">
+        <i class="fa fa-th-large"></i>
+        <label class="area-title">{{ 'fhir_viewer.tab_area_title' | translate }}</label>
+      </div>
+      <div class="lb-section__tabs">
+        <ul class="nav nav-tabs" role="tablist">
+          <li role="presentation" [class.active]="activeTab === 'authorization'" (click)="switchTab('authorization')">
+            <b role="tab">Authorization</b>
+          </li>
+          <li role="presentation" [class.active]="activeTab === 'tab2'" (click)="switchTab('tab2')">
+            <b role="tab">{{ 'fhir_viewer.tab_dashboard' | translate }}
+              <!-- 停留在本分頁時修改 FHIR Base URL 不會自動重載，由此鈕手動觸發；stopPropagation 避免同時觸發外層 li 的切換 -->
+              @if (activeTab === 'tab2' && hasFhirBase) {
+                <button type="button" class="btn-icon tpi-second ms-2" title="{{ 'button.refresh' | translate }}"
+                  (click)="$event.stopPropagation(); onRefreshPatients()">
+                  <i class="fa fa-sync"></i>
+                </button>
+              }
+            </b>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-content">
+      <!-- Tab 1: Authorization（仿 api-test 測試區排版與操作） -->
+      @if (activeTab === 'authorization') {
+      <div>
+        <!-- 請求 -->
+        <label class="panel-title">{{ "request" | translate }}</label>
+        <div class="form-row align-items-center">
+          <div class="card card-body lb-subcard">
+            <!-- URL -->
+            <label class="area-title required me-2">{{ 'fhir_viewer.request_url' | translate }}<span style="color:red;">*</span></label>
+            <div class="col-12" class="d-flex align-items-center" style="gap:1rem">
+              <p-select [options]="methods" formControlName="method"></p-select>
+              <input class="form-control" id="testUrl" formControlName="testUrl" />
+            </div>
+            <hr />
+
+            <!-- Authorization -->
+            <label class="area-title">Authorization</label>
+            <div class="form-group row">
+              <div class="col-3">
+                <label for="authMethod" class="col-form-label me-2">{{ 'fhir_viewer.auth_method' | translate }}</label>
+                <p-select id="authMethod" [options]="authMethodOptions" [filter]="true" formControlName="authMethod"
+                  [style]="{'width':'100%'}"></p-select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-3">
+                <label for="clientId" class="col-form-label me-2 required">
+                  {{ "client_id" | translate }}<span style="color:red;">*</span>
+                </label>
+                <input class="form-control me-2" id="clientId" formControlName="clientId" style="width: 100%"
+                  autocomplete="off" />
+              </div>
+              <div class="col-3">
+                <label for="clientSecret" class="col-form-label me-2 required">{{
+                  'fhir_viewer.client_secret' | translate
+                  }}<span style="color:red;">*</span></label>
+                <!-- 遮罩 + 眼睛切換（比照 ac0002 密碼欄位） -->
+                <div class="ui-inputgroup">
+                  <input [type]="clientSecretMask ? 'text' : 'password'" class="form-control" id="clientSecret"
+                    formControlName="clientSecret" autocomplete="off" />
+                  <button pButton type="button" [icon]="clientSecretMask ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    class="ms-1 tpi-night input-btn" (click)="clientSecretMask = !clientSecretMask"></button>
+                </div>
+              </div>
+            </div>
+            <hr />
+
+            <!-- 請求表頭 -->
+            <label class="area-title">{{ "req_header" | translate }}</label>
+            <div class="key-value-row align-has-checkbox align-has-btn-2">
+              <label class="col-form-label">{{ "key" | translate }}</label>
+              <input type="text" class="form-control" name="key" value="Content-Type" disabled />
+              <label class="col-form-label">{{ "value" | translate }}</label>
+              <input type="text" class="form-control" name="value" formControlName="ContentType" />
+            </div>
+            <!-- client_secret_basic 自動帶入的表頭項目（Authorization） -->
+            @if (authMethod.value === 'client_secret_basic') {
+              <div class="key-value-row align-has-checkbox align-has-btn-2">
+                <label class="col-form-label">{{ "key" | translate }}</label>
+                <input type="text" class="form-control" value="Authorization"  />
+                <label class="col-form-label">{{ "value" | translate }}</label>
+                <input type="text" class="form-control" [value]="basicAuthorization" />
+              </div>
+            }
+            <div class="key-value-row-has-add-btn">
+              <app-key-value name="keyvalue" keyLabel="{{ 'key' | translate }}" valueLabel="{{ 'value' | translate }}"
+                #keyValueRequest formControlName="keyValueRequest" [useMask]="true"></app-key-value>
+              <!-- 增加"列"按鈕 -->
+              <button type="button" class="btn-icon tpi-second" (click)="add('request')">
+                <i class="fa fa-plus"></i>
+              </button>
+            </div>
+            <hr />
+
+            <!-- 請求內文 -->
+            <div [style]="{
+                display: 'flex',
+                width: '100%',
+                'flex-direction': 'column',
+                'align-items': 'start'
+              }">
+              <label class="area-title">{{ "req_body" | translate }}</label>
+
+              <div class="p-form-check-line form-group">
+                <ng-container>
+                  <div class="p-form-check">
+                    <p-radioButton name="requestBody" formControlName="requestBody" value="none" inputId="requestBody_none"></p-radioButton>
+                    <label for="requestBody_none" class="ms-2 mb-0">{{ "none" | translate }}</label>
+                  </div>
+                  <div class="p-form-check">
+                    <p-radioButton name="requestBody" formControlName="requestBody" value="form" inputId="requestBody_form"></p-radioButton>
+                    <label for="requestBody_form" class="ms-2 mb-0">form-data</label>
+                  </div>
+                  <div class="p-form-check">
+                    <p-radioButton name="requestBody" formControlName="requestBody" value="formurl" inputId="requestBody_formurl"></p-radioButton>
+                    <label for="requestBody_formurl" class="ms-2 mb-0">x-www-form-urlencoded</label>
+                  </div>
+                  <div class="p-form-check">
+                    <p-radioButton name="requestBody" formControlName="requestBody" value="body" inputId="requestBody_body"></p-radioButton>
+                    <label for="requestBody_body" class="ms-2 mb-0">raw</label>
+                  </div>
+                </ng-container>
+              </div>
+
+              @if (form.get('requestBody')!.value == 'body') {
+              <div class="row col-12 mb-2" style="width: 100%;">
+                <textarea rows="5" class="form-control mx-2" formControlName="bodyText" style="resize: none;width:100%"></textarea>
+              </div>
+              }
+
+              @if (form.get('requestBody')!.value == 'form') {
+              <div class="row col-12 px-0">
+                <div class="col-10">
+                  <app-key-value-grid name="keyvalue" #keyValueForm formControlName="keyValueForm" [useMask]="true"></app-key-value-grid>
+                </div>
+                <div class="col-auto px-0" style="display: flex; align-items: end;">
+                  <button type="button" class="btn btn-icon tpi-second" (click)="add('form')" style="margin-bottom: 14px">
+                    <i class="fa fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+              }
+
+              <!-- x-www-form-urlencode -->
+              @if (form.get('requestBody')!.value == 'formurl') {
+              <div class="row col-12 px-0">
+                <div class="col-10">
+                  <app-key-value name="keyvalue" #keyValueForm formControlName="keyValueForm" [useMask]="true"></app-key-value>
+                </div>
+                <div class="col-auto px-0" style="display: flex;align-items: end;">
+                  <button type="button" class="btn btn-icon tpi-second flex-shrink-0" (click)="add('form')" style="margin-bottom: 8px">
+                    <i class="fa fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+
+            <div>
+              <button type="button" class="btn tpi-btn tpi-night me-2" (click)="send()">
+                {{ "test" | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 回應 -->
+        <label class="panel-title">{{ "response" | translate }}</label>
+        <div class="form-row align-items-center">
+          <div class="card card-body lb-subcard" style="width: 100%">
+            <div [style]="{
+                display: 'flex',
+                width: '100%',
+                'flex-direction': 'column',
+                'align-items': 'start',
+                'font-size':'0.8rem'
+              }">
+              <div style="width: 100%">
+                <div style="margin-bottom: 4px" [ngStyle]="{color: (form.get('resStatus')!.value.toString().length>0 && form.get('resStatus')!.value.toString().charAt(0)!='2')?'#dc3545':'#5A5541'}">{{ "status" | translate }}</div>
+                <div class="form-inline">
+                  <input type="text" readonly class="form-input form-control" formControlName="resStatus"
+                    style="width: 100%" />
+                  <span class="ms-2 text-danger">{{ resTime }}</span>
+                </div>
+              </div>
+              <div style="width: 100%">
+                <div style="margin-bottom: 4px; margin-top: 20px">
+                  {{ "headers" | translate }}
+                </div>
+                <div>
+                  <textarea rows="3" class="form-control" formControlName="headerList" readonly
+                    style="resize: none"></textarea>
+                </div>
+              </div>
+              <div style="width: 100%">
+                <div style="margin-bottom: 4px; margin-top: 20px">
+                  {{ "body" | translate }}
+                </div>
+                <div>
+                  <textarea rows="5" class="form-control" formControlName="resBody" readonly style="resize: none"></textarea>
+                </div>
+              </div>
+              <!-- 取得 access_token 後的狀態提示：Patient Dashboard 查詢將自動帶入此 Bearer token -->
+              @if (accessToken) {
+                <div class="field-flex-start mt-3">
+                  <span class="pd-tag" style="background:#00824c">
+                    <i class="fa fa-check me-1"></i>{{ 'fhir_viewer.token_captured' | translate }}
+                  </span>
+                  <button type="button" class="btn-icon tpi-cancel" title="{{ 'fhir_viewer.token_clear' | translate }}"
+                    (click)="clearAccessToken()">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      <!-- Tab 2: Patient Dashboard（做法參考 digiCare twcore-patient-dashboard） -->
+      @if (activeTab === 'tab2') {
+      <div class="row">
+        <!-- 左欄：病人搜尋 / 病人摘要 / 過篩資料 -->
+        <div class="col-12 col-lg-4 col-xl-3">
+          @if (!hasFhirBase) {
+            <div class="card card-body">
+              <small class="text-muted">{{ 'fhir_viewer.base_url_first' | translate }}</small>
+            </div>
+          } @else {
+            <!-- 病人搜尋清單 -->
+            <div class="card mb-3 overflow-hidden">
+              <div class="p-2 border-bottom">
+                <!-- 搜尋條件：名稱 → name:contains、證件號 → identifier、ID → _id；關鍵字為空時為全域搜尋 -->
+                <div class="p-form-check-line mb-2">
+                  <div class="p-form-check">
+                    <p-radioButton name="patientSearchMode" formControlName="patientSearchMode" value="name"
+                      inputId="patientSearchMode_name"></p-radioButton>
+                    <label for="patientSearchMode_name" class="ms-2 mb-0">{{ 'fhir_viewer.search_by_name' | translate }}</label>
+                  </div>
+                  <div class="p-form-check">
+                    <p-radioButton name="patientSearchMode" formControlName="patientSearchMode" value="identifier"
+                      inputId="patientSearchMode_identifier"></p-radioButton>
+                    <label for="patientSearchMode_identifier" class="ms-2 mb-0">{{ 'fhir_viewer.search_by_identifier' | translate }}</label>
+                  </div>
+                  <div class="p-form-check">
+                    <p-radioButton name="patientSearchMode" formControlName="patientSearchMode" value="id"
+                      inputId="patientSearchMode_id"></p-radioButton>
+                    <label for="patientSearchMode_id" class="ms-2 mb-0">{{ 'fhir_viewer.search_by_id' | translate }}</label>
+                  </div>
+                </div>
+                <div class="field-flex-start">
+                  <input class="form-control" formControlName="patientKeyword" type="search"
+                    (keydown.enter)="$event.preventDefault(); onSearchPatients()" autocomplete="off" />
+                  <button type="button" class="btn-icon tpi-second" (click)="onSearchPatients()">
+                    <i class="fa fa-search"></i>
+                  </button>
+                </div>
+                @if (accessToken) {
+                  <small class="d-block mt-1" style="color:#00824c">
+                    <i class="fa fa-key me-1"></i>{{ 'fhir_viewer.token_in_use' | translate }}
+                  </small>
+                }
+                <small class="text-muted d-block mt-1">
+                  @if (patientsFailed) {
+                    {{ 'fhir_viewer.patients_failed' | translate }}
+                  } @else if (!patientsLoaded) {
+                    {{ 'fhir_viewer.searching' | translate }}
+                  } @else if (patientTotal !== null) {
+                    {{ 'fhir_viewer.result_count_total' | translate: {total: patientTotal, loaded: patients.length} }}
+                  } @else {
+                    {{ 'fhir_viewer.result_count_loaded' | translate: {loaded: patients.length} }}
+                  }
+                </small>
+              </div>
+              <div class="pd-patient-list">
+                @if (patientsLoaded && !patientsFailed && patients.length === 0) {
+                  <div class="text-center text-muted p-3">{{ 'fhir_viewer.no_data' | translate }}</div>
+                }
+                @for (p of patients; track p.id) {
+                  <button type="button" class="pd-patient" [class.active]="selectedPatient?.id === p.id"
+                    (click)="selectPatient(p)">
+                    <span class="pd-avatar"><i class="fa fa-user"></i></span>
+                    <span class="pd-patient__body">
+                      <span class="pd-patient__line">
+                        <span class="pd-patient__name">{{ p.name }}</span>
+                        <span class="text-muted">{{ codeLabel('gender', p.gender) }}</span>
+                      </span>
+                      <span class="pd-patient__id">{{ p.idNumber || '—' }}</span>
+                    </span>
+                  </button>
+                }
+              </div>
+              @if (hasMorePatients) {
+                <div class="p-2 border-top">
+                  <button type="button" class="btn tpi-btn tpi-cancel w-100" [disabled]="patientsLoadingMore"
+                    (click)="loadMorePatients()">
+                    {{ (patientsLoadingMore ? 'fhir_viewer.loading' : 'fhir_viewer.load_more') | translate }}
+                  </button>
+                </div>
+              }
+            </div>
+
+            <!-- 病人摘要 -->
+            @if (selectedPatient) {
+              <div class="card card-body mb-3">
+                <div class="pd-card-title">{{ 'fhir_viewer.patient_summary' | translate }}</div>
+                <div class="field-flex-start">
+                  <b>{{ selectedPatient.name }}</b>
+                  <span class="text-muted">{{ codeLabel('gender', selectedPatient.gender) }}</span>
+                </div>
+                <div class="pd-summary-rows mt-2">
+                  <div>
+                    <i class="fa fa-calendar"></i>
+                    <span class="text-muted">{{ 'fhir_viewer.birth_date' | translate }}:</span>
+                    <span>{{ selectedPatient.birthDate || '—' }}@if (patientAge !== null) { ({{ patientAge }} {{ 'fhir_viewer.age_unit' | translate }}) }</span>
+                  </div>
+                  <div>
+                    <i class="fa fa-id-card-o"></i>
+                    <span class="text-muted">{{ 'fhir_viewer.id_number' | translate }}:</span>
+                    <span class="pd-mono">{{ selectedPatient.idNumber || '—' }}</span>
+                  </div>
+                  <div>
+                    <i class="fa fa-phone"></i>
+                    <span class="text-muted">{{ 'fhir_viewer.phone' | translate }}:</span>
+                    <span>{{ selectedPatient.phone || '—' }}</span>
+                  </div>
+                  <div>
+                    <i class="fa fa-map-marker"></i>
+                    <span class="text-muted">{{ 'fhir_viewer.address' | translate }}:</span>
+                    <span>{{ selectedPatient.address || '—' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- 過篩資料（資源參照樹），僅資源檢視 / 完整 JSON 模式顯示 -->
+            @if (selectedPatient && everythingLoaded && viewMode !== 'summary') {
+              <div class="card card-body">
+                <div class="pd-card-title">{{ 'fhir_viewer.filtered_data' | translate }}</div>
+                <small class="text-muted d-block mb-2">
+                  {{ 'fhir_viewer.filtered_stats' | translate: {types: resourceTypeCount, count: everythingEntries.length} }}
+                </small>
+                <div class="pd-tree">
+                  @for (row of visibleRows; track row.key) {
+                    <div class="pd-tree__row" [style.padding-left.rem]="row.depth" [title]="row.key">
+                      <span class="pd-tree__type">{{ row.type }}</span>
+                      @if (row.summary) {
+                        <span class="pd-tree__summary">{{ row.summary }}</span>
+                      }
+                      @if (row.childCount > 0) {
+                        <span class="pd-tree__count">{{ 'fhir_viewer.items_count' | translate: {count: row.childCount} }}</span>
+                      }
+                      @if (row.hasChildren) {
+                        <button type="button" class="pd-tree__plus" (click)="toggleReveal(row)">
+                          <i class="fa" [ngClass]="revealed.has(row.key) ? 'fa-minus' : 'fa-plus'"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- 右欄：主內容（病歷摘要 / 資源檢視 / 完整 JSON） -->
+        <div class="col-12 col-lg-8 col-xl-9">
+          @if (!selectedPatient) {
+            <div class="card card-body text-center text-muted p-5">
+              <i class="fa fa-user fa-3x d-block mb-3"></i>
+              {{ 'fhir_viewer.select_patient_first' | translate }}
+            </div>
+          } @else {
+            <!-- 病人標題 + 檢視模式切換 -->
+            <div class="card card-body mb-3">
+              <div class="field-flex-space-between flex-wrap">
+                <div class="field-flex-start">
+                  <b style="font-size: 1.1rem">{{ selectedPatient.name }}</b>
+                  <span class="pd-tag-gray pd-mono">Patient/{{ selectedPatient.id }}</span>
+                </div>
+                <div class="field-flex-start">
+                  <button type="button" class="btn tpi-btn" [ngClass]="viewMode === 'summary' ? 'tpi-primary' : 'tpi-cancel'"
+                    (click)="viewMode = 'summary'">{{ 'fhir_viewer.view_summary' | translate }}</button>
+                  <button type="button" class="btn tpi-btn" [ngClass]="viewMode === 'resource' ? 'tpi-primary' : 'tpi-cancel'"
+                    (click)="viewMode = 'resource'">{{ 'fhir_viewer.view_resource' | translate }}</button>
+                  <button type="button" class="btn tpi-btn" [ngClass]="viewMode === 'json' ? 'tpi-primary' : 'tpi-cancel'"
+                    (click)="viewMode = 'json'">{{ 'fhir_viewer.view_json' | translate }}</button>
+                </div>
+              </div>
+              @if (everythingFailed) {
+                <small class="text-danger mt-2">{{ 'fhir_viewer.everything_failed' | translate }}</small>
+              }
+            </div>
+
+            @switch (viewMode) {
+              <!-- 病歷摘要：就診時間軸 -->
+              @case ('summary') {
+                @if (everythingLoaded && encounters.length === 0) {
+                  <div class="card card-body text-center text-muted">{{ 'fhir_viewer.no_encounter' | translate }}</div>
+                }
+                <div class="pd-timeline">
+                  @for (enc of encounters; track enc.id) {
+                    <div class="pd-timeline__item">
+                      <span class="pd-timeline__dot" [style.background]="encClassColor(enc.classCode)"></span>
+                      <div class="card overflow-hidden">
+                        <button type="button" class="pd-visit__head" (click)="toggleEncounter(enc)">
+                          <span class="pd-tag" [style.background]="encClassColor(enc.classCode)">{{ codeLabel('enc_class', enc.classCode) }}</span>
+                          <b>{{ enc.department || enc.serviceText || 'Encounter' }}</b>
+                          <span class="text-muted">{{ codeLabel('enc_status', enc.status) }}</span>
+                          <span class="pd-visit__date">{{ fmtDate(enc.start) }}@if (enc.end && enc.end !== enc.start) { – {{ fmtDate(enc.end) }} }</span>
+                          <i class="fa" [ngClass]="enc.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                        @if (enc.expanded) {
+                          <div class="card-body border-top">
+                            @if (enc.reasonText || enc.diagnosis) {
+                              <div class="mb-2">
+                                <i class="fa fa-file-text-o me-1"></i>{{ 'fhir_viewer.diagnosis' | translate }}: {{ enc.reasonText || enc.diagnosis }}
+                                @if (enc.reasonCode) { <span class="pd-code">{{ enc.reasonCode }}</span> }
+                              </div>
+                            }
+                            @if (enc.locationName || enc.identifier || enc.practitioner || enc.dischargeText) {
+                              <div class="pd-detail__meta">
+                                @if (enc.locationName) { <span><i class="fa fa-building-o"></i>{{ enc.locationName }}</span> }
+                                @if (enc.identifier) { <span><i class="fa fa-hashtag"></i>{{ 'fhir_viewer.encounter_no' | translate }} {{ enc.identifier }}</span> }
+                                @if (enc.practitioner) { <span><i class="fa fa-user-md"></i>{{ enc.practitioner }}</span> }
+                                @if (enc.dischargeText) { <span><i class="fa fa-sign-out"></i>{{ 'fhir_viewer.discharge' | translate }}: {{ enc.dischargeText }}</span> }
+                              </div>
+                            }
+                            @if (enc.meds.length > 0 || enc.labs.length > 0 || enc.reports.length > 0) {
+                              <div class="row mt-2 pt-2 border-top">
+                                @if (enc.meds.length > 0) {
+                                  <div class="col-12 col-md-6">
+                                    <div class="pd-card-title">{{ 'fhir_viewer.current_meds' | translate }}</div>
+                                    <ul class="pd-detail__list">
+                                      @for (m of enc.meds; track m.key) {
+                                        <li>
+                                          <b>{{ m.medication }}</b><span class="text-muted"> — {{ m.dosage }}</span>
+                                          @if (m.status) {
+                                            <span class="pd-pill" [ngClass]="medStatusClass(m.status)">{{ codeLabel('med_status', m.status) }}</span>
+                                          }
+                                        </li>
+                                      }
+                                    </ul>
+                                  </div>
+                                }
+                                @if (enc.labs.length > 0 || enc.reports.length > 0) {
+                                  <div class="col-12 col-md-6">
+                                    <div class="pd-card-title">{{ 'fhir_viewer.current_labs' | translate }}</div>
+                                    <ul class="pd-detail__list">
+                                      @for (lab of enc.labs; track lab.key) {
+                                        <li class="pd-lab">
+                                          <span>{{ lab.label }}</span>
+                                          <span class="pd-mono" [class.pd-lab--abn]="lab.flag">{{ lab.value }} {{ lab.unit }}</span>
+                                          @if (lab.flag === 'high') {
+                                            <span class="pd-flag pd-flag--high"><i class="fa fa-arrow-up"></i> {{ 'fhir_viewer.flag_high' | translate }}</span>
+                                          } @else if (lab.flag === 'low') {
+                                            <span class="pd-flag pd-flag--low"><i class="fa fa-arrow-down"></i> {{ 'fhir_viewer.flag_low' | translate }}</span>
+                                          }
+                                        </li>
+                                      }
+                                      @for (r of enc.reports; track r.key) {
+                                        <li>{{ r.code }}@if (r.conclusion) { <span class="text-muted"> — {{ r.conclusion }}</span> }</li>
+                                      }
+                                    </ul>
+                                  </div>
+                                }
+                              </div>
+                            }
+                            @if (enc.media.length > 0) {
+                              <div class="mt-2 pt-2 border-top">
+                                <div class="pd-card-title"><i class="fa fa-image me-1"></i>{{ 'fhir_viewer.media_docs' | translate }} ({{ enc.media.length }})</div>
+                                <ul class="pd-detail__list">
+                                  @for (md of enc.media; track md.key) {
+                                    <li>
+                                      {{ md.title }}
+                                      @if (md.url) {
+                                        <a [href]="md.url" target="_blank" rel="noopener noreferrer" class="ms-1">
+                                          <i class="fa fa-external-link"></i> {{ 'fhir_viewer.open_link' | translate }}
+                                        </a>
+                                      }
+                                    </li>
+                                  }
+                                </ul>
+                              </div>
+                            }
+                            @if (enc.meds.length === 0 && enc.labs.length === 0 && enc.reports.length === 0
+                              && enc.media.length === 0 && !enc.reasonText && !enc.diagnosis && !enc.locationName && !enc.practitioner) {
+                              <span class="text-muted">{{ 'fhir_viewer.no_more_detail' | translate }}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+              <!-- 資源檢視：與左側過篩資料樹同步的卡片清單 -->
+              @case ('resource') {
+                @if (visibleRows.length === 0) {
+                  <div class="card card-body text-center text-muted">{{ 'fhir_viewer.expand_hint' | translate }}</div>
+                }
+                <div class="d-flex flex-column gap-3">
+                  @for (row of visibleRows; track row.key) {
+                    <div class="card overflow-hidden" [style.margin-left.rem]="row.depth * 1.5"
+                      [class.pd-rescard--nested]="row.depth > 0">
+                      <button type="button" class="pd-rescard__head" (click)="toggleCard(row)">
+                        <b>{{ row.key }}</b>
+                        @if (row.summary) {
+                          <span class="pd-rescard__summary">{{ row.summary }}</span>
+                        }
+                        <i class="fa" [ngClass]="expandedCards.has(row.key) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                      </button>
+                      @if (expandedCards.has(row.key)) {
+                        <div class="px-3 pb-3">
+                          <pre class="json-view">{{ cardJson(row.key) }}</pre>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+              <!-- 完整 JSON：$everything 合併後的 Bundle -->
+              @case ('json') {
+                <div class="card card-body">
+                  <div class="field-flex-end mb-2">
+                    <button type="button" class="btn tpi-btn tpi-cancel" (click)="copyJson()">
+                      <i class="fa" [ngClass]="copiedJson ? 'fa-check' : 'fa-copy'"></i>
+                      {{ (copiedJson ? 'fhir_viewer.copied' : 'fhir_viewer.copy') | translate }}
+                    </button>
+                  </div>
+                  <pre class="json-view pd-json-full">{{ everythingJson }}</pre>
+                </div>
+              }
+            }
+
+            <!-- 分頁：依 $everything 總筆數 / 每頁筆數（everythingPageSize）呈現頁數 -->
+            @if (everythingLoaded && everythingTotal !== null && everythingTotal > everythingPageSize) {
+              <div class="card card-body mt-3 p-2 align-items-center">
+                <p-paginator [first]="everythingFirst" [rows]="everythingPageSize" [totalRecords]="everythingTotal"
+                  (onPageChange)="onEverythingPageChange($event)"></p-paginator>
+              </div>
+            }
+          }
+        </div>
+      </div>
+      }
+      </div>
+    </div>
+  </form>
+</app-container>

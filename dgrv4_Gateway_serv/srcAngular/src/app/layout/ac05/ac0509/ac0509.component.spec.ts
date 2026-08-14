@@ -1,11 +1,11 @@
 import { Ac0509Component } from './ac0509.component';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 describe('Sc0003Component', () => {
   let component: Ac0509Component;
   let fixture: ComponentFixture<Ac0509Component>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ Ac0509Component ]
     })

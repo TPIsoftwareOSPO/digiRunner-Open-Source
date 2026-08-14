@@ -40,6 +40,7 @@ import { SelectModule } from 'primeng/select';
 import { PopoverModule } from 'primeng/popover';
 import { TabsModule } from 'primeng/tabs';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { PaginatorModule } from 'primeng/paginator';
 
 
 const sharedModules: any[] = [
@@ -79,7 +80,8 @@ const sharedModules: any[] = [
   IconFieldModule,
   InputIconModule,
   TabsModule,
-  ProgressBarModule
+  ProgressBarModule,
+  PaginatorModule
 ];
 @NgModule({
   imports: [CommonModule],

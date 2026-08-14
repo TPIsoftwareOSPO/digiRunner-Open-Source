@@ -4,7 +4,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ActivatedRoute } from '@angular/router';
 import { AiService } from 'src/app/shared/services/api-ai.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { SortEvent } from 'primeng/api';
 import { Table } from 'primeng/table';
 

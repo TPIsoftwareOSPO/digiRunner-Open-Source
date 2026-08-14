@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Note Generator"
+  short_description: "依 commit message 產出內外部 Release Note"
+  default_prompt: "Use $release-note-generator to generate internal and external release notes."

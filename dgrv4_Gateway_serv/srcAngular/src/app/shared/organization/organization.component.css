@@ -57,3 +57,25 @@ body .ui-tree.ui-tree-horizontal .ui-treenode .ui-treenode-content.ui-state-high
   color: #FFFFFF;
   background: #FF6E38;
 }
+
+/* 加粗組織圖節點間的連接線，提升階層關係的辨識度。 */
+.p-organizationchart-connector-down {
+  width: 2px;
+  background: #b8b8b8;
+}
+
+.p-organizationchart-connector-top {
+  border-block-start-width: 2px;
+  border-block-start-color: #b8b8b8;
+}
+
+.p-organizationchart-connector-left {
+  border-inline-end-width: 2px;
+  border-inline-end-color: #b8b8b8;
+}
+
+.p-organizationchart-connectors
+  :nth-child(1 of .p-organizationchart-connector-right) {
+  border-inline-start-width: 2px;
+  border-inline-start-color: #b8b8b8;
+}

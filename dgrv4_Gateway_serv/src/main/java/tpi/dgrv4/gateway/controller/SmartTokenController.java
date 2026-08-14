@@ -41,6 +41,7 @@ import tpi.dgrv4.gateway.service.SmartTokenService;
  * - RFC 6749 §4.1.3（Authorization Code Grant - Access Token Request）
  * - RFC 6749 §5.1（Successful Response：Cache-Control: no-store, Pragma: no-cache）
  */
+@SuppressWarnings("java:S5122")//Allow any domain for sonarqube scan
 @CrossOrigin
 @RestController
 public class SmartTokenController {

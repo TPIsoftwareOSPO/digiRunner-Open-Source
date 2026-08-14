@@ -1,11 +1,8 @@
+<app-container [title]="'smart_launcher.title' | translate">
 <div class="smart-launcher">
 
-  <p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>
-
-  <h2 class="text-primary launcher-title">{{ 'smart_launcher.title' | translate }}</h2>
-  <br/>
-
   <!-- Tabs（Bootstrap nav，導覽用排版） -->
+  <div class="launcher-panel">
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" [class.active]="activeTab === 'launch'" (click)="activeTab = 'launch'">
       <b role="tab">{{ 'smart_launcher.tab_launch' | translate }}</b>
@@ -22,7 +19,7 @@
       <div class="row">
 
         <!-- Left column -->
-        <div [class]="launchType === 'backend_services' ? 'col-sm-12' : 'col-sm-6'">
+        <div class="col-sm-6">
 
           <!-- Launch Type -->
           <div class="form-group">
@@ -61,30 +58,16 @@
             </div>
           </div>
 
-          <!-- Misc. Options -->
-          <div class="form-group" *ngIf="launchType !== 'backend_services'">
+          <!-- Misc. Options（目前僅 EHR 風格 launch 有選項，standalone 不顯示空區塊） -->
+          <div class="form-group" *ngIf="launchType === 'provider_ehr' || launchType === 'patient_portal'">
             <div class="divider-bottom">
               <label class="text-primary">{{ 'smart_launcher.misc_options' | translate }}</label>
             </div>
-            <div class="field-checkbox mt-2" *ngIf="launchType === 'provider_ehr' || launchType === 'patient_portal'">
+            <div class="field-checkbox mt-2">
               <p-checkbox [(ngModel)]="simEhr" [binary]="true" inputId="simEhr"></p-checkbox>
               <label for="simEhr" class="ms-2">
                 {{ 'smart_launcher.sim_ehr' | translate }}
                 <span class="text-muted small"> {{ 'smart_launcher.sim_ehr_hint' | translate }}</span>
-              </label>
-            </div>
-            <div class="field-checkbox mt-2" *ngIf="launchType !== 'provider_ehr'">
-              <p-checkbox [(ngModel)]="skipLogin" [binary]="true" inputId="skipLogin"></p-checkbox>
-              <label for="skipLogin" class="ms-2">
-                {{ 'smart_launcher.skip_login' | translate }}
-                <span class="text-muted small"> {{ 'smart_launcher.skip_login_hint' | translate }}</span>
-              </label>
-            </div>
-            <div class="field-checkbox mt-2" *ngIf="launchType !== 'provider_ehr'">
-              <p-checkbox [(ngModel)]="skipAuth" [binary]="true" inputId="skipAuth"></p-checkbox>
-              <label for="skipAuth" class="ms-2">
-                {{ 'smart_launcher.skip_auth' | translate }}
-                <span class="text-muted small"> {{ 'smart_launcher.skip_auth_hint' | translate }}</span>
               </label>
             </div>
           </div>
@@ -92,18 +75,18 @@
         </div>
 
         <!-- Right column -->
-        <div class="col-sm-6" *ngIf="launchType !== 'backend_services'">
+        <div class="col-sm-6">
 
           <!-- Patient -->
           <div class="form-group picker-container">
             <label class="text-primary" for="patient">{{ 'smart_launcher.patient' | translate }}</label>
-            <div class="p-inputgroup">
-              <input pInputText type="text" id="patient"
+            <div class="ui-inputgroup">
+              <input type="text" id="patient" class="form-control"
                 [(ngModel)]="patientId"
                 (ngModelChange)="onPatientIdsInputChange()"
                 [placeholder]="'smart_launcher.patient_ids_placeholder' | translate"
                 (blur)="onPatientIdBlur()" />
-              <button pButton type="button" icon="fa fa-search"
+              <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
                 [pTooltip]="'smart_launcher.search_patients' | translate"
                 (click)="togglePatientPicker()"></button>
             </div>
@@ -124,9 +107,10 @@
                     [placeholder]="patientSearchMode === 'name' ? ('smart_launcher.search_by_name' | translate) : ('smart_launcher.search_by_id' | translate)"
                     [(ngModel)]="patientSearchKeyword"
                     (keyup.enter)="searchPatients()" />
-                  <button pButton type="button" (click)="searchPatients()" [disabled]="patientSearching">
-                    {{ patientSearching ? ('smart_launcher.searching' | translate) : ('smart_launcher.search' | translate) }}
-                  </button>
+                  <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
+                    [pTooltip]="'smart_launcher.search' | translate"
+                    [attr.aria-label]="'smart_launcher.search' | translate"
+                    (click)="searchPatients()" [disabled]="patientSearching"></button>
                 </div>
                 <button pButton [text]="true" type="button" class="picker-close" (click)="showPatientPicker = false">&times;</button>
               </div>
@@ -187,12 +171,12 @@
           <!-- Provider -->
           <div class="form-group picker-container" *ngIf="showProvider">
             <label class="text-primary" for="provider">{{ 'smart_launcher.provider' | translate }}</label>
-            <div class="p-inputgroup">
-              <input pInputText type="text" id="provider"
+            <div class="ui-inputgroup">
+              <input type="text" id="provider" class="form-control"
                 [(ngModel)]="providerIds"
                 (ngModelChange)="onProviderIdsInputChange()"
                 [placeholder]="'smart_launcher.provider_ids_placeholder' | translate" />
-              <button pButton type="button" icon="fa fa-search"
+              <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
                 [pTooltip]="'smart_launcher.search_providers' | translate"
                 (click)="toggleProviderPicker()"></button>
             </div>
@@ -213,9 +197,10 @@
                     [placeholder]="providerSearchMode === 'name' ? ('smart_launcher.search_by_name' | translate) : ('smart_launcher.search_by_id' | translate)"
                     [(ngModel)]="providerSearchKeyword"
                     (keyup.enter)="searchProviders()" />
-                  <button pButton type="button" (click)="searchProviders()" [disabled]="providerSearching">
-                    {{ providerSearching ? ('smart_launcher.searching' | translate) : ('smart_launcher.search' | translate) }}
-                  </button>
+                  <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-night input-btn"
+                    [pTooltip]="'smart_launcher.search' | translate"
+                    [attr.aria-label]="'smart_launcher.search' | translate"
+                    (click)="searchProviders()" [disabled]="providerSearching"></button>
                 </div>
                 <button pButton [text]="true" type="button" class="picker-close" (click)="showProviderPicker = false">&times;</button>
               </div>
@@ -350,7 +335,7 @@
       <hr />
 
       <!-- Client Type + PKCE (two columns) -->
-      <div class="row" *ngIf="launchType !== 'backend_services'">
+      <div class="row">
         <div class="col-sm-6">
           <div class="form-group">
             <label class="text-primary">{{ 'smart_launcher.client_type' | translate }}</label>
@@ -397,7 +382,7 @@
         </div>
       </div>
 
-      <hr *ngIf="launchType !== 'backend_services'" />
+      <hr />
 
       <!-- Client ID + Scope -->
       <div class="row">
@@ -455,13 +440,31 @@
       <!-- JWKS JSON -->
       <div *ngIf="showJwks">
         <div class="form-group">
-          <label class="text-primary">{{ 'smart_launcher.jwks_json' | translate }}</label>
+          <div class="d-flex align-items-center justify-content-between">
+            <label class="text-primary mb-0">{{ 'smart_launcher.jwks_json' | translate }}</label>
+            <button pButton [outlined]="true" type="button" class="p-button-sm"
+              (click)="generateAsymmetricKeypair()">
+              {{ 'smart_launcher.generate_keypair' | translate }}
+            </button>
+          </div>
           <textarea pTextarea class="w-100 jwks-textarea" rows="4"
             [(ngModel)]="jwksJson"
             placeholder='{ "keys": [...] }'
             spellcheck="false"></textarea>
           <span class="help-block small">
             {{ 'smart_launcher.jwks_json_hint' | translate }}
+          </span>
+        </div>
+
+        <!-- 私鑰（簽章用，demo）：僅前端持有，不寫入 client 設定 -->
+        <div class="form-group">
+          <label class="text-primary">{{ 'smart_launcher.private_key' | translate }}</label>
+          <textarea pTextarea class="w-100 jwks-textarea" rows="4"
+            [(ngModel)]="privateKeyInput"
+            placeholder='{ "kty": "RSA", ... }  或  -----BEGIN PRIVATE KEY-----'
+            spellcheck="false"></textarea>
+          <span class="help-block small">
+            {{ 'smart_launcher.private_key_hint' | translate }}
           </span>
         </div>
       </div>
@@ -507,49 +510,45 @@
           </div>
         </div>
       </div>
-      <button pButton type="button" (click)="saveSmartConfig()">
+      <button type="button" class="btn tpi-btn tpi-primary smart-action-button" (click)="saveSmartConfig()">
         {{ 'smart_launcher.cfg_save' | translate }}
       </button>
 
     </div>
 
   </div>
+  </div>
 
   <!-- ═══════ Bottom Launch Box ═══════ -->
   <div class="launch-box">
 
-    <!-- App Launch URL (all non-backend modes) -->
-    <div *ngIf="launchType !== 'backend_services'">
+    <!-- App Launch URL -->
+    <div>
       <h4 class="text-primary launch-box-title">{{ 'smart_launcher.app_launch_url' | translate }}</h4>
-      <div class="launch-box-row">
-        <div class="launch-box-input">
-          <div class="p-inputgroup">
-            <input pInputText type="text" class="mono-input"
-              [(ngModel)]="appLaunchUrl"
-              [placeholder]="'smart_launcher.app_launch_url_placeholder' | translate" />
-            <button pButton type="button"
-              (click)="launch()"
-              [disabled]="!appLaunchUrl || !proxyName">{{ 'smart_launcher.launch_btn' | translate }}</button>
-          </div>
-        </div>
-        <div class="launch-box-sample">
-          <button pButton [outlined]="true" type="button" (click)="launchSampleApp()">
-            <span class="text-success">{{ 'smart_launcher.launch_sample_app' | translate }}</span>
-          </button>
-        </div>
+      <div class="p-inputgroup">
+        <input pInputText type="text" class="mono-input"
+          [(ngModel)]="appLaunchUrl"
+          [placeholder]="'smart_launcher.app_launch_url_placeholder' | translate" />
+        <button type="button" class="btn tpi-btn tpi-primary smart-action-button launch-action"
+          (click)="launch()"
+          [disabled]="!appLaunchUrl || !proxyName">{{ 'smart_launcher.launch_btn' | translate }}</button>
       </div>
       <span class="small text-muted">
         {{ 'smart_launcher.app_launch_url_hint' | translate }}
       </span>
+      <div class="mt-3">
+        <button type="button" class="btn tpi-btn tpi-second smart-action-button" (click)="launchSampleApp()">
+          {{ 'smart_launcher.launch_sample_app' | translate }}
+        </button>
+      </div>
     </div>
 
-    <!-- FHIR Base URL (standalone + backend) -->
-    <div *ngIf="isStandaloneLaunch || launchType === 'backend_services'"
-      [class.mt-2]="launchType !== 'backend_services'">
+    <!-- FHIR Base URL (standalone) -->
+    <div *ngIf="isStandaloneLaunch" class="mt-2">
       <h4 class="text-primary launch-box-title">{{ 'smart_launcher.fhir_base_url' | translate }}</h4>
       <div class="p-inputgroup">
         <input pInputText type="text" class="mono-input" [value]="fhirBaseUrl" readonly />
-        <button pButton type="button"
+        <button type="button" class="btn tpi-btn tpi-second launch-action"
           (click)="copyFhirBaseUrl()">{{ copySuccess ? ('smart_launcher.copied' | translate) : ('smart_launcher.copy_url' | translate) }}</button>
       </div>
       <span class="small text-muted">
@@ -566,3 +565,5 @@
   </p>
 
 </div>
+</app-container>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

@@ -8,7 +8,7 @@ import { ListService } from 'src/app/shared/services/api-list.service';
 import { MailService } from 'src/app/shared/services/api-mail.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { BaseComponent } from '../../base-component';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { MessageService } from 'primeng/api';
 import { DPB0117Req, DPB0117Resp } from 'src/app/models/api/MailService/dpb0117.interface';
 import { NgxUiLoaderService } from 'ngx-ui-loader';

@@ -33,7 +33,10 @@ public class DgrRdbConnection {
 	
 	@Column(name = "max_pool_size")
 	private Integer maxPoolSize = 10;
-
+	
+	@Column(name = "minimum_idle")
+	private Integer minimumIdle = 10;
+	
 	@Column(name = "connection_timeout")
 	private Long connectionTimeout = 30000L;
 
@@ -65,10 +68,11 @@ public class DgrRdbConnection {
 	@Override
 	public String toString() {
 		return "DgrRdbConnection [connectionName=" + connectionName + ", jdbcUrl=" + jdbcUrl + ", userName=" + userName
-				+ ", mima=" + mima + ", maxPoolSize=" + maxPoolSize + ", connectionTimeout=" + connectionTimeout
-				+ ", idleTimeout=" + idleTimeout + ", maxLifetime=" + maxLifetime + ", dataSourceProperty="
-				+ dataSourceProperty + ", createDateTime=" + createDateTime + ", createUser=" + createUser
-				+ ", updateDateTime=" + updateDateTime + ", updateUser=" + updateUser + ", version=" + version + "]";
+				+ ", mima=" + mima + ", maxPoolSize=" + maxPoolSize + ", minimumIdle=" + minimumIdle
+				+ ", connectionTimeout=" + connectionTimeout + ", idleTimeout=" + idleTimeout + ", maxLifetime="
+				+ maxLifetime + ", dataSourceProperty=" + dataSourceProperty + ", createDateTime=" + createDateTime
+				+ ", createUser=" + createUser + ", updateDateTime=" + updateDateTime + ", updateUser=" + updateUser
+				+ ", version=" + version + "]";
 	}
 
 	public String getConnectionName() {
@@ -181,6 +185,14 @@ public class DgrRdbConnection {
 
 	public void setVersion(Long version) {
 		this.version = version;
+	}
+
+	public Integer getMinimumIdle() {
+		return minimumIdle;
+	}
+
+	public void setMinimumIdle(Integer minimumIdle) {
+		this.minimumIdle = minimumIdle;
 	}
 
 }

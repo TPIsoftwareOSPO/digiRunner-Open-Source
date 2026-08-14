@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ToolService } from "../services/tool.service";
 import { DynamicDialogConfig, DynamicDialogRef } from "primeng/dynamicdialog";
 import { DPB0190RespItem } from "src/app/models/api/ServerService/dpb0190.interface";
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ServerService } from "../services/api-server.service";
 
 @Component({

@@ -3,7 +3,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 
 @Component({

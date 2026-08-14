@@ -327,9 +327,9 @@
         </div>
         <div class="col-lg-4">
           <label class="control-label" for="startTime">{{'service_time' | translate}}</label>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <app-timepicker formControlName="svcST"></app-timepicker>
-            <span class="px-1">～</span>
+            <span class="px-1 form-field-affix">～</span>
             <app-timepicker formControlName="svcET"></app-timepicker>
           </div>
         </div>
@@ -416,6 +416,7 @@
           </div>
           <div *ngIf="emails.invalid && (emails.dirty || emails.touched)" class="text-danger">
             <small class="form-text">{{emails.errors.maxlength | translate:maxlength500}}</small>
+            <small *ngIf="emails.errors.mailFormat" class="form-text">{{emails.errors.mailFormat | translate}}</small>
           </div>
         </div>
       </div>
@@ -511,9 +512,9 @@
         </div>
         <div class="col-lg-4">
           <label class="control-label" for="startTime">{{'service_time' | translate}}</label>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <app-timepicker formControlName="newSvcST"></app-timepicker>
-            <span class="px-1">～</span>
+            <span class="px-1 form-field-affix">～</span>
             <app-timepicker formControlName="newSvcET"></app-timepicker>
           </div>
         </div>
@@ -580,6 +581,7 @@
           </div>
           <div *ngIf="newEmails.invalid && (newEmails.dirty || newEmails.touched)" class="text-danger">
             <small class="form-text">{{newEmails.errors.maxlength | translate:maxlength500}}</small>
+            <small *ngIf="newEmails.errors.mailFormat" class="form-text">{{newEmails.errors.mailFormat | translate}}</small>
           </div>
         </div>
       </div>

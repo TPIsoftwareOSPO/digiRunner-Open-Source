@@ -13,6 +13,7 @@ public class DPB0193Req extends ReqValidator{
 	private String userName;
 	private String mima;
 	private Integer maxPoolSize;
+	private Integer minimumIdle;
 	private Long connectionTimeout;
 	private Long idleTimeout;
 	private Long maxLifetime;
@@ -108,6 +109,16 @@ public class DPB0193Req extends ReqValidator{
 	}
 
 
+	public Integer getMinimumIdle() {
+		return minimumIdle;
+	}
+
+
+	public void setMinimumIdle(Integer minimumIdle) {
+		this.minimumIdle = minimumIdle;
+	}
+
+
 	@Override
 	protected List<BeforeControllerRespItem> provideConstraints(String locale) {
 		return Arrays.asList(new BeforeControllerRespItem[] {
@@ -135,6 +146,13 @@ public class DPB0193Req extends ReqValidator{
 				.build(),
 				new BeforeControllerRespItemBuilderSelector()
 				.buildInt(locale)
+				.field("minimumIdle")
+				.isRequired()
+				.min(0)
+				.max(2147483647)
+				.build(),
+				new BeforeControllerRespItemBuilderSelector()
+				.buildInt(locale)
 				.field("connectionTimeout")
 				.isRequired()
 				.min(0)
@@ -144,7 +162,7 @@ public class DPB0193Req extends ReqValidator{
 				.buildInt(locale)
 				.field("idleTimeout")
 				.isRequired()
-				.min(0)
+				.min(10000)
 				.max(2147483647)
 				.build(),
 				new BeforeControllerRespItemBuilderSelector()

@@ -101,8 +101,7 @@
   }
 }
 
-.p-dropdown-clear-icon,
-.p-input-icon-right > i {
+.p-dropdown-clear-icon {
   transform: translateY(25%);
 }
 
@@ -476,6 +475,23 @@ p-table .p-datatable-table{
   }
 }
 
+.p-dialog.p-confirmdialog .p-dialog-header-actions p-button:last-child,
+.p-dialog.p-confirmdialog .p-dialog-header-actions p-button:last-child > button,
+p-dynamicdialog .p-dialog .p-dialog-header-actions p-button:last-child,
+p-dynamicdialog .p-dialog .p-dialog-header-actions p-button:last-child > button{
+  background: #434343;
+  border-color: #434343;
+}
+
+.p-dialog.p-confirmdialog .p-dialog-header-actions p-button:last-child:hover,
+.p-dialog.p-confirmdialog .p-dialog-header-actions p-button:last-child:hover > button,
+p-dynamicdialog .p-dialog .p-dialog-header-actions p-button:last-child:hover,
+p-dynamicdialog .p-dialog .p-dialog-header-actions p-button:last-child:hover > button{
+  background: #434343;
+  border-color: #434343;
+  color: var(--tpi-primary);
+}
+
 .p-menu{
   .p-menu-item-content{
     margin: 2px;
@@ -501,6 +517,3 @@ button.p-button-secondary {
     border-color: var(--p-gray-500);
   }
 }
-
-
-

@@ -19,7 +19,12 @@ public interface TsmpDpMailLogDao extends JpaRepository<TsmpDpMailLog, Long> {
 	public List<TsmpDpMailLog> findByCreateUser(String createUser);
 	
 	public List<TsmpDpMailLog> findByMaillogIdAndRecipients(Long maillogId, String recipients);
-	
+
+	public List<TsmpDpMailLog> findByRefCodeIn(List<String> refCodes);
+
+	public List<TsmpDpMailLog> findByRefCodeInAndCreateDateTimeBetween(List<String> refCodes, Date startDate,
+			Date endDate);
+
 	public List<TsmpDpMailLog> queryMailLogList(String startDate, String endDate, String result, Long id,
 			String keyword, Integer pageSize);
 

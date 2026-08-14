@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
@@ -17,7 +17,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import * as FileSaver from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Component({
     selector: 'app-websocket-proxy',
@@ -27,6 +27,7 @@ import * as dayjs from 'dayjs';
     standalone: false
 })
 export class WebsocketProxyComponent extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
@@ -265,7 +266,7 @@ export class WebsocketProxyComponent extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   exportWebsocketProxy(){

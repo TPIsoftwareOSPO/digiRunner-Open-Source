@@ -52,6 +52,7 @@ public class DPB0191Service {
 			resp.setUpdateDateTime(info.getUpdateDateTime());
 			resp.setUpdateUser(info.getUpdateUser());
 			resp.setUserName(info.getUserName());
+			resp.setMinimumIdle(info.getMinimumIdle());
 
 		} catch (TsmpDpAaException e) {
 			throw e;

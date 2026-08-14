@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -6,13 +6,14 @@ import { DPB0179IdPInfoItem } from 'src/app/models/api/ServerService/dpb0179.int
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0181LdapDataItem, DPB0181Req } from 'src/app/models/api/ServerService/dpb0181.interface';
 import { DPB0180Req, DPB0180Resp } from 'src/app/models/api/ServerService/dpb0180.interface';
 import { DPB0182LdapDataItem, DPB0182Req } from 'src/app/models/api/ServerService/dpb0182.interface';
 import { DomSanitizer } from '@angular/platform-browser';
+import * as ValidatorFns from 'src/app/shared/validator-functions';
 
 @Component({
     selector: 'app-ac0019',
@@ -22,6 +23,8 @@ import { DomSanitizer } from '@angular/platform-browser';
     standalone: false
 })
 export class Ac0019Component extends BaseComponent implements OnInit {
+
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
 
   currentTitle: string = this.title;
   currentAction: string = '';
@@ -54,7 +57,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
       status: new UntypedFormControl(),
       ldapTimeout: new UntypedFormControl(),
       policy: new UntypedFormControl(),
-      approvalResultMail: new UntypedFormControl(),
+      approvalResultMail: new UntypedFormControl('', ValidatorFns.multipleMailValidator()),
       iconFile: new UntypedFormControl(),
       pageTitle: new UntypedFormControl(),
       ldapDataList: new UntypedFormControl(),
@@ -102,6 +105,8 @@ export class Ac0019Component extends BaseComponent implements OnInit {
         this.serverService.createIdPInfo_mldap_before().subscribe(res => {
           if (this.toolService.checkDpSuccess(res.ResHeader)) {
             this.addFormValidator(this.form, res.RespBody.constraints);
+            this.approvalResultMail.addValidators(ValidatorFns.multipleMailValidator());
+            this.approvalResultMail.updateValueAndValidity();
             this.currentTitle = `${this.title} > ${dict['button.create']}`;
             this.pageNum = 2;
             this.status.markAsTouched();
@@ -155,6 +160,8 @@ export class Ac0019Component extends BaseComponent implements OnInit {
             this.serverService.updateIdPInfo_mldap_before().subscribe(valid =>{
               if (this.toolService.checkDpSuccess(valid.ResHeader)) {
                 this.addFormValidator(this.form, valid.RespBody.constraints);
+                this.approvalResultMail.addValidators(ValidatorFns.multipleMailValidator());
+                this.approvalResultMail.updateValueAndValidity();
                 this.currentTitle = `${this.title} > ${dict['button.update']}`;
                 this.pageNum = 2;
               }
@@ -175,7 +182,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   checkLdapDataListValid() {
@@ -210,7 +217,7 @@ export class Ac0019Component extends BaseComponent implements OnInit {
 
   public clearFile() {
     this._fileSrc = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   create() {

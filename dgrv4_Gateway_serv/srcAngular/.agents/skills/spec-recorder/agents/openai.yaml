@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Recorder"
+  short_description: "依本次對話產出可追溯的工作規格紀錄"
+  default_prompt: "Use $spec-recorder to document this session in doc/specs/."

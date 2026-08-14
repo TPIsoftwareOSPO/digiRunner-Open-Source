@@ -21,7 +21,7 @@
         <!-- 匯入 -->
         <div style="display: flex;align-items: center;">
           <div class="ui-inputgroup me-2">
-            <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
+            <input type="file" id="file" #fileRef style="display: none;" accept=".xlsx" (change)="fileChange($event)">
             <input type="text" class="form-control" value="{{fileName}}" readOnly
               placeholder="{{'upload_file' | translate}}">
             <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"

@@ -50,11 +50,12 @@
             <div class="col-6">
               <label id="newUserMail_label" for="newUserMail" class="control-label">{{'new_user_mail' |
                 translate}}</label>
-              <input type="text" class="form-control" id="newUserMail" formControlName="newUserMail"
+              <input type="email" class="form-control" id="newUserMail" formControlName="newUserMail"
                 placeholder="{{'new_user_mail' | translate}}">
               <div *ngIf="newUserMail?.invalid && (newUserMail?.dirty || newUserMail?.touched)" class="text-danger">
                 <small class="form-text">{{newUserMail.errors.maxlength}}</small>
                 <small class="form-text">{{newUserMail.errors.pattern}}</small>
+                <small *ngIf="newUserMail.errors.mailFormat" class="form-text">{{newUserMail.errors.mailFormat | translate}}</small>
                 <small class="form-text">{{newUserMail.errors.isRequired}}</small>
               </div>
             </div>

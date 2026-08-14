@@ -1,7 +1,7 @@
-<form action="" class="d-flex form-group" [formGroup]="form">
+<form action="" class="d-flex align-items-center form-group mb-0" [formGroup]="form">
   <input type="text" class="form-control text-center" style="width:60px;" name="hour" maxlength="2"
     (keypress)="numberOnly($event)" (blur)="inputChange($event)" formControlName="hour" placeholder="HH">
-  <div>：</div>
+  <div class="d-flex align-items-center justify-content-center form-field-affix">：</div>
   <input type="text" class="form-control text-center" style="width:60px;" formControlName="minute" maxlength="2"
     (keypress)="numberOnly($event)" (blur)="inputChange($event)" placeholder="MM">
 </form>

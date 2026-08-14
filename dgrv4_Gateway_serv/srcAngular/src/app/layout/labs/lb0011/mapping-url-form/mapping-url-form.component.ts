@@ -122,7 +122,7 @@ export class MappingUrlFormComponent extends BaseComponent implements OnInit {
                 this.form.controls[row.key].setValidators([
                   ValidatorFns.requiredValidator(),
                 ]);
-                $(`#${row.key}_label`).addClass('required');
+                document.getElementById(`${row.key}_label`)?.classList.add('required');
               }
               this.form.controls[row.key]?.setValue(row.value);
             });
@@ -154,7 +154,7 @@ export class MappingUrlFormComponent extends BaseComponent implements OnInit {
                 this.form.controls[row.key].setValidators([
                   ValidatorFns.requiredValidator(),
                 ]);
-                $(`#${row.key}_label`).addClass('required');
+                document.getElementById(`${row.key}_label`)?.classList.add('required');
               }
               this.form.controls[row.key]?.setValue(row.value);
             });
@@ -188,7 +188,7 @@ export class MappingUrlFormComponent extends BaseComponent implements OnInit {
                 this.form.controls[row.key].setValidators([
                   ValidatorFns.requiredValidator(),
                 ]);
-                $(`#${row.key}_label`).addClass('required');
+                document.getElementById(`${row.key}_label`)?.classList.add('required');
               }
               this.form.controls[row.key]?.setValue(row.value);
             });
@@ -222,7 +222,7 @@ export class MappingUrlFormComponent extends BaseComponent implements OnInit {
                 this.form.controls[row.key].setValidators([
                   ValidatorFns.requiredValidator(),
                 ]);
-                $(`#${row.key}_label`).addClass('required');
+                document.getElementById(`${row.key}_label`)?.classList.add('required');
               }
               this.form.controls[row.key]?.setValue(row.value);
             });

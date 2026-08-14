@@ -5,7 +5,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { DPB0088certItem, DPB0088Req } from 'src/app/models/api/CertificateAuthorityService/dpb0088.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ClientCAService } from 'src/app/shared/services/api-certificate-authority.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0087Req } from 'src/app/models/api/CertificateAuthorityService/dpb0087.interface';

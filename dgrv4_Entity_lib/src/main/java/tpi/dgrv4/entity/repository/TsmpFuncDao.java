@@ -28,4 +28,6 @@ public interface TsmpFuncDao extends JpaRepository<TsmpFunc, TsmpFuncId> {
 	public List<TsmpFunc> findMasterFuncList(String locale);
 	
 	public List<TsmpFunc> findByLocaleAndFuncTypeAndFuncCodeStartsWithOrderByFuncCodeAsc(String locale, String funcType, String funcCode);
+
+	public List<TsmpFunc> findByFuncTypeAndLocaleIn(String funcType, List<String> locale);
 }

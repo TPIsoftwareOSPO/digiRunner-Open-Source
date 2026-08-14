@@ -436,6 +436,8 @@ export enum TxID {
   createAndUpdateBotDetectionList = 'DPB0233',
   testEsConnection = 'DPB9938',
   testKibanaConnection = 'DPB9939',
+  exportMultilingual = 'DPB9940',
+  importMultilingual = 'DPB9941',
   queryWebhookNotify = 'DPB0280',
   createWebhookNotify = 'DPB0281',
   getWebhookNotify = 'DPB0282',
@@ -498,6 +500,7 @@ export enum TxID {
   addSticky = 'DPB0318',
   batchUpdateSticky = 'DPB0319',
   batchDeleteSticky = 'DPB0320',
+  testSmartOnFhirProxyRelay = 'DPB0341',
   // SMART Client 管理
   querySmartClientList = 'DPB0330',
   createSmartClient = 'DPB0331',

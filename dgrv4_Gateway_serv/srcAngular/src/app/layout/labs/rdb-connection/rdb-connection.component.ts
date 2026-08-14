@@ -7,7 +7,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { DPB0190Resp, DPB0190RespItem } from 'src/app/models/api/ServerService/dpb0190.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0192Req } from 'src/app/models/api/ServerService/dpb0192.interface';
 import { DPB0200Req } from 'src/app/models/api/ServerService/dpb0200.interface';
@@ -65,6 +65,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
       userName: new UntypedFormControl(''),
       mima: new UntypedFormControl(''),
       maxPoolSize: new UntypedFormControl(''),
+      minimumIdle: new UntypedFormControl(''),
       connectionTimeout: new UntypedFormControl(''),
       idleTimeout: new UntypedFormControl(''),
       maxLifetime: new UntypedFormControl(''),
@@ -126,6 +127,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
             this.pageNum = 2;
             this.addFormValidator(this.formEdit, res.RespBody.constraints);
             this.maxPoolSize.setValue(10);
+            this.minimumIdle.setValue(10);
             this.connectionTimeout.setValue(30000);
             this.idleTimeout.setValue(600000);
             this.maxLifetime.setValue(1800000);
@@ -143,6 +145,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
             this.userName.setValue(res.RespBody.userName);
             this.mima.setValue(res.RespBody.mima);
             this.maxPoolSize.setValue(res.RespBody.maxPoolSize);
+            this.minimumIdle.setValue(res.RespBody.minimumIdle);
             this.connectionTimeout.setValue(res.RespBody.connectionTimeout);
             this.idleTimeout.setValue(res.RespBody.idleTimeout);
             this.maxLifetime.setValue(res.RespBody.maxLifetime);
@@ -168,6 +171,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
               this.userName.setValue(res.RespBody.userName);
               this.mima.setValue(res.RespBody.mima);
               this.maxPoolSize.setValue(res.RespBody.maxPoolSize);
+              this.minimumIdle.setValue(res.RespBody.minimumIdle);
               this.connectionTimeout.setValue(res.RespBody.connectionTimeout);
               this.idleTimeout.setValue(res.RespBody.idleTimeout);
               this.maxLifetime.setValue(res.RespBody.maxLifetime);
@@ -231,6 +235,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
       jdbcUrl: this.jdbcUrl.value,
       userName: this.userName.value,
       maxPoolSize: this.maxPoolSize.value,
+      minimumIdle: this.minimumIdle.value,
       connectionTimeout: this.connectionTimeout.value,
       idleTimeout: this.idleTimeout.value,
       maxLifetime: this.maxLifetime.value,
@@ -281,6 +286,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
       jdbcUrl: this.jdbcUrl.value,
       userName: this.userName.value,
       maxPoolSize: this.maxPoolSize.value,
+      minimumIdle: this.minimumIdle.value,
       connectionTimeout: this.connectionTimeout.value,
       idleTimeout: this.idleTimeout.value,
       maxLifetime: this.maxLifetime.value,
@@ -330,6 +336,7 @@ jdbc:informix-sqli://{{hostname}}:{{port}}/{{databaseName}}:informixserver={{ser
   public get userName() { return this.formEdit.get('userName')!; };
   public get mima() { return this.formEdit.get('mima')!; };
   public get maxPoolSize() { return this.formEdit.get('maxPoolSize')!; };
+  public get minimumIdle() { return this.formEdit.get('minimumIdle')!; };
   public get connectionTimeout() { return this.formEdit.get('connectionTimeout')!; };
   public get idleTimeout() { return this.formEdit.get('idleTimeout')!; };
   public get maxLifetime() { return this.formEdit.get('maxLifetime')!; };

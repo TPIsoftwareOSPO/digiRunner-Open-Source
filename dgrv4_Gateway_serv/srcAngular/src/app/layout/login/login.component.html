@@ -134,10 +134,11 @@
           </div>
           <div class="form-group col-12">
             <label id="email_label" class="control-label">Email</label>
-            <input id="email" #usermail type="text" class="form-control" formControlName="email"
+            <input id="email" #usermail type="email" class="form-control" formControlName="email"
               [placeholder]="'plz_enter'|translate" />
             <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="text-danger">
               <small class="form-text">{{email.errors.pattern}}</small>
+              <small *ngIf="email.errors.mailFormat" class="form-text">{{email.errors.mailFormat | translate}}</small>
               <small class="form-text">{{email.errors.isRequired}}</small>
             </div>
           </div>

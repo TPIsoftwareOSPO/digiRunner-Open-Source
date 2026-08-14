@@ -1009,11 +1009,11 @@ INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_DPAA_RUNLOOP_INTERVAL',
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_DELETEMODULE_ALERT', 'false', 'Enable the Prompt when deleting MODULE - true/false');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_APILOG_FORCE_WRITE_RDB', 'false', 'Write API log into RDB enablement ( true/false )');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('DGR_LOGOUT_URL', '', 'Customized Login Page URL{{scheme}}://{{ip}}:{{port}}/{{path}} ex: "https://203.69.248.109:38452/dgr-cus-scbank-ac/"');
---INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'http://tsmp-composer:1880', 'COMPOSER broadcasting, separated by commas');
+--INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'http://tsmp-composer:1880', 'Composer address, if an HA architecture is required, please configure the nginx address');
 --INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PORT', '48080', 'The Composer access port used for AC');
 --INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PATH', '/editor/tsmpApi', 'The Composer path used for AC');
 --COMPOSER SERVER used locally with proxy
-INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'https://127.0.0.1:8440', 'COMPOSER broadcasting, separated by commas');
+INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_ADDRESS', 'https://127.0.0.1:8440', 'Composer address, if an HA architecture is required, please configure the nginx address');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PORT', '8080', 'The Composer access port used for AC');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_COMPOSER_PATH', '/website/composer', 'The Composer path used for AC');
 INSERT INTO TSMP_SETTING (ID, VALUE, MEMO) VALUES ('TSMP_PROXY_PORT', '4944', 'Currently inused ; Reserved as the functionality - TSMP_REPORT_ADDRESS');

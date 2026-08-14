@@ -32,10 +32,11 @@ import { MessageService, SelectItem, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 // import { ModuleService } from 'srcAngular/app/shared/services/api-module.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { generate } from 'generate-password';
 import {
   Component,
+  ElementRef,
   OnInit,
   ViewChild,
   ViewContainerRef,
@@ -81,6 +82,7 @@ export class TsmpdpitemsComponent extends BaseComponent implements OnInit {
   @ViewChild('paramitem', { read: ViewContainerRef })
   paramitemRef!: ViewContainerRef;
   @ViewChild('locale', { read: ViewContainerRef }) localeRef!: ViewContainerRef;
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
   @ViewChild('subitems', { read: ViewContainerRef })
   subitemsRef!: ViewContainerRef;
 
@@ -718,7 +720,7 @@ export class TsmpdpitemsComponent extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   importTsmpDpItems() {

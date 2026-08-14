@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.OAuthIntrospectionService;
 
@@ -34,6 +35,12 @@ public class OAuthIntrospectionController {
 		this.oauthIntrospectionService = oauthIntrospectionService;
 	}
 
+	// v1
+	/**
+	 * 可驗證來自 v1 的 token_endpoint 的 token, 
+	 * 例如:
+	 * https://localhost:18080/oauth/token
+	 */
 	@PostMapping(value = "/oauth/introspection",
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,7 +51,28 @@ public class OAuthIntrospectionController {
 		
 		TPILogger.tl.info("\n--【" + httpReq.getRequestURL().toString() + "】--");
 		
-		ResponseEntity<?> resp = oauthIntrospectionService.introspection(httpReq, httpRes);
+		ResponseEntity<?> resp = oauthIntrospectionService.introspection(httpReq, httpRes, DgrTokenVersion.PATH_V1);
+		
+		return resp;
+	}
+	
+	// v2
+	/**
+	 * 可驗證來自 v2 的 token_endpoint 的 token, 
+	 * 例如:
+	 * https://localhost:18080/oauth/v2/token
+	 */
+	@PostMapping(value = "/oauth/v2/introspection",
+			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> introspectionV2(HttpServletRequest httpReq,
+			HttpServletResponse httpRes,
+			@RequestHeader HttpHeaders httpHeaders,
+			@RequestParam MultiValueMap<String, String> values) {
+		
+		TPILogger.tl.info("\n--【" + httpReq.getRequestURL().toString() + "】--");
+		
+		ResponseEntity<?> resp = oauthIntrospectionService.introspection(httpReq, httpRes, DgrTokenVersion.PATH_V2);
 		
 		return resp;
 	}

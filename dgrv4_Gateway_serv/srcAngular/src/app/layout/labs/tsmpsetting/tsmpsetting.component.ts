@@ -21,13 +21,13 @@ import { TranslateService } from '@ngx-translate/core';
 import { concatMap } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { generate } from 'generate-password';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
 import { DPB9903Req } from 'src/app/models/api/ServerService/dpb9903.interface';
 import { saveAs } from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -41,6 +41,8 @@ import { ReportTestConnectionComponent } from './report-test-connection/report-t
     standalone: false
 })
 export class TsmpsettingComponent extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
   form!: UntypedFormGroup;
@@ -477,7 +479,7 @@ export class TsmpsettingComponent extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   public get keyword() {

@@ -1259,7 +1259,8 @@ public class GatewayFilter extends OncePerRequestFilter {
 			"/dgrv4/ssotoken/smart/token",
 			"/dgrv4/ssotoken/smart/jwks",
 			"/dgrv4/ssotoken/smart/launch",
-			"/dgrv4/ssotoken/smart/introspect"
+			"/dgrv4/ssotoken/smart/introspect",
+			"/dgrv4/ssotoken/smart/revoke"
 	);
 
 	/**

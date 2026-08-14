@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -167,6 +168,21 @@ public class SmartOnFhirProxyRoutingService {
 		    }
 		    TPILogger.tl.debug("resourceType: " + resourceType + 
 		        ", from path: " + fhirResourcePath);
+		}
+
+		// 額外 fallback：裸 GET /[type]（無 query）無法被 FhirInteraction 識別，
+		// 若剝離 basePath 後為單一段路徑且首字母大寫（FHIR resource type 慣例），
+		// 直接取其為 resourceType
+		if (resourceType == null) {
+		    // [EN]Strip leading/trailing slashes without regex to avoid ReDoS (sonar java:S5852/S5850)
+		    // [ZH]不用 regex 去除頭尾斜線，避免 ReDoS 疑慮 (sonar java:S5852/S5850)
+		    String trimmed = StringUtils.strip(fhirResourcePath, "/");
+		    if (!trimmed.isEmpty() && !trimmed.contains("/")
+		            && Character.isUpperCase(trimmed.charAt(0))) {
+		        resourceType = trimmed;
+		        TPILogger.tl.debug("resourceType: " + resourceType + 
+		            ", from single-segment path: " + fhirResourcePath);
+		    }
 		}
 
 		DiversionConfig diversionConfig = null;

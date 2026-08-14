@@ -54,6 +54,7 @@ public class DPB0190Service {
 				item.setConnectionName(i.getConnectionName());
 				item.setJdbcUrl(i.getJdbcUrl());
 				item.setMaxPoolSize(i.getMaxPoolSize());
+				item.setMinimumIdle(i.getMinimumIdle());
 				Date updateTime = i.getUpdateDateTime() == null ? i.getCreateDateTime() : i.getUpdateDateTime();
 
 				item.setUpdateDateTime(updateTime);

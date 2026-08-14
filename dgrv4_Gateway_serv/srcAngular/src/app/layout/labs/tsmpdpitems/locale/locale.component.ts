@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB9907Item } from 'src/app/models/api/ServerService/dpb9907.interface';
 
 interface localeItem extends DPB9907Item {

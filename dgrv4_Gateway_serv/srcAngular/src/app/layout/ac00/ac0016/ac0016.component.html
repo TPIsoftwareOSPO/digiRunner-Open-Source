@@ -82,7 +82,10 @@
       <div class="form-group row">
         <div class="col-3">
           <label id="userEmail_label" for="userEmail" class="control-label">User Email</label>
-          <input type="text" class="form-control" id="userEmail" formControlName="userEmail" placeholder="">
+          <input type="email" class="form-control" id="userEmail" formControlName="userEmail" placeholder="">
+          <div *ngIf="userEmail.invalid && (userEmail.dirty || userEmail.touched)" class="text-danger">
+            <small *ngIf="userEmail.errors?.mailFormat" class="form-text">{{userEmail.errors?.mailFormat | translate}}</small>
+          </div>
         </div>
         <div class="col-3">
           <label id="idpType_label" for="idpType" class="control-label">Type</label>
@@ -190,7 +193,10 @@
       <div class="form-group row">
         <div class="col-3">
           <label id="newUserEmail_label" for="newUserEmail" class="control-label">User Email</label>
-          <input type="text" class="form-control" id="newUserEmail" formControlName="newUserEmail" placeholder="">
+          <input type="email" class="form-control" id="newUserEmail" formControlName="newUserEmail" placeholder="">
+          <div *ngIf="newUserEmail_u.invalid && (newUserEmail_u.dirty || newUserEmail_u.touched)" class="text-danger">
+            <small *ngIf="newUserEmail_u.errors?.mailFormat" class="form-text">{{newUserEmail_u.errors?.mailFormat | translate}}</small>
+          </div>
         </div>
         <div class="col-3">
           <label id="newIdpType_label" for="newIdpType" class="control-label">Type</label>

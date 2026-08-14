@@ -1,22 +1,7 @@
 <div class="login-center-page">
 
-  <div class="form-wrapper" *ngIf="consentState === 'no-state'">
-    <div class="form-header"><h1>digiRunner</h1></div>
-    <hr />
-    <div class="form-body"><p class="line">缺少授權參數</p></div>
-  </div>
-
-  <div class="form-wrapper" *ngIf="consentState === 'error'">
-    <div class="form-header"><h1>digiRunner</h1></div>
-    <hr />
-    <div class="form-body"><p class="line">授權請求已過期或無效</p></div>
-  </div>
-
-  <div class="form-wrapper" *ngIf="consentState === 'loading'">
-    <div class="form-header"><h1>digiRunner</h1></div>
-    <hr />
-    <div class="form-body"><p class="line">載入中…</p></div>
-  </div>
+  <app-smart-status-panel *ngIf="consentState === 'loading' || consentState === 'error'"
+                          [status]="panelStatus"></app-smart-status-panel>
 
   <!-- autoApprove=Y：不顯示任何 UI，自動送 approve -->
   <div *ngIf="consentState === 'auto-submit'">

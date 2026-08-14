@@ -1,0 +1,94 @@
+<app-container [title]="currentTitle" (headerReturn)="headerReturn()">
+  <form [formGroup]="form">
+    <div class="form-group row">
+      <div class="col-6 col-xl-6 col-lg-6">
+        <label class="control-label">{{'ml_export_item_list'|translate}}</label>
+        <p-multiSelect [options]="exportItemOptions" formControlName="exportItemList"
+          placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}"></p-multiSelect>
+      </div>
+
+      <div class="col-6 col-xl-6 col-lg-6">
+        <label class="control-label">{{'ml_export_locale_list'|translate}}</label>
+        <p-multiSelect [filter]="true" [options]="localeList" formControlName="exportLocaleList"
+          placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}"></p-multiSelect>
+      </div>
+    </div>
+
+    <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
+      <!-- 匯出多語系 -->
+      <button type="button" class="btn tpi-btn tpi-primary me-2"
+        [disabled]="!exportItemList.value?.length || !exportLocaleList.value?.length"
+        (click)="export();">{{'button.export'|translate}}</button>
+
+      <div style="display: flex;align-items: center;">
+        <div class="ui-inputgroup me-2">
+          <input type="file" id="file" #fileInput style="display: none;" accept=".xlsx" (change)="fileChange($event)">
+          <input type="text" class="form-control" value="{{fileName}}" readOnly
+            placeholder="{{'upload_file' | translate}}">
+          <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
+            [pTooltip]="'upload_file' | translate" tooltipPosition="top" (click)="openFileBrowser();"></button>
+        </div>
+        <button type="button" class="btn tpi-btn tpi-primary me-2" [disabled]="!fileName"
+          (click)="importMultilingual();">{{'button.import'|translate}}</button>
+      </div>
+    </div>
+  </form>
+
+  <section class="card shadow-sm mt-4 import-guide" role="note" aria-labelledby="importGuideTitle">
+    <div class="card-header bg-light d-flex align-items-center gap-2 py-3">
+      <i class="pi pi-info-circle import-guide__icon" aria-hidden="true"></i>
+      <h3 id="importGuideTitle" class="import-guide__title mb-0">
+        {{ 'ml_import_guide_title' | translate }}
+      </h3>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-xl-6">
+          <div class="import-guide__item h-100">
+            <p class="import-guide__main">{{ 'ml_import_note_1' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_1_1' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="import-guide__item h-100">
+            <p class="import-guide__main">{{ 'ml_import_note_2' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_2_1' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="import-guide__item h-100">
+            <p class="import-guide__main">{{ 'ml_import_note_3' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_3_1' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="import-guide__item h-100">
+            <p class="import-guide__main">{{ 'ml_import_note_4' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_4_1' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_4_2' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="import-guide__item h-100">
+            <p class="import-guide__main">{{ 'ml_import_note_5' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_5_1' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_5_2' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="import-guide__item h-100">
+            <p class="import-guide__main">{{ 'ml_import_note_6' | translate }}</p>
+            <p class="import-guide__detail">{{ 'ml_import_note_6_1' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</app-container>
+<p-toast [style]="{marginTop: '60px'}" position="top-left"></p-toast>

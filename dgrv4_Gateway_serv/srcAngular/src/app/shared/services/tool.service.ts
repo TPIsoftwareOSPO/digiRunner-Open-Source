@@ -18,7 +18,7 @@ import { isNumber } from 'util';
 import { environment } from 'src/environments/environment';
 import { ResToken } from 'src/app/models/api/TokenService/token.interface';
 import { AA0206Req } from 'src/app/models/api/ClientService/aa0206.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
 import { ResHeader } from 'src/app/models/api/base.header.interface';

@@ -16,7 +16,7 @@ import { ApiSignOffService } from 'src/app/shared/services/api-api-sign-off.serv
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { DPB0069Req, DPB0069Resp } from 'src/app/models/api/RequisitionService/dpb0069.interface';

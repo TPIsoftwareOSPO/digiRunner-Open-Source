@@ -23,6 +23,6 @@ export class CaStatComponent implements OnInit {
     this.restart.emit({});
   }
   switchErrorMessage(evt) {
-    $(this.error_messages.nativeElement).toggleClass('hide');
+    this.error_messages.nativeElement.classList.toggle('hide');
   }
 }

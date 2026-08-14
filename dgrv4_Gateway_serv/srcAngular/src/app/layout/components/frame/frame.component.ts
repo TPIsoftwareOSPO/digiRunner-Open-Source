@@ -9,7 +9,6 @@ const base64url = require('base64url');
 import * as shajs from 'sha.js';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { delay, Subscription } from 'rxjs';
-import { event } from 'jquery';
 
 
 @Component({

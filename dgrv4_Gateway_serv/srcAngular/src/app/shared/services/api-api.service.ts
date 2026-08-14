@@ -49,7 +49,6 @@ import {
   AA0320Req,
   ResAA0320,
 } from 'src/app/models/api/ApiService/aa0320.interface';
-import * as shajs from 'sha.js';
 import {
   AA0304Req,
   ReqAA0304,
@@ -79,7 +78,7 @@ import {
   ResAA0312,
   ResAA0312Before,
 } from 'src/app/models/api/ApiService/aa0312_v3.interface';
-import { ReqAA0427, RespAA0427 } from 'src/app/models/api/ApiService/aa0427.interface';
+import { AA0427Req, ReqAA0427, RespAA0427 } from 'src/app/models/api/ApiService/aa0427.interface';
 import { AA0428Req, ReqAA0428, ResAA0428 } from 'src/app/models/api/ApiService/aa0428.interfcae';
 import { AA0423Req, ReqAA0423, RespAA0423 } from 'src/app/models/api/ApiService/aa0423.interface';
 import { ReqAA0429, RespAA0429 } from 'src/app/models/api/ApiService/aa0429.interfcae';
@@ -400,42 +399,17 @@ export class ApiService {
   }
 
   /**
-   * AA0320: 查詢API群組清單
+   * AA0320: 查詢API群組清單，忽略 1298 回應碼
    * @param ReqBody
    */
-  queryGroupApiList_ajax(ReqBody: AA0320Req) {
-    let body = {
-      ReqHeader: this.api.getReqHeader(TxID.queryGroupApiList),
-      ReqBody: ReqBody,
-    } as ReqAA0321;
-    const path = `${environment.apiUrl}/${this.npBasePath}/AA0320`;
-    let token = this.tool.getToken();
-    const prefix = this.tool.getSignBlock();
-    const bodyJosn = JSON.stringify(body);
-    let signCode = shajs('sha256')
-      .update(prefix + bodyJosn)
-      .digest('hex');
-    return new Promise<ResAA0320>((resolve, reject) => {
-      $.ajax({
-        url: path,
-        type: 'POST',
-        dataType: 'json', // response的資料格式
-        cache: false,
-        data: JSON.stringify(body),
-        processData: false,
-        headers: {
-          'Content-Type': 'application/json',
-          SignCode: signCode,
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .done(function (res) {
-          resolve(res);
-        })
-        .fail(function (res) {
-          reject(res);
-        });
-    });
+  queryGroupApiList_ignore1298(ReqBody: AA0320Req): Observable<ResAA0320> {
+    return this.api.excuteNpPost_ignore1298<ResAA0320>(
+      `${this.npBasePath}/AA0320`,
+      {
+        ReqHeader: this.api.getReqHeader(TxID.queryGroupApiList),
+        ReqBody,
+      } as ReqAA0321,
+    );
   }
 
   /**
@@ -450,10 +424,10 @@ export class ApiService {
     return this.api.npPost<ResAA0321>(path, body);
   }
 
-  queryAllLabel_ignore1298(): Observable<RespAA0427> {
+  queryAllLabel_ignore1298(ReqBody: AA0427Req = {}): Observable<RespAA0427> {
     let body = {
         ReqHeader: this.api.getReqHeader(TxID.queryAllLabel),
-        ReqBody: {}
+        ReqBody: ReqBody
     } as ReqAA0427
     const path = `${this.npBasePath}/AA0427`;
     return this.api.excuteNpPost_ignore1298<RespAA0427>(path, body);

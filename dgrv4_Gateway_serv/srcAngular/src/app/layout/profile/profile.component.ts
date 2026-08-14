@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { AA0003Resp, AA0003Req } from 'src/app/models/api/UserService/aa0003.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as base64 from 'js-base64';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Component({
     selector: 'app-profile',

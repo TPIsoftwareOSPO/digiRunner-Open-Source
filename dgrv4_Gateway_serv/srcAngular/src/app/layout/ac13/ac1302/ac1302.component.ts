@@ -1,13 +1,13 @@
 import { ReportService } from 'src/app/shared/services/api-report.service';
 import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { ListService } from 'src/app/shared/services/api-list.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 // import * as chartjs from 'chart.js';
 import { Chart } from 'chart.js/auto'
 import { AA1202Req } from 'src/app/models/api/ReportService/aa1202.interface';
@@ -26,12 +26,14 @@ import { AA0321Req, AA0321RespItem } from 'src/app/models/api/ApiService/aa0321.
     standalone: false
 })
 export class Ac1302Component extends BaseComponent implements OnInit {
+    @ViewChild('reportChartRef', { static: true }) reportChartRef!: ElementRef<HTMLCanvasElement>;
 
     currentTitle: string = this.title;
     pageNum: number = 1;
     form!: UntypedFormGroup;
     canvas: any;
     ctx: any;
+    chart?: Chart;
     timeTypes: { label: string; value: string }[] = [];
     today: Date = new Date();
     minDate: Date = new Date();
@@ -74,7 +76,7 @@ export class Ac1302Component extends BaseComponent implements OnInit {
     ngOnInit() {
       this.minDate.setHours(0,0,0,0);
         this.acConf = this.toolService.getAcConf();
-        this.canvas = document.getElementById('reportChart');
+        this.canvas = this.reportChartRef.nativeElement;
         this.ctx = this.canvas.getContext('2d');
 
         // 欄位檢查
@@ -251,10 +253,8 @@ export class Ac1302Component extends BaseComponent implements OnInit {
     }
 
     submitForm() {
-        // 清除canvas
-        $('#reportChart').remove();
-        $('#div_canvas').append('<canvas id="reportChart"></canvas>');
-        this.canvas = document.getElementById('reportChart');
+        // 清除 canvas：改用 chart.destroy() 銷毀舊的 Chart 實例，沿用同一個 canvas 元素
+        this.chart?.destroy();
         this.canvas.height = '100%';
         this.ctx = this.canvas.getContext('2d');
         // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -314,7 +314,7 @@ export class Ac1302Component extends BaseComponent implements OnInit {
                     _datasets.push(_obj);
                 });
 
-                new Chart(this.ctx, {
+                this.chart = new Chart(this.ctx, {
                     type: 'bar',
                     data: {
                         labels: res.RespBody.labels,

@@ -249,7 +249,7 @@
       <div class="form-group row">
         <div class="col-3">
           <div class="ui-inputgroup">
-            <input type="file" id="file" accept=".json" (change)="changeFile($event)" formControlName="file"
+            <input type="file" id="file" #fileRef accept=".json" (change)="changeFile($event)" formControlName="file"
               style="display: none;">
             <input type="text" class="form-control" formControlName="fileName"
               placeholder="{{'chs_json_file' | translate}}">

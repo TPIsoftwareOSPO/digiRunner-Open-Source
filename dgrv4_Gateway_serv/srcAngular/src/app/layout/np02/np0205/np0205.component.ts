@@ -10,7 +10,7 @@ import { DPB0229RespItem } from 'src/app/models/api/ServerService/dpb0229.interf
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0225Req } from 'src/app/models/api/ServerService/dpb0225.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0228Resp } from 'src/app/models/api/ServerService/dpb0228.interface';
 import { DPB0226Req } from 'src/app/models/api/ServerService/dpb0226.interface';
 import { DPB0231Req } from 'src/app/models/api/ServerService/dpb0231.interface';

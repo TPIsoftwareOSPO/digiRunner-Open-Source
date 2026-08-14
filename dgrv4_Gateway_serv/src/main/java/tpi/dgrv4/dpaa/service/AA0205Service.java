@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.Setter;
 import tpi.dgrv4.common.constant.AuditLogEvent;
 import tpi.dgrv4.common.constant.TableAct;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
@@ -19,6 +20,8 @@ import tpi.dgrv4.entity.entity.TsmpClient;
 import tpi.dgrv4.entity.entity.TsmpDpClientext;
 import tpi.dgrv4.entity.entity.jpql.TsmpClientHost;
 import tpi.dgrv4.entity.repository.OauthClientDetailsDao;
+import tpi.dgrv4.entity.repository.TsmpClientCert2Dao;
+import tpi.dgrv4.entity.repository.TsmpClientCertDao;
 import tpi.dgrv4.entity.repository.TsmpClientDao;
 import tpi.dgrv4.entity.repository.TsmpClientGroupDao;
 import tpi.dgrv4.entity.repository.TsmpClientHostDao;
@@ -42,6 +45,8 @@ public class AA0205Service {
 	private TsmpClientVgroupDao tsmpClientVgroupDao;
 	private DgrAuditLogService dgrAuditLogService;
 	private TsmpSettingService tsmpSettingService;
+	private @Setter(onMethod_ = @Autowired) TsmpClientCertDao tsmpClientCertDao;
+	private @Setter(onMethod_ = @Autowired) TsmpClientCert2Dao tsmpClientCert2Dao;
 
 	@Autowired
 	public AA0205Service(TsmpClientDao tsmpClientDao, TsmpClientHostDao tsmpClientHostDao,
@@ -142,6 +147,11 @@ public class AA0205Service {
 
 			// 刪除Client與虛擬Group關係
 			getTsmpClientVgroupDao().deleteByClientId(opt_tsmpClient.get().getClientId());
+			
+			//Delete JWE encryption credentials and TLS communication credentials related data to avoid problems during data transfer.
+			//刪除JWE加密憑證和TLS通訊憑證相關資料,避免匯出匯入時有產生問題
+			getTsmpClientCertDao().deleteByClientId(clientId);
+			getTsmpClientCert2Dao().deleteByClientId(clientId);
 
 			// in-memory, 用列舉的值傳入值
 			TPILogger.updateTime4InMemory(DgrDataType.CLIENT.value());
@@ -187,4 +197,14 @@ public class AA0205Service {
 	protected TsmpSettingService getTsmpSettingService() {
 		return tsmpSettingService;
 	}
+
+	protected TsmpClientCertDao getTsmpClientCertDao() {
+		return tsmpClientCertDao;
+	}
+
+	protected TsmpClientCert2Dao getTsmpClientCert2Dao() {
+		return tsmpClientCert2Dao;
+	}
+	
+	
 }

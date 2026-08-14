@@ -511,7 +511,7 @@ public class OAuthTokenService {
 				// 是否為 GTW IdP 流程
 				boolean isGtwIdPFlow = TokenHelper.isGtwIdPFlow(userName, idPType);
 				if (isGtwIdPFlow) {
-					String scopeStr = getScopeListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
+					String scopeStr = TokenHelper.getListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
 					// ID Token 使用
 					oauthTokenData.oidcAndVgroupScopeStr = scopeStr;
 				}
@@ -701,7 +701,7 @@ public class OAuthTokenService {
 			String idTokenJwtstr = getIdTokenJwtstr(grantType, isGtwIdPFlow, accessTokenExp, oauthTokenData,
 					accessTokenJwtstr, clientId, userName, iat);
 
-			String scopeStr = getScopeListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
+			String scopeStr = TokenHelper.getListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
 
 			resp.setAccessToken(accessTokenJwtstr);
 			resp.setExpiresIn(accessTokenValidity - 1);
@@ -769,22 +769,6 @@ public class OAuthTokenService {
 		}
 
 		return null;
-	}
-
-	/**
-	 * 取得多個 scope, 以空格分隔的字串
-	 */
-	private String getScopeListToStr(List<String> scopeList) {
-		if (CollectionUtils.isEmpty(scopeList)) {
-			return "";
-		}
-
-		StringBuilder scopeSb = new StringBuilder();
-		for (String scope : scopeList) {
-			scopeSb.append(scope).append(" ");
-		}
-		
-		return scopeSb.toString().trim();
 	}
 	
 	/**
@@ -1406,7 +1390,7 @@ public class OAuthTokenService {
 	 * 要符合 OIDC 規範, <br>
 	 * 需要使用 JWKS Endpoint 的 Private Key 簽章 <br>
 	 */
-	private String getTokenJwsByJwks(String tokenPayload) throws Exception {
+	public String getTokenJwsByJwks(String tokenPayload) throws Exception {
 		// 隨機選 JWK(2擇1)
 		String jwkStr = getJwk();
 		JWK jwk = JWK.parse(jwkStr);

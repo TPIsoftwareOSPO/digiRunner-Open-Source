@@ -124,7 +124,7 @@ export class Lb0012Component extends BaseComponent implements OnInit {
 
     this.confirmationService.confirm({
       header: dict['button.resend'],
-      message: `Webhook Name: ${rowData.notifyName}`,
+      message: `AI Proxy Name: ${rowData.notifyName}`,
 
       accept: () => {
         this.ngxSrvice.start();

@@ -25,6 +25,7 @@ import tpi.dgrv4.gateway.service.SmartIntrospectionService;
  * Resource server 可呼叫此端點驗證 access token 的有效性。
  * 呼叫者必須通過 client 認證。
  */
+@SuppressWarnings("java:S5122")//Allow any domain for sonarqube scan
 @CrossOrigin
 @RestController
 public class SmartIntrospectionController {
@@ -50,7 +51,8 @@ public class SmartIntrospectionController {
             String baseUrl = resolveBaseUrl(request);
             String introspectUrl = baseUrl + "/dgrv4/ssotoken/smart/introspect";
             String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            authenticator.authenticate(authorizationHeader, params, introspectUrl);
+            // 呼叫者是 resource server，不要求註冊成 SMART client，但一律驗憑證
+            authenticator.authenticateWithoutSmartRegistration(authorizationHeader, params, introspectUrl);
 
             String token = params.get("token");
             Map<String, Object> result = introspectionService.introspect(token);

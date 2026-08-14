@@ -102,6 +102,9 @@ public class SmartDiscoveryService {
 	/**
 	 * 設定所有請求共用的 CORS 基本 header。
 	 */
+	// [EN]Intentional wildcard: SMART App Launch STU2.2 requires open CORS on this discovery endpoint
+	// [ZH]刻意使用萬用字元：SMART App Launch STU2.2 規格要求 discovery 端點必須開放跨來源存取
+	@SuppressWarnings("java:S5122")
 	private void setCorsHeaders(HttpServletResponse response) {
 		response.setHeader(CORS_ALLOW_ORIGIN, "*");
 	}

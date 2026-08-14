@@ -216,6 +216,27 @@ public class SmartOnFhirProxySearchService {
             dto.setSofProxyIgnoreApi(entity.getSofProxyIgnoreApi());
             dto.setSofProxyClientId(entity.getSofProxyClientId());
 
+            // ===== SMART on FHIR 認證擴充：Inbound（secret 一律遮罩）=====
+            dto.setSofProxyAuth(entity.getSofProxyAuth());
+            dto.setSofProxyInIntrospectionEndpoint(entity.getSofProxyInIntrospectionEndpoint());
+            dto.setSofProxyInWellKnown(entity.getSofProxyInWellKnown());
+            dto.setSofProxyInIntrospectionAuth(entity.getSofProxyInIntrospectionAuth());
+            dto.setSofProxyInIntrospectionClientId(entity.getSofProxyInIntrospectionClientId());
+            dto.setHasIntrospectionSecret(StringUtils.hasText(entity.getSofProxyInIntrospectionSecretEnc()));
+            dto.setSofProxyInAllowedIss(entity.getSofProxyInAllowedIss());
+            dto.setSofProxyInExpectedAud(entity.getSofProxyInExpectedAud());
+
+            // ===== SMART on FHIR 認證擴充：Outbound（secret 一律遮罩）=====
+            if (entity.getSofProxyOutRelay() != null) {
+                dto.setSofProxyOutRelay(entity.getSofProxyOutRelay().getCode());
+            }
+            dto.setSofProxyOutAuthMethod(entity.getSofProxyOutAuthMethod());
+            dto.setSofProxyOutClientId(entity.getSofProxyOutClientId());
+            dto.setHasOutClientSecret(StringUtils.hasText(entity.getSofProxyOutClientSecretEnc()));
+            dto.setSofProxyOutWellKnown(entity.getSofProxyOutWellKnown());
+            dto.setSofProxyOutTokenEndpoint(entity.getSofProxyOutTokenEndpoint());
+            dto.setSofProxyOutScope(entity.getSofProxyOutScope());
+
             // 設置關聯的 Diversion 列表
             List<SmartOnFhirProxyDiversionDto> diversionList = diversionMap.get(entity.getSofProxyId());
             dto.setDiversionList(diversionList != null ? diversionList : new ArrayList<>());

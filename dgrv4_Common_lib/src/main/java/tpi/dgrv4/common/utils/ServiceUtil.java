@@ -37,7 +37,9 @@ public class ServiceUtil {
 			// replaceAll() 方法的第一個參數是作為正則表達式處理的，如果 key 變數包含正則表達式的特殊字符，
 			// 可能會導致意外行為或安全問題。
 			// 對於 replaceAll() 方法，正確的修正方式是使用 Pattern.quote() 包裝正則表達式部分
-			template = template.replaceAll("\\{\\{" + Pattern.quote(key) + "\\}\\}", value);
+			// [EN]Wrap value with Matcher.quoteReplacement() to prevent $ and \ in the value from being interpreted as regex replacement references
+			// [ZH]用 Matcher.quoteReplacement() 包裝 value，防止密碼等欄位中的 $ 或 \ 被當成 regex 取代參考而拋出例外
+			template = template.replaceAll("\\{\\{" + Pattern.quote(key) + "\\}\\}", Matcher.quoteReplacement(value));
 		}
 		return template;
 	}

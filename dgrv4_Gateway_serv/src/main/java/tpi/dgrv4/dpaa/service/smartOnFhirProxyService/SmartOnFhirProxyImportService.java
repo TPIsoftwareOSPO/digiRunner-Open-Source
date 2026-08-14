@@ -38,6 +38,7 @@ import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.vo.SmartOnFhirProxyImportI
 import tpi.dgrv4.entity.constant.CodeEnums;
 import tpi.dgrv4.entity.constant.FhirInteraction;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxy;
+import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
 import tpi.dgrv4.gateway.service.SmartOnFhirProxyRouteContext;
 import tpi.dgrv4.gateway.service.SmartOnFhirProxyStickyService;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxyDiversion;
@@ -64,6 +65,7 @@ public class SmartOnFhirProxyImportService {
     private TsmpClientDao tsmpClientDao;
     private ObjectMapper objectMapper;
     private ExecutorService executorService;
+    private TsmpTAEASKHelper taeask;
 
     @Autowired
     public SmartOnFhirProxyImportService(
@@ -72,13 +74,15 @@ public class SmartOnFhirProxyImportService {
             DgrSmartOnFhirProxyStickyDao dgrSmartOnFhirProxyStickyDao,
             SmartOnFhirProxyStickyService stickyService,
             TsmpClientDao tsmpClientDao,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            TsmpTAEASKHelper taeask) {
         this.dgrSmartOnFhirProxyDao = dgrSmartOnFhirProxyDao;
         this.dgrSmartOnFhirProxyDiversionDao = dgrSmartOnFhirProxyDiversionDao;
         this.dgrSmartOnFhirProxyStickyDao = dgrSmartOnFhirProxyStickyDao;
         this.stickyService = stickyService;
         this.tsmpClientDao = tsmpClientDao;
         this.objectMapper = objectMapper;
+        this.taeask = taeask;
         this.executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
@@ -512,6 +516,50 @@ public class SmartOnFhirProxyImportService {
                 }
             }
         }
+
+        // sofProxyAuth: 值域 none/digirunner/third-party（相容舊值 dgr）
+        if (item.getSofProxyAuth() != null) {
+            for (String a : item.getSofProxyAuth()) {
+                if (a == null || !SofProxyAuthValues.ALLOWED.contains(a)) {
+                    result.setSuccess(false);
+                    result.setErrorMessage("sofProxyAuth contains invalid value: " + a);
+                    result.getErrorDetails()
+                            .add("sofProxyAuth contains invalid value: " + a
+                                    + " (allowed: none, digirunner, third-party; legacy: dgr)");
+                }
+            }
+        }
+
+        // sofProxyOutRelay: 驗證枚舉值（Y/N）
+        if (StringUtils.hasText(item.getSofProxyOutRelay())) {
+            if (!CodeEnums.tryFromCode(DgrSmartOnFhirProxy.Status.class, item.getSofProxyOutRelay()).isPresent()) {
+                result.setSuccess(false);
+                result.setErrorMessage("sofProxyOutRelay is invalid");
+                result.getErrorDetails().add("sofProxyOutRelay is invalid");
+            }
+        }
+
+        // sofProxyInIntrospectionAuth: 值域 client_secret_basic/bearer/none
+        String inAuth = item.getSofProxyInIntrospectionAuth();
+        if (StringUtils.hasText(inAuth) && !("client_secret_basic".equalsIgnoreCase(inAuth)
+                || "bearer".equalsIgnoreCase(inAuth) || "none".equalsIgnoreCase(inAuth))) {
+            result.setSuccess(false);
+            result.setErrorMessage("sofProxyInIntrospectionAuth is invalid");
+            result.getErrorDetails()
+                    .add("sofProxyInIntrospectionAuth invalid: " + inAuth
+                            + " (allowed: client_secret_basic, bearer, none)");
+        }
+
+        // sofProxyOutAuthMethod: 值域 client_secret_basic/client_secret_post
+        String outMethod = item.getSofProxyOutAuthMethod();
+        if (StringUtils.hasText(outMethod) && !("client_secret_basic".equalsIgnoreCase(outMethod)
+                || "client_secret_post".equalsIgnoreCase(outMethod))) {
+            result.setSuccess(false);
+            result.setErrorMessage("sofProxyOutAuthMethod is invalid");
+            result.getErrorDetails()
+                    .add("sofProxyOutAuthMethod invalid: " + outMethod
+                            + " (allowed: client_secret_basic, client_secret_post)");
+        }
     }
 
     /**
@@ -749,6 +797,34 @@ public class SmartOnFhirProxyImportService {
         proxy.setSofProxyClientId(
                 item.getSofProxyClientId() != null ? item.getSofProxyClientId() : new ArrayList<>());
 
+        // ===== SMART on FHIR 認證擴充：Inbound =====
+        // 寫入前正規化：舊值 dgr → digirunner（讀舊寫新）
+        proxy.setSofProxyAuth(item.getSofProxyAuth() != null
+                ? SofProxyAuthValues.normalize(item.getSofProxyAuth())
+                : new ArrayList<>(java.util.List.of("none")));
+        proxy.setSofProxyInIntrospectionEndpoint(item.getSofProxyInIntrospectionEndpoint());
+        proxy.setSofProxyInWellKnown(item.getSofProxyInWellKnown());
+        proxy.setSofProxyInIntrospectionAuth(item.getSofProxyInIntrospectionAuth());
+        proxy.setSofProxyInIntrospectionClientId(item.getSofProxyInIntrospectionClientId());
+        if (StringUtils.hasText(item.getSofProxyInIntrospectionSecret())) {
+            proxy.setSofProxyInIntrospectionSecretEnc(taeask.encrypt(item.getSofProxyInIntrospectionSecret()));
+        }
+        proxy.setSofProxyInAllowedIss(
+                item.getSofProxyInAllowedIss() != null ? item.getSofProxyInAllowedIss() : new ArrayList<>());
+        proxy.setSofProxyInExpectedAud(item.getSofProxyInExpectedAud());
+
+        // ===== SMART on FHIR 認證擴充：Outbound（代取）=====
+        proxy.setSofProxyOutRelay(getStatusOrDefault(item.getSofProxyOutRelay(),
+                DgrSmartOnFhirProxy.Status.DISABLED));
+        proxy.setSofProxyOutAuthMethod(item.getSofProxyOutAuthMethod());
+        proxy.setSofProxyOutClientId(item.getSofProxyOutClientId());
+        if (StringUtils.hasText(item.getSofProxyOutClientSecret())) {
+            proxy.setSofProxyOutClientSecretEnc(taeask.encrypt(item.getSofProxyOutClientSecret()));
+        }
+        proxy.setSofProxyOutWellKnown(item.getSofProxyOutWellKnown());
+        proxy.setSofProxyOutTokenEndpoint(item.getSofProxyOutTokenEndpoint());
+        proxy.setSofProxyOutScope(item.getSofProxyOutScope());
+
         // 設定系統欄位（使用實際匯入時間與人員）
         proxy.setCreateDateTime(DateTimeUtil.now());
         proxy.setCreateUser(auth.getUserName());
@@ -800,6 +876,55 @@ public class SmartOnFhirProxyImportService {
 
         if (item.getSofProxyClientId() != null) {
             proxy.setSofProxyClientId(item.getSofProxyClientId());
+        }
+
+        // ===== SMART on FHIR 認證擴充：Inbound（缺值保留現有）=====
+        if (item.getSofProxyAuth() != null) {
+            // 寫入前正規化：舊值 dgr → digirunner（讀舊寫新）
+            proxy.setSofProxyAuth(SofProxyAuthValues.normalize(item.getSofProxyAuth()));
+        }
+        if (StringUtils.hasText(item.getSofProxyInIntrospectionEndpoint())) {
+            proxy.setSofProxyInIntrospectionEndpoint(item.getSofProxyInIntrospectionEndpoint());
+        }
+        if (StringUtils.hasText(item.getSofProxyInWellKnown())) {
+            proxy.setSofProxyInWellKnown(item.getSofProxyInWellKnown());
+        }
+        if (StringUtils.hasText(item.getSofProxyInIntrospectionAuth())) {
+            proxy.setSofProxyInIntrospectionAuth(item.getSofProxyInIntrospectionAuth());
+        }
+        if (StringUtils.hasText(item.getSofProxyInIntrospectionClientId())) {
+            proxy.setSofProxyInIntrospectionClientId(item.getSofProxyInIntrospectionClientId());
+        }
+        // SECRET：有值才重新加密；缺/空保留現有密文（匯入無法表達清除）
+        if (StringUtils.hasText(item.getSofProxyInIntrospectionSecret())) {
+            proxy.setSofProxyInIntrospectionSecretEnc(taeask.encrypt(item.getSofProxyInIntrospectionSecret()));
+        }
+        if (item.getSofProxyInAllowedIss() != null) {
+            proxy.setSofProxyInAllowedIss(item.getSofProxyInAllowedIss());
+        }
+        if (StringUtils.hasText(item.getSofProxyInExpectedAud())) {
+            proxy.setSofProxyInExpectedAud(item.getSofProxyInExpectedAud());
+        }
+
+        // ===== SMART on FHIR 認證擴充：Outbound（代取，缺值保留現有）=====
+        proxy.setSofProxyOutRelay(getStatusOrDefault(item.getSofProxyOutRelay(), proxy.getSofProxyOutRelay()));
+        if (StringUtils.hasText(item.getSofProxyOutAuthMethod())) {
+            proxy.setSofProxyOutAuthMethod(item.getSofProxyOutAuthMethod());
+        }
+        if (StringUtils.hasText(item.getSofProxyOutClientId())) {
+            proxy.setSofProxyOutClientId(item.getSofProxyOutClientId());
+        }
+        if (StringUtils.hasText(item.getSofProxyOutClientSecret())) {
+            proxy.setSofProxyOutClientSecretEnc(taeask.encrypt(item.getSofProxyOutClientSecret()));
+        }
+        if (StringUtils.hasText(item.getSofProxyOutWellKnown())) {
+            proxy.setSofProxyOutWellKnown(item.getSofProxyOutWellKnown());
+        }
+        if (StringUtils.hasText(item.getSofProxyOutTokenEndpoint())) {
+            proxy.setSofProxyOutTokenEndpoint(item.getSofProxyOutTokenEndpoint());
+        }
+        if (StringUtils.hasText(item.getSofProxyOutScope())) {
+            proxy.setSofProxyOutScope(item.getSofProxyOutScope());
         }
 
         // 更新系統欄位（使用實際匯入時間與人員）

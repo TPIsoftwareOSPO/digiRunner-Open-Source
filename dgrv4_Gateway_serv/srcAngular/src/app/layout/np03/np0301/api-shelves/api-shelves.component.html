@@ -22,7 +22,7 @@
     </div>
     <div class="col-4 col-lg-4 col-sm-4">
         <div class="ui-inputgroup">
-            <input id="choose-file_{{no}}" type="file" style="display: none">
+            <input id="choose-file_{{no}}" #chooseFileRef type="file" style="display: none">
             <input type="text" class="form-control" formControlName="fileName"
                 placeholder="{{'api_doc_upload' | translate}}">
             <button pButton type="button" icon="pi pi-upload" class="tpi-night ms-1"

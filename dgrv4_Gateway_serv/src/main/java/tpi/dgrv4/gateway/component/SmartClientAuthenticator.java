@@ -44,6 +44,9 @@ import tpi.dgrv4.gateway.keeper.TPILogger;
  *    - public：不驗密碼，確認 client 存在即可
  *    - confidential-symmetric（client_secret_basic / client_secret_post）：BCrypt 比對密碼
  *    - confidential-asymmetric（private_key_jwt）：JWT assertion 驗簽 + 過期檢查 + JTI 重放防護
+ *
+ * 另提供 {@link #authenticateWithoutSmartRegistration}，供 introspection / revocation 端點使用；
+ * 該路徑不查 SMART client 註冊，但一律要求憑證。
  */
 @Component
 public class SmartClientAuthenticator {
@@ -100,20 +103,29 @@ public class SmartClientAuthenticator {
      * @throws SmartAuthenticationException 認證失敗
      */
     public String authenticate(String authorizationHeader, Map<String, String> params, String tokenEndpointUrl) {
-        // 1. 判斷認證方式並取得 client_id
+        // 1. 判斷認證方式並取得 client_id（client_assertion iss / Basic username / body client_id）
         String clientId = resolveClientId(authorizationHeader, params);
 
-        // 2. 查詢 SMART client 設定
+        // 2. client_credentials（Backend Services）委派平台統一 OAuth 核發（PATH_V2），由平台自行認證；
+        //    其 client 為平台 OAuth client、未必有 DgrSmartClient 註冊，故在此不查 SMART client、不驗憑證，
+        //    直接回 client_id，避免「SMART client not found」誤擋（app-launch 的驗證仍照常執行）。
+        if ("client_credentials".equals(params.get("grant_type"))) {
+            return clientId;
+        }
+
+        // 3. 其餘情境（app-launch 的 authorization_code / refresh_token 與 launch 註冊）：
+        //    查詢 SMART client 設定，依 clientType 決定是否驗證憑證。
         DgrSmartClient smartClient = smartClientDao.findByClientId(clientId)
             .orElseThrow(() -> new SmartAuthenticationException("invalid_client",
                 "SMART client not found: " + clientId));
 
-        // 3. 依 clientType 分派驗證
+        // 4. public client 不驗密碼，確認 client 存在即可
         String clientType = smartClient.getClientType();
         if ("public".equals(clientType)) {
             return clientId;
         }
 
+        // 5. confidential client 依 token_endpoint_auth_method 分派驗證
         String authMethod = smartClient.getTokenEndpointAuthMethod();
         if ("client_secret_basic".equals(authMethod)) {
             verifyClientSecretBasic(clientId, authorizationHeader);
@@ -124,6 +136,53 @@ public class SmartClientAuthenticator {
         } else {
             throw new SmartAuthenticationException("invalid_client",
                 "Unsupported token_endpoint_auth_method: " + authMethod);
+        }
+
+        return clientId;
+    }
+
+    /**
+     * 認證 introspection / revocation 端點的呼叫者。
+     *
+     * 與 {@link #authenticate} 的差異，源自這兩個端點的語意不同於 token endpoint：
+     * 1. 不查 DgrSmartClient。introspection 的呼叫者是 resource server；revocation 則可能是
+     *    以 client_credentials 取得 token 的 backend service。兩者多為平台 OAuth client，
+     *    本就不會註冊成 SMART client，沿用 authenticate() 會被「SMART client not found」誤擋。
+     * 2. 一律要求憑證。這兩種請求都沒有 grant_type，不適用 authenticate() 為 Backend Services
+     *    保留的 client_credentials 略過分支；且 RFC 7662 §2.1 要求 introspection 必須認證
+     *    呼叫者，撤銷他人 token 的破壞力更大，故 public client 亦不得免驗。
+     *
+     * 憑證比對的來源與 authenticate() 相同（oauth_client_details 的 BCrypt hash），
+     * DgrSmartClient 僅在該 client 指定 private_key_jwt 時用來取得 JWKS。
+     *
+     * 本方法只認證「呼叫者是誰」；token 是否屬於該 client 由呼叫端自行檢查。
+     *
+     * @param authorizationHeader HTTP Authorization header（可為 null）
+     * @param params              form body 參數
+     * @param endpointUrl         端點完整 URL（private_key_jwt aud 驗證用）
+     * @return 認證通過的 client_id
+     * @throws SmartAuthenticationException 認證失敗
+     */
+    public String authenticateWithoutSmartRegistration(String authorizationHeader, Map<String, String> params,
+            String endpointUrl) {
+        String clientId = resolveClientId(authorizationHeader, params);
+
+        // 有註冊 SMART client 且指定 private_key_jwt → 沿用非對稱驗證
+        Optional<DgrSmartClient> smartClientOpt = smartClientDao.findByClientId(clientId);
+        if (smartClientOpt.isPresent()
+                && "private_key_jwt".equals(smartClientOpt.get().getTokenEndpointAuthMethod())) {
+            verifyPrivateKeyJwt(clientId, smartClientOpt.get(), params, endpointUrl);
+            return clientId;
+        }
+
+        // 其餘一律比對 secret，Basic 優先於 body
+        if (authorizationHeader != null && authorizationHeader.startsWith(BASIC_PREFIX)) {
+            verifyClientSecretBasic(clientId, authorizationHeader);
+        } else if (StringUtils.hasText(params.get("client_secret"))) {
+            verifyClientSecretPost(clientId, params);
+        } else {
+            throw new SmartAuthenticationException("invalid_client",
+                "Client authentication is required for introspection");
         }
 
         return clientId;

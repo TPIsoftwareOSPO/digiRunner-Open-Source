@@ -9,7 +9,7 @@ import { ApiService } from 'src/app/shared/services/api-api.service';
 import { ExportService } from 'src/app/shared/services/export.service';
 import { AA0507AuditLog, AA0507Req } from 'src/app/models/api/UtilService/aa0507.interface';
 import { AA0301Item, AA0301Req } from 'src/app/models/api/ApiService/aa0301_v3.interfcae';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { MessageService } from 'primeng/api';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 

@@ -12,6 +12,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import {
   Component,
+  ElementRef,
   OnInit,
   ViewChild,
   AfterViewInit,
@@ -111,6 +112,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   @ViewChild('dialog') _dialog!: DialogComponent;
   @ViewChild('labelFilter')
   labelFilter!: MultiSelect;
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
   form!: UntypedFormGroup;
   queryForm: UntypedFormGroup;
   dialogTitle: string = '';
@@ -162,9 +164,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }[] = [];
 
   searchByLabel: boolean = false;
-  selLabelList: Array<string> = [];
+  // selLabelList: Array<string> = [];
   showLabelList_tip: boolean = false;
-  lblList: { label: string; value: string }[] = [];
+  lblList: { label: string; value: string | null }[] = [];
   apiFile?: File;
 
   import_apiList: Array<AA0318Item> = [];
@@ -242,6 +244,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       publicFlag: new UntypedFormControl('0'),
       queryJweFlag: new UntypedFormControl('null'),
       queryJweFlagResp: new UntypedFormControl('null'),
+      include: new UntypedFormControl('Y'),
+      labelList: new UntypedFormControl([]),
+      labelApiSrc: new UntypedFormArray([]), // 「依標籤搜尋」分頁的 API 來源
     });
 
     this.detailForm = this.fb.group({
@@ -351,6 +356,10 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         }
         this.apiSrcOpt = _apiSrcOpt;
         const arrayApiSrc = <UntypedFormArray>this.queryForm.get('apiSrc');
+        // 「依標籤搜尋」分頁使用同一份 API 來源選項，但選取狀態獨立
+        const arrayLabelApiSrc = <UntypedFormArray>(
+          this.queryForm.get('labelApiSrc')
+        );
         for (let item of this.apiSrcOpt) {
           if (this.acConf.edition == 'Express') {
             arrayApiSrc.push(
@@ -360,7 +369,15 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 selected: true,
               }),
             );
+            arrayLabelApiSrc.push(
+              this.fb.group({
+                name: item.label,
+                value: item.value,
+                selected: true,
+              }),
+            );
             this.queryForm.get('apiSrc')!.disable();
+            this.queryForm.get('labelApiSrc')!.disable();
           } else {
             arrayApiSrc.push(
               this.fb.group({
@@ -369,7 +386,18 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                 selected: false,
               }),
             );
+            arrayLabelApiSrc.push(
+              this.fb.group({
+                name: item.label,
+                value: item.value,
+                selected: false,
+              }),
+            );
           }
+        }
+        // Express 版本的來源為固定勾選，需重新取得標籤清單使其符合來源條件
+        if (this.acConf.edition == 'Express') {
+          this.queryAllLabel();
         }
       }
     });
@@ -579,8 +607,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         this.bodyMaskKeyword.setValue('');
       });
 
-    this.labelList.valueChanges.subscribe((res) => {
-      this.labelList.setValue(
+    this.u_labelList.valueChanges.subscribe((res) => {
+      this.u_labelList.setValue(
         Array.isArray(res) ? res.map((item) => item.toLowerCase()) : [],
         { emitEvent: false },
       );
@@ -621,12 +649,46 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.queryAllLabel();
   }
 
+  /**
+   * 取出指定 apiSrc FormArray 中已勾選的來源值
+   * - FormArray 在 Express 版本會被 disable，因此直接讀 controls 而非 form value
+   * - p-checkbox 未設 binary，勾選後 control 值會是陣列(勾選:[value]、取消:[])，
+   *   初始值則是建立 FormGroup 時給的布林值，兩種型別都要判斷
+   */
+  getSelectedApiSrc(controlName: string): Array<string> {
+    const array = <UntypedFormArray>this.queryForm.get(controlName);
+    if (!array) return [];
+    return array.controls
+      .filter((ctrl) => {
+        const selected = ctrl.get('selected')!.value;
+        return Array.isArray(selected) ? selected.length > 0 : selected === true;
+      })
+      .map((ctrl) => ctrl.get('value')!.value);
+  }
+
+  /**
+   * 「依標籤搜尋」分頁的 API 來源異動：
+   * 清空已選標籤與查詢結果，並依新的來源條件重新取得標籤清單
+   */
+  labelApiSrcChange() {
+    this.selected = [];
+    this.dataList = [];
+    this.rowcount = this.dataList.length;
+    this.q_labelList.setValue([]);
+    this.queryAllLabel();
+  }
+
   queryAllLabel() {
-    //標籤資料清單
-    this.apiService.queryAllLabel_ignore1298().subscribe((res) => {
+    //標籤資料清單，依「依標籤搜尋」分頁所選的 API 來源過濾
+    const apiSrc = this.getSelectedApiSrc('labelApiSrc');
+    this.apiService.queryAllLabel_ignore1298({ apiSrc }).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.lblList = res.RespBody.labelList.map((item) => {
           return { label: item, value: item };
+        });
+        this.lblList.unshift({
+          label: '"No label"',
+          value: null,
         });
       } else this.lblList = [];
     });
@@ -777,7 +839,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   moreApiListData() {
     if (this.searchByLabel) {
       let req = {
-        labelList: this.selLabelList,
+        labelList: this.q_labelList.value,
         moduleName: this.dataList[this.dataList.length - 1].moduleName.t
           ? this.dataList[this.dataList.length - 1].moduleName.ori
           : this.dataList[this.dataList.length - 1].moduleName.val,
@@ -785,6 +847,8 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           ? this.dataList[this.dataList.length - 1].apiKey.ori
           : this.dataList[this.dataList.length - 1].apiKey.val,
         paging: 'Y',
+         include: this.include?.value,
+        apiSrc: this.getSelectedApiSrc('labelApiSrc'),
       } as AA0428Req;
       this.apiService.queryAPIListByLabel(req).subscribe((res) => {
         if (this.tool.checkDpSuccess(res.ResHeader)) {
@@ -1012,7 +1076,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                     detail: `${dictC['message.update']} ${dictC['message.success']}`,
                   });
                   this.searchByLabel
-                    ? this.queryAPIListByLabel(this.selLabelList)
+                    ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
                     : this.submitForm();
                 }
               });
@@ -1089,7 +1153,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               });
               this.queryAllLabel();
               this.searchByLabel
-                ? this.queryAPIListByLabel(this.selLabelList)
+                ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
                 : this.submitForm();
             }
           }
@@ -1113,7 +1177,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               detail: `${dict['message.update']} ${dict['message.success']}`,
             });
             this.searchByLabel
-              ? this.queryAPIListByLabel(this.selLabelList)
+              ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
               : this.submitForm();
           }
         });
@@ -1291,7 +1355,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         });
         this.queryAllLabel();
         this.searchByLabel
-          ? this.queryAPIListByLabel(this.selLabelList)
+          ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
           : this.submitForm();
       }
     });
@@ -1532,7 +1596,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
           ? this.apiDetail!.apiKey.v
           : this.apiDetail!.apiKey.o,
     } as AA0320Req;
-    this.apiService.queryGroupApiList(ReqBody).subscribe((res) => {
+    this.apiService.queryGroupApiList_ignore1298(ReqBody).subscribe((res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.apiGroupList = res.RespBody.dataList;
         this.apiGroupListRowcount = this.apiGroupList.length;
@@ -1563,7 +1627,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
   async checkChips(evt) {
     if (evt.value.length > 20) {
-      this.labelList.value.pop();
+      this.u_labelList.value.pop();
       this.showLabelList_tip = true;
     } else {
       this.showLabelList_tip = false;
@@ -1585,13 +1649,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       });
       // console.log(duplicates)
 
-      if(duplicates.length > 0){
+      if (duplicates.length > 0) {
         currentValues.pop();
         this.updateForm.get('labelList')?.setValue(currentValues);
       }
 
       if (currentValues.length > maxLimit) {
-
         event.preventDefault();
 
         this.messageService.add({
@@ -1743,7 +1806,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               : this.bodyMaskKeyword.value;
         }
 
-        updateRCapiReqBody.labelList = this.labelList.value;
+        updateRCapiReqBody.labelList = this.u_labelList.value;
 
         // console.log('fixedCacheTime', parseInt(this.fixedCacheTime.value))
 
@@ -1788,19 +1851,23 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                   this.lblList = res.RespBody.labelList.map((item) => {
                     return { label: item, value: item };
                   });
+                  this.lblList.unshift({
+                    label: '"No label"',
+                    value: null,
+                  });
 
-                  this.selLabelList = this.selLabelList.filter((selItem) =>
+                  let _labelLsit = this.q_labelList.value.filter((selItem) =>
                     this.lblList.map((x) => x.label).includes(selItem),
                   );
-                  // this.clearFilter();
-
+                  this.q_labelList.setValue(_labelLsit);
+                  this.clearFilter();
                   this.searchByLabel
-                    ? this.queryAPIListByLabel(this.selLabelList)
+                    ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
                     : this.submitForm();
                   this.changePage('query');
                 } else {
                   this.lblList = [];
-                  this.selLabelList = [];
+                  this.q_labelList.setValue([]);
                   this.clearFilter();
                   this.submitForm();
                   this.changePage('query');
@@ -1860,19 +1927,24 @@ export class Ac0301Component extends BaseComponent implements OnInit {
                   this.lblList = res.RespBody.labelList.map((item) => {
                     return { label: item, value: item };
                   });
+                  this.lblList.unshift({
+                    label: '"No label"',
+                    value: null,
+                  });
 
-                  this.selLabelList = this.selLabelList.filter((selItem) =>
+                  let _labelLsit = this.q_labelList.value.filter((selItem) =>
                     this.lblList.map((x) => x.label).includes(selItem),
                   );
+                  this.q_labelList.setValue(_labelLsit);
                   this.clearFilter();
 
                   this.searchByLabel
-                    ? this.queryAPIListByLabel(this.selLabelList)
+                    ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
                     : this.submitForm();
                   this.changePage('query');
                 } else {
                   this.lblList = [];
-                  this.selLabelList = [];
+                  this.q_labelList.setValue([]);
                   this.clearFilter();
                   this.submitForm();
                   this.changePage('query');
@@ -1996,7 +2068,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
             if (!res.RespBody.bodyMaskPolicy)
               this.apiDetail.bodyMaskPolicy = '0';
 
-            this.labelList.setValue(this.apiDetail.labelList);
+            this.u_labelList.setValue(this.apiDetail.labelList);
             this.fixedCacheTime.setValue(this.apiDetail.fixedCacheTime);
 
             let ReqBody = {
@@ -2014,7 +2086,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               //   ? this.apiDetail.apiKey.v
               //   : this.apiDetail.apiKey.o,
             } as AA0320Req;
-            this.apiService.queryGroupApiList_ajax(ReqBody).then((res) => {
+            this.apiService.queryGroupApiList_ignore1298(ReqBody).subscribe((res) => {
               if (this.tool.checkDpSuccess(res.ResHeader)) {
                 this.apiGroupList = res.RespBody.dataList;
                 this.apiGroupListRowcount = this.apiGroupList.length;
@@ -2263,7 +2335,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
               );
               this.bodyMaskKeyword.setValue(res.RespBody.bodyMaskKeyword);
               // console.log(this.redirectByIpDataList.value)
-              this.labelList.setValue(this.apiDetail.labelList);
+              this.u_labelList.setValue(this.apiDetail.labelList);
 
               this.failDiscoveryPolicy.setValue(
                 this.apiDetail.failDiscoveryPolicy,
@@ -2401,10 +2473,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
         }
         this.resetFormValidator(this.form);
         this.apiFile = undefined;
-        $('#file').val('');
         this.import_apiList = [];
         this.currentTitle = `${this.title} > ${dict['upload_reg_comp_api_file']}`;
         this.pageNum = 5;
+        // `#fileRef` is inside `*ngIf="pageNum == 5"`, so refresh the view first.
+        this.cdRef.detectChanges();
+        this.fileRef.nativeElement.value = '';
 
         break;
     }
@@ -2461,7 +2535,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
       this.reloadFlag = false;
       this.queryAllLabel();
       this.searchByLabel
-        ? this.queryAPIListByLabel(this.selLabelList)
+        ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
         : this.submitForm();
     }
     this.changePage('query');
@@ -2546,22 +2620,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
 
   async queryLabelList() {
-    this.queryAPIListByLabel(this.selLabelList);
-    // const code = ['label_list'];
-    // const dict = await this.tool.getDict(code);
-    // const ref = this.dialogService.open(LabelListComponent, {
-    //   header: dict['label_list'],
-    //   width: '700px',
-    // });
-
-    // ref.onClose.subscribe((res) => {
-    //   if (res && res.length > 0) {
-    //     this.selLabelList = res;
-    //     this.queryAPIListByLabel(res);
-    //   } else {
-    //     this.selLabelList = [];
-    //   }
-    // });
+    this.queryAPIListByLabel(this.q_labelList.value ?? []);
   }
 
   queryAPIListByLabel(labelList: Array<string>) {
@@ -2569,7 +2628,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     this.dataList = [];
     this.rowcount = this.dataList.length;
     let req = {
+      include: this.include?.value,
       labelList: labelList,
+      apiSrc: this.getSelectedApiSrc('labelApiSrc'),
       paging: 'Y',
     } as AA0428Req;
     this.apiService.queryAPIListByLabel(req).subscribe((res) => {
@@ -2588,21 +2649,18 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     } else {
       this.selected = [];
       this.dataList = [];
-      this.selLabelList = [];
+      this.q_labelList.setValue([]);
+      this.include?.setValue('Y');
       this.queryAllLabel();
     }
   }
 
   clearFilter() {
-    this.selLabelList = [];
-    // if (this.lableFilter) {
-    //   this.lableFilter.filterValue = '';
-    //   this.lableFilter.updateFilledState();
-    // }
+    this.q_labelList.setValue([]);
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   changeFile(event) {
@@ -2971,7 +3029,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
 
                   // 取回資料
                   this.searchByLabel
-                    ? this.queryAPIListByLabel(this.selLabelList)
+                    ? this.queryAPIListByLabel(this.q_labelList.value ?? [])
                     : this.submitForm();
                 }
               });
@@ -3007,6 +3065,9 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   public get apiSrc() {
     return this.queryForm.get('apiSrc');
   }
+  public get labelApiSrc() {
+    return this.queryForm.get('labelApiSrc');
+  }
   public get queryKeyword() {
     return this.queryForm.get('keyword');
   }
@@ -3015,6 +3076,12 @@ export class Ac0301Component extends BaseComponent implements OnInit {
   }
   public get publicFlag() {
     return this.queryForm.get('publicFlag');
+  }
+  public get include() {
+    return this.queryForm.get('include');
+  }
+  public get q_labelList() {
+    return this.queryForm.get('labelList')!;
   }
   public get detailKeyword() {
     return this.detailForm.get('keyword');
@@ -3114,7 +3181,7 @@ export class Ac0301Component extends BaseComponent implements OnInit {
     return this.updateForm.get('bodyMaskKeyword')!;
   }
 
-  public get labelList() {
+  public get u_labelList() {
     return this.updateForm.get('labelList')!;
   }
   public get fixedCacheTime() {

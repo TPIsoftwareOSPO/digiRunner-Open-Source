@@ -18,6 +18,7 @@ export interface DPB0190RespItem {
   connectionName: string;
   jdbcUrl: string;
   maxPoolSize: string;
+  minimumIdle: number;
   updateDateTime: string;
   updateUser: string;
 }

@@ -3,11 +3,13 @@
     <div class="form-group row">
       <div class="col-6">
         <label class="control-label">{{ "keyword_search" | translate }}</label>
-        <span class="p-input-icon-right" style="width: 100%;">
-          <i class="pi pi-search tpi-i-search" (click)="queryWebhookNotify();"></i>
+        <!-- p-input-icon-right 為 PrimeNG 17 以前的舊 class，v18+ 已無對應樣式，
+             改用 p-iconfield/p-inputicon（比照 search-input 元件寫法） -->
+        <p-iconfield iconPosition="right" style="width: 100%;">
           <input type="search" class="form-control tpi-i-input" id="keyword" formControlName="keyword" placeholder=""
             (keydown.enter)="queryWebhookNotify()">
-        </span>
+          <p-inputicon styleClass="pi pi-search tpi-i-search" style="cursor: pointer;" (click)="queryWebhookNotify();" />
+        </p-iconfield>
       </div>
     </div>
   </form>

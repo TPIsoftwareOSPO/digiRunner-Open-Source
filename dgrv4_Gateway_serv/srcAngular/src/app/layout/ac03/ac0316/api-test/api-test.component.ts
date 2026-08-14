@@ -715,7 +715,7 @@ export class ApiTestComponent implements OnInit {
         );
         break;
       case "DELETE":
-        this.httpClient.delete(`${path}`, { headers: header, observe: 'response', responseType: 'text' }).subscribe(
+        this.httpClient.delete(`${path}`, { headers: header, body: body, observe: 'response', responseType: 'text' }).subscribe(
           // (res: HttpResponse<any>) => {
           // //處理結果
           // this.bindResResult(res);}
@@ -910,10 +910,6 @@ export class ApiTestComponent implements OnInit {
     this.resTime = responseTimes + "ms";
   }
 
-  openFileBrowser() {
-    $('#fileBinary').click();
-  }
-
   onFileChange(event) {
 
     if(event.target.files && event.target.files.length) {
@@ -924,12 +920,6 @@ export class ApiTestComponent implements OnInit {
       });
       this._fileName = _file.name;
     }
-  }
-
-  removeFile(){
-    this.form.get("file")?.setValue(null);
-    this._fileName = '';
-    $('#fileBinary').val('');
   }
 
   public get authType() { return this.form.get('authType')!; };

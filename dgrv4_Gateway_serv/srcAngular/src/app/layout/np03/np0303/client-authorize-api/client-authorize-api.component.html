@@ -60,7 +60,7 @@
                 <label *ngIf="config.data.operate != formOperate.create"
                     class="control-label">{{'new_application_file'|translate}}</label>：
                 <div class="ui-inputgroup">
-                    <input type="file" id="file" style="display: none;"  (change)="fileChange($event.target.files)">
+                    <input type="file" id="file" #fileRef style="display: none;"  (change)="fileChange($event.target.files)">
                     <input type="text" class="form-control" value="{{fileName}}" readOnly
                     placeholder="{{'upload_file' | translate}}">
                     <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"

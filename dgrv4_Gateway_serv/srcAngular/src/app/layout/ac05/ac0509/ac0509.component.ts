@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0128Req, DPB0128RespItem } from 'src/app/models/api/ServerService/dpb0128.interface';
 import { ParamItemComponent } from './param-item/param-item.component';
 

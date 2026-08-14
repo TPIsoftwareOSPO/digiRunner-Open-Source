@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { ToolService } from 'src/app/shared/services/tool.service';
+import { Observable, throwError } from 'rxjs';
+import { SMART_MISSING_STATE } from './smart-error';
 
 export interface PatientDisplay {
   id: string;
@@ -18,6 +18,13 @@ export interface ProviderDisplay {
   reference: string;
 }
 
+export interface EncounterDisplay {
+  id: string;
+  type: string;
+  period: string;
+  status: string;
+}
+
 export interface ConsentInfo {
   clientName: string;
   clientId: string;
@@ -29,6 +36,8 @@ export interface ConsentInfo {
   fhirUser: string | null;
   autoApprove: boolean;
   patientCandidates: string[];
+  /** 已預綁的病患 ID（launch 註冊時單選帶入；供 encounter 選取頁過濾） */
+  patientId: string | null;
   websiteName: string;
   fhirBasePath: string;
 }
@@ -55,25 +64,49 @@ export interface SmartSelection {
 @Injectable({ providedIn: 'root' })
 export class SmartFhirClientService {
 
-  constructor(private http: HttpClient, private tool: ToolService) {}
+  /**
+   * TokenInterceptor 逃生門標記。
+   * 攔截器只判斷 header 是否存在（值不拘），且會在送出前將它 delete，後端看不到。
+   */
+  private static readonly BYPASS_MARK = 'smart picker';
+
+  constructor(private http: HttpClient) {}
 
   // ==================== consent-info ====================
 
   getConsentInfo(state: string): Observable<ConsentInfo> {
+    // 非 proxy 路徑，不需要 X-Smart-State，但同樣需要逃生門：
+    // state 失效時後端回 400，若不繞過攔截器會彈出顯示原始 JSON 的全域錯誤視窗；
+    // 離線時 err.error 為 null 更會讓攔截器內部丟 TypeError。
     return this.http.get<ConsentInfo>('/dgrv4/ssotoken/smart/consent-info', {
-      params: { state }
+      params: { state },
+      headers: new HttpHeaders({ digiRunner: SmartFhirClientService.BYPASS_MARK }),
     });
   }
 
-  // ==================== FHIR headers ====================
-
-  fhirHeaders(): HttpHeaders {
-    const token = this.tool.getToken();
-    let headers = new HttpHeaders({ 'X-Smart-Launcher': 'true' });
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
+  // ===== Proxy 瀏覽（launch 流程 patient/provider picker）=====
+  /**
+   * SMART picker 專用的 proxy GET。兩個 header 缺一不可：
+   *
+   * - digiRunner：TokenInterceptor 逃生門。外部授權流程的使用者沒有後台 refresh_token，
+   *   少了它，任何 401 都會讓攔截器清空 sessionStorage 並硬跳轉到後台登入頁，
+   *   SMART 流程直接斷掉無法復原。
+   * - X-Smart-State：後端 isSmartSessionBypass 的旁路憑證。後端限制為僅 GET、
+   *   session phase 須為 AUTHENTICATED、websiteName 須綁定該 proxy、30 分鐘 TTL，
+   *   並在轉發前 strip 掉所有 x-smart-* header，不會外洩到 FHIR server。
+   */
+  private proxyGet<T>(state: string, url: string, params?: Record<string, string>): Observable<T> {
+    if (!state) {
+      // 各 picker 都在 state 存在時才呼叫，正常走不到這裡。
+      // 防呆用哨兵錯誤而非靜默送出無 state 的請求：否則前端 bug 會回 401，
+      // 在畫面上長得跟「授權已逾時」一模一樣，難以辨別。
+      return throwError(() => new Error(SMART_MISSING_STATE));
     }
-    return headers;
+    const headers = new HttpHeaders({
+      digiRunner: SmartFhirClientService.BYPASS_MARK,
+      'X-Smart-State': state,
+    });
+    return this.http.get<T>(url, { params, headers });
   }
 
   /** 把 fhirBasePath 正規化：'/' 視為空字串避免雙斜線 */
@@ -84,6 +117,7 @@ export class SmartFhirClientService {
   // ==================== Patient ====================
 
   searchPatients(
+    state: string,
     websiteName: string, fhirBasePath: string,
     keyword: string, searchBy: 'name' | 'id',
     offset: number, count: number
@@ -98,7 +132,7 @@ export class SmartFhirClientService {
     if (keyword) {
       params[searchBy === 'id' ? '_id' : 'name:contains'] = keyword;
     }
-    return this.http.get<any>(url, { params, headers: this.fhirHeaders() });
+    return this.proxyGet<any>(state, url, params);
   }
 
   extractPatientDisplay(resource: any): PatientDisplay {
@@ -125,6 +159,7 @@ export class SmartFhirClientService {
   // ==================== Practitioner ====================
 
   searchPractitioners(
+    state: string,
     websiteName: string, fhirBasePath: string,
     keyword: string, searchBy: 'name' | 'id',
     count: number, offset: number = 0
@@ -139,27 +174,77 @@ export class SmartFhirClientService {
     if (keyword) {
       params[searchBy === 'id' ? '_id' : 'name:contains'] = keyword;
     }
-    return this.http.get<any>(url, { params, headers: this.fhirHeaders() });
+    return this.proxyGet<any>(state, url, params);
   }
 
-  getPractitionerById(websiteName: string, fhirBasePath: string, id: string): Observable<any> {
+  getPractitionerById(state: string, websiteName: string, fhirBasePath: string, id: string): Observable<any> {
     const path = this.normalizeBasePath(fhirBasePath);
     const url = `/smart-on-fhir/${websiteName}${path}/Practitioner/${id}`;
-    return this.http.get<any>(url, { headers: this.fhirHeaders() });
+    return this.proxyGet<any>(state, url);
   }
 
-  getPatientById(websiteName: string, fhirBasePath: string, id: string): Observable<any> {
+  getPatientById(state: string, websiteName: string, fhirBasePath: string, id: string): Observable<any> {
     const path = this.normalizeBasePath(fhirBasePath);
     const url = `/smart-on-fhir/${websiteName}${path}/Patient/${id}`;
-    return this.http.get<any>(url, { headers: this.fhirHeaders() });
+    return this.proxyGet<any>(state, url);
+  }
+
+  // ==================== Encounter ====================
+
+  /** 查詢 Encounter；patientId 有值時以 subject 過濾，空值則不過濾（無 patient context 的邊角情境） */
+  searchEncounters(
+    state: string,
+    websiteName: string, fhirBasePath: string,
+    patientId: string, offset: number, count: number
+  ): Observable<any> {
+    const path = this.normalizeBasePath(fhirBasePath);
+    const url = `/smart-on-fhir/${websiteName}${path}/Encounter`;
+    const params: Record<string, string> = {
+      '_count': count.toString(),
+      '_offset': offset.toString(),
+      '_sort': '_id',
+    };
+    if (patientId) {
+      params['subject'] = `Patient/${patientId}`;
+    }
+    return this.proxyGet<any>(state, url, params);
+  }
+
+  extractEncounterDisplay(resource: any): EncounterDisplay {
+    const types: any[] = resource.type || [];
+    const typeText = types.map((t: any) => {
+      const codings = t.coding || [];
+      return t.text || (codings[0] && codings[0].display) || (codings[0] && codings[0].code) || '';
+    }).filter(Boolean).join(', ') || '-';
+
+    let period = '';
+    if (resource.period) {
+      const start = resource.period.start ? resource.period.start.substring(0, 10) : '';
+      const end = resource.period.end ? resource.period.end.substring(0, 10) : '';
+      period = end && end !== start ? `${start} ~ ${end}` : start;
+    }
+
+    return {
+      id: resource.id || '',
+      type: typeText,
+      period,
+      status: resource.status || '',
+    };
   }
 
   /**
    * 用 FHIR Bundle.link 的 URL（next/previous）直接抓下一頁。
    * 絕對 URL 會被截成相對路徑，避免 CORS 與多餘 origin。
    */
-  fetchByLink(url: string): Observable<any> {
-    return this.http.get<any>(this.toRelative(url), { headers: this.fhirHeaders() });
+  fetchByLink(state: string, url: string): Observable<any> {
+    const relative = this.toRelative(url);
+    // proxy 未開啟 URL rewrite 時，Bundle.link 會是上游 FHIR server 的絕對 URL，
+    // 截成相對路徑後會打到 gateway 根路徑而非本 proxy。直接視為錯誤，
+    // 避免送出注定失敗的請求，也避免其 401 被誤判成「授權已逾時」。
+    if (!relative.startsWith('/smart-on-fhir/')) {
+      return throwError(() => new Error('link_not_under_proxy'));
+    }
+    return this.proxyGet<any>(state, relative);
   }
 
   /** 從 bundle.link 找指定 relation 的 url */

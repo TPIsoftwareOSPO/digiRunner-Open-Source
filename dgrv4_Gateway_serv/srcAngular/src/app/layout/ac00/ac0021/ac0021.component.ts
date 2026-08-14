@@ -10,7 +10,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0195RespItem } from 'src/app/models/api/ServerService/dpb0195.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0220RespItem } from 'src/app/models/api/ServerService/dpb0220.interface';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { DPB0222Req } from 'src/app/models/api/ServerService/dpb0222.interface';

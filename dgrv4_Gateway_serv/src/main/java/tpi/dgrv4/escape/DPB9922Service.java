@@ -19,6 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import tpi.dgrv4.common.constant.MultilingualSheetNameEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.StackTraceUtil;
@@ -200,7 +201,10 @@ public class DPB9922Service {
 		List<TsmpSetting> entities = new ArrayList<>();
 
 		try (Workbook workbook = new XSSFWorkbook(inputStream);) {
-			Sheet sheet = workbook.getSheetAt(0);
+			// [EN] Prefer "setting" sheet by name; fall back to index 0 for single-sheet uploads
+			// [ZH] 優先依名稱取 "setting" sheet，找不到時 fallback 到 index 0 以相容單獨上傳的情境
+			Sheet sheet = workbook.getSheet(MultilingualSheetNameEnum.SETTING.value()) != null 
+					? workbook.getSheet(MultilingualSheetNameEnum.SETTING.value()) : workbook.getSheetAt(0);
 			boolean isFirst = true;
 			DataFormatter formatter = new DataFormatter();
 			Iterator<Row> rows = sheet.iterator();

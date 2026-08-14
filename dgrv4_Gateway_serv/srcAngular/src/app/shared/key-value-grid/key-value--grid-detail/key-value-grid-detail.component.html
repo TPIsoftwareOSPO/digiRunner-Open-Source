@@ -44,12 +44,15 @@
         }
         <!-- || this._fileName != '' -->
 
-        <input type="file" [id]="'fileField'+ no" (change)="onFileChange($event)" [hidden]="valueType.value=='text'"
+        <input type="file" [id]="'fileField'+ no" #fileFieldRef (change)="onFileChange($event)" [hidden]="valueType.value=='text'"
           style="display: none;" multiple/>
-        <span class="p-input-icon-right me-2" style="width: 100%;" [hidden]="_fileName==''">
-          <i class="pi pi-trash tpi-i-search" (click)="removeFile();"></i>
+        <!-- p-input-icon-right 為 PrimeNG 17 以前的舊 class，v18+ 已無對應樣式，
+             改用 p-iconfield/p-inputicon（比照 search-input 元件寫法）；
+             p-iconfield 自帶 display:block 會蓋過 [hidden]，故以 d-none 控制顯隱 -->
+        <p-iconfield iconPosition="right" class="me-2" style="width: 100%;" [class.d-none]="_fileName==''">
           <input type="text" class="form-control tpi-i-input" readonly [value]="_fileName">
-        </span>
+          <p-inputicon styleClass="pi pi-trash tpi-i-search" style="cursor: pointer;" (click)="removeFile();" />
+        </p-iconfield>
         <button type="button" class="btn tpi-btn tpi-primary pull-right"
           [hidden]="valueType.value=='text'"
           (click)="openFileBrowser();"

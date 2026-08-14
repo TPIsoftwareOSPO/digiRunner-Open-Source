@@ -16,8 +16,7 @@
         <label class="form-label control-label">Header</label>
         <ng-template #headerValue></ng-template>
         <div>
-          <button type="button" class="btn tpi-second" (click)="addHeaderValue()" [hidden]="disabled"
-            style="border-radius: 50%;">
+          <button type="button" class="btn btn-icon tpi-second flex-shrink-0" (click)="addHeaderValue()" [hidden]="disabled">
             <i class="fa fa-plus"></i>
           </button>
         </div>
@@ -30,8 +29,7 @@
         <label id="Field_label" class="control-label fw-bold" >Body</label>
         <ng-template #fieldValue></ng-template>
         <div>
-          <button type="button" class="btn tpi-second" (click)="addFieldValue()" [hidden]="disabled"
-            style="border-radius: 50%;">
+          <button type="button" class="btn btn-icon tpi-second flex-shrink-0" (click)="addFieldValue()" [hidden]="disabled">
             <i class="fa fa-plus"></i>
           </button>
         </div>
@@ -45,7 +43,7 @@
 
 
 
-    <button type="button" class="btn tpi-primary ms-1" (click)="deleteItem()" style="border-radius: 50%"
+    <button type="button" class="btn btn-icon tpi-primary ms-1 flex-shrink-0" (click)="deleteItem()"
       [hidden]="disabled" >
       <i class="fa fa-minus"></i>
     </button>

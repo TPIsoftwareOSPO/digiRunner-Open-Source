@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { BaseComponent } from "../../base-component";
 import { ConfirmationService, MessageService } from "primeng/api";
 import { ActivatedRoute,Router } from "@angular/router";
@@ -20,6 +20,7 @@ import * as base64 from 'js-base64'
     standalone: false
 })
 export class Ac0318Component extends BaseComponent implements OnInit {
+    @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
 
     cols: { field: string; }[] = [];
     selected: Array<AA0318Item> = [];
@@ -67,7 +68,7 @@ export class Ac0318Component extends BaseComponent implements OnInit {
     }
 
     openFileBrowser() {
-        $('#file').click();
+        this.fileRef.nativeElement.click();
     }
 
     changeFile(event) {

@@ -162,12 +162,31 @@ export function stringANumValidator(maxLength: number): ValidatorFn {
 
 export function mailValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value;
-    const regex = new RegExp(/[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$/g);
-    const result = regex.test(value);
-    if (!result && value != '') return { mailFormat: 'validation.mailFormat' };
-    return null;
+    const value = control.value as string | null | undefined;
+    if (value === '' || value === null || value === undefined) return null;
+
+    return isValidMail(value)
+      ? null
+      : { mailFormat: 'validation.mailFormat' };
   };
+}
+
+export function multipleMailValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value as string | null | undefined;
+    if (value === '' || value === null || value === undefined) return null;
+
+    const mails = value.split(',').map((mail) => mail.trim());
+    return mails.length > 0 && mails.every(isValidMail)
+      ? null
+      : { mailFormat: 'validation.mailFormat' };
+  };
+}
+
+function isValidMail(value: string): boolean {
+  // 僅接受完整 ASCII email，避免 regex 只匹配到含中文輸入中的合法片段。
+  const regex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+  return regex.test(value);
 }
 
 export function websiteAddressValidator(): ValidatorFn {

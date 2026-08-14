@@ -20,7 +20,7 @@ import {
 } from 'src/app/models/api/UserService/aa0003.interface';
 import { MessageService } from 'primeng/api';
 import * as base64 from 'js-base64';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Component({
     selector: 'app-ac0006',
@@ -65,7 +65,7 @@ export class Ac0006Component extends BaseComponent implements OnInit {
     this.form = this.fb.group({
       newUserName: new UntypedFormControl(''), //, [ValidatorFns.stringNameValidator(this.newUserNameLimitChar.value)]),
       newUserAlias: new UntypedFormControl(''), //, [ValidatorFns.stringAliasValidator(this.newUserAliasLimitChar.value)]),
-      newUserMail: new UntypedFormControl(''), //, [ValidatorFns.maxLengthValidator(this.newUserMailLimitChar.value)]),
+      newUserMail: new UntypedFormControl('', ValidatorFns.mailValidator()),
       userBlock: new UntypedFormControl('', [
         ValidatorFns.maxLengthValidator(this.newUserBlockLimitChar.value),
       ]),
@@ -107,6 +107,8 @@ export class Ac0006Component extends BaseComponent implements OnInit {
     this.userService.updateTUserData_before().subscribe(async (res) => {
       if (this.tool.checkDpSuccess(res.ResHeader)) {
         this.addFormValidator(this.form, res.RespBody.constraints);
+        this.newUserMail!.addValidators(ValidatorFns.mailValidator());
+        this.newUserMail!.updateValueAndValidity();
       }
     });
 

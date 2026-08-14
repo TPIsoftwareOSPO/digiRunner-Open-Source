@@ -1,0 +1,68 @@
+<div class="login-center-page">
+
+  <app-smart-status-panel *ngIf="viewState !== 'ready'" [status]="panelStatus"></app-smart-status-panel>
+
+  <div class="form-wrapper wide" *ngIf="viewState === 'ready'">
+    <div class="form-header"><h1>digiRunner</h1></div>
+    <hr />
+    <div class="form-body">
+
+      <p class="page-title">請選擇就醫紀錄</p>
+      <p class="subtitle">「{{ clientName }}」需要一筆就醫紀錄（Encounter）作為存取範圍</p>
+      <p class="text-muted small text-center" *ngIf="patientId">病患：{{ patientId }}</p>
+
+      <p class="text-muted text-center" *ngIf="loading && encounters.length === 0">載入中…</p>
+
+      <div class="result-list" *ngIf="encounters.length > 0">
+        <table class="table table-sm table-hover mb-1">
+          <thead>
+            <tr>
+              <th style="width: 36px;"></th>
+              <th>ID</th>
+              <th>類型</th>
+              <th>期間</th>
+              <th>狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of encounters" (click)="pick(e)" class="pick-row"
+                [class.selected]="selected && selected.id === e.id">
+              <td>
+                <input type="radio" name="encounter" [checked]="selected && selected.id === e.id" (click)="pick(e)" />
+              </td>
+              <td>{{ e.id }}</td>
+              <td>{{ e.type }}</td>
+              <td>{{ e.period }}</td>
+              <td>{{ e.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager" *ngIf="encounters.length > 0 || page > 1">
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="prevPage()" [disabled]="loading || !hasPrevPage">上一頁</button>
+          <span class="page-info">第 {{ page }} 頁</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="nextPage()" [disabled]="loading || !hasNextPage">下一頁</button>
+        </div>
+      </div>
+
+      <div class="text-center my-3" *ngIf="listError">
+        <p class="text-danger mb-1">{{ 'smart_picker.query_failed' | translate }}</p>
+        <p class="text-muted small mb-2">{{ listErrorHint | translate }}</p>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="search()" [disabled]="loading">
+          {{ 'smart_picker.retry' | translate }}
+        </button>
+      </div>
+
+      <p class="text-muted text-center" *ngIf="!listError && !loading && encounters.length === 0 && page === 1">找不到就醫紀錄</p>
+
+      <div class="btn-row">
+        <button type="button" class="btn tpi-btn tpi-primary" (click)="confirm()" [disabled]="!selected">
+          確認
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

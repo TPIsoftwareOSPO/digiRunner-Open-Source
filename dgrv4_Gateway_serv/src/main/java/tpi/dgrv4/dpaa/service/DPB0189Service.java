@@ -101,7 +101,7 @@ public class DPB0189Service {
                 	dataSourceMap.put(connVo.getConnectionName(), dsVo);
                 }else {//不是預設DB
                 	//新連線或有更新
-	                if (dsVo == null || (dsVo != null && connVo.getVersion() > dsVo.getVersion())) {
+	                if (dsVo == null || (dsVo != null && connVo.getVersion().longValue() > dsVo.getVersion().longValue())) {
 	                	//設定HikariConfig的連線參數值
 	                    HikariConfig config = new HikariConfig();
 	                    config.setJdbcUrl(connVo.getJdbcUrl());
@@ -109,6 +109,7 @@ public class DPB0189Service {
 	                    String mima = decryptMima(connVo.getMima());
 	                    config.setPassword(mima);
 	                    config.setMaximumPoolSize(connVo.getMaxPoolSize());
+	                    config.setMinimumIdle(connVo.getMinimumIdle());
 	                    config.setConnectionTimeout(connVo.getConnectionTimeout());
 	                    config.setIdleTimeout(connVo.getIdleTimeout());
 	                    config.setMaxLifetime(connVo.getMaxLifetime());
@@ -131,6 +132,12 @@ public class DPB0189Service {
 	                    //建立連線
 	                    dsVo = new DataSourceInfoVo();
 	                    HikariDataSource dataSource = new HikariDataSource(config); // NOSONAR
+	                    //Print out the "actual effective value" after HikariCP verification/overwrite to avoid confusion with the input settings (e.g., idleTimeout<10000ms will be forcibly changed back to 600000ms by Hikari).
+	                    //印出HikariCP驗證/覆寫後的「實際生效值」,避免跟送進去的設定值搞混(例如idleTimeout<10000ms會被Hikari強制改回600000ms)
+	                    TPILogger.tl.info("ConnectionName="+connVo.getConnectionName()
+	                    		+ ", maximumPoolSize=" + dataSource.getHikariConfigMXBean().getMaximumPoolSize()
+	                    		+ ", minimumIdle=" + dataSource.getHikariConfigMXBean().getMinimumIdle()
+	                    		+ ", idleTimeout=" + dataSource.getHikariConfigMXBean().getIdleTimeout());
 	                    dsVo.setHikariDataSource(dataSource);
 	                    dsVo.setVersion(connVo.getVersion());
 	                    dataSourceMap.put(connVo.getConnectionName(), dsVo);

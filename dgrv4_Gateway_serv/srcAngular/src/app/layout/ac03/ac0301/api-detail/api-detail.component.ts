@@ -27,9 +27,11 @@ export class ApiDetailComponent implements OnInit {
     srcUrlPool: { percent: string; url: string }[];
   }[] = [];
   @Input() apiGroupList: Array<AA0320Item> = [];
+  @Input() apiGroupListRowcount: number = 0;
   @Input() detailCols: { field: string; header: string }[] = [];
 
   @Output() getApiGroupListEvt: EventEmitter<string> = new EventEmitter();
+  @Output() moreApiGroupListEvt: EventEmitter<void> = new EventEmitter();
 
   detailForm: UntypedFormGroup;
 
@@ -93,6 +95,10 @@ export class ApiDetailComponent implements OnInit {
   queryApiGroupList() {
     // console.log(this.keyword.value)
     this.getApiGroupListEvt.emit(this.keyword.value);
+  }
+
+  moreApiGroupList() {
+    this.moreApiGroupListEvt.emit();
   }
 
   public get keyword() {

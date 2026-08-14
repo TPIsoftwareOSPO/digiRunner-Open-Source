@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -8,7 +8,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.service';
 import { DPB0095Item, DPB0095Req } from 'src/app/models/api/OpenApiService/dpb0095.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { DPB0240Req, DPB0240RespItem } from 'src/app/models/api/ServerService/dpb0240.interface';
@@ -25,6 +25,7 @@ import { DomSanitizer } from '@angular/platform-browser';
     standalone: false
 })
 export class Ac0231Component extends BaseComponent implements OnInit {
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
 
   currentTitle = this.title;
   pageNum: number = 1;
@@ -310,12 +311,12 @@ export class Ac0231Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   public clearFile() {
     this._fileSrc = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   async fileChange(files: FileList) {

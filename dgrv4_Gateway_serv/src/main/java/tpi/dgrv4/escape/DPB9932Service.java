@@ -79,7 +79,7 @@ public class DPB9932Service {
 		   //checkmarx, Unchecked Input for Loop Condition
 		     int lastRowNum = sheet.getLastRowNum();
 		     final int maxRowsLimit = 1000000;
-		     if (lastRowNum <= 0) {
+		     if (lastRowNum < 0) {
 	             throw TsmpDpAaRtnCode._1559.throwing("Invalid row number: " + lastRowNum);
 	         }
 	         

@@ -240,7 +240,7 @@
           <ng-container *ngIf="currentAction !='detail'">
             <div>
               <button type="button" class="btn tpi-btn tpi-night me-2" (click)="openFileBrowser();">{{'chs_file'|translate}}</button>
-              <input type="file" id="fileName" (change)="fileChange($event.target.files)" formControlName="iconFile"
+              <input type="file" id="fileName" #fileNameRef (change)="fileChange($event.target.files)" formControlName="iconFile"
                 style="display: none;">
               <button type="button" class="btn tpi-btn tpi-night" (click)="clearFile();"
                 *ngIf="this._fileSrc">{{'remove'|translate}}</button>

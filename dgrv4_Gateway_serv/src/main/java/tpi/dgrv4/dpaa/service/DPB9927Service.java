@@ -70,26 +70,17 @@ public class DPB9927Service {
 			this.writeHeaderFunc(workbook, sheet1);
 			
 			//資料
-			List<String> funcCodeList =  this.writeDataFunc(sheet1, funcType);
-			
-			sheet1.setColumnWidth(0, 5120); //20*256
-		    sheet1.setColumnWidth(1, 5120); //20*256
-		    sheet1.setColumnWidth(2, 5120); //20*256
-		    sheet1.setColumnWidth(3, 10240); //40*256
-		    sheet1.setColumnWidth(4, 5120); //20*256
-		    sheet1.setColumnWidth(5, 5120); //20*256
-		    
+			List<TsmpFunc> funcDataList = this.getDataFunc(funcType);
+			List<String> funcCodeList =  this.writeDataFunc(sheet1, funcDataList);
+
 		    XSSFSheet sheet2 = workbook.createSheet("TsmpReportUrl");
 
 			//抬頭
 			this.writeHeaderReportUrl(workbook, sheet2);
 			
 			//資料
-			this.writeDataReportUrl(sheet2, funcCodeList);
-			
-			sheet2.setColumnWidth(0, 5120); //20*256
-			sheet2.setColumnWidth(1, 5120); //20*256
-			sheet2.setColumnWidth(2, 65280); //255*256
+			List<TsmpReportUrl> reportUrlDataList = getDataReportUrl(funcCodeList);
+			this.writeDataReportUrl(sheet2, reportUrlDataList);
 		    
 			doExportTsmpFunc(response, req, reqHeader);
 			//寫入串流
@@ -105,7 +96,7 @@ public class DPB9927Service {
 
 	}
 	
-	private void writeHeaderFunc(XSSFWorkbook wb, XSSFSheet sheet) {
+	public void writeHeaderFunc(XSSFWorkbook wb, XSSFSheet sheet) {
 		
 		//粗體字
 		XSSFCellStyle cellStyle = wb.createCellStyle();
@@ -127,9 +118,13 @@ public class DPB9927Service {
         }
 	}
 	
-	private List<String> writeDataFunc(XSSFSheet sheet, String funcType) {
+	private List<TsmpFunc> getDataFunc(String funcType){
+		return getTsmpFuncDao().findAllByFuncType(funcType);
+	}
+	
+	public List<String> writeDataFunc(XSSFSheet sheet, List<TsmpFunc> list) {
 		List<String> funcCodeList = new ArrayList<String>();
-		List<TsmpFunc> list = getTsmpFuncDao().findAllByFuncType(funcType);
+		
 		if(CollectionUtils.isEmpty(list)) {
 			throw TsmpDpAaRtnCode._1298.throwing();
 		}
@@ -157,10 +152,17 @@ public class DPB9927Service {
 	        cell.setCellValue(vo.getFuncType());
 		}
 		
+		sheet.setColumnWidth(0, 5120); //20*256
+	    sheet.setColumnWidth(1, 5120); //20*256
+	    sheet.setColumnWidth(2, 5120); //20*256
+	    sheet.setColumnWidth(3, 10240); //40*256
+	    sheet.setColumnWidth(4, 5120); //20*256
+	    sheet.setColumnWidth(5, 5120); //20*256
+		
 		return funcCodeList;
 	}
 	
-	private void writeHeaderReportUrl(XSSFWorkbook wb, XSSFSheet sheet) {
+	public void writeHeaderReportUrl(XSSFWorkbook wb, XSSFSheet sheet) {
 		
 		//粗體字
 		XSSFCellStyle cellStyle = wb.createCellStyle();
@@ -182,9 +184,11 @@ public class DPB9927Service {
         }
 	}
 	
-	private void writeDataReportUrl(XSSFSheet sheet, List<String> funcCodeList) {
-		List<TsmpReportUrl> list = getTsmpReportUrlDao().queryAllByReportId(funcCodeList);
-		
+	private List<TsmpReportUrl> getDataReportUrl(List<String> funcCodeList) {
+		return getTsmpReportUrlDao().queryAllByReportId(funcCodeList);
+	}
+	
+	public void writeDataReportUrl(XSSFSheet sheet, List<TsmpReportUrl> list) {
 		int rowIndex = 1;
 		for(TsmpReportUrl vo : list) {
 			Row row = sheet.createRow(rowIndex++);
@@ -197,6 +201,10 @@ public class DPB9927Service {
 	        cell = row.createCell(2);
 	        cell.setCellValue(vo.getReportUrl());
 		}
+		
+		sheet.setColumnWidth(0, 5120); //20*256
+		sheet.setColumnWidth(1, 5120); //20*256
+		sheet.setColumnWidth(2, 65280); //255*256
 	}
 	
 	/**

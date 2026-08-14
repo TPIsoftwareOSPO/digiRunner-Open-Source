@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '3.5.14'
+	id 'org.springframework.boot' version '3.5.16'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'com.github.jk1.dependency-license-report' version '2.9'
 
@@ -22,7 +22,7 @@ licenseReport {
 
 allprojects {
 	group = 'tpi.dgrv4'
-	version = 'release-rc-v4.7.24.1-2-g2be5dee15'
+	version = 'release-rc-v4.8.5.0'
 	apply plugin:  'io.spring.dependency-management'
 	
 	repositories {
@@ -47,6 +47,7 @@ sonarqube {
 }
 
 subprojects {
+
 	apply plugin:  'org.springframework.boot'
 	apply plugin:  'java'
 	apply plugin:  'java-library'
@@ -59,16 +60,16 @@ subprojects {
     }
 
 	dependencies {
-		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.7.24.1-2-g2be5dee15-lib.jar")
-		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.7.24.1-2-g2be5dee15-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_CodecUtil-v4.8.5.0-lib.jar")
+		implementation files("${rootDir}/libsext/dgrv4_HttpUtil-v4.8.5.0-lib.jar")
 		
 		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 		implementation ('org.springframework.boot:spring-boot-starter-web'){
-			exclude group:'org.apache.tomcat.embed', module:'tomcat-embed-core'
+			exclude group:'com.fasterxml.jackson.core', module:'jackson-databind'
 		}
 
-		// Correct the above exclusions
-		implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.55'
+		// Correct the above exclusions, CVE-2026-54515
+		implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
 
 		compileOnly 'com.h2database:h2'
 		compileOnly 'org.projectlombok:lombok:1.18.42'
@@ -161,6 +162,19 @@ project(':dgrv4_Gateway_serv'){
 			force 'io.grpc:grpc-util:1.61.0'
 		}
 	}
+	
+	// [EN]Spring Boot's BOM manages the whole Netty stack (pulled in transitively via grpc-netty)
+	//     through a single "netty.version" property, currently 4.1.135.Final, which is affected by
+	//     CVE-2026-55831, CVE-2026-55833, CVE-2026-56745, CVE-2026-56746, CVE-2026-59898,
+	//     CVE-2026-59899, CVE-2026-59900, CVE-2026-59901 and CVE-2026-59921 (all fixed in
+	//     Netty 4.1.136.Final). resolutionStrategy.force does not win here because the BOM-imported
+	//     netty-bom version is applied after it — overriding the BOM property is the correct fix.
+	// [ZH]Spring Boot 的 BOM 透過單一 "netty.version" 屬性統一管理整個 Netty 相依（經由 grpc-netty
+	//     傳遞引入），目前為 4.1.135.Final，受 CVE-2026-55831、CVE-2026-55833、CVE-2026-56745、
+	//     CVE-2026-56746、CVE-2026-59898、CVE-2026-59899、CVE-2026-59900、CVE-2026-59901、
+	//     CVE-2026-59921 影響（皆已在 Netty 4.1.136.Final 修復）。resolutionStrategy.force 在這裡
+	//     不會生效，因為 BOM 引入的 netty-bom 版本是在其後套用的，正確做法是覆蓋 BOM 屬性。
+	ext['netty.version'] = '4.1.136.Final'
 
 	// 引用其它 project
 	dependencies{
@@ -192,7 +206,6 @@ project(':dgrv4_Gateway_serv'){
        	implementation ('org.springdoc:springdoc-openapi-ui:1.6.14'){
 			exclude group: 'org.apache.commons', module: 'commons-lang3'
 		}
-		implementation 'org.yaml:snakeyaml:2.2'
 
 		implementation ('org.apache.poi:poi-ooxml:5.4.0'){
 			exclude group: 'org.apache.commons', module: 'commons-lang3'
@@ -217,9 +230,9 @@ project(':dgrv4_Gateway_serv'){
 		//  compileOnly:  JDBC Driver 5 種
 		implementation 'com.h2database:h2'
 		implementation project(':dgrv4_H2Config_lib')
-		implementation 'com.microsoft.sqlserver:mssql-jdbc:13.2.1.jre11'
+		implementation 'com.microsoft.sqlserver:mssql-jdbc:13.4.0.jre11'
 		implementation 'com.oracle.database.jdbc:ojdbc11'
-		implementation 'org.postgresql:postgresql:42.7.11'
+		implementation 'org.postgresql:postgresql:42.7.12'
 		implementation('org.mariadb.jdbc:mariadb-java-client:3.1.2', {
 			exclude group: 'net.java.dev.jna', module: 'jna-platform'  //使用其它版本的相依
 			exclude group: 'com.google.protobuf', module: 'protobuf-java'
@@ -244,7 +257,6 @@ project(':dgrv4_Gateway_serv'){
 			exclude group:'com.google.protobuf', module:'protobuf-java'
 		}
 		implementation 'io.grpc:grpc-stub:1.61.0'
-		implementation 'org.yaml:snakeyaml:2.2'
 		
 		// Correct the above exclusions, group:'com.google.protobuf', module:'protobuf-java'
 		implementation 'com.google.protobuf:protobuf-java:3.25.5'
@@ -256,21 +268,7 @@ project(':dgrv4_Gateway_serv'){
 			// [ZH]grpc-netty:1.61.0 傳遞依賴了 grpc-netty-shaded:1.55.1，
 			//     會把第二個 grpc-core（v1.55.1）放上 classpath 導致 AbstractMethodError，必須排除。
 			exclude group:'io.grpc', module:'grpc-netty-shaded'
-			// CVE-2025-55163
-			exclude group:'io.netty', module:'netty-codec-http2'
-			//CVE-2025-58056
-			exclude group:'io.netty', module:'netty-codec-http'
-			//CVE-2025-58057
-			exclude group:'io.netty', module:'netty-codec'
 		}
-		// Correct the above exclusions, CVE-2025-55163, CVE-2026-33871, CVE-2026-42587
-		implementation 'io.netty:netty-codec-http2:4.1.133.Final'
-		// Correct the above exclusions, CVE-2025-58056, CVE-2025-67735, CVE-2026-33870, CVE-2026-41417, CVE-2026-42587
-		implementation 'io.netty:netty-codec-http:4.1.133.Final'
-		// Correct the above exclusions, CVE-2025-58057, CVE-2026-42583
-		implementation 'io.netty:netty-codec:4.1.133.Final'
-		//CVE-2026-42578
-		implementation 'io.netty:netty-handler-proxy:4.1.133.Final'
 		
 		implementation 'io.netty:netty-tcnative-boringssl-static:2.0.61.Final'
 		

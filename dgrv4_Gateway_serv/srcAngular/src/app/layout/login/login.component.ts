@@ -104,7 +104,7 @@ export class LoginComponent
     this.form = this.fb.group({
       uname: new UntypedFormControl(''),
       pwd: new UntypedFormControl(''),
-      email: new UntypedFormControl(''),
+      email: new UntypedFormControl('', ValidatorFns.mailValidator()),
       expireKey: new UntypedFormControl(),
       otpCode: new UntypedFormControl(''),
       newMima: new UntypedFormControl(''),
@@ -346,6 +346,8 @@ export class LoginComponent
     this.userService.sendOtp_before().subscribe((res) => {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.addFormValidator(this.form, res.RespBody.constraints);
+        this.email.addValidators(ValidatorFns.mailValidator());
+        this.email.updateValueAndValidity();
         this.loginState = 'user_email';
         setTimeout(() => {
           this.usermail.nativeElement.focus();

@@ -80,7 +80,7 @@ public class AA0103Service {
 				throw TsmpDpAaRtnCode._1296.throwing();
 			}
 			String funcType = getFuncTypeByBcryptParamHelper(req.getFuncType(), locale);
-			List<TsmpFunc> tsmpFuncList =  getTsmpFuncDao().query_aa0103Service(funcCode, locale, words, getPageSize(), funcType);
+			List<TsmpFunc> tsmpFuncList =  getTsmpFuncDao().query_aa0103Service(funcCode, req.getLocale(), words, getPageSize(), funcType);
 			//我不知道為什麼之前要寫兩次，但是我覺得他應該可能也許是多寫的，所以我先把它註解起來 by zoe
 //			getTsmpFuncDao().query_aa0103Service(funcCode, locale, words, getPageSize());
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Commit Standardizer"
+  short_description: "依暫存區差異產生繁體中文 Conventional Commit"
+  default_prompt: "Use $git-commit-standardizer to draft a commit message for staged changes."

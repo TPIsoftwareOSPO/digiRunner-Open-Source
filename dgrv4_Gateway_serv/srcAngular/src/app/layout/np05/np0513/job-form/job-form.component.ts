@@ -7,7 +7,7 @@ import { ListService } from 'src/app/shared/services/api-list.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0062Req } from 'src/app/models/api/JobService/dpb0062.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { JobService } from 'src/app/shared/services/api-job.service';
 
 @Component({

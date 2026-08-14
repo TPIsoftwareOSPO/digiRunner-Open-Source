@@ -7,7 +7,7 @@ import { FormParams } from 'src/app/models/api/form-params.interface';
 import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
 import { ToolService } from 'src/app/shared/services/tool.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0078Req } from 'src/app/models/api/FileService/dpb0078.interface';
 import { FileService } from 'src/app/shared/services/api-file.service';
 import { DPB0093ApiItem } from 'src/app/models/api/OpenApiService/dpb0093.interface';

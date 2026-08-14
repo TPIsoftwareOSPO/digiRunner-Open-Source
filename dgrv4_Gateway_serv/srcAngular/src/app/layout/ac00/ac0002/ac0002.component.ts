@@ -109,12 +109,12 @@ export class Ac0002Component extends BaseComponent implements OnInit {
       userAlias: new UntypedFormControl(''),
       userBlock: new UntypedFormControl(''),
       confirmUserBlock: new UntypedFormControl(''),
-      userMail: new UntypedFormControl(''),
+      userMail: new UntypedFormControl('', ValidatorFns.mailValidator()),
       encodeStatus: new UntypedFormControl(''),
       orgID: new UntypedFormControl(''),
       roleIDList: new UntypedFormControl([]),
       newUserName: new UntypedFormControl(''),
-      newUserMail: new UntypedFormControl(''),
+      newUserMail: new UntypedFormControl('', ValidatorFns.mailValidator()),
       newUserAlias: new UntypedFormControl(''),
       newStatus: new UntypedFormControl(''),
       newRoleIDList: new UntypedFormControl([]),
@@ -660,6 +660,8 @@ export class Ac0002Component extends BaseComponent implements OnInit {
       case 'create':
         this.userService.addTUser_before().subscribe((res) => {
           this.addFormValidator(this.form, res.RespBody.constraints);
+          this.userMail!.addValidators(ValidatorFns.mailValidator());
+          this.userMail!.updateValueAndValidity();
 
           // $(`#userName_label`).addClass('required');
           // this.userName.setValidators([ValidatorFns.requiredValidator(), ValidatorFns.maxLengthValidator(this.userNameLimitChar.value), ValidatorFns.stringCharValidator()]);
@@ -705,6 +707,8 @@ export class Ac0002Component extends BaseComponent implements OnInit {
                   this.form,
                   resbefore.RespBody.constraints
                 );
+                this.newUserMail!.addValidators(ValidatorFns.mailValidator());
+                this.newUserMail!.updateValueAndValidity();
                 this.userDetail = res.RespBody;
                 const _userDetail = JSON.parse(JSON.stringify(this.userDetail));
                 this.currentTitle = `${this.title} > ${dict['button.update']}`;

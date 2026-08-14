@@ -1,0 +1,4 @@
+interface:
+  display_name: "DGR Angular Conventions"
+  short_description: "套用本專案 Angular、API、樣式與測試規範"
+  default_prompt: "Use $dgr-angular-conventions when changing this Angular project."

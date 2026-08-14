@@ -1273,6 +1273,15 @@ public class TsmpSettingService {
 		return getStringVal(key);
 	}
 	
+	public String getKey_GTW_IDP_USE_ABSOLUTE_PATH() {
+		return TsmpSettingDao.Key.GTW_IDP_USE_ABSOLUTE_PATH;
+	}
+	
+	public boolean getVal_GTW_IDP_USE_ABSOLUTE_PATH() {
+		String key = getKey_GTW_IDP_USE_ABSOLUTE_PATH();
+		return getBooleanVal(key, false);
+	}
+	
 	// 
 	public String getKey_DGR_PUBLIC_DOMAIN() {
 		return TsmpSettingDao.Key.DGR_PUBLIC_DOMAIN;

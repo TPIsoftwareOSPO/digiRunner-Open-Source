@@ -1,5 +1,5 @@
 import { map } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
@@ -21,7 +21,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import * as FileSaver from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import {
   SmartOnFhirProxyDto,
   SmartOnFhirProxySearchReq,
@@ -55,6 +55,9 @@ interface _SmartOnFhirProxyDto extends SmartOnFhirProxyDto {
   standalone: false,
 })
 export class Lb0013Component extends BaseComponent implements OnInit {
+  @ViewChild('fileInputP1') fileInputP1!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInputP3') fileInputP3!: ElementRef<HTMLInputElement>;
+
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
   form!: FormGroup;
@@ -78,6 +81,23 @@ export class Lb0013Component extends BaseComponent implements OnInit {
   importFileName: string = '';
   importData: _SmartOnFhirProxyDto[] = [];
   importSelected: _SmartOnFhirProxyDto[] = [];
+  // Auth 下拉選項（digirunner 送後端值為小寫，畫面顯示 digiRunner）
+  sofProxyAuthOptions: Array<{ label: string; value: string }> = [
+    { label: 'none', value: 'none' },
+    { label: 'digiRunner', value: 'digirunner' },
+    { label: 'third-party', value: 'third-party' },
+  ];
+  // Introspection Auth 下拉選項（label 與 value 相同）
+  sofProxyInIntrospectionAuthOptions: string[] = [
+    'client_secret_basic',
+    'bearer',
+    'none',
+  ];
+  // Fhir Server驗證 Auth Method 下拉選項（label 與 value 相同）
+  sofProxyOutAuthMethodOptions: string[] = [
+    'client_secret_basic',
+    'client_secret_post',
+  ];
   // formFile!: FormGroup;
   reload: boolean = false;
 
@@ -109,7 +129,17 @@ export class Lb0013Component extends BaseComponent implements OnInit {
       sofProxyStatus: new FormControl(''),
       sofProxyStatusName: new FormControl(''),
       sofProxyRemark: new FormControl(''),
-      sofProxyAccessToken: new FormControl(''),
+      sofProxyAuth: new FormControl('none'),
+      sofProxyInIntrospectionAuth: new FormControl(''),
+      sofProxyInWellKnown: new FormControl(''),
+      sofProxyInIntrospectionClientId: new FormControl(''),
+      sofProxyInIntrospectionSecret: new FormControl(''),
+      sofProxyOutRelay: new FormControl('N'),
+      sofProxyOutAuthMethod: new FormControl(''),
+      sofProxyOutWellKnown: new FormControl(''),
+      sofProxyOutClientId: new FormControl(''),
+      sofProxyOutClientSecret: new FormControl(''),
+      sofProxyOutScope: new FormControl(''),
       sofProxySqlInjection: new FormControl(''),
       sofProxyTraffic: new FormControl(''),
       sofProxyXss: new FormControl(''),
@@ -137,10 +167,7 @@ export class Lb0013Component extends BaseComponent implements OnInit {
       { field: 'sofProxyId', header: 'ID' },
       { field: 'sofProxyName', header: this.translate.instant('sof.name') },
       { field: 'sofProxyRemark', header: this.translate.instant('memo') },
-      {
-        field: 'sofProxyAccessToken',
-        header: this.translate.instant('sof.access_token'),
-      },
+      { field: 'sofProxyAuth', header: 'Auth' },
       {
         field: 'sofProxySqlInjection',
         header: this.translate.instant('sof.sql_injection'),
@@ -193,6 +220,68 @@ export class Lb0013Component extends BaseComponent implements OnInit {
 
     this.sofProxyTps.valueChanges.subscribe((val) => {
       if (val == null) this.sofProxyTps.setValue('');
+    });
+
+    // third-party 時 introspection 四欄位為必填；切回其他 Auth 模式時清空值並移除驗證
+    this.sofProxyAuth.valueChanges.subscribe((val) => {
+      const introspectionCtrls = [
+        this.sofProxyInIntrospectionAuth,
+        this.sofProxyInWellKnown,
+        this.sofProxyInIntrospectionClientId,
+        this.sofProxyInIntrospectionSecret,
+      ];
+      introspectionCtrls.forEach((ctrl) => {
+        if (val === 'third-party') {
+          ctrl.setValidators(ValidatorFns.requiredValidator());
+        } else {
+          ctrl.clearValidators();
+          ctrl.setValue('');
+        }
+        ctrl.updateValueAndValidity();
+      });
+      // third-party 時 Introspection Auth 下拉預設 client_secret_basic
+      if (val === 'third-party' && !this.sofProxyInIntrospectionAuth.value) {
+        this.sofProxyInIntrospectionAuth.setValue('client_secret_basic');
+      }
+      // Fhir Server驗證（sofProxyOutRelay）僅 Auth = none 時可操作；
+      // 其餘模式強制設為 N 並 disable（觸發既有 valueChanges 清空 out 欄位）
+      if (val === 'none') {
+        // detail 模式整份表單為 disabled，不得在此重新啟用
+        if (this.currentAction !== 'detail') {
+          this.sofProxyOutRelay.enable({ emitEvent: false });
+        }
+      } else {
+        if (this.sofProxyOutRelay.value !== 'N') {
+          this.sofProxyOutRelay.setValue('N');
+        }
+        this.sofProxyOutRelay.disable({ emitEvent: false });
+      }
+    });
+
+    // Fhir Server驗證（sofProxyOutRelay）= Y 時 Client ID / Client Secret 為必填；
+    // 取消勾選時清空五個 out 欄位並移除驗證
+    this.sofProxyOutRelay.valueChanges.subscribe((val) => {
+      const requiredCtrls = [this.sofProxyOutClientId, this.sofProxyOutClientSecret];
+      const outCtrls = [
+        this.sofProxyOutAuthMethod,
+        this.sofProxyOutWellKnown,
+        this.sofProxyOutClientId,
+        this.sofProxyOutClientSecret,
+        this.sofProxyOutScope,
+      ];
+      if (val === 'Y') {
+        requiredCtrls.forEach((ctrl) =>
+          ctrl.setValidators(ValidatorFns.requiredValidator()),
+        );
+        // 啟用 Fhir Server驗證時 Auth Method 下拉預設 client_secret_basic
+        if (!this.sofProxyOutAuthMethod.value) {
+          this.sofProxyOutAuthMethod.setValue('client_secret_basic');
+        }
+      } else {
+        requiredCtrls.forEach((ctrl) => ctrl.clearValidators());
+        outCtrls.forEach((ctrl) => ctrl.setValue(''));
+      }
+      outCtrls.forEach((ctrl) => ctrl.updateValueAndValidity());
     });
   }
 
@@ -285,6 +374,8 @@ export class Lb0013Component extends BaseComponent implements OnInit {
         this.pageNum = 2;
         this.btnName = dict['button.create'];
         this.sofProxyStatus.setValue('N');
+        this.sofProxyAuth.setValue('none');
+        this.sofProxyOutRelay.setValue('N');
         this.sofProxyTps.setValue(0);
 
         break;
@@ -299,9 +390,42 @@ export class Lb0013Component extends BaseComponent implements OnInit {
         this.sofProxyName.setValue(this.selectedItem!.sofProxyName);
         this.sofProxyStatus.setValue(this.selectedItem!.sofProxyStatus);
         this.sofProxyRemark.setValue(this.selectedItem!.sofProxyRemark);
-        this.sofProxyAccessToken.setValue(
-          this.selectedItem!.sofProxyAccessToken,
+        this.sofProxyAuth.setValue(
+          this.selectedItem!.sofProxyAuth?.[0] ?? 'none',
         );
+        // 需在 sofProxyAuth 之後帶入，避免被切換 Auth 模式的清空邏輯洗掉
+        this.sofProxyInIntrospectionAuth.setValue(
+          this.selectedItem!.sofProxyInIntrospectionAuth ||
+            'client_secret_basic',
+        );
+        this.sofProxyInWellKnown.setValue(
+          this.selectedItem!.sofProxyInWellKnown ?? '',
+        );
+        this.sofProxyInIntrospectionClientId.setValue(
+          this.selectedItem!.sofProxyInIntrospectionClientId ?? '',
+        );
+        // DPB0310 不會回傳 secret，帶入時固定空白
+        this.sofProxyInIntrospectionSecret.setValue('');
+        // Auth 非 none 時 relay 已被連動邏輯強制為 N/disable，不再帶入舊資料
+        if ((this.selectedItem!.sofProxyAuth?.[0] ?? 'none') === 'none') {
+          this.sofProxyOutRelay.setValue(
+            this.selectedItem!.sofProxyOutRelay ?? 'N',
+          );
+          this.sofProxyOutAuthMethod.setValue(
+            this.selectedItem!.sofProxyOutAuthMethod || 'client_secret_basic',
+          );
+          this.sofProxyOutWellKnown.setValue(
+            this.selectedItem!.sofProxyOutWellKnown ?? '',
+          );
+          this.sofProxyOutClientId.setValue(
+            this.selectedItem!.sofProxyOutClientId ?? '',
+          );
+          // 後端不回傳 client secret（以 hasOutClientSecret 遮罩），帶入時固定空白
+          this.sofProxyOutClientSecret.setValue('');
+          this.sofProxyOutScope.setValue(
+            this.selectedItem!.sofProxyOutScope ?? '',
+          );
+        }
         this.sofProxySqlInjection.setValue(
           this.selectedItem!.sofProxySqlInjection,
         );
@@ -328,9 +452,42 @@ export class Lb0013Component extends BaseComponent implements OnInit {
         this.sofProxyName.setValue(this.selectedItem!.sofProxyName);
         this.sofProxyStatus.setValue(this.selectedItem!.sofProxyStatus);
         this.sofProxyRemark.setValue(this.selectedItem!.sofProxyRemark);
-        this.sofProxyAccessToken.setValue(
-          this.selectedItem!.sofProxyAccessToken,
+        this.sofProxyAuth.setValue(
+          this.selectedItem!.sofProxyAuth?.[0] ?? 'none',
         );
+        // 需在 sofProxyAuth 之後帶入，避免被切換 Auth 模式的清空邏輯洗掉
+        this.sofProxyInIntrospectionAuth.setValue(
+          this.selectedItem!.sofProxyInIntrospectionAuth ||
+            'client_secret_basic',
+        );
+        this.sofProxyInWellKnown.setValue(
+          this.selectedItem!.sofProxyInWellKnown ?? '',
+        );
+        this.sofProxyInIntrospectionClientId.setValue(
+          this.selectedItem!.sofProxyInIntrospectionClientId ?? '',
+        );
+        // DPB0310 不會回傳 secret，帶入時固定空白
+        this.sofProxyInIntrospectionSecret.setValue('');
+        // Auth 非 none 時 relay 已被連動邏輯強制為 N/disable，不再帶入舊資料
+        if ((this.selectedItem!.sofProxyAuth?.[0] ?? 'none') === 'none') {
+          this.sofProxyOutRelay.setValue(
+            this.selectedItem!.sofProxyOutRelay ?? 'N',
+          );
+          this.sofProxyOutAuthMethod.setValue(
+            this.selectedItem!.sofProxyOutAuthMethod || 'client_secret_basic',
+          );
+          this.sofProxyOutWellKnown.setValue(
+            this.selectedItem!.sofProxyOutWellKnown ?? '',
+          );
+          this.sofProxyOutClientId.setValue(
+            this.selectedItem!.sofProxyOutClientId ?? '',
+          );
+          // 後端不回傳 client secret（以 hasOutClientSecret 遮罩），帶入時固定空白
+          this.sofProxyOutClientSecret.setValue('');
+          this.sofProxyOutScope.setValue(
+            this.selectedItem!.sofProxyOutScope ?? '',
+          );
+        }
         this.sofProxySqlInjection.setValue(
           this.selectedItem!.sofProxySqlInjection,
         );
@@ -410,8 +567,32 @@ export class Lb0013Component extends BaseComponent implements OnInit {
           sofProxyName: this.sofProxyName.value,
           sofProxyStatus: this.sofProxyStatus.value,
           sofProxyRemark: this.sofProxyRemark.value,
-          sofProxyAccessToken:
-            this.sofProxyAccessToken.value == 'Y' ? 'Y' : 'N',
+          // 後端仍需 sofProxyAccessToken 欄位，無 UI、固定送 'N'
+          sofProxyAccessToken: 'N',
+          sofProxyAuth: [this.sofProxyAuth.value || 'none'],
+          sofProxyOutRelay: this.sofProxyOutRelay.value == 'Y' ? 'Y' : 'N',
+          // Fhir Server驗證啟用時才送後端代取 token 相關欄位
+          ...(this.sofProxyOutRelay.value === 'Y'
+            ? {
+                sofProxyOutAuthMethod: this.sofProxyOutAuthMethod.value,
+                sofProxyOutWellKnown: this.sofProxyOutWellKnown.value,
+                sofProxyOutClientId: this.sofProxyOutClientId.value,
+                sofProxyOutClientSecret: this.sofProxyOutClientSecret.value,
+                sofProxyOutScope: this.sofProxyOutScope.value,
+              }
+            : {}),
+          // third-party 時才送 introspection 相關欄位
+          ...(this.sofProxyAuth.value === 'third-party'
+            ? {
+                sofProxyInIntrospectionAuth:
+                  this.sofProxyInIntrospectionAuth.value,
+                sofProxyInWellKnown: this.sofProxyInWellKnown.value,
+                sofProxyInIntrospectionClientId:
+                  this.sofProxyInIntrospectionClientId.value,
+                sofProxyInIntrospectionSecret:
+                  this.sofProxyInIntrospectionSecret.value,
+              }
+            : {}),
           sofProxySqlInjection:
             this.sofProxySqlInjection.value == 'Y' ? 'Y' : 'N',
           sofProxyTraffic: this.sofProxyTraffic.value == 'Y' ? 'Y' : 'N',
@@ -452,8 +633,32 @@ export class Lb0013Component extends BaseComponent implements OnInit {
           sofProxyStatus: this.sofProxyStatus.value,
           sofProxyRemark: this.sofProxyRemark.value,
 
-          sofProxyAccessToken:
-            this.sofProxyAccessToken.value == 'Y' ? 'Y' : 'N',
+          // 後端仍需 sofProxyAccessToken 欄位，無 UI、固定送 'N'
+          sofProxyAccessToken: 'N',
+          sofProxyAuth: [this.sofProxyAuth.value || 'none'],
+          sofProxyOutRelay: this.sofProxyOutRelay.value == 'Y' ? 'Y' : 'N',
+          // Fhir Server驗證啟用時才送後端代取 token 相關欄位
+          ...(this.sofProxyOutRelay.value === 'Y'
+            ? {
+                sofProxyOutAuthMethod: this.sofProxyOutAuthMethod.value,
+                sofProxyOutWellKnown: this.sofProxyOutWellKnown.value,
+                sofProxyOutClientId: this.sofProxyOutClientId.value,
+                sofProxyOutClientSecret: this.sofProxyOutClientSecret.value,
+                sofProxyOutScope: this.sofProxyOutScope.value,
+              }
+            : {}),
+          // third-party 時才送 introspection 相關欄位
+          ...(this.sofProxyAuth.value === 'third-party'
+            ? {
+                sofProxyInIntrospectionAuth:
+                  this.sofProxyInIntrospectionAuth.value,
+                sofProxyInWellKnown: this.sofProxyInWellKnown.value,
+                sofProxyInIntrospectionClientId:
+                  this.sofProxyInIntrospectionClientId.value,
+                sofProxyInIntrospectionSecret:
+                  this.sofProxyInIntrospectionSecret.value,
+              }
+            : {}),
           sofProxySqlInjection:
             this.sofProxySqlInjection.value == 'Y' ? 'Y' : 'N',
           sofProxyTraffic: this.sofProxyTraffic.value == 'Y' ? 'Y' : 'N',
@@ -492,6 +697,54 @@ export class Lb0013Component extends BaseComponent implements OnInit {
     }
   }
 
+  // DPB0341: 以目前輸入的 out_* 代取設定測試取 token（不寫 DB），依結果彈出提示
+  async testRelayToken() {
+    const dict = await this.toolService.getDict([
+      'message.success',
+      'message.fail',
+    ]);
+    this.ngxService.start();
+    this.serverService
+      .testSmartOnFhirProxyRelay({
+        sofProxyOutAuthMethod: this.sofProxyOutAuthMethod.value,
+        sofProxyOutClientId: this.sofProxyOutClientId.value,
+        sofProxyOutClientSecret: this.sofProxyOutClientSecret.value,
+        sofProxyOutWellKnown: this.sofProxyOutWellKnown.value,
+        // 無輸入框：更新時沿用既有 token endpoint，建立時留空由後端從 well-known 解析
+        sofProxyOutTokenEndpoint:
+          this.selectedItem?.sofProxyOutTokenEndpoint ?? '',
+        sofProxyOutScope: this.sofProxyOutScope.value,
+      })
+      .subscribe((res) => {
+        this.ngxService.stop();
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          const body = res.RespBody;
+          if (body.success && body.tokenObtained) {
+            // 代取成功且取得 token：顯示實際 endpoint 與有效秒數
+            this.alertService.ok(
+              dict['message.success'],
+              body.message,
+              AlertType.success,
+              `tokenEndpoint: ${body.tokenEndpoint}<br>expiresInSec: ${body.expiresInSec}`,
+            );
+          } else if (body.success && !body.tokenObtained) {
+            // 代取流程成功但未取得 token
+            this.alertService.ok(
+              dict['message.success'],
+              body.message,
+              AlertType.warning,
+            );
+          } else {
+            this.alertService.ok(
+              dict['message.fail'],
+              body.message,
+              AlertType.error,
+            );
+          }
+        }
+      });
+  }
+
   deleteConfirm(rowData: SmartOnFhirProxyDto) {
     let reqBodyD = {
       sofProxyId: rowData.sofProxyId,
@@ -528,7 +781,13 @@ export class Lb0013Component extends BaseComponent implements OnInit {
   // }
 
   openFileBrowser() {
-    $('#file').click();
+    // 依目前 pageNum 觸發對應的 input，修正舊版 jQuery $('#file') 因重複 id 只抓到第一個元素、
+    // 導致在 pageNum==3 誤觸發 pageNum==1 input 的既有 bug
+    if (this.pageNum === 3) {
+      this.fileInputP3.nativeElement.click();
+    } else {
+      this.fileInputP1.nativeElement.click();
+    }
   }
 
   exportWebsocketProxy() {
@@ -786,6 +1045,17 @@ export class Lb0013Component extends BaseComponent implements OnInit {
     fileReader.readAsText(this.importFile!);
   }
 
+  /** 將後端回傳的 Auth 值轉為畫面顯示文字（無對應選項時直接顯示原值） */
+  getSofProxyAuthLabel(values?: Array<string>): string {
+    return (values ?? [])
+      .map(
+        (val) =>
+          this.sofProxyAuthOptions.find((opt) => opt.value === val)?.label ??
+          val,
+      )
+      .join(', ');
+  }
+
   public get keyword() {
     return this.form.get('keyword')!;
   }
@@ -809,8 +1079,48 @@ export class Lb0013Component extends BaseComponent implements OnInit {
     return this.formE.get('sofProxyRemark')!;
   }
 
-  public get sofProxyAccessToken() {
-    return this.formE.get('sofProxyAccessToken')!;
+  public get sofProxyAuth() {
+    return this.formE.get('sofProxyAuth')!;
+  }
+
+  public get sofProxyInIntrospectionAuth() {
+    return this.formE.get('sofProxyInIntrospectionAuth')!;
+  }
+
+  public get sofProxyInWellKnown() {
+    return this.formE.get('sofProxyInWellKnown')!;
+  }
+
+  public get sofProxyInIntrospectionClientId() {
+    return this.formE.get('sofProxyInIntrospectionClientId')!;
+  }
+
+  public get sofProxyInIntrospectionSecret() {
+    return this.formE.get('sofProxyInIntrospectionSecret')!;
+  }
+
+  public get sofProxyOutRelay() {
+    return this.formE.get('sofProxyOutRelay')!;
+  }
+
+  public get sofProxyOutAuthMethod() {
+    return this.formE.get('sofProxyOutAuthMethod')!;
+  }
+
+  public get sofProxyOutWellKnown() {
+    return this.formE.get('sofProxyOutWellKnown')!;
+  }
+
+  public get sofProxyOutClientId() {
+    return this.formE.get('sofProxyOutClientId')!;
+  }
+
+  public get sofProxyOutClientSecret() {
+    return this.formE.get('sofProxyOutClientSecret')!;
+  }
+
+  public get sofProxyOutScope() {
+    return this.formE.get('sofProxyOutScope')!;
   }
 
   public get sofProxySqlInjection() {

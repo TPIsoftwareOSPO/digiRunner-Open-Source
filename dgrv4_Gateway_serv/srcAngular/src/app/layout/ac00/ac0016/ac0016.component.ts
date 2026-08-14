@@ -18,6 +18,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from 'src/app/layout/base-component';
 import { Component, OnInit } from '@angular/core';
+import * as ValidatorFns from 'src/app/shared/validator-functions';
 
 @Component({
     selector: 'app-ac0016',
@@ -91,7 +92,7 @@ export class Ac0016Component extends BaseComponent implements OnInit {
       userName: new UntypedFormControl(''),
       userAlias: new UntypedFormControl(''),
       status: new UntypedFormControl(''),
-      userEmail: new UntypedFormControl(''),
+      userEmail: new UntypedFormControl('', ValidatorFns.mailValidator()),
       idpType: new UntypedFormControl(''),
 
       longId: new UntypedFormControl(),
@@ -110,7 +111,7 @@ export class Ac0016Component extends BaseComponent implements OnInit {
       newUserName: new UntypedFormControl(''),
       newUserAlias: new UntypedFormControl(''),
       newStatus: new UntypedFormControl(''),
-      newUserEmail: new UntypedFormControl(''),
+      newUserEmail: new UntypedFormControl('', ValidatorFns.mailValidator()),
       newIdpType: new UntypedFormControl(''),
 
       roleIdList: new UntypedFormControl([]),
@@ -152,6 +153,8 @@ export class Ac0016Component extends BaseComponent implements OnInit {
             this.currentTitle = `${this.title} > ${dict['button.create']}`;
 
             this.addFormValidator(this.form,res.RespBody.constraints)
+            this.userEmail.addValidators(ValidatorFns.mailValidator());
+            this.userEmail.updateValueAndValidity();
             // this.newRoleIdList.setValue([]);
           }
 
@@ -195,6 +198,8 @@ export class Ac0016Component extends BaseComponent implements OnInit {
             // })
             // console.log(newTmp)
             this.addFormValidator(this.formU, constraints)
+            this.newUserEmail_u.addValidators(ValidatorFns.mailValidator());
+            this.newUserEmail_u.updateValueAndValidity();
 
           })
 

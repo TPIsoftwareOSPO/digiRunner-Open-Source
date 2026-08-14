@@ -4,6 +4,10 @@
 
 本文件包含供在此儲存庫（Repository）中工作的 AI Agent 遵守的指令。
 
+## 延伸規則文件（`.agents/skills/`）
+
+處理 Angular 前端工作時，應使用 `.agents/skills/dgr-angular-conventions/` skill，並依任務類型查閱其 `references/` 下的細部規範。其中，新增或修改 PrimeNG 元件，或調整 `.mcp.json`／`.codex/config.toml` 的 MCP 設定時，必須查閱 `references/primeng-mcp.md`。
+
 ## 通用規則
 
 - **最小化改動：** 保持改動範圍盡可能精簡，專注於解決使用者當下的需求。
@@ -42,6 +46,12 @@
 | **UI 排版**   | Bootstrap     | 負責網格系統（Grid）與基本排版          |
 | **UI 元件庫** | PrimeNG       | 優先使用其現成組件，避免自行刻製複雜 UI |
 
+PrimeNG MCP server 為獨立的專案本地工具；新環境 clone 後需另行執行：
+
+```bash
+cd .tools/primeng-mcp && npm ci
+```
+
 ### 2. Angular 開發準則（AI 必須遵守）
 
 - **組件架構：** 優先使用 **Standalone Components**。新建立的組件、指令（Directives）與管道（Pipes）應預設為 `standalone: true`。
@@ -62,7 +72,7 @@
 
 - **編輯方式：** 進行檔案編輯時，優先使用 `apply_patch` 或精準的區塊替換工具，避免重寫整份大檔案。
 - **安全性檢查：** **嚴禁**將任何 API Key、密碼、Token 或敏感憑證寫入代碼中。環境變數或機密資訊必須使用 `.env` 或 Angular 環境設定檔。
-- **前端驗證：** 改動後必須確保符合 TypeScript 規範，且應用程式能正常編譯（Build Success），不產生 Linter 錯誤。
+- **前端驗證：** 改動後應依修改範圍執行適當驗證，不要求每次修改都執行完整的 `npm run build`。一般修改可執行相關測試，或專案已有且適用的 TypeScript／Linter 檢查；涉及 Angular template、build 設定、套件依賴、跨模組修改，或使用者明確要求時，才必須執行 `npm run build`。純文件、註解或不影響編譯結果的修改可不執行 build。成果回報必須列出實際執行的驗證；若未執行完整 build，應明確說明。
 
 ### 3. 編輯後工作
 

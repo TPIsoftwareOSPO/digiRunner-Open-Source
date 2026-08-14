@@ -3,18 +3,16 @@ package tpi.dgrv4.entity.repository;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import jakarta.transaction.Transactional;
 import tpi.dgrv4.entity.entity.ITsmpRtnCode;
 import tpi.dgrv4.entity.entity.TsmpRtnCode;
 import tpi.dgrv4.entity.entity.TsmpRtnCodeId;
-import tpi.dgrv4.entity.repository.ITsmpRtnCodeDao;
 
 @Repository
 public interface TsmpRtnCodeDao extends JpaRepository<TsmpRtnCode, TsmpRtnCodeId>, ITsmpRtnCodeDao {
@@ -24,6 +22,10 @@ public interface TsmpRtnCodeDao extends JpaRepository<TsmpRtnCode, TsmpRtnCodeId
 	public List<TsmpRtnCode> query_dpb0097service_01(String rtnCode, String locale, String[] words,  int pageSize);
 	
 	public List<TsmpRtnCode> findAllByOrderByTsmpRtnCodeAsc();
+	
+	public List<TsmpRtnCode> findByLocaleOrderByTsmpRtnCodeAsc(String locale);
+	
+	public List<TsmpRtnCode> findByLocaleInOrderByTsmpRtnCodeAsc(List<String> localeList);
 
 	@Transactional
 	@Modifying(clearAutomatically = true)

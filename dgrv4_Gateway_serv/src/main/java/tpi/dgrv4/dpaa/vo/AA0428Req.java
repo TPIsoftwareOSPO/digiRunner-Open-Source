@@ -16,11 +16,12 @@ public class AA0428Req extends ReqValidator{
 	
 	/** 標籤 */
 	private List<String> labelList;
-	
+	private List<String> apiSrc;
 	
 	/** 是否分頁 */
 	private String paging;
 
+	private String include;
 
 	public String getModuleName() {
 		return moduleName;
@@ -59,6 +60,24 @@ public class AA0428Req extends ReqValidator{
 
 	public void setPaging(String paging) {
 		this.paging = paging;
+	}
+
+	public String getInclude() {
+		return include;
+	}
+
+	public void setInclude(String include) {
+		this.include = include;
+	}
+
+
+	public List<String> getApiSrc() {
+		return apiSrc;
+	}
+
+
+	public void setApiSrc(List<String> apiSrc) {
+		this.apiSrc = apiSrc;
 	}
 
 

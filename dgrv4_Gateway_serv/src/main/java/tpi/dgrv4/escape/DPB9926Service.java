@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
+import tpi.dgrv4.common.constant.MultilingualSheetNameEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -70,14 +71,15 @@ public class DPB9926Service {
 	public void importData(TsmpAuthorization tsmpAuthorization, InputStream inputStream) throws Exception {
 		try (Workbook workbook = new XSSFWorkbook(inputStream);){
 	
-			 Sheet sheet = workbook.getSheetAt(0);
+			 Sheet sheet = workbook.getSheet(MultilingualSheetNameEnum.MAIL_TPLT.value()) != null 
+					 ? workbook.getSheet(MultilingualSheetNameEnum.MAIL_TPLT.value()) : workbook.getSheetAt(0);
 			 boolean isFirst = true;
 			 DataFormatter formatter = new DataFormatter();
 			 Map<String, TsmpDpMailTplt> fileDataList = new HashMap<String, TsmpDpMailTplt>();
 		     Map<String, TsmpDpMailTplt> tsmpDpMailTpltMap = new HashMap<String, TsmpDpMailTplt>();
 		     //checkmarx, Unchecked Input for Loop Condition
 		     int lastRowNum = sheet.getLastRowNum();
-		     if (lastRowNum <= 0) {
+		     if (lastRowNum < 0) {
 	             throw TsmpDpAaRtnCode._1559.throwing("Invalid row number: " + lastRowNum);
 	         }
 	         

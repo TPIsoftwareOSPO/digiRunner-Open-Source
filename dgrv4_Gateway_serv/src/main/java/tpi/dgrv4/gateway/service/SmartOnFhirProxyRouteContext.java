@@ -188,7 +188,8 @@ public class SmartOnFhirProxyRouteContext {
 			String ignoreApiPaths,
 			boolean showLog,
 			List<String> clientIds,
-			boolean enableUrlRewrite) {
+			boolean enableUrlRewrite,
+			RelayConfig relay) {
 
 		/**
 		 * 從 DgrSmartOnFhirProxy 和 DgrSmartOnFhirProxyDiversion 列表建立 RouteContext
@@ -209,6 +210,7 @@ public class SmartOnFhirProxyRouteContext {
 					.showLog(proxy.getSofProxyShowLog() == DgrSmartOnFhirProxy.Status.ENABLED)
 					.clientIds(proxy.getSofProxyClientId())
 					.enableUrlRewrite(proxy.getSofProxyUrlRewrite() == DgrSmartOnFhirProxy.Status.ENABLED)
+					.relay(RelayConfig.fromFhirProxy(proxy))
 					.build();
 		}
 	}
@@ -226,7 +228,9 @@ public class SmartOnFhirProxyRouteContext {
 			boolean enableSqlInjectionCheck,
 			boolean enableXssCheck,
 			boolean enableXxeCheck,
-			boolean enableAccessToken) {
+			boolean enableAccessToken,
+			AuthMode authMode,
+			IntrospectConfig introspect) {
 
 		public static SecurityConfig fromFhirProxy(DgrSmartOnFhirProxy proxy) {
 			return SecurityConfig.builder()
@@ -234,6 +238,8 @@ public class SmartOnFhirProxyRouteContext {
 					.enableXssCheck(proxy.getSofProxyXss() == DgrSmartOnFhirProxy.Status.ENABLED)
 					.enableXxeCheck(proxy.getSofProxyXxe() == DgrSmartOnFhirProxy.Status.ENABLED)
 					.enableAccessToken(proxy.getSofProxyAccessToken() == DgrSmartOnFhirProxy.Status.ENABLED)
+					.authMode(AuthMode.fromList(proxy.getSofProxyAuth()))
+					.introspect(IntrospectConfig.fromFhirProxy(proxy))
 					.build();
 		}
 	}
@@ -281,6 +287,87 @@ public class SmartOnFhirProxyRouteContext {
 					.probability(diversion.getSofProxyDiversionProbability())
 					.targetUrl(diversion.getSofProxyDiversionUrl())
 					.fhirBasePath(normalizeFhirBasePath(diversion.getSofProxyDiversionFhirBasePath()))
+					.build();
+		}
+	}
+
+	/**
+	 * 入站 token 驗證模式（list 實際單值）。
+	 */
+	public enum AuthMode {
+		NONE, DGR, THIRD_PARTY;
+
+		/** 從 sof_proxy_auth list 解析；取第一個有效非 none 值，皆無則 NONE。"dgr" 為 digirunner 的相容舊值。 */
+		public static AuthMode fromList(List<String> auth) {
+			if (auth == null) {
+				return NONE;
+			}
+			for (String a : auth) {
+				if (a == null) {
+					continue;
+				}
+				String v = a.trim().toLowerCase();
+				if ("digirunner".equals(v) || "dgr".equals(v)) {
+					return DGR;
+				}
+				if ("third-party".equals(v)) {
+					return THIRD_PARTY;
+				}
+			}
+			return NONE;
+		}
+	}
+
+	/**
+	 * 入站 third-party introspection 設定。
+	 * secret 以密文（AES）攜帶，runtime 使用時才解密，避免長壽物件持有明文。
+	 */
+	@Builder
+	public record IntrospectConfig(
+			String introspectionEndpoint,
+			String wellKnownUrl,
+			String introspectionAuth,
+			String clientId,
+			String clientSecretEnc,
+			List<String> allowedIssuers,
+			String expectedAud) {
+
+		public static IntrospectConfig fromFhirProxy(DgrSmartOnFhirProxy proxy) {
+			return IntrospectConfig.builder()
+					.introspectionEndpoint(proxy.getSofProxyInIntrospectionEndpoint())
+					.wellKnownUrl(proxy.getSofProxyInWellKnown())
+					.introspectionAuth(proxy.getSofProxyInIntrospectionAuth())
+					.clientId(proxy.getSofProxyInIntrospectionClientId())
+					.clientSecretEnc(proxy.getSofProxyInIntrospectionSecretEnc())
+					.allowedIssuers(proxy.getSofProxyInAllowedIss())
+					.expectedAud(proxy.getSofProxyInExpectedAud())
+					.build();
+		}
+	}
+
+	/**
+	 * 出站代取 token 設定（client_credentials）。
+	 * secret 以密文（AES）攜帶，runtime 使用時才解密。
+	 */
+	@Builder
+	public record RelayConfig(
+			boolean enabled,
+			String authMethod,
+			String clientId,
+			String clientSecretEnc,
+			String wellKnownUrl,
+			String tokenEndpoint,
+			String scope) {
+
+		public static RelayConfig fromFhirProxy(DgrSmartOnFhirProxy proxy) {
+			return RelayConfig.builder()
+					.enabled(proxy.getSofProxyOutRelay() == DgrSmartOnFhirProxy.Status.ENABLED)
+					.authMethod(proxy.getSofProxyOutAuthMethod())
+					.clientId(proxy.getSofProxyOutClientId())
+					.clientSecretEnc(proxy.getSofProxyOutClientSecretEnc())
+					.wellKnownUrl(proxy.getSofProxyOutWellKnown())
+					.tokenEndpoint(proxy.getSofProxyOutTokenEndpoint())
+					.scope(proxy.getSofProxyOutScope())
 					.build();
 		}
 	}

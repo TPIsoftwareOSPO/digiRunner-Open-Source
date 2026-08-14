@@ -17,7 +17,7 @@
             placeholder="{{'plz_chs'|translate}}" [style]="{'width':'100%'}" (onChange)="localeChange()"></p-select>
         </div>
       </div>
-      <div class="col-12 px-0" style="display: flex;justify-content: space-between;">
+      <div class="col-12 px-0 d-flex align-items-center justify-content-between">
 
           <!-- 匯出 tsmp dp items -->
           <button type="button" class="btn tpi-btn tpi-primary me-2"
@@ -26,7 +26,7 @@
         <div style="display: flex;align-items: center;">
 
           <div class="ui-inputgroup me-2">
-            <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
+            <input type="file" id="file" #fileRef style="display: none;" accept=".xlsx" (change)="fileChange($event)">
             <input type="text" class="form-control" value="{{fileName}}" readOnly
               placeholder="{{'upload_file' | translate}}">
             <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"

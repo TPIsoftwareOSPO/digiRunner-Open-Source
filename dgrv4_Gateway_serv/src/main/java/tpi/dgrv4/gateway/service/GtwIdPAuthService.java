@@ -234,8 +234,13 @@ public class GtwIdPAuthService {
 		// 取得 user 登入畫面 URL
 		String dgrLoginUiUrl = getLoginUiUrl(idPType);
 		
-		URL urlObj = new URL(dgrLoginUiUrl);
-		dgrLoginUiUrl = urlObj.getPath();// 使用相對路徑
+		// 前端GTW IdP URL是否使用絶對路徑, 若 false 則為相對路徑
+		boolean useAbsolutePath = getTsmpSettingService().getVal_GTW_IDP_USE_ABSOLUTE_PATH();
+		
+		if (!useAbsolutePath) {
+			URL urlObj = new URL(dgrLoginUiUrl);
+			dgrLoginUiUrl = urlObj.getPath();// 使用相對路徑
+		}
 		
 		String redirectUrl = String.format(
 				"%s" 
@@ -270,6 +275,20 @@ public class GtwIdPAuthService {
 			);
 		}
 		
+		
+		/*
+		 * "redirectUrl" 使用相對路徑時:
+		 * SpringBoot 在產生 redirect response 時，會自動補上 Host。
+		 * 1. X-Forwarded-Proto / X-Forwarded-Host  ← Nginx 轉發過來的 Header
+		 * 2. Host Header                            ← Chrome 發出的原始 Host
+		 * 3. SpringBoot 自己的 server.port          ← fallback
+		 * 若 Spring Boot 之前有 Reverse Porxy(Nginx), 則需依賴:
+		 *         # 設置代理標頭
+		 *         proxy_set_header Host $host;
+		 *         proxy_set_header X-Real-IP $remote_addr;
+		 *         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		 *         proxy_set_header X-Forwarded-Proto $scheme;
+		 * */
 		// 轉導到 user 登入畫面
 		TPILogger.tl.debug("Redirect to URL【User Login UI URL】: " + redirectUrl);
 		httpResp.sendRedirect(redirectUrl);

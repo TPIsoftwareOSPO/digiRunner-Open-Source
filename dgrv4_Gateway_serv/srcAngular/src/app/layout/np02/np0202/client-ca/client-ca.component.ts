@@ -11,7 +11,7 @@ import { DPB0086Req } from 'src/app/models/api/CertificateAuthorityService/dpb00
 import { ClientCAService } from 'src/app/shared/services/api-certificate-authority.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0085Req } from 'src/app/models/api/CertificateAuthorityService/dpb0085.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { CusService } from 'src/app/shared/services/api-cus.service';
 import { interval, timer } from 'rxjs';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -180,7 +180,7 @@ export class ClientCAComponent implements OnInit {
     }
 
     openFileBrowser() {
-        $('#fileName').click();
+        this.upload_file.nativeElement.click();
     }
     bindData(evt) {
         this.selectedAction = EmApptJobType.SHOW;

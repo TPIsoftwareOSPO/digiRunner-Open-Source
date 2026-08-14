@@ -14,7 +14,7 @@ import * as shajs from 'sha.js';
 // import { BaseRes } from 'src/app/models/api/base.interface';
 import { environment } from 'src/environments/environment';
 import { AlertType, TxID } from 'src/app/models/common.enum';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 // import { generate } from 'generate-password';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 // import { BaseDotNetRes } from 'src/app/models/api/baseDotNet.interface';
@@ -909,9 +909,13 @@ export class ApiBaseService {
           }
         })
       )
-      $object.subscribe(r => {
-        obser.next(r);
+      // 完整轉送 HttpClient 的生命週期，確保呼叫端的 error、finalize 與取消訂閱能正常運作。
+      const subscription = $object.subscribe({
+        next: r => obser.next(r),
+        error: error => obser.error(error),
+        complete: () => obser.complete(),
       });
+      return () => subscription.unsubscribe();
     });
   }
 

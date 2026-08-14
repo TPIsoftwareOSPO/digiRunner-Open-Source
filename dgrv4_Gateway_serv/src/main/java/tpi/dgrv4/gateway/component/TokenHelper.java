@@ -99,7 +99,6 @@ import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.filter.GatewayFilter;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 import tpi.dgrv4.gateway.service.GtwIdPJwksService;
-import tpi.dgrv4.gateway.service.GtwIdPWellKnownService;
 import tpi.dgrv4.gateway.service.OAuthTokenService;
 import tpi.dgrv4.gateway.service.TsmpSettingService;
 import tpi.dgrv4.gateway.util.JsonNodeUtil;
@@ -213,6 +212,12 @@ public class TokenHelper {
 	@PostConstruct
 	public void init() {
 		instance = this;
+	}
+	
+	public static class JWTClaimsSetData{
+		public ResponseEntity<?> errRespEntity;
+		public JWTClaimsSet jwtClaimsSet;
+		public boolean isJWE = false;
 	}
 
 	public static class JwtPayloadData {
@@ -1329,6 +1334,7 @@ public class TokenHelper {
 
 		// access token 過期
 		long nowTime = System.currentTimeMillis() / 1000;// 去掉亳秒
+		
 		if (exp < nowTime) {
 			// access token 過期
 			TPILogger.tl.debug(TokenHelper.ACCESS_TOKEN_EXPIRED + exp);
@@ -1937,6 +1943,7 @@ public class TokenHelper {
 			if (respEntity != null) {// 資料有錯誤
 				return respEntity;
 			}
+			
 			JsonNode payloadJsonNode = jwtPayloadData.payloadJsonNode;
 
 			// 2.是否 token exp 沒有值 或 token 過期
@@ -2626,11 +2633,11 @@ public class TokenHelper {
 		return getUnauthorizedErrorResp(apiUrl, errMsg2);// 401
 	}
 
-	public ResponseEntity<?> getBadRequestErrorResp(String reqUri, String errMsg1, String errMsg2) {
+	public static ResponseEntity<?> getBadRequestErrorResp(String reqUri, String errMsg1, String errMsg2) {
 		return new ResponseEntity<>(getOAuthTokenErrorResp2(errMsg1, errMsg2), HttpStatus.BAD_REQUEST);// 400
 	}
 
-	public ResponseEntity<?> getUnauthorizedErrorResp(String apiUrl, String errMsg) {
+	public static ResponseEntity<?> getUnauthorizedErrorResp(String apiUrl, String errMsg) {
 		return new ResponseEntity<>(
 				getOAuthTokenErrorResp(TokenHelper.UNAUTHORIZED, errMsg, HttpStatus.UNAUTHORIZED.value(), apiUrl),
 				setContentTypeHeader(), HttpStatus.UNAUTHORIZED);// 401
@@ -2978,5 +2985,21 @@ public class TokenHelper {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * 取得多個值, 以空格分隔的字串, 例如: scope, aud
+	 */
+	public static String getListToStr(List<String> list) {
+		if (CollectionUtils.isEmpty(list)) {
+			return "";
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (String value : list) {
+			sb.append(value).append(" ");
+		}
+		
+		return sb.toString().trim();
 	}
 }

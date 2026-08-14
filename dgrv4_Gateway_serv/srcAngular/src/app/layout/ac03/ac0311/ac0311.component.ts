@@ -735,16 +735,15 @@ export class Ac0311Component extends BaseComponent implements OnInit {
   }
 
   getUploadFile(url) {
-    return new Promise<File>((resolve, reject) => {
-      $.get(url, (data) => {
+    return fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
         //加工
         let filename = this.getFilename(url);
         let jsonse = JSON.stringify(data);
         let blob = new Blob([jsonse], { type: 'application/json' });
-        let file = new File([blob], filename);
-        resolve(file);
+        return new File([blob], filename);
       });
-    });
   }
 
   getFilename(url) {

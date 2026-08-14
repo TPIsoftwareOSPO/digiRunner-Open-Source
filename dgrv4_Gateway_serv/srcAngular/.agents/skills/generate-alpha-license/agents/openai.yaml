@@ -1,0 +1,4 @@
+interface:
+  display_name: "DGR Alpha License Generator"
+  short_description: "產生預設 Alpha、TPI 與年度到期日的 DGR License"
+  default_prompt: "Use $generate-alpha-license to generate a DGR Alpha license with the default annual expiry."

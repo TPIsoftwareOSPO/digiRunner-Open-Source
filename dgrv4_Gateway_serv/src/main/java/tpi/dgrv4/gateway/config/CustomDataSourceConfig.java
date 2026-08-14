@@ -54,6 +54,12 @@ public class CustomDataSourceConfig {
 
     @Value("${spring.datasource.hikari.maximum-pool-size:10}")
     private int hikariMaximumPoolSize;
+    @Value("${spring.datasource.hikari.minimum-idle:5}")
+    private int hikariMinimumIdle;
+    @Value("${spring.datasource.hikari.keepalive-time:120000}")
+    private long hikariKeepaliveTime;
+    
+    
     @Value("${spring.datasource.hikari.connection-timeout:30000}")
     private long hikariConnectionTimeout;
     @Value("${spring.datasource.hikari.idle-timeout:600000}")
@@ -155,6 +161,8 @@ public class CustomDataSourceConfig {
                 hikariConfig.setConnectionTimeout(hikariConnectionTimeout);
                 hikariConfig.setIdleTimeout(hikariIdleTimeout);
                 hikariConfig.setMaxLifetime(hikariMaxLifeTime);
+                hikariConfig.setMinimumIdle(hikariMinimumIdle);
+                hikariConfig.setKeepaliveTime(hikariKeepaliveTime);
                 // 使用自訂義設定檔設定HikariDataSource
                 hikaridataSource = new HikariDataSource(hikariConfig);
             }

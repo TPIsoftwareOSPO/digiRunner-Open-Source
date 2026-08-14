@@ -27,7 +27,7 @@
         <!-- <div style="display: flex;align-items: center;">
 
           <div class="ui-inputgroup me-2">
-            <input type="file" id="file" style="display: none;" accept=".xlsx" (change)="fileChange($event)">
+            <input type="file" id="file" #fileInputP1 style="display: none;" accept=".xlsx" (change)="fileChange($event)">
             <input type="text" class="form-control" value="{{fileName}}" readOnly
               placeholder="{{'upload_file' | translate}}">
             <button pButton type="button" icon="pi pi-file" class="ms-1 tpi-primary"
@@ -65,9 +65,7 @@
           <td>{{rowData.sofProxyId}}</td>
           <td>{{rowData.sofProxyName}}</td>
           <td>{{rowData.sofProxyRemark}}</td>
-          <td style="text-align: center">
-            <i *ngIf="rowData.sofProxyAccessToken ==='Y'" class="fas fa-check"></i>
-          </td>
+          <td>{{getSofProxyAuthLabel(rowData.sofProxyAuth)}}</td>
           <td style="text-align: center">
             <i *ngIf="rowData.sofProxySqlInjection ==='Y'" class="fas fa-check"></i>
           </td>
@@ -99,10 +97,8 @@
               tooltipPosition="top"></button>
             <!-- Sticky List -->
             <button pButton pRipple type="button" icon="fa fa-list"
-              class="p-button-rounded p-button-text p-button-plain"
-              (click)="changePage('sticky', rowData)"
-              pTooltip="Sticky List"
-              tooltipPosition="top"></button>
+              class="p-button-rounded p-button-text p-button-plain" (click)="changePage('sticky', rowData)"
+              pTooltip="Sticky List" tooltipPosition="top"></button>
             <!-- 更新 -->
             <button pButton pRipple type="button" icon="fa fa-edit"
               class="p-button-rounded p-button-text p-button-plain" (click)="changePage('update', rowData)"
@@ -167,24 +163,17 @@
             <small class="form-text">{{websiteStatusC.errors.isRequired}}</small>
           </div> -->
         </div>
-        <div class="col-auto" *ngIf="currentAction=='update'">
-          <label id="sticky_label" class="control-label">Sticky List</label>
-          <div class="form-control border-line" style=" background: #F6F6F6;">
-            <button pButton pRipple type="button" icon="fa fa-list"
-              class="p-button-rounded p-button-text p-button-plain" (click)="openStickyList(selectedItem)"
-              tooltipPosition="top"></button>
-          </div>
+        <div class="col-auto align-self-end" *ngIf="currentAction=='update'">
+          <!-- 開啟 Sticky List 對話框 -->
+          <button type="button" class="btn tpi-btn tpi-second" (click)="openStickyList(selectedItem)">
+            <i class="fa fa-list me-2"></i>Sticky List
+          </button>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-12">
           <label class="control-label">{{ "check_item" | translate }}</label>
           <div class="p-form-check-line">
-            <div class="p-form-check">
-              <p-checkbox [binary]="true" inputId="sofProxyAccessToken" formControlName="sofProxyAccessToken"
-                trueValue="Y" falseValue="N"></p-checkbox>
-              <label class="mb-0 ms-2" for="sofProxyAccessToken">Auth</label>
-            </div>
             <div class="p-form-check">
               <p-checkbox [binary]="true" inputId="sqlInj" formControlName="sofProxySqlInjection" trueValue="Y"
                 falseValue="N"></p-checkbox>
@@ -215,6 +204,116 @@
                 falseValue="N"></p-checkbox>
               <label class="mb-0 ms-2" for="sticky">Sticky</label>
             </div>
+          </div>
+        </div>
+      </div>
+      <!-- Auth -->
+      <div class="form-group row">
+        <div class="col-4">
+          <label id="sofProxyAuth_label" for="sofProxyAuth" class="control-label required">Auth</label>
+          <p-select inputId="sofProxyAuth" [options]="sofProxyAuthOptions" optionLabel="label" optionValue="value"
+            formControlName="sofProxyAuth" [style]="{'width':'100%'}"></p-select>
+        </div>
+        <div class="col-auto">
+          <label id="sofProxyOutRelay_label" for="sofProxyOutRelay" class="control-label">Fhir Server驗證</label>
+          <div class="p-form-check-line form-group">
+            <div class="p-form-check">
+              <p-checkbox [binary]="true" inputId="sofProxyOutRelay" formControlName="sofProxyOutRelay" trueValue="Y"
+                falseValue="N"></p-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Auth = third-party 時的 introspection 設定（必填），以邊框群組與其他欄位區隔 -->
+      <div class="form-group border rounded-3 p-3 mb-3" *ngIf="sofProxyAuth.value === 'third-party'">
+        <label class="control-label fw-bold d-block mb-2">Auth: Third-Party Introspection</label>
+        <div class="row g-3">
+          <div class="col-3">
+            <label id="sofProxyInIntrospectionAuth_label" for="sofProxyInIntrospectionAuth"
+              class="control-label required">Introspection Auth</label>
+            <p-select inputId="sofProxyInIntrospectionAuth" [options]="sofProxyInIntrospectionAuthOptions"
+              formControlName="sofProxyInIntrospectionAuth" [style]="{'width':'100%'}"></p-select>
+          </div>
+          <div class="col-3">
+            <label id="sofProxyInWellKnown_label" for="sofProxyInWellKnown" class="control-label required">Well-Known
+              URL</label>
+            <input type="text" class="form-control" id="sofProxyInWellKnown" formControlName="sofProxyInWellKnown">
+            <div *ngIf="sofProxyInWellKnown.invalid && (sofProxyInWellKnown.dirty || sofProxyInWellKnown.touched)"
+              class="text-danger">
+              <small class="form-text">{{sofProxyInWellKnown.errors.required | translate}}</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <label id="sofProxyInIntrospectionClientId_label" for="sofProxyInIntrospectionClientId"
+              class="control-label required">Introspection Client ID</label>
+            <input type="text" class="form-control" id="sofProxyInIntrospectionClientId"
+              formControlName="sofProxyInIntrospectionClientId">
+            <div
+              *ngIf="sofProxyInIntrospectionClientId.invalid && (sofProxyInIntrospectionClientId.dirty || sofProxyInIntrospectionClientId.touched)"
+              class="text-danger">
+              <small class="form-text">{{sofProxyInIntrospectionClientId.errors.required | translate}}</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <label id="sofProxyInIntrospectionSecret_label" for="sofProxyInIntrospectionSecret"
+              class="control-label required">Introspection Secret</label>
+            <input type="text" class="form-control" id="sofProxyInIntrospectionSecret"
+              formControlName="sofProxyInIntrospectionSecret">
+            <small *ngIf="currentAction === 'update'" class="form-text text-danger d-block mt-1">
+              {{ 'sof.introspection_secret_update_hint' | translate }}
+            </small>
+            <div
+              *ngIf="sofProxyInIntrospectionSecret.invalid && (sofProxyInIntrospectionSecret.dirty || sofProxyInIntrospectionSecret.touched)"
+              class="text-danger">
+              <small class="form-text">{{sofProxyInIntrospectionSecret.errors.required | translate}}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Fhir Server驗證 = Y 時的後端代取 token 設定，以邊框群組與其他欄位區隔 -->
+      <div class="form-group border rounded-3 p-3 mb-3" *ngIf="sofProxyOutRelay.value === 'Y'">
+        <label class="control-label fw-bold d-block mb-2">Fhir Server驗證（Token 代取設定）</label>
+        <div class="row g-3">
+          <div class="col-3">
+            <label id="sofProxyOutAuthMethod_label" for="sofProxyOutAuthMethod" class="control-label">Auth
+              Method</label>
+            <p-select inputId="sofProxyOutAuthMethod" [options]="sofProxyOutAuthMethodOptions"
+              formControlName="sofProxyOutAuthMethod" [style]="{'width':'100%'}"></p-select>
+          </div>
+          <div class="col-3">
+            <label id="sofProxyOutWellKnown_label" for="sofProxyOutWellKnown" class="control-label">Well-Known
+              URL</label>
+            <input type="text" class="form-control" id="sofProxyOutWellKnown" formControlName="sofProxyOutWellKnown">
+          </div>
+          <div class="col-3">
+            <label id="sofProxyOutClientId_label" for="sofProxyOutClientId" class="control-label required">Client
+              ID</label>
+            <input type="text" class="form-control" id="sofProxyOutClientId" formControlName="sofProxyOutClientId">
+            <div *ngIf="sofProxyOutClientId.invalid && (sofProxyOutClientId.dirty || sofProxyOutClientId.touched)"
+              class="text-danger">
+              <small class="form-text">{{sofProxyOutClientId.errors.required | translate}}</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <label id="sofProxyOutClientSecret_label" for="sofProxyOutClientSecret"
+              class="control-label required">Client Secret</label>
+            <input type="text" class="form-control" id="sofProxyOutClientSecret"
+              formControlName="sofProxyOutClientSecret">
+            <div
+              *ngIf="sofProxyOutClientSecret.invalid && (sofProxyOutClientSecret.dirty || sofProxyOutClientSecret.touched)"
+              class="text-danger">
+              <small class="form-text">{{sofProxyOutClientSecret.errors.required | translate}}</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <label id="sofProxyOutScope_label" for="sofProxyOutScope" class="control-label">Scope</label>
+            <input type="text" class="form-control" id="sofProxyOutScope" formControlName="sofProxyOutScope">
+          </div>
+          <div class="col-3 align-self-end">
+            <!-- 測試取token（DPB0341） -->
+            <button type="button" class="btn tpi-btn tpi-primary" [hidden]="currentAction=='detail'"
+              [disabled]="sofProxyOutClientId.invalid || sofProxyOutClientSecret.invalid"
+              (click)="testRelayToken()">{{ 'sof.test_token' | translate }}</button>
           </div>
         </div>
       </div>
@@ -250,8 +349,8 @@
       <div class="form-group row">
         <div class="col-7">
           <label id="ignoreApi_label" for="ignoreApi" class="control-label">Client ID List
-            <button pButton type="button" icon="pi pi-search" class="ms-1 tpi-primary"
-              [hidden]="currentAction=='detail'" [pTooltip]="'button.select_client' | translate" tooltipPosition="top"
+            <button pButton type="button" icon="pi pi-search" class="ms-1 input-btn tpi-primary"
+              [hidden]="currentAction=='detail'" [pTooltip]="'smart_launcher.select_client' | translate" tooltipPosition="top"
               (click)="queryRoleList();"></button>
           </label>
           <textarea id="ignoreApi" rows="3" class="form-control" formControlName="sofProxyClientId"></textarea>
@@ -286,7 +385,7 @@
     <div class="form-group row">
       <div class="col-3">
         <div class="ui-inputgroup">
-          <input type="file" id="file" accept=".json" (change)="changeFile($event)" style="display: none;">
+          <input type="file" id="file" #fileInputP3 accept=".json" (change)="changeFile($event)" style="display: none;">
           <!-- <input type="text" class="form-control" formControlName="fileName"
               placeholder="{{'chs_json_file' | translate}}"> -->
           <input type="text" class="form-control" value="{{importFileName}}" readOnly
@@ -350,9 +449,7 @@
           <td rowspan="2">{{rowData.sofProxyId}}</td>
           <td rowspan="2">{{rowData.sofProxyName}}</td>
           <td rowspan="2">{{rowData.sofProxyRemark}}</td>
-          <td rowspan="2" style="text-align: center">
-            <i *ngIf="rowData.sofProxyAccessToken ==='Y'" class="fas fa-check"></i>
-          </td>
+          <td rowspan="2">{{getSofProxyAuthLabel(rowData.sofProxyAuth)}}</td>
           <td rowspan="2" style="text-align: center">
             <i *ngIf="rowData.sofProxySqlInjection ==='Y'" class="fas fa-check"></i>
           </td>
@@ -415,12 +512,10 @@
 <p-confirmDialog #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
   <ng-template pTemplate="footer">
     <div class="col-12 d-flex gap-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check"
-         class="p-button-primary"
-        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary" label="{{'button.confirm' | translate}}"
+        (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
         label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
   </ng-template>
 </p-confirmDialog>
-

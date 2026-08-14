@@ -33,6 +33,10 @@ public class GtwIdPWellKnownResp {
 
 	@JsonProperty("code_challenge_methods_supported")
 	private List<String> codeChallengeMethodsSupported;
+	
+	@JsonProperty("introspection_endpoint")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String introspection;
 
 	@Override
 	public String toString() {
@@ -40,7 +44,7 @@ public class GtwIdPWellKnownResp {
 				+ ", tokenEndpoint=" + tokenEndpoint + ", userinfoEndpoint=" + userinfoEndpoint + ", jwksUri=" + jwksUri
 				+ ", idTokenSigningAlgValuesSupported=" + idTokenSigningAlgValuesSupported + ", scopesSupported="
 				+ scopesSupported + ", callbackEndpoint=" + callbackEndpoint + ", codeChallengeMethodsSupported="
-				+ codeChallengeMethodsSupported + "]";
+				+ codeChallengeMethodsSupported + ", introspection=" + introspection + "]";
 	}
 
 	public String getIssuer() {
@@ -113,5 +117,13 @@ public class GtwIdPWellKnownResp {
 
 	public void setCodeChallengeMethodsSupported(List<String> codeChallengeMethodsSupported) {
 		this.codeChallengeMethodsSupported = codeChallengeMethodsSupported;
+	}
+
+	public String getIntrospection() {
+		return introspection;
+	}
+
+	public void setIntrospection(String introspection) {
+		this.introspection = introspection;
 	}
 }

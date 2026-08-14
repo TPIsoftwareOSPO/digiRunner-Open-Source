@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { UntypedFormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -7,7 +7,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.service';
 import { ServerService } from 'src/app/shared/services/api-server.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { FileService } from 'src/app/shared/services/api-file.service';
@@ -28,6 +28,8 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
     standalone: false
 })
 export class Ac0230Component extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   currentTitle = this.title;
   pageNum: number = 1;
 
@@ -86,7 +88,7 @@ export class Ac0230Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   changeFile(event) {

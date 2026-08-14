@@ -32,6 +32,7 @@ import tpi.dgrv4.entity.constant.CodeEnums;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxy;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxyDiversion;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxy_;
+import tpi.dgrv4.entity.component.cipher.TsmpTAEASKHelper;
 import tpi.dgrv4.gateway.service.SmartOnFhirProxyRouteContext;
 import tpi.dgrv4.entity.repository.DgrSmartOnFhirProxyDao;
 import tpi.dgrv4.entity.repository.DgrSmartOnFhirProxyDiversionDao;
@@ -47,21 +48,25 @@ public class SmartOnFhirProxyCreateUpdateDeleteService {
     /** 預先編譯的正則表達式：sofProxyName 只能包含英文字母和數字 */
     private static final Pattern PROXY_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]+$");
 
+
     private DgrSmartOnFhirProxyDao dgrSmartOnFhirProxyDao;
     private DgrSmartOnFhirProxyDiversionDao dgrSmartOnFhirProxyDiversionDao;
     private TsmpClientDao tsmpClientDao;
     private tpi.dgrv4.gateway.service.SmartOnFhirProxyStickyService stickyService;
+    private TsmpTAEASKHelper taeask;
 
     @Autowired
     public SmartOnFhirProxyCreateUpdateDeleteService(
             DgrSmartOnFhirProxyDao dgrSmartOnFhirProxyDao,
             DgrSmartOnFhirProxyDiversionDao dgrSmartOnFhirProxyDiversionDao,
             TsmpClientDao tsmpClientDao,
-            tpi.dgrv4.gateway.service.SmartOnFhirProxyStickyService stickyService) {
+            tpi.dgrv4.gateway.service.SmartOnFhirProxyStickyService stickyService,
+            TsmpTAEASKHelper taeask) {
         this.dgrSmartOnFhirProxyDao = dgrSmartOnFhirProxyDao;
         this.dgrSmartOnFhirProxyDiversionDao = dgrSmartOnFhirProxyDiversionDao;
         this.tsmpClientDao = tsmpClientDao;
         this.stickyService = stickyService;
+        this.taeask = taeask;
     }
 
     @Transactional
@@ -350,6 +355,37 @@ public class SmartOnFhirProxyCreateUpdateDeleteService {
         proxy.setSofProxyClientId(
                 reqDto.getSofProxyClientId() != null ? reqDto.getSofProxyClientId() : new ArrayList<>());
 
+        // ===== SMART on FHIR 認證擴充：Inbound =====
+        // 寫入前正規化：舊值 dgr → digirunner（讀舊寫新）
+        proxy.setSofProxyAuth(reqDto.getSofProxyAuth() != null
+                ? SofProxyAuthValues.normalize(reqDto.getSofProxyAuth())
+                : new ArrayList<>(List.of("none")));
+        proxy.setSofProxyInIntrospectionEndpoint(reqDto.getSofProxyInIntrospectionEndpoint());
+        proxy.setSofProxyInWellKnown(reqDto.getSofProxyInWellKnown());
+        proxy.setSofProxyInIntrospectionAuth(reqDto.getSofProxyInIntrospectionAuth());
+        proxy.setSofProxyInIntrospectionClientId(reqDto.getSofProxyInIntrospectionClientId());
+        if (StringUtils.hasText(reqDto.getSofProxyInIntrospectionSecret())) {
+            proxy.setSofProxyInIntrospectionSecretEnc(taeask.encrypt(reqDto.getSofProxyInIntrospectionSecret()));
+        }
+        proxy.setSofProxyInAllowedIss(
+                reqDto.getSofProxyInAllowedIss() != null ? reqDto.getSofProxyInAllowedIss() : new ArrayList<>());
+        proxy.setSofProxyInExpectedAud(reqDto.getSofProxyInExpectedAud());
+
+        // ===== SMART on FHIR 認證擴充：Outbound（代取）=====
+        proxy.setSofProxyOutRelay(getStatusOrDefault(reqDto.getSofProxyOutRelay(),
+                DgrSmartOnFhirProxy.Status.DISABLED));
+        proxy.setSofProxyOutAuthMethod(reqDto.getSofProxyOutAuthMethod());
+        proxy.setSofProxyOutClientId(reqDto.getSofProxyOutClientId());
+        if (StringUtils.hasText(reqDto.getSofProxyOutClientSecret())) {
+            proxy.setSofProxyOutClientSecretEnc(taeask.encrypt(reqDto.getSofProxyOutClientSecret()));
+        }
+        proxy.setSofProxyOutWellKnown(reqDto.getSofProxyOutWellKnown());
+        proxy.setSofProxyOutTokenEndpoint(reqDto.getSofProxyOutTokenEndpoint());
+        proxy.setSofProxyOutScope(reqDto.getSofProxyOutScope());
+
+        // 驗證 auth / relay 設定一致性（驗證 entity 狀態，create 與 update 共用）
+        validateAuthAndRelayConfig(proxy, -1);
+
         // 設定系統欄位
         proxy.setCreateDateTime(DateTimeUtil.now());
         proxy.setCreateUser(auth.getUserName());
@@ -441,6 +477,27 @@ public class SmartOnFhirProxyCreateUpdateDeleteService {
         dto.setSofProxyTps(entity.getSofProxyTps());
         dto.setSofProxyIgnoreApi(entity.getSofProxyIgnoreApi());
         dto.setSofProxyClientId(entity.getSofProxyClientId());
+
+        // ===== SMART on FHIR 認證擴充：Inbound（secret 一律遮罩）=====
+        dto.setSofProxyAuth(entity.getSofProxyAuth());
+        dto.setSofProxyInIntrospectionEndpoint(entity.getSofProxyInIntrospectionEndpoint());
+        dto.setSofProxyInWellKnown(entity.getSofProxyInWellKnown());
+        dto.setSofProxyInIntrospectionAuth(entity.getSofProxyInIntrospectionAuth());
+        dto.setSofProxyInIntrospectionClientId(entity.getSofProxyInIntrospectionClientId());
+        dto.setHasIntrospectionSecret(StringUtils.hasText(entity.getSofProxyInIntrospectionSecretEnc()));
+        dto.setSofProxyInAllowedIss(entity.getSofProxyInAllowedIss());
+        dto.setSofProxyInExpectedAud(entity.getSofProxyInExpectedAud());
+
+        // ===== SMART on FHIR 認證擴充：Outbound（secret 一律遮罩）=====
+        if (entity.getSofProxyOutRelay() != null) {
+            dto.setSofProxyOutRelay(entity.getSofProxyOutRelay().getCode());
+        }
+        dto.setSofProxyOutAuthMethod(entity.getSofProxyOutAuthMethod());
+        dto.setSofProxyOutClientId(entity.getSofProxyOutClientId());
+        dto.setHasOutClientSecret(StringUtils.hasText(entity.getSofProxyOutClientSecretEnc()));
+        dto.setSofProxyOutWellKnown(entity.getSofProxyOutWellKnown());
+        dto.setSofProxyOutTokenEndpoint(entity.getSofProxyOutTokenEndpoint());
+        dto.setSofProxyOutScope(entity.getSofProxyOutScope());
 
         // 設置 Diversion 列表
         List<SmartOnFhirProxyDiversionDto> diversionDtos = diversionList.stream()
@@ -737,6 +794,70 @@ public class SmartOnFhirProxyCreateUpdateDeleteService {
                     updateDto.getSofProxyClientId().get() != null ? updateDto.getSofProxyClientId().get()
                             : new ArrayList<>());
         }
+
+        // ===== SMART on FHIR 認證擴充：Inbound =====
+        if (updateDto.getSofProxyAuth() != null && updateDto.getSofProxyAuth().isPresent()) {
+            // 寫入前正規化：舊值 dgr → digirunner（讀舊寫新）
+            proxy.setSofProxyAuth(updateDto.getSofProxyAuth().get() != null
+                    ? SofProxyAuthValues.normalize(updateDto.getSofProxyAuth().get())
+                    : new ArrayList<>(List.of("none")));
+        }
+        if (updateDto.getSofProxyInIntrospectionEndpoint() != null
+                && updateDto.getSofProxyInIntrospectionEndpoint().isPresent()) {
+            proxy.setSofProxyInIntrospectionEndpoint(updateDto.getSofProxyInIntrospectionEndpoint().get());
+        }
+        if (updateDto.getSofProxyInWellKnown() != null && updateDto.getSofProxyInWellKnown().isPresent()) {
+            proxy.setSofProxyInWellKnown(updateDto.getSofProxyInWellKnown().get());
+        }
+        if (updateDto.getSofProxyInIntrospectionAuth() != null
+                && updateDto.getSofProxyInIntrospectionAuth().isPresent()) {
+            proxy.setSofProxyInIntrospectionAuth(updateDto.getSofProxyInIntrospectionAuth().get());
+        }
+        if (updateDto.getSofProxyInIntrospectionClientId() != null
+                && updateDto.getSofProxyInIntrospectionClientId().isPresent()) {
+            proxy.setSofProxyInIntrospectionClientId(updateDto.getSofProxyInIntrospectionClientId().get());
+        }
+        // SECRET：undefined=保留現有密文（外層 isPresent 守住）；空/null=清除；有值=重新加密
+        if (updateDto.getSofProxyInIntrospectionSecret() != null
+                && updateDto.getSofProxyInIntrospectionSecret().isPresent()) {
+            String inSecret = updateDto.getSofProxyInIntrospectionSecret().get();
+            proxy.setSofProxyInIntrospectionSecretEnc(
+                    StringUtils.hasText(inSecret) ? taeask.encrypt(inSecret) : null);
+        }
+        if (updateDto.getSofProxyInAllowedIss() != null && updateDto.getSofProxyInAllowedIss().isPresent()) {
+            proxy.setSofProxyInAllowedIss(updateDto.getSofProxyInAllowedIss().get() != null
+                    ? updateDto.getSofProxyInAllowedIss().get() : new ArrayList<>());
+        }
+        if (updateDto.getSofProxyInExpectedAud() != null && updateDto.getSofProxyInExpectedAud().isPresent()) {
+            proxy.setSofProxyInExpectedAud(updateDto.getSofProxyInExpectedAud().get());
+        }
+
+        // ===== SMART on FHIR 認證擴充：Outbound（代取）=====
+        if (updateDto.getSofProxyOutRelay() != null && updateDto.getSofProxyOutRelay().isPresent()) {
+            proxy.setSofProxyOutRelay(getStatusOrDefault(updateDto.getSofProxyOutRelay().get(),
+                    DgrSmartOnFhirProxy.Status.DISABLED));
+        }
+        if (updateDto.getSofProxyOutAuthMethod() != null && updateDto.getSofProxyOutAuthMethod().isPresent()) {
+            proxy.setSofProxyOutAuthMethod(updateDto.getSofProxyOutAuthMethod().get());
+        }
+        if (updateDto.getSofProxyOutClientId() != null && updateDto.getSofProxyOutClientId().isPresent()) {
+            proxy.setSofProxyOutClientId(updateDto.getSofProxyOutClientId().get());
+        }
+        // SECRET：undefined=保留現有密文；空/null=清除；有值=重新加密
+        if (updateDto.getSofProxyOutClientSecret() != null && updateDto.getSofProxyOutClientSecret().isPresent()) {
+            String outSecret = updateDto.getSofProxyOutClientSecret().get();
+            proxy.setSofProxyOutClientSecretEnc(
+                    StringUtils.hasText(outSecret) ? taeask.encrypt(outSecret) : null);
+        }
+        if (updateDto.getSofProxyOutWellKnown() != null && updateDto.getSofProxyOutWellKnown().isPresent()) {
+            proxy.setSofProxyOutWellKnown(updateDto.getSofProxyOutWellKnown().get());
+        }
+        if (updateDto.getSofProxyOutTokenEndpoint() != null && updateDto.getSofProxyOutTokenEndpoint().isPresent()) {
+            proxy.setSofProxyOutTokenEndpoint(updateDto.getSofProxyOutTokenEndpoint().get());
+        }
+        if (updateDto.getSofProxyOutScope() != null && updateDto.getSofProxyOutScope().isPresent()) {
+            proxy.setSofProxyOutScope(updateDto.getSofProxyOutScope().get());
+        }
     }
 
     /**
@@ -753,6 +874,102 @@ public class SmartOnFhirProxyCreateUpdateDeleteService {
                 proxy.getSofProxyTps(),
                 proxy.getSofProxyStatus() != null ? proxy.getSofProxyStatus().getCode() : null,
                 index);
+
+        // 驗證 auth / relay 設定一致性（驗證合併後的 entity 狀態）
+        validateAuthAndRelayConfig(proxy, index);
+    }
+
+    /**
+     * 驗證 inbound auth 與 outbound 代取設定的一致性（驗證 entity 最終狀態，create 與 update 共用）。
+     * 注意：secret 以 *SecretEnc（密文）是否存在判斷「是否已設定」。
+     */
+    private void validateAuthAndRelayConfig(DgrSmartOnFhirProxy proxy, int index) {
+        String prefix = (index >= 0 ? "Proxy[" + index + "] " : "");
+
+        // 1. auth 值域
+        List<String> authList = proxy.getSofProxyAuth();
+        if (authList != null) {
+            for (String a : authList) {
+                if (a == null || !SofProxyAuthValues.ALLOWED.contains(a)) {
+                    String msg = prefix + "sofProxyAuth contains invalid value: '" + a
+                            + "'. Allowed: none, digirunner, third-party (legacy: dgr).";
+                    this.logger.error(msg);
+                    throw TsmpDpAaRtnCode._1559.throwing(msg);
+                }
+            }
+            // third-party 需 introspection endpoint 或 well-known 其一
+            if (authList.contains("third-party")
+                    && !StringUtils.hasText(proxy.getSofProxyInIntrospectionEndpoint())
+                    && !StringUtils.hasText(proxy.getSofProxyInWellKnown())) {
+                String msg = prefix
+                        + "auth 'third-party' requires sofProxyInIntrospectionEndpoint or sofProxyInWellKnown.";
+                this.logger.error(msg);
+                throw TsmpDpAaRtnCode._1559.throwing(msg);
+            }
+        }
+
+        // 1.5 認證方式值域（有填才檢查；錯值若不擋，runtime 會默默視為不帶認證）
+        String inAuth = proxy.getSofProxyInIntrospectionAuth();
+        if (StringUtils.hasText(inAuth) && !("client_secret_basic".equalsIgnoreCase(inAuth)
+                || "bearer".equalsIgnoreCase(inAuth) || "none".equalsIgnoreCase(inAuth))) {
+            String msg = prefix + "sofProxyInIntrospectionAuth invalid: '" + inAuth
+                    + "'. Allowed: client_secret_basic, bearer, none.";
+            this.logger.error(msg);
+            throw TsmpDpAaRtnCode._1559.throwing(msg);
+        }
+        String outMethod = proxy.getSofProxyOutAuthMethod();
+        if (StringUtils.hasText(outMethod) && !("client_secret_basic".equalsIgnoreCase(outMethod)
+                || "client_secret_post".equalsIgnoreCase(outMethod))) {
+            String msg = prefix + "sofProxyOutAuthMethod invalid: '" + outMethod
+                    + "'. Allowed: client_secret_basic, client_secret_post.";
+            this.logger.error(msg);
+            throw TsmpDpAaRtnCode._1559.throwing(msg);
+        }
+
+        // 2. URL 格式（有填才檢查，沿用 isValidUrl：http/https + 長度上限）
+        if (StringUtils.hasText(proxy.getSofProxyInIntrospectionEndpoint())
+                && !isValidUrl(proxy.getSofProxyInIntrospectionEndpoint())) {
+            throwInvalidUrl(prefix, "sofProxyInIntrospectionEndpoint", proxy.getSofProxyInIntrospectionEndpoint());
+        }
+        if (StringUtils.hasText(proxy.getSofProxyInWellKnown())
+                && !isValidUrl(proxy.getSofProxyInWellKnown())) {
+            throwInvalidUrl(prefix, "sofProxyInWellKnown", proxy.getSofProxyInWellKnown());
+        }
+        if (StringUtils.hasText(proxy.getSofProxyOutWellKnown())
+                && !isValidUrl(proxy.getSofProxyOutWellKnown())) {
+            throwInvalidUrl(prefix, "sofProxyOutWellKnown", proxy.getSofProxyOutWellKnown());
+        }
+        if (StringUtils.hasText(proxy.getSofProxyOutTokenEndpoint())
+                && !isValidUrl(proxy.getSofProxyOutTokenEndpoint())) {
+            throwInvalidUrl(prefix, "sofProxyOutTokenEndpoint", proxy.getSofProxyOutTokenEndpoint());
+        }
+
+        // 3. 代取啟用時的必填：client_id + secret（密文）+ well-known/token-endpoint 其一
+        if (proxy.getSofProxyOutRelay() == DgrSmartOnFhirProxy.Status.ENABLED) {
+            if (!StringUtils.hasText(proxy.getSofProxyOutClientId())) {
+                String msg = prefix + "outbound relay enabled requires sofProxyOutClientId.";
+                this.logger.error(msg);
+                throw TsmpDpAaRtnCode._1559.throwing(msg);
+            }
+            if (!StringUtils.hasText(proxy.getSofProxyOutClientSecretEnc())) {
+                String msg = prefix + "outbound relay enabled requires sofProxyOutClientSecret.";
+                this.logger.error(msg);
+                throw TsmpDpAaRtnCode._1559.throwing(msg);
+            }
+            if (!StringUtils.hasText(proxy.getSofProxyOutWellKnown())
+                    && !StringUtils.hasText(proxy.getSofProxyOutTokenEndpoint())) {
+                String msg = prefix
+                        + "outbound relay enabled requires sofProxyOutWellKnown or sofProxyOutTokenEndpoint.";
+                this.logger.error(msg);
+                throw TsmpDpAaRtnCode._1559.throwing(msg);
+            }
+        }
+    }
+
+    private void throwInvalidUrl(String prefix, String field, String value) {
+        String msg = prefix + field + " is not a valid http(s) URL (length <= 1000): " + value;
+        this.logger.error(msg);
+        throw TsmpDpAaRtnCode._1559.throwing(msg);
     }
 
     /**

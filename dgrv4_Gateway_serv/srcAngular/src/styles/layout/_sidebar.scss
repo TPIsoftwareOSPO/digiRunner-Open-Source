@@ -66,13 +66,19 @@
       list-style-type: none;
     }
     ul.submenu {
-      display: block;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
       list-style-type: none;
       margin-block-start: 0;
       margin-block-end: 0;
       margin-inline-start: 0px;
       margin-inline-end: 0px;
       padding-inline-start: 3rem;
+
+      &.active {
+        max-height: 1000px;
+      }
 
       li {
         &:hover {
@@ -98,9 +104,6 @@
           }
         }
       }
-    }
-    .active {
-      display: block !important;
     }
   }
 }

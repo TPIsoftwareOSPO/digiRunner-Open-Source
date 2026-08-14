@@ -1,5 +1,8 @@
-<ng-container #content>
+<!-- #content 必須是真實 DOM 元素（比照 key-value-grid）：
+     ngAfterViewInit/setDisabledState 會對 nativeElement 呼叫 querySelectorAll，
+     若掛在 ng-container 上 nativeElement 是 Comment 節點，執行期會拋 TypeError -->
+<div #content>
   <label *ngIf="label">{{ label }}</label>
   <ng-template #keyvalue></ng-template>
   <!-- <button type="button" class="btn btn-warning" (click)="add()">New</button> -->
-</ng-container>
+</div>

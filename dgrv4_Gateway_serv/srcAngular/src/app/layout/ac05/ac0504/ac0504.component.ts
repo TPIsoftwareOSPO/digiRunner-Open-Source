@@ -8,7 +8,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { AA0525Item, AA0525Req } from 'src/app/models/api/UtilService/aa0525.interface';
 import { RoleService } from 'src/app/shared/services/api-role.service';
 import { DPB0115Req } from 'src/app/models/api/RoleService/dpb0115.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AA0505Item, AA0505Req, AA0505Resp } from 'src/app/models/api/UtilService/aa0505.interface';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { ListService } from 'src/app/shared/services/api-list.service';

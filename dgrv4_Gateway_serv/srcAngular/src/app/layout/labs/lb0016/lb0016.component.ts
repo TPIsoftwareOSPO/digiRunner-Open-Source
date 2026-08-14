@@ -21,8 +21,7 @@ export type LaunchType =
   | 'provider_ehr'
   | 'provider_standalone'
   | 'patient_standalone'
-  | 'patient_portal'
-  | 'backend_services';
+  | 'patient_portal';
 
 @Component({
   selector: 'app-lb0016',
@@ -42,7 +41,6 @@ export class Lb0016Component extends BaseComponent implements OnInit {
     { value: 'provider_standalone', labelKey: 'smart_launcher.launch_type_provider_standalone' },
     { value: 'patient_standalone',  labelKey: 'smart_launcher.launch_type_patient_standalone' },
     { value: 'patient_portal',      labelKey: 'smart_launcher.launch_type_patient_portal' },
-    { value: 'backend_services',    labelKey: 'smart_launcher.launch_type_backend_services' },
   ];
 
   launchTypeDescription: string = '';
@@ -53,7 +51,6 @@ export class Lb0016Component extends BaseComponent implements OnInit {
     provider_standalone: 'smart_launcher.launch_type_desc_provider_standalone',
     patient_standalone:  'smart_launcher.launch_type_desc_patient_standalone',
     patient_portal:      'smart_launcher.launch_type_desc_patient_portal',
-    backend_services:    'smart_launcher.launch_type_desc_backend_services',
   };
 
   showClientSecret: boolean = false;
@@ -73,6 +70,8 @@ export class Lb0016Component extends BaseComponent implements OnInit {
   clientSecret: string = '';
   jwksUrl: string = '';
   jwksJson: string = '';
+  /** confidential-asymmetric demo：簽 client assertion 用的私鑰（JWK 或 PEM）。僅前端持有，不寫入 client 設定 */
+  privateKeyInput: string = '';
   pkceMode: string = 'auto';
 
   pkceModeOptions: { value: string; labelKey: string }[] = [
@@ -105,8 +104,6 @@ export class Lb0016Component extends BaseComponent implements OnInit {
   selectedProviderIdSet: Set<string> = new Set<string>();
 
   simEhr: boolean = false;
-  skipLogin: boolean = false;
-  skipAuth: boolean = false;
   simError: string = '';
 
   appLaunchUrl: string = '';
@@ -336,6 +333,15 @@ export class Lb0016Component extends BaseComponent implements OnInit {
     const scopeArr = (this.scopeText || '').trim().split(/\s+/).filter(s => s);
     const redirectArr = (this.redirectUri || '').split(',').map(s => s.trim()).filter(s => s);
 
+    // 依 clientType 正規化憑證欄位，符合後端 SmartClientValidator（否則跳 1559）：
+    // public → 不帶 authMethod / jwks；symmetric → 帶 authMethod、不帶 jwks；
+    // asymmetric → 帶 authMethod + 剛好一個 jwks/jwksUri（內嵌 jwks 優先，並清掉 jwksUri 以免「兩者都給」被擋）。
+    const isConfidential = this.clientType === 'confidential-symmetric' || this.clientType === 'confidential-asymmetric';
+    const isAsymmetric = this.clientType === 'confidential-asymmetric';
+    const authMethodOut = isConfidential ? (this.smartAuthMethod || null) : null;
+    const jwksOut = isAsymmetric ? (this.jwksJson || null) : null;
+    const jwksUriOut = isAsymmetric && !jwksOut ? (this.jwksUrl || null) : null;
+
     if (this.smartCfgExists && this.smartCfgVersion != null) {
       const item: SmartClientUpdateItem = {
         clientId,
@@ -346,9 +352,9 @@ export class Lb0016Component extends BaseComponent implements OnInit {
         redirectUris: redirectArr.length ? redirectArr : null,
         launchMode: this.smartLaunchMode || null,
         autoApprove: this.smartAutoApprove || null,
-        tokenEndpointAuthMethod: this.smartAuthMethod || null,
-        jwksUri: this.jwksUrl || null,
-        jwks: this.jwksJson || null,
+        tokenEndpointAuthMethod: authMethodOut,
+        jwksUri: jwksUriOut,
+        jwks: jwksOut,
       };
       this.serverService.batchUpdateSmartClient({ updateList: [item] }).subscribe({
         next: (res) => {
@@ -369,9 +375,9 @@ export class Lb0016Component extends BaseComponent implements OnInit {
         redirectUris: redirectArr.length ? redirectArr : undefined,
         launchMode: this.smartLaunchMode || undefined,
         autoApprove: this.smartAutoApprove || undefined,
-        tokenEndpointAuthMethod: this.smartAuthMethod || undefined,
-        jwksUri: this.jwksUrl || undefined,
-        jwks: this.jwksJson || undefined,
+        tokenEndpointAuthMethod: authMethodOut ?? undefined,
+        jwksUri: jwksUriOut ?? undefined,
+        jwks: jwksOut ?? undefined,
       };
       this.serverService.createSmartClient(body).subscribe({
         next: (res) => {
@@ -413,7 +419,7 @@ export class Lb0016Component extends BaseComponent implements OnInit {
   }
 
   get launchBoxUrl(): string {
-    if (this.isStandaloneLaunch || this.launchType === 'backend_services') {
+    if (this.isStandaloneLaunch) {
       return this.fhirBaseUrl;
     }
     return this.appLaunchUrl;
@@ -422,25 +428,20 @@ export class Lb0016Component extends BaseComponent implements OnInit {
   /** sim_error 下拉的分組選項（label 為 i18n key，依 launchType 過濾），供 p-select [group] 使用 */
   get simErrorOptions(): { label: string; items: { label: string; value: string }[] }[] {
     const groups: { label: string; items: { label: string; value: string }[] }[] = [];
-    const isBackend = this.launchType === 'backend_services';
-    if (!isBackend) {
-      groups.push({
-        label: 'smart_launcher.sim_error_group_auth',
-        items: [
-          { label: 'smart_launcher.sim_error_auth_invalid_client_id', value: 'auth_invalid_client_id' },
-          { label: 'smart_launcher.sim_error_auth_invalid_redirect_uri', value: 'auth_invalid_redirect_uri' },
-          { label: 'smart_launcher.sim_error_auth_invalid_scope', value: 'auth_invalid_scope' },
-          { label: 'smart_launcher.sim_error_auth_invalid_client_secret', value: 'auth_invalid_client_secret' },
-        ],
-      });
-    }
+    groups.push({
+      label: 'smart_launcher.sim_error_group_auth',
+      items: [
+        { label: 'smart_launcher.sim_error_auth_invalid_client_id', value: 'auth_invalid_client_id' },
+        { label: 'smart_launcher.sim_error_auth_invalid_redirect_uri', value: 'auth_invalid_redirect_uri' },
+        { label: 'smart_launcher.sim_error_auth_invalid_scope', value: 'auth_invalid_scope' },
+        { label: 'smart_launcher.sim_error_auth_invalid_client_secret', value: 'auth_invalid_client_secret' },
+      ],
+    });
     const tokenItems = [
       { label: 'smart_launcher.sim_error_token_invalid_token', value: 'token_invalid_token' },
       { label: 'smart_launcher.sim_error_token_invalid_scope', value: 'token_invalid_scope' },
+      { label: 'smart_launcher.sim_error_token_expired_refresh', value: 'token_expired_refresh_token' },
     ];
-    if (!isBackend) {
-      tokenItems.push({ label: 'smart_launcher.sim_error_token_expired_refresh', value: 'token_expired_refresh_token' });
-    }
     groups.push({ label: 'smart_launcher.sim_error_group_token', items: tokenItems });
     groups.push({
       label: 'smart_launcher.sim_error_group_request',
@@ -456,14 +457,8 @@ export class Lb0016Component extends BaseComponent implements OnInit {
     const lt = this.launchType;
 
     this.launchTypeDescription = this.launchTypeDescriptions[lt];
-    this.showPkce = lt !== 'backend_services';
+    this.showPkce = true;
     this.showProvider = lt === 'provider_ehr' || lt === 'provider_standalone';
-
-    if (lt === 'backend_services') {
-      this.clientType = 'confidential-asymmetric';
-    } else if (this.clientType === 'backend-service') {
-      this.clientType = 'public';
-    }
 
     this.onClientTypeChange();
     this.resetDefaultScope();
@@ -472,6 +467,14 @@ export class Lb0016Component extends BaseComponent implements OnInit {
   onClientTypeChange(): void {
     this.showClientSecret = this.clientType === 'confidential-symmetric';
     this.showJwks = this.clientType === 'confidential-asymmetric';
+    // 依 clientType 正規化 auth method，避免殘留不合法值（例如切回 public 仍帶 client_secret_basic
+    // 導致後端 SmartClientValidator 1559）。public → 空；confidential → 取該型別合法方式。
+    const allowed = this.cfgAuthMethods();
+    if (allowed.length === 0) {
+      this.smartAuthMethod = '';
+    } else if (!allowed.includes(this.smartAuthMethod)) {
+      this.smartAuthMethod = allowed[0];
+    }
   }
 
   // ── Scope ──
@@ -511,7 +514,6 @@ export class Lb0016Component extends BaseComponent implements OnInit {
       provider_standalone: 'openid profile patient/*.cruds',
       patient_standalone:  'openid profile launch/patient patient/*.cruds',
       patient_portal:      'openid profile launch patient/*.cruds',
-      backend_services:    'system/*.cruds',
     };
     this.scopeText = defaults[this.launchType];
     this.onScopeTextChange();
@@ -818,12 +820,12 @@ export class Lb0016Component extends BaseComponent implements OnInit {
 
       case 'provider_ehr':
       case 'patient_portal':
-        this.launchWithContext();
+        void this.launchWithContext();
         break;
     }
   }
 
-  private launchWithContext(): void {
+  private async launchWithContext(): Promise<void> {
     if (!this.proxyName || !this.appLaunchUrl) return;
     if (!this.clientId) {
       this.showError(this.translate.instant('smart_launcher.error_launch_missing_client_id'));
@@ -838,15 +840,29 @@ export class Lb0016Component extends BaseComponent implements OnInit {
     // fhirUser type 依 launchType 決定：patient_portal → patient，其他 EHR 風格 → practitioner
     form['user_type'] = this.launchType === 'patient_portal' ? 'patient' : 'practitioner';
 
+    // launch 註冊也會過後端 authenticate()，confidential client 需在此帶憑證。
     let basicAuth: string | undefined;
     if (this.clientType === 'confidential-symmetric' && this.clientSecret) {
+      // 後端依註冊的 auth method 分派，Basic header 與 body client_secret 兩者都給以求通用。
       basicAuth = btoa(this.clientId + ':' + this.clientSecret);
+      form['client_secret'] = this.clientSecret;
+    } else if (this.clientType === 'confidential-asymmetric' && this.privateKeyInput) {
+      // private_key_jwt：aud 為 launch 端點（後端 registerLaunch 以此為 aud 驗證）。
+      try {
+        const launchAud = `${window.location.origin}/dgrv4/ssotoken/smart/launch`;
+        form['client_assertion_type'] = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+        form['client_assertion'] = await this.fhirService.signClientAssertion(this.clientId, launchAud, this.privateKeyInput);
+      } catch {
+        this.showError(this.translate.instant('smart_launcher.error_asymmetric_sign'));
+        return;
+      }
     }
 
     this.fhirService.createLaunch(form, basicAuth).subscribe({
       next: (data) => {
         if (data.launch) {
-          if (this.simEhr && this.launchType === 'provider_ehr') {
+          // html 的 Simulate EHR checkbox 對 provider_ehr / patient_portal 皆顯示，邏輯需一致
+          if (this.simEhr && (this.launchType === 'provider_ehr' || this.launchType === 'patient_portal')) {
             this.router.navigate(['ehr'], {
               relativeTo: this.route,
               queryParams: {
@@ -887,19 +903,70 @@ export class Lb0016Component extends BaseComponent implements OnInit {
     });
   }
 
+  /** confidential-asymmetric demo：在瀏覽器產生 RSA 金鑰對，公鑰填入 JWKS（註冊用）、私鑰填入私鑰欄位（簽章用）。 */
+  async generateAsymmetricKeypair(): Promise<void> {
+    try {
+      const { jwks, privateKey } = await this.fhirService.generateRsaKeypair();
+      this.jwksJson = jwks;
+      this.privateKeyInput = privateKey;
+      this.messageService.add({
+        severity: 'success',
+        summary: this.translate.instant('smart_launcher.error_summary'),
+        detail: this.translate.instant('smart_launcher.keypair_generated'),
+      });
+    } catch {
+      this.showError(this.translate.instant('smart_launcher.error_keypair_gen'));
+    }
+  }
+
   launchSampleApp(): void {
     if (!this.proxyName) return;
+
+    // confidential-asymmetric：需私鑰在瀏覽器內簽 client assertion。未提供私鑰時提示先產生 / 填入。
+    if (this.clientType === 'confidential-asymmetric' && !this.privateKeyInput) {
+      this.showError(this.translate.instant('smart_launcher.error_asymmetric_no_key'));
+      return;
+    }
+
     const iss = this.fhirBaseUrl;
     const params: Record<string, string> = { iss };
     if (this.clientId) params['client_id'] = this.clientId;
     if (this.scopeText) params['scope'] = this.scopeText;
     if (this.simError) params['sim_error'] = this.simError;
+    // pkceMode 傳給 sample app：none 不做 PKCE、auto / always 做 S256
+    if (this.pkceMode) params['pkce'] = this.pkceMode;
+    // confidential demo：直接把憑證帶給範例 App 換 token（secret / 私鑰會在網址 / sessionStorage 曝光，
+    // 此為 launcher 測試工具的刻意取捨，正式第三方請勿如此；後端仍會確實驗證）。
+    if (this.clientType === 'confidential-symmetric' && this.clientSecret) {
+      params['client_secret'] = this.clientSecret;
+    }
+    if (this.clientType === 'confidential-asymmetric' && this.privateKeyInput) {
+      params['private_key'] = this.privateKeyInput;
+    }
 
     if (this.isStandaloneLaunch) {
       const qs = new URLSearchParams(params).toString();
-      this.router.navigateByUrl(`/lb00/lb0016/sample?${qs}`);
+      const navigate = () => this.router.navigateByUrl(`/lb00/lb0016/sample?${qs}`);
+      // 與 EHR 一致：先存 dgr_smart_client（含公鑰 JWKS）再啟動，
+      // 否則 asymmetric 剛產生的公鑰還沒進後端，token 交換驗簽會失敗。
+      if (this.clientId) {
+        this.saveSmartConfig(navigate);
+      } else {
+        navigate();
+      }
     } else {
-      this.appLaunchUrl = `${window.location.origin}/dgrv4/ac4/lb00/lb0016/sample`;
+      // EHR 風格也要把 client_id / scope 傳給 sample app，
+      // 否則 sample app 會退回預設 dg_sample_app，與 launch token 綁定的 client 不符
+      const appParams = new URLSearchParams({ pkce: this.pkceMode });
+      if (this.clientId) appParams.set('client_id', this.clientId);
+      if (this.scopeText) appParams.set('scope', this.scopeText);
+      if (this.clientType === 'confidential-symmetric' && this.clientSecret) {
+        appParams.set('client_secret', this.clientSecret);
+      }
+      if (this.clientType === 'confidential-asymmetric' && this.privateKeyInput) {
+        appParams.set('private_key', this.privateKeyInput);
+      }
+      this.appLaunchUrl = `${window.location.origin}/dgrv4/ac4/lb00/lb0016/sample?${appParams.toString()}`;
       this.redirectUri = `${window.location.origin}/dgrv4/ac4/lb00/lb0016/sample/callback`;
       this.launch();
     }
@@ -911,4 +978,5 @@ export class Lb0016Component extends BaseComponent implements OnInit {
       setTimeout(() => (this.copySuccess = false), 2000);
     });
   }
+
 }

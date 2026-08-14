@@ -1,5 +1,5 @@
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { Component, OnInit, ViewChild, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
 import { FormParams } from 'src/app/models/api/form-params.interface';
@@ -27,6 +27,7 @@ import { DPB0076Req } from 'src/app/models/api/LovService/dpb0076.interface';
 export class ApiShelvesComponent implements OnInit {
 
   @ViewChild('dialog') _dialog!: DialogComponent;
+  @ViewChild('chooseFileRef') chooseFileRef!: ElementRef<HTMLInputElement>;
   @Input() _ref: any;
   @Input() no?: number;
   @Input() data?: newApiOnOff;
@@ -212,7 +213,7 @@ export class ApiShelvesComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#choose-file_' + this.no).click();
+    this.chooseFileRef.nativeElement.click();
   }
 
   // async upload(event) {

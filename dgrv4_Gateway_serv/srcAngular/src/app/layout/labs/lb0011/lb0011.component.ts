@@ -1,6 +1,6 @@
 import { flatMap } from 'rxjs/operators';
 import { DPB0282Field } from './../../../models/api/ServerService/dpb0282.interface';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
@@ -34,6 +34,8 @@ import dayjs from 'dayjs';
     standalone: false
 })
 export class Lb0011Component extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   currentTitle = this.title;
   pageNum: number = 1;
   form!: UntypedFormGroup;
@@ -519,7 +521,7 @@ export class Lb0011Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   async fileChange(event: any) {

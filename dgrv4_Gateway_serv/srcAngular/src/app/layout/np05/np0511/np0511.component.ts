@@ -5,7 +5,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0106RespItem, DPB0106Req } from 'src/app/models/api/EventService/dpb0106.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { EventService } from 'src/app/shared/services/api-event.service';
 import { FormOperate } from 'src/app/models/common.enum';
 import { TranslateService } from '@ngx-translate/core';
@@ -142,7 +142,7 @@ export class Np0511Component extends BaseComponent implements OnInit {
             if (this.tool.checkDpSuccess(res.ResHeader)) {
                 rowData.keepFlag = rowData.keepFlag == 'Y' ? 'N' : 'Y';
                 let flagSrc = this.evnFlagPipe.transform(rowData.keepFlag == 'Y' ? 'N' : 'Y');
-                $("#keepFlag_" + index).attr("src", flagSrc);
+                document.getElementById("keepFlag_" + index)?.setAttribute("src", flagSrc);
                 const codes = ['keep', 'event_log', 'message.success'];
                 const dicts = await this.tool.getDict(codes);
                 this.message.clear();
@@ -163,7 +163,7 @@ export class Np0511Component extends BaseComponent implements OnInit {
             if (this.tool.checkDpSuccess(res.ResHeader)) {
                 rowData.archiveFlag = rowData.archiveFlag == 'Y' ? 'N' : 'Y';
                 let flagSrc = this.evnFlagPipe.transform(rowData.archiveFlag == 'Y' ? 'N' : 'Y');
-                $("#archiveFlag_" + index).attr("src", flagSrc);
+                document.getElementById("archiveFlag_" + index)?.setAttribute("src", flagSrc);
                 const codes = ['archive', 'event_log', 'message.success'];
                 const dicts = await this.tool.getDict(codes);
                 this.message.clear();

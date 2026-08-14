@@ -75,7 +75,6 @@ public class TSMPCServiceGet implements IApiCacheService {
 				aType = "C";
 			}
 
-			TPILogger.tl.debug("\n--【LOGUUID】【" + uuid + "】【Start】--\n");
 			// 檢查資料
 			TsmpApiReg apiReg = getCommForwardProcService().getTsmpApiReg(httpReq);
 			ResponseEntity<?> allowMethodErrRespEntity = getCommForwardProcService().checkMethod(apiReg, httpReq);

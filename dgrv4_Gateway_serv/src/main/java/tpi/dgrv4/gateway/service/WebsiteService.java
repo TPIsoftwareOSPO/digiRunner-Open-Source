@@ -1005,8 +1005,11 @@ public class WebsiteService {
 
 
 	private String buildUrl(String url, String resourceUrl) {
-	    String result = url + resourceUrl;
-	    return result;
+	    // [EN]Trim trailing slash from base URL and leading slash from resource URL to avoid double slashes
+	    // [ZH]去掉 base URL 結尾的斜線與 resourceUrl 開頭的斜線，避免組出 //
+	    String base = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+	    String resource = resourceUrl.startsWith("/") ? resourceUrl : "/" + resourceUrl;
+	    return base + resource;
 	}
 
 

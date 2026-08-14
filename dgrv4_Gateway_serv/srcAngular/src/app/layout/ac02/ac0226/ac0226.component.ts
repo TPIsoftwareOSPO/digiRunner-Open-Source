@@ -14,7 +14,7 @@ import {
   DPB0169Req,
   DPB0169RespItem,
 } from 'src/app/models/api/ServerService/dpb0169.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import {
   DPB0170Req,
   DPB0170Resp,

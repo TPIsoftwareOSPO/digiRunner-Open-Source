@@ -103,6 +103,16 @@ public class AA0428Service {
 		} else {
 			paging = "N";
 		}
+		
+		String include = nvl(req.getInclude());
+		if (StringUtils.hasLength(include)) {
+			if (!"Y".equals(include) && !"N".equals(include)) {
+				throw TsmpDpAaRtnCode._1290.throwing(); // 1290:參數錯誤
+			}
+		} else {
+			include = "Y";
+		}
+		
 		List<String> labeList = req.getLabelList();
 		if (CollectionUtils.isEmpty(labeList)) {
 			throw TsmpDpAaRtnCode._2009.throwing("1");
@@ -130,6 +140,8 @@ public class AA0428Service {
 		cri.setSortColumn(nvl(reqKey));
 		cri.setSort(nvl(reqValue));
 		cri.setLabeList(labeList);
+		cri.setInclude(include);
+		cri.setApiSrc(req.getApiSrc());
 		return cri;
 
 	}

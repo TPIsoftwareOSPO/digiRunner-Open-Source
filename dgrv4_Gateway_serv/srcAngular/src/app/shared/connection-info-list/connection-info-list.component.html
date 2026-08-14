@@ -13,6 +13,7 @@
           <th>Connection Name</th>
           <th>JDBC URL</th>
           <th>Max Pool Size</th>
+          <th>Minimum Idle</th>
           <th>Last Update User</th>
           <th>Last Update Time</th>
       </tr>
@@ -28,13 +29,14 @@
         <td>{{rowData.connectionName}}</td>
         <td>{{rowData.jdbcUrl}}</td>
         <td>{{rowData.maxPoolSize}}</td>
+        <td>{{rowData.minimumIdle}}</td>
         <td>{{rowData.updateUser}}</td>
         <td>{{formateDate(rowData.updateDateTime)}}</td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage" let-columns>
       <tr>
-        <td [attr.colspan]="6">
+        <td [attr.colspan]="7">
           {{ "no_rec" | translate }}
         </td>
       </tr>

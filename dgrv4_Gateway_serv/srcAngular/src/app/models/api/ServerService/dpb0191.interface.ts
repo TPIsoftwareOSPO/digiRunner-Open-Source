@@ -18,6 +18,7 @@ export interface DPB0191Resp {
   userName: string;
   mima: string;
   maxPoolSize: string;
+  minimumIdle: number;
   connectionTimeout: string;
   idleTimeout: string;
   maxLifetime: string;

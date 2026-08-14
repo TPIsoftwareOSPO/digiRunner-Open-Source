@@ -54,10 +54,6 @@ public class DPB9921Service {
 			// 資料
 			this.writeData(sheet);
 
-			sheet.setColumnWidth(0, 12800); // 50*256
-			sheet.setColumnWidth(1, 20480); // 80*256
-			sheet.setColumnWidth(2, 25600); // 100*256
-
 			// 寫入串流
 			workbook.write(outputStream);
 			workbook.close();
@@ -71,7 +67,7 @@ public class DPB9921Service {
 		}
 	}
 
-	private void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
+	public void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
 
 		// 粗體字
 		XSSFCellStyle cellStyle = wb.createCellStyle();
@@ -95,7 +91,7 @@ public class DPB9921Service {
 		cell.setCellStyle(cellStyle);
 	}
 
-	private void writeData(XSSFSheet sheet) {
+	public void writeData(XSSFSheet sheet) {
 		List<TsmpSetting> list = getTsmpSettingDao().findAllByOrderByIdAsc();
 		if (CollectionUtils.isEmpty(list)) {
 			throw TsmpDpAaRtnCode._1298.throwing();
@@ -114,6 +110,10 @@ public class DPB9921Service {
 			cell.setCellValue(vo.getMemo());
 
 		}
+		
+		sheet.setColumnWidth(0, 12800); // 50*256
+		sheet.setColumnWidth(1, 20480); // 80*256
+		sheet.setColumnWidth(2, 25600); // 100*256
 	}
 
 	protected TsmpSettingDao getTsmpSettingDao() {

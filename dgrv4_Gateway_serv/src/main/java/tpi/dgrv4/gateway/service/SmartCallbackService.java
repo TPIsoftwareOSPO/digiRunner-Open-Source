@@ -36,6 +36,9 @@ public class SmartCallbackService {
 
     private static final long AUTH_CODE_TTL_MS = 60_000L;
     private static final int AUTH_CODE_BYTES = 16;
+    // [EN] Reuse a single SecureRandom instance to satisfy SonarQube java:S2119
+ 	// [ZH] 重用同一個 SecureRandom 實例，符合 SonarQube java:S2119 規則
+ 	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final DgrSmartAuthSessionDao sessionDao;
     private final DgrGtwIdpAuthCodeDao idpAuthCodeDao;
@@ -176,9 +179,9 @@ public class SmartCallbackService {
     }
 
     private String generateAuthCode() {
-        SecureRandom random = new SecureRandom();
+        
         byte[] bytes = new byte[AUTH_CODE_BYTES];
-        random.nextBytes(bytes);
+        SECURE_RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 

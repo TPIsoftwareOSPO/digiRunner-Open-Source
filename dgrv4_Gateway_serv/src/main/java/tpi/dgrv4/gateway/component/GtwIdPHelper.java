@@ -112,15 +112,19 @@ public class GtwIdPHelper {
 
 		// 前端GTW IdP errMsg顯示訊息的URL
 		String msgUrl = getTsmpSettingService().getVal_GTW_IDP_MSG_URL();
+		// 前端GTW IdP URL是否使用絶對路徑, 若 false 則為相對路徑
+		boolean useAbsolutePath = getTsmpSettingService().getVal_GTW_IDP_USE_ABSOLUTE_PATH();
 
 		if (DgrIdPType.LDAP.equals(idPType) || DgrIdPType.API.equals(idPType) || DgrIdPType.JDBC.equals(idPType)) {
-			URL urlObj = new URL(msgUrl);
-			msgUrl = urlObj.getPath();// 使用相對路徑
+			if (!useAbsolutePath) {
+				URL urlObj = new URL(msgUrl);
+				msgUrl = urlObj.getPath();// 使用相對路徑
+			}
 		}
 
 		String msg_en = "";
 		if (StringUtils.hasLength(msg)) {
-			TPILogger.tl.debug("RedirectToShowMsg(error msg): " + msg);
+			TPILogger.tl.debug("Redirect to URL【error msg URL】: " + msg);
 			msg_en = Base64Util.base64URLEncode(msg.getBytes());// 訊息做 Base64Url Encode
 		}
 

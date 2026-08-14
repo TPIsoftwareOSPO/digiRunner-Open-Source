@@ -45,7 +45,7 @@ export class BaseComponent {
                 let _validator  = new Array;
                 if (item.isRequired) {
                     _validator.push(ValidatorFns.isRequiredValidator(item.isRequired.msg));
-                    $(`#${item.field}_label`).addClass('required');
+                    document.getElementById(`${item.field}_label`)?.classList.add('required');
                 }
                 if (item.maxLength) {
                     _validator.push(ValidatorFns.maxLengthValidator(item.maxLength.value, item.maxLength.msg));
@@ -74,7 +74,7 @@ export class BaseComponent {
 
     public resetFormValidator(form: UntypedFormGroup,formReset = true) {
         for (const formControlName in form.controls) {
-            $(`#${formControlName}_label`).removeClass('required');
+            document.getElementById(`${formControlName}_label`)?.classList.remove('required');
             if (formReset) form.controls[formControlName].reset('')
             form.controls[formControlName].clearValidators();
             form.controls[formControlName].updateValueAndValidity();

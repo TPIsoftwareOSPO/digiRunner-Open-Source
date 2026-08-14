@@ -29,8 +29,8 @@
       <div>
         <label class="pt-1" [hidden]="!readonly">Req:{{req}} ,Resp:{{resp}}</label>
       </div>
-      <button type="button" class="btn tpi-primary mx-1" (click)="delete($event)"
-        style="border-radius: 50%;" [hidden]="readonly">
+      <button type="button" class="btn btn-icon tpi-primary mx-1 flex-shrink-0" (click)="delete($event)"
+        [hidden]="readonly">
         <i class="fa fa-minus"></i>
       </button>
     </div>

@@ -1,7 +1,7 @@
 import { ToolService } from './../../../shared/services/tool.service';
 import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { FuncService } from './../../../shared/services/api-func.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -25,7 +25,7 @@ import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import * as FileSaver from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -37,6 +37,8 @@ import { AlertService } from 'src/app/shared/services/alert.service';
     standalone: false
 })
 export class Ac0101Component extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   form: UntypedFormGroup;
   detailForm: UntypedFormGroup;
   dialogTitle: string = '';
@@ -405,7 +407,7 @@ export class Ac0101Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   public get keyword() {

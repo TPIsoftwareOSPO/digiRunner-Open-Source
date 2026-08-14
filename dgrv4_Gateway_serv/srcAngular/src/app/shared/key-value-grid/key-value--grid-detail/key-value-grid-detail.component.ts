@@ -1,7 +1,7 @@
 import { MessageService } from 'primeng/api';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { IKeyValueGrid } from './../key-value-grid.interface';
-import { Component, OnInit, Input, ComponentRef, AfterViewInit, SimpleChange, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, Input, ComponentRef, AfterViewInit, SimpleChange, EventEmitter, Output, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { NgModel, UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import * as ValidatorFns from '../../validator-functions';
 
@@ -14,6 +14,8 @@ import * as ValidatorFns from '../../validator-functions';
     standalone: false
 })
 export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
+  @ViewChild('fileFieldRef') fileFieldRef!: ElementRef<HTMLInputElement>;
+
   changeLog = [];
   keyvalue :IKeyValueGrid |undefined;
   form:UntypedFormGroup;
@@ -113,13 +115,13 @@ export class KeyValueGridDetailComponent implements OnInit,AfterViewInit {
   }
 
   openFileBrowser() {
-    $('#fileField'+this.no).click();
+    this.fileFieldRef.nativeElement.click();
   }
 
   removeFile(){
     this.file.setValue(null);
     this._fileName = '';
-    $('#fileField'+this.no).val('');
+    this.fileFieldRef.nativeElement.value = '';
   }
 
 

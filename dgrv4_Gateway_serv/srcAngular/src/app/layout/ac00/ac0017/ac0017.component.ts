@@ -11,7 +11,7 @@ import { DPB0150Req } from 'src/app/models/api/ServerService/dpb0150.interface';
 import { DPB0151Req } from 'src/app/models/api/ServerService/dpb0151.interface';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DPB0152Req } from 'src/app/models/api/ServerService/dpb0152.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Component({
     selector: 'app-ac0017',

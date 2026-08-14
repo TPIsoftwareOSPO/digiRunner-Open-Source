@@ -7,7 +7,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.service';
 import { ServerService } from 'src/app/shared/services/api-server.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { FileService } from 'src/app/shared/services/api-file.service';
@@ -110,10 +110,6 @@ export class Ac0322Component extends BaseComponent implements OnInit {
         }
         this.ngxService.stop();
       });
-  }
-
-  openFileBrowser() {
-    $('#file').click();
   }
 
   changeFile(event) {

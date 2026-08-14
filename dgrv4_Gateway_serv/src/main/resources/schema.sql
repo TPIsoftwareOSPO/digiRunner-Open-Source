@@ -2509,3 +2509,33 @@ ALTER TABLE dgr_smart_auth_session ADD COLUMN IF NOT EXISTS fhir_user_type VARCH
 
 -- 20260519, tsmp_client.client_name 放寬長度 30→150（對齊正式 DB，支援較長 SMART client 名稱）, Kevin Cheng
 ALTER TABLE tsmp_client ALTER COLUMN client_name VARCHAR(150) NOT NULL;
+
+-- 20260630, v4, SOF Proxy token 認證(inbound)與後端代取(outbound)功能, Kevin Cheng
+-- INBOUND: 入站 token 驗證模式; sof_proxy_auth 取代 sof_proxy_access_token(本版並存, backfill 後沿用)
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_auth                        VARCHAR(200);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_introspection_endpoint   VARCHAR(1000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_well_known               VARCHAR(1000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_introspection_auth       VARCHAR(30);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_introspection_client_id  VARCHAR(255);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_introspection_secret_enc VARCHAR(2000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_allowed_iss              VARCHAR(2000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_in_expected_aud             VARCHAR(1000);
+-- OUTBOUND: 後端代取 token (client_credentials + client_secret)
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_relay                   VARCHAR(1) NOT NULL DEFAULT 'N';
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_auth_method             VARCHAR(30);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_client_id               VARCHAR(255);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_client_secret_enc       VARCHAR(2000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_well_known              VARCHAR(1000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_token_endpoint          VARCHAR(1000);
+ALTER TABLE dgr_smart_on_fhir_proxy ADD COLUMN IF NOT EXISTS sof_proxy_out_scope                   VARCHAR(2000);
+-- backfill: 舊 sof_proxy_access_token(Y/N) 對映新 auth; WHERE IS NULL 確保只補一次(idempotent, 不覆蓋使用者後續設定)
+UPDATE dgr_smart_on_fhir_proxy SET sof_proxy_auth = CASE sof_proxy_access_token WHEN 'Y' THEN '["dgr"]' ELSE '["none"]' END WHERE sof_proxy_auth IS NULL;
+-- dgr 更名 digirunner: 既有(含上行 backfill 產出)的 ["dgr"] 一律轉為 ["digirunner"]; 轉換後無列可匹配, 重跑無效果(idempotent)
+UPDATE dgr_smart_on_fhir_proxy SET sof_proxy_auth = '["digirunner"]' WHERE sof_proxy_auth = '["dgr"]';
+
+-- 20260806, 增加最小空閒連線數, tom
+ALTER TABLE dgr_rdb_connection ADD COLUMN minimum_idle INT NOT NULL DEFAULT 10;
+
+-- 20260811, tsmp_dp_mail_log.ref_code 放寬長度 20→255 並建索引（外部系統對帳用 refCode 較長，原長度會使寄件歷程寫入失敗；本表以 ref_code IN (...) 查詢，無索引在歷程量大時會全表掃描）, Kevin Cheng
+ALTER TABLE tsmp_dp_mail_log ALTER COLUMN ref_code VARCHAR(255) NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_tsmp_dp_mail_log_ref_code ON tsmp_dp_mail_log (ref_code);

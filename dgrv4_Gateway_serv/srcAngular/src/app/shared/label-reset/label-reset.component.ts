@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ToolService } from "../services/tool.service";
 import { DynamicDialogConfig, DynamicDialogRef } from "primeng/dynamicdialog";
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ServerService } from "../services/api-server.service";
 import { ListService } from "../services/api-list.service";
 import { ApiService } from "../services/api-api.service";

@@ -12,9 +12,10 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { TransformMenuNamePipe } from './../../../shared/pipes/transform-menu-name.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { BaseComponent } from './../../base-component';
-import { Component, OnInit } from '@angular/core';
-import * as dayjs from 'dayjs';
-import * as base64 from 'js-base64'
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import dayjs from 'dayjs';
+import * as ValidatorFns from 'src/app/shared/validator-functions';
+
 
 @Component({
     selector: 'app-ac0018',
@@ -25,6 +26,7 @@ import * as base64 from 'js-base64'
 })
 export class Ac0018Component extends BaseComponent implements OnInit {
 
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
 
   currentTitle: string = this.title;
   pageNum: number = 1;
@@ -59,7 +61,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
       ldapDn: new UntypedFormControl(''),
       ldapTimeout: new UntypedFormControl(0),
       ldapStatus: new UntypedFormControl(),
-      approvalResultMail: new UntypedFormControl(''),
+      approvalResultMail: new UntypedFormControl('', ValidatorFns.multipleMailValidator()),
       iconFile: new UntypedFormControl(''),
       pageTitle: new UntypedFormControl(''),
     });
@@ -103,6 +105,8 @@ export class Ac0018Component extends BaseComponent implements OnInit {
         this.clearFile();
         this.serverService.createIdPInfo_ldap_before().subscribe(res => {
           this.addFormValidator(this.form, res.RespBody.constraints);
+          this.approvalResultMail?.addValidators(ValidatorFns.multipleMailValidator());
+          this.approvalResultMail?.updateValueAndValidity();
 
           this.currentTitle = `${this.title} > ${dict['button.create']}`;
           this.pageNum = 2;
@@ -114,6 +118,8 @@ export class Ac0018Component extends BaseComponent implements OnInit {
         this.currentRowData = rowData;
         this.serverService.updateIdPInfo_ldap_before().subscribe(res => {
           this.addFormValidator(this.form, res.RespBody.constraints);
+          this.approvalResultMail?.addValidators(ValidatorFns.multipleMailValidator());
+          this.approvalResultMail?.updateValueAndValidity();
 
           this.currentTitle = `${this.title} > ${dict['button.update']}`;
           this.pageNum = 2;
@@ -164,7 +170,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   async fileChange(files: FileList) {
@@ -195,7 +201,7 @@ export class Ac0018Component extends BaseComponent implements OnInit {
 
   public clearFile() {
     this._fileSrc = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   update() {

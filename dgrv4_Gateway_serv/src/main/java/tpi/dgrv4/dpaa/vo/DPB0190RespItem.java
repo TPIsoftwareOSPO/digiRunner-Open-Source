@@ -8,6 +8,7 @@ public class DPB0190RespItem {
 	private Integer maxPoolSize;
 	private Date updateDateTime;
 	private String updateUser;
+	private Integer minimumIdle;
 
 	public String getConnectionName() {
 		return connectionName;
@@ -48,4 +49,13 @@ public class DPB0190RespItem {
 	public void setUpdateUser(String updateUser) {
 		this.updateUser = updateUser;
 	}
+
+	public Integer getMinimumIdle() {
+		return minimumIdle;
+	}
+
+	public void setMinimumIdle(Integer minimumIdle) {
+		this.minimumIdle = minimumIdle;
+	}
+	
 }

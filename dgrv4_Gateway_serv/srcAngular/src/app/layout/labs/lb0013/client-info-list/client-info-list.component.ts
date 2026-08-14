@@ -57,10 +57,8 @@ export class ClientInfoListComponent implements OnInit {
       if (this.toolService.checkDpSuccess(res.ResHeader)) {
         this.queryStatusOption =
           res.RespBody.subItems?.map((row: any) => {
-            console.log(row);
             return { label: row.subitemName, value: row.subitemNo };
           }) ?? [];
-        console.log(this.queryStatusOption);
       }
     });
 

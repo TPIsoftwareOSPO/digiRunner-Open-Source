@@ -8,7 +8,7 @@ import { ToolService } from 'src/app/shared/services/tool.service';
 import { ListService } from 'src/app/shared/services/api-list.service';
 import { ReportService } from 'src/app/shared/services/api-report.service';
 import { DPB0047Req } from 'src/app/models/api/ListService/dpb0047.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 // import * as chartjs from 'chart.js';
 import { Chart } from 'chart.js/auto';
 import { AA1205Req } from 'src/app/models/api/ReportService/aa1205.interface';

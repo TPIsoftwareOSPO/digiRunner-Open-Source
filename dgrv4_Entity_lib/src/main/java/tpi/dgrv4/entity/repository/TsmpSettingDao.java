@@ -158,6 +158,7 @@ public interface TsmpSettingDao extends JpaRepository<TsmpSetting, String> {
 		public static final String GTW_IDP_MSG_URL = "GTW_IDP_MSG_URL";
 		public static final String GTW_IDP_LOGIN_URL = "GTW_IDP_LOGIN_URL";
 		public static final String GTW_IDP_CONSENT_URL = "GTW_IDP_CONSENT_URL";
+		public static final String GTW_IDP_USE_ABSOLUTE_PATH = "GTW_IDP_USE_ABSOLUTE_PATH";
 
 		public static final String DGR_PUBLIC_DOMAIN = "DGR_PUBLIC_DOMAIN";
 		public static final String DGR_PUBLIC_PORT = "DGR_PUBLIC_PORT";

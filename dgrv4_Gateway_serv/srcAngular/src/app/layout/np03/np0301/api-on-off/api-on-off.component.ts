@@ -6,7 +6,7 @@ import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { DPB0075RespItem, DPB0075Req } from 'src/app/models/api/LovService/dpb0075.interface';
 import { DPB0065Req, DPB0065ApiBindingData, newApiOnOff, newApiOnOffAddNo, DPB0065ApiOnOff } from 'src/app/models/api/RequisitionService/dpb0065.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { LovService } from 'src/app/shared/services/api-lov.service';
 import { MessageService } from 'primeng/api';

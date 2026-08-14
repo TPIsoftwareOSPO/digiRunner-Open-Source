@@ -42,8 +42,12 @@ export class KeyValueComponent implements OnInit, ControlValueAccessor {
 
   writeValue(hosts: Array<{ key: string, value: any }>): void {
     this.value = hosts;
-    if (this.value)
+    if (this.value) {
+      // 程式化寫入資料時先清空既有列再逐列帶入，避免殘留空白列或重複疊列
+      this.keyValueRef.clear();
+      this.keyvalues = [];
       this.value.forEach(val => this.add(val));
+    }
     else {
       if (this.value == null) {
         this.keyValueRef.clear();
@@ -65,24 +69,16 @@ export class KeyValueComponent implements OnInit, ControlValueAccessor {
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
     if (this.content) {
-      if (isDisabled) {
-        // $(this.content.nativeElement).find('input , button').prop('disabled', true).off('click');
-        $(this.content.nativeElement).find('input , button').prop('disabled', true);
-      } else {
-        // $(this.content.nativeElement).find('input , button').prop('disabled', false).on('click');
-        $(this.content.nativeElement).find('input , button').prop('disabled', false);
-      }
+      this.content.nativeElement.querySelectorAll('input, button').forEach(
+        (el: HTMLInputElement | HTMLButtonElement) => el.disabled = isDisabled
+      );
     }
   }
 
   ngAfterViewInit(): void {
-    if (this.disabled) {
-      // $(this.content.nativeElement).find('input , button').prop('disabled', true).off('click');
-      $(this.content.nativeElement).find('input , button').prop('disabled', true);
-    } else {
-      // $(this.content.nativeElement).find('input , button').prop('disabled', false).on('click');
-      $(this.content.nativeElement).find('input , button').prop('disabled', false);
-    }
+    this.content.nativeElement.querySelectorAll('input, button').forEach(
+      (el: HTMLInputElement | HTMLButtonElement) => el.disabled = this.disabled
+    );
   }
 
 
@@ -91,7 +87,8 @@ export class KeyValueComponent implements OnInit, ControlValueAccessor {
 
   add(keyvalue?: { key: string, value: any  }) {
     // this.hostInputRef.clear();
-    if (keyvalue && this.keyvalues.length) {
+    // 有帶資料時一律以該資料建列（原本清單為空時會誤存成空列，導致程式化寫值遺失）
+    if (keyvalue) {
       this.keyvalues.push({ key: keyvalue.key, value: keyvalue.value, no: this.nums, selected:true });
     }
     else {

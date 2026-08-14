@@ -1,0 +1,12 @@
+{
+  "name": "dgr-primeng-mcp-tool",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Project-local PrimeNG MCP server runtime",
+  "dependencies": {
+    "@primeng/mcp": "21.1.9"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": "1.25.2"
+  }
+}

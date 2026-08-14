@@ -3,7 +3,7 @@ import { DPB9909Item } from './../../../../models/api/ServerService/dpb9909.inte
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import * as ValidatorFns from '../../../../shared/validator-functions';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 
 

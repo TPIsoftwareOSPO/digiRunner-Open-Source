@@ -165,6 +165,7 @@
             <small class="form-text">{{approvalResultMail?.errors.minlength | translate }}</small>
             <small class="form-text">{{approvalResultMail?.errors.pattern | translate}}</small> -->
             <small class="form-text">{{approvalResultMail?.errors.isRequired | translate}}</small>
+            <small *ngIf="approvalResultMail?.errors.mailFormat" class="form-text">{{approvalResultMail?.errors.mailFormat | translate}}</small>
           </div>
         </div>
       </div>
@@ -193,7 +194,7 @@
                 *ngIf="this._fileSrc">{{'remove'|translate}}</button>
             </div>
             <div class="col-sm-6" style="padding-right: unset;">
-              <input type="file" id="fileName" (change)="fileChange($event.target.files)" formControlName="iconFile"
+              <input type="file" id="fileName" #fileNameRef (change)="fileChange($event.target.files)" formControlName="iconFile"
                 style="display: none;">
             </div>
 

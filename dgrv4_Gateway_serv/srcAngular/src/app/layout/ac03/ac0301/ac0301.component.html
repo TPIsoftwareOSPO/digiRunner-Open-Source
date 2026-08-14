@@ -1,15 +1,15 @@
 <app-container [title]="currentTitle" [isDefault]="pageNum==1" (headerReturn)="headerReturn()">
   <div [hidden]="pageNum != 1">
-    <div class="form-group">
+    <form [formGroup]="queryForm">
+      <div class="form-group">
+        <p-tabs value="0" (valueChange)="tabChange({index:+$event})" class="tab">
+          <p-tablist>
+            <p-tab value="0">{{'keyword_search'|translate}}</p-tab>
+            <p-tab value="1">{{'button.searchByTags'|translate}}</p-tab>
+          </p-tablist>
+          <p-tabpanels>
+            <p-tabpanel value="0">
 
-      <p-tabs value="0" (valueChange)="tabChange({index:+$event})" class="tab">
-        <p-tablist>
-          <p-tab value="0">{{'keyword_search'|translate}}</p-tab>
-          <p-tab value="1">{{'button.searchByTags'|translate}}</p-tab>
-        </p-tablist>
-        <p-tabpanels>
-          <p-tabpanel value="0">
-            <form [formGroup]="queryForm" (ngSubmit)="submitForm()">
               <div class="form-group row">
                 <div class="col-8">
                   <label for="keyword">{{ "keyword_search" | translate }}</label>
@@ -79,75 +79,76 @@
                 justify-content: center;
                 width: 100%;
               ">
-                    <button type="submit" class="btn tpi-btn tpi-primary text-center me-2">
+                    <button type="submit" class="btn tpi-btn tpi-primary text-center me-2"  (click)="submitForm()">
                       {{ "button.search" | translate }}
                     </button>
                   </div>
                 </div>
               </div>
-            </form>
-          </p-tabpanel>
-          <p-tabpanel value="1">
-
-            <div class="form-group row">
-              <div class="col-12">
-                <label class="control-label">{{'labelList'|translate}}</label>
-                <div style="display:block">
-                  <p-multiSelect #labelFilter [options]="lblList" [(ngModel)]="selLabelList" appendTo="body"
-                    [emptyFilterMessage]="'no_data_result'|translate" placeholder="{{'plz_chs' | translate}}"
-                    showClear="true" display="chip" [emptyMessage]="'no_data_result'|translate"
-                    [style]="{'width':'100%'}">
-                  </p-multiSelect>
+            </p-tabpanel>
+            <p-tabpanel value="1">
+              <div class="form-group row">
+                <div class="col-4 col-md-4 col-xl-4">
+                  <label class="control-label">{{ "api_src" | translate }}</label>
+                  <div formArrayName="labelApiSrc">
+                    <div class="p-form-check-line">
+                      <div class="p-form-check"
+                        *ngFor="let item of getControls(queryForm, 'labelApiSrc'); let j = index" [formGroupName]="j">
+                        <p-checkbox formControlName="selected" [value]="item.get('value').value"
+                          inputId="labelApiSrc_{{j}}" (onChange)="labelApiSrcChange()"></p-checkbox>
+                        <label class="ms-2 mb-0" for="labelApiSrc_{{j}}">{{item.get("name").value}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-8 col-md-8 col-xl-8">
+                  <label class="control-label">{{'labelList'|translate}}</label>
+                  <div class="field-flex-start">
+                    <div class="p-form-check-line flex-shrink-0">
+                      <div class="p-form-check">
+                        <p-radioButton name="include" formControlName="include" value="Y"
+                          inputId="includeY"></p-radioButton>
+                        <label for="includeY" class="ms-2 mb-0">{{"button.include"|translate}}</label>
+                      </div>
+                      <div class="p-form-check">
+                        <p-radioButton name="include" formControlName="include" value="N"
+                          inputId="includeN"></p-radioButton>
+                        <label for="includeN" class="ms-2 mb-0">{{"button.exclude"|translate}}</label>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1">
+                      <p-multiSelect #labelFilter [options]="lblList" formControlName="labelList" appendTo="body"
+                        [emptyFilterMessage]="'no_data_result'|translate" placeholder="{{'plz_chs' | translate}}"
+                        showClear="true" display="chip" [emptyMessage]="'no_data_result'|translate"
+                        [style]="{'width':'100%'}">
+                      </p-multiSelect>
+                    </div>
+                  </div>
+                  <div *ngIf="include?.invalid && (include?.dirty || include?.touched)" class="text-danger">
+                    <small class="form-text">{{include?.errors.pattern | translate}}</small>
+                    <small class="form-text">{{include?.errors.isRequired | translate}}</small>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group row">
-              <div style="
+              <hr />
+              <div class="form-group row">
+                <div style="
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 width: 100%;
               ">
-                <button type="button" class="btn tpi-btn tpi-primary text-center " (click)="queryLabelList()">
-                  {{ "button.search" | translate }}
-                </button>
+                  <button type="button" class="btn tpi-btn tpi-primary text-center " (click)="queryLabelList()">
+                    {{ "button.search" | translate }}
+                  </button>
+                </div>
               </div>
-            </div>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
 
-
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
-
-    </div>
-
-    <!-- <p-popover #jwtSettingPanel [style]="{
-        width: '450px',
-        marginTop: '-70px',
-        marginLeft: '-235px',
-        backgroundColor: '#F49E00',
-        'border-radius': '.25rem'
-      }" (onShow)="showJwtSetting()">
-      <form [formGroup]="queryForm">
-        <div class="row">
-          <div class="col-4">
-            <label class="control-label">{{ "body_encode" | translate }}</label>
-            <p-inputSwitch formControlName="jwtSetting" (onChange)="jwtSettingOnChange($event)">
-            </p-inputSwitch>
-          </div>
-          <div class="col-8">
-            <label class="control-label">Request</label>：
-            <p-select class="jwt-req-dropdown" [options]="updateJwtSettingFlags" formControlName="jweFlag"
-              (onChange)="jweFlagOnChange($event)" [style]="{ width: '100%', 'background-color': '#ffa5009e' }">
-            </p-select>
-            <label class="control-label">Response</label>：
-            <p-select class="jwt-resp-dropdown" [options]="updateJwtSettingFlags" formControlName="jweFlagResp"
-              (onChange)="jweFlagRespOnChange($event)" [style]="{ width: '100%' }">
-            </p-select>
-          </div>
-        </div>
-      </form>
-    </p-popover> -->
+      </div>
+    </form>
     <p-table [columns]="cols" [value]="dataList" [(selection)]="selected" stripedRows showGridlines>
       <ng-template pTemplate="caption">
         <div class="field-flex-space-between">
@@ -523,8 +524,9 @@
   <!-- API詳細資料 -->
   <div *ngIf="pageNum==2">
     <app-api-detail [apiDetail]="apiDetail" [srcUrlPool]="srcUrlPool" [ipSrcUrl]="ipSrcUrl"
-      [apiGroupList]="apiGroupList" [detailCols]="detailCols"
-      (getApiGroupListEvt)="getApiGroupListEvt($event)"></app-api-detail>
+      [apiGroupList]="apiGroupList" [apiGroupListRowcount]="apiGroupListRowcount" [detailCols]="detailCols"
+      (getApiGroupListEvt)="getApiGroupListEvt($event)"
+      (moreApiGroupListEvt)="moreApiGroupList()"></app-api-detail>
     <div class="form-group row">
       <div class="col-12">
         <button type="button" class="btn tpi-btn tpi-primary float-start" (click)="changePage('query')">
@@ -542,12 +544,14 @@
           <!-- <p-inputSwitch class="form-control border-line" formControlName="apiStatus"></p-inputSwitch> -->
           <div class="p-form-check-line form-group">
             <div class="p-form-check">
-              <p-radioButton name="apiStatus" formControlName="apiStatus" [value]="true" inputId="apiStatus_true"></p-radioButton>
+              <p-radioButton name="apiStatus" formControlName="apiStatus" [value]="true"
+                inputId="apiStatus_true"></p-radioButton>
               <label for="apiStatus_true" class="ms-2 mb-0"
                 style="white-space: nowrap;">{{'button.enable'|translate}}</label>
             </div>
             <div class="p-form-check">
-              <p-radioButton name="apiStatus" formControlName="apiStatus" [value]="false" inputId="apiStatus_false"></p-radioButton>
+              <p-radioButton name="apiStatus" formControlName="apiStatus" [value]="false"
+                inputId="apiStatus_false"></p-radioButton>
               <label for="apiStatus_false" class="ms-2 mb-0"
                 style="white-space: nowrap;">{{'button.disable'|translate}}</label>
             </div>
@@ -647,12 +651,14 @@
               <!-- <label class="control-label" style="white-space: nowrap;">{{ "body_encode" | translate }}</label> -->
               <ng-container>
                 <div class="p-form-check">
-                  <p-radioButton name="jwtSetting" formControlName="jwtSetting" [value]="true" inputId="jwtSettingY"></p-radioButton>
+                  <p-radioButton name="jwtSetting" formControlName="jwtSetting" [value]="true"
+                    inputId="jwtSettingY"></p-radioButton>
                   <label for="jwtSettingY" class="ms-2 mb-0"
                     style="white-space: nowrap;">{{'button.enable'|translate}}</label>
                 </div>
                 <div class="p-form-check">
-                  <p-radioButton name="jwtSetting" formControlName="jwtSetting" [value]="false" inputId="jwtSettingN"></p-radioButton>
+                  <p-radioButton name="jwtSetting" formControlName="jwtSetting" [value]="false"
+                    inputId="jwtSettingN"></p-radioButton>
                   <label for="jwtSettingN" class="ms-2 mb-0"
                     style="white-space: nowrap;">{{'button.disable'|translate}}</label>
                 </div>
@@ -824,14 +830,16 @@
 
           <div class="col-12 form-group ">
             <div class="p-form-check mb-2">
-              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="0" inputId="headerMaskPolicy0"></p-radioButton>
+              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="0"
+                inputId="headerMaskPolicy0"></p-radioButton>
               <label for="headerMaskPolicy0" class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
               <!-- <input type="radio" id="headerMaskPolicy0" class="form-check-input" value="0"
                 formControlName="headerMaskPolicy" />
               <label class="form-check-label" for="headerMaskPolicy0">Policy 0: {{'mask.none'|translate}}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="1" inputId="headerMaskPolicy1"></p-radioButton>
+              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="1"
+                inputId="headerMaskPolicy1"></p-radioButton>
               <label for="headerMaskPolicy1" class="ms-2 mb-0">Policy 1: {{
                 'mask.before_after'|translate:{num:(headerMaskPolicyNum.value?headerMaskPolicyNum.value:'1'),
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') }
@@ -844,7 +852,8 @@
                 }}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="2" inputId="headerMaskPolicy2"></p-radioButton>
+              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="2"
+                inputId="headerMaskPolicy2"></p-radioButton>
               <label for="headerMaskPolicy2" class="ms-2 mb-0">Policy 2: {{
                 'mask.before'|translate:{num:(headerMaskPolicyNum.value?headerMaskPolicyNum.value:'1'),
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') } }}</label>
@@ -855,7 +864,8 @@
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') } }}</label> -->
             </div>
             <div class="p-form-check">
-              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="3" inputId="headerMaskPolicy3"></p-radioButton>
+              <p-radioButton name="headerMaskPolicy" formControlName="headerMaskPolicy" value="3"
+                inputId="headerMaskPolicy3"></p-radioButton>
               <label for="headerMaskPolicy3" class="ms-2 mb-0">Policy 3: {{
                 'mask.after'|translate:{num:(headerMaskPolicyNum.value?headerMaskPolicyNum.value:'1'),
                 mask:(headerMaskPolicySymbol.value?headerMaskPolicySymbol.value:'*') } }}</label>
@@ -892,14 +902,16 @@
           <label id="headerMask_label" class="control-label">API Log Body Mask Policy</label>
           <div class="col-12 form-group ">
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="0" inputId="bodyMaskPolicy0"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="0"
+                inputId="bodyMaskPolicy0"></p-radioButton>
               <label for="bodyMaskPolicy0" class="ms-2 mb-0">Policy 0: {{'mask.none'|translate}}</label>
               <!-- <input type="radio" id="bodyMaskPolicy0" class="form-check-input" value="0"
                 formControlName="bodyMaskPolicy" />
               <label class="form-check-label" for="bodyMaskPolicy0">Policy 0: {{'mask.none'|translate}}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="1" inputId="bodyMaskPolicy1"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="1"
+                inputId="bodyMaskPolicy1"></p-radioButton>
               <label for="bodyMaskPolicy1" class="ms-2 mb-0">Policy 1: {{
                 'mask.body_before_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
@@ -910,7 +922,8 @@
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="2" inputId="bodyMaskPolicy2"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="2"
+                inputId="bodyMaskPolicy2"></p-radioButton>
               <label for="bodyMaskPolicy2" class="ms-2 mb-0">Policy 2: {{
                 'mask.body_before'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
@@ -921,7 +934,8 @@
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="3" inputId="bodyMaskPolicy3"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="3"
+                inputId="bodyMaskPolicy3"></p-radioButton>
               <label for="bodyMaskPolicy3" class="ms-2 mb-0">Policy 3: {{
                 'mask.body_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
@@ -932,7 +946,8 @@
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="4" inputId="bodyMaskPolicy4"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="4"
+                inputId="bodyMaskPolicy4"></p-radioButton>
               <label for="bodyMaskPolicy4" class="ms-2 mb-0">Policy 4: {{
                 'mask.body_after_regex'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
@@ -943,19 +958,22 @@
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="5" inputId="bodyMaskPolicy5"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="5"
+                inputId="bodyMaskPolicy5"></p-radioButton>
               <label for="bodyMaskPolicy5" class="ms-2 mb-0">Policy 5: {{
                 'mask.body_remain_before_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="6" inputId="bodyMaskPolicy6"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="6"
+                inputId="bodyMaskPolicy6"></p-radioButton>
               <label for="bodyMaskPolicy6" class="ms-2 mb-0">Policy 6: {{
                 'mask.body_remain_before'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="7" inputId="bodyMaskPolicy7"></p-radioButton>
+              <p-radioButton name="bodyMaskPolicy" formControlName="bodyMaskPolicy" value="7"
+                inputId="bodyMaskPolicy7"></p-radioButton>
               <label for="bodyMaskPolicy7" class="ms-2 mb-0">Policy 7: {{
                 'mask.body_remain_after'|translate:{num:bodyMaskPolicyNum.value?bodyMaskPolicyNum.value:'1',
                 mask:bodyMaskPolicySymbol.value?bodyMaskPolicySymbol.value:'*' } }}</label>
@@ -1017,14 +1035,16 @@
           <label class="control-label required">{{ 'fail_handle_policy.label'| translate}}</label>
           <div class="col-12 form-group ">
             <div class="p-form-check mb-2">
-              <p-radioButton name="failHandlePolicy" formControlName="failHandlePolicy" value="0" inputId="failHandlePolicy0"></p-radioButton>
+              <p-radioButton name="failHandlePolicy" formControlName="failHandlePolicy" value="0"
+                inputId="failHandlePolicy0"></p-radioButton>
               <label for="failHandlePolicy0" class="ms-2 mb-0">Policy 0:
                 {{'fail_handle_policy.policy_0'|translate}}</label>
               <!-- <input id="failHandlePolicy0" type="radio" class="form-check-input" value="0" formControlName="failHandlePolicy"/>
               <label for="failHandlePolicy0" class="form-check-label">Policy 0: {{'fail_handle_policy.policy_0'|translate}}</label> -->
             </div>
             <div class="p-form-check mb-2">
-              <p-radioButton name="failHandlePolicy" formControlName="failHandlePolicy" value="1" inputId="failHandlePolicy1"></p-radioButton>
+              <p-radioButton name="failHandlePolicy" formControlName="failHandlePolicy" value="1"
+                inputId="failHandlePolicy1"></p-radioButton>
               <label for="failHandlePolicy1" class="ms-2 mb-0">Policy 1:
                 {{'fail_handle_policy.policy_1'|translate}}</label>
             </div>
@@ -1182,7 +1202,7 @@
       <div class="form-group row">
         <div class="col-6">
           <div class="ui-inputgroup">
-            <input type="file" id="file" accept=".json" (change)="changeFile($event)" formControlName="file"
+            <input type="file" id="file" #fileRef accept=".json" (change)="changeFile($event)" formControlName="file"
               style="display: none;">
             <input type="text" class="form-control" formControlName="fileName"
               placeholder="{{'chs_json_file' | translate}}">
@@ -1389,8 +1409,8 @@
   styleClass="cHeader cContent cIcon">
   <ng-template #footer>
     <div class="col-12 d-flex gap-2 mt-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
-        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary" label="{{'button.confirm' | translate}}"
+        (click)="cd.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
         label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
     </div>
@@ -1401,8 +1421,8 @@
   styleClass="cHeader cContent cIcon">
   <ng-template #footer>
     <div class="col-12 d-flex gap-2 mt-2 justify-content-center">
-      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
-        label="{{'button.confirm' | translate}}" (click)="del.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary" label="{{'button.confirm' | translate}}"
+        (click)="del.onAccept()"></button>
       <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
         label="{{'button.cancel' | translate}}" (click)="del.onReject()"></button>
     </div>

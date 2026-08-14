@@ -81,6 +81,7 @@ public class GtwIdPWellKnownService {
 		String userinfoEndpoint = OIDCWellKnownHelper.getUserinfoEndpoint(schemeAndDomainAndPort);
 		String jwksUri = OIDCWellKnownHelper.getJwksUri(schemeAndDomainAndPort);
 		String callbackEndpoint = OIDCWellKnownHelper.getCallbackEndpoint(schemeAndDomainAndPort, idPType);
+		String introspectionEndpoint = OIDCWellKnownHelper.getIntrospectionEndpoint(schemeAndDomainAndPort, pathVer);
 		
 		// 支援哪些 Scope (scopes_supported)
 		List<String> scopesSupportedList = GtwIdPHelper.getScopesSupportedList();
@@ -103,6 +104,7 @@ public class GtwIdPWellKnownService {
 		}
 
 		gtwIdPWellKnownResp.setCodeChallengeMethodsSupported(codeChallengeMethodsSupportedList);
+		gtwIdPWellKnownResp.setIntrospection(introspectionEndpoint);
 		
 		String respJsonStr = getObjectMapper().writeValueAsString(gtwIdPWellKnownResp);
 		respJsonStr = JWKcodec.toPrettyJson(respJsonStr);

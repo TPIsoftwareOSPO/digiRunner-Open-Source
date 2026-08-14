@@ -159,12 +159,17 @@ public class GtwCusIdPCallbackService extends CusIdPService {
 	private String getDgrUserConsentUiUrl(String idPType, String responseType, String dgrClientId,
 			String openIdScopeStr, String dgrClientRedirectUri, String state, String reqUserName) throws Exception {
 
+ 		// 前端GTW IdP URL是否使用絶對路徑, 若 false 則為相對路徑
+		boolean useAbsolutePath = getTsmpSettingService().getVal_GTW_IDP_USE_ABSOLUTE_PATH();
+		
 		String dgrConsentUiUrl = getTsmpSettingService().getVal_GTW_IDP_CONSENT_URL();
 
 		dgrConsentUiUrl = dgrConsentUiUrl.replace("{idPType}", idPType);
-
-		URL urlObj = new URL(dgrConsentUiUrl);
-		dgrConsentUiUrl = urlObj.getPath();// 使用相對路徑
+		
+		if (!useAbsolutePath) {
+			URL urlObj = new URL(dgrConsentUiUrl);
+			dgrConsentUiUrl = urlObj.getPath();// 使用相對路徑
+		}
 
 		return String.format(
 				"%s" + "?response_type=%s" + "&client_id=%s" + "&scope=%s" + "&redirect_uri=%s" + "&state=%s"

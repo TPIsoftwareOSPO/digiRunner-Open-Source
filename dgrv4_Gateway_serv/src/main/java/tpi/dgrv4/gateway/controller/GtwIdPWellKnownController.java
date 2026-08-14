@@ -62,4 +62,19 @@ public class GtwIdPWellKnownController {
 			throw new TsmpDpAaException(e, null);
 		}
 	}
+	
+	
+	// v2 smart-configuration
+	@GetMapping(value = "/dgrv4/ssotoken/v2/{idPType}/.well-known/smart-configuration", 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> getGtwIdPWellKnownV2ForSmart(@RequestHeader HttpHeaders httpHeaders, 
+			HttpServletRequest httpReq,
+			HttpServletResponse httpResp, 
+			@PathVariable("idPType") String idPType) {
+		try {
+			return service.getGtwIdPWellKnown(httpHeaders, httpReq, httpResp, idPType, DgrTokenVersion.PATH_V2);
+		} catch (Exception e) {
+			throw new TsmpDpAaException(e, null);
+		}
+	}
 }

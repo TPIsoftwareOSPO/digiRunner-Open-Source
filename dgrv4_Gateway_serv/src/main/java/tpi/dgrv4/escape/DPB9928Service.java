@@ -77,14 +77,37 @@ public class DPB9928Service {
 	}
 	
 	public void importDataFunc(TsmpAuthorization tsmpAuthorization, InputStream inputStream, String encodeFuncType, String locale) throws Exception {
+		String funcType = getFuncTypeByBcryptParamHelper(encodeFuncType, locale);
+		importDataFunc(tsmpAuthorization, inputStream, funcType);
+	}
+	
+	public void importDataFunc(TsmpAuthorization tsmpAuthorization, InputStream inputStream, String funcType) throws Exception {
 		try (Workbook workbook = new XSSFWorkbook(inputStream);){
 			 if (workbook.getNumberOfSheets() != 2) {
-				 throw TsmpDpAaRtnCode._1291.throwing();
+				 if(!"0".equals(funcType) && !"1".equals(funcType)) {
+					 throw TsmpDpAaRtnCode._1291.throwing();
+				 }
+				 
+				 if("0".equals(funcType)) {
+					 if(workbook.getSheet("func") == null || workbook.getSheet("func_reportUrl") == null) {
+						 throw TsmpDpAaRtnCode._1291.throwing();
+					 }
+				 }else if("1".equals(funcType)) {
+					 if(workbook.getSheet("embeddedFunc") == null || workbook.getSheet("embeddedFunc_reportUrl") == null) {
+						 throw TsmpDpAaRtnCode._1291.throwing();
+					 }
+				 }
+			 }
+			
+			 Sheet sheet = null;
+			 if("0".equals(funcType)) {
+				 sheet = workbook.getSheet("func");
+			 }else if("1".equals(funcType)) {
+				 sheet = workbook.getSheet("embeddedFunc");
+			 }else {
+				 sheet = workbook.getSheetAt(0);
 			 }
 			 
-			 String funcType = getFuncTypeByBcryptParamHelper(encodeFuncType, locale);
-			
-			 Sheet sheet = workbook.getSheetAt(0);
 			 boolean isFirst = true;
 			 DataFormatter formatter = new DataFormatter();
 		     Iterator<Row> rows = sheet.iterator();
@@ -180,13 +203,34 @@ public class DPB9928Service {
 		}
 	}
 	
-	public void importDataReportUrl(TsmpAuthorization tsmpAuthorization, InputStream inputStream) throws Exception {
+	public void importDataReportUrl(TsmpAuthorization tsmpAuthorization, InputStream inputStream) throws Exception{
+		importDataReportUrl(tsmpAuthorization, inputStream, "-1");
+	}
+	
+	public void importDataReportUrl(TsmpAuthorization tsmpAuthorization, InputStream inputStream, String funcType) throws Exception {
 		try (Workbook workbook = new XSSFWorkbook(inputStream);){
 			 if (workbook.getNumberOfSheets() != 2) {
-				 throw TsmpDpAaRtnCode._1291.throwing();
+				 if("0".equals(funcType)) {
+					 if(workbook.getSheet("func") == null || workbook.getSheet("func_reportUrl") == null) {
+						 throw TsmpDpAaRtnCode._1291.throwing();
+					 }
+				 }else if("1".equals(funcType)) {
+					 if(workbook.getSheet("embeddedFunc") == null || workbook.getSheet("embeddedFunc_reportUrl") == null) {
+						 throw TsmpDpAaRtnCode._1291.throwing();
+					 }
+				 }else {
+					 throw TsmpDpAaRtnCode._1291.throwing();
+				 }
 			 }
 	
-			 Sheet sheet = workbook.getSheetAt(1);
+			 Sheet sheet = null;
+			 if("0".equals(funcType)) {
+				 sheet = workbook.getSheet("func_reportUrl");
+			 }else if("1".equals(funcType)) {
+				 sheet = workbook.getSheet("embeddedFunc_reportUrl");
+			 }else {
+				 sheet = workbook.getSheetAt(1);
+			 }
 			 boolean isFirst = true;
 			 DataFormatter formatter = new DataFormatter();
 		     Iterator<Row> rows = sheet.iterator();

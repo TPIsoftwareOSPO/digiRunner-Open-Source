@@ -3,7 +3,7 @@
     <div class="col-12" [formGroup]="form" style="align-items: center;display: flex;">
       <label class="control-label required me-1">Field</label>
       <input type="text" class="form-control" name="field" formControlName="field">
-      <button type="button" class="btn tpi-primary ms-1" (click)="delete($event)" style="border-radius: 50%"
+      <button type="button" class="btn btn-icon tpi-primary ms-1 flex-shrink-0" (click)="delete($event)"
         [hidden]="disabled">
         <i class="fa fa-minus"></i>
       </button>

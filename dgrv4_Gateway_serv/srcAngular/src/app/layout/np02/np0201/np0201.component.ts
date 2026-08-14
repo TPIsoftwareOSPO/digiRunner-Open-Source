@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -10,7 +10,7 @@ import {
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ClientCAService } from 'src/app/shared/services/api-certificate-authority.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0087Req } from 'src/app/models/api/CertificateAuthorityService/dpb0087.interface';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0086Req } from 'src/app/models/api/CertificateAuthorityService/dpb0086.interface';
@@ -29,6 +29,8 @@ import { ApiBaseService } from 'src/app/shared/services/api-base.service';
     standalone: false
 })
 export class Np0201Component extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   form: UntypedFormGroup;
   cols: { field: string; header: string }[] = [];
   certList: Array<DPB0088certItem> = new Array<DPB0088certItem>();
@@ -425,7 +427,7 @@ export class Np0201Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   public get startDate() {

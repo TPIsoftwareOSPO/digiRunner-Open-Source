@@ -26,6 +26,7 @@ public interface TsmpClientCertDao extends JpaRepository<TsmpClientCert, Long> {
 	public List<TsmpClientCert> findByClientIdAndClientCertId(String clientId, Long clientCertId);
 	
 	public long deleteByClientIdAndClientCertId(String clientId, Long clientCertId);
+	public long deleteByClientId(String clientId);
 	
 //	public List<TsmpClientCert> findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, Long expiredAt);// 不使用
 	public List<TsmpClientCert> query_findByClientIdAndExpiredAtAfterOrderByCreateDateTime(String clientId, Long expiredAt);

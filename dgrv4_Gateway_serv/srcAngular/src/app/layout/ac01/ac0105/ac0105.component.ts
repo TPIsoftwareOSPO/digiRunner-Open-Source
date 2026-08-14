@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
@@ -25,7 +25,7 @@ import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { saveAs } from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -39,6 +39,8 @@ import { Subscription } from 'rxjs';
     standalone: false
 })
 export class Ac0105Component extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   funcInfoList: Array<AA0103List> = [];
   form!: UntypedFormGroup;
   detailForm!: UntypedFormGroup;
@@ -539,7 +541,7 @@ export class Ac0105Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   public get keyword() {

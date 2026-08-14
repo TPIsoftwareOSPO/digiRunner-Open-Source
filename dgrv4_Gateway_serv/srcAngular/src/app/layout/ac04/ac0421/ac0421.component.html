@@ -4,7 +4,7 @@
         <div class="upload">
             <img src="assets/images/icon_cloud@2x.png" alt="">
             <label class="percentage">{{value}}</label>
-            <input class="choose-file" accept=".zip" type="file" id="choose-file" (change)="openFileBrowser($event)"
+            <input class="choose-file" accept=".zip" type="file" id="choose-file" #chooseFile (change)="openFileBrowser($event)"
                 required style="display:none">
             <!-- <div class="choose-file" id="choose-file"></div> -->
             <label for="choose-file" class="upload-file net" data-text="choose 1 file">

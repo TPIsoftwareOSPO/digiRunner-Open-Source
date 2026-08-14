@@ -610,15 +610,15 @@ public class GtwIdPLoginService {
 			// 6.轉導到 user 同意畫面
 			String dgrConsentUiUrl = getDgrUserConsentUiUrl(idPType, responseType, dgrClientId, openIdScopeStr,
 					dgrClientRedirectUri, state, reqUserName);
+			
+			// user 同意畫面
+			TPILogger.tl.debug("Redirect to URL【User Consent UI URL】: " + dgrConsentUiUrl);
 
 			//checkmarx, Frameable Login Page, 已通過中風險
 			httpResp.setHeader("X-Frame-Options", "sameorigin");
 			//checkmarx, Missing HSTS Header
 			httpResp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
 	        
-			
-			// user 同意畫面
-			TPILogger.tl.debug("Redirect to URL【User Consent UI URL】: " + dgrConsentUiUrl);
 			httpResp.sendRedirect(dgrConsentUiUrl);
 
 		} catch (Exception e) {
@@ -711,7 +711,7 @@ public class GtwIdPLoginService {
 			// 6.轉導到 user 同意畫面
 			String dgrConsentUiUrl = getDgrUserConsentUiUrl(idPType, responseType, dgrClientId, openIdScopeStr,
 					dgrClientRedirectUri, state, reqUserName);
-
+			
 			// user 同意畫面
 			TPILogger.tl.debug("Redirect to URL【User Consent UI URL】: " + dgrConsentUiUrl);
 			
@@ -720,7 +720,6 @@ public class GtwIdPLoginService {
 			//checkmarx, Missing HSTS Header
 			httpResp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"); 
 	        
-			
 			httpResp.sendRedirect(dgrConsentUiUrl);
 
 		} catch (Exception e) {
@@ -751,15 +750,21 @@ public class GtwIdPLoginService {
 
 		dgrConsentUiUrl = dgrConsentUiUrl.replace("{idPType}", idPType);
 
-		URL urlObj = new URL(dgrConsentUiUrl);
-		dgrConsentUiUrl = urlObj.getPath();// 使用相對路徑
+ 		// 前端GTW IdP URL是否使用絶對路徑, 若 false 則為相對路徑
+		boolean useAbsolutePath = getTsmpSettingService().getVal_GTW_IDP_USE_ABSOLUTE_PATH();
+		
+		if (!useAbsolutePath) {
+			URL urlObj = new URL(dgrConsentUiUrl);
+			dgrConsentUiUrl = urlObj.getPath();// 使用相對路徑
+		}
 		
 		boolean isUnjwe = false;
 		if(dgrConsentUiUrl.indexOf("/v2/") > -1) {
 			isUnjwe = true;
 		}
 		
-		if(StringUtils.hasText(urlPrefix)) {
+		if (StringUtils.hasText(urlPrefix) && !useAbsolutePath) {
+			// 可配合 '使用相對路徑', 以避免 Setting=GTW_IDP_XXX 改太多值
 			dgrConsentUiUrl = urlPrefix + dgrConsentUiUrl;
 		}
 
@@ -785,6 +790,9 @@ public class GtwIdPLoginService {
 					IdPHelper.getUrlEncode(openIdScopeStr), IdPHelper.getUrlEncode(dgrClientRedirectUri),
 					IdPHelper.getUrlEncode(state), IdPHelper.getUrlEncode(reqUserName));
 		}
+
+		// user 同意畫面
+		TPILogger.tl.debug("Redirect to URL【User Consent UI URL】: " + dgrConsentUiUrl);
 		
 		return redirectUrl;
 	}

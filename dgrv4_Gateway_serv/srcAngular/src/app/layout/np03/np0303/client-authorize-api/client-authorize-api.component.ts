@@ -1,10 +1,10 @@
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, Input, ViewChild } from '@angular/core';
 import { FormParams } from 'src/app/models/api/form-params.interface';
 import { UntypedFormBuilder, NgForm, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormOperate } from 'src/app/models/common.enum';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import * as ValidatorFns from 'src/app/shared/validator-functions';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0075Req, DPB0075RespItem } from 'src/app/models/api/LovService/dpb0075.interface';
@@ -33,6 +33,7 @@ import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.
 export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit {
 
   @ViewChild('dialog') _dialog!: DialogComponent;
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
   @Input() data!: FormParams;
   @Input() close!: Function;
 
@@ -371,7 +372,7 @@ export class ClientAuthorizeApiComponent extends BaseComponent implements OnInit
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
 }
 
   public get effectiveDate() { return this.form.get('effectiveDate'); };

@@ -4,7 +4,7 @@ import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angul
 import { ToolService } from 'src/app/shared/services/tool.service';
 import * as ValidatorFns from '../../../shared/validator-functions';
 import { ApiSignOffService } from 'src/app/shared/services/api-api-sign-off.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';

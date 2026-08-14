@@ -18,6 +18,7 @@ public class DgrApplicationEventListener {
 	
 	private static final String NO_ENTERPRISE_SERVICE = "...No Enterprise Service...";
 	private static final String TPI_DGRV4 = "tpi.dgrv4";
+	public static int SYS_INFO_SLEEP = 60000;
 	
 	@Autowired
 	public DgrApplicationEventListener(@Nullable ILogbackService service) {
@@ -48,7 +49,7 @@ public class DgrApplicationEventListener {
 		
 		try {
 			//因為tpi.dgrv4.dpaa.component.TsmpCoreTokenInitializerInit有被用thread印出的LOG是sys_info所需要的LOG,所以等待1分
-			Thread.sleep(60000);
+			Thread.sleep(SYS_INFO_SLEEP);
 		} catch (InterruptedException e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
 			Thread.currentThread().interrupt();

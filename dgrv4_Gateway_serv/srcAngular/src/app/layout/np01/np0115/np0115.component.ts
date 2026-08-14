@@ -287,11 +287,11 @@ export class Np0115Component extends BaseComponent implements OnInit {
             this.list = newList;
         }
         setTimeout(() => {
-            const res = $(itemTemplate).find('.collapseBtn > i').hasClass('fa-angle-down');
+            const res = (itemTemplate as HTMLElement)?.querySelector('.collapseBtn > i')?.classList.contains('fa-angle-down');
 
             setTimeout(() => {
-                if (res) $(itemTemplate).find('.collapseBtn').trigger('click')
-                $('#span_' + (maxId + 1)).trigger('click');
+                if (res) (itemTemplate as HTMLElement)?.querySelector<HTMLElement>('.collapseBtn')?.click();
+                document.getElementById('span_' + (maxId + 1))?.click();
             });
 
         });
@@ -322,15 +322,28 @@ export class Np0115Component extends BaseComponent implements OnInit {
         if (!this.allDisabled) {
             row.item.focus = true;
             this.allDisabled = true;
-            $('#span_' + row.item.id).hide();
-            $('#input_' + row.item.id).addClass('d-flex').removeClass('d-none').find('input').first().focus().select();
+            const span = document.getElementById('span_' + row.item.id);
+            if (span) span.style.display = 'none';
+            const inputWrapper = document.getElementById('input_' + row.item.id);
+            if (inputWrapper) {
+                inputWrapper.classList.add('d-flex');
+                inputWrapper.classList.remove('d-none');
+                const firstInput = inputWrapper.querySelector('input');
+                firstInput?.focus();
+                firstInput?.select();
+            }
         }
     }
     onBlurHandler(row) {
         delete row.item.focus;
         this.allDisabled = false;
-        $('#span_' + row.item.id).show();
-        $('#input_' + row.item.id).removeClass('d-flex').addClass('d-none');
+        const span = document.getElementById('span_' + row.item.id);
+        if (span) span.style.display = '';
+        const inputWrapper = document.getElementById('input_' + row.item.id);
+        if (inputWrapper) {
+            inputWrapper.classList.remove('d-flex');
+            inputWrapper.classList.add('d-none');
+        }
     }
     onEscapeHandler(row) {
         this.cancelEdit(row);

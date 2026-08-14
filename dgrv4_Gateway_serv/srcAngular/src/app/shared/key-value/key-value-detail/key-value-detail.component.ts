@@ -43,6 +43,11 @@ export class KeyValueDetailComponent implements OnInit,AfterViewInit {
     //   key : new FormControl(this.data ? this.data.key : '',[ValidatorFns.maxLengthValidator(30)]),
     //   value : new FormControl(this.data ? this.data.value : '')
     // })
+    // data 是動態掛載（createComponent）後才指定的，constructor 建表單當下拿不到，
+    // 在此補寫入表單，讓程式化帶入的 key-value 能正確顯示
+    if (this.data) {
+      this.form.patchValue({ key: this.data.key, value: this.data.value });
+    }
     this.keyvalue = {} as IKeyValue;
     this.form.valueChanges.subscribe((res:{key:string,value:any,selected:boolean}) => {
       this.change.emit({key : res.key , value : res.value , no : this.no, selected: res.selected} as IKeyValue);

@@ -26,6 +26,24 @@ public class SmartOnFhirProxyExportDto {
     private String sofProxyIgnoreApi;
     private List<String> sofProxyClientId;
 
+    // ===== SMART on FHIR 認證擴充：Inbound =====
+    private List<String> sofProxyAuth;
+    private String sofProxyInIntrospectionEndpoint;
+    private String sofProxyInWellKnown;
+    private String sofProxyInIntrospectionAuth;
+    private String sofProxyInIntrospectionClientId;
+    private boolean hasIntrospectionSecret;            // 僅旗標，不匯出密文/明文
+    private List<String> sofProxyInAllowedIss;
+    private String sofProxyInExpectedAud;
+    // ===== SMART on FHIR 認證擴充：Outbound =====
+    private String sofProxyOutRelay;
+    private String sofProxyOutAuthMethod;
+    private String sofProxyOutClientId;
+    private boolean hasOutClientSecret;                // 僅旗標，不匯出密文/明文
+    private String sofProxyOutWellKnown;
+    private String sofProxyOutTokenEndpoint;
+    private String sofProxyOutScope;
+
     // 關聯資料
     private List<SmartOnFhirProxyDiversionDto> diversionList;
     private List<SmartOnFhirProxyStickyImportDto> stickyList;
@@ -213,6 +231,126 @@ public class SmartOnFhirProxyExportDto {
         this.sofProxyUrlRewrite = sofProxyUrlRewrite;
     }
 
+    public List<String> getSofProxyAuth() {
+        return sofProxyAuth;
+    }
+
+    public void setSofProxyAuth(List<String> sofProxyAuth) {
+        this.sofProxyAuth = sofProxyAuth;
+    }
+
+    public String getSofProxyInIntrospectionEndpoint() {
+        return sofProxyInIntrospectionEndpoint;
+    }
+
+    public void setSofProxyInIntrospectionEndpoint(String sofProxyInIntrospectionEndpoint) {
+        this.sofProxyInIntrospectionEndpoint = sofProxyInIntrospectionEndpoint;
+    }
+
+    public String getSofProxyInWellKnown() {
+        return sofProxyInWellKnown;
+    }
+
+    public void setSofProxyInWellKnown(String sofProxyInWellKnown) {
+        this.sofProxyInWellKnown = sofProxyInWellKnown;
+    }
+
+    public String getSofProxyInIntrospectionAuth() {
+        return sofProxyInIntrospectionAuth;
+    }
+
+    public void setSofProxyInIntrospectionAuth(String sofProxyInIntrospectionAuth) {
+        this.sofProxyInIntrospectionAuth = sofProxyInIntrospectionAuth;
+    }
+
+    public String getSofProxyInIntrospectionClientId() {
+        return sofProxyInIntrospectionClientId;
+    }
+
+    public void setSofProxyInIntrospectionClientId(String sofProxyInIntrospectionClientId) {
+        this.sofProxyInIntrospectionClientId = sofProxyInIntrospectionClientId;
+    }
+
+    public boolean isHasIntrospectionSecret() {
+        return hasIntrospectionSecret;
+    }
+
+    public void setHasIntrospectionSecret(boolean hasIntrospectionSecret) {
+        this.hasIntrospectionSecret = hasIntrospectionSecret;
+    }
+
+    public List<String> getSofProxyInAllowedIss() {
+        return sofProxyInAllowedIss;
+    }
+
+    public void setSofProxyInAllowedIss(List<String> sofProxyInAllowedIss) {
+        this.sofProxyInAllowedIss = sofProxyInAllowedIss;
+    }
+
+    public String getSofProxyInExpectedAud() {
+        return sofProxyInExpectedAud;
+    }
+
+    public void setSofProxyInExpectedAud(String sofProxyInExpectedAud) {
+        this.sofProxyInExpectedAud = sofProxyInExpectedAud;
+    }
+
+    public String getSofProxyOutRelay() {
+        return sofProxyOutRelay;
+    }
+
+    public void setSofProxyOutRelay(String sofProxyOutRelay) {
+        this.sofProxyOutRelay = sofProxyOutRelay;
+    }
+
+    public String getSofProxyOutAuthMethod() {
+        return sofProxyOutAuthMethod;
+    }
+
+    public void setSofProxyOutAuthMethod(String sofProxyOutAuthMethod) {
+        this.sofProxyOutAuthMethod = sofProxyOutAuthMethod;
+    }
+
+    public String getSofProxyOutClientId() {
+        return sofProxyOutClientId;
+    }
+
+    public void setSofProxyOutClientId(String sofProxyOutClientId) {
+        this.sofProxyOutClientId = sofProxyOutClientId;
+    }
+
+    public boolean isHasOutClientSecret() {
+        return hasOutClientSecret;
+    }
+
+    public void setHasOutClientSecret(boolean hasOutClientSecret) {
+        this.hasOutClientSecret = hasOutClientSecret;
+    }
+
+    public String getSofProxyOutWellKnown() {
+        return sofProxyOutWellKnown;
+    }
+
+    public void setSofProxyOutWellKnown(String sofProxyOutWellKnown) {
+        this.sofProxyOutWellKnown = sofProxyOutWellKnown;
+    }
+
+    public String getSofProxyOutTokenEndpoint() {
+        return sofProxyOutTokenEndpoint;
+    }
+
+    public void setSofProxyOutTokenEndpoint(String sofProxyOutTokenEndpoint) {
+        this.sofProxyOutTokenEndpoint = sofProxyOutTokenEndpoint;
+    }
+
+    public String getSofProxyOutScope() {
+        return sofProxyOutScope;
+    }
+
+    public void setSofProxyOutScope(String sofProxyOutScope) {
+        this.sofProxyOutScope = sofProxyOutScope;
+    }
+
     @Override
     public String toString() {
         return "SmartOnFhirProxyExportDto [sofProxyId=" + sofProxyId + ", sofProxyName=" + sofProxyName
@@ -224,6 +362,14 @@ public class SmartOnFhirProxyExportDto {
                 + ", sofProxyIgnoreApi=" + sofProxyIgnoreApi
                 + ", sofProxyClientId=" + sofProxyClientId + ", diversionList=" + diversionList + ", createDateTime="
                 + createDateTime + ", createUser=" + createUser + ", updateDateTime=" + updateDateTime
-                + ", updateUser=" + updateUser + ", version=" + version + "]";
+                + ", updateUser=" + updateUser + ", version=" + version
+                + ", sofProxyAuth=" + sofProxyAuth + ", sofProxyInIntrospectionEndpoint=" + sofProxyInIntrospectionEndpoint
+                + ", sofProxyInWellKnown=" + sofProxyInWellKnown + ", sofProxyInIntrospectionAuth=" + sofProxyInIntrospectionAuth
+                + ", sofProxyInIntrospectionClientId=" + sofProxyInIntrospectionClientId
+                + ", hasIntrospectionSecret=" + hasIntrospectionSecret + ", sofProxyInAllowedIss=" + sofProxyInAllowedIss
+                + ", sofProxyInExpectedAud=" + sofProxyInExpectedAud + ", sofProxyOutRelay=" + sofProxyOutRelay
+                + ", sofProxyOutAuthMethod=" + sofProxyOutAuthMethod + ", sofProxyOutClientId=" + sofProxyOutClientId
+                + ", hasOutClientSecret=" + hasOutClientSecret + ", sofProxyOutWellKnown=" + sofProxyOutWellKnown
+                + ", sofProxyOutTokenEndpoint=" + sofProxyOutTokenEndpoint + ", sofProxyOutScope=" + sofProxyOutScope + "]";
     }
 }

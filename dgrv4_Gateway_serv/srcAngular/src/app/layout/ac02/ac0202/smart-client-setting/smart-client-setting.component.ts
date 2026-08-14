@@ -335,30 +335,34 @@ export class SmartClientSettingComponent implements OnChanges, OnInit, OnDestroy
     if (!this.smartClient) return;
 
     this.confirmationService.confirm({
+      key: 'smartClientConfirm',
+      header: this.translate.instant('cfm_del'),
       message: this.translate.instant('smart_client.delete_confirm'),
-      accept: () => {
-        this.serverService.batchDeleteSmartClient({
-          deleteList: [{
-            clientId: this.clientId,
-            version: Number(this.smartClient!.version),
-          }],
-        }).subscribe({
-          next: (res) => {
-            if (this.toolService.checkDpSuccess(res.ResHeader)) {
-              this.messageService.add({
-                severity: 'success',
-                summary: this.translate.instant('smart_client.delete_success'),
-              });
-              this.smartClient = undefined;
-              this.mode = 'view';
-            }
-          },
-          error: () => {
-            this.messageService.add({
-              severity: 'error',
-              summary: this.translate.instant('smart_client.delete_fail'),
-            });
-          },
+      accept: () => this.onDeleteSmartClientConfirm(),
+    });
+  }
+
+  private onDeleteSmartClientConfirm(): void {
+    this.serverService.batchDeleteSmartClient({
+      deleteList: [{
+        clientId: this.clientId,
+        version: Number(this.smartClient!.version),
+      }],
+    }).subscribe({
+      next: (res) => {
+        if (this.toolService.checkDpSuccess(res.ResHeader)) {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('smart_client.delete_success'),
+          });
+          this.smartClient = undefined;
+          this.mode = 'view';
+        }
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('smart_client.delete_fail'),
         });
       },
     });

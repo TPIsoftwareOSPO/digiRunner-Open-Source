@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -9,12 +9,13 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DPB0195RespItem } from 'src/app/models/api/ServerService/dpb0195.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0197Req } from 'src/app/models/api/ServerService/dpb0197.interface';
 import { DPB0196Req, DPB0196Resp } from 'src/app/models/api/ServerService/dpb0196.interface';
 import { DPB0198Req } from 'src/app/models/api/ServerService/dpb0198.interface';
 import { KeyValueFormComponent } from '../../ac02/ac0228/key-value-form/key-value-form.component';
 import { DomSanitizer } from '@angular/platform-browser';
+import * as ValidatorFns from 'src/app/shared/validator-functions';
 
 @Component({
     selector: 'app-ac0020',
@@ -26,6 +27,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 export class Ac0020Component extends BaseComponent implements OnInit {
 
   @ViewChild("keyValueComp") keyValueComp!: KeyValueFormComponent;
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
 
   currentTitle = this.title;
   pageNum: number = 1;
@@ -92,7 +94,7 @@ export class Ac0020Component extends BaseComponent implements OnInit {
       id: new UntypedFormControl({ value: '', disabled: true }),
       // clientId: new FormControl({ value: '', disabled: true }),
       status: new UntypedFormControl(''),
-      approvalResultMail: new UntypedFormControl(''),
+      approvalResultMail: new UntypedFormControl('', ValidatorFns.multipleMailValidator()),
       apiMethod: new UntypedFormControl(''),
       apiUrl: new UntypedFormControl(''),
       reqHeader: new UntypedFormControl(''),
@@ -151,6 +153,8 @@ export class Ac0020Component extends BaseComponent implements OnInit {
             this.currentTitle += `> ${dict['button.create']}`
             this.pageNum = 2;
             this.addFormValidator(this.formEdit, res.RespBody.constraints);
+            this.approvalResultMail.addValidators(ValidatorFns.multipleMailValidator());
+            this.approvalResultMail.updateValueAndValidity();
 
             this.status?.markAsTouched();
             this.sucByType.markAsTouched();
@@ -237,6 +241,8 @@ export class Ac0020Component extends BaseComponent implements OnInit {
                 this.currentTitle += `> ${dict['button.update']}`
                 this.pageNum = 2;
                 this.addFormValidator(this.formEdit, resValid.RespBody.constraints);
+                this.approvalResultMail.addValidators(ValidatorFns.multipleMailValidator());
+                this.approvalResultMail.updateValueAndValidity();
 
                 this.id.setValue(res.RespBody.id);
                 this.id.disable();
@@ -325,12 +331,12 @@ export class Ac0020Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   public clearFile() {
     this._fileSrc = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   async fileChange(files: FileList) {

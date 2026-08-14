@@ -13,7 +13,7 @@ import {
   UntypedFormControl,
 } from '@angular/forms';
 import * as ValidatorFns from '../../../shared/validator-functions';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { MessageService } from 'primeng/api';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';

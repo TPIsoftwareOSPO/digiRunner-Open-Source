@@ -11,6 +11,7 @@ export interface DPB0192Req {
   userName: string;
   mima?: string;
   maxPoolSize: string;
+  minimumIdle: number;
   connectionTimeout: string;
   idleTimeout: string;
   maxLifetime: string;

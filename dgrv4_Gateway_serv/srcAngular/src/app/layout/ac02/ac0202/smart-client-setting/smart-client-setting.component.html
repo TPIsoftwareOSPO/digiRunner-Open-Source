@@ -356,4 +356,13 @@
 </div>
 
 <!-- 刪除確認對話框 -->
-<p-confirmDialog></p-confirmDialog>
+<p-confirmDialog key="smartClientConfirm" #cd [style]="{width: '30vw'}" icon="pi pi-exclamation-triangle" styleClass="cHeader cContent cIcon">
+  <ng-template pTemplate="footer">
+    <div class="col-12 d-flex gap-2 justify-content-center">
+      <button type="button" pButton icon="pi pi-check" class="p-button-primary"
+        label="{{'button.confirm' | translate}}" (click)="cd.onAccept()"></button>
+      <button type="button" pButton icon="pi pi-times" class="p-button-secondary"
+        label="{{'button.cancel' | translate}}" (click)="cd.onReject()"></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>

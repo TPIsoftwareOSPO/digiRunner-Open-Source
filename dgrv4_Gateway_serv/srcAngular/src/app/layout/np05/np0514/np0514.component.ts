@@ -29,7 +29,7 @@ import {
   DPB0101Req,
   DPB0101Cron,
 } from 'src/app/models/api/CycleScheduleService/dpb0101.interface';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import {
   DPB0103Req,
   DPB0103Resp,

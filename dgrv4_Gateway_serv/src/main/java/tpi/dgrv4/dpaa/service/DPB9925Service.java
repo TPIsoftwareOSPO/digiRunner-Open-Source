@@ -51,10 +51,6 @@ public class DPB9925Service {
 			
 			//資料
 			this.writeData(sheet);
-			
-		    sheet.setColumnWidth(0, 5120); //20*256
-		    sheet.setColumnWidth(1, 25600); //100*256
-		    sheet.setColumnWidth(2, 10240); //40*256
 		    
 		    doExportTsmpDpMailTplt(response);
 			//寫入串流
@@ -71,7 +67,7 @@ public class DPB9925Service {
 
 	}
 	
-	private void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
+	public void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
 		
 		//粗體字
 		XSSFCellStyle cellStyle = wb.createCellStyle();
@@ -93,7 +89,7 @@ public class DPB9925Service {
         }
 	}
 	
-	private void writeData(XSSFSheet sheet) {
+	public void writeData(XSSFSheet sheet) {
 		List<TsmpDpMailTplt> list = getTsmpDpMailTpltDao().findAllByOrderByMailtpltIdAsc();
 		if(CollectionUtils.isEmpty(list)) {
 			throw TsmpDpAaRtnCode._1298.throwing();
@@ -112,6 +108,10 @@ public class DPB9925Service {
 	        cell = row.createCell(2);
 	        cell.setCellValue(vo.getRemark());
 		}
+		
+		sheet.setColumnWidth(0, 5120); //20*256
+	    sheet.setColumnWidth(1, 25600); //100*256
+	    sheet.setColumnWidth(2, 10240); //40*256
 	}
 	
 	private void doExportTsmpDpMailTplt(HttpServletResponse response) {

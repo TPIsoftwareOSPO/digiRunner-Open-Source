@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-md-12">
           <div class="ui-inputgroup">
-            <input type="file" id="fileName" accept=".pem" (change)="fileChange($event.target.files)"
+            <input type="file" id="fileName" #upload_file accept=".pem" (change)="fileChange($event.target.files)"
               [(ngModel)]="fileName" style="display: none;">
             <input type="text" class="form-control" style="display: unset;" placeholder="{{'upload_file' | translate}}"
               value="{{_fileName}}" disabled>

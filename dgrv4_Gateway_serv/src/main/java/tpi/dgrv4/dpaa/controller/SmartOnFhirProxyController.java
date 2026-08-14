@@ -21,8 +21,10 @@ import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.SmartOnFhirProxyCreateUpdateDeleteService;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.SmartOnFhirProxyExportService;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.SmartOnFhirProxyImportService;
+import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.SmartOnFhirProxyRelayTestService;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.SmartOnFhirProxySearchService;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.vo.DPB0310Resp;
+import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.vo.DPB0341Resp;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.vo.DPB0312Req;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.vo.DPB0312Resp;
 import tpi.dgrv4.dpaa.service.smartOnFhirProxyService.vo.DPB0313Req;
@@ -48,6 +50,7 @@ public class SmartOnFhirProxyController {
     private SmartOnFhirProxyCreateUpdateDeleteService smartOnFhirProxyCreateUpdateDeleteService;
     private SmartOnFhirProxyExportService smartOnFhirProxyExportService;
     private SmartOnFhirProxyImportService smartOnFhirProxyImportService;
+    private SmartOnFhirProxyRelayTestService smartOnFhirProxyRelayTestService;
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -56,11 +59,13 @@ public class SmartOnFhirProxyController {
             SmartOnFhirProxyCreateUpdateDeleteService smartOnFhirProxyCreateUpdateDeleteService,
             SmartOnFhirProxyExportService smartOnFhirProxyExportService,
             SmartOnFhirProxyImportService smartOnFhirProxyImportService,
+            SmartOnFhirProxyRelayTestService smartOnFhirProxyRelayTestService,
             ObjectMapper objectMapper) {
         this.smartOnFhirProxySearchService = smartOnFhirProxySearchService;
         this.smartOnFhirProxyCreateUpdateDeleteService = smartOnFhirProxyCreateUpdateDeleteService;
         this.smartOnFhirProxyExportService = smartOnFhirProxyExportService;
         this.smartOnFhirProxyImportService = smartOnFhirProxyImportService;
+        this.smartOnFhirProxyRelayTestService = smartOnFhirProxyRelayTestService;
         this.objectMapper = objectMapper;
     }
 
@@ -258,6 +263,32 @@ public class SmartOnFhirProxyController {
         } catch (Exception e) {
             throw new TsmpDpAaException(e, null);
         }
+    }
+
+    /**
+     * DPB0341: 測試後端代取 token（不寫 DB）
+     * input 沿用 SmartOnFhirProxyDto（類似 DPB0311），僅讀其中 out_* 代取設定試打一次。
+     *
+     * @param headers HTTP Headers
+     * @param req     請求參數（沿用 Proxy DTO，使用其中的 out_* 代取設定）
+     * @return 代取測試結果（成功與否、token endpoint、完整 token 與有效秒數；token 為診斷用）
+     */
+    @PostMapping(value = "/dgrv4/11/DPB0341", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public TsmpBaseResp<DPB0341Resp> testSmartOnFhirProxyRelay(
+            @RequestHeader HttpHeaders headers,
+            @RequestBody TsmpBaseReq<SmartOnFhirProxyDto> req) {
+
+        TsmpHttpHeader tsmpHttpHeader = ControllerUtil.toTsmpHttpHeader(headers);
+        DPB0341Resp resp = null;
+
+        try {
+            ControllerUtil.validateRequest(tsmpHttpHeader.getAuthorization(), req);
+            resp = smartOnFhirProxyRelayTestService.testRelay(tsmpHttpHeader.getAuthorization(), req.getBody());
+        } catch (Exception e) {
+            throw new TsmpDpAaException(e, req.getReqHeader());
+        }
+
+        return ControllerUtil.tsmpResponseBaseObj(req.getReqHeader(), resp);
     }
 
     /**

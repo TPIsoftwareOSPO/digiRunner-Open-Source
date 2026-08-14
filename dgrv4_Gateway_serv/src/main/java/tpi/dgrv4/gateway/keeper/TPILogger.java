@@ -763,11 +763,6 @@ public class TPILogger extends ITPILogger implements IEntityTPILogger {
 
         // 控制後續的非首次連線
         TPILogger.isFirstConnection = false;
-
-        createThreadStarter();
-
-        // 控制後續的非首次連線
-        TPILogger.isFirstConnection = false;
         h2ConfigSyncServive.setPrimaryId(primaryId);
         h2ConfigSyncServive.setReplicaIds(replicaIds);
 

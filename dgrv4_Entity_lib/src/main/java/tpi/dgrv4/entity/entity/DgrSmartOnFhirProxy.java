@@ -75,6 +75,59 @@ public class DgrSmartOnFhirProxy implements DgrSequenced {
     @Convert(converter = StatusConverter.class)
     private Status sofProxyUrlRewrite = Status.ENABLED;
 
+    // ===== INBOUND 入站 token 驗證 (取代 sofProxyAccessToken, 本版並存) =====
+    // 值為 ["none"|"digirunner"|"third-party"]，list 但實際單值；"dgr" 為 digirunner 的相容舊值
+    @Column(name = "sof_proxy_auth")
+    @Convert(converter = StringListJsonConverter.class)
+    private List<String> sofProxyAuth = List.of("none");
+
+    @Column(name = "sof_proxy_in_introspection_endpoint")
+    private String sofProxyInIntrospectionEndpoint;
+
+    @Column(name = "sof_proxy_in_well_known")
+    private String sofProxyInWellKnown;
+
+    @Column(name = "sof_proxy_in_introspection_auth")
+    private String sofProxyInIntrospectionAuth;
+
+    @Column(name = "sof_proxy_in_introspection_client_id")
+    private String sofProxyInIntrospectionClientId;
+
+    // AES 密文(TsmpTAEASKHelper)，勿入 log / toString
+    @Column(name = "sof_proxy_in_introspection_secret_enc")
+    private String sofProxyInIntrospectionSecretEnc;
+
+    @Column(name = "sof_proxy_in_allowed_iss")
+    @Convert(converter = StringListJsonConverter.class)
+    private List<String> sofProxyInAllowedIss;
+
+    @Column(name = "sof_proxy_in_expected_aud")
+    private String sofProxyInExpectedAud;
+
+    // ===== OUTBOUND 後端代取 token (client_credentials + client_secret) =====
+    @Column(name = "sof_proxy_out_relay")
+    @Convert(converter = StatusConverter.class)
+    private Status sofProxyOutRelay = Status.DISABLED;
+
+    @Column(name = "sof_proxy_out_auth_method")
+    private String sofProxyOutAuthMethod;
+
+    @Column(name = "sof_proxy_out_client_id")
+    private String sofProxyOutClientId;
+
+    // AES 密文(TsmpTAEASKHelper)，勿入 log / toString
+    @Column(name = "sof_proxy_out_client_secret_enc")
+    private String sofProxyOutClientSecretEnc;
+
+    @Column(name = "sof_proxy_out_well_known")
+    private String sofProxyOutWellKnown;
+
+    @Column(name = "sof_proxy_out_token_endpoint")
+    private String sofProxyOutTokenEndpoint;
+
+    @Column(name = "sof_proxy_out_scope")
+    private String sofProxyOutScope;
+
     @Column(name = "create_date_time")
     private Date createDateTime = DateTimeUtil.now();
 
@@ -271,6 +324,130 @@ public class DgrSmartOnFhirProxy implements DgrSequenced {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    // ===== INBOUND getters/setters =====
+
+    public List<String> getSofProxyAuth() {
+        return sofProxyAuth;
+    }
+
+    public void setSofProxyAuth(List<String> sofProxyAuth) {
+        this.sofProxyAuth = sofProxyAuth;
+    }
+
+    public String getSofProxyInIntrospectionEndpoint() {
+        return sofProxyInIntrospectionEndpoint;
+    }
+
+    public void setSofProxyInIntrospectionEndpoint(String sofProxyInIntrospectionEndpoint) {
+        this.sofProxyInIntrospectionEndpoint = sofProxyInIntrospectionEndpoint;
+    }
+
+    public String getSofProxyInWellKnown() {
+        return sofProxyInWellKnown;
+    }
+
+    public void setSofProxyInWellKnown(String sofProxyInWellKnown) {
+        this.sofProxyInWellKnown = sofProxyInWellKnown;
+    }
+
+    public String getSofProxyInIntrospectionAuth() {
+        return sofProxyInIntrospectionAuth;
+    }
+
+    public void setSofProxyInIntrospectionAuth(String sofProxyInIntrospectionAuth) {
+        this.sofProxyInIntrospectionAuth = sofProxyInIntrospectionAuth;
+    }
+
+    public String getSofProxyInIntrospectionClientId() {
+        return sofProxyInIntrospectionClientId;
+    }
+
+    public void setSofProxyInIntrospectionClientId(String sofProxyInIntrospectionClientId) {
+        this.sofProxyInIntrospectionClientId = sofProxyInIntrospectionClientId;
+    }
+
+    public String getSofProxyInIntrospectionSecretEnc() {
+        return sofProxyInIntrospectionSecretEnc;
+    }
+
+    public void setSofProxyInIntrospectionSecretEnc(String sofProxyInIntrospectionSecretEnc) {
+        this.sofProxyInIntrospectionSecretEnc = sofProxyInIntrospectionSecretEnc;
+    }
+
+    public List<String> getSofProxyInAllowedIss() {
+        return sofProxyInAllowedIss;
+    }
+
+    public void setSofProxyInAllowedIss(List<String> sofProxyInAllowedIss) {
+        this.sofProxyInAllowedIss = sofProxyInAllowedIss;
+    }
+
+    public String getSofProxyInExpectedAud() {
+        return sofProxyInExpectedAud;
+    }
+
+    public void setSofProxyInExpectedAud(String sofProxyInExpectedAud) {
+        this.sofProxyInExpectedAud = sofProxyInExpectedAud;
+    }
+
+    // ===== OUTBOUND getters/setters =====
+
+    public Status getSofProxyOutRelay() {
+        return sofProxyOutRelay;
+    }
+
+    public void setSofProxyOutRelay(Status sofProxyOutRelay) {
+        this.sofProxyOutRelay = sofProxyOutRelay;
+    }
+
+    public String getSofProxyOutAuthMethod() {
+        return sofProxyOutAuthMethod;
+    }
+
+    public void setSofProxyOutAuthMethod(String sofProxyOutAuthMethod) {
+        this.sofProxyOutAuthMethod = sofProxyOutAuthMethod;
+    }
+
+    public String getSofProxyOutClientId() {
+        return sofProxyOutClientId;
+    }
+
+    public void setSofProxyOutClientId(String sofProxyOutClientId) {
+        this.sofProxyOutClientId = sofProxyOutClientId;
+    }
+
+    public String getSofProxyOutClientSecretEnc() {
+        return sofProxyOutClientSecretEnc;
+    }
+
+    public void setSofProxyOutClientSecretEnc(String sofProxyOutClientSecretEnc) {
+        this.sofProxyOutClientSecretEnc = sofProxyOutClientSecretEnc;
+    }
+
+    public String getSofProxyOutWellKnown() {
+        return sofProxyOutWellKnown;
+    }
+
+    public void setSofProxyOutWellKnown(String sofProxyOutWellKnown) {
+        this.sofProxyOutWellKnown = sofProxyOutWellKnown;
+    }
+
+    public String getSofProxyOutTokenEndpoint() {
+        return sofProxyOutTokenEndpoint;
+    }
+
+    public void setSofProxyOutTokenEndpoint(String sofProxyOutTokenEndpoint) {
+        this.sofProxyOutTokenEndpoint = sofProxyOutTokenEndpoint;
+    }
+
+    public String getSofProxyOutScope() {
+        return sofProxyOutScope;
+    }
+
+    public void setSofProxyOutScope(String sofProxyOutScope) {
+        this.sofProxyOutScope = sofProxyOutScope;
     }
 
     @Getter

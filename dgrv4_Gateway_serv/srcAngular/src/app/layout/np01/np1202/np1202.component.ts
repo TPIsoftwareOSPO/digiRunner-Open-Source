@@ -8,7 +8,7 @@ import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.serv
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import {
   DPB0234ApiDataItem,

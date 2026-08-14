@@ -1,8 +1,9 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SmartFhirClientService, ConsentInfo, SmartSelection } from '../smart-shared/smart-fhir-client.service';
+import { classifySmartError, SmartErrorKind, SmartPanelStatus } from '../smart-shared/smart-error';
 
-type ConsentState = 'loading' | 'ready' | 'no-state' | 'error' | 'auto-submit';
+type ConsentState = 'loading' | 'ready' | 'error' | 'auto-submit';
 
 @Component({
   selector: 'app-smart-consent',
@@ -14,6 +15,8 @@ export class SmartConsentComponent implements OnInit {
 
   state: string = '';
   consentState: ConsentState = 'loading';
+  /** consentState==='error' 時決定顯示哪一段說明 */
+  errorKind: SmartErrorKind = 'server';
 
   clientName: string = '';
   scopes: { scope: string; description: string }[] = [];
@@ -37,7 +40,8 @@ export class SmartConsentComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const state = params['state'];
       if (!state) {
-        this.consentState = 'no-state';
+        this.errorKind = 'no-state';
+        this.consentState = 'error';
         return;
       }
       this.state = state;
@@ -60,6 +64,11 @@ export class SmartConsentComponent implements OnInit {
           this.router.navigate(['/smart/select-patient'], { queryParams: { state: this.state } });
           return;
         }
+        // 缺 encounter → 轉去 encounter 選取頁（放在 patient 之後：encounter 依所選病患過濾）
+        if (info.needsEncounterSelection && !this.selection.encounterId) {
+          this.router.navigate(['/smart/select-encounter'], { queryParams: { state: this.state } });
+          return;
+        }
         // 缺 provider → 轉去 provider 選取頁
         if (info.needsProviderSelection && !this.selection.fhirUser) {
           this.router.navigate(['/smart/select-provider'], { queryParams: { state: this.state } });
@@ -78,10 +87,16 @@ export class SmartConsentComponent implements OnInit {
           this.consentState = 'ready';
         }
       },
-      error: () => this.consentState = 'error',
+      error: (err) => {
+        this.errorKind = classifySmartError(err);
+        this.consentState = 'error';
+      },
     });
   }
 
+  get panelStatus(): SmartPanelStatus {
+    return this.consentState === 'loading' ? 'loading' : this.errorKind;
+  }
 
   get approvedScopes(): string {
     return this.scopes.map(s => s.scope).join(' ');

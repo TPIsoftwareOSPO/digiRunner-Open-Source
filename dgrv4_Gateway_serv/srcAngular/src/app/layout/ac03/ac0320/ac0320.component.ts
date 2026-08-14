@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from 'src/app/shared/services/api-api.service';
 import { BaseComponent } from '../../base-component';
@@ -27,6 +27,8 @@ import { AlertType } from 'src/app/models/common.enum';
     standalone: false
 })
 export class Ac0320Component extends BaseComponent implements OnInit {
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
+
   pageNum: number = 1;
   currentTitle: string = this.title;
 
@@ -432,11 +434,11 @@ export class Ac0320Component extends BaseComponent implements OnInit {
     this.importList = [];
     this.file.reset();
     this.fileName.setValue('');
-    $('#file').val('');
+    this.fileRef.nativeElement.value = '';
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   import() {

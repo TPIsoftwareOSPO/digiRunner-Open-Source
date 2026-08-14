@@ -7,8 +7,8 @@ const DEV_HOST = 'https://localhost';
 // const DEV_HOST = "https://dev.88.eapdd-tpisoftware.com";
 // const DEV_HOST = "https://192.168.30.99";
 // const DEV_PORT = '18442';  //18442 19442
-const DEV_PORT = '18080';  //18442 19442
-// const DEV_PORT = '';
+// const DEV_PORT = '18080';  //18442 19442
+const DEV_PORT = '18080';
 
 
 export const environment = {

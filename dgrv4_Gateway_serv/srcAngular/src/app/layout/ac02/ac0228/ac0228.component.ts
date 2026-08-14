@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -16,7 +16,7 @@ import {
   DPB0184RespItem,
 } from 'src/app/models/api/ServerService/dpb0184.interface';
 import { ServerService } from 'src/app/shared/services/api-server.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import {
   DPB0185Req,
   DPB0185Resp,
@@ -36,6 +36,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class Ac0228Component extends BaseComponent implements OnInit {
   @ViewChild('keyValueComp') keyValueComp!: KeyValueFormComponent;
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
 
   currentTitle = this.title;
   pageNum: number = 1;
@@ -467,12 +468,12 @@ export class Ac0228Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   public clearFile() {
     this._fileSrc = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   async fileChange(files: FileList) {

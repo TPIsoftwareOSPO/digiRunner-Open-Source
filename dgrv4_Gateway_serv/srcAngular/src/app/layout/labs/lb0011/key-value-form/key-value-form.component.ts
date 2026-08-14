@@ -116,7 +116,7 @@ export class KeyValueFormComponent extends BaseComponent implements OnInit {
         this.form.controls['url'].setValidators([
           ValidatorFns.requiredValidator(),
         ]);
-        $(`#url_label`).addClass('required');
+        document.getElementById(`url_label`)?.classList.add('required');
       }
 
       this.formSubscription = this.form.valueChanges.subscribe((res) => {

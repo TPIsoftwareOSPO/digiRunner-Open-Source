@@ -26,8 +26,8 @@ import {
   AA0201HostReq,
   AA0201Req,
 } from 'src/app/models/api/ClientService/aa0201.interface';
-import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { isArray, isDate, isNullOrUndefined } from 'util';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { AA0204Req } from 'src/app/models/api/ClientService/aa0204.interface';
@@ -208,7 +208,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
       owner: new UntypedFormControl(''),
       createStatus: new UntypedFormControl(''),
       publicFlag: new UntypedFormControl('2'),
-      emails: new UntypedFormControl(''),
+      emails: new UntypedFormControl('', ValidatorFns.multipleMailValidator()),
       newClientName: new UntypedFormControl(''),
       newClientAlias: new UntypedFormControl(''),
       newSignupNum: new UntypedFormControl(''),
@@ -222,7 +222,7 @@ export class Ac0202Component extends BaseComponent implements OnInit {
       newCPriority: new UntypedFormControl(5),
       newOwner: new UntypedFormControl(''),
       newEncodePublicFlag: new UntypedFormControl(''),
-      newEmails: new UntypedFormControl(''),
+      newEmails: new UntypedFormControl('', ValidatorFns.multipleMailValidator()),
       newSecurityID: new UntypedFormControl(''),
       authorizedGrantType: new UntypedFormControl(),
       accessTokenValidity: new UntypedFormControl(),
@@ -1813,7 +1813,10 @@ export class Ac0202Component extends BaseComponent implements OnInit {
             this.createStatus!.setValidators(ValidatorFns.requiredValidator());
             this.publicFlag!.setValidators(ValidatorFns.requiredValidator());
             this.emails!.setValidators(
-              ValidatorFns.maxLengthValidator(this.maxlength500.value)
+              [
+                ValidatorFns.maxLengthValidator(this.maxlength500.value),
+                ValidatorFns.multipleMailValidator(),
+              ]
             );
             this.apiQuota!.setValue(0);
             this.tps!.setValue(10);
@@ -1979,7 +1982,10 @@ export class Ac0202Component extends BaseComponent implements OnInit {
             this.emails!.setValue(this.clientDetail.emails);
             this.newEmails!.setValue(this.clientDetail.emails);
             this.newEmails!.setValidators(
-              ValidatorFns.maxLengthValidator(this.maxlength500.value)
+              [
+                ValidatorFns.maxLengthValidator(this.maxlength500.value),
+                ValidatorFns.multipleMailValidator(),
+              ]
             );
             this.newRemark!.setValue(this.clientDetail.remark);
           }

@@ -8,7 +8,10 @@ export interface ReqAA0428 extends BaseReq {
   ReqBody: AA0428Req;
 }
 export interface AA0428Req {
+  include:  string;
   labelList: Array<string>;
+  /** API 來源，空陣列或未帶則不做來源過濾 */
+  apiSrc?: Array<string>;
   moduleName?: string;
   apiKey?: string;
   paging?: string; // 前端固定傳 'Y'

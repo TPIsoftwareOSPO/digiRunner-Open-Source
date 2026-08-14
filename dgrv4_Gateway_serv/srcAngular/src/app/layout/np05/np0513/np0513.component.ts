@@ -3,7 +3,7 @@ import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angul
 import { DPB0058RespItem, DPB0058Req } from 'src/app/models/api/JobService/dpb0058.interface';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { JobService } from 'src/app/shared/services/api-job.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import * as ValidatorFns from '../../../shared/validator-functions';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DPB0060Req } from 'src/app/models/api/JobService/dpb0060.interface';

@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -12,7 +12,7 @@ import { RoleService } from 'src/app/shared/services/api-role.service';
 import { ServerService } from 'src/app/shared/services/api-server.service';
 import { DPB0164RespItem } from 'src/app/models/api/ServerService/dpb0164.interface';
 
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { APIStatusPipe } from 'src/app/shared/pipes/api-status.pipe';
 import { DPB0165Req, DPB0165Resp } from 'src/app/models/api/ServerService/dpb0165.interface';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -29,6 +29,7 @@ import { DomSanitizer } from '@angular/platform-browser';
     standalone: false
 })
 export class Ac0227Component extends BaseComponent implements OnInit {
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
 
   currentTitle = this.title;
   pageNum: number = 1;
@@ -317,7 +318,7 @@ export class Ac0227Component extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   async fileChange(files: FileList) {
@@ -346,7 +347,7 @@ export class Ac0227Component extends BaseComponent implements OnInit {
 
   public clearFile() {
     this._fileSrc = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   public get keyword() { return this.formIndex.get('keyword'); };

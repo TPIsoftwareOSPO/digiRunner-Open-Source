@@ -73,6 +73,9 @@ export class SampleAppCallbackComponent implements OnInit {
     }
 
     const simError = sessionStorage.getItem('smart_sample_sim_error') || '';
+    // PKCE：auth code 為一次性，verifier 讀出後即清除（重試也不會成功）
+    const codeVerifier = sessionStorage.getItem('smart_sample_pkce_verifier') || '';
+    sessionStorage.removeItem('smart_sample_pkce_verifier');
 
     try {
       // 外部 App 視角：以 HttpClient 交換 token（無 admin auth）
@@ -82,9 +85,12 @@ export class SampleAppCallbackComponent implements OnInit {
         redirect_uri: redirectUri,
         client_id: clientId,
       };
+      if (codeVerifier) form['code_verifier'] = codeVerifier;
       if (simError) form['sim_error'] = simError;
+      // confidential demo：附上 client 憑證（symmetric secret 或 asymmetric assertion）。aud = token 端點。
+      const basicAuth = await this.applyClientAuth(form, clientId, tokenEndpoint);
 
-      const data = await firstValueFrom(this.fhir.postToken(tokenEndpoint, form));
+      const data = await firstValueFrom(this.fhir.postToken(tokenEndpoint, form, basicAuth));
       if (data.error) {
         this.status = 'error';
         this.errorMessage = data.error_description || data.error;
@@ -105,6 +111,33 @@ export class SampleAppCallbackComponent implements OnInit {
     }
   }
 
+  /**
+   * confidential demo：依可用憑證完成 client 認證，回傳 Basic 憑證（若適用）。
+   *
+   * - asymmetric（sessionStorage 有 private_key）：用私鑰簽 private_key_jwt client assertion，
+   *   放入 form 的 client_assertion / client_assertion_type；不回 Basic。aud 用傳入的 audience（token 端點）。
+   * - symmetric（有 client_secret）：body 塞 client_secret + 回傳 Basic 憑證，兩者都給，
+   *   讓 client 不論註冊成 client_secret_basic / client_secret_post 都能通過。
+   * - public / 未帶憑證：不動 form、回傳 undefined。
+   *
+   * @param audience assertion 的 aud（此處為 token 端點 URL，需與後端逐字相符）
+   * @returns base64("client_id:client_secret") 供 Authorization: Basic 使用；不適用時 undefined
+   */
+  private async applyClientAuth(form: Record<string, string>, clientId: string, audience: string): Promise<string | undefined> {
+    const privateKey = sessionStorage.getItem('smart_sample_private_key') || '';
+    if (privateKey) {
+      form['client_assertion_type'] = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+      form['client_assertion'] = await this.fhir.signClientAssertion(clientId, audience, privateKey);
+      return undefined;
+    }
+    const clientSecret = sessionStorage.getItem('smart_sample_client_secret') || '';
+    if (clientSecret) {
+      form['client_secret'] = clientSecret;
+      return btoa(`${clientId}:${clientSecret}`);
+    }
+    return undefined;
+  }
+
   /** 從 HttpErrorResponse / Error 取出可顯示的錯誤訊息（保留 token 端點的 error_description） */
   private extractError(e: unknown): string {
     if (e instanceof HttpErrorResponse) {
@@ -115,15 +148,7 @@ export class SampleAppCallbackComponent implements OnInit {
   }
 
   private decodeJwt(token: string | undefined): string {
-    if (!token) return '';
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return '(not a JWT)';
-      const payload: unknown = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-      return JSON.stringify(payload, null, 2);
-    } catch {
-      return '(decode failed)';
-    }
+    return this.fhir.decodeJwtPayload(token);
   }
 
   private async loadPatient(patientId: string, accessToken: string): Promise<void> {
@@ -152,7 +177,9 @@ export class SampleAppCallbackComponent implements OnInit {
       };
       const simErr = sessionStorage.getItem('smart_sample_sim_error') || '';
       if (simErr) form['sim_error'] = simErr;
-      const data = await firstValueFrom(this.fhir.postToken(tokenEndpoint, form));
+      // confidential：refresh 亦需 client 認證（symmetric secret 或 asymmetric assertion）。aud = token 端點。
+      const basicAuth = await this.applyClientAuth(form, clientId, tokenEndpoint);
+      const data = await firstValueFrom(this.fhir.postToken(tokenEndpoint, form, basicAuth));
       if (data.access_token) {
         this.tokenResponse = { ...this.tokenResponse, ...data };
         this.accessTokenDecoded = this.decodeJwt(data.access_token);

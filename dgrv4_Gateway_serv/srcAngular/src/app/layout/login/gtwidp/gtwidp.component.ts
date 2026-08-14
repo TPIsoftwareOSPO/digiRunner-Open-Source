@@ -6,6 +6,7 @@ import { TxID } from 'src/app/models/common.enum';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { environment } from 'src/environments/environment';
+import * as base64 from 'js-base64';
 
 
 @Component({
@@ -90,7 +91,12 @@ export class GtwidpComponent implements OnInit {
     }
     else {
       this.show = true;
-      this.msg = this.toolService.Base64Decoder(this.paramsObj['msg'])
+      try {
+        this.msg = base64.Base64.decode(this.paramsObj['msg']);
+      } catch {
+        const dict = await this.toolService.getDict(['gtwidp.msg_decode_error']);
+        this.msg = dict['gtwidp.msg_decode_error'];
+      }
     }
 
   }

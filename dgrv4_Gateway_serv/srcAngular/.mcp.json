@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "primeng": {
+      "command": "node",
+      "args": [".tools/primeng-mcp/node_modules/@primeng/mcp/dist/index.js"]
+    }
+  }
+}

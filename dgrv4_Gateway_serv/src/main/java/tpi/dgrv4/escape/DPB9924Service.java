@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import tpi.dgrv4.common.constant.MultilingualSheetNameEnum;
 import tpi.dgrv4.common.constant.TsmpDpAaRtnCode;
 import tpi.dgrv4.common.exceptions.TsmpDpAaException;
 import tpi.dgrv4.common.utils.DateTimeUtil;
@@ -72,7 +73,10 @@ public class DPB9924Service {
 	public void importData(TsmpAuthorization tsmpAuthorization, InputStream inputStream) throws Exception {
 		try (Workbook workbook = new XSSFWorkbook(inputStream);){
 	
-			 Sheet sheet = workbook.getSheetAt(0);
+			 // [EN] Prefer "items" sheet by name; fall back to index 0 for single-sheet uploads
+			 // [ZH] 優先依名稱取 "items" sheet，找不到時 fallback 到 index 0 以相容單獨上傳的情境
+			 Sheet sheet = workbook.getSheet(MultilingualSheetNameEnum.ITEMS.value()) != null 
+					 ? workbook.getSheet(MultilingualSheetNameEnum.ITEMS.value()) : workbook.getSheetAt(0);
 			 boolean isFirst = true;
 			 DataFormatter formatter = new DataFormatter();
 		     Iterator<Row> rows = sheet.iterator();

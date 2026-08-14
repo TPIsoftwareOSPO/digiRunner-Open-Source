@@ -287,9 +287,12 @@ public class SmartAuthorizeService {
 		// Provider 候選清單與自動帶入
 		// 注意：providerIds 只在 Provider 端 launch（Practitioner type）有意義；
 		// Patient Portal launch 的 fhirUser 由 patient pick 推導，不靠 providerIds。
+		// launch 註冊明確指定的 user_type 優先；scope 啟發式（launch/patient → Patient Portal）
+		// 只在未指定時適用，避免 provider EHR launch 因 scope 混入 launch/patient 被誤判。
 		List<String> providerIds = ctx.getProviderIds();
-		boolean isPatientFhirUser = "patient".equalsIgnoreCase(ctx.getFhirUserType())
-				|| isPatientPortalScope(session.getRequestedScope());
+		String launchUserType = ctx.getFhirUserType();
+		boolean isPatientFhirUser = "patient".equalsIgnoreCase(launchUserType)
+				|| (!StringUtils.hasText(launchUserType) && isPatientPortalScope(session.getRequestedScope()));
 		if (providerIds != null && !providerIds.isEmpty() && !isPatientFhirUser) {
 			session.setProviderCandidates(providerIds);
 			if (providerIds.size() == 1) {

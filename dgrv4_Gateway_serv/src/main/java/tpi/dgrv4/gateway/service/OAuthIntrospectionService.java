@@ -1,19 +1,30 @@
 package tpi.dgrv4.gateway.service;
 
+import java.security.PrivateKey;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.nimbusds.jose.crypto.RSADecrypter;
+import com.nimbusds.jwt.EncryptedJWT;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import tpi.dgrv4.codec.utils.Base64Util;
 import tpi.dgrv4.codec.utils.IdTokenUtil;
 import tpi.dgrv4.codec.utils.IdTokenUtil.IdTokenData;
@@ -27,40 +38,31 @@ import tpi.dgrv4.entity.repository.TsmpTokenHistoryDao;
 import tpi.dgrv4.entity.repository.TsmpUserDao;
 import tpi.dgrv4.gateway.component.OIDCWellKnownHelper;
 import tpi.dgrv4.gateway.component.TokenHelper;
+import tpi.dgrv4.gateway.component.TokenHelper.JWTClaimsSetData;
 import tpi.dgrv4.gateway.component.TokenHelper.JwtPayloadData;
-import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.constant.DgrTokenType;
+import tpi.dgrv4.gateway.constant.DgrTokenVersion;
 import tpi.dgrv4.gateway.keeper.TPILogger;
-import tpi.dgrv4.gateway.util.JsonNodeUtil;
 import tpi.dgrv4.gateway.vo.OAuthIntrospectionResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp;
 import tpi.dgrv4.gateway.vo.OAuthTokenErrorResp2;
 import tpi.dgrv4.gateway.vo.TsmpAuthorization;
 
+@RequiredArgsConstructor
+@Getter(AccessLevel.PROTECTED)
+@Component
 @Service
 public class OAuthIntrospectionService {
 
-	private TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
-	private TokenHelper tokenHelper;
-	private TsmpSettingService tsmpSettingService;
-	private DgrAcIdpUserDao dgrAcIdpUserDao;
-	private TsmpUserDao tsmpUserDao;
-	private TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	private final TsmpCoreTokenEntityHelper tsmpCoreTokenHelper;
+	private final TokenHelper tokenHelper;
+	private final TsmpSettingService tsmpSettingService;
+	private final DgrAcIdpUserDao dgrAcIdpUserDao;
+	private final TsmpUserDao tsmpUserDao;
+	private final TsmpTokenHistoryDao tsmpTokenHistoryDao;
+	private final GtwIdPJwksService gtwIdPJwksService;
 
-	@Autowired
-	public OAuthIntrospectionService(TsmpCoreTokenEntityHelper tsmpCoreTokenHelper, TokenHelper tokenHelper,
-			TsmpSettingService tsmpSettingService, DgrAcIdpUserDao dgrAcIdpUserDao, TsmpUserDao tsmpUserDao,
-			TsmpTokenHistoryDao tsmpTokenHistoryDao) {
-		super();
-		this.tsmpCoreTokenHelper = tsmpCoreTokenHelper;
-		this.tokenHelper = tokenHelper;
-		this.tsmpSettingService = tsmpSettingService;
-		this.dgrAcIdpUserDao = dgrAcIdpUserDao;
-		this.tsmpUserDao = tsmpUserDao;
-		this.tsmpTokenHistoryDao = tsmpTokenHistoryDao;
-	}
-
-	public ResponseEntity<?> introspection(HttpServletRequest httpReq, HttpServletResponse httpRes) {
+	public ResponseEntity<?> introspection(HttpServletRequest httpReq, HttpServletResponse httpRes, String pathVer) {
 		String reqUri = httpReq.getRequestURI();
 		try {
 
@@ -71,7 +73,7 @@ public class OAuthIntrospectionService {
 				}
 			});
 
-			return introspection(parameters, reqUri);
+			return introspection(parameters, reqUri, pathVer);
 
 		} catch (Exception e) {
 			TPILogger.tl.error(StackTraceUtil.logStackTrace(e));
@@ -81,8 +83,60 @@ public class OAuthIntrospectionService {
 					HttpStatus.INTERNAL_SERVER_ERROR);// 500
 		}
 	}
+	
+	protected JWTClaimsSetData getJWTClaimsSetData(String tokenStr, String reqUri) throws ParseException {
+		JWTClaimsSetData jwtClaimsSetData = new JWTClaimsSetData();
 
-	public ResponseEntity<?> introspection(Map<String, String> parameters, String reqUri) {
+		// 解析 JWT
+		JWT jwt = JWTParser.parse(tokenStr);
+
+		if (jwt instanceof SignedJWT) {
+			// 這是 JWS
+			SignedJWT signedJWT = (SignedJWT) jwt;
+
+			// 取得 JWS 的 Claims 集合 (Payload 部分)
+			jwtClaimsSetData.jwtClaimsSet = signedJWT.getJWTClaimsSet();
+
+		} else if (jwt instanceof EncryptedJWT) {
+			// 這是 JWE
+			jwtClaimsSetData.isJWE = true;
+			EncryptedJWT encryptedJWT = (EncryptedJWT) jwt;
+			
+			try {
+				// 1.取得 digiRunner 的私鑰
+				PrivateKey privateKey = getTsmpCoreTokenHelper().getKeyPair().getPrivate();
+
+				// 準備 RSA 私鑰解密器
+				RSADecrypter decrypter = new RSADecrypter(privateKey); // java.security.interfaces.RSAPrivateKey
+				// 執行解密
+				encryptedJWT.decrypt(decrypter);
+
+				// 解密後才能取得 Claims
+				JWTClaimsSet tokenClaims = encryptedJWT.getJWTClaimsSet();
+				if (tokenClaims == null) {
+					// JWE 解密失敗
+					String errMsg = "Token JWE decryption failed.";
+					TPILogger.tl.debug(errMsg);
+					jwtClaimsSetData.errRespEntity = TokenHelper.getBadRequestErrorResp(reqUri,
+							TokenHelper.INVALID_TOKEN, errMsg);
+					return jwtClaimsSetData;
+				}
+
+				jwtClaimsSetData.jwtClaimsSet = tokenClaims;
+
+			} catch (Exception e) {
+				TPILogger.tl.warn(StackTraceUtil.logStackTrace(e));
+				String errMsg = "Token JWE decryption error.";
+				TPILogger.tl.debug(errMsg);
+				jwtClaimsSetData.errRespEntity = TokenHelper.getBadRequestErrorResp(reqUri, TokenHelper.INVALID_TOKEN,
+						errMsg);
+			}
+		}
+		
+		return jwtClaimsSetData;
+	}
+
+	public ResponseEntity<?> introspection(Map<String, String> parameters, String reqUri, String pathVer) throws Exception {
 
 		ResponseEntity<?> respEntity = checkData(parameters, reqUri);
 		if (respEntity != null) {// 資料驗證有錯誤
@@ -92,37 +146,66 @@ public class OAuthIntrospectionService {
 		String tokenStr = parameters.get("token");
 		String tokenTypeHint = parameters.get("token_type_hint");// access_token 或 refresh_token
 		String clientId = parameters.get("client_id");
-
-		// 由 token 取得資料
-		JwtPayloadData oauthIntrospection_jwtPayloadData = getTokenHelper().getJwtPayloadData(tokenStr);
-		respEntity = oauthIntrospection_jwtPayloadData.errRespEntity;
+		
+		JWTClaimsSetData jwtClaimsSetData = getJWTClaimsSetData(tokenStr, reqUri);
+		
+		respEntity = jwtClaimsSetData.errRespEntity;
 		if (respEntity != null) {// 資料有錯誤
 			return respEntity;
 		}
+		
+		JWTClaimsSet tokenClaims = jwtClaimsSetData.jwtClaimsSet;
+	    
+	    // 取得 JWS 的 Issuer
+		String issuer = tokenClaims.getIssuer();// iss
+		
+		Long exp = tokenClaims.getExpirationTime().getTime() / 1000;// 去掉亳秒
+		JwtPayloadData oauthIntrospectionJwtPayloadData = null;
+		
+		// exp 是否沒有值 或 過期
+		boolean isTokenExpired = getTokenHelper().checkTokenExpired(tokenTypeHint, tokenStr, exp);
+		if (isTokenExpired) {
+			return getResp(tokenClaims, false, tokenTypeHint);
+		}
+		
+		boolean isJWE = jwtClaimsSetData.isJWE;
+		if (!isJWE) {
+			// 驗證簽章
+			if (DgrTokenVersion.PATH_V2.equals(pathVer)) {
+				// 取得 JWKS 的公鑰 JSON
+				String jwksJsonStr = getGtwIdPJwksService().getJwksJsonStr();
+				// 驗證 JWS 簽章
+				oauthIntrospectionJwtPayloadData = getTokenHelper().verifyTokenByJwks(tokenStr, issuer, jwksJsonStr);
 
-		JsonNode payloadJsonNode = oauthIntrospection_jwtPayloadData.payloadJsonNode;
-		String jti = JsonNodeUtil.getNodeAsText(payloadJsonNode, "jti");
-		String tokenClientId = JsonNodeUtil.getNodeAsText(payloadJsonNode, "client_id");
-		Long exp = JsonNodeUtil.getNodeAsLong(payloadJsonNode, "exp");
+			} else {
+				oauthIntrospectionJwtPayloadData = getTokenHelper().getJwtPayloadData(tokenStr);
 
+			}
+			
+			respEntity = oauthIntrospectionJwtPayloadData.errRespEntity;
+			if (respEntity != null) {// 資料有錯誤
+				return respEntity;
+			}
+		}
+
+		String jti = tokenClaims.getJWTID();// jti
+		String tokenClientId = tokenClaims.getClaimAsString("client_id");
+		
 		// token 的 client_id 沒有值,或 client_id 和 token 中的 client_id 值不相同
 		respEntity = getTokenHelper().checkTokenClientId(clientId, tokenClientId, tokenStr, "token");
 		if (respEntity != null) {// 資料驗證有錯誤
 			return respEntity;
 		}
 
-		// 是否 token exp 沒有值 或 token 過期
-		boolean isTokenExpired = getTokenHelper().checkTokenExpired(tokenTypeHint, tokenStr, exp);
-
 		// 是否 token 已撤銷
 		boolean isTokenRevoked = getTokenHelper().checkTokenRevoked(tokenTypeHint, jti);
 
 		boolean active = false;
-		if (isTokenExpired == false && isTokenRevoked == false) {// token 未過期且未撤銷
+		if (!isTokenRevoked) {// token 未撤銷
 			active = true;
 		}
 
-		return getResp(payloadJsonNode, active, tokenTypeHint);
+		return getResp(tokenClaims, active, tokenTypeHint);
 	}
 
 	public ResponseEntity<?> checkData(Map<String, String> parameters, String reqUri) {
@@ -179,32 +262,44 @@ public class OAuthIntrospectionService {
 		return null;
 	}
 
-	protected ResponseEntity<?> getResp(JsonNode payloadJsonNode, boolean active, String tokenTypeHint) {
+	protected ResponseEntity<?> getResp(JWTClaimsSet tokenClaims, boolean active, String tokenTypeHint)
+			throws ParseException {
+		Long exp = tokenClaims.getExpirationTime().getTime() / 1000;// exp, 拿掉亳秒
+		String jti = tokenClaims.getJWTID();// jti
+		String ati = tokenClaims.getClaimAsString("ati");// 若為 refresh token, 則有 ati
+		Long iat = tokenClaims.getIssueTime().getTime() / 1000;// iat, 拿掉亳秒
+		
+		List<String> scopeList = tokenClaims.getStringListClaim("scope");
+		String scopeStr = TokenHelper.getListToStr(scopeList);// 取得多個 scope, 以空格分隔的字串
 
-		Long exp = JsonNodeUtil.getNodeAsLong(payloadJsonNode, "exp");
-		String jti = JsonNodeUtil.getNodeAsText(payloadJsonNode, "jti");
-		String ati = JsonNodeUtil.getNodeAsText(payloadJsonNode, "ati");// 若為 refresh token, 則有 ati
+		String tokenUserName = tokenClaims.getClaimAsString("user_name");
+		String tokenClientId = tokenClaims.getClaimAsString("client_id");
 
-		JsonNode scopeArray = JsonNodeUtil.getNodeAsArrayNode(payloadJsonNode, "scope");
-		String scopeStr = JsonNodeUtil.convertJsonArrayToString(scopeArray, " ");
 
-		String tokenUserName = JsonNodeUtil.getNodeAsText(payloadJsonNode, "user_name");
-		String tokenClientId = JsonNodeUtil.getNodeAsText(payloadJsonNode, "client_id");
-		Long iat = JsonNodeUtil.getNodeAsLong(payloadJsonNode, "iat");
+		List<String> audList = tokenClaims.getAudience();// aud, 可能是 Array 或 String
+		String audStr = TokenHelper.getListToStr(audList);// 取得多個 aud, 以空格分隔的字串
 
-		JsonNode audArray = JsonNodeUtil.getNodeAsArrayNode(payloadJsonNode, "aud");
-		String audStr = JsonNodeUtil.convertJsonArrayToString(audArray, " ");
-
-		String idPType = JsonNodeUtil.getNodeAsText(payloadJsonNode, "idp_type");
+		String idPType = tokenClaims.getClaimAsString("idp_type");
+		
 
 		boolean isAcIdPFlow = TokenHelper.isAcIdPFlow(tokenUserName, idPType);
 		boolean isGtwIdPFlow = TokenHelper.isGtwIdPFlow(tokenUserName, idPType);
 
 		String userNameForQuery = TsmpAuthorization.getUserNameForQuery(tokenUserName);
 
-		String issuer = getIssuer(idPType, isGtwIdPFlow);
-		String userAlias = getUserAlias(tokenTypeHint, idPType, jti, ati, userNameForQuery, isAcIdPFlow, isGtwIdPFlow);
+		// v1的 token 沒有 sub, v2 的 token 才加了 sub
+		String sub = userNameForQuery;
+		if (sub == null || sub.isEmpty()) {
+			sub = tokenClaims.getClaimAsString("sub");
+		}
+		
+		String issuer = tokenClaims.getIssuer();// iss		
+		if(!StringUtils.hasText(issuer)) {
+			issuer = getIssuer(idPType, isGtwIdPFlow);
+		}
 
+		String userAlias = getUserAlias(tokenTypeHint, idPType, jti, ati, userNameForQuery, isAcIdPFlow, isGtwIdPFlow);
+		
 		OAuthIntrospectionResp resp = new OAuthIntrospectionResp();
 		resp.setActive(active);
 		resp.setScope(scopeStr);
@@ -214,13 +309,14 @@ public class OAuthIntrospectionService {
 		resp.setExp(exp);
 		resp.setIat(iat);
 		resp.setNbf(iat);// token 的生效時間,目前token中沒有,放iat
-		resp.setSub(userNameForQuery);// 可供機器識別是哪位 user 授權了這個 token，例如說：db 記錄的 uuid
+		resp.setSub(sub);// 可供機器識別是哪位 user 授權了這個 token，例如說：db 記錄的 uuid
 		resp.setAud(audStr);
 		resp.setIss(issuer);// 簽發人
 		resp.setJti(jti);
 
 		return new ResponseEntity<OAuthIntrospectionResp>(resp, HttpStatus.OK);
 	}
+	 
 
 	/**
 	 * 取得 issuer 的值, <br>

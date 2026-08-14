@@ -67,24 +67,16 @@ export class KeyValueGridComponent implements OnInit, ControlValueAccessor {
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
     if (this.content) {
-      if (isDisabled) {
-        // $(this.content.nativeElement).find('input , button').prop('disabled', true).off('click');
-        $(this.content.nativeElement).find('input , button').prop('disabled', true);
-      } else {
-        // $(this.content.nativeElement).find('input , button').prop('disabled', false).on('click');
-        $(this.content.nativeElement).find('input , button').prop('disabled', false);
-      }
+      this.content.nativeElement.querySelectorAll('input, button').forEach(
+        (el: HTMLInputElement | HTMLButtonElement) => el.disabled = isDisabled
+      );
     }
   }
 
   ngAfterViewInit(): void {
-    if (this.disabled) {
-      // $(this.content.nativeElement).find('input , button').prop('disabled', true).off('click');
-      $(this.content.nativeElement).find('input , button').prop('disabled', true);
-    } else {
-      // $(this.content.nativeElement).find('input , button').prop('disabled', false).on('click');
-      $(this.content.nativeElement).find('input , button').prop('disabled', false);
-    }
+    this.content.nativeElement.querySelectorAll('input, button').forEach(
+      (el: HTMLInputElement | HTMLButtonElement) => el.disabled = this.disabled
+    );
   }
 
 

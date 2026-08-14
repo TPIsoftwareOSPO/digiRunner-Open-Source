@@ -16,6 +16,7 @@ public class DPB0191Resp {
 	private String createUser;
 	private Date updateDateTime;
 	private String updateUser;
+	private Integer minimumIdle;
 
 	public String getConnectionName() {
 		return connectionName;
@@ -120,4 +121,14 @@ public class DPB0191Resp {
 	public void setUpdateUser(String updateUser) {
 		this.updateUser = updateUser;
 	}
+
+	public Integer getMinimumIdle() {
+		return minimumIdle;
+	}
+
+	public void setMinimumIdle(Integer minimumIdle) {
+		this.minimumIdle = minimumIdle;
+	}
+	
+	
 }

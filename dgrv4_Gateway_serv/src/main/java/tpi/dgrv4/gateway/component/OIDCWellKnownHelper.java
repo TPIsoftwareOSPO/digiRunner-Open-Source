@@ -95,4 +95,15 @@ public class OIDCWellKnownHelper {
 	public static String getJwksUri(String schemeAndDomainAndPort) {
 		return String.format("%s/dgrv4/ssotoken/oauth2/certs", schemeAndDomainAndPort);
 	}
+	
+	/**
+	 * digiRunner 的 introspection URL <br>
+	 * 例如: <br>
+	 * https://127.0.0.1:8080/oauth/introspection <br>
+	 * https://127.0.0.1:8080/oauth/v2/introspection <br>
+	 * @param pathVer
+	 */
+	public static String getIntrospectionEndpoint(String schemeAndDomainAndPort, String pathVer) {
+		return String.format("%s/oauth%s/introspection", schemeAndDomainAndPort, pathVer);
+	}
 }

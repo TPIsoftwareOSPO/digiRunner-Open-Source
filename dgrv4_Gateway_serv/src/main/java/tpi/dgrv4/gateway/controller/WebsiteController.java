@@ -41,7 +41,7 @@ public class WebsiteController {
 
 	}
 
-	@SuppressWarnings("java:S3752") // allow all methods for sonarqube scan
+	@SuppressWarnings({"java:S3752", "java:S5122"}) // allow all methods for sonarqube scan,Allow any domain for sonarqube scan
 	@CrossOrigin
 	@RequestMapping(value = "/smart-on-fhir/{websiteName}/**")
 	public void smartOnFhir(@PathVariable("websiteName") String websiteName, @RequestHeader HttpHeaders httpHeaders,

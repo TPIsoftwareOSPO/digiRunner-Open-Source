@@ -75,13 +75,13 @@ public class TsmpSettingTableInitializer {
 
 			createTsmpSetting("TSMP_AC_CLIENT_ID","YWRtaW5Db25zb2xl","Login AC account (do not modify)");
 			createTsmpSetting("TSMP_AC_CLIENT_PW","dHNtcDEyMw==","AC login password (do not modify)");
-
+			
 			createTsmpSetting("TSMP_FAIL_THRESHOLD","6","Allowed \"User password\" fail THRESHOLD");
 			createTsmpSetting("SSO_PKCE","true","PKCE Level AuthCode verification enablement - true/false");
 			createTsmpSetting("SSO_DOUBLE_CHECK","true","Enablement of Double-check verification - true/false");
 			createTsmpSetting("SSO_AUTO_CREATE_USER","false","Enablement of SSO auto - user account creation - true/false");
 			createTsmpSetting("TSMP_DPAA_RUNLOOP_INTERVAL","1","The RUNLOOP sett for DPAA, if it is set to 0, the alarm detection will be disabled");
-			createTsmpSetting("TSMP_COMPOSER_ADDRESS","http://tsmp-composer:1880","COMPOSER broadcasting, separated by commas");
+			createTsmpSetting("TSMP_COMPOSER_ADDRESS","http://tsmp-composer:1880","Composer address, if an HA architecture is required, please configure the nginx address");
 			createTsmpSetting("TSMP_DELETEMODULE_ALERT","false","Enable the Prompt when deleting MODULE - true/false");
 			createTsmpSetting("TSMP_AC_CONF","{\"dp\":0,\"net\":false}","When logging in, the setting value for AC provided by the backend.");
 //	      -- 20221118, v4, 增加 RDB 版本的 API Log
@@ -189,7 +189,7 @@ public class TsmpSettingTableInitializer {
 			createTsmpSetting((id = "AC_IDP_ACCALLBACK_URL"), (value = "https://localhost:8080/dgrv4/ac4/idpsso/accallback"), (memo = "Frontend AC IdP AC callback URL"));
 			createTsmpSetting((id = "AC_IDP_LDAP_REVIEW_ENABLE"), (value = "true"), (memo = "Is the AC IdP LDAP sending the approval email and auto-creating users enabled? (true/false)"));
 
-			createTsmpSetting((id = "DGR_AC_LOGIN_PAGE"), (value = "redirect:/dgrv4/ac4/login"), (memo = "The digiRunner login page must be restarted after modifications. The available modification options include 'redirect:/dgrv4/ac4/login' and 'redirect:/dgrv4/ac4/ldap'."));
+			createTsmpSetting((id = "DGR_AC_LOGIN_PAGE"), (value = "redirect:/dgrv4/ac4/index.html"), (memo = "The digiRunner login page must be restarted after modifications. The available modification options include 'redirect:/dgrv4/ac4/login' and 'redirect:/dgrv4/ac4/ldap'."));
 
 //		  -- 20230410, v4 GTW IdP 的設定, Mini Lee
 	        createTsmpSetting((id = "GTW_IDP_JWK1"), (value = "{\"p\":\"4zMSqD0dhGjwrxAdoHDYVl6gHSyX5Lr-oA8SSIAswXFsSoU6dup0uU9vtEGxME7JS83rQowPG1rzIZjaf3078skm_Ry4jNq6b3KjPCnmLZXD7STAw6_pfe9oZYFDE5m05B129zfYa83yiKhEFY96CyWCBYqUPIENqsJ5ybQcr80\",\"kty\":\"RSA\",\"q\":\"y0dI4g2EsCDC-5D5zJAsjsp9jFfh1qIIYy_zWHWm4-o8R5kYR9k4CX-QiqM5w9fZSu5eCX98T4NmlkfoKwf68a49bPAyvIsBbor7GBZU-nTGYjsjsF4XnFgv-UTuc5WCWDV119Ph3ebYxYFeLo-bnKrPr52JZyHE_FNqudn0yB8\",\"d\":\"AYk60TXj1goNm7kvSltXawShh__WxuzUsIkAMJaA4QXSGabkUzHTkxiP13mHSGiX80mxMsyqJTZHF7kZESzJhu3C3Kzbf4G68aB4PbDLM-3q12DywbfGX_TR5UzstsDWlJ259bl6QibLbBRTvZyIgzGMWBWOc40MV7wRhvHDl9Gyfk7MDtRJgYJfhWO4GmIl-nwECgzqEPmZrhUFSTEAQzzSL2lEpXIGii_cURM3fDxi8RTb4_LT7Ox_2MyCpIIqrlrOzYv39RKeuyJ6S5NV7TdxLnOpxAbxzhmeQGjvSTj0AcH7HT5b6pVF3MRFO1_V4Pji1ezZ_E4Vdd0yaLm3sQ\",\"e\":\"AQAB\",\"use\":\"sig\",\"kid\":\"39f9cd84-34bd-4fd8-84c7-8676f9ff741e\",\"qi\":\"hvMpK7FBbSKND8mBHeG5XiJHl1O2nOZSFh3vGN9tbTfowFK8pbGgiABniYzHZq5ghm7qepxQrfi_-o6r1-zlh3rdMpjU5WWI5UfTseXixfNoSac2QHk4fwItjkPVynyYyjDWR8HdJDN_BR3QyUGvms8BEqrnAIm96RzwBmPsmoU\",\"dp\":\"uMizJe3-8dA_4MIktnbRHP39D31TVI7ZxOg9IIZO4E4Vm05cTJdHs-ftnBfJutZ5VZP3AbrUFpWUJQEixInglggQE9CmMLk85KPCK46QTQb_wQIhXYbXSrvKlrPZEDn1K4rjVRIwjQ2FcqwYI8j7o9EvvL4G7mav7PAbCXfZ1Qk\",\"alg\":\"RS256\",\"dq\":\"MpugrYaoDiFZ6b-CMUeDkFkhQJtwgjr805TQhKllz0A1ma2nudt-c_7qQVm5u-Q1GM6XYs32aOVR2QA18OCfvSOf70stlnsU9CxtruWAaopACZynmfUS872Q1AIxS11hggxtNjpt9QzP0vwOMpFWMH7mDdauqpphrGAoJfT5WAk\",\"n\":\"tGjDpJF0f32LXfSJbI_0PJTlrgxI1oefXXMHJtsNi8phBQsACimkqrqyBiJMIPm94Y5yANrQOusJLQxKcqDlQqfRZ45NPgpMx8J2cGrY4GYz-mXpXdXVqzb8Yo46k4WolMk14mFA-g9nKwKrjlkPeSVobvq9hqbymIEJo-skguR2gkpGOHDPgzkvkST02a3kiIoswmPDkhfUTgZBoYrocxg_pPRDOIN2v5YKGtcGQESev914dWTScHAX5m3-fGj8j-6Ua8gxGddN0iFHbfCa_WegEkl8K7EynZTcfkARzvs9kVBOOzMFUj40fTFnvlAJcik_Kc6wGE1_mz2kjTVx0w\"}"), (memo = "Gateway IdP JWKS, 1st key pair"));
@@ -307,7 +307,7 @@ public class TsmpSettingTableInitializer {
 			createTsmpSetting((id = "AUDIT_LOG_RETENTION_DAYS"), (value = "0"), (memo = "Audit log retention days, default: 0, setting to 0 means using gov_long time setting"));
 
 			//  --2025/07/31 kibana allowlist ,Zoe Lee
-			createTsmpSetting((id = "KIBANA_REFERER_ALLOWLIST"),(value = "/app/dashboards,/app/discover,/app/monitoring"),(memo = "Allowed Referer list for Kibana. Multiple paths should be separated by \",\"."));
+			createTsmpSetting((id = "KIBANA_REFERER_ALLOWLIST"),(value = "/app/dashboards,/app/discover,/app/monitoring,/api/status"),(memo = "Allowed Referer list for Kibana. Multiple paths should be separated by \",\"."));
 			
 		    //  --2025/09/11 first time login change ,Tom
 			createTsmpSetting((id = "FIRST_TIME_LOGIN_CHANGE_MIMA_ENABLED"),(value = "false"),(memo = "Whether to display the password change for the first login"));
@@ -361,6 +361,9 @@ public class TsmpSettingTableInitializer {
 
             // -- 2026/03/27, H2 sync time out , Zoe Lee
             createTsmpSetting((id = "H2_SYNC_TIMEOUT_MINUTES"),(value = "30"),(memo = "H2 sync timeout minutes (default: 30)"));
+            
+            // -- 2026/06/09, Mini Lee, 前端 GTW IdP User登入/同意/訊息畫面的URL是否使用絶對路徑? 若 false 則為相對路徑 (true/false) (預設為false)
+			createTsmpSetting((id = "GTW_IDP_USE_ABSOLUTE_PATH"), (value = "false"), (memo = "Does the URL for the GTW IdP User login/agreement/message screen on the front end use an absolute path? If false, then a relative path is used. (true/false) (default: false)"));
 
 
         } catch (Exception e) {

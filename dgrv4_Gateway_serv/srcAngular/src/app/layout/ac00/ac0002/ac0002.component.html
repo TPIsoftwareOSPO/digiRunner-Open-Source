@@ -255,6 +255,7 @@
             <small class="form-text">{{userMail?.errors.isRequired | translate}}</small>
             <small class="form-text">{{userMail?.errors.maxlength | translate}}</small>
             <small class="form-text">{{userMail?.errors.pattern | translate}}</small>
+            <small *ngIf="userMail?.errors.mailFormat" class="form-text">{{userMail?.errors.mailFormat | translate}}</small>
           </div>
         </div>
         <div class="col-12 col-lg-6">
@@ -372,6 +373,7 @@
             <small class="form-text">{{newUserMail?.errors.isRequired | translate}}</small>
             <small class="form-text">{{newUserMail?.errors.maxlength | translate}}</small>
             <small class="form-text">{{newUserMail?.errors.pattern | translate}}</small>
+            <small *ngIf="newUserMail?.errors.mailFormat" class="form-text">{{newUserMail?.errors.mailFormat | translate}}</small>
           </div>
         </div>
         <div class="col-12 col-lg-6">

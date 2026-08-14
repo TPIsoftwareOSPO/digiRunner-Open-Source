@@ -36,6 +36,8 @@ public class AA0301SearchCriteria {
 	
 	private List<String> labeList;
 	
+	private String include;
+	
 	public AA0301SearchCriteria() {}
 
 	public TsmpApi getLastTsmpApi() {
@@ -157,5 +159,15 @@ public class AA0301SearchCriteria {
 	public void setLabeList(List<String> labeList) {
 		this.labeList = labeList;
 	}
+
+	public String getInclude() {
+		return include;
+	}
+
+	public void setInclude(String include) {
+		this.include = include;
+	}
+	
+	
 	
 }

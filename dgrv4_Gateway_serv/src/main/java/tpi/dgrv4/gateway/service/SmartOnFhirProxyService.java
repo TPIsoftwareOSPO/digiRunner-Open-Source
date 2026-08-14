@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +27,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 import tpi.dgrv4.common.utils.CheckmarxCommUtils;
 import tpi.dgrv4.common.utils.StackTraceUtil;
+import tpi.dgrv4.entity.entity.DgrSmartAuthSession;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxy;
 import tpi.dgrv4.entity.entity.DgrSmartOnFhirProxyDiversion;
+import tpi.dgrv4.entity.repository.DgrSmartAuthSessionDao;
 import tpi.dgrv4.entity.repository.DgrSmartOnFhirProxyDao;
 import tpi.dgrv4.entity.repository.DgrSmartOnFhirProxyDiversionDao;
+import tpi.dgrv4.entity.repository.TsmpClientHostDao;
 import tpi.dgrv4.gateway.component.TokenHelper;
 import tpi.dgrv4.gateway.component.check.SqlInjectionCheck;
 import tpi.dgrv4.gateway.component.check.XssCheck;
@@ -75,6 +80,13 @@ public class SmartOnFhirProxyService {
 	// ===== SMART App Launch =====
 	private static final String WELL_KNOWN_SMART_CONFIGURATION = "/.well-known/smart-configuration";
 
+	// ===== SMART 授權 session 旁路（picker）=====
+	// 外部授權流程的 picker 以此 header 帶入 state，換取入站驗證旁路（僅限 GET 讀取）
+	private static final String HEADER_X_SMART_STATE = "X-Smart-State";
+	private static final String SMART_SESSION_PHASE_AUTHENTICATED = "AUTHENTICATED";
+	/** picker 以 state 旁路的時效上限（毫秒）；consent 應於短時間內完成，逾時視為失效。 */
+	private static final long SMART_SESSION_BYPASS_TTL_MS = 30 * 60 * 1000L;
+
 	// ===== Content Types =====
 	private static final String CONTENT_TYPE_JSON_UTF8 = "application/json;charset=UTF-8";
 	private static final String CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded";
@@ -111,8 +123,16 @@ public class SmartOnFhirProxyService {
 	private final XxeCheck xxeCheck;
 	private final TokenHelper tokenHelper;
 
-	@Autowired
-	private SmartDiscoveryService smartDiscoveryService;
+	private @Setter(onMethod_ = @Autowired) SmartDiscoveryService smartDiscoveryService;
+
+	// 後端代取 token（outbound relay）；用 setter 注入以免動到既有建構子（測試相容）
+	private @Setter(onMethod_ = @Autowired) SmartProxyBackendTokenService backendTokenService;
+
+	// 入站 third-party introspection 驗證；同樣 setter 注入
+	private @Setter(onMethod_ = @Autowired) SmartProxyInboundIntrospector inboundIntrospector;
+
+	// SMART 授權流程 picker 的 state 旁路查詢；同樣 setter 注入（測試相容）
+	private @Setter(onMethod_ = @Autowired) DgrSmartAuthSessionDao smartAuthSessionDao;
 
 	/** 流量控制：routeName → (targetUrl → TrafficCounter) */
 	public final ConcurrentHashMap<String, ConcurrentHashMap<String, TrafficCounter>> trafficMap = new ConcurrentHashMap<>();
@@ -201,9 +221,39 @@ public class SmartOnFhirProxyService {
 				return;
 			}
 
-			// 5. 智能路由（selectDiversion）
+			// 4.6 outbound relay 預備：在 selectDiversion（含 autodiscovery 探測）之前先辦好代取 token，
+			// 讓探測請求也帶上 strip/代取後的 Authorization（修正 autodiscovery 未帶代取 token 的問題）。
+			boolean launcherBypassed = isLauncherAdminBypass(request);
+			// SMART 授權流程 picker：外部使用者無後台 token，改以 state 對應的 AUTHENTICATED session 旁路（僅限 GET 讀取）
+			boolean sessionBypassed = "GET".equalsIgnoreCase(method) && isSmartSessionBypass(request, websiteName);
+			// 特權旁路（launcher 後台 或 授權 session）：略過入站驗證、strip caller token、relay 出站行為皆一致
+			boolean privileged = launcherBypassed || sessionBypassed;
+			SmartOnFhirProxyRouteContext.AuthMode authMode = routeContext.securityConfig().authMode();
+			SmartOnFhirProxyRouteContext.RelayConfig relay = routeContext.relay();
+			boolean authNone = (authMode == null || authMode == SmartOnFhirProxyRouteContext.AuthMode.NONE);
+			String callerAuth = request.getHeader("Authorization");
+			boolean callerHasBearer = callerAuth != null && callerAuth.regionMatches(true, 0, "Bearer ", 0, 7);
+			boolean effectiveNoBearer = !callerHasBearer || privileged;
+			String acquiredRelayToken = null;
+			if (relay != null && relay.enabled() && backendTokenService != null && authNone && effectiveNoBearer) {
+				try {
+					acquiredRelayToken = backendTokenService.acquire(relay);
+				} catch (Exception ex) {
+					TPILogger.tl.error("SmartOnFhirProxy backend token relay failed: " + ex.getMessage());
+					writeError(response, HttpStatus.BAD_GATEWAY, "backend_token_error",
+							"failed to acquire backend token", requestUri, isShowLog, uuid);
+					return;
+				}
+			}
+			final String relayToken = acquiredRelayToken;
+
+			// 5. 智能路由（selectDiversion）：探測請求帶上 strip/代取後的 Authorization
 			RoutingResult routingResult = routingService.selectDiversion(routeContext, resourceURL, method,
-					() -> convertHeaders(request, httpHeaders), request.getQueryString(), payload);
+					() -> {
+						Map<String, List<String>> probeHeaders = convertHeaders(request, httpHeaders);
+						applyOutboundAuth(probeHeaders, privileged, relayToken);
+						return probeHeaders;
+					}, request.getQueryString(), payload);
 
 			DiversionConfig diversionConfig = routingResult.diversionConfig();
 			if (diversionConfig == null) {
@@ -213,9 +263,30 @@ public class SmartOnFhirProxyService {
 				return;
 			}
 
-			// 6.Access Token 檢查
-			if (routeContext.securityConfig().enableAccessToken()) {
-				if (!isLauncherAdminBypass(request)) {
+			// 6. 入站 token 驗證（依 authMode：none 略過 / dgr 既有驗證 / third-party introspection）
+			SmartOnFhirProxyRouteContext.AuthMode inboundMode = routeContext.securityConfig().authMode();
+			if (inboundMode == null) {
+				// 後備：相容舊 enableAccessToken（視為 dgr）
+				inboundMode = routeContext.securityConfig().enableAccessToken()
+						? SmartOnFhirProxyRouteContext.AuthMode.DGR
+						: SmartOnFhirProxyRouteContext.AuthMode.NONE;
+			}
+			if (inboundMode != SmartOnFhirProxyRouteContext.AuthMode.NONE && !privileged) {
+				if (inboundMode == SmartOnFhirProxyRouteContext.AuthMode.THIRD_PARTY) {
+					String inboundAuth = request.getHeader("Authorization");
+					String bearer = (inboundAuth != null && inboundAuth.regionMatches(true, 0, "Bearer ", 0, 7))
+							? inboundAuth.substring(7).trim()
+							: null;
+					String err = (inboundIntrospector == null)
+							? "introspection validator unavailable"
+							: inboundIntrospector.validate(routeContext.securityConfig().introspect(), bearer,
+									routingResult.resourceType());
+					if (err != null) {
+						writeError(response, HttpStatus.UNAUTHORIZED, ERROR_INVALID_TOKEN, err, requestUri,
+								isShowLog, uuid);
+						return;
+					}
+				} else { // DGR：沿用既有驗證鏈
 					ResponseEntity<?> respEntity = getTokenHelper().verifyAccessTokenForSmartOnFhir(httpHeaders,
 							request, requestUri, routingResult.resourceType(), routeContext.clientIds(),
 							resourceURL, isBundleTransaction);
@@ -282,6 +353,10 @@ public class SmartOnFhirProxyService {
 					headers.put("X-Smart-Encounter", List.of(authCtx.getEncounter()));
 				}
 			}
+
+			// 10.6 套用出站 Authorization：特權旁路（launcher / 授權 session）strip caller token、有代取 token 則注入後端。
+			// 代取 token 已於 selectDiversion 前（4.6）辦好，與 autodiscovery 探測一致。
+			applyOutboundAuth(headers, privileged, relayToken);
 
 			byte[] forwardBody = rewrite
 					? SmartOnFhirProxyResponseRewriter.rewriteRequestBody(requestBody, proxyBaseUrl, redirectedUrl)
@@ -957,6 +1032,16 @@ public class SmartOnFhirProxyService {
 		return xxeCheck;
 	}
 
+	/** 套用出站 Authorization：特權旁路（launcher / 授權 session）或代取時先移除 caller token；有代取 token 則注入 Bearer。 */
+	private void applyOutboundAuth(Map<String, List<String>> headers, boolean stripCallerAuth, String relayToken) {
+		if (stripCallerAuth || relayToken != null) {
+			headers.entrySet().removeIf(e -> "authorization".equalsIgnoreCase(e.getKey()));
+		}
+		if (relayToken != null) {
+			headers.put("Authorization", List.of("Bearer " + relayToken));
+		}
+	}
+
 	private boolean isLauncherAdminBypass(HttpServletRequest request) {
 		String launcherHeader = request.getHeader("X-Smart-Launcher");
 		if (!"true".equals(launcherHeader)) {
@@ -984,6 +1069,52 @@ public class SmartOnFhirProxyService {
 			return true;
 		} catch (Exception e) {
 			TPILogger.tl.debug("Launcher admin bypass failed: " + e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * SMART 授權流程 picker 的 state 旁路判定。
+	 *
+	 * <p>
+	 * 外部 SMART App Launch 的使用者透過 IdP 登入，手上沒有後台 admin token， 但授權流程已完成 client 驗證與使用者登入，並在 DB
+	 * 建立 phase=AUTHENTICATED 的 {@link DgrSmartAuthSession}。 picker 讀取候選清單時以
+	 * {@code X-Smart-State} 帶入 state，本方法比對該 session 有效即放行—— 信任模型與 consent-info / approve
+	 * 一致（皆僅憑 state），且讀清單權限比 approve 更小。
+	 * </p>
+	 *
+	 * <p>
+	 * 三道邊界收斂：session 必須為 AUTHENTICATED、websiteName 必須綁定本 proxy、 且未超過時效上限；呼叫端另限定僅 GET
+	 * 方可旁路，避免以 session 對 FHIR 寫入。
+	 * </p>
+	 */
+	private boolean isSmartSessionBypass(HttpServletRequest request, String websiteName) {
+		String state = request.getHeader(HEADER_X_SMART_STATE);
+		if (!StringUtils.hasText(state) || smartAuthSessionDao == null) {
+			return false;
+		}
+		try {
+			DgrSmartAuthSession session = smartAuthSessionDao.findByState(state).orElse(null);
+			if (session == null) {
+				return false;
+			}
+			// 必須是「已登入、待 consent」的窗口
+			if (!SMART_SESSION_PHASE_AUTHENTICATED.equals(session.getPhase())) {
+				return false;
+			}
+			// 綁定本 proxy：防止用 A proxy 的 session 讀 B proxy 的 FHIR 資料
+			if (!session.getWebsiteName().equals(websiteName)) {
+				return false;
+			}
+			// 時效檢查（沿用既有 createDateTime，不需改 schema）
+			Date createDateTime = session.getCreateDateTime();
+			if (createDateTime == null
+					|| System.currentTimeMillis() - createDateTime.getTime() > SMART_SESSION_BYPASS_TTL_MS) {
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			TPILogger.tl.debug("Smart session bypass failed: " + e.getMessage());
 			return false;
 		}
 	}

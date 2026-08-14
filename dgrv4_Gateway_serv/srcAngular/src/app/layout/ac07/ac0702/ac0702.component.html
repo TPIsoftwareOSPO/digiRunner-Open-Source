@@ -210,7 +210,7 @@
           <div class="input-group">
             <input formControlName="logField" type="text" class="form-control" placeholder="{{'log_field'|translate}}">
             &nbsp;&nbsp;
-            <span class="px-1 py-1 mt-1">-</span>
+            <span class="px-1 py-1 mt-1 form-field-affix">-</span>
             &nbsp;&nbsp;
             <input formControlName="rtnValue" type="text" class="form-control" placeholder="{{'rtn_value'|translate}}">
           </div>
@@ -221,7 +221,7 @@
             <input formControlName="moduleName" type="text" class="form-control"
               placeholder="{{'module_name'|translate}}">
             &nbsp;&nbsp;
-            <span class="px-1 py-1 mt-1">-</span>
+            <span class="px-1 py-1 mt-1 form-field-affix">-</span>
             &nbsp;&nbsp;
             <input formControlName="txid" type="text" class="form-control" placeholder="{{'api_key'|translate}}">
           </div>
@@ -274,10 +274,10 @@
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="threshold_label" class="control-label">{{'threshold'|translate}}</label>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <input formControlName="threshold" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'times'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'times'|translate}}</span>
           </div>
           <div *ngIf="threshold?.invalid && (threshold?.dirty || threshold?.touched)" class="text-danger">
             <small class="form-text">{{threshold.errors.isRequired}}</small>
@@ -287,10 +287,10 @@
         </div>
         <div class="col-3 col-sm-3">
           <label id="duration_label" class="control-label">{{'duration'|translate}}</label>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <input formControlName="duration" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'sec'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="duration?.invalid && (duration?.dirty || duration?.touched)" class="text-danger">
             <small class="form-text">{{duration.errors.isRequired}}</small>
@@ -300,10 +300,10 @@
         </div>
         <div class="col-3 col-sm-3">
           <label id="alertInterval_label" class="control-label">{{'alert_interval'|translate}}</label>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <input formControlName="alertInterval" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'sec'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="alertInterval?.invalid && (alertInterval?.dirty || alertInterval?.touched)" class="text-danger">
             <small class="form-text">{{alertInterval.errors.isRequired}}</small>
@@ -313,10 +313,10 @@
         </div>
         <div *ngIf="alertType!.value == 'responseTime'" class="col-3 col-sm-3">
           <label id="elapse_label" class="required control-label">{{'response_time'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex align-items-center">
             <input type="number" class="form-control w-75" formControlName="elapse" min="0"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'milli_sec'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'milli_sec'|translate}}</span>
           </div>
         </div>
       </div>
@@ -647,7 +647,7 @@
           <div class="input-group">
             <input formControlName="logField" type="text" class="form-control" placeholder="{{'log_field'|translate}}">
             &nbsp;&nbsp;
-            <span class="px-1 py-1 mt-1">-</span>
+            <span class="px-1 py-1 mt-1 form-field-affix">-</span>
             &nbsp;&nbsp;
             <input formControlName="rtnValue" type="text" class="form-control" placeholder="{{'rtn_value'|translate}}">
           </div>
@@ -658,7 +658,7 @@
             <input formControlName="moduleName" type="text" class="form-control"
               placeholder="{{'module_name'|translate}}">
             &nbsp;&nbsp;
-            <span class="px-1 py-1 mt-1">-</span>
+            <span class="px-1 py-1 mt-1 form-field-affix">-</span>
             &nbsp;&nbsp;
             <input formControlName="txid" type="text" class="form-control" placeholder="{{'api_key'|translate}}">
           </div>
@@ -703,10 +703,10 @@
       <div class="form-group row">
         <div class="col-3 col-sm-3">
           <label id="threshold_label" class="control-label">{{'threshold'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex align-items-center">
             <input formControlName="threshold" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'times'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'times'|translate}}</span>
           </div>
           <div *ngIf="threshold.invalid && (threshold.dirty || threshold.touched)" class="text-danger">
             <small class="form-text">{{threshold.errors.isRequired}}</small>
@@ -716,10 +716,10 @@
         </div>
         <div class="col-3 col-sm-3">
           <label id="duration_label" class="control-label">{{'duration'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex align-items-center">
             <input formControlName="duration" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'sec'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="duration.invalid && (duration.dirty || duration.touched)" class="text-danger">
             <small class="form-text">{{duration.errors.isRequired}}</small>
@@ -729,10 +729,10 @@
         </div>
         <div class="col-3 col-sm-3">
           <label id="alertInterval_label" class="control-label">{{'alert_interval'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex align-items-center">
             <input formControlName="alertInterval" type="number" class="form-control w-75"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'sec'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'sec'|translate}}</span>
           </div>
           <div *ngIf="alertInterval.invalid && (alertInterval.dirty || alertInterval.touched)" class="text-danger">
             <small class="form-text">{{alertInterval.errors.isRequired}}</small>
@@ -742,10 +742,10 @@
         </div>
         <div *ngIf="alertType.value == 'responseTime'" class="col-3 col-sm-3">
           <label id="elapse_label" class="required control-label">{{'response_time'|translate}}</label>
-          <div class="form-inline">
+          <div class="d-flex align-items-center">
             <input type="number" class="form-control w-75" formControlName="elapse" min="0"
               onkeyup="this.value=Math.round(this.value)" onafterpaste="this.value=Math.round(this.value)">
-            <span class="ms-1">{{'milli_sec'|translate}}</span>
+            <span class="ms-1 form-field-affix">{{'milli_sec'|translate}}</span>
           </div>
         </div>
       </div>
@@ -795,7 +795,7 @@
           <div class="input-group">
             <app-timepicker formControlName="exTimeS"></app-timepicker>
             <div class="input-group-append">
-              <span class="px-1 py-1 mt-1">～</span>
+              <span class="px-1 py-1 mt-1 form-field-affix">～</span>
               <app-timepicker formControlName="exTimeE"></app-timepicker>
             </div>
           </div>
@@ -803,7 +803,7 @@
         <div class="col-3 col-sm-3"></div>
         <div class="col-9 col-sm-9">
           <!-- <span class="mt-1">({{'exc_days_pl'|translate}})</span> -->
-          <span class="mt-1" [innerHTML]="exc_days_pl"></span>
+          <span class="mt-1 form-field-affix" [innerHTML]="exc_days_pl"></span>
         </div>
       </div>
       <div class="form-group row">

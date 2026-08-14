@@ -7,7 +7,7 @@ import { UntypedFormGroup, UntypedFormBuilder, UntypedFormControl } from '@angul
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { DPB0094Req, DPB0094RespItem } from 'src/app/models/api/OpenApiService/dpb0094.interface';
 import { OpenApiKeyService } from 'src/app/shared/services/api-open-api-key.service';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { DPB0091Resp, DPB0091Req } from 'src/app/models/api/OpenApiService/dpb0091.interface';
 import { DPB0078Req } from 'src/app/models/api/FileService/dpb0078.interface';
 import { FileService } from 'src/app/shared/services/api-file.service';

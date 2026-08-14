@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { ToolService } from 'src/app/shared/services/tool.service';
 import { BaseComponent } from 'src/app/layout/base-component';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ModuleService } from 'src/app/shared/services/api-module.service';
@@ -18,6 +18,7 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 })
 export class Ac0421Component extends BaseComponent {
     @ViewChild('upload') upload: FileUpload;
+    @ViewChild('chooseFile') chooseFile!: ElementRef<HTMLInputElement>;
     uploadedFiles: any[] = [];
     url: string;
     netUrl: string;
@@ -59,7 +60,7 @@ export class Ac0421Component extends BaseComponent {
 
     excuteUpload(upload): Observable<boolean> {
         return Observable.create(obser => {
-            let files = file && file.files && file.files.length ? file.files : $('#choose-file')[0].files;
+            let files = file && file.files && file.files.length ? file.files : this.chooseFile.nativeElement.files;
             if (!files.length) return;
 
             let formData = new FormData();
@@ -94,7 +95,7 @@ export class Ac0421Component extends BaseComponent {
                     if (upload) {
                         upload.clear();
                     } else {
-                        $('#choose-file').val('');
+                        self.chooseFile.nativeElement.value = '';
                         self.file = undefined;
                     }
                     self.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: this.responseText });

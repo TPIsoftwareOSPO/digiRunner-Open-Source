@@ -51,21 +51,8 @@ public class DPB9923Service {
 			this.writeHeader(workbook, sheet);
 			
 			//資料
-			this.writeData(sheet);
-			
-			sheet.setColumnWidth(0, 2560); //10*256
-		    sheet.setColumnWidth(1, 5120); //20*256
-		    sheet.setColumnWidth(2, 12800); //50*256
-		    sheet.setColumnWidth(3, 10240); //40*256
-		    sheet.setColumnWidth(4, 12800); //50*256
-		    sheet.setColumnWidth(5, 2560); //10*256
-		    sheet.setColumnWidth(6, 3840); //10*256
-		    sheet.setColumnWidth(7, 5120); //10*256
-		    sheet.setColumnWidth(8, 5120); //20*256
-		    sheet.setColumnWidth(9, 5120); //20*256
-		    sheet.setColumnWidth(10, 5120); //20*256
-		    sheet.setColumnWidth(11, 5120); //20*256
-		    sheet.setColumnWidth(12, 3840); //15*256
+			List<TsmpDpItems> itemsDataList = this.getData();
+			this.writeData(sheet, itemsDataList);
 		    
 		    doExportTsmpDpItems(response);
 			//寫入串流
@@ -81,7 +68,7 @@ public class DPB9923Service {
 		}
 	}
 	
-	private void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
+	public void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
 		
 		//粗體字
 		XSSFCellStyle cellStyle = wb.createCellStyle();
@@ -104,8 +91,12 @@ public class DPB9923Service {
         }
 	}
 	
-	private void writeData(XSSFSheet sheet) {
-		List<TsmpDpItems> list = getTsmpDpItemsDao().findAllByOrderByItemIdAsc();
+	private List<TsmpDpItems> getData() {
+		 return getTsmpDpItemsDao().findAllByOrderByItemIdAsc();
+	}
+	
+	public void writeData(XSSFSheet sheet, List<TsmpDpItems> list) {
+		
 		if(CollectionUtils.isEmpty(list)) {
 			throw TsmpDpAaRtnCode._1298.throwing();
 		}
@@ -172,6 +163,20 @@ public class DPB9923Service {
 	        cell.setCellValue(vo.getLocale());
 	        cell.setCellStyle(cellStyle);
 		}
+		
+		sheet.setColumnWidth(0, 2560); //10*256
+	    sheet.setColumnWidth(1, 5120); //20*256
+	    sheet.setColumnWidth(2, 12800); //50*256
+	    sheet.setColumnWidth(3, 10240); //40*256
+	    sheet.setColumnWidth(4, 12800); //50*256
+	    sheet.setColumnWidth(5, 2560); //10*256
+	    sheet.setColumnWidth(6, 3840); //10*256
+	    sheet.setColumnWidth(7, 5120); //10*256
+	    sheet.setColumnWidth(8, 5120); //20*256
+	    sheet.setColumnWidth(9, 5120); //20*256
+	    sheet.setColumnWidth(10, 5120); //20*256
+	    sheet.setColumnWidth(11, 5120); //20*256
+	    sheet.setColumnWidth(12, 3840); //15*256
 	}
 	
 	private void doExportTsmpDpItems(HttpServletResponse response) {

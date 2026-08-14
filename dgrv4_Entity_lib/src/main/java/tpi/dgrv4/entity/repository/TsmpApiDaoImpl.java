@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -1095,6 +1097,12 @@ public class TsmpApiDaoImpl extends BaseDao {
 			sb.append(" AND (A.orgId IN :orgList or A.orgId is Null or LENGTH(A.orgId) = 0)");
 			params.put("orgList", cri.getOrgList());
 		}
+		
+		//API src
+		if (cri.getApiSrc() != null && cri.getApiSrc().size() > 0) {
+			sb.append(" AND A.apiSrc IN :apiSrc ");
+			params.put("apiSrc", cri.getApiSrc());
+		}
 
 		// 分頁
 		if ("Y".equals(cri.getPaging())) {
@@ -1104,17 +1112,69 @@ public class TsmpApiDaoImpl extends BaseDao {
 		}
 		List<String> labelList = cri.getLabeList();
 		if (labelList != null && labelList.size() > 0) {
-			sb.append(" AND ( ");
-			sb.append("		1=2 ");
+			// [EN]Separate null from labelList; IN/NOT IN cannot match NULL via equality
+			// [ZH]將 labelList 中的 null 分離；IN/NOT IN 無法透過等值比較匹配 NULL
+			boolean hasNull = labelList.contains(null);
+			List<String> nonNullList = labelList.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-			sb.append(" 	OR LOWER(A.label1) IN :labelList");
-			sb.append(" 	OR LOWER(A.label2) IN :labelList");
-			sb.append(" 	OR LOWER(A.label3) IN :labelList");
-			sb.append(" 	OR LOWER(A.label4) IN :labelList");
-			sb.append(" 	OR LOWER(A.label5) IN :labelList");
-			params.put("labelList", labelList);
-
-			sb.append(" 	) ");
+			if ("N".equals(cri.getInclude())) {
+				// [EN]Exclude: add IS NOT NULL only when user explicitly passed null; must use nonNullList for NOT IN to avoid null poisoning
+				// [ZH]不包含：只有使用者傳入 null 時才加 IS NOT NULL；NOT IN 必須用 nonNullList 避免 null 污染導致全列被過濾
+				sb.append(" AND ( ");
+				if (hasNull && !nonNullList.isEmpty()) {
+					// [EN]Exclude null + values: complement of Y's (all null OR any IN list)
+					// [EN]= (at least one NOT NULL) AND (each label IS NULL OR NOT IN list)
+					// [ZH]排除 null 加其他值：Y 條件（全部為 null 或任一符合清單）的補集
+					// [ZH]= (至少一個不為 null) AND (每個 label 為 null 或不在清單中)
+					sb.append("		(A.label1 IS NOT NULL OR A.label2 IS NOT NULL OR A.label3 IS NOT NULL OR A.label4 IS NOT NULL OR A.label5 IS NOT NULL)");
+					sb.append(" AND (A.label1 IS NULL OR LOWER(A.label1) NOT IN :labelList)");
+					sb.append(" AND (A.label2 IS NULL OR LOWER(A.label2) NOT IN :labelList)");
+					sb.append(" AND (A.label3 IS NULL OR LOWER(A.label3) NOT IN :labelList)");
+					sb.append(" AND (A.label4 IS NULL OR LOWER(A.label4) NOT IN :labelList)");
+					sb.append(" AND (A.label5 IS NULL OR LOWER(A.label5) NOT IN :labelList)");
+					params.put("labelList", nonNullList);
+				} else if (hasNull) {
+					// [EN]Exclude null only: complement of "all 5 null" → at least one label must be NOT NULL
+					// [ZH]只排除 null：「全部為 null」的反面 → label1~5 至少一個不為 null 的資料才符合
+					sb.append("		(A.label1 IS NOT NULL OR A.label2 IS NOT NULL OR A.label3 IS NOT NULL OR A.label4 IS NOT NULL OR A.label5 IS NOT NULL)");
+				} else {
+					// [EN]No null in list: treat null labels as "no tag" → include them (IS NULL OR NOT IN)
+					// [ZH]清單無 null：null label 視為「沒有任何 tag」→ 符合不包含條件，需保留（IS NULL OR NOT IN）
+					sb.append("		(A.label1 IS NULL OR LOWER(A.label1) NOT IN :labelList)");
+					sb.append(" AND (A.label2 IS NULL OR LOWER(A.label2) NOT IN :labelList)");
+					sb.append(" AND (A.label3 IS NULL OR LOWER(A.label3) NOT IN :labelList)");
+					sb.append(" AND (A.label4 IS NULL OR LOWER(A.label4) NOT IN :labelList)");
+					sb.append(" AND (A.label5 IS NULL OR LOWER(A.label5) NOT IN :labelList)");
+					params.put("labelList", labelList);
+				}
+				sb.append(" 	) ");
+			} else {
+				// [EN]Include: match based on labelList content
+				// [ZH]包含：依 labelList 內容決定比對邏輯
+				sb.append(" AND ( ");
+				sb.append("		1=2 ");
+				if (hasNull && !nonNullList.isEmpty()) {
+					// [EN]Include null + values: rows where ALL 5 labels are null, OR any label IN non-null values
+					// [ZH]包含 null 加其他值：label1~5 全為 null 的資料，或任一 label 符合非 null 清單
+					sb.append(" OR (A.label1 IS NULL AND A.label2 IS NULL AND A.label3 IS NULL AND A.label4 IS NULL AND A.label5 IS NULL)");
+					sb.append(" OR (LOWER(A.label1) IN :labelList OR LOWER(A.label2) IN :labelList OR LOWER(A.label3) IN :labelList OR LOWER(A.label4) IN :labelList OR LOWER(A.label5) IN :labelList)");
+					params.put("labelList", nonNullList);
+				} else if (hasNull) {
+					// [EN]Include null only: rows where ALL 5 labels are null
+					// [ZH]只包含 null：label1~5 全部為 null 的資料才符合
+					sb.append(" OR (A.label1 IS NULL AND A.label2 IS NULL AND A.label3 IS NULL AND A.label4 IS NULL AND A.label5 IS NULL)");
+				} else {
+					// [EN]Include non-null values only: any label matches
+					// [ZH]只包含非 null 值：任一 label 符合即可
+					sb.append(" 	OR LOWER(A.label1) IN :labelList");
+					sb.append(" 	OR LOWER(A.label2) IN :labelList");
+					sb.append(" 	OR LOWER(A.label3) IN :labelList");
+					sb.append(" 	OR LOWER(A.label4) IN :labelList");
+					sb.append(" 	OR LOWER(A.label5) IN :labelList");
+					params.put("labelList", labelList);
+				}
+				sb.append(" 	) ");
+			}
 		}
 
 		if (orderBySb == null || "".equals(orderBySb.toString())) {

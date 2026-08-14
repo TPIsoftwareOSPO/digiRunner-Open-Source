@@ -1,6 +1,6 @@
 import { combineLatest } from 'rxjs';
 import { generate } from 'generate-password';
-import { Component, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { ActivatedRoute } from '@angular/router';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
@@ -26,7 +26,7 @@ import { DPB0155Req } from 'src/app/models/api/ServerService/dpb0155.interface';
 import { DPB0156Req } from 'src/app/models/api/ServerService/dpb0156.interface';
 
 import * as FileSaver from 'file-saver';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ApiBaseService } from 'src/app/shared/services/api-base.service';
 import { AlertType, TxID } from 'src/app/models/common.enum';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -60,6 +60,7 @@ export class WebsiteProxyComponent extends BaseComponent implements OnInit {
   file: any = null;
 
   // @ViewChild('websiterow', { read: ViewContainerRef, static: true }) websiterowRef!: ViewContainerRef;
+  @ViewChild('fileRef') fileRef!: ElementRef<HTMLInputElement>;
 
   constructor(
     route: ActivatedRoute,
@@ -618,7 +619,7 @@ export class WebsiteProxyComponent extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#file').click();
+    this.fileRef.nativeElement.click();
   }
 
   public get keyword() {

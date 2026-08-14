@@ -1,7 +1,5 @@
 package tpi.dgrv4.gateway.service;
 
-import java.security.KeyPair;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,27 +8,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 
-import tpi.dgrv4.gateway.component.SmartKeyProvider;
+import tpi.dgrv4.gateway.component.SmartTokenVerifier;
+import tpi.dgrv4.gateway.component.TokenHelper;
+import tpi.dgrv4.gateway.constant.DgrTokenType;
 import tpi.dgrv4.gateway.keeper.TPILogger;
 
 /**
  * SMART Token Introspection 服務（RFC 7662）。
  *
  * 解析並驗證 JWT access token，回傳 active/inactive 與 claims。
+ * 驗章通過後仍須查平台撤銷帳本 TSMP_TOKEN_HISTORY：JWT 本身無狀態，
+ * 被撤銷的 token 簽章依舊有效，唯有查帳才能反映 SmartRevokeService 寫下的撤銷標記。
  */
 @Service
 public class SmartIntrospectionService {
 
-    private final SmartKeyProvider keyProvider;
+    private final SmartTokenVerifier tokenVerifier;
+    private final TokenHelper tokenHelper;
 
     @Autowired
-    public SmartIntrospectionService(SmartKeyProvider keyProvider) {
-        this.keyProvider = keyProvider;
+    public SmartIntrospectionService(SmartTokenVerifier tokenVerifier, TokenHelper tokenHelper) {
+        this.tokenVerifier = tokenVerifier;
+        this.tokenHelper = tokenHelper;
     }
 
     /**
@@ -45,18 +46,21 @@ public class SmartIntrospectionService {
         }
 
         try {
-            SignedJWT jwt = SignedJWT.parse(token);
-
-            KeyPair keyPair = keyProvider.getSigningKeyPair();
-            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) keyPair.getPublic());
-            if (!jwt.verify(verifier)) {
+            JWTClaimsSet claims = tokenVerifier.verify(token);
+            if (claims == null) {
                 return inactiveResponse();
             }
 
-            JWTClaimsSet claims = jwt.getJWTClaimsSet();
-
             Date exp = claims.getExpirationTime();
             if (exp != null && new Date().after(exp)) {
+                return inactiveResponse();
+            }
+
+            // 撤銷帳本：revoked_status 有值即視為已撤銷（"R" 撤銷、"N" 後踢前、"RT" 換發作廢）
+            String jti = claims.getJWTID();
+            if (StringUtils.hasText(jti)
+                    && tokenHelper.checkTokenRevoked(DgrTokenType.ACCESS_TOKEN, jti)) {
+                TPILogger.tl.debug("[SMART Introspect] token revoked, jti=" + jti);
                 return inactiveResponse();
             }
 

@@ -15,9 +15,9 @@ import { TranslateService } from '@ngx-translate/core';
 // import { ModuleService } from 'srcAngular/app/shared/services/api-module.service';
 import { concatMap, flatMap, map } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { generate } from 'generate-password';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BaseComponent } from '../../base-component';
 import { TransformMenuNamePipe } from 'src/app/shared/pipes/transform-menu-name.pipe';
 import { DPB9901Req } from 'src/app/models/api/ServerService/dpb9901.interface';
@@ -44,6 +44,8 @@ import { AlertType } from 'src/app/models/common.enum';
     standalone: false
 })
 export class TsmpdpFileComponent extends BaseComponent implements OnInit {
+  @ViewChild('fileNameRef') fileNameRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileNameUpdateRef') fileNameUpdateRef!: ElementRef<HTMLInputElement>;
 
   currentTitle: string = this.title;
   pageNum: number = 1; // 1：查詢、2：建立
@@ -776,7 +778,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
   }
 
   openFileBrowser() {
-    $('#fileName').click();
+    this.fileNameRef.nativeElement.click();
   }
 
   private createAPI(code, dict, tmpfileName: string | null) {
@@ -801,7 +803,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
   public clearFile() {
     this._fileName = null;
     this._fileData = null;
-    $('#fileName').val('');
+    this.fileNameRef.nativeElement.value = '';
   }
 
   public removeFile() {
@@ -820,7 +822,7 @@ export class TsmpdpFileComponent extends BaseComponent implements OnInit {
   public openFileBrowser_update() {
     this.isDisplayPreviewBlock = false;
     setTimeout(() => {
-      $('#fileName_update').click();
+      this.fileNameUpdateRef.nativeElement.click();
     }, 500);
   }
 

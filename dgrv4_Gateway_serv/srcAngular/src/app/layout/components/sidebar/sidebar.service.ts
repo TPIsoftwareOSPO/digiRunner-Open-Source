@@ -16,10 +16,8 @@ export class SidebarService {
     // mainId:string = '';
     mainId:Subject<string> = new Subject();
     siderbarEventEmitter: EventEmitter<{ menu: any, actived: any, id:any }>;
-    actived: any;
     activeId: string = '';
     acConf: AA0510Resp;
-    ACTIVE: string = 'active';
     funcList: Array<AA0101func> = [];
     newFuncList: Array<AA0101func> = [];
     // 移除不顯示在menu上的項目
@@ -47,11 +45,7 @@ export class SidebarService {
         this.siderbarEventEmitter = new EventEmitter<{ menu: any, actived: any, id:any }>();
         this.siderbarEventEmitter.subscribe(({ menu, actived, id }) => {
           // console.log('first',menu)
-            this.clear();
-            this.actived = actived;
-            if (id) this.activeId = id;
-            // $(menu.nativeElement).closest('.list-group').find('.' + this.ACTIVE).removeClass(this.ACTIVE);
-            $(actived).addClass(this.ACTIVE)
+            if (id) this.activeId = id.toLowerCase();
         });
         const urlSegments = this.router.url.split('/');
         this.activeId = urlSegments[urlSegments.length - 1];
@@ -342,16 +336,20 @@ export class SidebarService {
         return mains;
     }
 
-    clear() {
-        $(this.actived).removeClass(this.ACTIVE)
-    }
-
     setMenuMainId(_id:string) {
       this.mainId.next(_id);
     }
 
     getMenuMainId() {
       return this.mainId.asObservable();
+    }
+
+    /**
+     * 重設 sidebar 目前的 active／展開狀態（例如點擊 logo 返回 dashboard 時）
+     */
+    clear() {
+        this.activeId = '';
+        this.setMenuMainId('');
     }
 
 }

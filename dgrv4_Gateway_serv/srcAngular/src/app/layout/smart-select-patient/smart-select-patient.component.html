@@ -1,22 +1,6 @@
 <div class="login-center-page">
 
-  <div class="form-wrapper" *ngIf="viewState === 'no-state'">
-    <div class="form-header"><h1>digiRunner</h1></div>
-    <hr />
-    <div class="form-body"><p class="line">缺少授權參數</p></div>
-  </div>
-
-  <div class="form-wrapper" *ngIf="viewState === 'error'">
-    <div class="form-header"><h1>digiRunner</h1></div>
-    <hr />
-    <div class="form-body"><p class="line">授權請求已過期或無效</p></div>
-  </div>
-
-  <div class="form-wrapper" *ngIf="viewState === 'loading'">
-    <div class="form-header"><h1>digiRunner</h1></div>
-    <hr />
-    <div class="form-body"><p class="line">載入中…</p></div>
-  </div>
+  <app-smart-status-panel *ngIf="viewState !== 'ready'" [status]="panelStatus"></app-smart-status-panel>
 
   <div class="form-wrapper wide" *ngIf="viewState === 'ready'">
     <div class="form-header"><h1>digiRunner</h1></div>
@@ -103,7 +87,15 @@
         </div>
       </div>
 
-      <p class="text-muted text-center" *ngIf="!loading && patients.length === 0 && page === 1">找不到病患</p>
+      <div class="text-center my-3" *ngIf="listError">
+        <p class="text-danger mb-1">{{ 'smart_picker.query_failed' | translate }}</p>
+        <p class="text-muted small mb-2">{{ listErrorHint | translate }}</p>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="search()" [disabled]="loading">
+          {{ 'smart_picker.retry' | translate }}
+        </button>
+      </div>
+
+      <p class="text-muted text-center" *ngIf="!listError && !loading && patients.length === 0 && page === 1">找不到病患</p>
       </ng-container>
 
       <div class="btn-row">

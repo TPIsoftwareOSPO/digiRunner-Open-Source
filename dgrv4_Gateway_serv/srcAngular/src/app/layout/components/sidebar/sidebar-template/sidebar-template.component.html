@@ -1,6 +1,6 @@
 <div class="nested-menu" #tsmp_menu *ngIf="allEnabled" (mouseenter)="mouseenter(icon,menu.main)"
   (mouseout)="mouseout(icon,menu.main)">
-  <a class="menu-group-item" (click)="addExpandClass(tsmp_menu,menu.main)"
+  <a class="menu-group-item" (click)="toggleExpand()"
     [ngClass]="{'active':  (_mainId == menu.main) }" (mouseenter)="mouseenter(icon,menu.main)"
     (mouseout)="mouseout(icon,menu.main)">
     <img #icon [src]="'assets/images/menu/'+ (menu.main.indexOf('ZA')>-1? 'AC13':menu.main)  + '.png'" [class]="menu.main" [alt]="menu.main"
@@ -13,7 +13,7 @@
 
   <!-- //NOSONAR -->
   <li class="nested" (mouseenter)="mouseenter(icon,menu.main)" (mouseout)="mouseout(icon,menu.main)">
-    <ul class="submenu" *ngIf="menu.subs && menu.subs.length">
+    <ul class="submenu" [class.active]="_mainId == menu.main" *ngIf="menu.subs && menu.subs.length">
       <li *ngFor="let sub of menu.subs">
         <a *ngIf="sub.enabled" routerLink="{{sub.path}}" #subname id="{{sub.id}}"
           [ngClass]="{'active' : sub.name.toLowerCase() === this.service.activeId}" (click)="click(subname,sub)">

@@ -1,19 +1,21 @@
-// ──────────────────────────────────────────────
-//  SMART Launcher — Bootstrap 3 skin compat
-//  原始 launch.smarthealthit.org 用 BS3 + App.css
-//  DGR Angular 用 BS5，這裡補上 BS3 缺失的 class
-// ──────────────────────────────────────────────
+// SMART Launcher 保留既有表單結構，外觀套用 DGR 共用品牌色與面板語彙。
 
 :host {
   display: block;
 }
 
 .smart-launcher {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px 15px 40px;
-  font-size: 15px;
-  color: #333;
+  width: 100%;
+  font-size: 0.875rem;
+  color: var(--text-color);
+
+  .launcher-panel,
+  .launch-box {
+    overflow: hidden;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    background: #fff;
+  }
 
   // ── BS3 form-group ──
   .form-group {
@@ -28,9 +30,10 @@
     color: #737373;
   }
 
-  // ── BS3 text-primary override ──
+  // 欄位標籤沿用既有 template class，改以專案文字色呈現。
   .text-primary {
-    color: #337ab7 !important;
+    color: var(--text-color) !important;
+    font-weight: 600;
   }
 
   // ── BS3 checkbox / radio ──
@@ -72,11 +75,13 @@
 
   // ── BS3 nav-tabs ──
   .nav-tabs {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e3e3e3;
+    border-left: 3px solid var(--tpi-primary);
     list-style: none;
     padding-left: 0;
     margin-bottom: 0;
     display: flex;
+    background: #f6f6f6;
 
     > li {
       margin-bottom: -1px;
@@ -85,7 +90,7 @@
         margin-right: 2px;
         line-height: 1.42857143;
         border: 1px solid transparent;
-        border-radius: 4px 4px 0 0;
+        border-radius: 0;
         position: relative;
         display: block;
         padding: 10px 15px;
@@ -96,19 +101,21 @@
       &.active > * {
         opacity: 1;
         background-color: #fff;
-        border: 1px solid #ddd;
-        border-bottom-color: transparent;
+        border: 1px solid #e3e3e3;
+        border-top: 2px solid var(--tpi-primary);
+        border-bottom-color: #fff;
+        color: var(--tpi-primary);
       }
 
       &:hover:not(.active) > * {
         opacity: 0.9;
-        background-color: #f5f5f5;
+        background-color: #ededed;
       }
     }
   }
 
   .tab-content {
-    padding: 20px 0 0;
+    padding: 1rem;
   }
 
   // ── BS3 form-control ──
@@ -208,9 +215,9 @@
     border: 1px solid #ddd;
 
     &.active {
-      background: #337ab7;
+      background: var(--tpi-primary);
       color: #fff;
-      border-color: #337ab7;
+      border-color: var(--tpi-primary);
     }
 
     &:hover {
@@ -349,12 +356,6 @@
     font-size: 12px;
   }
 
-  // ── 標題 ──
-  .launcher-title {
-    font-weight: 300;
-    font-size: 32px;
-  }
-
   // ── 取代 inline style 的工具 class ──
   .divider-bottom {
     border-bottom: 1px solid #eee;
@@ -397,27 +398,25 @@
 
   // ── Bottom Launch Box ──
   .launch-box {
-    background: #f3f3f3;
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-top: 20px;
+    background: #f6f6f6;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-left: 3px solid var(--tpi-primary);
   }
 
   .launch-box-title {
     margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--text-color) !important;
   }
 
-  .launch-box-row {
-    display: flex;
+  .smart-action-button {
+    min-width: 10rem;
+    white-space: nowrap;
   }
 
-  .launch-box-input {
-    flex: 10 1 0;
-  }
-
-  .launch-box-sample {
-    flex: 1 1 0;
-    margin-left: 5px;
+  .launch-action {
+    border-radius: 0 4px 4px 0;
   }
 
   // ── PrimeNG 元件樣式微調（::ng-deep 穿透，scope 限於 .smart-launcher） ──
@@ -464,8 +463,8 @@
 
   // ── Responsive ──
   @media (max-width: 768px) {
-    .row {
-      flex-direction: column;
+    .smart-action-button {
+      min-width: 8rem;
     }
   }
 }

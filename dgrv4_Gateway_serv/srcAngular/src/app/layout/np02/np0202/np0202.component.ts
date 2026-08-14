@@ -274,7 +274,7 @@ export class Np0202Component extends BaseComponent implements OnInit {
         this.resultCUS0003().subscribe();
     }
     switchErrorMessage(evt) {
-        $(this.error_messages.nativeElement).toggleClass('hide');
+        this.error_messages.nativeElement.classList.toggle('hide');
     }
 
     headerReturn() {

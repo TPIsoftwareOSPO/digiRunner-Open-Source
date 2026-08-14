@@ -27,6 +27,7 @@ public interface TsmpClientCert2Dao extends JpaRepository<TsmpClientCert2, Long>
 	public List<TsmpClientCert2> findByClientIdAndClientCert2Id(String clientId, Long clientCert2Id);
 	
 	public long deleteByClientIdAndClientCert2Id(String clientId, Long clientCert2Id);
+	public long deleteByClientId(String clientId);
 	
 }
 

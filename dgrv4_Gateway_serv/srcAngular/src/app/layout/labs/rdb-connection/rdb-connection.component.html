@@ -23,6 +23,7 @@
           <th>Connection Name</th>
           <th>JDBC URL</th>
           <th>Max Pool Size</th>
+          <th>Minimum Idle</th>
           <th>Last Update User</th>
           <th>Last Update Time</th>
           <th style="width:180px;" scope="col">{{'action'|translate}}
@@ -39,6 +40,7 @@
           <td>{{rowData.connectionName}}</td>
           <td>{{rowData.jdbcUrl}}</td>
           <td>{{rowData.maxPoolSize}}</td>
+          <td>{{rowData.minimumIdle}}</td>
           <td>{{rowData.updateUser}}</td>
           <td>{{formateDate(rowData.updateDateTime)}}</td>
 
@@ -73,7 +75,7 @@
       </ng-template> -->
       <ng-template pTemplate="emptymessage" let-columns>
         <tr>
-          <td [attr.colspan]="6">
+          <td [attr.colspan]="7">
             {{'no_rec' | translate}}
           </td>
         </tr>
@@ -188,6 +190,20 @@
             <small class="form-text">{{maxPoolSize?.errors.isRequired | translate}}</small>
             <small class="form-text">{{maxPoolSize?.errors.min | translate}}</small>
             <small class="form-text">{{maxPoolSize?.errors.max | translate}}</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-6">
+          <label id="minimumIdle_label" for="minimumIdle" class="control-label">Minimum Idle</label>
+          <div style="display:block">
+            <input type="number" class="form-control" id="minimumIdle" formControlName="minimumIdle">
+          </div>
+          <div *ngIf="minimumIdle?.invalid && (minimumIdle?.dirty || minimumIdle?.touched)" class="text-danger">
+            <small class="form-text">{{minimumIdle?.errors.isRequired | translate}}</small>
+            <small class="form-text">{{minimumIdle?.errors.min | translate}}</small>
+            <small class="form-text">{{minimumIdle?.errors.max | translate}}</small>
           </div>
         </div>
       </div>

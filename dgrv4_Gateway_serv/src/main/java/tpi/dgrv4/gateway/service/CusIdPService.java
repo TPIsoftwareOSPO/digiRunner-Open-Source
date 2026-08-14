@@ -1,5 +1,8 @@
 package tpi.dgrv4.gateway.service;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -49,7 +52,18 @@ public class CusIdPService {
 		if (isAcIdp) {
 			msgUrl = getTsmpSettingService().getVal_AC_IDP_MSG_URL();
 		} else {
-			msgUrl = getTsmpSettingService().getVal_GTW_IDP_MSG_URL();
+			// 前端GTW IdP URL是否使用絶對路徑, 若 false 則為相對路徑
+			boolean useAbsolutePath = getTsmpSettingService().getVal_GTW_IDP_USE_ABSOLUTE_PATH();
+			
+			msgUrl = getTsmpSettingService().getVal_GTW_IDP_MSG_URL();			
+			if (!useAbsolutePath) {
+				try {
+					URL urlObj = new URL(msgUrl);
+					msgUrl = urlObj.getPath();// 使用相對路徑
+				} catch (MalformedURLException e) {
+					TPILogger.tl.debug("URL error 'GTW_IDP_MSG_URL': " + e.getMessage());
+				}
+			}
 		}
 
 		// 建立登入失敗的日誌 第三方登入無法驗證登入失敗與否，取消紀錄, Kevin Cheng, 2024/08/21

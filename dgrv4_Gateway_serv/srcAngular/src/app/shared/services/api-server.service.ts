@@ -504,6 +504,7 @@ import {
   RespDPB0209,
 } from 'src/app/models/api/ServerService/dpb0209.interface';
 import { ReqDPB9923 } from 'src/app/models/api/ServerService/dpb9923.interface';
+import { ReqDPB9940, DPB9940Req } from 'src/app/models/api/ServerService/dpb9940.interface';
 import { DPB9927Req } from 'src/app/models/api/ServerService/dpb9927.interface';
 import {
   DPB0294Req,
@@ -717,6 +718,10 @@ import {
   ReqDPB0314,
   RespDPB0314,
 } from 'src/app/models/api/ServerService/dpb0314.interface';
+import {
+  ReqDPB0341,
+  RespDPB0341,
+} from 'src/app/models/api/ServerService/dpb0341.interface';
 import {
   ReqDPB0317,
   RespDPB0317,
@@ -2128,6 +2133,20 @@ export class ServerService {
     return this.api.excuteTsmpSetting<RespDPB9922>(path, file, req);
   }
 
+  exportMultilingual(ReqBody: DPB9940Req): Observable<Blob> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.exportMultilingual),
+      ReqBody: ReqBody,
+    } as ReqDPB9940;
+    const path = `${this.basePath}/DPB9940`;
+    return this.api.excutePostGetFile(path, body);
+  }
+
+  importMultilingual(req: any, file: File): Observable<RespDPB9922> {
+    const path = `${this.basePath}/DPB9941`;
+    return this.api.excuteTsmpSetting<RespDPB9922>(path, file, req);
+  }
+
   queryIdPInfoList_cus(ReqBody?: DPB0220Req): Observable<RespDPB0220> {
     let body = {
       ReqHeader: this.api.getReqHeader(TxID.queryIdPInfoList_cus),
@@ -2662,6 +2681,18 @@ export class ServerService {
     } as ReqDPB0314;
     const path = `${this.indexPath}/DPB0314`;
     return this.api.npPost<RespDPB0314>(path, body);
+  }
+
+  // DPB0341: 測試後端代取 token（不寫 DB），req 沿用 DPB0311 DTO 的 out_* 代取設定
+  testSmartOnFhirProxyRelay(
+    ReqBody: Partial<SmartOnFhirProxyDto>,
+  ): Observable<RespDPB0341> {
+    let body = {
+      ReqHeader: this.api.getReqHeader(TxID.testSmartOnFhirProxyRelay),
+      ReqBody: ReqBody,
+    } as ReqDPB0341;
+    const path = `${this.indexPath}/DPB0341`;
+    return this.api.npPost<RespDPB0341>(path, body);
   }
 
   queryStickyList(

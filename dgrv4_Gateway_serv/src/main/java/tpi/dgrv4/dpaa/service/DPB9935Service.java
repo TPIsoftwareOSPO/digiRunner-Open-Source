@@ -50,12 +50,8 @@ public class DPB9935Service {
 			this.writeHeader(workbook, sheet);
 			
 			//資料
-			this.writeData(sheet);
-			
-			sheet.setColumnWidth(0, 5120); //20*256
-		    sheet.setColumnWidth(1, 5120); //20*256
-		    sheet.setColumnWidth(2, 7680); //30*256
-		    sheet.setColumnWidth(3, 12800); //50*256
+			List<TsmpRtnCode> list = getData();
+			this.writeData(sheet, list);
 		    
 		    doExportTsmpRtnCode(response);
 			//寫入串流
@@ -72,7 +68,7 @@ public class DPB9935Service {
 
 	}
 	
-	private void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
+	public void writeHeader(XSSFWorkbook wb, XSSFSheet sheet) {
 		
 		//粗體字
 		XSSFCellStyle cellStyle = wb.createCellStyle();
@@ -94,8 +90,12 @@ public class DPB9935Service {
         }
 	}
 	
-	private void writeData(XSSFSheet sheet) {
-		List<TsmpRtnCode> list = getTsmpRtnCodeDao().findAllByOrderByTsmpRtnCodeAsc();
+	private List<TsmpRtnCode> getData(){
+		return getTsmpRtnCodeDao().findAllByOrderByTsmpRtnCodeAsc();
+	}
+	
+	public void writeData(XSSFSheet sheet, List<TsmpRtnCode> list) {
+		
 		if(CollectionUtils.isEmpty(list)) {
 			throw TsmpDpAaRtnCode._1298.throwing();
 		}
@@ -115,6 +115,11 @@ public class DPB9935Service {
 	        cell = row.createCell(3);
 	        cell.setCellValue(vo.getTsmpRtnDesc());
 		}
+		
+		sheet.setColumnWidth(0, 5120); //20*256
+	    sheet.setColumnWidth(1, 5120); //20*256
+	    sheet.setColumnWidth(2, 7680); //30*256
+	    sheet.setColumnWidth(3, 12800); //50*256
 	}
 	
 	private void doExportTsmpRtnCode(HttpServletResponse response) {
